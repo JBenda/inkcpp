@@ -3,8 +3,8 @@
 
 #include "pch.h"
 #include "compiler.h"
+#include "story.h"
 #include "runtime.h"
-#include "command.h"
 #include "choice.h"
 
 int main()
@@ -24,11 +24,40 @@ int main()
 
 	{
 		std::ofstream fout("test.bin", std::ios::binary | std::ios::out);
-		binary::compile::run(j, fout);
+		ink::compiler::run(j, fout);
 		fout.close();
 	}
 
 	{
+		// Load ink and start a runner
+		ink::runtime::story myInk("test.bin");
+		ink::runtime::runner thread(&myInk);
+
+		while (true)
+		{
+			while (thread.can_continue())
+				std::cout << thread;
+
+			if(thread.has_choices())
+			{
+				for (const ink::runtime::choice& c : thread)
+				{
+					std::cout << "* " << c.text() << std::endl;
+				}
+
+				int c = 0;
+				std::cin >> c;
+				thread.choose(c);
+				continue;
+			}
+
+			break;
+		}
+
+		return 0;
+	}
+
+	/*{
 		binary::runtime::ink i;
 		i.load("test.bin");
 
@@ -47,7 +76,7 @@ int main()
 			r.choose(index);
 			r.run();
 		}
-	}
+	}*/
 
 	return 0;
 }

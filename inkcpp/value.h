@@ -1,70 +1,126 @@
 #pragma once
 
-namespace binary
+#include "system.h"
+
+namespace ink
 {
-	namespace runtime
+	namespace runtime 
 	{
-		enum ValueType
+		namespace internal 
 		{
-			VALUE_TYPES_START,
-
-			INTEGER = VALUE_TYPES_START,
-			FLOAT,
-			STRING,
-			DIVERT,
-
-			NUM_VALUE_TYPES
-		};
-
-		class value
-		{
-		public:
-			// == value constructors == 
-			value() : _intValue(0), _type(INTEGER) { }
-			value(int val) : _intValue(val), _type(INTEGER) { }
-			value(float val) : _floatValue(val), _type(FLOAT) { }
-			value(double val) : _floatValue((float)val), _type(FLOAT) { }
-			value(const std::string& str) : _stringValue(str), _type(STRING) { }
-			value(uint32_t divert_value) : _divertValue(divert_value), _type(ValueType::DIVERT) { }
-
-			// Casts to another value type
-			value cast(ValueType type) const;
-
-			// Type accessor
-			ValueType type() const { return _type; }
-
-			// == accessors ==
-			float as_float() const { return _floatValue; }
-			int as_int() const { return _intValue; }
-			const std::string& as_string() const { return _stringValue; }
-			uint32_t as_divert() const { return _divertValue; }
-
-			template<typename T>
-			T get() const;
-
-			template<>
-			int get<int>() const { return as_int(); }
-
-			template<>
-			float get<float>() const { return as_float(); }
-
-			template<>
-			std::string get<std::string>() const { return as_string(); }
-
-		private:
-			// Type
-			ValueType _type;
-
-			// Data
-			union
+			// Data types that can be held internally within the ink runtime
+			enum class data_type
 			{
-				float _floatValue;
-				int _intValue;
-				uint32_t _divertValue;
+				none,							// blank. used when data is in a fixed array
+				int32,							// 32-bit integer value
+				float32,						// 32-bit floating point value
+				uint32,							// 32-bit unsigned integer value
+				string_table_pointer,			// Represents an offset within the story's constant string table
+				allocated_string_pointer,		// Represents an offset within the runner's allocated string table (TODO)
+				marker,							// Special marker (used in output stream)
+				glue,							// Glue.
+				newline,						// \n
+				null,							// void/null (used for void function returns)
 			};
-			std::string _stringValue;
-		};
 
-		std::ostream& operator << (std::ostream& out, const value& v);
+			// Container for any data used as part of the runtime (variable values, output streams, evaluation stack, etc.)
+			struct data
+			{
+				// Type of data
+				data_type type;
+
+				union
+				{
+					int integer_value;
+					uint32_t uint_value;
+					float float_value;
+					const char* string_val;
+					// TODO: Do we need a marker type?
+				};
+
+				inline void set_none() { type = data_type::none; }
+				inline void set_void() { type = data_type::null; }
+				inline void set_int(int val) { type = data_type::int32; integer_value = val; }
+				inline void set_uint(uint32_t val) { type = data_type::uint32; uint_value = val; }
+				inline void set_float(float val) { type = data_type::float32; float_value = val; }
+				inline void set_string(const char* val, bool allocated) { type = allocated ? data_type::allocated_string_pointer : data_type::string_table_pointer; string_val = val; }
+			};
+
+			static_assert(sizeof(data) == sizeof(data_type) + sizeof(offset_t), "No data type should take up more than 32 bits");
+
+			// Types of values
+			enum class value_type
+			{
+				null,
+				divert,
+				integer,
+				decimal,
+				string,
+			};
+
+			class basic_stream;
+
+			// Used to store values on the evaluation stack or variables.
+			class value
+			{
+			public:
+				value();							// Creates a value with the "none" type
+				value(int);							// Create a new int value
+				value(float);						// Create a new float value
+				value(uint32_t);					// Create a new divert value
+				value(const data&);					// Create value from data
+
+				// Create a new string value (must specify whether or not it's an allocated or story string)
+				value(const char*, bool allocated = false);
+
+				// Check the value's current type
+				value_type type() const;
+
+				// == Getters ==
+				int as_int() const { return _first.integer_value; }
+				float as_float() const { return _first.float_value; }
+				uint32_t as_divert() const { return _first.uint_value; }
+				// TODO: String access?
+
+				void append_to(basic_stream&) const;
+				void load_from(basic_stream&);
+
+				// == Binary operations ==
+				static value add(value, value);
+				static value subtract(value, value);
+				static value is_equal(value, value);
+
+			private:
+				static void cast(value&, value_type, value_type);
+				static value_type maybe_cast(value& left, value& right);
+
+			private:
+				// Maximum sequential data a value can have
+				static const size_t VALUE_DATA_LENGTH = 4;
+
+				union
+				{
+					// Quick access struct
+					struct 
+					{
+						data _first; 
+						data _second;
+					};
+					
+					// Data array
+					data _data[VALUE_DATA_LENGTH];
+				};
+				
+			};
+
+			// == Binary Operators ==
+			value operator+(const value&, const value&);
+			value operator-(const value&, const value&);
+			value operator==(const value&, const value&);
+
+			// == Stream Operators ==
+			basic_stream& operator <<(basic_stream&, const value&);
+			basic_stream& operator >>(basic_stream&, value&);
+		}
 	}
 }

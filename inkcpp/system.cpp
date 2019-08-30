@@ -2,23 +2,48 @@
 
 #include "system.h"
 
-namespace binary
+namespace ink
 {
-	namespace system
-	{
 #define A 54059 /* a prime */
 #define B 76963 /* another prime */
 #define C 86969 /* yet another prime */
 #define FIRSTH 37 /* also prime */
 
-		NameHash hash_string(const char* s)
+	hash_t hash_string(const char* string)
+	{
+		hash_t h = FIRSTH;
+		while (*string) {
+			h = (h * A) ^ (string[0] * B);
+			string++;
+		}
+		return h; // or return h % C;
+	}
+
+	bool is_whitespace(const char* string, bool includeNewline)
+	{
+		// Iterate string
+		while (true)
 		{
-			NameHash h = FIRSTH;
-			while (*s) {
-				h = (h * A) ^ (s[0] * B);
-				s++;
+			switch (*(string++))
+			{
+			case 0:
+				return true;
+			case '\n':
+				if (!includeNewline)
+					return false;
+			case '\t':
+			case ' ':
+				continue;
+			default:
+				return false;
 			}
-			return h; // or return h % C;
 		}
 	}
+
+	void assert(bool condition, const char* msg /*= nullptr*/)
+	{
+		if (!condition)
+			throw std::exception(msg);
+	}
+
 }

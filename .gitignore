@@ -3,6 +3,14 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Ink binary compilation
+*.bin
+
+# TEMP: Ignore solution files for now
+*.vcxproj
+*.vcxproj.filters
+*.sln
+
 # User-specific files
 *.suo
 *.user

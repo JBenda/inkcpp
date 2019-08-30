@@ -1,19 +1,26 @@
 #pragma once
 
-namespace binary
+namespace ink
 {
 	namespace runtime
 	{
+		namespace internal
+		{
+			class basic_stream;
+		}
+
 		class choice
 		{
 		public:
-			choice(const std::string& text, int index, uint32_t path);
-
 			int index() const { return _index; }
-			const std::string& text() const { return _text; }
+			const char* text() const { return _text; }
 			uint32_t path() const { return _path; }
 		private:
-			std::string _text;
+			friend class runner;
+
+			void setup(internal::basic_stream&, int index, uint32_t path);
+		private:
+			const char* _text;
 			int _index;
 			uint32_t _path;
 		};

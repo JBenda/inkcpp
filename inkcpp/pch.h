@@ -16,6 +16,5 @@
 #include <sstream>
 #include <stack>
 #include <map>
-#include "defs.h"
 
 #endif //PCH_H
