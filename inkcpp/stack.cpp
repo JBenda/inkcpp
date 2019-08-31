@@ -82,6 +82,12 @@ namespace ink
 				return _stack[_pos].data.as_divert();
 			}
 
+			void basic_stack::clear()
+			{
+				_save = _jump = ~0;
+				_pos = 0;
+			}
+
 			void basic_stack::save()
 			{
 				assert(_save == ~0, "Can not save stack twice! restore() or forget() first");

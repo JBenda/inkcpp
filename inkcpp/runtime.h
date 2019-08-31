@@ -72,6 +72,9 @@ namespace ink
 			// Steps the interpreter a single instruction
 			void step();
 
+			// Resets the runtime
+			void reset();
+
 			// == Save/Restore
 			void save();
 			void restore();
@@ -120,7 +123,6 @@ namespace ink
 			choice _choices[MAX_CHOICES];
 			size_t _num_choices;
 
-			bool _finished;
 			bool _saved;
 		};
 

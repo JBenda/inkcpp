@@ -54,6 +54,9 @@ namespace ink
 				//  are non-whitespace strings
 				bool text_past_save() const;
 
+				// Clears the whole stream
+				void clear();
+
 				// = Save/Restore
 				void save();
 				void restore();

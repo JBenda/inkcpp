@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "output.h"
 
 namespace ink
@@ -310,6 +309,12 @@ namespace ink
 
 				// No text
 				return false;
+			}
+
+			void basic_stream::clear()
+			{
+				_save = ~0;
+				_size = 0;
 			}
 
 #ifdef INK_ENABLE_STL

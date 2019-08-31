@@ -33,6 +33,9 @@ namespace ink
 				// Pops a frame (and all temporary variables) from the callstack.
 				offset_t pop_frame();
 
+				// Clears the entire stack
+				void clear();
+
 				// == Save/Restore ==
 				void save();
 				void restore();

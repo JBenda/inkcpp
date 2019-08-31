@@ -186,159 +186,179 @@ namespace ink
 
 		void runner::step()
 		{
-			assert(_ptr != nullptr, "Can not step! Do not have a valid pointer");
+			try
+			{
+				assert(_ptr != nullptr, "Can not step! Do not have a valid pointer");
 
-			// Load current command
-			Command cmd = read<Command>();
-			CommandFlag flag = read<CommandFlag>();
+				// Load current command
+				Command cmd = read<Command>();
+				CommandFlag flag = read<CommandFlag>();
 
-			switch (cmd)
-			{
-			case Command::STR:
-			{
-				const char* str = read<const char*>();
-				if (bEvaluationMode)
-					_eval.push(str);
-				else
-					_output << str;
-			}
-			break;
-			case Command::NEWLINE:
-			{
-				if (bEvaluationMode)
-					_eval.push(newline);
-				else
-					_output << newline;
-			}
-			break;
-			case Command::GLUE:
-			{
-				if (bEvaluationMode)
-					_eval.push(glue);
-				else
-					_output << glue;
-			}
-			break;
-			case Command::INT:
-			{
-				int val = read<int>();
-				if (bEvaluationMode)
+				switch (cmd)
+				{
+				case Command::STR:
+				{
+					const char* str = read<const char*>();
+					if (bEvaluationMode)
+						_eval.push(str);
+					else
+						_output << str;
+				}
+				break;
+				case Command::NEWLINE:
+				{
+					if (bEvaluationMode)
+						_eval.push(newline);
+					else
+						_output << newline;
+				}
+				break;
+				case Command::GLUE:
+				{
+					if (bEvaluationMode)
+						_eval.push(glue);
+					else
+						_output << glue;
+				}
+				break;
+				case Command::INT:
+				{
+					int val = read<int>();
+					if (bEvaluationMode)
+						_eval.push(val);
+					else
+						_output << val;
+				}
+				break;
+				case Command::DIVERT_VAL:
+				{
+					assert(bEvaluationMode, "Can not push divert value into the output stream!");
+
+					// Push the divert target onto the stack
+					uint32_t target = read<uint32_t>();
+					_eval.push(value(target));
+				}
+				break;
+
+				// == Binary Operators ==
+				case Command::ADD:
+				{
+					value b = _eval.pop(), a = _eval.pop();
+					_eval.push(a + b);
+				}
+				break;
+				case Command::IS_EQUAL:
+				{
+					value b = _eval.pop(), a = _eval.pop();
+					_eval.push(a == b);
+				}
+				break;
+
+				case Command::DIVERT:
+				{
+					// Move to divert address
+					uint32_t target = read<uint32_t>();
+					_ptr = _story->instructions() + target;
+					assert(_ptr < _story->end(), "Diverted past end of story data!");
+				}
+				break;
+				case Command::DIVERT_TO_VARIABLE:
+				{
+					// Get variable value
+					hash_t variable = read<hash_t>();
+					const value& val = *_stack.get(variable);
+
+					// Move to location
+					_ptr = _story->instructions() + val.as_divert();
+					assert(_ptr < _story->end(), "Diverted past end of story data!");
+				}
+				break;
+				case Command::CHOICE:
+				{
+					// Use a marker to start compiling the choice text
+					_output << marker;
+
+					if (flag & CommandFlag::CHOICE_HAS_CONDITION) {} // TODO
+					if (flag & CommandFlag::CHOICE_HAS_START_CONTENT) {
+						_output << _eval.pop();
+					}
+					if (flag & CommandFlag::CHOICE_HAS_CHOICE_ONLY_CONTENT) {
+						_output << _eval.pop();
+					}
+					if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
+					if (flag & CommandFlag::CHOICE_IS_ONCE_ONLY) {} // TODO
+
+					// Read path
+					uint32_t path = read<uint32_t>();
+
+					// Create choice and record it
+					add_choice().setup(_output, _num_choices, path);
+				} break;
+				case Command::START_STR:
+				{
+					assert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
+					bEvaluationMode = false;
+					_output << marker;
+				} break;
+				case Command::END_STR:
+				{
+					// TODO: Assert we really had a marker on there?
+					assert(!bEvaluationMode);
+					bEvaluationMode = true;
+
+					// Load value from output stream
+					value val;
+					_output >> val;
+
+					// Push onto stack
 					_eval.push(val);
-				else
-					_output << val;
-			}
-			break;
-			case Command::DIVERT_VAL:
-			{
-				assert(bEvaluationMode, "Can not push divert value into the output stream!");
+				} break;
+				case Command::START_EVAL:
+					bEvaluationMode = true;
+					break;
+				case Command::END_EVAL:
+					bEvaluationMode = false;
 
-				// Push the divert target onto the stack
-				uint32_t target = read<uint32_t>();
-				_eval.push(value(target));
-			}
-			break;
-
-			// == Binary Operators ==
-			case Command::ADD:
-			{
-				value b = _eval.pop(), a = _eval.pop();
-				_eval.push(a + b);
-			}
-			break;
-			case Command::IS_EQUAL:
-			{
-				value b = _eval.pop(), a = _eval.pop();
-				_eval.push(a == b);
-			}
-			break;
-			
-			case Command::DIVERT:
-			{
-				// Move to divert address
-				uint32_t target = read<uint32_t>();
-				_ptr = _story->instructions() + target;
-				assert(_ptr < _story->end(), "Diverted past end of story data!");
-			}
-			break;
-			case Command::DIVERT_TO_VARIABLE:
-			{
-				// Get variable value
-				hash_t variable = read<hash_t>();
-				const value& val = *_stack.get(variable);
-
-				// Move to location
-				_ptr = _story->instructions() + val.as_divert();
-				assert(_ptr < _story->end(), "Diverted past end of story data!");
-			}
-			break;
-			case Command::CHOICE:
-			{
-				// Use a marker to start compiling the choice text
-				_output << marker;
-
-				if (flag & CommandFlag::CHOICE_HAS_CONDITION) {} // TODO
-				if (flag & CommandFlag::CHOICE_HAS_START_CONTENT) {
-					_output << _eval.pop();
+					// Assert stack is empty? Is that necessary?
+					break;
+				case Command::OUTPUT:
+				{
+					value v = _eval.pop();
+					_output << v;
 				}
-				if (flag & CommandFlag::CHOICE_HAS_CHOICE_ONLY_CONTENT) {
-					_output << _eval.pop();
+				break;
+				case Command::DEFINE_TEMP:
+				{
+					hash_t variableName = read<hash_t>();
+
+					// Get the top value and put it into the variable
+					value v = _eval.pop();
+					_stack.set(variableName, v);
 				}
-				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
-				if (flag & CommandFlag::CHOICE_IS_ONCE_ONLY) {} // TODO
-
-				// Read path
-				uint32_t path = read<uint32_t>();
-
-				// Create choice and record it
-				add_choice().setup(_output, _num_choices, path);
-			} break;
-			case Command::START_STR:
-			{
-				assert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
-				bEvaluationMode = false;
-				_output << marker;
-			} break;
-			case Command::END_STR:
-			{
-				// TODO: Assert we really had a marker on there?
-				assert(!bEvaluationMode);
-				bEvaluationMode = true;
-
-				// Load value from output stream
-				value val;
-				_output >> val;
-
-				// Push onto stack
-				_eval.push(val);
-			} break;
-			case Command::START_EVAL:
-				bEvaluationMode = true;
 				break;
-			case Command::END_EVAL:
-				bEvaluationMode = false;
-
-				// Assert stack is empty? Is that necessary?
-				break;
-			case Command::OUTPUT:
+				case Command::END:
+				case Command::DONE:
+					_ptr = nullptr;
+					break;
+				}
+			}
+			catch(...)
 			{
-				value v = _eval.pop();
-				_output << v;
+				// Reset our whole state as it's probably corrupt
+				reset();
+				throw;
 			}
-			break;
-			case Command::DEFINE_TEMP:
-			{
-				hash_t variableName = read<hash_t>();
+		}
 
-				// Get the top value and put it into the variable
-				value v = _eval.pop();
-				_stack.set(variableName, v);
-			}
-			break;
-			case Command::END:
-			case Command::DONE:
-				_ptr = nullptr;
-				break;
-			}
+		void runner::reset()
+		{
+			_eval.clear();
+			_output.clear();
+			_stack.clear();
+			bEvaluationMode = false;
+			_saved = false;
+			_num_choices = 0;
+			_ptr = nullptr;
 		}
 
 		void runner::save()
