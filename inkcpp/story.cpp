@@ -1,10 +1,11 @@
-#include "pch.h"
 #include "story.h"
+#include "platform.h"
 
 namespace ink
 {
 	namespace runtime
 	{
+#ifdef INK_ENABLE_STL
 		unsigned char* read_file_into_memory(const char* filename, size_t* read)
 		{
 			using namespace std;
@@ -22,19 +23,49 @@ namespace ink
 		}
 
 		story::story(const char* filename)
-			: file(nullptr)
-			, string_table(nullptr)
-			, instruction_data(nullptr)
-			, length(0)
+			: _file(nullptr)
+			, _string_table(nullptr)
+			, _instruction_data(nullptr)
+			, _length(0)
+			, _managed(true)
 		{
 			// Load file into memory
-			file = read_file_into_memory(filename, &length);
+			_file = read_file_into_memory(filename, &_length);
 
+			// Find all the right data sections
+			setup_pointers();
+		}
+#endif
+
+		story::story(unsigned char* binary, size_t len, bool manage /*= true*/)
+			: _file(binary), _length(len), _managed(manage)
+		{
+			// Setup data section pointers
+			setup_pointers();
+		}
+
+		story::~story()
+		{
+			if (_file != nullptr && _managed)
+				delete[] _file;
+
+			_file = nullptr;
+			_instruction_data = nullptr;
+			_string_table = nullptr;
+		}
+
+		const char* story::string(uint32_t index) const
+		{
+			return _string_table + index;
+		}
+
+		void story::setup_pointers()
+		{
 			// String table is after the version information
-			string_table = (char*)file + sizeof(int);
+			_string_table = (char*)_file + sizeof(int);
 
 			// Pass over strings
-			const char* ptr = string_table;
+			const char* ptr = _string_table;
 			while (true)
 			{
 				// Read until null terminator
@@ -50,23 +81,7 @@ namespace ink
 			}
 
 			// After strings comes instruction data
-			instruction_data = (ip_t)ptr + 1;
-		}
-
-		story::~story()
-		{
-			if (file != nullptr)
-				delete[] file;
-
-			file = nullptr;
-			instruction_data = nullptr;
-			string_table = nullptr;
-		}
-
-
-		const char* story::string(uint32_t index) const
-		{
-			return string_table + index;
+			_instruction_data = (ip_t)ptr + 1;
 		}
 	}
 }

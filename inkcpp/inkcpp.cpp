@@ -1,11 +1,28 @@
 // inkcpp.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include "pch.h"
 #include "compiler.h"
 #include "story.h"
 #include "runtime.h"
 #include "choice.h"
+
+#include <fstream>
+
+unsigned char* read_file_into_memory(const char* filename, size_t* read)
+{
+	using namespace std;
+
+	ifstream ifs(filename, ios::binary | ios::ate);
+	ifstream::pos_type pos = ifs.tellg();
+	size_t length = (size_t)pos;
+	unsigned char* data = new unsigned char[length];
+	ifs.seekg(0, ios::beg);
+	ifs.read((char*)data, length);
+	ifs.close();
+
+	*read = (size_t)length;
+	return data;
+}
 
 int main()
 {

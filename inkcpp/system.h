@@ -4,6 +4,8 @@
 
 namespace ink
 {
+	typedef unsigned int uint32_t;
+
 	// Name hash (used for temporary variables)
 	typedef uint32_t hash_t;
 
@@ -30,4 +32,19 @@ namespace ink
 
 	// assert
 	void assert(bool condition, const char* msg = nullptr);
+
+#ifdef INK_ENABLE_STL
+	using ink_exception = std::exception;
+#else 
+	// Non-STL exception class
+	class ink_exception
+	{
+	public:
+		ink_exception(const char* msg) : _msg(msg) { }
+
+		inline const char* message() const { return _msg; }
+	private:
+		const char* _msg;
+	};
+#endif
 }

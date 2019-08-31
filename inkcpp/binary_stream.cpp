@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "binary_stream.h"
 
 namespace ink

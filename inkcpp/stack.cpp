@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "stack.h"
 
 namespace ink

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "system.h"
+#include <string>
+#include <vector>
 
 namespace ink
 {

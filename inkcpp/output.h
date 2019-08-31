@@ -1,7 +1,7 @@
 #pragma once
 
 #include "value.h"
-#include "config.h"
+#include "platform.h"
 
 namespace ink
 {

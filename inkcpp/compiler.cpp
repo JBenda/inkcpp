@@ -1,4 +1,10 @@
-#include "pch.h"
+// STL includes
+#include <string>
+#include <stack>
+#include <vector>
+#include <map>
+#include <fstream>
+
 #include "compiler.h"
 #include "binary_stream.h"
 
@@ -355,5 +361,72 @@ namespace ink {
 			delete root;
 			root = nullptr;
 		}
+
+		void run(const char* filenameIn, const char* filenameOut)
+		{
+			// Load JSON
+			nlohmann::json j;
+			std::ifstream fin(filenameIn);
+			fin >> j;
+
+			// Open output stream
+			std::ofstream fout(filenameOut, std::ios::binary | std::ios::out);
+
+			// Run compiler
+			ink::compiler::run(j, fout);
+
+			// Close file
+			fout.close();
+		}
+
+		void run(const char* filenameIn, std::ostream& out)
+		{
+			// Load JSON
+			nlohmann::json j;
+			std::ifstream fin(filenameIn);
+			fin >> j;
+
+			// Run compiler
+			ink::compiler::run(j, out);
+		}
+
+		void run(const nlohmann::json& j, const char* filenameOut)
+		{
+			// Open output stream
+			std::ofstream fout(filenameOut, std::ios::binary | std::ios::out);
+
+			// Run compiler
+			ink::compiler::run(j, fout);
+
+			// Close file
+			fout.close();
+		}
+
+		void run(std::istream& in, std::ostream& out)
+		{
+			// Load JSON
+			nlohmann::json j;
+			in >> j;
+
+			// Run compiler
+			ink::compiler::run(j, out);
+		}
+
+		void run(std::istream& in, const char* filenameOut)
+		{
+			// Load JSON
+			nlohmann::json j;
+			in >> j;
+
+			// Open output stream
+			std::ofstream fout(filenameOut, std::ios::binary | std::ios::out);
+
+			// Run compiler
+			ink::compiler::run(j, fout);
+
+			// Close file
+			fout.close();
+		}
+
 	}
 }

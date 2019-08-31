@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include "system.h"
 
 namespace ink
@@ -43,7 +41,7 @@ namespace ink
 	void assert(bool condition, const char* msg /*= nullptr*/)
 	{
 		if (!condition)
-			throw std::exception(msg);
+			throw ink_exception(msg);
 	}
 
 }
