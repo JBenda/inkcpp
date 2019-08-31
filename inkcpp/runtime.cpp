@@ -333,8 +333,13 @@ namespace ink
 				// == Divert commands
 				case Command::DIVERT:
 				{
-					// Move to divert address
+					// Find divert address
 					uint32_t target = read<uint32_t>();
+
+					// Check for condition
+					if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop())
+						break;
+
 					_ptr = _story->instructions() + target;
 					assert(_ptr < _story->end(), "Diverted past end of story data!");
 				}
@@ -343,6 +348,11 @@ namespace ink
 				{
 					// Get variable value
 					hash_t variable = read<hash_t>();
+
+					// Check for condition
+					if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop())
+						break;
+
 					const value& val = *_stack.get(variable);
 
 					// Move to location
@@ -389,6 +399,14 @@ namespace ink
 				case Command::DUPLICATE:
 					_eval.push(_eval.top());
 					break;
+				case Command::PUSH_VARIABLE_VALUE:
+				{
+					hash_t variableName = read<hash_t>();
+					const value* val = _stack.get(variableName);
+					assert(val != nullptr, "Could not find temporary variable!");
+					_eval.push(*val);
+					break;
+				}
 				case Command::START_STR:
 				{
 					assert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");

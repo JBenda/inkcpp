@@ -47,6 +47,7 @@ namespace ink {
 				std::vector<container_structure*> children;
 				std::map<std::string, container_structure*> named_children;
 				std::map<int, container_structure*> indexed_children;
+				std::map<int, uint32_t> noop_offsets;
 				container_structure* parent;
 				uint32_t offset = 0;
 
@@ -62,6 +63,7 @@ namespace ink {
 					children.clear();
 					named_children.clear();
 					indexed_children.clear();
+					noop_offsets.clear();
 					parent = nullptr;
 				}
 			};
@@ -91,13 +93,13 @@ namespace ink {
 				data.paths.push_back(make_tuple(param_position, path, context));
 			}
 
-			void write_variable(compilation_data& data, Command command, const std::string& name)
+			void write_variable(compilation_data& data, Command command, const std::string& name, CommandFlag flag = CommandFlag::NO_FLAGS)
 			{
 				// Hash the name of the variable
 				uint32_t hash = hash_string(name.c_str());
 
 				// Write it out
-				write(data, command, hash);
+				write(data, command, hash, flag);
 
 				// TODO: Check for hash collisions?
 			}
@@ -173,6 +175,11 @@ namespace ink {
 						{
 							write(data, Command::STR, data.push(string));
 						}
+						else if (string == "nop")
+						{
+							// Add addressable reference
+							self->noop_offsets.insert(std::make_pair(index, data.container_data.pos()));
+						}
 						else
 						{
 							compile_command(string, data);
@@ -194,16 +201,23 @@ namespace ink {
 							// Get the divert path
 							auto path = (*iter)["->"].get<std::string>();
 
+							CommandFlag flag = CommandFlag::NO_FLAGS;
+							auto isConditional = iter->find("c");
+							if (isConditional != iter->end() && isConditional->get<bool>())
+							{
+								flag = CommandFlag::DIVERT_HAS_CONDITION;
+							}
+
 							// Is it a variable divert?
 							auto isVar = iter->find("var");
 							if (isVar != iter->end() && isVar->get<bool>())
 							{
-								write_variable(data, Command::DIVERT_TO_VARIABLE, path);
+								write_variable(data, Command::DIVERT_TO_VARIABLE, path, flag);
 							}
 							else
 							{
 								// Write path in DIVERT command
-								write_path(data, Command::DIVERT, path, self);
+								write_path(data, Command::DIVERT, path, self, flag);
 							}
 						}
 						else if (iter->find("^->") != iter->end())
@@ -222,6 +236,15 @@ namespace ink {
 
 							// Define temporary variable
 							write_variable(data, Command::DEFINE_TEMP, name);
+						}
+						// Push variable value onto stack
+						else if (iter->find("VAR?") != iter->end())
+						{
+							// Get variable name
+							auto name = (*iter)["VAR?"].get<std::string>();
+
+							// Define temporary variable
+							write_variable(data, Command::PUSH_VARIABLE_VALUE, name);
 						}
 						// Choice
 						else if (iter->find("*") != iter->end())
@@ -278,6 +301,7 @@ namespace ink {
 					bool firstParent = true;
 
 					// We need to parse the path
+					offset_t noop_offset = ~0;
 					char* _context;
 					const char* token = strtok_s(const_cast<char*>(path_cstr), ".", &_context);
 					while (token != nullptr)
@@ -285,7 +309,16 @@ namespace ink {
 						// Number
 						if (std::isdigit(token[0]))
 						{
-							container = container->indexed_children[atoi(token)];
+							// Check if we have a nop registered at that index
+							int index = atoi(token);
+							auto nop_iter = container->noop_offsets.find(index);
+							if (nop_iter != container->noop_offsets.end())
+							{
+								noop_offset = nop_iter->second;
+								break;
+							}
+							else
+								container = container->indexed_children[index];
 						}
 						// Parent
 						else if (token[0] == '^')
@@ -305,8 +338,15 @@ namespace ink {
 						token = strtok_s(nullptr, ".", &_context);
 					}
 
-					// Write container address
-					data.container_data.set(position, container->offset);
+					if (noop_offset != ~0)
+					{
+						data.container_data.set(position, noop_offset);
+					}
+					else
+					{
+						// Write container address
+						data.container_data.set(position, container->offset);
+					}
 				}
 			}
 		}

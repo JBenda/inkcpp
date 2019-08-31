@@ -29,6 +29,7 @@ namespace ink
 		OUTPUT,
 		POP,
 		DUPLICATE,
+		PUSH_VARIABLE_VALUE,
 
 		// == String stack
 		START_STR,
@@ -75,6 +76,9 @@ namespace ink
 		CHOICE_HAS_CHOICE_ONLY_CONTENT = 1 << 2,
 		CHOICE_IS_INVISIBLE_DEFAULT = 1 << 3,
 		CHOICE_IS_ONCE_ONLY = 1 << 4,
+
+		// == Divert flags
+		DIVERT_HAS_CONDITION = 1 << 0,
 	};
 
 	inline bool operator& (CommandFlag lhs, CommandFlag rhs)
@@ -101,6 +105,7 @@ namespace ink
 		"out",
 		"pop",
 		"du",
+		nullptr,
 
 		"str",
 		"/str",

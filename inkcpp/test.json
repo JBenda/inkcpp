@@ -1,1 +1,1 @@
-﻿{"inkVersion":19,"root":[["^Glue test","\n","<>","^ In one line","\n","end",["done",{"#f":5,"#n":"g-0"}],null],"done",{"#f":1}],"listDefs":{}}
+﻿{"inkVersion":19,"root":[["ev",0,"/ev",{"temp=":"x"},"^Glue test","\n","ev",{"VAR?":"x"},0,"==","/ev",[{"->":".^.b","c":true},{"b":["^ ",{"->":"A"},{"->":"0.12"},null]}],"nop","\n","end",["done",{"#f":5,"#n":"g-0"}],null],"done",{"A":["<>","^ In one line","\n","end",{"#f":1}],"global decl":["ev","/ev","end",null],"#f":1}],"listDefs":{}}
