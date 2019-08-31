@@ -79,6 +79,9 @@ namespace ink
 				// Pop a value off the stack
 				value pop();
 
+				// Gets the top value without popping
+				const value& top() const;
+
 				// Check if the stack is empty
 				bool is_empty() const;
 

@@ -99,6 +99,9 @@ namespace ink
 			choice& add_choice();
 			void clear_choices();
 
+			void run_binary_operator(unsigned char cmd);
+			void run_unary_operator(unsigned char cmd);
+
 		private:
 			const story* _story;
 

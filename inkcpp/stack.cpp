@@ -160,6 +160,13 @@ namespace ink
 				return _stack[_pos];
 			}
 
+			const value& basic_eval_stack::top() const
+			{
+				assert(_pos > 0, "Stack is empty! No top()");
+
+				return _stack[_pos - 1];
+			}
+
 			bool basic_eval_stack::is_empty() const
 			{
 				return _pos == 0;

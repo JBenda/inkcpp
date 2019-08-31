@@ -82,13 +82,24 @@ namespace ink
 				uint32_t as_divert() const { return _first.uint_value; }
 				// TODO: String access?
 
+				// Is this value "true"
+				bool is_truthy() const;
+				inline operator bool() const { return is_truthy(); }
+
 				void append_to(basic_stream&) const;
 				void load_from(basic_stream&);
 
 				// == Binary operations ==
 				static value add(value, value);
 				static value subtract(value, value);
+				static value multiply(value, value);
+				static value divide(value, value);
+				static value mod(value, value);
 				static value is_equal(value, value);
+				static value less_than(value, value);
+
+				// == Unary operations
+				static value negate(const value&);
 
 			private:
 				static void cast(value&, value_type, value_type);
@@ -114,9 +125,19 @@ namespace ink
 			};
 
 			// == Binary Operators ==
-			value operator+(const value&, const value&);
-			value operator-(const value&, const value&);
-			value operator==(const value&, const value&);
+			inline value operator+(const value& lhs, const value& rhs) { return value::add(lhs, rhs); }
+			inline value operator-(const value& lhs, const value& rhs) { return value::subtract(lhs, rhs); }
+			inline value operator*(const value& lhs, const value& rhs) { return value::multiply(lhs, rhs); } 
+			inline value operator/(const value& lhs, const value& rhs) { return value::divide(lhs, rhs); }
+			inline value operator%(const value& lhs, const value& rhs) { return value::mod(lhs, rhs); }
+			inline value operator-(const value& val) { return value::negate(val); }
+
+			inline value operator==(const value& lhs, const value& rhs) { return value::is_equal(lhs, rhs); }
+			inline value operator!=(const value& lhs, const value& rhs) { return !value::is_equal(lhs, rhs); }
+			inline value operator<(const value& lhs, const value& rhs) { return value::less_than(lhs, rhs); }
+			inline value operator<=(const value& lhs, const value& rhs) { return value::less_than(lhs, rhs) || value::is_equal(lhs, rhs); }
+			inline value operator>(const value& lhs, const value& rhs) { return !(lhs <= rhs); }
+			inline value operator>=(const value& lhs, const value& rhs) { return !value::less_than(lhs,rhs); }
 
 			// == Stream Operators ==
 			basic_stream& operator <<(basic_stream&, const value&);

@@ -44,6 +44,86 @@ namespace ink
 			_num_choices = 0;
 		}
 
+		void runner::run_binary_operator(unsigned char cmd)
+		{
+			// Pop
+			value rhs = _eval.pop(), lhs = _eval.pop();
+			value result;
+
+			switch ((Command)cmd)
+			{
+			case Command::ADD:
+				result = lhs + rhs;
+				break;
+			case Command::SUBTRACT:
+				result = lhs - rhs;
+				break;
+			case Command::DIVIDE:
+				result = lhs / rhs;
+				break;
+			case Command::MULTIPLY:
+				result = lhs * rhs;
+				break;
+			case Command::MOD:
+				result = lhs % rhs;
+				break;
+			case Command::IS_EQUAL:
+				result = lhs == rhs;
+				break;
+			case Command::GREATER_THAN:
+				result = lhs > rhs;
+				break;
+			case Command::LESS_THAN:
+				result = lhs < rhs;
+				break;
+			case Command::GREATER_THAN_EQUALS:
+				result = lhs >= rhs;
+				break;
+			case Command::LESS_THAN_EQUALS:
+				result = lhs <= rhs;
+				break;
+			case Command::NOT_EQUAL:
+				result = lhs != rhs;
+				break;
+			case Command::AND:
+				result = lhs && rhs;
+				break;
+			case Command::OR:
+				result = lhs || rhs;
+				break;
+			case Command::MIN:
+				result = lhs < rhs ? lhs : rhs;
+				break;
+			case Command::MAX:
+				result = lhs > rhs ? lhs : rhs;
+				break;
+			}
+
+			// Push result onto the stack
+			_eval.push(result);
+		}
+
+		void runner::run_unary_operator(unsigned char cmd)
+		{
+			// Pop
+			value v = _eval.pop();
+			value result;
+
+			// Run command
+			switch ((Command)cmd)
+			{
+			case Command::NEGATE:
+				result = -v;
+				break;
+			case Command::NOT:
+				result = !v;
+				break;
+			}
+
+			// Push to the stack
+			_eval.push(result);
+		}
+
 		runner::runner(const story* data)
 			: _story(data)
 		{
@@ -194,8 +274,17 @@ namespace ink
 				Command cmd = read<Command>();
 				CommandFlag flag = read<CommandFlag>();
 
-				switch (cmd)
+				if (cmd >= Command::BINARY_OPERATORS_START && cmd <= Command::BINARY_OPERATORS_END)
 				{
+					run_binary_operator((unsigned char)cmd);
+				}
+				else if (cmd >= Command::UNARY_OPERATORS_START && cmd <= Command::UNARY_OPERATORS_END)
+				{
+					run_unary_operator((unsigned char)cmd);
+				}
+				else switch (cmd)
+				{
+				// == Value Commands ==
 				case Command::STR:
 				{
 					const char* str = read<const char*>();
@@ -203,6 +292,25 @@ namespace ink
 						_eval.push(str);
 					else
 						_output << str;
+				}
+				break;
+				case Command::INT:
+				{
+					int val = read<int>();
+					if (bEvaluationMode)
+						_eval.push(val);
+					else
+						_output << val;
+				}
+				break;
+
+				case Command::DIVERT_VAL:
+				{
+					assert(bEvaluationMode, "Can not push divert value into the output stream!");
+
+					// Push the divert target onto the stack
+					uint32_t target = read<uint32_t>();
+					_eval.push(value(target));
 				}
 				break;
 				case Command::NEWLINE:
@@ -221,39 +329,8 @@ namespace ink
 						_output << glue;
 				}
 				break;
-				case Command::INT:
-				{
-					int val = read<int>();
-					if (bEvaluationMode)
-						_eval.push(val);
-					else
-						_output << val;
-				}
-				break;
-				case Command::DIVERT_VAL:
-				{
-					assert(bEvaluationMode, "Can not push divert value into the output stream!");
 
-					// Push the divert target onto the stack
-					uint32_t target = read<uint32_t>();
-					_eval.push(value(target));
-				}
-				break;
-
-				// == Binary Operators ==
-				case Command::ADD:
-				{
-					value b = _eval.pop(), a = _eval.pop();
-					_eval.push(a + b);
-				}
-				break;
-				case Command::IS_EQUAL:
-				{
-					value b = _eval.pop(), a = _eval.pop();
-					_eval.push(a == b);
-				}
-				break;
-
+				// == Divert commands
 				case Command::DIVERT:
 				{
 					// Move to divert address
@@ -273,6 +350,66 @@ namespace ink
 					assert(_ptr < _story->end(), "Diverted past end of story data!");
 				}
 				break;
+
+				// == Terminal commands
+				case Command::END:
+				case Command::DONE:
+					_ptr = nullptr;
+					break;
+
+					// == Variable definitions
+				case Command::DEFINE_TEMP:
+				{
+					hash_t variableName = read<hash_t>();
+
+					// Get the top value and put it into the variable
+					value v = _eval.pop();
+					_stack.set(variableName, v);
+				}
+				break;
+
+				// == Evaluation stack
+				case Command::START_EVAL:
+					bEvaluationMode = true;
+					break;
+				case Command::END_EVAL:
+					bEvaluationMode = false;
+
+					// Assert stack is empty? Is that necessary?
+					break;
+				case Command::OUTPUT:
+				{
+					value v = _eval.pop();
+					_output << v;
+				}
+				break;
+				case Command::POP:
+					_eval.pop();
+					break;
+				case Command::DUPLICATE:
+					_eval.push(_eval.top());
+					break;
+				case Command::START_STR:
+				{
+					assert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
+					bEvaluationMode = false;
+					_output << marker;
+				} break;
+				case Command::END_STR:
+				{
+					// TODO: Assert we really had a marker on there?
+					assert(!bEvaluationMode);
+					bEvaluationMode = true;
+
+					// Load value from output stream
+					value val;
+					_output >> val;
+
+					// Push onto stack
+					_eval.push(val);
+				} break;
+
+				// == Choice commands
 				case Command::CHOICE:
 				{
 					// Use a marker to start compiling the choice text
@@ -294,52 +431,6 @@ namespace ink
 					// Create choice and record it
 					add_choice().setup(_output, _num_choices, path);
 				} break;
-				case Command::START_STR:
-				{
-					assert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
-					bEvaluationMode = false;
-					_output << marker;
-				} break;
-				case Command::END_STR:
-				{
-					// TODO: Assert we really had a marker on there?
-					assert(!bEvaluationMode);
-					bEvaluationMode = true;
-
-					// Load value from output stream
-					value val;
-					_output >> val;
-
-					// Push onto stack
-					_eval.push(val);
-				} break;
-				case Command::START_EVAL:
-					bEvaluationMode = true;
-					break;
-				case Command::END_EVAL:
-					bEvaluationMode = false;
-
-					// Assert stack is empty? Is that necessary?
-					break;
-				case Command::OUTPUT:
-				{
-					value v = _eval.pop();
-					_output << v;
-				}
-				break;
-				case Command::DEFINE_TEMP:
-				{
-					hash_t variableName = read<hash_t>();
-
-					// Get the top value and put it into the variable
-					value v = _eval.pop();
-					_stack.set(variableName, v);
-				}
-				break;
-				case Command::END:
-				case Command::DONE:
-					_ptr = nullptr;
-					break;
 				}
 			}
 			catch(...)

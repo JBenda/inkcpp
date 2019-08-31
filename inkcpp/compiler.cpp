@@ -241,7 +241,7 @@ namespace ink {
 
 			void compile_command(const std::string& name, compilation_data& data)
 			{
-				for (int i = 0; i < (int)Command::COMMAND_END; i++)
+				for (int i = 0; i < (int)Command::NUM_COMMANDS; i++)
 				{
 					if (CommandStrings[i] != nullptr && name == CommandStrings[i])
 					{
