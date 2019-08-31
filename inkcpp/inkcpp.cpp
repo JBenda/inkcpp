@@ -35,7 +35,7 @@ int main()
 
 		while (true)
 		{
-			while (thread.can_continue())
+			while (thread)
 				std::cout << thread;
 
 			if(thread.has_choices())

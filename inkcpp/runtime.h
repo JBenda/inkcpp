@@ -22,6 +22,7 @@ namespace ink
 
 			// Checks that the runner can continue
 			bool can_continue() const;
+			inline operator bool() const { return can_continue(); }
 
 			// == Choices ==
 
