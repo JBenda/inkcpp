@@ -42,9 +42,8 @@ Only very basic commands are supported right now.
 * Int, String, or Divert values
 * Eval stack (`ev`, `/ev`), String stack (`str`, `/str`)
 * Basic choices (no differentiation between `*` and `+`, no conditions)
-* Diverts (variable and fixed)
+* Diverts (variable and fixed, conditional and normal)
 * All mathematical operators (`+`, `<=`, etc.). String equality not supported.
-* Can not divert to a `noop` instruction. Can only divert to containers
 * Glue
 
 ## Dependencies
