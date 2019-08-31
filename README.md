@@ -20,7 +20,7 @@ story myInk("story.bin");
 runner thread(&myInk);
 
 // Write to cout
-while(thread.can_continue())
+while(thread)
 	std::cout << thread;
 
 // Iterate choices
@@ -43,11 +43,11 @@ Only very basic commands are supported right now.
 * Eval stack (`ev`, `/ev`), String stack (`str`, `/str`)
 * Basic choices (no differentiation between `*` and `+`, no conditions)
 * Diverts (variable and fixed)
-* Addition (`+`) and equality (`==`) operators. No string equality.
+* All mathematical operators (`+`, `<=`, etc.). String equality not supported.
 * Can not divert to a `noop` instruction. Can only divert to containers
-* Glue (untested)
+* Glue
 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
 
-The runtime does not depend on either (though there are still a few calls left to be culled). If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators `std::string` support.
+The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators `std::string` support.
