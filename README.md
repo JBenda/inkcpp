@@ -49,4 +49,4 @@ Only very basic commands are supported right now.
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
 
-The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators `std::string` support.
+The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators and `std::string` support.
