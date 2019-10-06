@@ -2,6 +2,7 @@
 #include "command.h"
 #include "story.h"
 #include "choice.h"
+#include "globals.h"
 
 namespace ink
 {
@@ -42,6 +43,73 @@ namespace ink
 		{
 			// TODO: Garbage collection?
 			_num_choices = 0;
+		}
+
+		void runner::jump(ip_t dest)
+		{
+			// Check which direction we are jumping
+			bool reverse = dest < _ptr;
+
+			// iteration
+			const uint32_t* iter = nullptr;
+			container_t container_id;
+			ip_t offset;
+
+			// Iterate until we find the container marker just before our own
+			while (_story->iterate_containers(iter, container_id, offset, reverse)) {
+				if (!reverse && offset >= _ptr || reverse && offset < _ptr) {
+
+					// Step back once in the iteration and break
+					_story->iterate_containers(iter, container_id, offset, !reverse);
+					break;
+				}
+			}
+
+			size_t pos = _container.size();
+
+			// Start moving forward (or backwards)
+			while (_story->iterate_containers(iter, container_id, offset, reverse))
+			{
+				// Break when we've past the destination
+				if (!reverse && offset > dest || reverse && offset < dest)
+					break;
+
+				// Two cases:
+
+				// (1) Container iterator has the same value as the top of the stack.
+				//  This means that this is an end marker for the container we're in
+				if (!_container.empty() && _container.top() == container_id)
+				{
+					if (_container.size() == pos)
+						pos--;
+
+					// Get out of that container
+					_container.pop();
+				}
+
+				// (2) This must be the entrance marker for a new container. Enter it
+				else
+				{
+					// Push it
+					_container.push(container_id);
+				}
+			}
+
+			// Iterate over the container stack marking any _new_ entries as "visited"
+			{
+				const container_t* iter;
+				size_t num_new = _container.size() - pos;
+				while (_container.iter(iter))
+				{
+					if (num_new == 0)
+						break;
+					_globals->visit(*iter);
+					num_new--;
+				}
+			}
+
+			// Jump
+			_ptr = dest;
 		}
 
 		void runner::run_binary_operator(unsigned char cmd)
@@ -124,8 +192,8 @@ namespace ink
 			_eval.push(result);
 		}
 
-		runner::runner(const story* data)
-			: _story(data)
+		runner::runner(const story* data, globals* global)
+			: _story(data), _globals(global), _container(~0)
 		{
 			_ptr = _story->instructions();
 			bEvaluationMode = false;
@@ -187,8 +255,9 @@ namespace ink
 		}
 
 		void runner::choose(int index)
-		{
-			_ptr = _story->instructions() + _choices[index].path();
+		{			
+			// Jump to destination and clear choice list
+			jump(_story->instructions() + _choices[index].path());
 			clear_choices();
 		}
 
@@ -245,6 +314,9 @@ namespace ink
 				// If we're on a newline
 				if (_output.ends_with(data_type::newline))
 				{
+					// TODO: REMOVE
+					// return true;
+
 					// Unless we are out of content, we are going to try
 					//  to continue a little further. This is to check for
 					//  glue (which means there is potentially more content
@@ -340,7 +412,7 @@ namespace ink
 					if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop())
 						break;
 
-					_ptr = _story->instructions() + target;
+					jump(_story->instructions() + target);
 					assert(_ptr < _story->end(), "Diverted past end of story data!");
 				}
 				break;
@@ -356,14 +428,14 @@ namespace ink
 					const value& val = *_stack.get(variable);
 
 					// Move to location
-					_ptr = _story->instructions() + val.as_divert();
+					jump(_story->instructions() + val.as_divert());
 					assert(_ptr < _story->end(), "Diverted past end of story data!");
 				}
 				break;
 
 				// == Terminal commands
-				case Command::END:
 				case Command::DONE:
+				case Command::END:
 					_ptr = nullptr;
 					break;
 
@@ -449,6 +521,39 @@ namespace ink
 					// Create choice and record it
 					add_choice().setup(_output, _num_choices, path);
 				} break;
+				case Command::START_CONTAINER_MARKER:
+				{
+					// Keep track of current container
+					_container.push(read<uint32_t>());
+
+					// Increment visit count
+					if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS)
+					{
+						_globals->visit(_container.top());
+					}
+					
+					// TODO Turn counts
+				} break;
+				case Command::END_CONTAINER_MARKER:
+				{
+					// Move up out of the current container
+					_container.pop();
+
+					// SPECIAL: If we've popped all containers, then there's an implied 'done' command
+					if (_container.empty())
+					{
+						_ptr = nullptr;
+						return;
+					}
+				} break;
+				case Command::VISIT:
+				{
+					// Push the visit count for the current container to the top
+					_eval.push((int)_globals->visits(_container.top()));
+				} break;
+				default:
+					assert(false, "Unrecognized command!");
+					break;
 				}
 			}
 			catch(...)
@@ -468,6 +573,7 @@ namespace ink
 			_saved = false;
 			_num_choices = 0;
 			_ptr = nullptr;
+			_container.clear();
 		}
 
 		void runner::save()
@@ -478,6 +584,7 @@ namespace ink
 			_output.save();
 			_stack.save();
 			_backup = _ptr;
+			_container.save();
 
 			// TODO: Save eval stack? Should be empty
 			assert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -490,6 +597,7 @@ namespace ink
 			_output.restore();
 			_stack.restore();
 			_ptr = _backup;
+			_container.restore();
 
 			// TODO: Save eval stack? Should be empty
 			assert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -505,6 +613,7 @@ namespace ink
 
 			_output.forget();
 			_stack.forget();
+			_container.forget();
 
 			// Nothing to do for eval stack. It should just stay as it is
 

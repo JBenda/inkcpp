@@ -1,6 +1,6 @@
-Basic choice test {1 + "Hello"}
-Here is a second line
-* First
-* Second
-- Ending
-->END
+->start
+
+= start
+How many times have we gone around? {start} times!
++ Continue
+- ->start

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+
+  <Catch2Adapter disabled="false">
+    <FilenameFilter>_test$</FilenameFilter>
+  </Catch2Adapter>
+
+</RunSettings>

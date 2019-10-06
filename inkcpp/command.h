@@ -30,6 +30,7 @@ namespace ink
 		POP,
 		DUPLICATE,
 		PUSH_VARIABLE_VALUE,
+		VISIT,
 
 		// == String stack
 		START_STR,
@@ -62,6 +63,9 @@ namespace ink
 		NEGATE,
 		UNARY_OPERATORS_END = NEGATE,
 
+		START_CONTAINER_MARKER,
+		END_CONTAINER_MARKER,
+
 		NUM_COMMANDS,
 	};
 
@@ -79,11 +83,21 @@ namespace ink
 
 		// == Divert flags
 		DIVERT_HAS_CONDITION = 1 << 0,
+
+		// == Container marker
+		CONTAINER_MARKER_TRACK_VISITS = 1 << 0,
+		CONTAINER_MARKER_TRACK_TURNS = 1 << 1,
 	};
 
 	inline bool operator& (CommandFlag lhs, CommandFlag rhs)
 	{
 		return (static_cast<unsigned char>(lhs) & static_cast<unsigned char>(rhs)) > 0;
+	}
+
+	inline CommandFlag& operator|= (CommandFlag& lhs, CommandFlag rhs)
+	{
+		lhs = static_cast<CommandFlag>(static_cast<unsigned char>(lhs) | static_cast<unsigned char>(rhs));
+		return lhs;
 	}
 
 #ifdef INK_COMPILER
@@ -106,6 +120,7 @@ namespace ink
 		"pop",
 		"du",
 		nullptr,
+		"visit",
 
 		"str",
 		"/str",
@@ -130,6 +145,9 @@ namespace ink
 
 		"!",
 		"~",
+
+		nullptr,
+		nullptr
 	};
 
 	static_assert(sizeof(CommandStrings) / sizeof(const char*) == (int)Command::NUM_COMMANDS, "CommandStrings list much match Command enumeration");

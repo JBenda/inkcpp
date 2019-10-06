@@ -3,6 +3,7 @@
 #include "system.h"
 #include <string>
 #include <vector>
+#include <ostream>
 
 namespace ink
 {

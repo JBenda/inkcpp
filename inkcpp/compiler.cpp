@@ -3,6 +3,7 @@
 #include <stack>
 #include <vector>
 #include <map>
+#include <set>
 #include <fstream>
 
 #include "compiler.h"
@@ -24,7 +25,38 @@ namespace ink {
 				binary_stream string_table;
 				binary_stream container_data;
 				std::vector<std::tuple<size_t, std::string, container_structure*>> paths;
-				std::stack<std::tuple<nlohmann::json, std::string, container_structure*>> deferred;
+
+				// container map
+				uint32_t next_container_index = 0;
+				std::vector<std::pair<uint32_t, uint32_t>> container_map;
+
+				void container_start(uint32_t offset, uint32_t containerIndex)
+				{
+					if (container_map.rbegin() != container_map.rend())
+					{
+						if (container_map.rbegin()->first > offset)
+						{
+							std::cerr << "WARNING: Container map written out of order. Wrote container at offset "
+								<< offset << " after container with offset " << container_map.rbegin()->first << std::endl;
+						}
+					}
+
+					container_map.push_back(std::make_pair(offset, containerIndex));
+				}
+
+				void container_end(uint32_t offset, uint32_t containerIndex)
+				{
+					if (container_map.rbegin() != container_map.rend())
+					{
+						if (container_map.rbegin()->first > offset)
+						{
+							std::cerr << "WARNING: Container map written out of order. Wrote container at offset " 
+								<< offset << " after container with offset " << container_map.rbegin()->first << std::endl;
+						}
+					}
+
+					container_map.push_back(std::make_pair(offset, containerIndex));
+				}
 
 				uint32_t push(const std::string& string)
 				{
@@ -50,6 +82,9 @@ namespace ink {
 				std::map<int, uint32_t> noop_offsets;
 				container_structure* parent;
 				uint32_t offset = 0;
+				container_t counter_index = ~0;
+
+				std::stack<std::tuple<nlohmann::json, std::string, container_structure*>> deferred;
 
 				~container_structure()
 				{
@@ -86,7 +121,7 @@ namespace ink {
 			void write_path(compilation_data& data, Command command, const std::string& path, container_structure* context, CommandFlag flags = CommandFlag::NO_FLAGS)
 			{
 				// Write command out with stub param
-				write(data, command, (uint32_t)0, flags);;
+				write(data, command, (uint32_t)0, flags);
 
 				// Note to write over that param later
 				size_t param_position = data.container_data.pos() - sizeof(uint32_t);
@@ -108,6 +143,87 @@ namespace ink {
 			container_structure* compile_container(const nlohmann::json& container, compilation_data& data, container_structure* parent, int index_in_parent);
 			void process_paths(compilation_data& data, container_structure* root);
 
+			uint32_t handle_settings(const nlohmann::json& meta, compilation_data& data, container_structure* self, container_structure* parent, bool& recordInContainerMap)
+			{
+				std::string name;
+				uint32_t indexToReturn = ~0;
+				recordInContainerMap = false;
+
+				// Should be an assert
+				if (meta.is_object())
+				{
+					for (auto& meta_iter : meta.items())
+					{
+						// Name
+						if (meta_iter.key() == "#n")
+						{
+							// Add to parent's named children list
+							if (parent != nullptr)
+							{
+								name = meta_iter.value().get<std::string>();
+								parent->named_children.insert({ name, self });
+							}
+						}
+						// Flags
+						else if (meta_iter.key() == "#f")
+						{
+							int flags = meta_iter.value().get<int>();
+
+							bool visits = false, turns = false, onlyFirst = false;
+
+							if ((flags & 0x1) > 0) // Should record visit counts
+							{
+								visits = true;
+							}
+							if ((flags & 0x2) > 0) // Should record turn counts
+							{
+								turns = true;
+							}
+							if ((flags & 0x4) > 0) // Only count when you enter the first subelement
+							{
+								onlyFirst = true;
+							}
+
+							if (visits || turns)
+							{
+								uint32_t myIndex = data.next_container_index++;
+
+								// Make appropriate flags
+								CommandFlag flags = CommandFlag::NO_FLAGS;
+								if (visits)
+									flags |= CommandFlag::CONTAINER_MARKER_TRACK_VISITS;
+								if(turns)
+									flags |= CommandFlag::CONTAINER_MARKER_TRACK_TURNS;
+
+								// Write command out at this position
+								write(data, Command::START_CONTAINER_MARKER, myIndex, flags);
+
+								indexToReturn = myIndex;
+								self->counter_index = indexToReturn;
+
+								//if (!onlyFirst)
+								{
+									recordInContainerMap = true;
+									data.container_start(self->offset, myIndex);
+
+									// TODO: Do we need to nudge the offset so that when we jump to this container
+									//  we don't hit the marker? I think yes. Let's do it here.
+									self->offset = data.container_data.pos();
+								}
+							}
+						}
+						// Child container
+						else
+						{
+							// Add to deferred compilation list
+							self->deferred.push(std::make_tuple(meta_iter.value(), meta_iter.key(), self));
+						}
+					}
+				}
+
+				return indexToReturn;
+			}
+
 			container_structure* compile_container(const nlohmann::json& container, compilation_data& data, container_structure* parent, int index_in_parent)
 			{
 				// Create meta structure and add to parent
@@ -120,47 +236,17 @@ namespace ink {
 					parent->indexed_children.insert(std::make_pair(index_in_parent, self));
 				}
 
+				// Handle settings object
+				bool recordInContainerMap = false;
+				uint32_t myIndex = handle_settings(*container.rbegin(), data, self, parent, recordInContainerMap);
+
 				int index = -1;
 
-				for (auto iter = container.begin(); iter != container.end(); ++iter)
+				auto end = container.end() - 1;
+				for (auto iter = container.begin(); iter != end; ++iter)
 				{
+					// Increment index
 					index++;
-
-					// Handle final object
-					if (container.end() - 1 == iter)
-					{
-						// Should be an assert
-						if (iter->is_object())
-						{
-							auto meta = *iter;
-							for (auto& meta_iter : meta.items())
-							{
-								// Name
-								if (meta_iter.key() == "#n")
-								{
-									// Add to parent's named children list
-									if (parent != nullptr)
-									{
-										std::string name = meta_iter.value().get<std::string>();
-										parent->named_children.insert({ name, self });
-									}
-								}
-								// Flags
-								else if (meta_iter.key() == "#f")
-								{
-									//std::cout << "Flags: " << meta_iter.value().get<int>() << std::endl;
-									// TODO: Flags
-								}
-								// Child container
-								else
-								{
-									// Add to deferred compilation list
-									data.deferred.push(std::make_tuple(meta_iter.value(), meta_iter.key(), self));
-								}
-							}
-						}
-						continue;
-					}
 
 					// Recursive compilation
 					if (iter->is_array())
@@ -259,6 +345,46 @@ namespace ink {
 					}
 				}
 
+				if (self->deferred.size() > 0)
+				{
+					std::vector<size_t> divert_positions;
+
+					// (1) Write empty divert
+					write(data, Command::DIVERT, 0);
+					divert_positions.push_back(data.container_data.pos() - sizeof(uint32_t));
+
+					// (2) Write deffered containers (TODO: Clean this up. has unnecessary shit)
+					while (self->deferred.size() > 0)
+					{
+						using std::get;
+
+						// Defer compilation
+						auto t = self->deferred.top();
+						self->deferred.pop();
+
+						// Add to named child list
+						container_structure* namedChild = compile_container(get<0>(t), data, get<2>(t), -1);
+						get<2>(t)->named_children.insert({ get<1>(t), namedChild });
+
+						// Need a divert here
+						write(data, Command::DIVERT, 0);
+						divert_positions.push_back(data.container_data.pos() - sizeof(uint32_t));
+					}
+
+					// (3) Set divert position
+					for(size_t offset : divert_positions)
+						data.container_data.set(offset, data.container_data.pos());
+				}
+
+				// (4) Record end offset (only if applicable)
+				if (myIndex != ~0)
+				{
+					// Before so we don't ofset overlap with start of next container
+					if (recordInContainerMap)
+						data.container_end(data.container_data.pos(), myIndex);
+
+					write(data, Command::END_CONTAINER_MARKER);
+				}
 				return self;
 			}
 
@@ -302,7 +428,7 @@ namespace ink {
 
 					// We need to parse the path
 					offset_t noop_offset = ~0;
-					char* _context;
+					char* _context = nullptr;
 					const char* token = strtok_s(const_cast<char*>(path_cstr), ".", &_context);
 					while (token != nullptr)
 					{
@@ -349,6 +475,42 @@ namespace ink {
 					}
 				}
 			}
+
+			void write_container_map(const compilation_data& data, std::ostream& out)
+			{
+				// Write out container count
+				out.write((const char*)&data.next_container_index, sizeof(uint32_t));
+
+				// Write out entries
+				for (const auto& pair : data.container_map)
+				{
+					out.write((const char*)& pair.first, sizeof(uint32_t));
+					out.write((const char*)& pair.second, sizeof(uint32_t));
+				}
+			}
+
+			void log_container_counter_index(const std::string& name, const container_structure* container)
+			{
+				if (container->counter_index != ~0)
+				{
+					std::clog << "Container " << name << " has counter index " << container->counter_index << std::endl;
+				}
+
+				std::set<const container_structure*> used;
+				for (auto& pair : container->named_children)
+				{
+					log_container_counter_index(pair.first, pair.second);
+					used.insert(pair.second);
+				}
+
+				for (auto child : container->children)
+				{
+					if (used.find(child) != used.end())
+						continue;
+
+					log_container_counter_index("", child);
+				}
+			}
 		}
 
 		void run(const nlohmann::json& src, std::ostream& out)
@@ -364,20 +526,6 @@ namespace ink {
 			// Get the root container and compile it
 			container_structure* root = compile_container(src["root"], data, nullptr, 0);
 
-			// Deferred compilation
-			while (data.deferred.size() > 0)
-			{
-				using std::get;
-
-				// Defer compilation
-				auto t = data.deferred.top();
-				data.deferred.pop();
-
-				// Add to named child list
-				container_structure* namedChild = compile_container(get<0>(t), data, get<2>(t), -1);
-				get<2>(t)->named_children.insert({ get<1>(t), namedChild });
-			}
-
 			// Handle path processing
 			process_paths(data, root);
 
@@ -392,11 +540,21 @@ namespace ink {
 			// Write a separator
 			out << (char)0;
 
+			// Write out container map
+			write_container_map(data, out);
+
+			// Write a separator
+			uint32_t END_MARKER = ~0;
+			out.write((const char*)& END_MARKER, sizeof(uint32_t));
+
 			// Write the container data
 			data.container_data.write_to(out);
 
 			// Flush the file
 			out.flush();
+
+			// LOGGING
+			log_container_counter_index("ROOT", root);
 
 			delete root;
 			root = nullptr;

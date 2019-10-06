@@ -6,6 +6,7 @@
 #include "stack.h"
 #include "choice.h"
 #include "config.h"
+#include "simple_restorable_stack.h"
 
 namespace ink
 {
@@ -13,12 +14,13 @@ namespace ink
 	{
 		class story;
 		class choice;
+		class globals;
 
 		class runner
 		{
 		public:
 			// Creates a new runner at the start of a loaded ink story
-			runner(const story*);
+			runner(const story*, globals*);
 
 			// Checks that the runner can continue
 			bool can_continue() const;
@@ -99,11 +101,15 @@ namespace ink
 			choice& add_choice();
 			void clear_choices();
 
+			// Special code for jumping from the current IP to another
+			void jump(ip_t);
+
 			void run_binary_operator(unsigned char cmd);
 			void run_unary_operator(unsigned char cmd);
 
 		private:
-			const story* _story;
+			const story* const _story;
+			globals* const _globals;
 
 			// == State ==
 
@@ -125,6 +131,9 @@ namespace ink
 			static const size_t MAX_CHOICES = 10;
 			choice _choices[MAX_CHOICES];
 			size_t _num_choices;
+
+			// Container set
+			internal::restorable_stack<container_t, 20> _container;
 
 			bool _saved;
 		};

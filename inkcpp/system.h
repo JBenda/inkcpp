@@ -27,8 +27,14 @@ namespace ink
 	// Used for the size of arrays
 	typedef unsigned int size_t;
 
+	// Used as the unique identifier for an ink container
+	typedef uint32_t container_t;
+
 	// Checks if a string is only whitespace
 	bool is_whitespace(const char* string, bool includeNewline = true);
+
+	// Zero memory
+	void zero_memory(void* buffer, size_t length);
 
 	// assert
 	void assert(bool condition, const char* msg = nullptr);
@@ -48,3 +54,7 @@ namespace ink
 	};
 #endif
 }
+
+// Platform specific defines //
+
+#define inkZeroMemory ink::zero_memory

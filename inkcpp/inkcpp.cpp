@@ -5,6 +5,7 @@
 #include "story.h"
 #include "runtime.h"
 #include "choice.h"
+#include "globals.h"
 
 #include <fstream>
 
@@ -48,7 +49,11 @@ int main()
 	{
 		// Load ink and start a runner
 		ink::runtime::story myInk("test.bin");
-		ink::runtime::runner thread(&myInk);
+
+		// Create a global store
+		ink::runtime::globals store(&myInk);
+
+		ink::runtime::runner thread(&myInk, &store);
 
 		while (true)
 		{

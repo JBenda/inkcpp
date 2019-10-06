@@ -1,5 +1,6 @@
 #include "story.h"
 #include "platform.h"
+#include "globals.h"
 
 namespace ink
 {
@@ -59,6 +60,50 @@ namespace ink
 			return _string_table + index;
 		}
 
+		bool story::iterate_containers(const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse) const
+		{
+			if (iterator == nullptr)
+			{
+				// Empty check
+				if (_container_list_size == 0)
+				{
+					return false;
+				}
+
+				// Start
+				iterator = reverse 
+					? _container_list + (_container_list_size - 1) * 2
+					: _container_list;
+			}
+			else
+			{
+				// Range check
+				assert(iterator >= _container_list && iterator <= _container_list + _container_list_size * 2);
+
+				// Advance
+				iterator += reverse ? -2 : 2;
+
+				// End?
+				if (iterator >= _container_list + _container_list_size * 2 || iterator < _container_list)
+				{
+					iterator = nullptr;
+					index = 0;
+					offset = nullptr;
+					return false;
+				}
+			}
+
+			// Get metadata
+			index = *(iterator + 1);
+			offset = *iterator + instructions();
+			return true;
+		}
+
+		globals* story::new_global_store() const
+		{
+			return nullptr;
+		}
+
 		void story::setup_pointers()
 		{
 			// String table is after the version information
@@ -77,11 +122,35 @@ namespace ink
 
 				// Second null. Strings are done.
 				if (*ptr == 0)
+				{
+					ptr++;
 					break;
+				}
+			}
+
+			_num_containers = *(uint32_t*)(ptr);
+			ptr += sizeof(uint32_t);
+
+			// Pass over the container data
+			_container_list_size = 0;
+			_container_list = (uint32_t*)(ptr);
+			while (true)
+			{
+				uint32_t val = *(uint32_t*)ptr;
+				if (val == ~0)
+				{
+					ptr += sizeof(uint32_t);
+					break;
+				}
+				else
+				{
+					ptr += sizeof(uint32_t) * 2;
+					_container_list_size++;
+				}
 			}
 
 			// After strings comes instruction data
-			_instruction_data = (ip_t)ptr + 1;
+			_instruction_data = (ip_t)ptr;
 		}
 	}
 }
