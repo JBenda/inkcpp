@@ -83,6 +83,7 @@ namespace ink
 
 		// == Divert flags
 		DIVERT_HAS_CONDITION = 1 << 0,
+		DIVERT_IS_FALLTHROUGH = 1 << 1, // Divert was auto-generated as a result of falling out of a containers content
 
 		// == Container marker
 		CONTAINER_MARKER_TRACK_VISITS = 1 << 0,

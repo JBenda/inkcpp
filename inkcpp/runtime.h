@@ -102,7 +102,7 @@ namespace ink
 			void clear_choices();
 
 			// Special code for jumping from the current IP to another
-			void jump(ip_t);
+			void jump(ip_t, bool record_visits = true);
 
 			void run_binary_operator(unsigned char cmd);
 			void run_unary_operator(unsigned char cmd);
@@ -116,6 +116,7 @@ namespace ink
 			// Instruction pointer
 			ip_t _ptr;
 			ip_t _backup; // backup pointer
+			ip_t _done; // when we last hit a done
 
 			// Output stream
 			internal::stream<100> _output;
@@ -134,6 +135,7 @@ namespace ink
 
 			// Container set
 			internal::restorable_stack<container_t, 20> _container;
+			bool _is_falling = false;
 
 			bool _saved;
 		};

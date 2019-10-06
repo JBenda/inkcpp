@@ -45,7 +45,7 @@ namespace ink
 			_num_choices = 0;
 		}
 
-		void runner::jump(ip_t dest)
+		void runner::jump(ip_t dest, bool record_visits)
 		{
 			// Check which direction we are jumping
 			bool reverse = dest < _ptr;
@@ -96,6 +96,7 @@ namespace ink
 			}
 
 			// Iterate over the container stack marking any _new_ entries as "visited"
+			if(record_visits)
 			{
 				const container_t* iter;
 				size_t num_new = _container.size() - pos;
@@ -255,7 +256,12 @@ namespace ink
 		}
 
 		void runner::choose(int index)
-		{			
+		{	
+			// Restore pointer to the last "done" point
+			assert(_done != nullptr, "No 'done' point recorded before finishing choice output");
+			jump(_done, false);
+			_done = nullptr;
+
 			// Jump to destination and clear choice list
 			jump(_story->instructions() + _choices[index].path());
 			clear_choices();
@@ -346,6 +352,13 @@ namespace ink
 				Command cmd = read<Command>();
 				CommandFlag flag = read<CommandFlag>();
 
+				// If we're falling and we hit a non-fallthrough command, stop the fall.
+				if (_is_falling && !((cmd == Command::DIVERT && flag & CommandFlag::DIVERT_IS_FALLTHROUGH) || cmd == Command::END_CONTAINER_MARKER))
+				{
+					_is_falling = false;
+					_done = nullptr;
+				}
+
 				if (cmd >= Command::BINARY_OPERATORS_START && cmd <= Command::BINARY_OPERATORS_END)
 				{
 					run_binary_operator((unsigned char)cmd);
@@ -412,8 +425,19 @@ namespace ink
 					if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop())
 						break;
 
+					// SPECIAL: Fallthrough divert. We're starting to fall out of containers
+					if (flag & CommandFlag::DIVERT_IS_FALLTHROUGH && !_is_falling)
+					{
+						// Record the position of the instruction pointer at the first fallthrough.
+						//  We'll use this if we run out of content and hit an implied "done" to restore
+						//  our position when a choice is chosen. See ::choose
+						_done = _ptr;
+						_is_falling = true;
+					}
+
+					// Do the jump
+					assert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
 					jump(_story->instructions() + target);
-					assert(_ptr < _story->end(), "Diverted past end of story data!");
 				}
 				break;
 				case Command::DIVERT_TO_VARIABLE:
@@ -435,6 +459,7 @@ namespace ink
 
 				// == Terminal commands
 				case Command::DONE:
+					_done = _ptr;
 				case Command::END:
 					_ptr = nullptr;
 					break;
@@ -573,6 +598,7 @@ namespace ink
 			_saved = false;
 			_num_choices = 0;
 			_ptr = nullptr;
+			_done = nullptr;
 			_container.clear();
 		}
 

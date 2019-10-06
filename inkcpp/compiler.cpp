@@ -84,7 +84,7 @@ namespace ink {
 				uint32_t offset = 0;
 				container_t counter_index = ~0;
 
-				std::stack<std::tuple<nlohmann::json, std::string, container_structure*>> deferred;
+				std::vector<std::tuple<nlohmann::json, std::string>> deferred;
 
 				~container_structure()
 				{
@@ -216,7 +216,7 @@ namespace ink {
 						else
 						{
 							// Add to deferred compilation list
-							self->deferred.push(std::make_tuple(meta_iter.value(), meta_iter.key(), self));
+							self->deferred.push_back(std::make_tuple(meta_iter.value(), meta_iter.key()));
 						}
 					}
 				}
@@ -350,28 +350,24 @@ namespace ink {
 					std::vector<size_t> divert_positions;
 
 					// (1) Write empty divert
-					write(data, Command::DIVERT, 0);
+					write(data, Command::DIVERT, 0, CommandFlag::DIVERT_IS_FALLTHROUGH);
 					divert_positions.push_back(data.container_data.pos() - sizeof(uint32_t));
 
-					// (2) Write deffered containers (TODO: Clean this up. has unnecessary shit)
-					while (self->deferred.size() > 0)
+					// (2) Write deffered containers
+					for (auto& t : self->deferred)
 					{
 						using std::get;
 
-						// Defer compilation
-						auto t = self->deferred.top();
-						self->deferred.pop();
-
 						// Add to named child list
-						container_structure* namedChild = compile_container(get<0>(t), data, get<2>(t), -1);
-						get<2>(t)->named_children.insert({ get<1>(t), namedChild });
+						container_structure* namedChild = compile_container(get<0>(t), data, self, -1);
+						self->named_children.insert({ get<1>(t), namedChild });
 
 						// Need a divert here
-						write(data, Command::DIVERT, 0);
+						write(data, Command::DIVERT, 0, CommandFlag::DIVERT_IS_FALLTHROUGH);
 						divert_positions.push_back(data.container_data.pos() - sizeof(uint32_t));
 					}
 
-					// (3) Set divert position
+					// (3) Set divert positions
 					for(size_t offset : divert_positions)
 						data.container_data.set(offset, data.container_data.pos());
 				}
