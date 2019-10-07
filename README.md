@@ -42,7 +42,7 @@ Only very basic commands are supported right now.
 * Int, String, or Divert values
 * Eval stack (`ev`, `/ev`), String stack (`str`, `/str`)
 * Basic choices (no differentiation between `*` and `+`, no conditions)
-* Diverts (variable and fixed)
+* Diverts (variable and fixed, conditional and normal)
 * All mathematical operators (`+`, `<=`, etc.). String equality not supported.
 * Glue
 * Visit and read counts (`visits` and `CNT?` commands).
@@ -50,4 +50,4 @@ Only very basic commands are supported right now.
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
 
-The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators `std::string` support.
+The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators and `std::string` support.
