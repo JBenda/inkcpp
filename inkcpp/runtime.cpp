@@ -47,6 +47,16 @@ namespace ink
 
 		void runner::jump(ip_t dest, bool record_visits)
 		{
+			// Optimization: if we are _is_falling, then we can
+			//  _should be_ able to safely assume that there is nothing to do here. A falling
+			//  divert should only be taking us from a container to that same container's end point
+			//  without entering any other containers
+			if (_is_falling)
+			{
+				_ptr = dest;
+				return;
+			}
+
 			// Check which direction we are jumping
 			bool reverse = dest < _ptr;
 
@@ -570,6 +580,7 @@ namespace ink
 					// SPECIAL: If we've popped all containers, then there's an implied 'done' command
 					if (_container.empty())
 					{
+						_is_falling = false;
 						_ptr = nullptr;
 						return;
 					}
