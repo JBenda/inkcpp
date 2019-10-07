@@ -57,7 +57,7 @@ namespace ink
 
 			// Iterate until we find the container marker just before our own
 			while (_story->iterate_containers(iter, container_id, offset, reverse)) {
-				if (!reverse && offset >= _ptr || reverse && offset < _ptr) {
+				if (!reverse && offset > _ptr || reverse && offset < _ptr) {
 
 					// Step back once in the iteration and break
 					_story->iterate_containers(iter, container_id, offset, !reverse);
@@ -71,7 +71,7 @@ namespace ink
 			while (_story->iterate_containers(iter, container_id, offset, reverse))
 			{
 				// Break when we've past the destination
-				if (!reverse && offset > dest || reverse && offset < dest)
+				if (!reverse && offset > dest || reverse && offset <= dest)
 					break;
 
 				// Two cases:
@@ -321,7 +321,7 @@ namespace ink
 				if (_output.ends_with(data_type::newline))
 				{
 					// TODO: REMOVE
-					// return true;
+					//return true;
 
 					// Unless we are out of content, we are going to try
 					//  to continue a little further. This is to check for
@@ -561,6 +561,9 @@ namespace ink
 				} break;
 				case Command::END_CONTAINER_MARKER:
 				{
+					container_t index = read<container_t>();
+					assert(_container.top() == index, "Leaving container we are not in!");
+
 					// Move up out of the current container
 					_container.pop();
 
@@ -575,6 +578,14 @@ namespace ink
 				{
 					// Push the visit count for the current container to the top
 					_eval.push((int)_globals->visits(_container.top()));
+				} break;
+				case Command::READ_COUNT:
+				{
+					// Get container index
+					container_t container = read<container_t>();
+
+					// Push the read count for the requested container index
+					_eval.push((int)_globals->visits(container));
 				} break;
 				default:
 					assert(false, "Unrecognized command!");

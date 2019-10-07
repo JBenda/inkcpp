@@ -172,6 +172,15 @@ SCENARIO("simple_restorable_stack supports save/restore", "[stack]") {
 					int expected[] = { 1, 90, 91 };
 					stack_matches(stack, expected);
 				}
+
+				WHEN("we pop them back off") {
+					stack.pop(); stack.pop();
+
+					THEN("the correct entry is on top") {
+						REQUIRE(stack.top() == 1);
+						REQUIRE(stack.size() == 1);
+					}
+				}
 			}
 		}
 	}

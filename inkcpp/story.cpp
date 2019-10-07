@@ -2,6 +2,10 @@
 #include "platform.h"
 #include "globals.h"
 
+#ifdef INK_ENABLE_STL
+#include <iostream>
+#endif
+
 namespace ink
 {
 	namespace runtime
@@ -151,6 +155,15 @@ namespace ink
 
 			// After strings comes instruction data
 			_instruction_data = (ip_t)ptr;
+
+			{
+				const uint32_t* iter = nullptr;
+				container_t index; ip_t offset;
+				while (this->iterate_containers(iter, index, offset))
+				{
+					std::clog << "Container #" << index << ": " << (int)offset << std::endl;
+				}
+			}
 		}
 	}
 }

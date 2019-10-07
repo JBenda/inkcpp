@@ -24,7 +24,7 @@ namespace ink {
 			{
 				binary_stream string_table;
 				binary_stream container_data;
-				std::vector<std::tuple<size_t, std::string, container_structure*>> paths;
+				std::vector<std::tuple<size_t, std::string, container_structure*, bool>> paths;
 
 				// container map
 				uint32_t next_container_index = 0;
@@ -118,14 +118,14 @@ namespace ink {
 				data.container_data.write(flag);
 			}
 
-			void write_path(compilation_data& data, Command command, const std::string& path, container_structure* context, CommandFlag flags = CommandFlag::NO_FLAGS)
+			void write_path(compilation_data& data, Command command, const std::string& path, container_structure* context, CommandFlag flags = CommandFlag::NO_FLAGS, bool useCountIndex = false)
 			{
 				// Write command out with stub param
 				write(data, command, (uint32_t)0, flags);
 
 				// Note to write over that param later
 				size_t param_position = data.container_data.pos() - sizeof(uint32_t);
-				data.paths.push_back(make_tuple(param_position, path, context));
+				data.paths.push_back(make_tuple(param_position, path, context, useCountIndex));
 			}
 
 			void write_variable(compilation_data& data, Command command, const std::string& name, CommandFlag flag = CommandFlag::NO_FLAGS)
@@ -204,11 +204,11 @@ namespace ink {
 								//if (!onlyFirst)
 								{
 									recordInContainerMap = true;
-									data.container_start(self->offset, myIndex);
 
 									// TODO: Do we need to nudge the offset so that when we jump to this container
 									//  we don't hit the marker? I think yes. Let's do it here.
 									self->offset = data.container_data.pos();
+									data.container_start(self->offset, myIndex);
 								}
 							}
 						}
@@ -342,6 +342,15 @@ namespace ink {
 							// Create choice command
 							write_path(data, Command::CHOICE, path, self, (CommandFlag)flags);
 						}
+						// read count
+						else if (iter->find("CNT?") != iter->end())
+						{
+							// Get the path to run a count check on
+							auto path = (*iter)["CNT?"].get<std::string>();
+
+							// Write out path. Speciically, we want the post-processor to write out the counter index for this container
+							write_path(data, Command::READ_COUNT, path, self, CommandFlag::NO_FLAGS, true);
+						}
 					}
 				}
 
@@ -375,11 +384,10 @@ namespace ink {
 				// (4) Record end offset (only if applicable)
 				if (myIndex != ~0)
 				{
-					// Before so we don't ofset overlap with start of next container
+					write(data, Command::END_CONTAINER_MARKER, myIndex);
+
 					if (recordInContainerMap)
 						data.container_end(data.container_data.pos(), myIndex);
-
-					write(data, Command::END_CONTAINER_MARKER);
 				}
 				return self;
 			}
@@ -408,6 +416,7 @@ namespace ink {
 					size_t position = get<0>(pair);
 					const std::string& path = get<1>(pair);
 					container_structure* context = get<2>(pair);
+					bool useCountIndex = get<3>(pair);
 
 					// Start at the root
 					container_structure* container = root;
@@ -462,12 +471,22 @@ namespace ink {
 
 					if (noop_offset != ~0)
 					{
+						assert(!useCountIndex, "Can't count visits to a noop!");
 						data.container_data.set(position, noop_offset);
 					}
 					else
 					{
-						// Write container address
-						data.container_data.set(position, container->offset);
+						// If we want the count index, write that out
+						if (useCountIndex)
+						{
+							assert(container->counter_index != ~0, "No count index available for this container!");
+							data.container_data.set(position, container->counter_index);
+						}
+						else
+						{
+							// Otherwise, write container address
+							data.container_data.set(position, container->offset);
+						}
 					}
 				}
 			}

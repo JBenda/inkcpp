@@ -31,6 +31,7 @@ namespace ink
 		DUPLICATE,
 		PUSH_VARIABLE_VALUE,
 		VISIT,
+		READ_COUNT,
 
 		// == String stack
 		START_STR,
@@ -122,6 +123,7 @@ namespace ink
 		"du",
 		nullptr,
 		"visit",
+		nullptr,
 
 		"str",
 		"/str",

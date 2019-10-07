@@ -81,8 +81,13 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline const T& simple_restorable_stack<T>::top() const
 	{
-		assert(_pos > 0, "Stack is empty! No top()");
+		if (_pos == _save)
+		{
+			assert(_jump > 0, "Stack is empty! No top()");
+			return _buffer[_jump - 1];
+		}
 
+		assert(_pos > 0, "Stack is empty! No top()");
 		return _buffer[_pos - 1];
 	}
 
@@ -90,7 +95,7 @@ namespace ink::runtime::internal
 	inline size_t simple_restorable_stack<T>::size() const
 	{
 		// If we're past the save point, ignore anything in the jump region
-		if (_pos > _save)
+		if (_pos >= _save)
 			return _pos - (_save - _jump);
 
 		// Otherwise, pos == size
