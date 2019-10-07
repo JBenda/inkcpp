@@ -25,7 +25,7 @@ while(thread)
 
 // Iterate choices
 for(choice& c : thread) {
-	std::cout << "* " << c.text() << std::endl;
+	std::cout << "* " << c << std::endl;
 }
 
 // Pick a choice
@@ -44,8 +44,8 @@ Only very basic commands are supported right now.
 * Basic choices (no differentiation between `*` and `+`, no conditions)
 * Diverts (variable and fixed)
 * All mathematical operators (`+`, `<=`, etc.). String equality not supported.
-* Can not divert to a `noop` instruction. Can only divert to containers
 * Glue
+* Visit and read counts (`visits` and `CNT?` commands).
 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
