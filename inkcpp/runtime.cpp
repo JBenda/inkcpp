@@ -249,8 +249,13 @@ namespace ink
 					break;
 			}
 
+			// Eval stack should be cleared
+			// (this can have lingering elements if, for example, a choice is conditional
+			//   and doesn't end up popping its text/etc. off the eval stack)
+			_eval.clear();
+
 			// Should be nothing in the eval stack
-			assert(_eval.is_empty(), "Eval stack should be empty after advancing one line");
+			// assert(_eval.is_empty(), "Eval stack should be empty after advancing one line");
 			assert(!_saved, "Should be no state snapshot at the end of newline");
 		}
 
@@ -537,10 +542,36 @@ namespace ink
 				// == Choice commands
 				case Command::CHOICE:
 				{
+					// Read path
+					uint32_t path = read<uint32_t>();
+
+					// If we're a once only choice, make sure our destination hasn't
+					//  been visited
+					if (flag & CommandFlag::CHOICE_IS_ONCE_ONLY) {
+						// Need to convert offset to container index
+						container_t destination = -1;
+						if (_story->get_container_id(_story->instructions() + path, destination))
+						{
+							// Ignore the choice if we've visited the destination before
+							if (_globals->visits(destination) > 0)
+								break;
+						}
+						else
+						{
+							assert(false, "Destination for choice block does not have counting flags.");
+						}
+					}
+
+					// Choice is conditional
+					if (flag & CommandFlag::CHOICE_HAS_CONDITION) {
+						// Only show if the top of the eval stack is 'truthy'
+						if (!_eval.pop())
+							break;
+					}
+
 					// Use a marker to start compiling the choice text
 					_output << marker;
 
-					if (flag & CommandFlag::CHOICE_HAS_CONDITION) {} // TODO
 					if (flag & CommandFlag::CHOICE_HAS_START_CONTENT) {
 						_output << _eval.pop();
 					}
@@ -548,10 +579,6 @@ namespace ink
 						_output << _eval.pop();
 					}
 					if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
-					if (flag & CommandFlag::CHOICE_IS_ONCE_ONLY) {} // TODO
-
-					// Read path
-					uint32_t path = read<uint32_t>();
 
 					// Create choice and record it
 					add_choice().setup(_output, _num_choices, path);

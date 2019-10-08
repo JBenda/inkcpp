@@ -28,6 +28,7 @@ namespace ink
 			inline uint32_t num_containers() const { return _num_containers; }
 
 			bool iterate_containers(const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false) const;
+			bool get_container_id(ip_t offset, container_t& container_id) const;
 
 			// Creates a new global store for use with runners executing this story
 			globals* new_global_store() const;

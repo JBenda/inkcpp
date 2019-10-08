@@ -41,7 +41,7 @@ Only very basic commands are supported right now.
 * Temporary variables
 * Int, String, or Divert values
 * Eval stack (`ev`, `/ev`), String stack (`str`, `/str`)
-* Basic choices (no differentiation between `*` and `+`, no conditions)
+* Choices (support for both `*` and `+` and conditional choices)
 * Diverts (variable and fixed, conditional and normal)
 * All mathematical operators (`+`, `<=`, etc.). String equality not supported.
 * Glue

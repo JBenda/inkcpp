@@ -103,6 +103,19 @@ namespace ink
 			return true;
 		}
 
+		bool story::get_container_id(ip_t offset, container_t& container_id) const
+		{
+			const uint32_t* iter = nullptr;
+			ip_t iter_offset = nullptr;
+			while(iterate_containers(iter, container_id, iter_offset))
+			{
+				if (iter_offset == offset)
+					return true;
+			}
+
+			return false;
+		}
+
 		globals* story::new_global_store() const
 		{
 			return nullptr;
