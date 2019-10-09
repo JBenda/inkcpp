@@ -1,6 +1,7 @@
 #pragma once
 
 #include "system.h"
+#include "array.h"
 
 namespace ink::runtime
 {
@@ -20,17 +21,19 @@ namespace ink::runtime
 		// Records a visit to a container
 		void visit(uint32_t container_id);
 
-		// Updates visit and turn counts that would result from a jump from start to end
-		void handle_jump(ip_t start, ip_t end, container_t previous);
-
 		// Checks the number of visits to a container
 		uint32_t visits(uint32_t container_id) const;
+
+		// == Save/Restore ==
+		void save();
+		void restore();
+		void forget();
 	private:
 		// Store the number of containers. This is the length of most of our lists
 		const uint32_t _num_containers;
 		
 		// Visit count array
-		uint32_t* _visit_counts;
+		internal::allocated_restorable_array<uint32_t> _visit_counts;
 
 		// Pointer back to owner story.
 		const story* const _owner;

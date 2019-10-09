@@ -3,7 +3,7 @@
 
 #include "..//inkcpp/system.h"
 
-void ink::assert(bool condition, const char* msg)
+/*void ink::assert(bool condition, const char* msg)
 {
 	REQUIRE(condition); // todo: message
-}
+}*/

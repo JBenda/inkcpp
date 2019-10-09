@@ -660,6 +660,7 @@ namespace ink
 			_stack.save();
 			_backup = _ptr;
 			_container.save();
+			_globals->save();
 
 			// TODO: Save eval stack? Should be empty
 			assert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -673,6 +674,7 @@ namespace ink
 			_stack.restore();
 			_ptr = _backup;
 			_container.restore();
+			_globals->restore();
 
 			// TODO: Save eval stack? Should be empty
 			assert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -689,6 +691,7 @@ namespace ink
 			_output.forget();
 			_stack.forget();
 			_container.forget();
+			_globals->forget();
 
 			// Nothing to do for eval stack. It should just stay as it is
 
