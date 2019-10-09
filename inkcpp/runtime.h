@@ -7,6 +7,7 @@
 #include "choice.h"
 #include "config.h"
 #include "simple_restorable_stack.h"
+#include "types.h"
 
 namespace ink
 {
@@ -14,13 +15,12 @@ namespace ink
 	{
 		class story;
 		class choice;
-		class globals;
 
 		class runner
 		{
 		public:
 			// Creates a new runner at the start of a loaded ink story
-			runner(const story*, globals*);
+			runner(const story*, globals_p&);
 
 			// Checks that the runner can continue
 			bool can_continue() const;
@@ -109,7 +109,7 @@ namespace ink
 
 		private:
 			const story* const _story;
-			globals* const _globals;
+			globals_p _globals;
 
 			// == State ==
 

@@ -1,6 +1,7 @@
 #include "story.h"
 #include "platform.h"
 #include "globals.h"
+#include "runtime.h"
 
 #ifdef INK_ENABLE_STL
 #include <iostream>
@@ -39,6 +40,10 @@ namespace ink
 
 			// Find all the right data sections
 			setup_pointers();
+
+			// create story block
+			_block = new internal::ref_block();
+			_block->references = 1;
 		}
 #endif
 
@@ -51,12 +56,19 @@ namespace ink
 
 		story::~story()
 		{
+			// delete file memory if we're responsible for it
 			if (_file != nullptr && _managed)
 				delete[] _file;
 
+			// clear pointers
 			_file = nullptr;
 			_instruction_data = nullptr;
 			_string_table = nullptr;
+
+			// clear out our reference block
+			_block->valid = false;
+			internal::ref_block::remove_reference(_block);
+			_block = nullptr;
 		}
 
 		const char* story::string(uint32_t index) const
@@ -116,9 +128,16 @@ namespace ink
 			return false;
 		}
 
-		globals* story::new_global_store() const
+		globals_p story::new_global_store()
 		{
-			return nullptr;
+			return globals_p(new globals(this), _block);
+		}
+
+		runner_p story::new_runner(globals_p store)
+		{
+			if (store == nullptr)
+				store = new_global_store();
+			return runner_p(new runner(this, store), _block);
 		}
 
 		void story::setup_pointers()

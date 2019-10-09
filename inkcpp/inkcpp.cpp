@@ -49,27 +49,23 @@ int main()
 	{
 		// Load ink and start a runner
 		ink::runtime::story myInk("test.bin");
-
-		// Create a global store
-		ink::runtime::globals store(&myInk);
-
-		ink::runtime::runner thread(&myInk, &store);
+		ink::runtime::runner_p thread = myInk.new_runner();
 
 		while (true)
 		{
-			while (thread)
-				std::cout << thread;
+			while (*thread)
+				std::cout << *thread;
 
-			if(thread.has_choices())
+			if(thread->has_choices())
 			{
-				for (const ink::runtime::choice& c : thread)
+				for (const ink::runtime::choice& c : *thread)
 				{
 					std::cout << "* " << c.text() << std::endl;
 				}
 
 				int c = 0;
 				std::cin >> c;
-				thread.choose(c);
+				thread->choose(c);
 				continue;
 			}
 

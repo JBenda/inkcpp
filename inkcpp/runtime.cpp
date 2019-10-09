@@ -1,6 +1,6 @@
+#include "story.h"
 #include "runtime.h"
 #include "command.h"
-#include "story.h"
 #include "choice.h"
 #include "globals.h"
 
@@ -203,7 +203,7 @@ namespace ink
 			_eval.push(result);
 		}
 
-		runner::runner(const story* data, globals* global)
+		runner::runner(const story* data, globals_p& global)
 			: _story(data), _globals(global), _container(~0)
 		{
 			_ptr = _story->instructions();

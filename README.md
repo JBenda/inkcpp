@@ -16,20 +16,20 @@ using namespace ink::runtime;
 // Load ink binary story
 story myInk("story.bin");
 
-// Create a new thread at the start of the story
-runner thread(&myInk);
+// Create a new thread
+runner_p thread = myInk.create_runner();
 
 // Write to cout
-while(thread)
-	std::cout << thread;
+while(*thread)
+	std::cout << *thread;
 
 // Iterate choices
-for(choice& c : thread) {
+for(choice& c : *thread) {
 	std::cout << "* " << c << std::endl;
 }
 
 // Pick a choice
-thread.choose(0);
+thread->choose(0);
 
 ```
 
