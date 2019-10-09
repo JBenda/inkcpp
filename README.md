@@ -46,6 +46,23 @@ Only very basic commands are supported right now.
 * All mathematical operators (`+`, `<=`, etc.). String equality not supported.
 * Glue
 * Visit and read counts (`visits` and `CNT?` commands).
+* `seq` command and all sequence types (stopping, cycle, shuffle)
+* Global store that can be shared between runners
+
+### Glaring Omissions
+
+The big things we're missing right now are:
+
+* Global variables
+* Function calls, internal and external
+* Threads
+* Tunnels
+* Choices whose text is not a single, fixed string
+* Variable observers
+
+Not to mention that the project is not organized to actually be used as a library or anything like that.
+
+There are unit tests using `catch` for some of the underlying types (restorable stacks, arrays, and the shared-ish pointer) but not for any of the ink implementation.
 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
