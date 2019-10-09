@@ -82,6 +82,10 @@ namespace ink
 				uint32_t as_divert() const { return _first.uint_value; }
 				// TODO: String access?
 
+				inline operator int() const { return as_int(); }
+				inline operator float() const { return as_float(); }
+				inline operator uint32_t() const { return as_divert(); }
+
 				// Is this value "true"
 				bool is_truthy() const;
 				inline operator bool() const { return is_truthy(); }

@@ -32,6 +32,7 @@ namespace ink
 		PUSH_VARIABLE_VALUE,
 		VISIT,
 		READ_COUNT,
+		SEQUENCE,
 
 		// == String stack
 		START_STR,
@@ -124,6 +125,7 @@ namespace ink
 		nullptr,
 		"visit",
 		nullptr,
+		"seq",
 
 		"str",
 		"/str",
@@ -143,8 +145,8 @@ namespace ink
 		"!=",
 		"&&",
 		"||",
-		"MAX",
 		"MIN",
+		"MAX",
 
 		"!",
 		"~",

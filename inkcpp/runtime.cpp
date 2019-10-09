@@ -615,7 +615,19 @@ namespace ink
 				case Command::VISIT:
 				{
 					// Push the visit count for the current container to the top
-					_eval.push((int)_globals->visits(_container.top()));
+					//  is 0-indexed for some reason. idk why but this is what ink expects
+					_eval.push((int)_globals->visits(_container.top()) - 1);
+				} break;
+				case Command::SEQUENCE:
+				{
+					// TODO: The C# ink runtime does a bunch of fancy logic
+					//  to make sure each element is picked at least once in every
+					//  iteration loop. I don't feel like replicating that right now.
+					// So, let's just return a random number and *shrug*
+					int sequenceLength = _eval.pop();
+					int index = _eval.pop();
+
+					_eval.push(rand() % sequenceLength); // TODO: platform independance?
 				} break;
 				case Command::READ_COUNT:
 				{
