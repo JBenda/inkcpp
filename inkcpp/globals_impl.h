@@ -2,20 +2,20 @@
 
 #include "system.h"
 #include "array.h"
+#include "globals.h"
 
-namespace ink::runtime
+namespace ink::runtime::internal
 {
-	class story;
+	class story_impl;
 
-	/**
-	* Represents a global store to be shared amongst ink runners. 
-	* Stores global variable values, visit counts, turn counts, etc.
-	*/
-	class globals
+	// Implementation of the global store
+	class globals_impl : public globals_interface
 	{
 	public:
 		// Initializes a new global store from the given story
-		globals(const story*);
+		globals_impl(const story_impl*);
+
+		virtual void dummy() override { }
 
 	public:
 		// Records a visit to a container
@@ -36,6 +36,6 @@ namespace ink::runtime
 		internal::allocated_restorable_array<uint32_t> _visit_counts;
 
 		// Pointer back to owner story.
-		const story* const _owner;
+		const story_impl* const _owner;
 	};
 }

@@ -1,22 +1,23 @@
 #pragma once
 
-#include "system.h"
-#include "config.h"
-#include "types.h"
+#include <system.h>
+#include <config.h>
+#include <types.h>
+#include <story.h>
 
-namespace ink::runtime
+namespace ink::runtime::internal
 {
 	// Ink story. Constant once constructed. Can be shared safely between multiple runner instances
-	class story
+	class story_impl : public story
 	{
 	public:
 #ifdef INK_ENABLE_STL
-		story(const char* filename);
+		story_impl(const char* filename);
 #endif
 		// Create story from allocated binary data in memory. If manage is true, this class will delete
 		//  the pointers on destruction
-		story(unsigned char* binary, size_t len, bool manage = true);
-		~story();
+		story_impl(unsigned char* binary, size_t len, bool manage = true);
+		~story_impl();
 
 		const char* string(uint32_t index) const;
 		inline const ip_t instructions() const { return _instruction_data; }
@@ -28,8 +29,8 @@ namespace ink::runtime
 		bool get_container_id(ip_t offset, container_t& container_id) const;
 
 		// Creates a new global store for use with runners executing this story
-		globals_p new_global_store();
-		runner_p new_runner(globals_p store = nullptr);
+		virtual globals new_globals() override;
+		virtual runner new_runner(globals store = nullptr) override;
 
 	private:
 		void setup_pointers();
@@ -51,7 +52,7 @@ namespace ink::runtime
 		ip_t _instruction_data;
 
 		// story block used to creat various weak pointers
-		internal::ref_block* _block;
+		ref_block* _block;
 
 		// whether we need to delete our binary data after we destruct
 		bool _managed;

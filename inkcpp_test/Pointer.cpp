@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "..//inkcpp/story_ptr.h"
+#include <story_ptr.h>
 
 using namespace ink::runtime;
 using ink::runtime::internal::ref_block;

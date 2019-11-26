@@ -52,13 +52,20 @@ namespace ink::runtime
 		};
 	}
 
-	/*
+	/**
 	* Pointer wrapper to an object whose lifetime is tied to a story object.
-	* Is a kind of weak pointer that dies when the ownining story dies. Used for
-	*  global state and runners.
+	*
+	* A shared pointer whose lifetime is also tied to the lifetime of the parent
+	* story object. The referenced object will live until either
+	* 1) There are no more story_ptr's pointing to this object
+	* 2) The story object which owns this object dies
+	*
+	* @see story_interface
+	* @see runner_interface
+	* @see globals_interface
 	*/
 	template<typename T>
-	class story_ptr : internal::story_ptr_base
+	class story_ptr : public internal::story_ptr_base
 	{
 	public:
 		// constructor. internal use only.
@@ -66,6 +73,15 @@ namespace ink::runtime
 			: story_ptr_base(story)
 			, _ptr(ptr)
 		{ 
+			add_reference();
+		}
+
+		// casting constructor. internal use only
+		template<typename U>
+		story_ptr(T* ptr, const story_ptr<U>& other)
+			: story_ptr_base(other)
+			, _ptr(ptr)
+		{
 			add_reference();
 		}
 
@@ -84,6 +100,19 @@ namespace ink::runtime
 		story_ptr(const story_ptr<T>&);
 		story_ptr<T>& operator=(const story_ptr<T>&);
 
+		// == casting ==
+		template<typename U>
+		story_ptr<U> cast()
+		{
+			// if cast fails, return null
+			U* casted = dynamic_cast<U*>(_ptr);
+			if (casted == nullptr)
+				return nullptr;
+
+			// create new pointer with casted value but same instance blocks
+			return story_ptr<U>(casted, *this);
+		}
+
 		// == equality ==
 		inline bool operator==(const story_ptr<T>& other) { return _ptr == other._ptr; }
 
@@ -98,7 +127,6 @@ namespace ink::runtime
 		inline const T* operator->() const { return get(); }
 		inline T& operator*() { return *get(); }
 		inline const T& operator*() const { return *get(); }
-
 	private:
 		T* _ptr;
 	};

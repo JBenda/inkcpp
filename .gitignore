@@ -6,6 +6,9 @@
 # Ink binary compilation
 *.bin
 
+# Doxygen
+Documentation/*
+
 # TEMP: Ignore solution files for now
 *.vcxproj
 *.vcxproj.filters

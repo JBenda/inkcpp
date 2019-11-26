@@ -1,0 +1,148 @@
+#pragma once
+
+#include "config.h"
+#include "system.h"
+
+namespace ink::runtime
+{
+	class choice;
+
+	/**
+	 * A runner to execute ink script from a story.
+	 *
+	 * An independant runner which can execute ink script from a 
+	 * story independant of other runners. Think of the ink story
+	 * object like an executable file and the runners as 'threads'
+	 * (not to be confused with ink threads, which are a language
+	 * feature). Runners track their own instruction pointer, choice
+	 * list, temporary variables, callstack, etc. They can either
+	 * be started with their own globals store, or can share
+	 * one with other runner instances. 
+	 * @see globals
+	 * @see story
+	*/
+	class runner_interface
+	{
+	public:
+#pragma region Interface Methods
+
+		/**
+		 * Can the runner continue?
+		 *
+		 * Checks if the runner can continue execution. If it
+		 * can't, we are either at a choice or are out of content.
+		 * @see continue
+		 * @see has_choices
+		 *
+		 * @return Can continue be called
+		*/
+		virtual bool can_continue() const = 0;
+
+		/**
+		 * Gets the next line of output using c-style string allocation.
+		 *
+		 * Continue execution until the next newline, then allocate a c-style
+		 * string with the output. This allocated string is now the callers 
+		 * responsibility and it should be deleted.
+		 *
+		 * @return allocated c-style string with the output of a single line of execution
+		*/
+		virtual char* getline_alloc() = 0;
+
+#ifdef INK_ENABLE_STL
+		/**
+		 * Gets the next line of output using C++ STL string.
+		 *
+		 * Continue execution until the next newline, then return the output as
+		 * an STL C++ std::string. Requires INK_ENABLE_STL
+		 *
+		 * @return std::string with the next line of output
+		*/
+		virtual std::string getline() = 0;
+
+		/**
+		 * Gets the next line of output using C++ STL string.
+		 *
+		 * Continue execution until the next newline, then return the output as
+		 * an STL C++ std::string. Requires INK_ENABLE_STL
+		 *
+		 * @return std::string with the next line of output
+		*/
+		virtual void getline(std::ostream&) = 0;
+#endif
+
+		/**
+		 * Choice iterator.
+		 * 
+		 * Iterates over choices the runner is currently facing.
+		 *
+		 * @see end
+		 * @return constant iterator to the first choice
+		*/
+		virtual const choice* begin() const = 0;
+
+		/**
+		 * Terminal choice iterator.
+		 *
+		 * Pointer past the last choice the runner is currently facing.
+		 *
+		 * @see begin
+		 * @return end iterator
+		*/
+		virtual const choice* end() const = 0;
+
+		/**
+		 * Make a choice.
+		 *
+		 * Takes the choice at the given index and moves the instruction
+		 * pointer to that branch.
+		 *
+		 * @param index index of the choice to make
+		*/
+		virtual void choose(size_t index) = 0;
+#pragma endregion 
+
+#pragma region Convenience Methods
+		/**
+		 * Shortcut for checking if the runner can continue.
+		 * 
+		 * @see can_continue
+		*/
+		inline operator bool() const { return can_continue(); }
+
+		/**
+		 * Checks if we're currently facing any choices
+		 *
+		 * @return are there any choices available
+		*/
+		inline bool has_choices() const { return begin() != end(); }
+
+		/**
+		 * Returns the number of choices currently available
+		 *
+		 * @return number of choices
+		*/
+		size_t num_choices() const;
+
+		/**
+		 * Gets a choice
+		 *
+		 * Returns the choice object at a given index
+		 *
+		 * @see num_choices
+		 * @param index index of the choice to access
+		 * @return choice object with info on the choice
+		*/
+		const choice* get_choice(size_t index) const;
+
+		/**
+		 * Shorcut for accessing a choice
+		 *
+		 * @see get_choice
+		 * @param index index of the choice to access
+		 * @return choice object with info on the choice
+		*/
+		inline const choice* operator[](size_t index) { return get_choice(index); }
+#pragma endregion
+	};
+}
