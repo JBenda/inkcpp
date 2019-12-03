@@ -86,6 +86,47 @@ namespace ink
 				return str.str();
 			}
 #endif
+#ifdef INK_ENABLE_UNREAL
+			FString basic_stream::get()
+			{
+				size_t start = find_start();
+
+				// TODO: Slow! FString concatonation.
+				//  Is there really no equivilent of stringstream in Unreal? Some kind of String Builder?
+
+				// Move up from marker
+				bool hasGlue = false;
+				FString str;
+				for (size_t i = start; i < _size; i++)
+				{
+					if (should_skip(i, hasGlue))
+						continue;
+
+					switch (_data[i].type)
+					{
+					case data_type::int32:
+						str += FString::Printf(TEXT("%d"), _data[i].integer_value);
+						break;
+					case data_type::float32:
+						str += FString::Printf(TEXT("%f"), _data[i].float_value);
+						break;
+					case data_type::string_table_pointer:
+					case data_type::allocated_string_pointer:
+						str += _data[i].string_val;
+						break;
+					case data_type::newline:
+						str += "\n";
+						break;
+					}
+				}
+
+				// Reset stream size to where we last held the marker
+				_size = start;
+
+				// Return processed string
+				return str;
+			}
+#endif
 
 			void basic_stream::get(data* ptr, size_t length)
 			{
@@ -93,7 +134,7 @@ namespace ink
 				size_t start = find_start();
 
 				const data* end = ptr + length;
-				//assert(_size - start < length, "Insufficient space in data array to store stream contents!");
+				//inkAssert(_size - start < length, "Insufficient space in data array to store stream contents!");
 
 				// Move up from marker
 				bool hasGlue = false;
@@ -103,7 +144,7 @@ namespace ink
 						continue;
 
 					// Make sure we can fit the next element
-					assert(ptr < end, "Insufficient space in data array to store stream contents!");
+					inkAssert(ptr < end, "Insufficient space in data array to store stream contents!");
 
 					// Copy any value elements
 					switch (_data[i].type)
@@ -144,7 +185,7 @@ namespace ink
 
 			bool basic_stream::saved_ends_with(data_type type) const
 			{
-				assert(_save != ~0, "Stream is not saved!");
+				inkAssert(_save != ~0, "Stream is not saved!");
 
 				if (_save == 0)
 					return false;
@@ -154,7 +195,7 @@ namespace ink
 
 			void basic_stream::save()
 			{
-				assert(_save == ~0, "Can not save over existing save point!");
+				inkAssert(_save == ~0, "Can not save over existing save point!");
 
 				// Save the current size
 				_save = _size;
@@ -162,7 +203,7 @@ namespace ink
 
 			void basic_stream::restore()
 			{
-				assert(_save != ~0, "No save point to restore!");
+				inkAssert(_save != ~0, "No save point to restore!");
 
 				// Restore size to saved position
 				_size = _save;
@@ -171,7 +212,7 @@ namespace ink
 
 			void basic_stream::forget()
 			{
-				assert(_save != ~0, "No save point to forget!");
+				inkAssert(_save != ~0, "No save point to forget!");
 
 				// Just null the save point and continue as normal
 				_save = ~0;
@@ -267,7 +308,7 @@ namespace ink
 
 				// Make sure we're not violating a save point
 				if (_save != ~0 && start < _save)
-					assert(false, "Trying to access output stream prior to save point!");
+					inkAssert(false, "Trying to access output stream prior to save point!");
 
 				return start;
 			}
@@ -325,6 +366,13 @@ namespace ink
 			}
 
 			basic_stream& operator>>(basic_stream& in, std::string& out)
+			{
+				out = in.get();
+				return in;
+			}
+#endif
+#ifdef INK_ENABLE_UNREAL
+			basic_stream& operator>>(basic_stream& in, FString& out)
 			{
 				out = in.get();
 				return in;

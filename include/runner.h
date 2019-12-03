@@ -3,6 +3,10 @@
 #include "config.h"
 #include "system.h"
 
+#ifdef INK_ENABLE_UNREAL
+#include "Containers/UnrealString.h"
+#endif
+
 namespace ink::runtime
 {
 	class choice;
@@ -25,6 +29,17 @@ namespace ink::runtime
 	{
 	public:
 #pragma region Interface Methods
+
+		/**
+		 * Moves the runner to the specified path
+		 *
+		 * Clears any execution context and moves the runner
+		 *  to the content at the specified path.
+		 *
+		 * @param path path to search and move execution to
+		 * @return If the path was found
+		 */
+		virtual bool move_to(hash_t path) = 0;
 
 		/**
 		 * Can the runner continue?
@@ -69,6 +84,18 @@ namespace ink::runtime
 		 * @return std::string with the next line of output
 		*/
 		virtual void getline(std::ostream&) = 0;
+#endif
+
+#ifdef INK_ENABLE_UNREAL
+		/**
+		 * Gets the next line of output using unreal string allocation
+		 *
+		 * Continue execution until the next newline, then return the output as
+		 * an Unreal FString. Requires INK_ENABLE_UNREAL
+		 *
+		 * @return FString with the next line of output
+		*/
+		virtual FString getline() = 0;
 #endif
 
 		/**

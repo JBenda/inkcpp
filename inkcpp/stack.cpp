@@ -63,7 +63,7 @@ namespace ink
 
 			offset_t basic_stack::pop_frame()
 			{
-				assert(_pos > 0, "Can not pop frame from empty callstack");
+				inkAssert(_pos > 0, "Can not pop frame from empty callstack");
 
 				// Advance up the callstack until we find the frame record
 				_pos--;
@@ -76,7 +76,7 @@ namespace ink
 					_pos--;
 				}
 
-				assert(_stack[_pos].name == InvalidHash, "Attempting to pop_frame when no frames exist! Stack reset");
+				inkAssert(_stack[_pos].name == InvalidHash, "Attempting to pop_frame when no frames exist! Stack reset");
 
 				// Return the offset stored in the frame record
 				return _stack[_pos].data.as_divert();
@@ -90,7 +90,7 @@ namespace ink
 
 			void basic_stack::save()
 			{
-				assert(_save == ~0, "Can not save stack twice! restore() or forget() first");
+				inkAssert(_save == ~0, "Can not save stack twice! restore() or forget() first");
 
 				// Save current stack position
 				_save = _jump = _pos;
@@ -98,7 +98,7 @@ namespace ink
 
 			void basic_stack::restore()
 			{
-				assert(_save != ~0, "Can not restore() when there is no save!");
+				inkAssert(_save != ~0, "Can not restore() when there is no save!");
 
 				// Move position back to saved position
 				_pos = _save;
@@ -107,7 +107,7 @@ namespace ink
 
 			void basic_stack::forget()
 			{
-				assert(_save != ~0, "Can not forget when the stack has never been saved!");
+				inkAssert(_save != ~0, "Can not forget when the stack has never been saved!");
 
 				// If we have moven to a point earlier than the save point but we have a jump point
 				if (_pos < _save && _pos > _jump)
@@ -131,7 +131,7 @@ namespace ink
 					_pos = _save;
 				}
 
-				assert(_pos < _size, "Stack overflow!");
+				inkAssert(_pos < _size, "Stack overflow!");
 
 				// Push onto the top of the stack
 				_stack[_pos].name = name;
@@ -147,13 +147,13 @@ namespace ink
 
 			void basic_eval_stack::push(const value& val)
 			{
-				assert(_pos < _size, "Stack overflow!");
+				inkAssert(_pos < _size, "Stack overflow!");
 				_stack[_pos++] = val;
 			}
 
 			value basic_eval_stack::pop()
 			{
-				assert(_pos > 0, "Nothing left to pop!");
+				inkAssert(_pos > 0, "Nothing left to pop!");
 
 				// Decrement and return
 				_pos--;
@@ -162,7 +162,7 @@ namespace ink
 
 			const value& basic_eval_stack::top() const
 			{
-				assert(_pos > 0, "Stack is empty! No top()");
+				inkAssert(_pos > 0, "Stack is empty! No top()");
 
 				return _stack[_pos - 1];
 			}

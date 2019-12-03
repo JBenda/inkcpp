@@ -1,3 +1,7 @@
+#define INK_EXPOSE_JSON // make sure this is defined for internal compiler include
+#include "compiler.h"
+#include "binary_stream.h"
+
 // STL includes
 #include <string>
 #include <stack>
@@ -5,10 +9,6 @@
 #include <map>
 #include <set>
 #include <fstream>
-
-#define INK_EXPOSE_JSON // make sure this is defined for internal compiler include
-#include "compiler.h"
-#include "binary_stream.h"
 
 #define INK_COMPILER
 #include "command.h"
@@ -472,7 +472,7 @@ namespace ink {
 
 					if (noop_offset != ~0)
 					{
-						assert(!useCountIndex, "Can't count visits to a noop!");
+						inkAssert(!useCountIndex, "Can't count visits to a noop!");
 						data.container_data.set(position, noop_offset);
 					}
 					else
@@ -480,7 +480,7 @@ namespace ink {
 						// If we want the count index, write that out
 						if (useCountIndex)
 						{
-							assert(container->counter_index != ~0, "No count index available for this container!");
+							inkAssert(container->counter_index != ~0, "No count index available for this container!");
 							data.container_data.set(position, container->counter_index);
 						}
 						else

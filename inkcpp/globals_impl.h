@@ -14,6 +14,7 @@ namespace ink::runtime::internal
 	public:
 		// Initializes a new global store from the given story
 		globals_impl(const story_impl*);
+		virtual ~globals_impl() { }
 
 		virtual void dummy() override { }
 

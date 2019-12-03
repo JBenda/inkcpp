@@ -9,8 +9,8 @@
 #include "simple_restorable_stack.h"
 #include "types.h"
 
-#include <runner.h>
-#include <choice.h>
+#include "runner.h"
+#include "choice.h"
 
 namespace ink::runtime::internal
 {
@@ -22,6 +22,7 @@ namespace ink::runtime::internal
 	public:
 		// Creates a new runner at the start of a loaded ink story
 		runner_impl(const story_impl*, globals);
+		virtual ~runner_impl() { }
 
 #pragma region runner Implementation
 
@@ -40,12 +41,19 @@ namespace ink::runtime::internal
 		// c-style getline
 		virtual char* getline_alloc() override;
 
+		// move to path
+		virtual bool move_to(hash_t path) override;
+
 #ifdef INK_ENABLE_STL
 		// Gets a single line of output and stores it in a C++ std::string
 		virtual std::string getline() override;
 
 		// Reads a line into a std::ostream
 		virtual void getline(std::ostream&) override;
+#endif
+#ifdef INK_ENABLE_UNREAL
+		// Reads a line into an Unreal FString
+		virtual FString getline() override;
 #endif
 #pragma endregion
 	private:
@@ -116,7 +124,7 @@ namespace ink::runtime::internal
 		// Choice list
 		static const size_t MAX_CHOICES = 10;
 		choice _choices[MAX_CHOICES];
-		size_t _num_choices;
+		size_t _num_choices = 0;
 
 		// Container set
 		internal::restorable_stack<container_t, 20> _container;

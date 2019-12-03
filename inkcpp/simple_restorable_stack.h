@@ -49,7 +49,7 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline void simple_restorable_stack<T>::push(const T& value)
 	{
-		assert(value != _null, "Can not push a 'null' value onto the stack.");
+		inkAssert(value != _null, "Can not push a 'null' value onto the stack.");
 
 		// Don't overwrite saved data. Jump over it and record where we jumped from
 		if (_save != InvalidIndex && _pos < _save)
@@ -58,7 +58,7 @@ namespace ink::runtime::internal
 			_pos = _save;
 		}
 
-		assert(_pos < _size, "Stack overflow!");
+		inkAssert(_pos < _size, "Stack overflow!");
 
 		// Push onto the top of the stack
 		_buffer[_pos++] = value;
@@ -67,7 +67,7 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline T simple_restorable_stack<T>::pop()
 	{
-		assert(_pos > 0, "Nothing left to pop!");
+		inkAssert(_pos > 0, "Nothing left to pop!");
 
 		// Move over jump area
 		if (_pos == _save) {
@@ -83,11 +83,11 @@ namespace ink::runtime::internal
 	{
 		if (_pos == _save)
 		{
-			assert(_jump > 0, "Stack is empty! No top()");
+			inkAssert(_jump > 0, "Stack is empty! No top()");
 			return _buffer[_jump - 1];
 		}
 
-		assert(_pos > 0, "Stack is empty! No top()");
+		inkAssert(_pos > 0, "Stack is empty! No top()");
 		return _buffer[_pos - 1];
 	}
 
@@ -155,7 +155,7 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline void simple_restorable_stack<T>::save()
 	{
-		assert(_save == InvalidIndex, "Can not save stack twice! restore() or forget() first");
+		inkAssert(_save == InvalidIndex, "Can not save stack twice! restore() or forget() first");
 
 		// Save current stack position
 		_save = _jump = _pos;
@@ -164,7 +164,7 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline void simple_restorable_stack<T>::restore()
 	{
-		assert(_save != InvalidIndex, "Can not restore() when there is no save!");
+		inkAssert(_save != InvalidIndex, "Can not restore() when there is no save!");
 
 		// Move position back to saved position
 		_pos = _save;
@@ -174,7 +174,7 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline void simple_restorable_stack<T>::forget()
 	{
-		assert(_save != InvalidIndex, "Can not forget when the stack has never been saved!");
+		inkAssert(_save != InvalidIndex, "Can not forget when the stack has never been saved!");
 
 		/*// If we have moven to a point earlier than the save point but we have a jump point
 		if (_pos < _save && _pos > _jump)

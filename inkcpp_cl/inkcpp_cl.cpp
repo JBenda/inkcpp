@@ -8,6 +8,7 @@
 #include <runner.h>
 #include <compiler.h>
 #include <choice.h>
+#include <globals.h>
 
 int main()
 {

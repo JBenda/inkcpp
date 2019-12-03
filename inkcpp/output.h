@@ -37,6 +37,10 @@ namespace ink
 				// Extract into a string
 				std::string get();
 #endif
+#ifdef INK_ENABLE_UNREAL
+				// Extract into a string
+				FString get();
+#endif
 
 				// Check if the stream is empty
 				bool is_empty() const { return _size == 0; }
@@ -81,6 +85,9 @@ namespace ink
 #ifdef INK_ENABLE_STL
 			std::ostream& operator <<(std::ostream&, basic_stream&);
 			basic_stream& operator >>(basic_stream&, std::string&);
+#endif
+#ifdef INK_ENABLE_UNREAL
+			basic_stream& operator >>(basic_stream&, FString&);
 #endif
 
 			basic_stream& operator<<(basic_stream&, const data&);

@@ -9,9 +9,9 @@ namespace ink::runtime::internal
 	{
 	public:
 		basic_restorable_array(T* array, size_t capacity)
-			: _array(array), _temp(array + capacity/2), _capacity(capacity/2), _saved(false)
+			: _saved(false), _array(array), _temp(array + capacity/2), _capacity(capacity/2)
 		{
-			assert(capacity % 2 == 0, "basic_restorable_array requires a datablock of even length to split into two arrays");
+			inkAssert(capacity % 2 == 0, "basic_restorable_array requires a datablock of even length to split into two arrays");
 
 			// zero out main array and put 'nulls' in the clear_temp()
 			inkZeroMemory(_array, _capacity * sizeof(T));
@@ -46,7 +46,7 @@ namespace ink::runtime::internal
 		inline T* buffer() { return _array; }
 
 	private:
-		inline void check_index(size_t index) const { assert(index < capacity(), "Index out of range!"); }
+		inline void check_index(size_t index) const { inkAssert(index < capacity(), "Index out of range!"); }
 		void clear_temp();
 	private:
 		bool _saved;
@@ -66,7 +66,7 @@ namespace ink::runtime::internal
 	inline void basic_restorable_array<T>::set(size_t index, const T& value)
 	{
 		check_index(index);
-		assert(value != null, "Can not add a value considered a 'null' to a restorable_array");
+		inkAssert(value != null, "Can not add a value considered a 'null' to a restorable_array");
 
 		// If we're saved, store in second half of the array
 		if (_saved)

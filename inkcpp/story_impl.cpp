@@ -1,7 +1,7 @@
+#include "story_impl.h"
 #include "platform.h"
 #include "runner_impl.h"
 #include "globals_impl.h"
-#include "story_impl.h"
 
 #ifdef INK_ENABLE_STL
 #include <iostream>
@@ -9,10 +9,12 @@
 
 namespace ink::runtime
 {
+#ifdef INK_ENABLE_STL
 	story* story::from_file(const char* filename)
 	{
 		return new internal::story_impl(filename);
 	}
+#endif
 
 	story* story::from_binary(unsigned char* data, size_t length, bool freeOnDestroy)
 	{
@@ -41,9 +43,9 @@ namespace ink::runtime::internal
 
 	story_impl::story_impl(const char* filename)
 		: _file(nullptr)
+		, _length(0)
 		, _string_table(nullptr)
 		, _instruction_data(nullptr)
-		, _length(0)
 		, _managed(true)
 	{
 		// Load file into memory
@@ -63,6 +65,10 @@ namespace ink::runtime::internal
 	{
 		// Setup data section pointers
 		setup_pointers();
+
+		// create story block
+		_block = new internal::ref_block();
+		_block->references = 1;
 	}
 
 	story_impl::~story_impl()
@@ -105,7 +111,7 @@ namespace ink::runtime::internal
 		else
 		{
 			// Range check
-			assert(iterator >= _container_list && iterator <= _container_list + _container_list_size * 2);
+			inkAssert(iterator >= _container_list && iterator <= _container_list + _container_list_size * 2, "Container fail");
 
 			// Advance
 			iterator += reverse ? -2 : 2;
@@ -199,13 +205,14 @@ namespace ink::runtime::internal
 		// After strings comes instruction data
 		_instruction_data = (ip_t)ptr;
 
-		{
+		// Debugging info
+		/*{
 			const uint32_t* iter = nullptr;
 			container_t index; ip_t offset;
 			while (this->iterate_containers(iter, index, offset))
 			{
 				std::clog << "Container #" << index << ": " << (int)offset << std::endl;
 			}
-		}
+		}*/
 	}
 }

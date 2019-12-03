@@ -4,8 +4,9 @@
 namespace ink::runtime::internal
 {
 	globals_impl::globals_impl(const story_impl* story)
-		: _owner(story), _num_containers(story->num_containers())
+		: _num_containers(story->num_containers())
 		, _visit_counts(_num_containers)
+		, _owner(story)
 	{
 	}
 

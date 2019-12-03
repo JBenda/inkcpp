@@ -7,3 +7,6 @@
 #include <sstream>
 #include <fstream>
 #endif
+#ifdef INK_ENABLE_UNREAL
+#include "Containers/UnrealString.h"
+#endif

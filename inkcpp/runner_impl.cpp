@@ -1,5 +1,5 @@
-#include "story_impl.h"
 #include "runner_impl.h"
+#include "story_impl.h"
 #include "command.h"
 #include "choice.h"
 #include "globals_impl.h"
@@ -8,7 +8,7 @@ namespace ink::runtime
 {
 	const choice* runner_interface::get_choice(size_t index) const
 	{
-		assert(index < num_choices(), "Choice out of bounds!");
+		inkAssert(index < num_choices(), "Choice out of bounds!");
 		return begin() + index;
 	}
 
@@ -24,7 +24,7 @@ namespace ink::runtime::internal
 	inline T runner_impl::read()
 	{
 		// Sanity
-		assert(_ptr + sizeof(T) <= _story->end(), "Unexpected EOF in Ink execution");
+		inkAssert(_ptr + sizeof(T) <= _story->end(), "Unexpected EOF in Ink execution");
 
 		// Read memory
 		T val = *(const T*)_ptr;
@@ -45,7 +45,7 @@ namespace ink::runtime::internal
 
 	choice& runner_impl::add_choice()
 	{
-		assert(_num_choices < MAX_CHOICES, "Ran out of choice storage!");
+		inkAssert(_num_choices < MAX_CHOICES, "Ran out of choice storage!");
 		return _choices[_num_choices++];
 	}
 
@@ -231,7 +231,7 @@ namespace ink::runtime::internal
 		_output >> result;
 
 		// Return result
-		assert(_output.is_empty(), "Output should be empty after getline!");
+		inkAssert(_output.is_empty(), "Output should be empty after getline!");
 		return result;
 	}
 
@@ -244,9 +244,24 @@ namespace ink::runtime::internal
 		out << _output;
 
 		// Make sure we read everything
-		assert(_output.is_empty(), "Output should be empty after getline!");
+		inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	}
 
+#endif
+#ifdef INK_ENABLE_UNREAL
+	FString runner_impl::getline()
+	{
+		// Advance interpreter one line
+		advance_line();
+
+		// Read line into std::string
+		FString result;
+		_output >> result;
+
+		// Return result
+		inkAssert(_output.is_empty(), "Output should be empty after getline!");
+		return result;
+	}
 #endif
 
 	void runner_impl::advance_line()
@@ -265,8 +280,8 @@ namespace ink::runtime::internal
 		_eval.clear();
 
 		// Should be nothing in the eval stack
-		// assert(_eval.is_empty(), "Eval stack should be empty after advancing one line");
-		assert(!_saved, "Should be no state snapshot at the end of newline");
+		// inkAssert(_eval.is_empty(), "Eval stack should be empty after advancing one line");
+		inkAssert(!_saved, "Should be no state snapshot at the end of newline");
 	}
 
 	bool runner_impl::can_continue() const
@@ -277,8 +292,8 @@ namespace ink::runtime::internal
 	void runner_impl::choose(size_t index)
 	{
 		// Restore pointer to the last "done" point
-		assert(_done != nullptr, "No 'done' point recorded before finishing choice output");
-		assert(index < _num_choices, "Choice index out of range");
+		inkAssert(_done != nullptr, "No 'done' point recorded before finishing choice output");
+		inkAssert(index < _num_choices, "Choice index out of range");
 		jump(_done, false);
 		_done = nullptr;
 
@@ -291,6 +306,12 @@ namespace ink::runtime::internal
 	{
 		// TODO
 		return nullptr;
+	}
+
+	bool runner_impl::move_to(hash_t path)
+	{
+		// not implemented
+		return false;
 	}
 
 	runner_impl::change_type runner_impl::detect_change() const
@@ -372,7 +393,7 @@ namespace ink::runtime::internal
 	{
 		try
 		{
-			assert(_ptr != nullptr, "Can not step! Do not have a valid pointer");
+			inkAssert(_ptr != nullptr, "Can not step! Do not have a valid pointer");
 
 			// Load current command
 			Command cmd = read<Command>();
@@ -417,7 +438,7 @@ namespace ink::runtime::internal
 
 			case Command::DIVERT_VAL:
 			{
-				assert(bEvaluationMode, "Can not push divert value into the output stream!");
+				inkAssert(bEvaluationMode, "Can not push divert value into the output stream!");
 
 				// Push the divert target onto the stack
 				uint32_t target = read<uint32_t>();
@@ -462,7 +483,7 @@ namespace ink::runtime::internal
 				}
 
 				// Do the jump
-				assert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
+				inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
 				jump(_story->instructions() + target);
 			}
 			break;
@@ -479,7 +500,7 @@ namespace ink::runtime::internal
 
 				// Move to location
 				jump(_story->instructions() + val.as_divert());
-				assert(_ptr < _story->end(), "Diverted past end of story data!");
+				inkAssert(_ptr < _story->end(), "Diverted past end of story data!");
 			}
 			break;
 
@@ -526,20 +547,20 @@ namespace ink::runtime::internal
 			{
 				hash_t variableName = read<hash_t>();
 				const value* val = _stack.get(variableName);
-				assert(val != nullptr, "Could not find temporary variable!");
+				inkAssert(val != nullptr, "Could not find temporary variable!");
 				_eval.push(*val);
 				break;
 			}
 			case Command::START_STR:
 			{
-				assert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
+				inkAssert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
 				bEvaluationMode = false;
 				_output << marker;
 			} break;
 			case Command::END_STR:
 			{
 				// TODO: Assert we really had a marker on there?
-				assert(!bEvaluationMode);
+				inkAssert(!bEvaluationMode, "Must be in evaluation mode");
 				bEvaluationMode = true;
 
 				// Load value from output stream
@@ -569,7 +590,7 @@ namespace ink::runtime::internal
 					}
 					else
 					{
-						assert(false, "Destination for choice block does not have counting flags.");
+						inkAssert(false, "Destination for choice block does not have counting flags.");
 					}
 				}
 
@@ -610,7 +631,7 @@ namespace ink::runtime::internal
 			case Command::END_CONTAINER_MARKER:
 			{
 				container_t index = read<container_t>();
-				assert(_container.top() == index, "Leaving container we are not in!");
+				inkAssert(_container.top() == index, "Leaving container we are not in!");
 
 				// Move up out of the current container
 				_container.pop();
@@ -649,7 +670,7 @@ namespace ink::runtime::internal
 				_eval.push((int)_globals->visits(container));
 			} break;
 			default:
-				assert(false, "Unrecognized command!");
+				inkAssert(false, "Unrecognized command!");
 				break;
 			}
 		}
@@ -676,7 +697,7 @@ namespace ink::runtime::internal
 
 	void runner_impl::save()
 	{
-		assert(!_saved, "Runner state already saved");
+		inkAssert(!_saved, "Runner state already saved");
 
 		_saved = true;
 		_output.save();
@@ -686,12 +707,12 @@ namespace ink::runtime::internal
 		_globals->save();
 
 		// TODO: Save eval stack? Should be empty
-		assert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
+		inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
 	}
 
 	void runner_impl::restore()
 	{
-		assert(_saved, "Can't restore. No runner state saved.");
+		inkAssert(_saved, "Can't restore. No runner state saved.");
 
 		_output.restore();
 		_stack.restore();
@@ -700,7 +721,7 @@ namespace ink::runtime::internal
 		_globals->restore();
 
 		// TODO: Save eval stack? Should be empty
-		assert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
+		inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
 
 		_saved = false;
 	}

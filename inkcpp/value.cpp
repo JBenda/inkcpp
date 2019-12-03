@@ -59,7 +59,7 @@ namespace ink
 				case data_type::null:
 					return value_type::null;
 				default:
-					assert(false, "Invalid data in value container!");
+					inkFail("Invalid data in value container!");
 				}
 			}
 
@@ -68,9 +68,9 @@ namespace ink
 				if (old_type == new_type)
 					return;
 
-				assert(old_type < new_type, "Can only cast values upwards!");
-				assert(new_type != value_type::null && old_type != value_type::null, "Can not cast void values");
-				assert(new_type != value_type::divert && old_type != value_type::divert, "Can not cast divert values");
+				inkAssert(old_type < new_type, "Can only cast values upwards!");
+				inkAssert(new_type != value_type::null && old_type != value_type::null, "Can not cast void values");
+				inkAssert(new_type != value_type::divert && old_type != value_type::divert, "Can not cast divert values");
 
 				// We do not actually convert floats/ints to strings here.
 				//  Instead, we just pass along the float and it is appended to 
@@ -90,7 +90,7 @@ namespace ink
 					return;
 				}
 
-				assert(false, "Invalid value cast");
+				inkAssert(false, "Invalid value cast");
 			}
 
 			value_type value::maybe_cast(value& left, value& right)
@@ -128,7 +128,7 @@ namespace ink
 					return _first.string_val[0] != '\0';
 				}
 
-				assert(false, "Invalid type to check for truthy");
+				inkFail("Invalid type to check for truthy");
 			}
 
 			void value::append_to(basic_stream& out) const
@@ -178,7 +178,7 @@ namespace ink
 				}
 				}
 
-				assert(false, "Invalid type for add");
+				inkFail("Invalid type for add");
 			}
 
 			// TODO: Macro to make defining these easier when there's no string involvement?
@@ -196,7 +196,7 @@ namespace ink
 					return left.as_float() - right.as_float();
 				}
 
-				assert(false, "Invalid type for subtract");
+				inkFail("Invalid type for subtract");
 			}
 
 			value value::multiply(value left, value right)
@@ -212,7 +212,7 @@ namespace ink
 					return left.as_float() * right.as_float();
 				}
 
-				assert(false, "Invalid type for multiply");
+				inkFail("Invalid type for multiply");
 			}
 
 			value value::divide(value left, value right)
@@ -228,7 +228,7 @@ namespace ink
 					return left.as_float() / right.as_float();
 				}
 
-				assert(false, "Invalid type for divide");
+				inkFail("Invalid type for divide");
 			}
 
 			value value::mod(value left, value right)
@@ -242,7 +242,7 @@ namespace ink
 					return left.as_int() % right.as_int();
 				}
 
-				assert(false, "Invalid type for mod");
+				inkFail("Invalid type for mod");
 			}
 
 			value value::is_equal(value left, value right)
@@ -260,7 +260,7 @@ namespace ink
 					break; // TODO: data[] operators?
 				}
 
-				assert(false, "Invalid type for is_equal");
+				inkFail("Invalid type for is_equal");
 			}
 
 			value value::less_than(value left, value right)
@@ -276,12 +276,12 @@ namespace ink
 					return left.as_float() < right.as_float();
 				}
 
-				assert(false, "Invalid type for less_than");
+				inkFail("Invalid type for less_than");
 			}
 
 			value value::negate(const value& val)
 			{
-				assert(val._second.type == data_type::none, "Can not negate strings");
+				inkAssert(val._second.type == data_type::none, "Can not negate strings");
 
 				switch (val._first.type)
 				{
@@ -291,7 +291,7 @@ namespace ink
 					return -val._first.float_value;
 				}
 
-				assert(false, "Invalid type for negate");
+				inkFail("Invalid type for negate");
 			}
 
 			basic_stream& operator>>(basic_stream& in, value& out)

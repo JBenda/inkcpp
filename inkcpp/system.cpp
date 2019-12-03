@@ -17,27 +17,6 @@ namespace ink
 		return h; // or return h % C;
 	}
 
-	bool is_whitespace(const char* string, bool includeNewline)
-	{
-		// Iterate string
-		while (true)
-		{
-			switch (*(string++))
-			{
-			case 0:
-				return true;
-			case '\n':
-				if (!includeNewline)
-					return false;
-			case '\t':
-			case ' ':
-				continue;
-			default:
-				return false;
-			}
-		}
-	}
-
 	void zero_memory(void* buffer, size_t length)
 	{
 		char* buf = static_cast<char*>(buffer);

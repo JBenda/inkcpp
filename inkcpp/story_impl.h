@@ -2,8 +2,8 @@
 
 #include <system.h>
 #include <config.h>
-#include <types.h>
-#include <story.h>
+#include "types.h"
+#include "story.h"
 
 namespace ink::runtime::internal
 {
@@ -17,7 +17,7 @@ namespace ink::runtime::internal
 		// Create story from allocated binary data in memory. If manage is true, this class will delete
 		//  the pointers on destruction
 		story_impl(unsigned char* binary, size_t len, bool manage = true);
-		~story_impl();
+		virtual ~story_impl();
 
 		const char* string(uint32_t index) const;
 		inline const ip_t instructions() const { return _instruction_data; }
