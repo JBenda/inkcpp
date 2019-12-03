@@ -505,6 +505,33 @@ namespace ink {
 				}
 			}
 
+			void write_container_hash_map(const std::string& name, const container_structure* context, std::ostream& out)
+			{
+				for (auto child : context->named_children)
+				{
+					// Get the child's name in the hierarchy
+					std::string child_name = name.empty() ? child.first : (name + "." + child.first);
+					hash_t name_hash = hash_string(child_name.c_str());
+
+					// Write out name hash and offset
+					out.write((const char*)&name_hash, sizeof(hash_t));
+					out.write((const char*)&child.second->offset, sizeof(uint32_t));
+
+					// Recurse
+					write_container_hash_map(child_name, child.second, out);
+				}
+
+				for (auto child : context->indexed_children)
+				{
+					write_container_hash_map(name, child.second, out);
+				}
+			}
+
+			void write_container_hash_map(const container_structure* data, std::ostream& out)
+			{
+				write_container_hash_map("", data, out);
+			}
+
 			void log_container_counter_index(const std::string& name, const container_structure* container)
 			{
 				if (container->counter_index != ~0)
@@ -563,6 +590,10 @@ namespace ink {
 			uint32_t END_MARKER = ~0;
 			out.write((const char*)& END_MARKER, sizeof(uint32_t));
 
+			// Write container hash list
+			write_container_hash_map(root, out);
+			out.write((const char*)&END_MARKER, sizeof(uint32_t));
+
 			// Write the container data
 			data.container_data.write_to(out);
 
@@ -570,7 +601,7 @@ namespace ink {
 			out.flush();
 
 			// LOGGING
-			log_container_counter_index("ROOT", root);
+			// log_container_counter_index("ROOT", root);
 
 			delete root;
 			root = nullptr;

@@ -310,8 +310,18 @@ namespace ink::runtime::internal
 
 	bool runner_impl::move_to(hash_t path)
 	{
-		// not implemented
-		return false;
+		// find the path
+		ip_t destination = _story->find_offset_for(path);
+		if (destination == nullptr)
+		{
+			// TODO: Error state?
+			return false;
+		}
+		
+		// Clear state and move to destination
+		reset();
+		_ptr = _story->instructions();
+		jump(destination);
 	}
 
 	runner_impl::change_type runner_impl::detect_change() const

@@ -145,6 +145,23 @@ namespace ink::runtime::internal
 		return false;
 	}
 
+	ip_t story_impl::find_offset_for(hash_t path) const
+	{
+		hash_t* iter = _container_hash_start;
+
+		while (iter != _container_hash_end)
+		{
+			if (*iter == path)
+			{
+				return instructions() + *(offset_t*)(iter + 1);
+			}
+
+			iter += 2;
+		}
+
+		return nullptr;
+	}
+
 	globals story_impl::new_globals()
 	{
 		return globals(new globals_impl(this), _block);
@@ -200,6 +217,21 @@ namespace ink::runtime::internal
 				ptr += sizeof(uint32_t) * 2;
 				_container_list_size++;
 			}
+		}
+
+		// Next is the container hash map
+		_container_hash_start = (hash_t*)(ptr);
+		while (true)
+		{
+			uint32_t val = *(uint32_t*)ptr;
+			if (val == ~0)
+			{
+				_container_hash_end = (hash_t*)(ptr);
+				ptr += sizeof(uint32_t);
+				break;
+			}
+
+			ptr += sizeof(uint32_t) * 2;
 		}
 
 		// After strings comes instruction data

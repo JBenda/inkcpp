@@ -27,6 +27,9 @@ int main()
 		// Start runner
 		runner thread = myInk->new_runner();
 
+		// move to knot
+		thread->move_to(ink::hash_string("knot_1"));
+
 		while (true)
 		{
 			while (thread->can_continue())

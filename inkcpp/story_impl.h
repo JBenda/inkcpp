@@ -28,6 +28,8 @@ namespace ink::runtime::internal
 		bool iterate_containers(const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false) const;
 		bool get_container_id(ip_t offset, container_t& container_id) const;
 
+		ip_t find_offset_for(hash_t path) const;
+
 		// Creates a new global store for use with runners executing this story
 		virtual globals new_globals() override;
 		virtual runner new_runner(globals store = nullptr) override;
@@ -47,6 +49,10 @@ namespace ink::runtime::internal
 		uint32_t* _container_list;
 		uint32_t _container_list_size;
 		uint32_t _num_containers;
+
+		// container hashes
+		hash_t* _container_hash_start;
+		hash_t* _container_hash_end;
 
 		// instruction info
 		ip_t _instruction_data;
