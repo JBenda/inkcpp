@@ -60,13 +60,18 @@ namespace ink
 		MAX,
 		BINARY_OPERATORS_END = MAX,
 
+		// == Unary operators
 		UNARY_OPERATORS_START,
 		NOT = UNARY_OPERATORS_START,
 		NEGATE,
 		UNARY_OPERATORS_END = NEGATE,
 
+		// == Container tracking
 		START_CONTAINER_MARKER,
 		END_CONTAINER_MARKER,
+
+		// == Function calls
+		CALL_EXTERNAL,
 
 		NUM_COMMANDS,
 	};
@@ -150,6 +155,8 @@ namespace ink
 
 		"!",
 		"~",
+
+		nullptr,
 
 		nullptr,
 		nullptr

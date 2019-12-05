@@ -2,6 +2,10 @@
 
 #include "system.h"
 
+#ifdef INK_ENABLE_STL
+#include <string>
+#endif
+
 namespace ink
 {
 	namespace runtime 
@@ -82,6 +86,21 @@ namespace ink
 				float as_float() const { return _first.float_value; }
 				uint32_t as_divert() const { return _first.uint_value; }
 				// TODO: String access?
+
+				template<typename T>
+				T get() const { static_assert(false); }
+
+				template<>
+				int get<int>() const { return as_int(); }
+				template<>
+				float get<float>() const { return as_float(); }
+				template<>
+				uint32_t get<uint32_t>() const { return as_divert(); }
+
+#ifdef INK_ENABLE_STL
+				template<>
+				std::string get<std::string>() const { return _first.string_val; } // TODO: Missing amalgamate?
+#endif
 
 				inline operator int() const { return as_int(); }
 				inline operator float() const { return as_float(); }
