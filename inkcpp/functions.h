@@ -1,6 +1,7 @@
 #pragma once
 
 #include "functional.h"
+#include "system.h"
 
 namespace ink::runtime::internal
 {
@@ -17,7 +18,7 @@ namespace ink::runtime::internal
 		void add(hash_t name, function_base* func);
 
 		// Calls a function (if available)
-		bool call(hash_t name, basic_eval_stack* stack, size_t num_arguments, value& result);
+		bool call(hash_t name, basic_eval_stack* stack, size_t num_arguments);
 
 	private:
 		struct entry

@@ -90,6 +90,8 @@ namespace ink
 				template<typename T>
 				T get() const { static_assert(false); }
 
+				// == TODO: Asserts?
+
 				template<>
 				int get<int>() const { return as_int(); }
 				template<>
@@ -100,6 +102,10 @@ namespace ink
 #ifdef INK_ENABLE_STL
 				template<>
 				std::string get<std::string>() const { return _first.string_val; } // TODO: Missing amalgamate?
+#endif
+#ifdef INK_ENABLE_UNREAL
+				template<>
+				FString get<FString>() const { return _first.string_val; } // TODO: Missing amalgamate?
 #endif
 
 				inline operator int() const { return as_int(); }

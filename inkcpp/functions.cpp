@@ -39,7 +39,7 @@ namespace ink::runtime::internal
 		}
 	}
 
-	bool functions::call(hash_t name, basic_eval_stack* stack, size_t num_arguments, value& result)
+	bool functions::call(hash_t name, basic_eval_stack* stack, size_t num_arguments)
 	{
 		// find entry
 		entry* iter = _list;
@@ -51,7 +51,7 @@ namespace ink::runtime::internal
 			return false;
 
 		// call
-		result = iter->value->call(stack, num_arguments);
+		iter->value->call(stack, num_arguments);
 		return true;
 	}
 }

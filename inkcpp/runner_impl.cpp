@@ -548,14 +548,10 @@ namespace ink::runtime::internal
 				// Interpret flag as argument count
 				int numArguments = (int)flag;
 
-				// find and execute
-				value result;
-				_functions.call(functionName, &_eval, numArguments, result);
+				// find and execute. will automatically push a valid if applicable
+				_functions.call(functionName, &_eval, numArguments);
 
 				// TODO: Verify something was found?
-
-				// TODO: Push return value
-				_eval.push(result);
 			}
 			break;
 
