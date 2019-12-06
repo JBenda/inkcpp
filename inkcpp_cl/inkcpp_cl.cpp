@@ -10,6 +10,11 @@
 #include <choice.h>
 #include <globals.h>
 
+int x(int a, int b)
+{
+	return a + b;
+}
+
 int main()
 {
 	{
@@ -26,6 +31,9 @@ int main()
 
 		// Start runner
 		runner thread = myInk->new_runner();
+
+		// Register external functions
+		thread->bind(ink::hash_string("brook"), &x);
 
 		// move to knot
 		thread->move_to(ink::hash_string("knot_1"));

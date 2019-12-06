@@ -90,7 +90,14 @@ namespace ink::runtime
 			: story_ptr_base(nullptr, nullptr)
 			, _ptr(nullptr)
 		{
-			assert(ptr == nullptr, "can not create story_ptr from existing pointer!");
+			inkAssert(ptr == nullptr, "can not create story_ptr from existing pointer!");
+		}
+
+		// null constructor
+		story_ptr()
+			: story_ptr_base(nullptr, nullptr)
+			, _ptr(nullptr)
+		{
 		}
 
 		// destructor
@@ -105,7 +112,12 @@ namespace ink::runtime
 		story_ptr<U> cast()
 		{
 			// if cast fails, return null
+#ifdef INK_ENABLE_UNREAL
+			// Unreal disables RTTI
+			U* casted = reinterpret_cast<U*>(_ptr);
+#else
 			U* casted = dynamic_cast<U*>(_ptr);
+#endif
 			if (casted == nullptr)
 				return nullptr;
 

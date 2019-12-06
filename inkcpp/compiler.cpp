@@ -307,7 +307,7 @@ namespace ink {
 								write_path(data, Command::DIVERT, path, self, flag);
 							}
 						}
-						else if (iter->find("^->") != iter->end())
+						else if (iter->find("^->") != iter->end()) // divert to value
 						{
 							// Get the divert path
 							auto path = (*iter)["^->"].get<std::string>();
@@ -351,6 +351,19 @@ namespace ink {
 
 							// Write out path. Speciically, we want the post-processor to write out the counter index for this container
 							write_path(data, Command::READ_COUNT, path, self, CommandFlag::NO_FLAGS, true);
+						}
+						// external function call
+						else if (iter->find("x()") != iter->end())
+						{
+							// Get name and argument count
+							auto name = (*iter)["x()"].get<std::string>();
+							int numArgs = 
+								iter->find("exArgs") == iter->end()
+								? 0
+								: (*iter)["exArgs"].get<int>();
+
+							// Encode num arguments into command flag and write out the hash of the function name as the parameter
+							write(data, Command::CALL_EXTERNAL, hash_string(name.c_str()), (CommandFlag)numArgs);
 						}
 					}
 				}

@@ -8,6 +8,7 @@
 #include "config.h"
 #include "simple_restorable_stack.h"
 #include "types.h"
+#include "functions.h"
 
 #include "runner.h"
 #include "choice.h"
@@ -56,6 +57,9 @@ namespace ink::runtime::internal
 		virtual FString getline() override;
 #endif
 #pragma endregion
+	protected:
+		// bind external
+		virtual void internal_bind(hash_t name, internal::function_base* function) override;
 	private:
 		// Advances the interpreter by a line. This fills the output buffer
 		void advance_line();
@@ -126,11 +130,14 @@ namespace ink::runtime::internal
 		choice _choices[MAX_CHOICES];
 		size_t _num_choices = 0;
 
+		// TODO: Move to story? Both?
+		functions _functions;
+
 		// Container set
 		internal::restorable_stack<container_t, 20> _container;
 		bool _is_falling = false;
 
-		bool _saved;
+		bool _saved = false;
 	};
 
 #ifdef INK_ENABLE_STL

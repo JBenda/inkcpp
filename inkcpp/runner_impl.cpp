@@ -322,6 +322,13 @@ namespace ink::runtime::internal
 		reset();
 		_ptr = _story->instructions();
 		jump(destination);
+
+		return true;
+	}
+
+	void runner_impl::internal_bind(hash_t name, internal::function_base* function)
+	{
+		_functions.add(name, function);
 	}
 
 	runner_impl::change_type runner_impl::detect_change() const
@@ -529,6 +536,22 @@ namespace ink::runtime::internal
 				// Get the top value and put it into the variable
 				value v = _eval.pop();
 				_stack.set(variableName, v);
+			}
+			break;
+
+			// == Function calls
+			case Command::CALL_EXTERNAL:
+			{
+				// Read function name
+				hash_t functionName = read<hash_t>();
+
+				// Interpret flag as argument count
+				int numArguments = (int)flag;
+
+				// find and execute. will automatically push a valid if applicable
+				_functions.call(functionName, &_eval, numArguments);
+
+				// TODO: Verify something was found?
 			}
 			break;
 

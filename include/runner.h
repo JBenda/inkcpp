@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "system.h"
+#include "functional.h"
 
 #ifdef INK_ENABLE_UNREAL
 #include "Containers/UnrealString.h"
@@ -127,6 +128,34 @@ namespace ink::runtime
 		 * @param index index of the choice to make
 		*/
 		virtual void choose(size_t index) = 0;
+
+	protected:
+		// internal bind implementation. not for calling.
+		virtual void internal_bind(hash_t name, internal::function_base* function) = 0;
+	public:
+		/**
+		 * Binds an external callable to the runtime
+		 *
+		 * Given a name and a callable object, register this function
+		 *  to be called back from the ink runtime.
+		 *
+		 * @param name name hash
+		 * @param function callable
+		*/
+		template<typename F>
+		void bind(hash_t name, F function)
+		{
+			internal_bind(name, new internal::function(function));
+		}
+
+#ifdef INK_ENABLE_UNREAL
+		template<typename D>
+		void bind_delegate(hash_t name, D functionDelegate)
+		{
+			internal_bind(name, new internal::function_array_delegate(functionDelegate));
+		}
+#endif
+
 #pragma endregion 
 
 #pragma region Convenience Methods

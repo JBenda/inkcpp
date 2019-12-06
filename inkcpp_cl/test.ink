@@ -1,9 +1,7 @@
-- (start)
-Look at this crazy list: {&A|B|C|D}!
-Continue?
-+ Continue
--> start
+EXTERNAL brook(x, y)
 
-=== knot_1
-This is a knot!
+My ink file {brook(4, 2)}.
+
+
+
 ->END
