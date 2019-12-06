@@ -57,11 +57,16 @@ Only very basic commands are supported right now.
 * Global store that can be shared between runners
 * External function binding (strings as arguments, but no string return values) (no fallback support yet)
 
+## CMake
+Project is organized using `cmake`. Just run `cmake` and it should configure all the projects properly into a runtime, compiler, and command line project.
+
+## Unreal Plugin
+Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run `cmake --install . --component unreal --prefix Path/To/Unreal/Plugins/` which will add an `inkcpp` folder there with the `.uplugin`, the code for the UClasses, and all the inkcpp source files required. `config.h` will automatically detect it is being built in an Unreal plugin environment and disable STL and enable Unreal extensions (FString support, Unreal asserts, CityHash, etc.).
+
 ## Next Steps
 
-I have an Unreal plugin locally that integrates what I have so far. The next big step is to actually organize the files here into some coherant way so they can easily be packaged into either an Unreal plugin or just a bland, static library. Will probably use CMake or something.
-
-After that, I really need to get dynamic string allocation working so the engine can use strings beyond what is in the compiled string table.
+* Dynamic string allocation so that more than 4 strings can be appended together, choices can have dynamic text, and external functions can return strings to the runtime
+* Whatever I have on here: https://github.com/brwarner/inkcpp/projects/1
 
 ### Glaring Omissions
 
@@ -82,4 +87,6 @@ There are unit tests using `catch` for some of the underlying types (restorable 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
 
-The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators and `std::string` support.
+The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators and `std::string` support. If `INK_ENABLE_UNREAL`, then FStrings, Delegates and other Unreal classes will be supported. 
+
+NOTE: There is still some lingering C standard library calls in the runtime. I will be guarding them with an `INK_ENABLE_CSTD` or something soon.
