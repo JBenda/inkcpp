@@ -148,6 +148,14 @@ namespace ink::runtime
 			internal_bind(name, new internal::function(function));
 		}
 
+#ifdef INK_ENABLE_UNREAL
+		template<typename D>
+		void bind_delegate(hash_t name, D functionDelegate)
+		{
+			internal_bind(name, new internal::function_array_delegate(functionDelegate));
+		}
+#endif
+
 #pragma endregion 
 
 #pragma region Convenience Methods

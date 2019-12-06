@@ -1,5 +1,7 @@
 #include "system.h"
 
+#ifndef INK_ENABLE_UNREAL
+
 namespace ink
 {
 #define A 54059 /* a prime */
@@ -31,3 +33,5 @@ namespace ink
 	}
 
 }
+
+#endif

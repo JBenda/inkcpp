@@ -82,4 +82,31 @@ namespace ink::runtime::internal
 			}
 		}
 	};
+
+#ifdef INK_ENABLE_UNREAL
+	template<typename D>
+	class function_array_delegate : public function_base
+	{
+	public:
+		function_array_delegate(const D& del) : invocableDelegate(del) { }
+
+		// calls the underlying delegate using arguments on the stack
+		virtual void call(basic_eval_stack* stack, size_t length) override
+		{
+			// Create variable array
+			TArray<FInkVar> variables;
+			for (size_t i = 0; i < length; i++)
+			{
+				variables.Add(pop<FInkVar>(stack));
+			}
+
+			FInkVar result;
+			invocableDelegate.ExecuteIfBound(variables, result);
+
+			push(stack, result);
+		}
+	private:
+		D invocableDelegate;
+	};
+#endif
 }

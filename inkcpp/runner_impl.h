@@ -137,7 +137,7 @@ namespace ink::runtime::internal
 		internal::restorable_stack<container_t, 20> _container;
 		bool _is_falling = false;
 
-		bool _saved;
+		bool _saved = false;
 	};
 
 #ifdef INK_ENABLE_STL
