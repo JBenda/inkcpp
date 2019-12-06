@@ -13,11 +13,18 @@ Inkle Ink C++ Runtime with JSON -> Binary Compiler.
 ```cpp
 using namespace ink::runtime;
 
+int MyInkFunction(int a, int b) { return a + b; }
+
+...
+
 // Load ink binary story
-story myInk("story.bin");
+story* myInk = story::from_file("test.bin");
 
 // Create a new thread
-runner_p thread = myInk.create_runner();
+runner thread = myInk->create_runner();
+
+// Register external functions (glue automatically generated via templates)
+thread->bind(ink::hash_string("my_ink_function"), &MyInkFunction);
 
 // Write to cout
 while(*thread)
