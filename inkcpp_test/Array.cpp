@@ -11,12 +11,12 @@ SCENARIO("a restorable array can hold values", "[array]")
 {
 	GIVEN("an empty array")
 	{
-		const size_t length = 10;
+		const ink::size_t length = 10;
 		test_array array = test_array(length);
 
 		THEN("the default values should be zero")
 		{
-			for (size_t i = 0; i < length; i++)
+			for (ink::size_t i = 0; i < length; i++)
 			{
 				REQUIRE(array[i] == 0);
 			}
@@ -33,7 +33,7 @@ SCENARIO("a restorable array can hold values", "[array]")
 
 			THEN("the other values should be zero still")
 			{
-				for (size_t i = 0; i < length; i++)
+				for (ink::size_t i = 0; i < length; i++)
 				{
 					if (i == 3)
 						continue;
