@@ -3,7 +3,7 @@ add_library(inkcpp_compiler compiler.cpp binary_stream.h binary_stream.cpp json.
 # Make sure the include directory is included 
 target_include_directories(inkcpp_compiler 
     PUBLIC ../include
-    PRIVATE ../common
+    PUBLIC ../common
     )
 
 # Make sure this project and all dependencies use the C++17 standard

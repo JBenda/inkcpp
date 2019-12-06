@@ -17,7 +17,7 @@ add_library(inkcpp
 # Make sure the include directory is included 
 target_include_directories(inkcpp 
     PUBLIC ../include
-    PRIVATE ../common
+    PUBLIC ../common
     )
 
 # Make sure this project and all dependencies use the C++17 standard
