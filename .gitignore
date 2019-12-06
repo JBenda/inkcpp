@@ -6,9 +6,3 @@ Documentation/*
 
 # Output
 Build/*
-
-# Installed h/cpp files in the Unreal project
-Unreal/inkcpp/Source/inkcpp/Public/ink/*.*
-Unreal/inkcpp/Source/inkcpp/Private/ink/*.*
-Unreal/inkcpp/Source/inkcpp_editor/Private/ink/*.*
-Unreal/inkcpp/Source/common/*.h

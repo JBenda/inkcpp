@@ -1,0 +1,28 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "inkcpp",
+	"Description": "inkcpp integration",
+	"Category": "Narrative",
+	"CreatedBy": "brwarner",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+    {
+      "Name": "inkcpp",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "inkcpp_editor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+	]
+}
