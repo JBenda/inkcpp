@@ -13,11 +13,18 @@ Inkle Ink C++ Runtime with JSON -> Binary Compiler.
 ```cpp
 using namespace ink::runtime;
 
+int MyInkFunction(int a, int b) { return a + b; }
+
+...
+
 // Load ink binary story
-story myInk("story.bin");
+story* myInk = story::from_file("test.bin");
 
 // Create a new thread
-runner_p thread = myInk.create_runner();
+runner thread = myInk->create_runner();
+
+// Register external functions (glue automatically generated via templates)
+thread->bind(ink::hash_string("my_ink_function"), &MyInkFunction);
 
 // Write to cout
 while(*thread)
@@ -48,17 +55,25 @@ Only very basic commands are supported right now.
 * Visit and read counts (`visits` and `CNT?` commands).
 * `seq` command and all sequence types (stopping, cycle, shuffle)
 * Global store that can be shared between runners
+* External function binding (strings as arguments, but no string return values) (no fallback support yet)
+
+## Next Steps
+
+I have an Unreal plugin locally that integrates what I have so far. The next big step is to actually organize the files here into some coherant way so they can easily be packaged into either an Unreal plugin or just a bland, static library. Will probably use CMake or something.
+
+After that, I really need to get dynamic string allocation working so the engine can use strings beyond what is in the compiled string table.
 
 ### Glaring Omissions
 
 The big things we're missing right now are:
 
 * Global variables
-* Function calls, internal and external
+* Internal function calls. Fallback functions for externals.
 * Threads
 * Tunnels
 * Choices whose text is not a single, fixed string
 * Variable observers
+* Lists and whatever cool, crazy stuff Ink has been adding recently.
 
 Not to mention that the project is not organized to actually be used as a library or anything like that.
 
