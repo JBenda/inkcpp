@@ -1,6 +1,9 @@
 # Ink binary compilation
 *.bin
 
+# Visual Studio code
+*.code-workspace
+
 # Doxygen
 Documentation/*
 
