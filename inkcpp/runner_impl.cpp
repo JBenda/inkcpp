@@ -549,7 +549,18 @@ namespace ink::runtime::internal
 				int numArguments = (int)flag;
 
 				// find and execute. will automatically push a valid if applicable
-				_functions.call(functionName, &_eval, numArguments);
+				bool success = _functions.call(functionName, &_eval, numArguments);
+
+				// If we failed, we need to at least pretend so our state doesn't get fucked
+				if (!success)
+				{
+					// pop arguments
+					for (int i = 0; i < numArguments; i++)
+						_eval.pop();
+
+					// push void
+					_eval.push(value());
+				}
 
 				// TODO: Verify something was found?
 			}
