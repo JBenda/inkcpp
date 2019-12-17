@@ -218,6 +218,7 @@ namespace ink
 				_save = ~0;
 			}
 
+#ifdef INK_ENABLE_CSTD
 			const char* basic_stream::get_alloc()
 			{
 				size_t start = find_start();
@@ -294,6 +295,7 @@ namespace ink
 				// Return processed string
 				return buffer;
 			}
+#endif
 
 			size_t basic_stream::find_start() const
 			{

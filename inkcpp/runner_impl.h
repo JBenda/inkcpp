@@ -39,8 +39,10 @@ namespace ink::runtime::internal
 		// Chooses a choice by index
 		virtual void choose(size_t index) override;
 
+#ifdef INK_ENABLE_CSTD
 		// c-style getline
 		virtual char* getline_alloc() override;
+#endif
 
 		// move to path
 		virtual bool move_to(hash_t path) override;

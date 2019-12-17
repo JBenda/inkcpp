@@ -302,11 +302,13 @@ namespace ink::runtime::internal
 		clear_choices();
 	}
 
+#ifdef INK_ENABLE_CSTD
 	char* runner_impl::getline_alloc()
 	{
 		// TODO
 		return nullptr;
 	}
+#endif
 
 	bool runner_impl::move_to(hash_t path)
 	{

@@ -30,8 +30,10 @@ namespace ink
 				// Extract into a data array
 				void get(data*, size_t length);
 
+#ifdef INK_ENABLE_CSTD
 				// Extract to a newly allocated string
 				const char* get_alloc();
+#endif
 
 #ifdef INK_ENABLE_STL
 				// Extract into a string
