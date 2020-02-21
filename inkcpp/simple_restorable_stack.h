@@ -105,7 +105,7 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline bool simple_restorable_stack<T>::empty() const
 	{
-		return _pos == 0;
+		return size() == 0;
 	}
 
 	template<typename T>

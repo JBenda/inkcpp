@@ -184,4 +184,24 @@ SCENARIO("simple_restorable_stack supports save/restore", "[stack]") {
 			}
 		}
 	}
+
+	GIVEN("a stack with one entry that has been saved")
+	{
+		restorable_stack<int, 10> stack(~0);
+		stack.push(0);
+		stack.save();
+
+		WHEN("an item is popped, pushed, and popped again")
+		{
+			stack.pop();
+			stack.push(1);
+			stack.pop();
+
+			THEN("the stack should be considered 'empty'")
+			{
+				REQUIRE(stack.size() == 0); 
+				REQUIRE(stack.empty());
+			}
+		}
+	}
 }
