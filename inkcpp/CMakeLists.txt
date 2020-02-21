@@ -12,6 +12,7 @@ list(APPEND SOURCES
     story_ptr.cpp
     system.cpp
     value.h value.cpp
+    string_table.h string_table.cpp avl_array.h
 )
 add_library(inkcpp ${SOURCES})
 
