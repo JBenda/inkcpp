@@ -76,7 +76,6 @@ The big things we're missing right now are:
 * Internal function calls. Fallback functions for externals.
 * Threads
 * Tunnels
-* Choices whose text is not a single, fixed string
 * Variable observers
 * Lists and whatever cool, crazy stuff Ink has been adding recently.
 
