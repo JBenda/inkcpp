@@ -142,7 +142,7 @@ namespace ink::runtime::internal
 		switch ((Command)cmd)
 		{
 		case Command::ADD:
-			result = lhs + rhs;
+			result = value::add(lhs, rhs, _output, _strings);
 			break;
 		case Command::SUBTRACT:
 			result = lhs - rhs;
@@ -282,6 +282,9 @@ namespace ink::runtime::internal
 		// Should be nothing in the eval stack
 		// inkAssert(_eval.is_empty(), "Eval stack should be empty after advancing one line");
 		inkAssert(!_saved, "Should be no state snapshot at the end of newline");
+
+		// Garbage collection TODO: How often do we want to do this?
+		gc();
 	}
 
 	bool runner_impl::can_continue() const
@@ -659,7 +662,7 @@ namespace ink::runtime::internal
 				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
 
 				// Create choice and record it
-				add_choice().setup(_output, _num_choices, path);
+				add_choice().setup(_output, _strings, _num_choices, path);
 			} break;
 			case Command::START_CONTAINER_MARKER:
 			{
@@ -739,6 +742,24 @@ namespace ink::runtime::internal
 		_ptr = nullptr;
 		_done = nullptr;
 		_container.clear();
+	}
+
+	void runner_impl::gc()
+	{
+		// Mark all strings as unused
+		_strings.clear_usage();
+
+		// Find strings
+		_output.mark_strings(_strings);
+		_stack.mark_strings(_strings);
+		_eval.mark_strings(_strings);
+		
+		// Take into account choice text
+		for (int i = 0; i < _num_choices; i++)
+			_strings.mark_used(_choices[i]._text);
+
+		// Clean up
+		_strings.gc();
 	}
 
 	void runner_impl::save()

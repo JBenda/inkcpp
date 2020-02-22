@@ -9,6 +9,7 @@
 #include "simple_restorable_stack.h"
 #include "types.h"
 #include "functions.h"
+#include "string_table.h"
 
 #include "runner.h"
 #include "choice.h"
@@ -76,6 +77,9 @@ namespace ink::runtime::internal
 		// Resets the runtime
 		void reset();
 
+		// Runs garbage collection
+		void gc();
+
 		// == Save/Restore
 		void save();
 		void restore();
@@ -109,6 +113,7 @@ namespace ink::runtime::internal
 	private:
 		const story_impl* const _story;
 		story_ptr<globals_impl> _globals;
+		string_table _strings;
 
 		// == State ==
 

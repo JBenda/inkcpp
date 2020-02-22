@@ -12,6 +12,8 @@ namespace ink
 	{
 		namespace internal 
 		{
+			class string_table;
+
 			// Data types that can be held internally within the ink runtime
 			enum class data_type
 			{
@@ -20,7 +22,7 @@ namespace ink
 				float32,						// 32-bit floating point value
 				uint32,							// 32-bit unsigned integer value
 				string_table_pointer,			// Represents an offset within the story's constant string table
-				allocated_string_pointer,		// Represents an offset within the runner's allocated string table (TODO)
+				allocated_string_pointer,		// Represents an offset within the runner's allocated string table
 				marker,							// Special marker (used in output stream)
 				glue,							// Glue.
 				newline,						// \n
@@ -99,6 +101,9 @@ namespace ink
 				template<>
 				uint32_t get<uint32_t>() const { return as_divert(); }
 
+				// Garbage collection
+				void mark_strings(string_table&);
+
 #ifdef INK_ENABLE_STL
 				template<>
 				std::string get<std::string>() const { return _first.string_val; } // TODO: Missing amalgamate?
@@ -120,7 +125,7 @@ namespace ink
 				void load_from(basic_stream&);
 
 				// == Binary operations ==
-				static value add(value, value);
+				static value add(value, value, basic_stream&, string_table&);
 				static value subtract(value, value);
 				static value multiply(value, value);
 				static value divide(value, value);
@@ -155,7 +160,7 @@ namespace ink
 			};
 
 			// == Binary Operators ==
-			inline value operator+(const value& lhs, const value& rhs) { return value::add(lhs, rhs); }
+			// inline value operator+(const value& lhs, const value& rhs) { return value::add(lhs, rhs); }
 			inline value operator-(const value& lhs, const value& rhs) { return value::subtract(lhs, rhs); }
 			inline value operator*(const value& lhs, const value& rhs) { return value::multiply(lhs, rhs); } 
 			inline value operator/(const value& lhs, const value& rhs) { return value::divide(lhs, rhs); }

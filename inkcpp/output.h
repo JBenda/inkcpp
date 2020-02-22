@@ -27,13 +27,20 @@ namespace ink
 					append(&in[0], N);
 				}
 
+				// Returns the number of data items that will be extracted by the next get
+				int queued() const;
+
+				// Peeks the top entry
+				const data& peek() const;
+
+				// discards data
+				void discard(size_t length);
+
 				// Extract into a data array
 				void get(data*, size_t length);
 
-#ifdef INK_ENABLE_CSTD
 				// Extract to a newly allocated string
-				const char* get_alloc();
-#endif
+				const char* get_alloc(string_table&);
 
 #ifdef INK_ENABLE_STL
 				// Extract into a string
@@ -62,6 +69,9 @@ namespace ink
 
 				// Clears the whole stream
 				void clear();
+
+				// Marks strings that are in use
+				void mark_strings(string_table&);
 
 				// = Save/Restore
 				void save();

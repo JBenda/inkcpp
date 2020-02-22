@@ -9,6 +9,8 @@ namespace ink::runtime::internal
 	class string_table
 	{
 	public:
+		~string_table();
+
 		// Create a dynmaic string of a particular length
 		char* create(size_t length);
 

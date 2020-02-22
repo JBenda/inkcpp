@@ -36,6 +36,9 @@ namespace ink
 				// Clears the entire stack
 				void clear();
 
+				// Garbage collection
+				void mark_strings(string_table&);
+
 				// == Save/Restore ==
 				void save();
 				void restore();
@@ -87,6 +90,9 @@ namespace ink
 
 				// Clear stack
 				void clear();
+
+				// Garbage collection
+				void mark_strings(string_table&);
 
 			private:
 				// stack

@@ -2,6 +2,14 @@
 
 namespace ink::runtime::internal
 {
+	string_table::~string_table()
+	{
+		// Delete all allocated strings
+		for (auto iter = _table.begin(); iter != _table.end(); ++iter)
+			delete[] iter.key();
+		_table.clear();
+	}
+
 	char* string_table::create(size_t length)
 	{
 		// allocate the string
@@ -10,7 +18,7 @@ namespace ink::runtime::internal
 			return nullptr;
 
 		// Add to the tree
-		bool success = _table.insert(data, false);
+		bool success = _table.insert(data, true); // TODO: Should it start as used?
 		assert(success, "Duplicate string pointer in the string_table. How is that possible?");
 		if (!success)
 		{

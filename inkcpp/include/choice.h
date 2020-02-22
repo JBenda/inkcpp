@@ -9,6 +9,7 @@ namespace ink
 		{
 			class basic_stream;
 			class runner_impl;
+			class string_table;
 		}
 
 		/**
@@ -45,7 +46,7 @@ namespace ink
 			friend class internal::runner_impl;
 
 			uint32_t path() const { return _path; }
-			void setup(internal::basic_stream&, int index, uint32_t path);
+			void setup(internal::basic_stream&, internal::string_table& strings, int index, uint32_t path);
 		private:
 			const char* _text;
 			int _index;

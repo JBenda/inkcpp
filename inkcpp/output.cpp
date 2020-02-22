@@ -1,4 +1,5 @@
 #include "output.h"
+#include "string_table.h"
 
 namespace ink
 {
@@ -128,6 +129,26 @@ namespace ink
 			}
 #endif
 
+			int basic_stream::queued() const
+			{
+				size_t start = find_start();
+				return _size - start;
+			}
+
+			const data& basic_stream::peek() const
+			{
+				inkAssert(_size > 0, "Attempting to peek empty stream!");
+				return _data[_size - 1];
+			}
+
+			void basic_stream::discard(size_t length)
+			{
+				// discard elements
+				_size -= length;
+				if (_size < 0)
+					_size = 0;
+			}
+
 			void basic_stream::get(data* ptr, size_t length)
 			{
 				// Find start
@@ -218,8 +239,9 @@ namespace ink
 				_save = ~0;
 			}
 
-#ifdef INK_ENABLE_CSTD
-			const char* basic_stream::get_alloc()
+			// TODO: This uses C STD library methods. Move to my own.
+//#ifdef INK_ENABLE_CSTD
+			const char* basic_stream::get_alloc(string_table& strings)
 			{
 				size_t start = find_start();
 
@@ -250,7 +272,7 @@ namespace ink
 				}
 
 				// Allocate
-				char* buffer = new char[length + 1];
+				char* buffer = strings.create(length + 1);
 				char* end = buffer + length + 1;
 				char* ptr = buffer;
 				hasGlue = false;
@@ -295,7 +317,7 @@ namespace ink
 				// Return processed string
 				return buffer;
 			}
-#endif
+//#endif
 
 			size_t basic_stream::find_start() const
 			{
@@ -358,6 +380,16 @@ namespace ink
 			{
 				_save = ~0;
 				_size = 0;
+			}
+
+			void basic_stream::mark_strings(string_table& strings)
+			{
+				// Find all allocated strings and mark them as used
+				for (int i = 0; i < _size; i++)
+				{
+					if (_data[i].type == internal::data_type::allocated_string_pointer)
+						strings.mark_used(_data[i].string_val);
+				}
 			}
 
 #ifdef INK_ENABLE_STL

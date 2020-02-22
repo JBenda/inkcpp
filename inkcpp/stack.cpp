@@ -88,6 +88,16 @@ namespace ink
 				_pos = 0;
 			}
 
+			void basic_stack::mark_strings(string_table& strings)
+			{
+				// no matter if we're saved or not, we consider all strings
+				int len = _pos > _save ? _pos : _save;
+
+				// iterate and mark
+				for (int i = 0; i < len; i++)
+					_stack[i].data.mark_strings(strings);
+			}
+
 			void basic_stack::save()
 			{
 				inkAssert(_save == ~0, "Can not save stack twice! restore() or forget() first");
@@ -175,6 +185,12 @@ namespace ink
 			void basic_eval_stack::clear()
 			{
 				_pos = 0;
+			}
+
+			void basic_eval_stack::mark_strings(string_table& strings)
+			{
+				for (int i = 0; i < _pos; i++)
+					_stack[i].mark_strings(strings);
 			}
 
 		}

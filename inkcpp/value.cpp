@@ -1,5 +1,9 @@
 #include "value.h"
 #include "output.h"
+#include "string_table.h"
+
+// TODO
+#include <cstdlib>
 
 namespace ink
 {
@@ -111,6 +115,22 @@ namespace ink
 				return type;
 			}
 
+			void value::mark_strings(string_table& strings)
+			{
+				// mark any allocated strings we're using
+				for (int i = 0; i < VALUE_DATA_LENGTH; i++)
+				{
+					switch (_data[i].type)
+					{
+					case data_type::allocated_string_pointer:
+						strings.mark_used(_data[i].string_val);
+						break;
+					case data_type::none:
+						return;
+					}
+				}
+			}
+
 			bool value::is_truthy() const
 			{
 				// Concatenated strings are true
@@ -147,7 +167,7 @@ namespace ink
 				in.get(&_first, VALUE_DATA_LENGTH);
 			}
 
-			value value::add(value left, value right)
+			value value::add(value left, value right, basic_stream& stream, string_table& table)
 			{
 				// Cast as needed
 				value_type new_type = maybe_cast(left, right);
@@ -165,15 +185,47 @@ namespace ink
 
 					// Copy left values into new
 					int i = 0, j = 0;
-					while (left._data[j].type != data_type::none && j < VALUE_DATA_LENGTH && i < VALUE_DATA_LENGTH)
+					bool overflow = false;
+					while (left._data[j].type != data_type::none && j < VALUE_DATA_LENGTH && !overflow)
+					{
+						if (i >= VALUE_DATA_LENGTH)
+						{
+							overflow = true;
+							break;
+						}
 						new_value._data[i++] = left._data[j++];
+					}
 
 					// Copy right values into new
 					j = 0;
-					while (right._data[j].type != data_type::none && j < VALUE_DATA_LENGTH && i < VALUE_DATA_LENGTH)
+					while (right._data[j].type != data_type::none && j < VALUE_DATA_LENGTH && !overflow)
+					{
+						if (i >= VALUE_DATA_LENGTH)
+						{
+							overflow = true;
+							break;
+						}
 						new_value._data[i++] = right._data[j++];
+					}
 
-					// TODO: Test for overflow?
+					// Todo: Use string buffer for dynamic allocation!
+					if (overflow)
+					{
+						// Add a marker
+						stream << marker;
+
+						// Push everything into the stream
+						j = 0;
+						while (left._data[j].type != data_type::none && j < VALUE_DATA_LENGTH)
+							stream << left._data[j++];
+						j = 0;
+						while (right._data[j].type != data_type::none && j < VALUE_DATA_LENGTH)
+							stream << right._data[j++];
+
+						// Pull out into a new string
+						return value(stream.get_alloc(table), true);
+					}
+
 					return new_value;
 				}
 				}
