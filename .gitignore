@@ -1,6 +1,10 @@
 # Ink binary compilation
 *.bin
 
+# Ink files
+*.ink
+*.json
+
 # Visual Studio code
 *.code-workspace
 
