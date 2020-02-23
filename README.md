@@ -43,9 +43,9 @@ thread->choose(0);
 ## Current Status
 `inkcpp.cpp` has a `main()` function which compiles `test.json` -> `test.bin` and executes it using standard output and input.
 
-Only very basic commands are supported right now.
+Many, but not all features of the Ink language are supported (see Glaring Omissions below).
 
-* Temporary variables
+* Temporary and global variables
 * Int, String, or Divert values
 * Eval stack (`ev`, `/ev`), String stack (`str`, `/str`)
 * Choices (support for both `*` and `+` and conditional choices)
@@ -71,7 +71,6 @@ I am currently working toward a 1.0 release. You can track my progress here: htt
 
 The big things we're missing right now are:
 
-* Global variables
 * Internal function calls. Fallback functions for externals.
 * Threads
 * Tunnels
