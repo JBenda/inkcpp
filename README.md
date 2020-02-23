@@ -24,7 +24,7 @@ story* myInk = story::from_file("test.bin");
 runner thread = myInk->create_runner();
 
 // Register external functions (glue automatically generated via templates)
-thread->bind(ink::hash_string("my_ink_function"), &MyInkFunction);
+thread->bind("my_ink_function", &MyInkFunction);
 
 // Write to cout
 while(*thread)
@@ -55,7 +55,7 @@ Only very basic commands are supported right now.
 * Visit and read counts (`visits` and `CNT?` commands).
 * `seq` command and all sequence types (stopping, cycle, shuffle)
 * Global store that can be shared between runners
-* External function binding (strings as arguments, but no string return values) (no fallback support yet)
+* External function binding (no fallback support yet)
 
 ## CMake
 Project is organized using `cmake`. Just run `cmake` and it should configure all the projects properly into a runtime, compiler, and command line project.
@@ -65,8 +65,7 @@ Code for the Unreal plugin is located in the `unreal` directory. In order to ins
 
 ## Next Steps
 
-* Dynamic string allocation so that more than 4 strings can be appended together, choices can have dynamic text, and external functions can return strings to the runtime
-* Whatever I have on here: https://github.com/brwarner/inkcpp/projects/1
+I am currently working toward a 1.0 release. You can track my progress here: https://github.com/brwarner/inkcpp/projects/1
 
 ### Glaring Omissions
 
@@ -78,8 +77,6 @@ The big things we're missing right now are:
 * Tunnels
 * Variable observers
 * Lists and whatever cool, crazy stuff Ink has been adding recently.
-
-Not to mention that the project is not organized to actually be used as a library or anything like that.
 
 There are unit tests using `catch` for some of the underlying types (restorable stacks, arrays, and the shared-ish pointer) but not for any of the ink implementation.
 
