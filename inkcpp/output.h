@@ -71,7 +71,7 @@ namespace ink
 				void clear();
 
 				// Marks strings that are in use
-				void mark_strings(string_table&);
+				void mark_strings(string_table&) const;
 
 				// = Save/Restore
 				void save();

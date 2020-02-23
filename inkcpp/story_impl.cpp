@@ -164,6 +164,7 @@ namespace ink::runtime::internal
 
 	globals story_impl::new_globals()
 	{
+		// create the new globals store
 		return globals(new globals_impl(this), _block);
 	}
 

@@ -382,7 +382,7 @@ namespace ink
 				_size = 0;
 			}
 
-			void basic_stream::mark_strings(string_table& strings)
+			void basic_stream::mark_strings(string_table& strings) const
 			{
 				// Find all allocated strings and mark them as used
 				for (int i = 0; i < _size; i++)

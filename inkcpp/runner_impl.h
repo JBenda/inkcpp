@@ -24,7 +24,10 @@ namespace ink::runtime::internal
 	public:
 		// Creates a new runner at the start of a loaded ink story
 		runner_impl(const story_impl*, globals);
-		virtual ~runner_impl() { }
+		virtual ~runner_impl();
+
+		// used by the globals object to do garbage collection
+		void mark_strings(string_table&) const;
 
 #pragma region runner Implementation
 
@@ -39,6 +42,9 @@ namespace ink::runtime::internal
 
 		// Chooses a choice by index
 		virtual void choose(size_t index) override;
+
+		// runs silently
+		void getline_silent();
 
 #ifdef INK_ENABLE_CSTD
 		// c-style getline
@@ -77,9 +83,6 @@ namespace ink::runtime::internal
 		// Resets the runtime
 		void reset();
 
-		// Runs garbage collection
-		void gc();
-
 		// == Save/Restore
 		void save();
 		void restore();
@@ -113,7 +116,6 @@ namespace ink::runtime::internal
 	private:
 		const story_impl* const _story;
 		story_ptr<globals_impl> _globals;
-		string_table _strings;
 
 		// == State ==
 

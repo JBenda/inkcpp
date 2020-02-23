@@ -22,6 +22,7 @@ namespace ink
 
 		// == Variable definitions
 		DEFINE_TEMP,
+		SET_VARIABLE,
 
 		// == Evaluation stack
 		START_EVAL,
@@ -95,6 +96,9 @@ namespace ink
 		// == Container marker
 		CONTAINER_MARKER_TRACK_VISITS = 1 << 0,
 		CONTAINER_MARKER_TRACK_TURNS = 1 << 1,
+
+		// == Variable assignment
+		ASSIGNMENT_IS_REDEFINE = 1 << 0,
 	};
 
 	inline bool operator& (CommandFlag lhs, CommandFlag rhs)
@@ -120,6 +124,7 @@ namespace ink
 		"done",
 		"end",
 
+		nullptr,
 		nullptr,
 
 		"ev",

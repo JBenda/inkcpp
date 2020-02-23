@@ -142,7 +142,7 @@ namespace ink::runtime::internal
 		switch ((Command)cmd)
 		{
 		case Command::ADD:
-			result = value::add(lhs, rhs, _output, _strings);
+			result = value::add(lhs, rhs, _output, _globals->strings());
 			break;
 		case Command::SUBTRACT:
 			result = lhs - rhs;
@@ -214,10 +214,30 @@ namespace ink::runtime::internal
 	}
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
-		: _story(data), _globals(global.cast<globals_impl>()), _container(~0)
+		: _story(data), _globals(global.cast<globals_impl>()), _container(~0),
+		_backup(nullptr), _done(false), _choices()
 	{
 		_ptr = _story->instructions();
 		bEvaluationMode = false;
+
+		// register with globals
+		_globals->add_runner(this);
+
+		// initialize globals if necessary
+		if (!_globals->are_globals_initialized())
+		{
+			_globals->initialize_globals(this);
+
+			// Set us back to the beginning of the story
+			reset();
+			_ptr = _story->instructions();
+		}
+	}
+
+	runner_impl::~runner_impl()
+	{
+		// unregister with globals
+		_globals->remove_runner(this);
 	}
 
 #ifdef INK_ENABLE_STL
@@ -284,7 +304,7 @@ namespace ink::runtime::internal
 		inkAssert(!_saved, "Should be no state snapshot at the end of newline");
 
 		// Garbage collection TODO: How often do we want to do this?
-		gc();
+		_globals->gc();
 	}
 
 	bool runner_impl::can_continue() const
@@ -303,6 +323,13 @@ namespace ink::runtime::internal
 		// Jump to destination and clear choice list
 		jump(_story->instructions() + _choices[index].path());
 		clear_choices();
+	}
+
+	void runner_impl::getline_silent()
+	{
+		// advance and clear output stream
+		advance_line();
+		_output.clear();
 	}
 
 #ifdef INK_ENABLE_CSTD
@@ -544,6 +571,30 @@ namespace ink::runtime::internal
 			}
 			break;
 
+			case Command::SET_VARIABLE:
+			{
+				hash_t variableName = read<hash_t>();
+
+				// Check if it's a redefinition (not yet used, seems important for pointers later?)
+				// bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
+
+				// Check if there's a local variable of this name
+				const value* local = _stack.get(variableName);
+
+				// If not, we're setting a global (temporary variables are explicitely defined as such,
+				//  where globals are defined using SET_VARIABLE).
+				if (local == nullptr)
+				{
+					_globals->set_variable(variableName, _eval.pop());
+				}
+				else
+				{
+					// Otherwise, it's a temporary variable
+					_stack.set(variableName, _eval.pop());
+				}
+			}
+			break;
+
 			// == Function calls
 			case Command::CALL_EXTERNAL:
 			{
@@ -554,7 +605,7 @@ namespace ink::runtime::internal
 				int numArguments = (int)flag;
 
 				// find and execute. will automatically push a valid if applicable
-				bool success = _functions.call(functionName, &_eval, numArguments, _strings);
+				bool success = _functions.call(functionName, &_eval, numArguments, _globals->strings());
 
 				// If we failed, we need to at least pretend so our state doesn't get fucked
 				if (!success)
@@ -594,9 +645,15 @@ namespace ink::runtime::internal
 				break;
 			case Command::PUSH_VARIABLE_VALUE:
 			{
+				// Try to find in local stack
 				hash_t variableName = read<hash_t>();
 				const value* val = _stack.get(variableName);
-				inkAssert(val != nullptr, "Could not find temporary variable!");
+
+				// If not, try global store
+				if (val == nullptr)
+					val = _globals->get_variable(variableName);
+
+				inkAssert(val != nullptr, "Could not find variable!");
 				_eval.push(*val);
 				break;
 			}
@@ -662,7 +719,7 @@ namespace ink::runtime::internal
 				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
 
 				// Create choice and record it
-				add_choice().setup(_output, _strings, _num_choices, path);
+				add_choice().setup(_output, _globals->strings(), _num_choices, path);
 			} break;
 			case Command::START_CONTAINER_MARKER:
 			{
@@ -744,22 +801,16 @@ namespace ink::runtime::internal
 		_container.clear();
 	}
 
-	void runner_impl::gc()
+	void runner_impl::mark_strings(string_table& strings) const
 	{
-		// Mark all strings as unused
-		_strings.clear_usage();
+		// Find strings in output and stacks
+		_output.mark_strings(strings);
+		_stack.mark_strings(strings);
+		_eval.mark_strings(strings);
 
-		// Find strings
-		_output.mark_strings(_strings);
-		_stack.mark_strings(_strings);
-		_eval.mark_strings(_strings);
-		
 		// Take into account choice text
 		for (int i = 0; i < _num_choices; i++)
-			_strings.mark_used(_choices[i]._text);
-
-		// Clean up
-		_strings.gc();
+			strings.mark_used(_choices[i]._text);
 	}
 
 	void runner_impl::save()

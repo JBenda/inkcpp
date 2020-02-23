@@ -88,7 +88,7 @@ namespace ink
 				_pos = 0;
 			}
 
-			void basic_stack::mark_strings(string_table& strings)
+			void basic_stack::mark_strings(string_table& strings) const
 			{
 				// no matter if we're saved or not, we consider all strings
 				int len = (_save == ~0 || _pos > _save) ? _pos : _save;
@@ -187,7 +187,7 @@ namespace ink
 				_pos = 0;
 			}
 
-			void basic_eval_stack::mark_strings(string_table& strings)
+			void basic_eval_stack::mark_strings(string_table& strings) const
 			{
 				for (int i = 0; i < _pos; i++)
 					_stack[i].mark_strings(strings);

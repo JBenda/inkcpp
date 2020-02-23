@@ -324,6 +324,21 @@ namespace ink {
 							// Define temporary variable
 							write_variable(data, Command::DEFINE_TEMP, name);
 						}
+						else if (iter->find("VAR=") != iter->end())
+						{
+							// Get variable name
+							auto name = (*iter)["VAR="].get<std::string>();
+
+							// check if it's a redefinition
+							bool is_redef = false;
+							auto re = iter->find("re");
+							if (re != iter->end())
+								is_redef = re->get<bool>();							
+
+							// Set variable
+							write_variable(data, Command::SET_VARIABLE, name, 
+								is_redef ? CommandFlag::ASSIGNMENT_IS_REDEFINE : CommandFlag::NO_FLAGS);
+						}
 						// Push variable value onto stack
 						else if (iter->find("VAR?") != iter->end())
 						{

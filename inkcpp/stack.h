@@ -37,7 +37,7 @@ namespace ink
 				void clear();
 
 				// Garbage collection
-				void mark_strings(string_table&);
+				void mark_strings(string_table&) const;
 
 				// == Save/Restore ==
 				void save();
@@ -92,7 +92,7 @@ namespace ink
 				void clear();
 
 				// Garbage collection
-				void mark_strings(string_table&);
+				void mark_strings(string_table&) const;
 
 			private:
 				// stack
