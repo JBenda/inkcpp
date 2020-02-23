@@ -1,7 +1,8 @@
-EXTERNAL brook(x, y)
+EXTERNAL add(x, y)
 
-My ink file {brook(4, 2)}.
-
-
+~temp x = add(4,2)
+My ink file {x}.
+* Okay!
+- And again: {x}.
 
 ->END

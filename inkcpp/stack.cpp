@@ -91,7 +91,7 @@ namespace ink
 			void basic_stack::mark_strings(string_table& strings)
 			{
 				// no matter if we're saved or not, we consider all strings
-				int len = _pos > _save ? _pos : _save;
+				int len = (_save == ~0 || _pos > _save) ? _pos : _save;
 
 				// iterate and mark
 				for (int i = 0; i < len; i++)

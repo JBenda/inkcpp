@@ -145,9 +145,24 @@ namespace ink::runtime
 		 * @param function callable
 		*/
 		template<typename F>
-		void bind(hash_t name, F function)
+		inline void bind(hash_t name, F function)
 		{
 			internal_bind(name, new internal::function(function));
+		}
+
+		/**
+		 * Binds an external callable to the runtime
+		 *
+		 * Given a name and a callable object, register this function
+		 *  to be called back from the ink runtime.
+		 *
+		 * @param name name string
+		 * @param function callable
+		*/
+		template<typename F>
+		inline void bind(const char* name, F function)
+		{
+			bind(ink::hash_string(name), function);
 		}
 
 #ifdef INK_ENABLE_UNREAL

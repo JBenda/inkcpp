@@ -1,5 +1,11 @@
 #pragma once
 
+#include "config.h"
+
+#ifdef INK_ENABLE_STL
+#include <string>
+#endif
+
 namespace ink::runtime::internal
 {
 	template<unsigned int N, typename Arg, typename... Args>
@@ -30,6 +36,48 @@ namespace ink::runtime::internal
 
 	template<class T>
 	struct is_same<T, T> : constant<bool, true> {};
+
+	// == string testing (from me) ==
+
+	template<typename T>
+	struct is_string : constant<bool, false> { };
+
+	template<typename T>
+	struct is_string<T&> : is_string<T> { };
+
+	template<typename T>
+	struct is_string<const T> : is_string<T> { };
+
+	template<typename T>
+	struct is_string<const T*> : is_string<T*> { };
+
+	template<typename T>
+	struct string_handler { };
+
+	template<typename T>
+	struct string_handler<const T> : string_handler<T> { };
+
+	template<typename T>
+	struct string_handler<const T*> : string_handler<T*> { };
+
+	template<typename T>
+	struct string_handler<T&> : string_handler<T> { };
+
+#define MARK_AS_STRING(TYPE, LEN, SRC) template<> struct is_string<TYPE> : constant<bool, true> { }; \
+	template<> struct string_handler<TYPE> { \
+		static size_t length(const TYPE& x) { return LEN; } \
+		static const char* src(const TYPE& x) { return SRC; } \
+	};
+
+	MARK_AS_STRING(char*, strlen(x), x);
+#ifdef INK_ENABLE_STL
+	MARK_AS_STRING(std::string, x.size(), x.c_str());
+#endif
+#ifdef INK_ENABLE_UNREAL
+	MARK_AS_STRING(FString, x.Len(), TCHAR_TO_UTF8(*x));
+#endif
+
+#undef MARK_AS_STRING
 
 	// function_traits from https://functionalcpp.wordpress.com/2013/08/05/function-traits/
 

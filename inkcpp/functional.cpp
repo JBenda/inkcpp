@@ -2,6 +2,7 @@
 
 #include "value.h"
 #include "stack.h"
+#include "string_table.h"
 
 #ifdef INK_ENABLE_UNREAL
 #include "InkVar.h"
@@ -19,6 +20,16 @@ namespace ink::runtime::internal
 	static void function_base::push(basic_eval_stack* stack, const T& value)
 	{
 		stack->push(value);
+	}
+
+	void function_base::push_string(basic_eval_stack* stack, const char* dynamic_string)
+	{
+		stack->push(value(dynamic_string, true));
+	}
+
+	char* function_base::allocate(string_table& strings, size_t len)
+	{
+		return strings.create(len);
 	}
 
 	// Generate template implementations for all significant types

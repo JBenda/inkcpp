@@ -554,7 +554,7 @@ namespace ink::runtime::internal
 				int numArguments = (int)flag;
 
 				// find and execute. will automatically push a valid if applicable
-				bool success = _functions.call(functionName, &_eval, numArguments);
+				bool success = _functions.call(functionName, &_eval, numArguments, _strings);
 
 				// If we failed, we need to at least pretend so our state doesn't get fucked
 				if (!success)
