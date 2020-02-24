@@ -568,6 +568,7 @@ namespace ink::runtime::internal
 
 			// == Tunneling
 			case Command::TUNNEL:
+			case Command::FUNCTION:
 			{
 				// Find divert address
 				uint32_t target = read<uint32_t>();
@@ -581,6 +582,7 @@ namespace ink::runtime::internal
 			}
 			break;
 			case Command::TUNNEL_RETURN:
+			case Command::FUNCTION_RETURN:
 			{
 				// Pop the callstack
 				offset_t offset = _stack.pop_frame();

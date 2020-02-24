@@ -56,7 +56,7 @@ Many, but not all features of the Ink language are supported (see Glaring Omissi
 * `seq` command and all sequence types (stopping, cycle, shuffle)
 * Global store that can be shared between runners
 * External function binding (no fallback support yet)
-* Tunnels
+* Tunnels and internal functions
 
 ## CMake
 Project is organized using `cmake`. Just run `cmake` and it should configure all the projects properly into a runtime, compiler, and command line project.
@@ -72,7 +72,7 @@ I am currently working toward a 1.0 release. You can track my progress here: htt
 
 The big things we're missing right now are:
 
-* Internal function calls. Fallback functions for externals.
+* Fallback functions for externals.
 * Threads
 * Variable observers
 * Lists and whatever cool, crazy stuff Ink has been adding recently.

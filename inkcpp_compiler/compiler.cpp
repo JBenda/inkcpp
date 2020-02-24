@@ -375,6 +375,14 @@ namespace ink {
 							// Write out path. Speciically, we want the post-processor to write out the counter index for this container
 							write_path(data, Command::READ_COUNT, path, self, CommandFlag::NO_FLAGS, true);
 						}
+						else if (iter->find("f()") != iter->end())
+						{
+							// Get the functionpath
+							auto path = (*iter)["f()"].get<std::string>();
+
+							// Function command
+							write_path(data, Command::FUNCTION, path, self);
+						}
 						// external function call
 						else if (iter->find("x()") != iter->end())
 						{

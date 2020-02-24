@@ -17,11 +17,13 @@ namespace ink
 		DIVERT,
 		DIVERT_TO_VARIABLE,
 		TUNNEL,
+		FUNCTION,
 
 		// == Terminal commands
 		DONE,
 		END,
 		TUNNEL_RETURN,
+		FUNCTION_RETURN,
 
 		// == Variable definitions
 		DEFINE_TEMP,
@@ -126,9 +128,11 @@ namespace ink
 		nullptr,
 		nullptr,
 		nullptr,
+		nullptr,
 		"done",
 		"end",
 		"->->",
+		"~ret",
 
 		nullptr,
 		nullptr,
