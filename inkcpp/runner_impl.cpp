@@ -510,6 +510,12 @@ namespace ink::runtime::internal
 					_output << glue;
 			}
 			break;
+			case Command::VOID:
+			{
+				if (bEvaluationMode)
+					_eval.push(0); // TODO: void type?
+			}
+			break;
 
 			// == Divert commands
 			case Command::DIVERT:
@@ -559,6 +565,31 @@ namespace ink::runtime::internal
 			case Command::END:
 				_ptr = nullptr;
 				break;
+
+			// == Tunneling
+			case Command::TUNNEL:
+			{
+				// Find divert address
+				uint32_t target = read<uint32_t>();
+
+				// Push next address onto the callstack
+				_stack.push_frame(_ptr - _story->instructions());
+
+				// Do the jump
+				inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
+				jump(_story->instructions() + target);
+			}
+			break;
+			case Command::TUNNEL_RETURN:
+			{
+				// Pop the callstack
+				offset_t offset = _stack.pop_frame();
+
+				// Jump to the old offset
+				inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
+				jump(_story->instructions() + offset);
+			}
+			break;
 
 				// == Variable definitions
 			case Command::DEFINE_TEMP:

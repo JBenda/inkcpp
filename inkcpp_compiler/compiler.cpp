@@ -315,6 +315,14 @@ namespace ink {
 							// Write path in DIVERT_VAL command
 							write_path(data, Command::DIVERT_VAL, path, self);
 						}
+						else if (iter->find("->t->") != iter->end())
+						{
+							// Get the tunnel path
+							auto path = (*iter)["->t->"].get<std::string>();
+
+							// Tunnel command
+							write_path(data, Command::TUNNEL, path, self);
+						}
 						// Temporary variable
 						else if (iter->find("temp=") != iter->end())
 						{

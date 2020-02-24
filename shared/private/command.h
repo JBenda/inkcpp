@@ -11,14 +11,17 @@ namespace ink
 		DIVERT_VAL,
 		NEWLINE,
 		GLUE,
+		VOID,
 
 		// == Diverts
 		DIVERT,
 		DIVERT_TO_VARIABLE,
+		TUNNEL,
 
 		// == Terminal commands
 		DONE,
 		END,
+		TUNNEL_RETURN,
 
 		// == Variable definitions
 		DEFINE_TEMP,
@@ -119,10 +122,13 @@ namespace ink
 		nullptr,
 		"\n",
 		"<>",
+		"void",
+		nullptr,
 		nullptr,
 		nullptr,
 		"done",
 		"end",
+		"->->",
 
 		nullptr,
 		nullptr,
