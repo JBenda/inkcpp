@@ -1,5 +1,4 @@
 #pragma once
-#define INK_COMPILER
 #include "json.hpp"
 #include "system.h"
 #include "compilation_results.h"

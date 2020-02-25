@@ -9,8 +9,6 @@
 #include <map>
 #include <set>
 #include <fstream>
-
-#define INK_COMPILER
 #include "command.h"
 
 namespace ink {

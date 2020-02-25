@@ -4,7 +4,9 @@ list(APPEND SOURCES
     emitter.h
     text_emitter.h text_emitter.cpp
     binary_emitter.h binary_emitter.cpp
+    command.cpp
     )
+add_definitions(-DINK_COMPILER)
 add_library(inkcpp_compiler ${SOURCES})
 
 # Make sure the include directory is included 
