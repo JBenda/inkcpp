@@ -1,4 +1,3 @@
-#define INK_EXPOSE_JSON // make sure this is defined for internal compiler include
 #include "compiler.h"
 #include "binary_stream.h"
 

@@ -6,7 +6,7 @@ list(APPEND SOURCES
     binary_emitter.h binary_emitter.cpp
     command.cpp
     )
-add_definitions(-DINK_COMPILER)
+add_definitions(-DINK_COMPILER -DINK_EXPOSE_JSON)
 add_library(inkcpp_compiler ${SOURCES})
 
 # Make sure the include directory is included 
