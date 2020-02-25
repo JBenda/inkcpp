@@ -166,7 +166,7 @@ namespace ink::compiler::internal
 		process_paths();
 
 		// Open the file
-		std::ofstream out(_filename);
+		std::ofstream out(_filename, std::ios::binary | std::ios::out);
 
 		// Write the ink version
 		out.write((const char*)&_inkVersion, sizeof(int));
