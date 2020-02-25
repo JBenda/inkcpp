@@ -50,9 +50,16 @@ namespace ink::compiler::internal
 		}
 	};
 
-	void binary_emitter::set_filename(const std::string& filename)
+	binary_emitter::binary_emitter()
+		: _root(nullptr)
 	{
-		_filename = filename;
+	}
+
+	binary_emitter::~binary_emitter()
+	{
+		if (_root != nullptr)
+			delete _root;
+		_root = nullptr;
 	}
 
 	uint32_t binary_emitter::start_container(int index_in_parent, const std::string& name)
@@ -143,33 +150,10 @@ namespace ink::compiler::internal
 		_current->noop_offsets.insert({ index_in_parent, _containers.pos() });
 	}
 
-	void binary_emitter::initialize(int inkVersion, compilation_results* results)
+	void binary_emitter::output(std::ostream& out)
 	{
-		// Store compilation results for error reporting
-		_results = results;
-		_inkVersion = inkVersion;
-
-		// Reset binary data stores
-		_strings.reset();
-		_containers.reset();
-
-		// clear other data
-		_paths.clear();
-
-		_current = nullptr;
-		_root = nullptr;
-	}
-
-	void binary_emitter::finalize(const container_map& container_index_map, container_t num_containers)
-	{
-		// post process path commands
-		process_paths();
-
-		// Open the file
-		std::ofstream out(_filename, std::ios::binary | std::ios::out);
-
 		// Write the ink version
-		out.write((const char*)&_inkVersion, sizeof(int));
+		out.write((const char*)&_ink_version, sizeof(int));
 
 		// Write the string table
 		_strings.write_to(out);
@@ -178,7 +162,7 @@ namespace ink::compiler::internal
 		out << (char)0;
 
 		// Write out container map
-		write_container_map(out, container_index_map, num_containers);
+		write_container_map(out, _container_map, _max_container_index);
 
 		// Write a separator
 		uint32_t END_MARKER = ~0;
@@ -193,12 +177,28 @@ namespace ink::compiler::internal
 
 		// Flush the file
 		out.flush();
+	}
 
-		// LOGGING
-		// log_container_counter_index("ROOT", root);
+	void binary_emitter::initialize()
+	{
+		// Reset binary data stores
+		_strings.reset();
+		_containers.reset();
 
-		delete _root;
+		// clear other data
+		_paths.clear();
+
+		if (_root != nullptr)
+			delete _root;
+
+		_current = nullptr;
 		_root = nullptr;
+	}
+
+	void binary_emitter::finalize()
+	{
+		// post process path commands
+		process_paths();
 	}
 
 	uint32_t binary_emitter::fallthrough_divert()

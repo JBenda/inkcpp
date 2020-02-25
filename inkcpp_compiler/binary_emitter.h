@@ -11,7 +11,8 @@ namespace ink::compiler::internal
 	class binary_emitter : public emitter
 	{
 	public:
-		void set_filename(const std::string&);
+		binary_emitter();
+		virtual ~binary_emitter();
 
 		// Begin emitter
 		virtual uint32_t start_container(int index_in_parent, const std::string& name) override;
@@ -21,11 +22,16 @@ namespace ink::compiler::internal
 		virtual void write_variable(Command command, CommandFlag flag, const std::string& name) override;
 		virtual void write_string(Command command, CommandFlag flag, const std::string& string) override;
 		virtual void handle_nop(int index_in_parent) override;
-		virtual void initialize(int inkVersion, compilation_results*) override;
-		virtual void finalize(const container_map&, container_t) override;
 		virtual uint32_t fallthrough_divert() override;
 		virtual void patch_fallthroughs(uint32_t position) override;
 		// End emitter
+
+		// write out the emitters data
+		virtual void output(std::ostream&);
+
+	protected:
+		virtual void initialize() override;
+		virtual void finalize() override;
 
 	private:
 		void process_paths();
@@ -34,9 +40,6 @@ namespace ink::compiler::internal
 		void write_container_hash_map(std::ostream&, const std::string&, const container_data*);
 
 	private:
-		std::string _filename;
-		int _inkVersion;
-
 		container_data* _root;
 		container_data* _current;
 		compilation_results* _results;

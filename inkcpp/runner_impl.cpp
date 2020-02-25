@@ -857,8 +857,8 @@ namespace ink::runtime::internal
 		_container.save();
 		_globals->save();
 
-		// TODO: Save eval stack? Should be empty
-		inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
+		// Not doing this anymore. There can be lingering stack entries from function returns
+		// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
 	}
 
 	void runner_impl::restore()
@@ -871,8 +871,8 @@ namespace ink::runtime::internal
 		_container.restore();
 		_globals->restore();
 
-		// TODO: Save eval stack? Should be empty
-		inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
+		// Not doing this anymore. There can be lingering stack entries from function returns
+		// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
 
 		_saved = false;
 	}

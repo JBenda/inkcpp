@@ -1,5 +1,4 @@
 #include "json_compiler.h"
-#include "compiler2.h"
 #include <iostream>
 
 namespace ink::compiler::internal
@@ -10,7 +9,7 @@ namespace ink::compiler::internal
 	typedef std::tuple<json, std::string> defer_entry;
 
 	json_compiler::json_compiler()
-		: _emitter(nullptr), _results(nullptr), _next_container_index(0)
+		: _emitter(nullptr), _next_container_index(0)
 	{ }
 
 	void json_compiler::compile(const nlohmann::json& input, emitter* output, compilation_results* results)
@@ -20,23 +19,22 @@ namespace ink::compiler::internal
 		// TODO: Do something with version number
 
 		// Start the output
-		_results = results;
+		set_results(results);
 		_emitter = output;
 
 		// Initialize emitter
-		_emitter->initialize(inkVersion, results);
+		_emitter->start(inkVersion, results);
 
 		// Compile the root container
 		compile_container(input["root"], 0);
 
 		// finalize
-		_emitter->finalize(_container_map, _next_container_index);
+		_emitter->finish(_next_container_index);
 
 		// Clear
-		_results = nullptr;
 		_emitter = nullptr;
-		_container_map.clear();
 		_next_container_index = 0;
+		clear_results();
 	}
 
 	struct container_meta
@@ -122,7 +120,7 @@ namespace ink::compiler::internal
 		// tell the emitter we're beginning a new container
 		uint32_t position = _emitter->start_container(index_in_parent, name_override.empty() ? meta.name : name_override);
 		if(meta.recordInContainerMap)
-			add_start_to_container_map(position, meta.indexToReturn);
+			_emitter->add_start_to_container_map(position, meta.indexToReturn);
 
 		// Now, we want to iterate children of this container, save the last
 		//  The last is the settings object handled above
@@ -208,7 +206,7 @@ namespace ink::compiler::internal
 
 		// Record end position in map
 		if (meta.recordInContainerMap)
-			add_end_to_container_map(end_position, meta.indexToReturn);		
+			_emitter->add_end_to_container_map(end_position, meta.indexToReturn);
 	}
 
 	void json_compiler::compile_command(const std::string& command)
@@ -320,61 +318,5 @@ namespace ink::compiler::internal
 			// Encode argument count into command flag and write out the hash of the function name
 			_emitter->write(Command::CALL_EXTERNAL, hash_string(val.c_str()), (CommandFlag)numArgs);
 		}
-	}
-
-	void json_compiler::add_start_to_container_map(uint32_t offset, container_t index)
-	{
-		if (_container_map.rbegin() != _container_map.rend())
-		{
-			if (_container_map.rbegin()->first > offset)
-			{
-				warn() << "Container map written out of order. Wrote container at offset "
-					<< offset << " after container with offset " << _container_map.rbegin()->first << std::endl;
-			}
-		}
-
-		_container_map.push_back(std::make_pair(offset, index));
-	}
-
-	void json_compiler::add_end_to_container_map(uint32_t offset, container_t index)
-	{
-		if (_container_map.rbegin() != _container_map.rend())
-		{
-			if (_container_map.rbegin()->first > offset)
-			{
-				warn() << "Container map written out of order. Wrote container at offset "
-					<< offset << " after container with offset " << _container_map.rbegin()->first << std::endl;
-			}
-		}
-
-		_container_map.push_back(std::make_pair(offset, index));
-	}
-	
-	std::ostream& json_compiler::warn()
-	{
-		std::cerr << "WARNING: ";
-		return std::cerr;
-	}
-}
-
-#include "binary_emitter.h"
-#include <fstream>
-
-namespace ink::compiler
-{
-	void run_new(const char* in, const char* out)
-	{
-		using namespace internal;
-
-		binary_emitter e;
-		e.set_filename(out);
-
-		// Load JSON
-		nlohmann::json j;
-		std::ifstream fin(in);
-		fin >> j;
-
-		json_compiler c;
-		c.compile(j, &e, nullptr);
 	}
 }

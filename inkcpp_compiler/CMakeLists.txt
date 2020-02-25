@@ -1,7 +1,8 @@
 list(APPEND SOURCES 
     compiler.cpp binary_stream.h binary_stream.cpp json.hpp
     json_compiler.h json_compiler.cpp 
-    emitter.h
+    emitter.h emitter.cpp
+    reporter.h reporter.cpp
     text_emitter.h text_emitter.cpp
     binary_emitter.h binary_emitter.cpp
     command.cpp
