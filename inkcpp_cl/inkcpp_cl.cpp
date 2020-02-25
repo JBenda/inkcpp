@@ -60,9 +60,22 @@ int main(int argc, const char** argv)
 
 	// Open file and compile
 	{
+		ink::compiler::compilation_results results;
 		std::ofstream fout(outputFilename, std::ios::binary | std::ios::out);
-		ink::compiler::run(inputFilename.c_str(), fout);
+		ink::compiler::run(inputFilename.c_str(), fout, &results);
 		fout.close();
+
+		// Report errors
+		for (auto& warn : results.warnings)
+			std::cerr << "WARNING: " << warn << '\n';
+		for (auto& err : results.errors)
+			std::cerr << "ERROR: " << err << '\n';
+
+		if (results.errors.size() > 0 && playMode)
+		{
+			std::cerr << "Cancelling play mode. Errors detected in compilation" << std::endl;
+			return -1;
+		}
 	}
 
 	if (!playMode)

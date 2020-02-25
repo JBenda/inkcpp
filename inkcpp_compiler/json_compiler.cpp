@@ -222,7 +222,7 @@ namespace ink::compiler::internal
 		}
 
 		// Missing command warning
-		warn() << "Unknown command " << command << ". Skipping." << std::endl;
+		err() << "Unknown command '" << command << "'. Skipping." << std::flush;
 	}
 
 	void json_compiler::compile_complex_command(const nlohmann::json& command)

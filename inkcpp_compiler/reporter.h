@@ -1,14 +1,26 @@
 #pragma once
 
-#include <ostream>
-
-namespace ink::compiler
-{
-	struct compilation_results;
-}
+#include "compilation_results.h"
+#include <sstream>
 
 namespace ink::compiler::internal
 {
+	class error_strbuf : public std::stringbuf
+	{
+	public:
+		// start a new error message to be outputted to a given list
+		void start(error_list* list);
+
+		// If set, the next sync will throw an exception
+		void throw_on_sync(bool);
+	protected:
+		virtual int sync() override;
+
+	private:
+		error_list* _list = nullptr;
+		bool _throw = false;
+	};
+
 	class reporter
 	{
 	protected:
@@ -31,5 +43,7 @@ namespace ink::compiler::internal
 		std::ostream& crit();
 	private:
 		compilation_results* _results;
+		error_strbuf _buffer;
+		std::ostream _stream;
 	};
 }

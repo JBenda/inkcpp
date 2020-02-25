@@ -32,7 +32,7 @@ namespace ink::compiler::internal
 			if (_container_map.rbegin()->first > offset)
 			{
 				warn() << "Container map written out of order. Wrote container at offset "
-					<< offset << " after container with offset " << _container_map.rbegin()->first << std::endl;
+					<< offset << " after container with offset " << _container_map.rbegin()->first << std::flush;
 			}
 		}
 
@@ -46,7 +46,7 @@ namespace ink::compiler::internal
 			if (_container_map.rbegin()->first > offset)
 			{
 				warn() << "Container map written out of order. Wrote container at offset "
-					<< offset << " after container with offset " << _container_map.rbegin()->first << std::endl;
+					<< offset << " after container with offset " << _container_map.rbegin()->first << std::flush;
 			}
 		}
 
