@@ -8,6 +8,7 @@ namespace ink
 		// == Value Commands: Push values onto the stack
 		STR,
 		INT,
+		FLOAT,
 		DIVERT_VAL,
 		NEWLINE,
 		GLUE,
@@ -119,6 +120,7 @@ namespace ink
 
 #ifdef INK_COMPILER
 	const char* CommandStrings[] = {
+		nullptr,
 		nullptr,
 		nullptr,
 		nullptr,

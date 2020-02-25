@@ -10,6 +10,7 @@
 #include <compiler.h>
 #include <choice.h>
 #include <globals.h>
+#include <compiler2.h>
 
 void usage()
 {
@@ -60,9 +61,10 @@ int main(int argc, const char** argv)
 
 	// Open file and compile
 	{
-		std::ofstream fout(outputFilename, std::ios::binary | std::ios::out);
-		ink::compiler::run(inputFilename.c_str(), fout);
-		fout.close();
+		//std::ofstream fout(outputFilename, std::ios::binary | std::ios::out);
+		//ink::compiler::run(inputFilename.c_str(), fout);
+		//fout.close();
+		ink::compiler::run_new(inputFilename.c_str(), outputFilename.c_str());
 	}
 
 	if (!playMode)

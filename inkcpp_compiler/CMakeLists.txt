@@ -1,4 +1,10 @@
-list(APPEND SOURCES compiler.cpp binary_stream.h binary_stream.cpp json.hpp)
+list(APPEND SOURCES 
+    compiler.cpp binary_stream.h binary_stream.cpp json.hpp
+    json_compiler.h json_compiler.cpp 
+    emitter.h
+    text_emitter.h text_emitter.cpp
+    binary_emitter.h binary_emitter.cpp
+    )
 add_library(inkcpp_compiler ${SOURCES})
 
 # Make sure the include directory is included 

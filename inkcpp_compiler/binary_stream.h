@@ -53,6 +53,9 @@ namespace ink
 				// Writes data into an old position
 				void set(size_t offset, const byte_t* data, size_t len);
 
+				// reset to 0
+				void reset();
+
 			private:
 				// Size of a data slab. Whenever
 				//  a slab runs out of data,

@@ -13,17 +13,7 @@ namespace ink
 
 			binary_stream::~binary_stream()
 			{
-				// Delete all slabs
-				for (byte_t* slab : _slabs)
-				{
-					delete[] slab;
-				}
-				_slabs.clear();
-
-				// Delete active slab (if it exists)
-				if (_currentSlab != nullptr)
-					delete[] _currentSlab;
-				_currentSlab = _ptr = nullptr;
+				reset();
 			}
 
 			size_t binary_stream::write(const byte_t* data, size_t len)
@@ -116,6 +106,21 @@ namespace ink
 
 				// Otherwise write the whole data
 				memcpy(ptr, data, len);
+			}
+
+			void binary_stream::reset()
+			{
+				// Delete all slabs
+				for (byte_t* slab : _slabs)
+				{
+					delete[] slab;
+				}
+				_slabs.clear();
+
+				// Delete active slab (if it exists)
+				if (_currentSlab != nullptr)
+					delete[] _currentSlab;
+				_currentSlab = _ptr = nullptr;
 			}
 		}
 	}
