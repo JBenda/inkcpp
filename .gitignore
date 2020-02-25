@@ -1,5 +1,6 @@
 # Ink binary compilation
 *.bin
+*.tmp
 
 # Ink files
 *.ink

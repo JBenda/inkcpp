@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+#include <cstdlib>
 
 #include <story.h>
 #include <runner.h>
@@ -56,6 +57,21 @@ int main(int argc, const char** argv)
 	if (outputFilename.empty())
 	{
 		outputFilename = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".bin");
+	}
+
+	// If input filename is an .ink file
+	int val = inputFilename.find(".ink");
+	if (val == inputFilename.length() - 4)
+	{
+		// Create temporary filename
+		std::string jsonFile = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".tmp");
+
+		// Then we need to do a compilation with inklecate
+		std::string command = "inklecate -o " + jsonFile + " " + inputFilename;
+		std::system(command.c_str());
+
+		// New input is the json file
+		inputFilename = jsonFile;
 	}
 
 	// Open file and compile
