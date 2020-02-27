@@ -3,7 +3,7 @@
 *.tmp
 
 # Ink files
-*.ink
+inkcpp_cl/*.ink
 *.json
 
 # Visual Studio code

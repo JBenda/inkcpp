@@ -182,7 +182,11 @@ namespace ink::runtime::internal
 
 		// Pass over strings
 		const char* ptr = _string_table;
-		while (true)
+		if (*ptr == 0) // SPECIAL: No strings
+		{
+			ptr++;
+		}
+		else while (true)
 		{
 			// Read until null terminator
 			while (*ptr != 0)

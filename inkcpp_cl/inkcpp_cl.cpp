@@ -4,13 +4,14 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
-#include <cstdlib>
 
 #include <story.h>
 #include <runner.h>
 #include <compiler.h>
 #include <choice.h>
 #include <globals.h>
+
+#include "test.h"
 
 void usage()
 {
@@ -33,7 +34,7 @@ int main(int argc, const char** argv)
 
 	// Parse options
 	std::string outputFilename;
-	bool playMode = false;
+	bool playMode = false, testMode = false, testDirectory = false;
 	for (int i = 1; i < argc - 1; i++)
 	{
 		std::string option = argv[i];
@@ -44,6 +45,13 @@ int main(int argc, const char** argv)
 		}
 		else if (option == "-p")
 			playMode = true;
+		else if (option == "-t")
+			testMode = true;
+		else if (option == "-td")
+		{
+			testMode = true;
+			testDirectory = true;
+		}
 		else
 		{
 			std::cerr << "Unrecognized option '" << option << "'\n";
@@ -52,6 +60,18 @@ int main(int argc, const char** argv)
 
 	// Get input filename
 	std::string inputFilename = argv[argc - 1];
+
+	// Test mode
+	if (testMode)
+	{
+		bool result;
+		if (testDirectory)
+			result = test_directory(inputFilename);
+		else
+			result = test(inputFilename);
+
+		return result ? 0 : -1;
+	}
 
 	// If output filename not specified, use input filename as guideline
 	if (outputFilename.empty())
@@ -67,8 +87,7 @@ int main(int argc, const char** argv)
 		std::string jsonFile = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".tmp");
 
 		// Then we need to do a compilation with inklecate
-		std::string command = "inklecate -o " + jsonFile + " " + inputFilename;
-		std::system(command.c_str());
+		inklecate(inputFilename, jsonFile);
 
 		// New input is the json file
 		inputFilename = jsonFile;

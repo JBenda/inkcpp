@@ -81,12 +81,30 @@ namespace ink::runtime
 		/**
 		 * Gets the next line of output using C++ STL string.
 		 *
-		 * Continue execution until the next newline, then return the output as
-		 * an STL C++ std::string. Requires INK_ENABLE_STL
+		 * Continue execution until the next newline, then return the output to
+		 * an STL C++ std::ostream. Requires INK_ENABLE_STL
+		*/
+		virtual void getline(std::ostream&) = 0;
+
+		/**
+		 * Gets all the text until the next choice or end
+		 *
+		 * Continue execution until the next choice or the story ends, 
+		 * then return the output as an STL C++ std::string. 
+		 * Requires INK_ENABLE_STL
 		 *
 		 * @return std::string with the next line of output
 		*/
-		virtual void getline(std::ostream&) = 0;
+		virtual std::string getall() = 0;
+
+		/**
+		 * Gets all the text until the next choice or end
+		 *
+		 * Continue execution until the next choice or the story ends,
+		 * then return the output to an STL C++ std::ostream.
+		 * Requires INK_ENABLE_STL
+		*/
+		virtual void getall(std::ostream&) = 0;
 #endif
 
 #ifdef INK_ENABLE_UNREAL

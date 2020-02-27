@@ -60,6 +60,12 @@ namespace ink::runtime::internal
 
 		// Reads a line into a std::ostream
 		virtual void getline(std::ostream&) override;
+
+		// get all into string
+		virtual std::string getall() override;
+
+		// get all into stream
+		virtual void getall(std::ostream&) override;
 #endif
 #ifdef INK_ENABLE_UNREAL
 		// Reads a line into an Unreal FString

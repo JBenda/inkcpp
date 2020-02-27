@@ -71,6 +71,21 @@ namespace ink
 		}
 	}
 
+	static bool is_whitespace(char character, bool includeNewline = true)
+	{
+		switch (character)
+		{
+		case '\n':
+			if (!includeNewline)
+				return false;
+		case '\t':
+		case ' ':
+			return true;
+		default:
+			return false;
+		}
+	}
+
 	// Zero memory
 #ifndef INK_ENABLE_UNREAL
 	void zero_memory(void* buffer, size_t length);

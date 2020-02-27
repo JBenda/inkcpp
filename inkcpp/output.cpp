@@ -1,6 +1,10 @@
 #include "output.h"
 #include "string_table.h"
 
+#ifdef INK_ENABLE_STL
+#include <iomanip>
+#endif
+
 namespace ink
 {
 	namespace runtime
@@ -49,17 +53,87 @@ namespace ink
 					append(in[i]);
 			}
 
+			template<typename OUT>
+			inline void write_char(OUT& output, char c)
+			{
+				static_assert(false, "Invalid output type");
+			}
+
+			template<>
+			inline void write_char(char*& output, char c)
+			{
+				(*output++) = c;
+			}
+
+			template<>
+			inline void write_char(std::stringstream& output, char c)
+			{
+				output.put(c);
+			}
+
+			template<typename OUT>
+			void basic_stream::copy_string(const char* str, size_t& dataIter, OUT& output)
+			{
+				const char* iter = str;
+				while (*iter != '\0')
+				{
+					if (is_whitespace(*iter))
+					{
+						// pass over whitespace
+						const char* iter2 = iter;
+						while (*iter2 != '\0' && is_whitespace(*iter2))
+							iter2++;
+
+						// terminating whitespace
+						if (*iter2 == '\0')
+						{
+							// check what the next item
+							if (dataIter + 1 < _size)
+							{
+								const data& next = _data[dataIter + 1];
+
+								// If it's a newline, ignore all our whitespace
+								if (next.type == data_type::newline)
+									return;
+
+								// If it's another string, check if it starts with whitespace
+								if (next.type == data_type::allocated_string_pointer ||
+									next.type == data_type::string_table_pointer)
+								{
+									if (is_whitespace(next.string_val[0]))
+										return;
+								}
+
+								// Otherwise, add the whitespace
+								write_char(output, ' ');
+								iter = iter2;
+							}
+						}
+						else
+						{
+							// collapse whitespace into single space
+							write_char(output, ' ');
+							iter = iter2;
+						}
+					}
+					else
+					{
+						write_char(output, *iter++);
+					}
+				}
+			}
+
 #ifdef INK_ENABLE_STL
 			std::string basic_stream::get()
 			{
 				size_t start = find_start();
 
 				// Move up from marker
-				bool hasGlue = false;
+				bool hasGlue = false, lastNewline = false;
 				std::stringstream str;
 				for (size_t i = start; i < _size; i++)
 				{
-					if (should_skip(i, hasGlue))
+					if (should_skip(i, hasGlue, lastNewline))
 						continue;
 
 					switch (_data[i].type)
@@ -68,11 +142,11 @@ namespace ink
 						str << _data[i].integer_value;
 						break;
 					case data_type::float32:
-						str << _data[i].float_value;
+						str << std::setprecision(7) << _data[i].float_value;
 						break;
 					case data_type::string_table_pointer:
 					case data_type::allocated_string_pointer:
-						str << _data[i].string_val;
+						copy_string(_data[i].string_val, i, str);
 						break;
 					case data_type::newline:
 						str << std::endl;
@@ -109,6 +183,7 @@ namespace ink
 						str += FString::Printf(TEXT("%d"), _data[i].integer_value);
 						break;
 					case data_type::float32:
+						// TODO: Whitespace cleaning
 						str += FString::Printf(TEXT("%f"), _data[i].float_value);
 						break;
 					case data_type::string_table_pointer:
@@ -158,10 +233,10 @@ namespace ink
 				//inkAssert(_size - start < length, "Insufficient space in data array to store stream contents!");
 
 				// Move up from marker
-				bool hasGlue = false;
+				bool hasGlue = false, lastNewline = false;
 				for (size_t i = start; i < _size; i++)
 				{
-					if (should_skip(i, hasGlue))
+					if (should_skip(i, hasGlue, lastNewline))
 						continue;
 
 					// Make sure we can fit the next element
@@ -247,10 +322,10 @@ namespace ink
 
 				// Two passes. First for length
 				size_t length = 0;
-				bool hasGlue = false;
+				bool hasGlue = false, lastNewline = false;
 				for (size_t i = start; i < _size; i++)
 				{
-					if (should_skip(i, hasGlue))
+					if (should_skip(i, hasGlue, lastNewline))
 						continue;
 
 					switch (_data[i].type)
@@ -275,10 +350,10 @@ namespace ink
 				char* buffer = strings.create(length + 1);
 				char* end = buffer + length + 1;
 				char* ptr = buffer;
-				hasGlue = false;
+				hasGlue = false; lastNewline = false;
 				for (size_t i = start; i < _size; i++)
 				{
-					if (should_skip(i, hasGlue))
+					if (should_skip(i, hasGlue, lastNewline))
 						continue;
 
 					switch (_data[i].type)
@@ -298,9 +373,7 @@ namespace ink
 					case data_type::string_table_pointer:
 					case data_type::allocated_string_pointer:
 						// Copy string and advance
-						strcpy_s(ptr, end - ptr, _data[i].string_val);
-						while (*ptr != 0) ptr++;
-
+						copy_string(_data[i].string_val, i, ptr);
 						break;
 					case data_type::newline:
 						*ptr = '\n'; ptr++;
@@ -337,7 +410,7 @@ namespace ink
 				return start;
 			}
 
-			bool basic_stream::should_skip(size_t iter, bool& hasGlue) const
+			bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const
 			{
 				switch (_data[iter].type)
 				{
@@ -346,10 +419,15 @@ namespace ink
 				case data_type::string_table_pointer:
 				case data_type::allocated_string_pointer:
 					hasGlue = false;
+					lastNewline = false;
 					break;
 				case data_type::newline:
+					if (lastNewline)
+						return true;
 					if (hasGlue)
 						return true;
+					lastNewline = true;
+					break;
 				case data_type::glue:
 					hasGlue = true;
 					break;

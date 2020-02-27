@@ -267,6 +267,34 @@ namespace ink::runtime::internal
 		inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	}
 
+	std::string runner_impl::getall()
+	{
+		// Advance interpreter until we're stopped
+		while(can_continue())
+			advance_line();
+
+		// Read output into std::string
+		std::string result;
+		_output >> result;
+
+		// Return result
+		inkAssert(_output.is_empty(), "Output should be empty after getall!");
+		return result;
+	}
+
+	void runner_impl::getall(std::ostream& out)
+	{
+		// Advance interpreter until we're stopped
+		while (can_continue())
+			advance_line();
+
+		// Send output into stream
+		out << _output;
+
+		// Return result
+		inkAssert(_output.is_empty(), "Output should be empty after getall!");
+	}
+
 #endif
 #ifdef INK_ENABLE_UNREAL
 	FString runner_impl::getline()
@@ -478,6 +506,15 @@ namespace ink::runtime::internal
 			case Command::INT:
 			{
 				int val = read<int>();
+				if (bEvaluationMode)
+					_eval.push(val);
+				else
+					_output << val;
+			}
+			break;
+			case Command::FLOAT:
+			{
+				float val = read<float>();
 				if (bEvaluationMode)
 					_eval.push(val);
 				else
@@ -776,12 +813,12 @@ namespace ink::runtime::internal
 				_container.pop();
 
 				// SPECIAL: If we've popped all containers, then there's an implied 'done' command
-				if (_container.empty())
+				/*if (_container.empty())
 				{
 					_is_falling = false;
 					_ptr = nullptr;
 					return;
-				}
+				}*/
 			} break;
 			case Command::VISIT:
 			{
