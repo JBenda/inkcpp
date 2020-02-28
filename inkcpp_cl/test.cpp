@@ -36,6 +36,8 @@ bool test(const std::string& inkFilename)
 {
 	using namespace ink::runtime;
 
+	std::cerr << inkFilename << std::endl;
+
 	// Compile into a temporary json file
 	inklecate(inkFilename, "test.tmp");
 
@@ -43,7 +45,15 @@ bool test(const std::string& inkFilename)
 		ink::compiler::compilation_results results;
 		ink::compiler::run("test.tmp", "test.bin", &results);
 
-		// todo: fail on error
+		// Errors
+		if (results.errors.size() > 0)
+		{
+			for (auto& error : results.errors)
+			{
+				std::cerr << "ERROR: " << error << std::endl;
+			}
+			return false;
+		}
 	}
 
 	std::vector<std::string> expectations;

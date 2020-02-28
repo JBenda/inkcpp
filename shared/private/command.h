@@ -40,6 +40,7 @@ namespace ink
 		VISIT,
 		READ_COUNT,
 		SEQUENCE,
+		SEED,
 
 		// == String stack
 		START_STR,

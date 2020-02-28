@@ -32,6 +32,7 @@ namespace ink
 			"visit",
 			nullptr,
 			"seq",
+			"srnd",
 
 			"str",
 			"/str",

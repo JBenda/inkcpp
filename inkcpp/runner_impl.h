@@ -119,6 +119,8 @@ namespace ink::runtime::internal
 		void run_binary_operator(unsigned char cmd);
 		void run_unary_operator(unsigned char cmd);
 
+		void execute_return();
+
 	private:
 		const story_impl* const _story;
 		story_ptr<globals_impl> _globals;

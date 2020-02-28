@@ -33,6 +33,9 @@ namespace ink
 				// Pops a frame (and all temporary variables) from the callstack.
 				offset_t pop_frame();
 
+				// Returns true if there are any frames on the stack
+				bool has_frame() const;
+
 				// Clears the entire stack
 				void clear();
 

@@ -213,6 +213,16 @@ namespace ink::runtime::internal
 		_eval.push(result);
 	}
 
+	void runner_impl::execute_return()
+	{
+		// Pop the callstack
+		offset_t offset = _stack.pop_frame();
+
+		// Jump to the old offset
+		inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
+		jump(_story->instructions() + offset);
+	}
+
 	runner_impl::runner_impl(const story_impl* data, globals global)
 		: _story(data), _globals(global.cast<globals_impl>()), _container(~0),
 		_backup(nullptr), _done(false), _choices()
@@ -621,12 +631,7 @@ namespace ink::runtime::internal
 			case Command::TUNNEL_RETURN:
 			case Command::FUNCTION_RETURN:
 			{
-				// Pop the callstack
-				offset_t offset = _stack.pop_frame();
-
-				// Jump to the old offset
-				inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
-				jump(_story->instructions() + offset);
+				execute_return();
 			}
 			break;
 
@@ -812,13 +817,23 @@ namespace ink::runtime::internal
 				// Move up out of the current container
 				_container.pop();
 
-				// SPECIAL: If we've popped all containers, then there's an implied 'done' command
-				/*if (_container.empty())
+				// SPECIAL: If we've popped all containers, then there's an implied 'done' command or return
+				if (_container.empty())
 				{
 					_is_falling = false;
-					_ptr = nullptr;
-					return;
-				}*/
+
+					if (_stack.has_frame())
+					{
+						// push null and return
+						_eval.push(value());
+						execute_return();
+					}
+					else
+					{
+						_ptr = nullptr;
+						return;
+					}
+				}
 			} break;
 			case Command::VISIT:
 			{
@@ -836,6 +851,15 @@ namespace ink::runtime::internal
 				int index = _eval.pop();
 
 				_eval.push(rand() % sequenceLength); // TODO: platform independance?
+			} break;
+			case Command::SEED:
+			{
+				// TODO: Platform independance
+				int seed = _eval.pop();
+				srand(seed);
+
+				// push void (TODO)
+				_eval.push(0);
 			} break;
 			case Command::READ_COUNT:
 			{

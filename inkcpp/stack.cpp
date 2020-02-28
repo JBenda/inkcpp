@@ -82,6 +82,20 @@ namespace ink
 				return _stack[_pos].data.as_divert();
 			}
 
+			bool basic_stack::has_frame() const
+			{
+				size_t iter = _pos - 1;
+				while (_stack[iter].name != InvalidHash && iter > 0)
+				{
+					// Jump over saved data
+					if (iter == _save)
+						iter = _jump;
+
+					iter--;
+				}
+				return _stack[iter].name == InvalidHash;
+			}
+
 			void basic_stack::clear()
 			{
 				_save = _jump = ~0;
