@@ -36,7 +36,7 @@ bool test(const std::string& inkFilename)
 {
 	using namespace ink::runtime;
 
-	std::cerr << inkFilename << std::endl;
+	std::cout << std::filesystem::path(inkFilename).filename().string() << std::endl;
 
 	// Compile into a temporary json file
 	inklecate(inkFilename, "test.tmp");

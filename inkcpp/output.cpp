@@ -126,6 +126,7 @@ namespace ink
 					if (is_whitespace(*iter))
 					{
 						// pass over whitespace
+						bool start = iter == str;
 						const char* iter2 = iter;
 						while (*iter2 != '\0' && is_whitespace(*iter2))
 							iter2++;
@@ -133,6 +134,12 @@ namespace ink
 						// terminating whitespace
 						if (*iter2 == '\0')
 						{
+							// Whitespace at the start of the stream. Trim.
+							if (start && dataIter == 0)
+							{
+								return;
+							}
+
 							// check what the next item
 							const data* next = nullptr;
 							if (get_next(_data, dataIter, _size, &next))
