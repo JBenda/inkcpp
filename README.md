@@ -68,6 +68,8 @@ Code for the Unreal plugin is located in the `unreal` directory. In order to ins
 
 I am currently working toward a 1.0 release. You can track my progress here: https://github.com/brwarner/inkcpp/projects/1
 
+Part of that involves slowly migrating all the unit tests from the main inkle ink C# repository over to my new testing system. You can see the tests in the `tests` folder.
+
 ### Glaring Omissions
 
 The big things we're missing right now are:
