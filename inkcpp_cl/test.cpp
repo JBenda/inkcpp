@@ -41,20 +41,9 @@ bool test(const std::string& inkFilename)
 	// Compile into a temporary json file
 	inklecate(inkFilename, "test.tmp");
 
-	{
-		ink::compiler::compilation_results results;
-		ink::compiler::run("test.tmp", "test.bin", &results);
-
-		// Errors
-		if (results.errors.size() > 0)
-		{
-			for (auto& error : results.errors)
-			{
-				std::cerr << "ERROR: " << error << std::endl;
-			}
-			return false;
-		}
-	}
+	// Compile into binary
+	ink::compiler::compilation_results results;
+	ink::compiler::run("test.tmp", "test.bin", &results);
 
 	std::vector<std::string> expectations;
 	std::vector<int> choices;
@@ -63,6 +52,23 @@ bool test(const std::string& inkFilename)
 		// Load entire ink file into memory
 		std::string inkFile;
 		load_file(inkFilename, inkFile);
+
+		// Check for ignore
+		if (inkFile.find("//IGNORE") == 0)
+		{
+			std::cout << "IGNORED" << std::endl;
+			return true;
+		}
+
+		// Check for compile errors post ignore
+		if (results.errors.size() > 0)
+		{
+			for (auto& error : results.errors)
+			{
+				std::cerr << "ERROR: " << error << std::endl;
+			}
+			return false;
+		}
 
 		// Load expectations
 		auto reg = std::regex("\\/\\*\\*[ \t]*(\\d+)?[ \t]*\n((.|\n)*?)\\*\\*\\/");
