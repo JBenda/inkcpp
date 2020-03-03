@@ -153,6 +153,9 @@ namespace ink
 								write_char(output, ' ');
 								iter = iter2;
 							}
+
+							// Last element. Trim
+							return;
 						}
 						else
 						{
