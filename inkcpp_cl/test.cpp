@@ -8,6 +8,7 @@
 #include <runner.h>
 #include <story.h>
 #include <compiler.h>
+#include <choice.h>
 
 void inklecate(const std::string& inkFilename, const std::string& jsonFilename)
 {
@@ -47,6 +48,7 @@ bool test(const std::string& inkFilename)
 
 	std::vector<std::string> expectations;
 	std::vector<int> choices;
+	std::vector<std::string> choiceStrings;
 
 	{
 		// Load entire ink file into memory
@@ -71,7 +73,7 @@ bool test(const std::string& inkFilename)
 		}
 
 		// Load expectations
-		auto reg = std::regex("\\/\\*\\*[ \t]*(\\d+)?[ \t]*\n((.|\n)*?)\\*\\*\\/");
+		auto reg = std::regex("\\/\\*\\*[ \t]*(\\d+(:.+)?)?[ \t]*\n((.|\n)*?)\\*\\*\\/");
 		auto iter = std::sregex_iterator(inkFile.begin(), inkFile.end(), reg);
 		auto end = std::sregex_iterator();
 
@@ -80,12 +82,17 @@ bool test(const std::string& inkFilename)
 		{
 			if ((*iter)[1].matched)
 			{
-				expectations.push_back((*iter)[2].str());
+				expectations.push_back((*iter)[3].str());
 				choices.push_back(atoi((*iter)[1].str().c_str()));
+				
+				if ((*iter)[2].matched)
+					choiceStrings.push_back((*iter)[2].str().substr(1));
+				else
+					choiceStrings.push_back("");
 			}
 			else
 			{
-				expectations.push_back((*iter)[2].str());
+				expectations.push_back((*iter)[3].str());
 			}
 		}
 
@@ -135,6 +142,21 @@ bool test(const std::string& inkFilename)
 			// Pick choice
 			int choice = *choices.rbegin();
 			choices.pop_back();
+
+			// Make sure text matches
+			std::string choiceStr = *choiceStrings.rbegin();
+			choiceStrings.pop_back();
+			if (choiceStr != "" && runner->get_choice(choice)->text() != choiceStr)
+			{
+				std::cout << "FAIL: CHOICE MISMATCH\n";
+
+				std::cout << "== Expected ==\n"
+					<< choiceStr << "\n"
+					<< "== Actual ==\n"
+					<< runner->get_choice(choice)->text() << std::endl;
+				return false;
+			}
+
 			runner->choose(choice);
 		}
 		else
