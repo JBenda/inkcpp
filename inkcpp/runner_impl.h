@@ -141,6 +141,7 @@ namespace ink::runtime::internal
 		// Evaluation (NOTE: Will later need to be per-callstack entry)
 		bool bEvaluationMode;
 		internal::eval_stack<20> _eval;
+		bool bSavedEvaluationMode;
 
 		// Choice list
 		static const size_t MAX_CHOICES = 10;

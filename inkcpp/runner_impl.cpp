@@ -924,6 +924,7 @@ namespace ink::runtime::internal
 		_container.save();
 		_globals->save();
 		_eval.save();
+		bSavedEvaluationMode = bEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
 		// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -939,6 +940,7 @@ namespace ink::runtime::internal
 		_container.restore();
 		_globals->restore();
 		_eval.restore();
+		bEvaluationMode = bSavedEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
 		// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");

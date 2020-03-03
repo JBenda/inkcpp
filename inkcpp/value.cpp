@@ -316,6 +316,8 @@ namespace ink
 					return left.as_float() == right.as_float();
 				case value_type::string:
 					break; // TODO: data[] operators?
+				case value_type::divert:
+					return left.as_divert() == right.as_divert();
 				}
 
 				inkFail("Invalid type for is_equal");
