@@ -110,6 +110,8 @@ namespace ink
 			const data marker = { data_type::marker, 0 };
 			const data newline = { data_type::newline, 0 };
 			const data glue = { data_type::glue, 0 };
+			const data func_start = { data_type::func_start, 0 };
+			const data func_end = { data_type::func_end, 0 };
 
 			template<size_t N>
 			class stream : public basic_stream

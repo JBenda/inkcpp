@@ -203,5 +203,20 @@ SCENARIO("simple_restorable_stack supports save/restore", "[stack]") {
 				REQUIRE(stack.empty());
 			}
 		}
+
+		WHEN("an item is popped and pushed and then we forget()")
+		{
+			stack.pop();
+			stack.push(1);
+			stack.pop();
+			stack.forget();
+
+			THEN("the stack should be empty")
+			{
+				REQUIRE(stack.size() == 0);
+				REQUIRE(stack.empty());
+			}
+
+		}
 	}
 }

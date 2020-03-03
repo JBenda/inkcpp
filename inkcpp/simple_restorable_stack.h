@@ -179,8 +179,11 @@ namespace ink::runtime::internal
 		/*// If we have moven to a point earlier than the save point but we have a jump point
 		if (_pos < _save && _pos > _jump)
 		{*/
+			// If we're at the save point, move us instead
+			if (_pos == _save)
+				_pos = _jump;
 			// Everything between the jump point and the save point needs to be nullified
-			for (size_t i = _jump; i < _save; i++)
+			else for (size_t i = _jump; i < _save; i++)
 				_buffer[i] = _null;
 		/*}*/
 

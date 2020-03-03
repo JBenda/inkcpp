@@ -4,40 +4,40 @@ namespace ink
 {
 	// Command strings used by compiler
 	const char* CommandStrings[] = {
-			nullptr,
-			nullptr,
-			nullptr,
-			nullptr,
+			"STR",
+			"INT",
+			"FLOAT",
+			"DIVERT_VAL",
 			"\n",
 			"<>",
 			"void",
-			nullptr,
-			nullptr,
-			nullptr,
-			nullptr,
+			"DIVERT",
+			"DIVERT_TO_VARIABLE",
+			"TUNNEL",
+			"FUNCTION",
 			"done",
 			"end",
 			"->->",
 			"~ret",
 
-			nullptr,
-			nullptr,
+			"DEFINE_TEMP",
+			"SET_VARIABLE",
 
 			"ev",
 			"/ev",
 			"out",
 			"pop",
 			"du",
-			nullptr,
+			"PUSH_VARIABLE_VALUE",
 			"visit",
-			nullptr,
+			"READ_COUNT",
 			"seq",
 			"srnd",
 
 			"str",
 			"/str",
 
-			nullptr,
+			"CHOICE",
 
 			"+",
 			"-",
@@ -58,10 +58,10 @@ namespace ink
 			"!",
 			"~",
 
-			nullptr,
+			"START_CONTAINER",
+			"END_CONTAINER",
 
-			nullptr,
-			nullptr
+			"CALL_EXTERNAL"
 	};
 
 	static_assert(sizeof(CommandStrings) / sizeof(const char*) == (int)Command::NUM_COMMANDS, "CommandStrings list much match Command enumeration");

@@ -216,7 +216,12 @@ namespace ink::runtime::internal
 	void runner_impl::execute_return()
 	{
 		// Pop the callstack
-		offset_t offset = _stack.pop_frame();
+		frame_type type;
+		offset_t offset = _stack.pop_frame(&type);
+
+		// SPECIAL: On function, do a trim
+		if (type == frame_type::function)
+			_output << func_end;
 
 		// Jump to the old offset
 		inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
@@ -332,13 +337,6 @@ namespace ink::runtime::internal
 				break;
 		}
 
-		// Eval stack should be cleared
-		// (this can have lingering elements if, for example, a choice is conditional
-		//   and doesn't end up popping its text/etc. off the eval stack)
-		_eval.clear();
-
-		// Should be nothing in the eval stack
-		// inkAssert(_eval.is_empty(), "Eval stack should be empty after advancing one line");
 		inkAssert(!_saved, "Should be no state snapshot at the end of newline");
 
 		// Garbage collection TODO: How often do we want to do this?
@@ -617,11 +615,16 @@ namespace ink::runtime::internal
 			case Command::TUNNEL:
 			case Command::FUNCTION:
 			{
+				// add a function start marker
+				if (cmd == Command::FUNCTION)
+					_output << func_start;
+
 				// Find divert address
 				uint32_t target = read<uint32_t>();
 
 				// Push next address onto the callstack
-				_stack.push_frame(_ptr - _story->instructions());
+				_stack.push_frame(_ptr - _story->instructions(), 
+					cmd == Command::FUNCTION ? frame_type::function : frame_type::tunnel);
 
 				// Do the jump
 				inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
@@ -826,6 +829,9 @@ namespace ink::runtime::internal
 					{
 						// push null and return
 						_eval.push(value());
+
+						// HACK
+						_ptr += sizeof(Command) + sizeof(CommandFlag);
 						execute_return();
 					}
 					else
@@ -917,6 +923,7 @@ namespace ink::runtime::internal
 		_backup = _ptr;
 		_container.save();
 		_globals->save();
+		_eval.save();
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
 		// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -931,6 +938,7 @@ namespace ink::runtime::internal
 		_ptr = _backup;
 		_container.restore();
 		_globals->restore();
+		_eval.restore();
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
 		// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -948,6 +956,7 @@ namespace ink::runtime::internal
 		_stack.forget();
 		_container.forget();
 		_globals->forget();
+		_eval.forget();
 
 		// Nothing to do for eval stack. It should just stay as it is
 

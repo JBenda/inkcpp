@@ -19,14 +19,30 @@ namespace ink
 
 			void basic_stream::append(const data& in)
 			{
-				// TODO: CHECK SIZE
+				// SPECIAL: Incoming newline
+				if (in.type == data_type::newline && _size > 1)
+				{
+					// If the end of the stream is a function start marker, we actually
+					//  want to ignore this. Function start trimming.
+					if (_data[_size - 1].type == data_type::func_start)
+						return;
+				}
+				
+				// Ignore leading newlines
+				if (in.type == data_type::newline && _size == 0)
+					return;
+
+				// Add to data stream
+				inkAssert(_size < _max, "Output stream overflow");
 				_data[_size++] = in;
 
 				// Special: Incoming glue. Trim whitespace/newlines prior
-				if (in.type == data_type::glue && _size > 1)
+				//  This also applies when a function ends to trim trailing whitespace.
+				if ((in.type == data_type::glue || in.type == data_type::func_end) && _size > 1)
 				{
 					// Run backwards
-					for (size_t i = _size - 2; i >= 0; i--)
+					size_t i = _size - 2;
+					while(true)
 					{
 						data& d = _data[i];
 
@@ -42,6 +58,13 @@ namespace ink
 
 						// If it's not a newline or whitespace, stop
 						else break;
+
+						// If we've hit the end, break
+						if (i == 0)
+							break;
+
+						// Move on to next element
+						i--;
 					}
 				}
 			}
@@ -71,6 +94,29 @@ namespace ink
 				output.put(c);
 			}
 
+			inline bool get_next(const data* list, size_t i, size_t size, const data** next)
+			{
+				while (i + 1 < size)
+				{
+					*next = &list[i + 1];
+					data_type type = (*next)->type;
+					switch (type)
+					{
+					case data_type::int32:
+					case data_type::float32:
+					case data_type::uint32:
+					case data_type::string_table_pointer:
+					case data_type::allocated_string_pointer:
+					case data_type::newline:
+						return true;
+					}
+
+					i++;
+				}
+
+				return false;
+			}
+
 			template<typename OUT>
 			void basic_stream::copy_string(const char* str, size_t& dataIter, OUT& output)
 			{
@@ -88,19 +134,18 @@ namespace ink
 						if (*iter2 == '\0')
 						{
 							// check what the next item
-							if (dataIter + 1 < _size)
+							const data* next = nullptr;
+							if (get_next(_data, dataIter, _size, &next))
 							{
-								const data& next = _data[dataIter + 1];
-
 								// If it's a newline, ignore all our whitespace
-								if (next.type == data_type::newline)
+								if (next->type == data_type::newline)
 									return;
 
 								// If it's another string, check if it starts with whitespace
-								if (next.type == data_type::allocated_string_pointer ||
-									next.type == data_type::string_table_pointer)
+								if (next->type == data_type::allocated_string_pointer ||
+									next->type == data_type::string_table_pointer)
 								{
-									if (is_whitespace(next.string_val[0]))
+									if (is_whitespace(next->string_val[0]))
 										return;
 								}
 

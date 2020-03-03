@@ -14,6 +14,12 @@ namespace ink
 				value data;
 			};
 
+			enum class frame_type : uint32_t
+			{
+				function,
+				tunnel
+			};
+
 			class basic_stack
 			{
 			protected:
@@ -28,10 +34,10 @@ namespace ink
 				const value* get(hash_t name) const;
 
 				// pushes a new frame onto the stack
-				void push_frame(offset_t return_to);
+				void push_frame(offset_t return_to, frame_type type);
 
 				// Pops a frame (and all temporary variables) from the callstack.
-				offset_t pop_frame();
+				offset_t pop_frame(frame_type* type);
 
 				// Returns true if there are any frames on the stack
 				bool has_frame() const;
@@ -97,13 +103,22 @@ namespace ink
 				// Garbage collection
 				void mark_strings(string_table&) const;
 
+				// == Save/Restore ==
+				void save();
+				void restore();
+				void forget();
+
 			private:
 				// stack
-				value* _stack;
-				size_t _size;
+				value * const _stack;
+				const size_t _size;
 
 				// Current stack position
 				size_t _pos;
+
+				// Fuck me
+				size_t _save;
+				size_t _jump;
 			};
 
 			template<size_t N>

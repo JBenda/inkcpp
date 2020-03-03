@@ -26,7 +26,11 @@ namespace ink
 				marker,							// Special marker (used in output stream)
 				glue,							// Glue.
 				newline,						// \n
+				func_start,						// Start of function marker
+				func_end,						// End of function marker
 				null,							// void/null (used for void function returns)
+				tunnel_frame,					// Return from tunnel
+				function_frame,					// Return from function
 			};
 
 			// Container for any data used as part of the runtime (variable values, output streams, evaluation stack, etc.)
@@ -76,12 +80,15 @@ namespace ink
 				value(float);						// Create a new float value
 				value(uint32_t);					// Create a new divert value
 				value(const data&);					// Create value from data
+				value(uint32_t, data_type);			// Create divert with type
 
 				// Create a new string value (must specify whether or not it's an allocated or story string)
 				value(const char*, bool allocated = false);
 
 				// Check the value's current type
 				value_type type() const;
+				bool is_none() const { return _first.type == data_type::none; }
+				data_type data_type() const { return _first.type; }
 
 				// == Getters ==
 				int as_int() const { return _first.integer_value; }

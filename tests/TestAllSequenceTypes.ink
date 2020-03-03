@@ -3,9 +3,9 @@ Once: one two
 Stopping: one two two two
 Default: one two two two
 Cycle: one two one two
-Shuffle: two one two one
-Shuffle stopping: one two final final
-Shuffle once: two one
+Shuffle: two two one one
+Shuffle stopping: two one final final
+Shuffle once: one one
 **/
 
 ~ SEED_RANDOM(1)

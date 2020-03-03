@@ -133,7 +133,7 @@ namespace ink::runtime::internal
 		ip_t _done; // when we last hit a done
 
 		// Output stream
-		internal::stream<100> _output;
+		internal::stream<200> _output;
 
 		// Runtime stack. Used to store temporary variables and callstack
 		internal::stack<50> _stack;

@@ -7,7 +7,7 @@ namespace ink
 		namespace internal
 		{
 			basic_stack::basic_stack(entry* data, size_t size)
-				: _stack(data), _size(size), _pos(0), _save(~0)
+				: _stack(data), _size(size), _pos(0), _save(~0), _jump(~0)
 			{
 
 			}
@@ -55,13 +55,13 @@ namespace ink
 				return nullptr;
 			}
 
-			void basic_stack::push_frame(offset_t return_to)
+			void basic_stack::push_frame(offset_t return_to, frame_type type)
 			{
 				// Add to top of stack
-				add(InvalidHash, return_to);
+				add(InvalidHash, value(return_to, type == frame_type::tunnel ? data_type::tunnel_frame : data_type::function_frame));
 			}
 
-			offset_t basic_stack::pop_frame()
+			offset_t basic_stack::pop_frame(frame_type* type)
 			{
 				inkAssert(_pos > 0, "Can not pop frame from empty callstack");
 
@@ -78,12 +78,20 @@ namespace ink
 
 				inkAssert(_stack[_pos].name == InvalidHash, "Attempting to pop_frame when no frames exist! Stack reset");
 
+				// Store frame type
+				if (type != nullptr)
+					*type = (_stack[_pos].data.data_type() == data_type::tunnel_frame) ? frame_type::tunnel : frame_type::function;
+
 				// Return the offset stored in the frame record
 				return _stack[_pos].data.as_divert();
 			}
 
 			bool basic_stack::has_frame() const
 			{
+				// Empty case
+				if (_pos == 0)
+					return false;
+
 				size_t iter = _pos - 1;
 				while (_stack[iter].name != InvalidHash && iter > 0)
 				{
@@ -164,13 +172,20 @@ namespace ink
 			}
 
 			basic_eval_stack::basic_eval_stack(value* data, size_t size)
-				: _stack(data), _size(size), _pos(0)
+				: _stack(data), _size(size), _pos(0), _save(~0), _jump(~0)
 			{
 
 			}
 
 			void basic_eval_stack::push(const value& val)
 			{
+				// Don't destroy saved data. Jump over it
+				if (_pos < _save && _save != ~0)
+				{
+					_jump = _pos;
+					_pos = _save;
+				}
+
 				inkAssert(_pos < _size, "Stack overflow!");
 				_stack[_pos++] = val;
 			}
@@ -178,6 +193,14 @@ namespace ink
 			value basic_eval_stack::pop()
 			{
 				inkAssert(_pos > 0, "Nothing left to pop!");
+
+				// Jump over save data
+				if (_pos == _save)
+					_pos = _jump;
+
+				// Move over none data
+				while (_stack[_pos].is_none())
+					_pos--;
 
 				// Decrement and return
 				_pos--;
@@ -199,12 +222,51 @@ namespace ink
 			void basic_eval_stack::clear()
 			{
 				_pos = 0;
+				_jump = _save = ~0;
 			}
 
 			void basic_eval_stack::mark_strings(string_table& strings) const
 			{
-				for (int i = 0; i < _pos; i++)
+				// no matter if we're saved or not, we consider all strings
+				int len = (_save == ~0 || _pos > _save) ? _pos : _save;
+
+				for (int i = 0; i < len; i++)
 					_stack[i].mark_strings(strings);
+			}
+
+			void basic_eval_stack::save()
+			{
+				inkAssert(_save == ~0, "Can not save stack twice! restore() or forget() first");
+
+				// Save current stack position
+				_save = _jump = _pos;
+			}
+
+			void basic_eval_stack::restore()
+			{
+				inkAssert(_save != ~0, "Can not restore() when there is no save!");
+
+				// Move position back to saved position
+				_pos = _save;
+				_save = _jump = ~0;
+			}
+
+			void basic_eval_stack::forget()
+			{
+				inkAssert(_save != ~0, "Can not forget when the stack has never been saved!");
+
+				// If we have moven to a point earlier than the save point but we have a jump point
+				if (_pos < _save && _pos > _jump)
+				{
+					// Everything between the jump point and the save point needs to be nullified
+					data x; x.set_none();
+					value none = value(x);
+					for (size_t i = _jump; i < _save; i++)
+						_stack[i] = none;
+				}
+
+				// Just reset save position
+				_save = ~0;
 			}
 
 		}

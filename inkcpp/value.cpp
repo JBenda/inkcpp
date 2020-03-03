@@ -43,6 +43,12 @@ namespace ink
 				_first = d;
 			}
 
+			value::value(uint32_t val, internal::data_type t)
+			{
+				_first.set_uint(val);
+				_first.type = t;
+			}
+
 			value_type value::type() const
 			{
 				// If we have multiple values set, then we are a string
