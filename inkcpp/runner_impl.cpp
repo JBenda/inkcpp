@@ -453,7 +453,7 @@ namespace ink::runtime::internal
 			if (_output.ends_with(data_type::newline))
 			{
 				// TODO: REMOVE
-				//return true;
+				return true;
 
 				// Unless we are out of content, we are going to try
 				//  to continue a little further. This is to check for
@@ -580,6 +580,12 @@ namespace ink::runtime::internal
 					//  our position when a choice is chosen. See ::choose
 					_done = _ptr;
 					_is_falling = true;
+				}
+
+				// If we're falling out of the story, then we're hitting an implied done
+				if (_is_falling && _story->instructions() + target == _story->end()) {
+					_ptr = nullptr;
+					break;
 				}
 
 				// Do the jump
