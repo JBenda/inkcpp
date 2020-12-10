@@ -172,101 +172,58 @@ namespace ink
 			}
 
 			basic_eval_stack::basic_eval_stack(value* data, size_t size)
-				: _stack(data), _size(size), _pos(0), _save(~0), _jump(~0)
+				: base(data, size)
 			{
 
 			}
 
 			void basic_eval_stack::push(const value& val)
 			{
-				// Don't destroy saved data. Jump over it
-				if (_pos < _save && _save != ~0)
-				{
-					_jump = _pos;
-					_pos = _save;
-				}
-
-				inkAssert(_pos < _size, "Stack overflow!");
-				_stack[_pos++] = val;
+				base::push(val);
 			}
 
 			value basic_eval_stack::pop()
 			{
-				inkAssert(_pos > 0, "Nothing left to pop!");
-
-				// Jump over save data
-				if (_pos == _save)
-					_pos = _jump;
-
-				// Move over none data
-				while (_stack[_pos].is_none())
-					_pos--;
-
-				// Decrement and return
-				_pos--;
-				return _stack[_pos];
+				return base::pop([](const value& v) { return v.is_none(); });
 			}
 
 			const value& basic_eval_stack::top() const
 			{
-				inkAssert(_pos > 0, "Stack is empty! No top()");
-
-				return _stack[_pos - 1];
+				return base::top();
 			}
 
 			bool basic_eval_stack::is_empty() const
 			{
-				return _pos == 0;
+				return base::is_empty();
 			}
 
 			void basic_eval_stack::clear()
 			{
-				_pos = 0;
-				_jump = _save = ~0;
+				base::clear();
 			}
 
 			void basic_eval_stack::mark_strings(string_table& strings) const
 			{
-				// no matter if we're saved or not, we consider all strings
-				int len = (_save == ~0 || _pos > _save) ? _pos : _save;
-
-				for (int i = 0; i < len; i++)
-					_stack[i].mark_strings(strings);
+				// Iterate everything (including what we have saved) and mark strings
+				base::for_each_all([&strings](const value& elem) { elem.mark_strings(strings); });
 			}
 
 			void basic_eval_stack::save()
 			{
-				inkAssert(_save == ~0, "Can not save stack twice! restore() or forget() first");
-
-				// Save current stack position
-				_save = _jump = _pos;
+				base::save();
 			}
 
 			void basic_eval_stack::restore()
 			{
-				inkAssert(_save != ~0, "Can not restore() when there is no save!");
-
-				// Move position back to saved position
-				_pos = _save;
-				_save = _jump = ~0;
+				base::restore();
 			}
 
 			void basic_eval_stack::forget()
 			{
-				inkAssert(_save != ~0, "Can not forget when the stack has never been saved!");
-
-				// If we have moven to a point earlier than the save point but we have a jump point
-				if (_pos < _save && _pos > _jump)
-				{
-					// Everything between the jump point and the save point needs to be nullified
-					data x; x.set_none();
-					value none = value(x);
-					for (size_t i = _jump; i < _save; i++)
-						_stack[i] = none;
-				}
-
-				// Just reset save position
-				_save = ~0;
+				// Clear out
+				data x; x.set_none();
+				value none = value(x);
+				base::forget([&none](value& elem) { elem = none; });
 			}
 
 		}

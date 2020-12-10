@@ -109,12 +109,20 @@ namespace ink::runtime::internal
 			return _buffer[_pos];
 		}
 
-		const ElementType& top() 
+		const ElementType& top() const
 		{
 			if (_pos == _save)
 				return _buffer[_jump - 1];
 
 			return _buffer[_pos - 1];
+		}
+
+		bool is_empty() const { return _pos == 0; }
+
+		void clear()
+		{
+			_pos = 0;
+			_save = _jump = ~0;
 		}
 
 		// Forward iterate
@@ -140,6 +148,17 @@ namespace ink::runtime::internal
 				// Move forward one element
 				i++;
 			} while (i < _pos);
+		}
+
+		template<typename CallbackMethod>
+		void for_each_all(CallbackMethod callback) const
+		{
+			// no matter if we're saved or not, we iterate everything
+			int len = (_save == ~0 || _pos > _save) ? _pos : _save;
+
+			// Iterate
+			for (int i = 0; i < len; i++)
+				callback(_buffer[i]);
 		}
 
 		// Reverse iterate

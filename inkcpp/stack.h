@@ -1,6 +1,7 @@
 #pragma once
 
 #include "value.h"
+#include "collections/restorable.h"
 
 namespace ink
 {
@@ -79,10 +80,12 @@ namespace ink
 				entry _stack[N];
 			};
 
-			class basic_eval_stack
+			class basic_eval_stack : protected restorable<value>
 			{
 			protected:
 				basic_eval_stack(value* data, size_t size);
+
+				using base = restorable<value>;
 
 			public:
 				// Push value onto the stack
@@ -107,18 +110,6 @@ namespace ink
 				void save();
 				void restore();
 				void forget();
-
-			private:
-				// stack
-				value * const _stack;
-				const size_t _size;
-
-				// Current stack position
-				size_t _pos;
-
-				// Fuck me
-				size_t _save;
-				size_t _jump;
 			};
 
 			template<size_t N>

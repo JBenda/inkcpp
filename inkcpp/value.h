@@ -109,7 +109,7 @@ namespace ink
 				uint32_t get<uint32_t>() const { return as_divert(); }
 
 				// Garbage collection
-				void mark_strings(string_table&);
+				void mark_strings(string_table&) const;
 
 #ifdef INK_ENABLE_STL
 				template<>
