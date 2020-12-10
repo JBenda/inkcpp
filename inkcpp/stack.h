@@ -21,13 +21,15 @@ namespace ink
 				tunnel
 			};
 
-			class basic_stack
+			class basic_stack : protected restorable<entry>
 			{
 			protected:
 				basic_stack(entry* data, size_t size);
 
-			public:
+				// base class
+				using base = restorable<entry>;
 
+			public:
 				// Sets existing value, or creates a new one at this callstack entry
 				void set(hash_t name, const value& val);
 
@@ -56,17 +58,6 @@ namespace ink
 
 			private:
 				void add(hash_t name, const value& val);
-			private:
-				// stack
-				entry* _stack;
-				size_t _size;
-
-				// Current stack position
-				size_t _pos;
-
-				// Fuck me
-				size_t _save;
-				size_t _jump;
 			};
 
 			// stack for call history and temporary variables

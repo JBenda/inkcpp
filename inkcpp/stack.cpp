@@ -7,15 +7,14 @@ namespace ink
 		namespace internal
 		{
 			basic_stack::basic_stack(entry* data, size_t size)
-				: _stack(data), _size(size), _pos(0), _save(~0), _jump(~0)
+				: base(data, size)
 			{
-
 			}
 
 			void basic_stack::set(hash_t name, const value& val)
 			{
 				// If we have a save point, always add no matter what
-				if (_save != ~0)
+				if (base::is_saved())
 				{
 					add(name, val);
 					return;
@@ -31,27 +30,18 @@ namespace ink
 
 			const value* basic_stack::get(hash_t name) const
 			{
-				if (_pos == 0)
+				// Find whatever comes first: a matching entry or a stack frame entry
+				const entry* found = base::reverse_find([name](entry& e) { return e.name == name || e.name == InvalidHash; });
+
+				// If nothing found, no value
+				if (found == nullptr)
 					return nullptr;
 
-				// Move backwards and find the variable
-				size_t i = _pos;
-				do
-				{
-					i--;
+				// If we found something of that name, return the value
+				if (found->name == name)
+					return &found->data;
 
-					if (_stack[i].name == name)
-						return &_stack[i].data;
-
-					// We hit the top of this stack frame. Not found!
-					if (_stack[i].name == InvalidHash)
-						break;
-
-					// Jump over saved data
-					if (i == _save)
-						i = _jump;
-				} while (i > 0);
-
+				// Otherwise, nothing in this stack frame
 				return nullptr;
 			}
 
@@ -63,112 +53,68 @@ namespace ink
 
 			offset_t basic_stack::pop_frame(frame_type* type)
 			{
-				inkAssert(_pos > 0, "Can not pop frame from empty callstack");
+				inkAssert(!base::is_empty(), "Can not pop frame from empty callstack.");
 
-				// Advance up the callstack until we find the frame record
-				_pos--;
-				while (_stack[_pos].name != InvalidHash && _pos > 0)
+				const entry* popped = &base::pop([](const entry&) { return false; });
+				while (popped->name != InvalidHash && !base::is_empty())
 				{
-					// Jump over saved data
-					if (_pos == _save)
-						_pos = _jump;
-
-					_pos--;
+					popped = &base::pop([](const entry&) { return false; });
 				}
 
-				inkAssert(_stack[_pos].name == InvalidHash, "Attempting to pop_frame when no frames exist! Stack reset");
+				inkAssert(popped->name == InvalidHash, "Attempting to pop_frame when no frames exist! Stack reset.");
 
 				// Store frame type
 				if (type != nullptr)
-					*type = (_stack[_pos].data.data_type() == data_type::tunnel_frame) ? frame_type::tunnel : frame_type::function;
+					*type = (popped->data.data_type() == data_type::tunnel_frame) ? frame_type::tunnel : frame_type::function;
 
 				// Return the offset stored in the frame record
-				return _stack[_pos].data.as_divert();
+				return popped->data.as_divert();
 			}
 
 			bool basic_stack::has_frame() const
 			{
 				// Empty case
-				if (_pos == 0)
+				if (base::is_empty())
 					return false;
 
-				size_t iter = _pos - 1;
-				while (_stack[iter].name != InvalidHash && iter > 0)
-				{
-					// Jump over saved data
-					if (iter == _save)
-						iter = _jump;
+				// Search in reverse for a stack frame
+				const entry* frame = base::reverse_find([](const entry& elem) {
+					return elem.name == InvalidHash;
+				});
 
-					iter--;
-				}
-				return _stack[iter].name == InvalidHash;
+				// Return true if a frame was found
+				return frame != nullptr;
 			}
 
 			void basic_stack::clear()
 			{
-				_save = _jump = ~0;
-				_pos = 0;
+				base::clear();
 			}
 
 			void basic_stack::mark_strings(string_table& strings) const
 			{
-				// no matter if we're saved or not, we consider all strings
-				int len = (_save == ~0 || _pos > _save) ? _pos : _save;
-
-				// iterate and mark
-				for (int i = 0; i < len; i++)
-					_stack[i].data.mark_strings(strings);
+				// Mark all strings
+				base::for_each_all([&strings](const entry& elem) { elem.data.mark_strings(strings); });
 			}
 
 			void basic_stack::save()
 			{
-				inkAssert(_save == ~0, "Can not save stack twice! restore() or forget() first");
-
-				// Save current stack position
-				_save = _jump = _pos;
+				base::save();
 			}
 
 			void basic_stack::restore()
 			{
-				inkAssert(_save != ~0, "Can not restore() when there is no save!");
-
-				// Move position back to saved position
-				_pos = _save;
-				_save = _jump = ~0;
+				base::restore();
 			}
 
 			void basic_stack::forget()
 			{
-				inkAssert(_save != ~0, "Can not forget when the stack has never been saved!");
-
-				// If we have moven to a point earlier than the save point but we have a jump point
-				if (_pos < _save && _pos > _jump)
-				{
-					// Everything between the jump point and the save point needs to be nullified
-					for (size_t i = _jump; i < _save; i++)
-						_stack[i].name = ~0;
-				}
-
-				// Just reset save position
-				_save = ~0;
+				base::forget([](entry& elem) { elem.name = ~0; });
 			}
 
 			void basic_stack::add(hash_t name, const value& val)
 			{
-				// Don't destroy saved data
-				if (_pos < _save && _save != ~0)
-				{
-					// Move to next safe spot after saved data and save where we came from
-					_jump = _pos;
-					_pos = _save;
-				}
-
-				inkAssert(_pos < _size, "Stack overflow!");
-
-				// Push onto the top of the stack
-				_stack[_pos].name = name;
-				_stack[_pos].data = val;
-				_pos++;
+				base::push({ name, val });
 			}
 
 			basic_eval_stack::basic_eval_stack(value* data, size_t size)

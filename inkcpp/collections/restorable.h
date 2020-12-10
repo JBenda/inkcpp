@@ -20,6 +20,9 @@ namespace ink::runtime::internal
 			: _buffer(buffer), _size(size), _pos(0), _save(~0), _jump(~0)
 		{ }
 
+		// Checks if we have a save state
+		bool is_saved() const { return _save != ~0; }
+
 		// Creates a save point which can later be restored to or forgotten
 		void save()
 		{
@@ -150,6 +153,32 @@ namespace ink::runtime::internal
 			} while (i < _pos);
 		}
 
+		template<typename Predicate>
+		const ElementType* find(Predicate predicate) const
+		{
+			if (_pos == 0) {
+				return nullptr;
+			}
+
+			// Start at the beginning
+			size_t i = 0;
+			do
+			{
+				// Jump over saved data
+				if (i == _jump)
+					i = _save;
+
+				// Run callback
+				if (!isNull(_buffer[i]) && predicate(_buffer[i]))
+					return &_buffer[i];
+
+				// Move forward one element
+				i++;
+			} while (i < _pos);
+
+			return nullptr;
+		}
+
 		template<typename CallbackMethod>
 		void for_each_all(CallbackMethod callback) const
 		{
@@ -185,6 +214,34 @@ namespace ink::runtime::internal
 					i = _jump;
 
 			} while (i > 0);
+		}
+
+		// Reverse find
+		template<typename Predicate>
+		const ElementType* reverse_find(Predicate predicate) const
+		{
+			if (_pos == 0) {
+				return nullptr;
+			}
+
+			// Start at the end
+			size_t i = _pos;
+			do
+			{
+				// Move back one element
+				i--;
+
+				// Run callback
+				if (predicate(_buffer[i]))
+					return &_buffer[i];
+
+				// Jump over saved data
+				if (i == _save)
+					i = _jump;
+
+			} while (i > 0);
+
+			return nullptr;
 		}
 
 		template<typename IsNullPredicate>
