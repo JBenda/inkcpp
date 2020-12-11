@@ -51,6 +51,17 @@ namespace ink
 				// Garbage collection
 				void mark_strings(string_table&) const;
 
+				// == Threading ==
+
+				// Forks a new thread from the current callstack and returns that thread's unique id
+				thread_t fork_thread();
+
+				// Mark a thread as "done". It's callstack is still preserved until collapse_to_thread is called.
+				void complete_thread(thread_t thread);
+
+				// Collapses the callstack to the state of a single thread
+				void collapse_to_thread(thread_t thread);
+
 				// == Save/Restore ==
 				void save();
 				void restore();
@@ -58,6 +69,13 @@ namespace ink
 
 			private:
 				void add(hash_t name, const value& val);
+				const entry* pop();
+
+				// thread ids
+				thread_t _next_thread = 0;
+				thread_t _backup_next_thread = 0;
+
+				static const hash_t NulledHashId = ~0;
 			};
 
 			// stack for call history and temporary variables

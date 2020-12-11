@@ -31,6 +31,8 @@ namespace ink
 				null,							// void/null (used for void function returns)
 				tunnel_frame,					// Return from tunnel
 				function_frame,					// Return from function
+				thread_start,					// Start of a new thread frame
+				thread_end,						// End of a thread frame
 			};
 
 			// Container for any data used as part of the runtime (variable values, output streams, evaluation stack, etc.)
@@ -123,6 +125,8 @@ namespace ink
 				inline operator int() const { return as_int(); }
 				inline operator float() const { return as_float(); }
 				inline operator uint32_t() const { return as_divert(); }
+
+				inline bool is_thread_marker() const { return _first.type == data_type::thread_start || _first.type == data_type::thread_end; }
 
 				// Is this value "true"
 				bool is_truthy() const;

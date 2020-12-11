@@ -49,6 +49,9 @@ namespace ink
 	// Used as the unique identifier for an ink container
 	typedef uint32_t container_t;
 
+	// Used to uniquely identify threads
+	typedef uint32_t thread_t;
+
 	// Checks if a string is only whitespace
 	static bool is_whitespace(const char* string, bool includeNewline = true)
 	{
