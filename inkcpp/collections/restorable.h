@@ -173,7 +173,7 @@ namespace ink::runtime::internal
 				_pos = _jump;
 
 			// Move over empty data
-			while (isNull(_buffer[_pos]))
+			while (isNull(_buffer[_pos - 1]))
 				_pos--;
 
 			// Decrement and return

@@ -49,6 +49,9 @@ namespace ink
 		// == Choice commands
 		CHOICE,
 
+		// == Threading
+		THREAD,
+
 		// == Binary operators
 		BINARY_OPERATORS_START,
 		ADD = BINARY_OPERATORS_START,
@@ -118,6 +121,9 @@ namespace ink
 		lhs = static_cast<CommandFlag>(static_cast<unsigned char>(lhs) | static_cast<unsigned char>(rhs));
 		return lhs;
 	}
+
+	template<typename PayloadType>
+	constexpr unsigned int CommandSize = sizeof(Command) + sizeof(CommandFlag) + sizeof(PayloadType);
 
 #ifdef INK_COMPILER
 	const char* CommandStrings[];

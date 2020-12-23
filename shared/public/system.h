@@ -139,6 +139,12 @@ namespace ink
 		{
 			static constexpr T* value = nullptr;
 		};
+
+		template<>
+		struct restorable_type_null<ip_t>
+		{
+			static constexpr ip_t value = (ip_t)~0;
+		};
 	}
 }
 

@@ -46,11 +46,12 @@ namespace ink
 			friend class internal::runner_impl;
 
 			uint32_t path() const { return _path; }
-			void setup(internal::basic_stream&, internal::string_table& strings, int index, uint32_t path);
+			void setup(internal::basic_stream&, internal::string_table& strings, int index, uint32_t path, thread_t thread);
 		private:
 			const char* _text;
 			int _index;
 			uint32_t _path;
+			thread_t _thread;
 		};
 	}
 }

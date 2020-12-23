@@ -42,6 +42,9 @@ namespace ink::runtime::internal
 		void restore();
 		void forget();
 
+		// Resets all values and clears any save points
+		void clear(const T& value);
+
 	protected:
 		inline T* buffer() { return _array; }
 
@@ -130,6 +133,30 @@ namespace ink::runtime::internal
 			_temp[i] = null;
 		}
 	}
+
+	template<typename T>
+	inline void basic_restorable_array<T>::clear(const T& value)
+	{
+		_saved = false;
+		for (size_t i = 0; i < _capacity; i++)
+		{
+			_temp[i] = null;
+			_array[i] = value;
+		}
+	}
+
+	template<typename T, size_t SIZE>
+	class fixed_restorable_array : public basic_restorable_array<T>
+	{
+	public:
+		fixed_restorable_array(const T& initial) : basic_restorable_array<T>(_buffer, SIZE * 2) 
+		{ 
+			clear(initial);
+		}
+
+	private:
+		T _buffer[SIZE * 2];
+	};
 
 	template<typename T>
 	class allocated_restorable_array : public basic_restorable_array<T>

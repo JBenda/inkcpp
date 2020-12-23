@@ -213,7 +213,7 @@ namespace ink::runtime::internal
 		_eval.push(result);
 	}
 
-	void runner_impl::execute_return()
+	frame_type runner_impl::execute_return()
 	{
 		// Pop the callstack
 		frame_type type;
@@ -226,11 +226,14 @@ namespace ink::runtime::internal
 		// Jump to the old offset
 		inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
 		jump(_story->instructions() + offset);
+
+		// Return frame type
+		return type;
 	}
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
-		: _story(data), _globals(global.cast<globals_impl>()), _container(~0),
-		_backup(nullptr), _done(false), _choices()
+		: _story(data), _globals(global.cast<globals_impl>()), _container(~0), _threads(~0), 
+		_threadDone(nullptr), _backup(nullptr), _done(nullptr), _choices()
 	{
 		_ptr = _story->instructions();
 		bEvaluationMode = false;
@@ -350,11 +353,32 @@ namespace ink::runtime::internal
 
 	void runner_impl::choose(size_t index)
 	{
-		// Restore pointer to the last "done" point
-		inkAssert(_done != nullptr, "No 'done' point recorded before finishing choice output");
 		inkAssert(index < _num_choices, "Choice index out of range");
-		jump(_done, false);
+
+		// Get the choice
+		const auto& c = _choices[index];
+
+		// Get its thread
+		thread_t choiceThread = c._thread;
+
+		// Figure out where our previous pointer was for that thread
+		ip_t prev = nullptr;
+		if (choiceThread == ~0)
+			prev = _done;
+		else
+			prev = _threadDone.get(choiceThread);
+
+		// Make sure we have a previous pointer
+		inkAssert(prev != nullptr, "No 'done' point recorded before finishing choice output");
+
+		// Move to the previous pointer so we track our movements correctly
+		jump(prev, false);
 		_done = nullptr;
+
+		// Collapse callstacks to the correct thread
+		_stack.collapse_to_thread(choiceThread);
+		_threads.clear();
+		_threadDone.clear(nullptr);
 
 		// Jump to destination and clear choice list
 		jump(_story->instructions() + _choices[index].path());
@@ -453,7 +477,7 @@ namespace ink::runtime::internal
 			if (_output.ends_with(data_type::newline))
 			{
 				// TODO: REMOVE
-				return true;
+				// return true;
 
 				// Unless we are out of content, we are going to try
 				//  to continue a little further. This is to check for
@@ -488,7 +512,7 @@ namespace ink::runtime::internal
 			if (_is_falling && !((cmd == Command::DIVERT && flag & CommandFlag::DIVERT_IS_FALLTHROUGH) || cmd == Command::END_CONTAINER_MARKER))
 			{
 				_is_falling = false;
-				_done = nullptr;
+				set_done_ptr(nullptr);
 			}
 
 			if (cmd >= Command::BINARY_OPERATORS_START && cmd <= Command::BINARY_OPERATORS_END)
@@ -578,13 +602,13 @@ namespace ink::runtime::internal
 					// Record the position of the instruction pointer at the first fallthrough.
 					//  We'll use this if we run out of content and hit an implied "done" to restore
 					//  our position when a choice is chosen. See ::choose
-					_done = _ptr;
+					set_done_ptr(_ptr);
 					_is_falling = true;
 				}
 
-				// If we're falling out of the story, then we're hitting an implied done
+				// If we're falling out of the story, then we're hitting an implied done 
 				if (_is_falling && _story->instructions() + target == _story->end()) {
-					_ptr = nullptr;
+					on_done(false);
 					break;
 				}
 
@@ -612,7 +636,9 @@ namespace ink::runtime::internal
 
 			// == Terminal commands
 			case Command::DONE:
-				_done = _ptr;
+				on_done(true);
+				break;
+
 			case Command::END:
 				_ptr = nullptr;
 				break;
@@ -641,6 +667,21 @@ namespace ink::runtime::internal
 			case Command::FUNCTION_RETURN:
 			{
 				execute_return();
+			}
+			break;
+
+			case Command::THREAD:
+			{
+				// Push a thread frame so we can return easily
+				// TODO We push ahead of a single divert. Is that correct in all cases....?????
+				auto returnTo = _ptr + CommandSize<uint32_t>;
+				_stack.push_frame(returnTo - _story->instructions(), frame_type::thread);
+
+				// Fork a new thread on the callstack
+				thread_t thread = _stack.fork_thread();
+
+				// Push that thread onto our thread stack
+				_threads.push(thread);
 			}
 			break;
 
@@ -803,7 +844,7 @@ namespace ink::runtime::internal
 				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
 
 				// Create choice and record it
-				add_choice().setup(_output, _globals->strings(), _num_choices, path);
+				add_choice().setup(_output, _globals->strings(), _num_choices, path, current_thread());
 			} break;
 			case Command::START_CONTAINER_MARKER:
 			{
@@ -831,7 +872,13 @@ namespace ink::runtime::internal
 				{
 					_is_falling = false;
 
-					if (_stack.has_frame())
+					frame_type type;
+					if (!_threads.empty())
+					{
+						on_done(false);
+						return;
+					}
+					else if (_stack.has_frame(&type) && type == frame_type::function) // implicit return is only for functions
 					{
 						// push null and return
 						_eval.push(value());
@@ -842,7 +889,7 @@ namespace ink::runtime::internal
 					}
 					else
 					{
-						_ptr = nullptr;
+						on_done(false); // do we need to not set _done here? It wasn't set in the original code #implieddone
 						return;
 					}
 				}
@@ -894,11 +941,47 @@ namespace ink::runtime::internal
 		}
 	}
 
+	void runner_impl::on_done(bool setDone)
+	{
+		// If we're in a thread
+		if (!_threads.empty())
+		{
+			// Get the thread ID of the current thread
+			thread_t completedThreadId = _threads.pop();
+
+			// Push in a complete marker
+			_stack.complete_thread(completedThreadId);
+
+			// Go to where the thread started
+			frame_type type = execute_return();
+			inkAssert(type == frame_type::thread, "Expected thread frame marker to hold return to value but none found...");
+		}
+		else
+		{
+			if (setDone)
+				set_done_ptr(_ptr);
+			_ptr = nullptr;
+		}
+	}
+
+	void runner_impl::set_done_ptr(ip_t ptr)
+	{
+		thread_t curr = current_thread();
+		if (curr == ~0) {
+			_done = ptr;
+		}
+		else {
+			_threadDone.set(curr, ptr);
+		}
+	}
+
 	void runner_impl::reset()
 	{
 		_eval.clear();
 		_output.clear();
 		_stack.clear();
+		_threads.clear();
+		_threadDone.clear(nullptr);
 		bEvaluationMode = false;
 		_saved = false;
 		_num_choices = 0;
@@ -930,6 +1013,8 @@ namespace ink::runtime::internal
 		_container.save();
 		_globals->save();
 		_eval.save();
+		_threads.save();
+		_threadDone.save();
 		bSavedEvaluationMode = bEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -946,6 +1031,8 @@ namespace ink::runtime::internal
 		_container.restore();
 		_globals->restore();
 		_eval.restore();
+		_threads.restore();
+		_threadDone.restore();
 		bEvaluationMode = bSavedEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -965,6 +1052,8 @@ namespace ink::runtime::internal
 		_container.forget();
 		_globals->forget();
 		_eval.forget();
+		_threads.forget();
+		_threadDone.forget();
 
 		// Nothing to do for eval stack. It should just stay as it is
 

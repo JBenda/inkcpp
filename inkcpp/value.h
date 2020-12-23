@@ -31,6 +31,7 @@ namespace ink
 				null,							// void/null (used for void function returns)
 				tunnel_frame,					// Return from tunnel
 				function_frame,					// Return from function
+				thread_frame,					// Special tunnel marker for returning from threads
 				thread_start,					// Start of a new thread frame
 				thread_end,						// End of a thread frame
 				jump_marker,					// Used to mark a callstack jump
@@ -134,6 +135,7 @@ namespace ink
 				inline bool is_thread_start() const { return _first.type == data_type::thread_start; }
 				inline bool is_jump_marker() const { return _first.type == data_type::jump_marker; }
 				inline uint32_t& thread_jump() { return _second.uint_value; }
+				inline uint32_t thread_jump() const { return _second.uint_value; }
 
 				// Is this value "true"
 				bool is_truthy() const;

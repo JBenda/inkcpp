@@ -145,6 +145,18 @@ SCENARIO("threading with the callstack", "[callstack]")
 				}
 			}
 		}
+
+		WHEN("there is a fork with a tunnel that finishes")
+		{
+			thread_t thread = stack.fork_thread();
+			stack.push_frame(555, frame_type::tunnel);
+			stack.complete_thread(thread);
+
+			THEN("there should be no frames on the stack")
+			{
+				REQUIRE(stack.has_frame() == false);
+			}
+		}
 	}
 
 	GIVEN("a callstack with a single tunnel pushed")

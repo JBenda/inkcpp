@@ -5,7 +5,7 @@ namespace ink
 {
 	namespace runtime
 	{
-		void choice::setup(internal::basic_stream& in, internal::string_table& strings, int index, uint32_t path)
+		void choice::setup(internal::basic_stream& in, internal::string_table& strings, int index, uint32_t path, thread_t thread)
 		{
 			// if we only have one item in our output stream
 			if (in.queued() == 2)
@@ -32,6 +32,7 @@ namespace ink
 			// Index/path
 			_index = index;
 			_path = path;
+			_thread = thread;
 		}
 	}
 }

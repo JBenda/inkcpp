@@ -18,7 +18,8 @@ namespace ink
 			enum class frame_type : uint32_t
 			{
 				function,
-				tunnel
+				tunnel,
+				thread
 			};
 
 			class basic_stack : protected restorable<entry>
@@ -43,7 +44,7 @@ namespace ink
 				offset_t pop_frame(frame_type* type);
 
 				// Returns true if there are any frames on the stack
-				bool has_frame() const;
+				bool has_frame(frame_type* type = nullptr) const;
 
 				// Clears the entire stack
 				void clear();
