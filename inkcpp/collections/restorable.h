@@ -2,6 +2,61 @@
 
 namespace ink::runtime::internal
 {
+	template<typename ElementType>
+	constexpr auto EmptyNullPredicate = [](const ElementType&) { return false; };
+
+	// Iterator type used with restorable
+	template<typename ElementType>
+	class restorable_iter
+	{
+	public:
+		// Create an iterator moving from start (inclusive) to end (exclusive)
+		restorable_iter(ElementType* start, ElementType* end)
+			: _current(start), _end(end) { }
+
+		// Move to the next non-null element
+		template<typename IsNullPredicate = decltype(EmptyNullPredicate<ElementType>)>
+		bool next(IsNullPredicate isNull = EmptyNullPredicate<ElementType>)
+		{
+			if (_current != _end)
+			{
+				// Determine direction of iteration
+				int dir = _end - _current > 0 ? 1 : -1;
+
+				// Move pointer
+				_current += dir;
+
+				// Make sure to skip over null items
+				while (isNull(*_current) && _current != _end) {
+					_current += dir;
+				}
+			}
+
+			// If we've hit the end, return false
+			if (_current == _end)
+				return false;
+
+			// Otherwise, iteration is valid
+			return true;
+		}
+
+		// Get current element
+		inline ElementType* get() { return _current; }
+
+		// Get current element (const)
+		inline const ElementType* get() const { return _current;  }
+
+		// Is iteration complete (opposite of is valid)
+		inline bool done() const { return _current == _end; }
+
+	private:
+		// Current point of iteration
+		ElementType* _current;
+
+		// End point (non-valid)
+		ElementType* _end;
+	};
+
 	/**
 	 * A special base class for collections which have save/restore/forget functionality
 	 * 
@@ -71,8 +126,19 @@ namespace ink::runtime::internal
 			_save = _jump = ~0;
 		}
 
+		using iterator = restorable_iter<ElementType>;
+		using const_iterator = restorable_iter<const ElementType>;
+
+		// Iterator that begins at the end of the stack
+		iterator begin() { return iterator(&_buffer[_pos - 1], _buffer - 1); }
+		const_iterator begin() const { return iterator(&_buffer[_pos - 1], _buffer - 1); }
+
+		// Iterator that points to the element past the beginning of the stack
+		iterator end() { return iterator(_buffer - 1, _buffer - 1); }
+		iterator end() const { return const_iterator(_buffer - 1, _buffer - 1); }
+
 		// Push element onto the top of collection
-		void push(const ElementType& elem)
+		ElementType& push(const ElementType& elem)
 		{
 			// Don't destroy saved data. Jump over it
 			if (_pos < _save && _save != ~0)
@@ -87,6 +153,9 @@ namespace ink::runtime::internal
 
 			// Push onto the top
 			_buffer[_pos++] = elem;
+
+			// Return reference
+			return _buffer[_pos - 1];
 		}
 
 		// Pop an element off the top of the collection

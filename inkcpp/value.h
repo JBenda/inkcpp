@@ -33,6 +33,7 @@ namespace ink
 				function_frame,					// Return from function
 				thread_start,					// Start of a new thread frame
 				thread_end,						// End of a thread frame
+				jump_marker,					// Used to mark a callstack jump
 			};
 
 			// Container for any data used as part of the runtime (variable values, output streams, evaluation stack, etc.)
@@ -96,6 +97,7 @@ namespace ink
 				int as_int() const { return _first.integer_value; }
 				float as_float() const { return _first.float_value; }
 				uint32_t as_divert() const { return _first.uint_value; }
+				uint32_t as_thread_id() const { return _first.uint_value; }
 				// TODO: String access?
 
 				template<typename T>
@@ -126,7 +128,12 @@ namespace ink
 				inline operator float() const { return as_float(); }
 				inline operator uint32_t() const { return as_divert(); }
 
+				// == Threading ==
 				inline bool is_thread_marker() const { return _first.type == data_type::thread_start || _first.type == data_type::thread_end; }
+				inline bool is_thread_end() const { return _first.type == data_type::thread_end; }
+				inline bool is_thread_start() const { return _first.type == data_type::thread_start; }
+				inline bool is_jump_marker() const { return _first.type == data_type::jump_marker; }
+				inline uint32_t& thread_jump() { return _second.uint_value; }
 
 				// Is this value "true"
 				bool is_truthy() const;

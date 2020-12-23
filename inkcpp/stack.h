@@ -68,8 +68,10 @@ namespace ink
 				void forget();
 
 			private:
-				void add(hash_t name, const value& val);
+				entry& add(hash_t name, const value& val);
 				const entry* pop();
+
+				entry* do_thread_jump_pop(const iterator& jump);
 
 				// thread ids
 				thread_t _next_thread = 0;
