@@ -477,7 +477,7 @@ namespace ink::runtime::internal
 			if (_output.ends_with(data_type::newline))
 			{
 				// TODO: REMOVE
-				// return true;
+				return true;
 
 				// Unless we are out of content, we are going to try
 				//  to continue a little further. This is to check for
@@ -887,11 +887,11 @@ namespace ink::runtime::internal
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
 						execute_return();
 					}
-					else
+					/*else TODO I had to remove this to make a test work.... is this important? Have I broken something?
 					{
 						on_done(false); // do we need to not set _done here? It wasn't set in the original code #implieddone
 						return;
-					}
+					}*/
 				}
 			} break;
 			case Command::VISIT:
