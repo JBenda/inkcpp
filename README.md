@@ -41,9 +41,11 @@ thread->choose(0);
 ```
 
 ## Current Status
-`inkcpp.cpp` has a `main()` function which compiles `test.json` -> `test.bin` and executes it using standard output and input.
+Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must me in the same folder or in the PATH.
 
-Many, but not all features of the Ink language are supported (see Glaring Omissions below).
+Without the `-p` flag, it'll just compile the JSON/Ink file into InkCPP's binary format (see the Wiki on GitHub).
+
+Many, but not all features of the Ink language are supported (see Glaring Omissions below), but be warned, this runtime is still highly unstable. I am currently working on getting it to pass all the unit tests on [ink-proof](https://github.com/chromy/ink-proof).
 
 * Temporary and global variables
 * Int, String, or Divert values
@@ -57,6 +59,7 @@ Many, but not all features of the Ink language are supported (see Glaring Omissi
 * Global store that can be shared between runners
 * External function binding (no fallback support yet)
 * Tunnels and internal functions
+* Ink threads (probably incredibly unstable though)
 
 ## CMake
 Project is organized using `cmake`. Just run `cmake` and it should configure all the projects properly into a runtime, compiler, and command line project.
@@ -75,7 +78,6 @@ Part of that involves slowly migrating all the unit tests from the main inkle in
 The big things we're missing right now are:
 
 * Fallback functions for externals.
-* Threads
 * Variable observers
 * Lists and whatever cool, crazy stuff Ink has been adding recently.
 
