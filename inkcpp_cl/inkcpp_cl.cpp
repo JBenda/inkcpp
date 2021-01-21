@@ -133,14 +133,16 @@ int main(int argc, const char** argv)
 
 			if (thread->has_choices())
 			{
+				int index = 1;
 				for (const ink::runtime::choice& c : *thread)
 				{
-					std::cout << "* " << c.text() << std::endl;
+					std::cout << index++ << ": " << c.text() << std::endl;
 				}
 
 				int c = 0;
 				std::cin >> c;
-				thread->choose(c);
+				thread->choose(c - 1);
+				std::cout << "?> ";
 				continue;
 			}
 

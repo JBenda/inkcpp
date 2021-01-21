@@ -1,4 +1,8 @@
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 list(APPEND SOURCES 
+    collections/restorable.h 
+    collections/restorable.cpp
     array.h
     choice.cpp
     functional.cpp
@@ -14,6 +18,7 @@ list(APPEND SOURCES
     value.h value.cpp
     string_table.h string_table.cpp avl_array.h
 )
+source_group(Collections REGULAR_EXPRESSION collections/.*)
 add_library(inkcpp ${SOURCES})
 
 # Make sure the include directory is included 

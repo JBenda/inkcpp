@@ -31,6 +31,10 @@ namespace ink
 				null,							// void/null (used for void function returns)
 				tunnel_frame,					// Return from tunnel
 				function_frame,					// Return from function
+				thread_frame,					// Special tunnel marker for returning from threads
+				thread_start,					// Start of a new thread frame
+				thread_end,						// End of a thread frame
+				jump_marker,					// Used to mark a callstack jump
 			};
 
 			// Container for any data used as part of the runtime (variable values, output streams, evaluation stack, etc.)
@@ -94,6 +98,7 @@ namespace ink
 				int as_int() const { return _first.integer_value; }
 				float as_float() const { return _first.float_value; }
 				uint32_t as_divert() const { return _first.uint_value; }
+				uint32_t as_thread_id() const { return _first.uint_value; }
 				// TODO: String access?
 
 				template<typename T>
@@ -109,7 +114,7 @@ namespace ink
 				uint32_t get<uint32_t>() const { return as_divert(); }
 
 				// Garbage collection
-				void mark_strings(string_table&);
+				void mark_strings(string_table&) const;
 
 #ifdef INK_ENABLE_STL
 				template<>
@@ -123,6 +128,14 @@ namespace ink
 				inline operator int() const { return as_int(); }
 				inline operator float() const { return as_float(); }
 				inline operator uint32_t() const { return as_divert(); }
+
+				// == Threading ==
+				inline bool is_thread_marker() const { return _first.type == data_type::thread_start || _first.type == data_type::thread_end; }
+				inline bool is_thread_end() const { return _first.type == data_type::thread_end; }
+				inline bool is_thread_start() const { return _first.type == data_type::thread_start; }
+				inline bool is_jump_marker() const { return _first.type == data_type::jump_marker; }
+				inline uint32_t& thread_jump() { return _second.uint_value; }
+				inline uint32_t thread_jump() const { return _second.uint_value; }
 
 				// Is this value "true"
 				bool is_truthy() const;

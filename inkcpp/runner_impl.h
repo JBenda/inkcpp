@@ -10,6 +10,7 @@
 #include "types.h"
 #include "functions.h"
 #include "string_table.h"
+#include "array.h"
 
 #include "runner.h"
 #include "choice.h"
@@ -119,7 +120,12 @@ namespace ink::runtime::internal
 		void run_binary_operator(unsigned char cmd);
 		void run_unary_operator(unsigned char cmd);
 
-		void execute_return();
+		frame_type execute_return();
+
+		void on_done(bool setDone);
+		void set_done_ptr(ip_t ptr);
+
+		inline thread_t current_thread() const { return _threads.empty() ? ~0 : _threads.top(); }
 
 	private:
 		const story_impl* const _story;
@@ -138,10 +144,14 @@ namespace ink::runtime::internal
 		// Runtime stack. Used to store temporary variables and callstack
 		internal::stack<50> _stack;
 
-		// Evaluation (NOTE: Will later need to be per-callstack entry)
-		bool bEvaluationMode;
+		// Evaluation stack
+		bool bEvaluationMode = false;
 		internal::eval_stack<20> _eval;
-		bool bSavedEvaluationMode;
+		bool bSavedEvaluationMode = false;
+
+		// Keeps track of what threads we're inside
+		internal::restorable_stack<thread_t, 20> _threads;
+		internal::fixed_restorable_array<ip_t, 20> _threadDone;
 
 		// Choice list
 		static const size_t MAX_CHOICES = 10;

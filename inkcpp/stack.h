@@ -1,6 +1,7 @@
 #pragma once
 
 #include "value.h"
+#include "collections/restorable.h"
 
 namespace ink
 {
@@ -17,16 +18,19 @@ namespace ink
 			enum class frame_type : uint32_t
 			{
 				function,
-				tunnel
+				tunnel,
+				thread
 			};
 
-			class basic_stack
+			class basic_stack : protected restorable<entry>
 			{
 			protected:
 				basic_stack(entry* data, size_t size);
 
-			public:
+				// base class
+				using base = restorable<entry>;
 
+			public:
 				// Sets existing value, or creates a new one at this callstack entry
 				void set(hash_t name, const value& val);
 
@@ -40,7 +44,7 @@ namespace ink
 				offset_t pop_frame(frame_type* type);
 
 				// Returns true if there are any frames on the stack
-				bool has_frame() const;
+				bool has_frame(frame_type* type = nullptr) const;
 
 				// Clears the entire stack
 				void clear();
@@ -48,24 +52,33 @@ namespace ink
 				// Garbage collection
 				void mark_strings(string_table&) const;
 
+				// == Threading ==
+
+				// Forks a new thread from the current callstack and returns that thread's unique id
+				thread_t fork_thread();
+
+				// Mark a thread as "done". It's callstack is still preserved until collapse_to_thread is called.
+				void complete_thread(thread_t thread);
+
+				// Collapses the callstack to the state of a single thread
+				void collapse_to_thread(thread_t thread);
+
 				// == Save/Restore ==
 				void save();
 				void restore();
 				void forget();
 
 			private:
-				void add(hash_t name, const value& val);
-			private:
-				// stack
-				entry* _stack;
-				size_t _size;
+				entry& add(hash_t name, const value& val);
+				const entry* pop();
 
-				// Current stack position
-				size_t _pos;
+				entry* do_thread_jump_pop(const iterator& jump);
 
-				// Fuck me
-				size_t _save;
-				size_t _jump;
+				// thread ids
+				thread_t _next_thread = 0;
+				thread_t _backup_next_thread = 0;
+
+				static const hash_t NulledHashId = ~0;
 			};
 
 			// stack for call history and temporary variables
@@ -79,10 +92,12 @@ namespace ink
 				entry _stack[N];
 			};
 
-			class basic_eval_stack
+			class basic_eval_stack : protected restorable<value>
 			{
 			protected:
 				basic_eval_stack(value* data, size_t size);
+
+				using base = restorable<value>;
 
 			public:
 				// Push value onto the stack
@@ -107,18 +122,6 @@ namespace ink
 				void save();
 				void restore();
 				void forget();
-
-			private:
-				// stack
-				value * const _stack;
-				const size_t _size;
-
-				// Current stack position
-				size_t _pos;
-
-				// Fuck me
-				size_t _save;
-				size_t _jump;
 			};
 
 			template<size_t N>

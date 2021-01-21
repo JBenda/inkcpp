@@ -121,7 +121,7 @@ namespace ink
 				return type;
 			}
 
-			void value::mark_strings(string_table& strings)
+			void value::mark_strings(string_table& strings) const
 			{
 				// mark any allocated strings we're using
 				for (int i = 0; i < VALUE_DATA_LENGTH; i++)
