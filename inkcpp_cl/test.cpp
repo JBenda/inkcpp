@@ -5,6 +5,7 @@
 #include <regex>
 #include <filesystem>
 
+#include <globals.h>
 #include <runner.h>
 #include <story.h>
 #include <compiler.h>
