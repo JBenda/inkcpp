@@ -121,30 +121,6 @@ namespace ink
 	{
 		template<typename T>
 		struct always_false { static constexpr bool value = false; };
-
-		template<typename T>
-		struct restorable_type_null
-		{
-			static_assert(always_false<T>, "No restorable_type_null defined for this type!");
-		};
-
-		template<>
-		struct restorable_type_null<uint32_t>
-		{
-			static constexpr uint32_t value = ~0;
-		};
-
-		template<typename T>
-		struct restorable_type_null<T*>
-		{
-			static constexpr T* value = nullptr;
-		};
-
-		template<>
-		struct restorable_type_null<ip_t>
-		{
-			static constexpr ip_t value = (ip_t)~0;
-		};
 	}
 }
 

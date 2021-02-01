@@ -233,7 +233,7 @@ namespace ink::runtime::internal
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
 		: _story(data), _globals(global.cast<globals_impl>()), _container(~0), _threads(~0), 
-		_threadDone(nullptr), _backup(nullptr), _done(nullptr), _choices()
+		_threadDone(nullptr, (ip_t)~0), _backup(nullptr), _done(nullptr), _choices()
 	{
 		_ptr = _story->instructions();
 		bEvaluationMode = false;
