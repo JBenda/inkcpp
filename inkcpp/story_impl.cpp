@@ -24,6 +24,14 @@ namespace ink::runtime
 
 namespace ink::runtime::internal
 {
+
+	story_impl::Header story_impl::Header::parseHeader(const char *data)
+	{
+		Header res;
+		res._data = *reinterpret_cast<const decltype(_data)*>(data);
+		return res;
+	}
+
 #ifdef INK_ENABLE_STL
 	unsigned char* read_file_into_memory(const char* filename, size_t* read)
 	{
@@ -177,8 +185,10 @@ namespace ink::runtime::internal
 
 	void story_impl::setup_pointers()
 	{
-		// String table is after the version information
-		_string_table = (char*)_file + sizeof(int);
+		_header = Header::parseHeader(reinterpret_cast<char*>(_file));
+
+		// String table is after the header
+		_string_table = (char*)_file + sizeof(Header);
 
 		// Pass over strings
 		const char* ptr = _string_table;

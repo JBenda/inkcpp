@@ -5,12 +5,33 @@
 #include "types.h"
 #include "story.h"
 
+#ifdef INK_ENABLE_STL
+#include <tuple>
+#endif
+
 namespace ink::runtime::internal
 {
 	// Ink story. Constant once constructed. Can be shared safely between multiple runner instances
 	class story_impl : public story
 	{
 	public:
+		struct Header {
+			/**
+			 * @brief construct Header from inkBin file data.
+			 * @param _data pointer to begin of file data
+			 */
+			static Header parseHeader(const char* data);
+
+			enum ENDENSE : int {NONE, BIG, LITTEL };
+
+
+			const int& inkVersion = std::get<0>(_data);
+			const int& inkCppVersion = std::get<1>(_data);
+			const ENDENSE& endien = std::get<2>(_data);
+		private:
+			std::tuple<int,int,ENDENSE> _data;
+		};
+
 #ifdef INK_ENABLE_STL
 		story_impl(const char* filename);
 #endif
@@ -41,6 +62,8 @@ namespace ink::runtime::internal
 		// file information
 		unsigned char* _file;
 		size_t _length;
+
+		Header _header;
 
 		// string table
 		const char* _string_table;
