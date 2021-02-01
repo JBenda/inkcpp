@@ -2,7 +2,7 @@
 
 #include "config.h"
 #ifdef INK_EXPOSE_JSON
-#include "json.hpp"
+#include "../json.hpp"
 #endif
 #include "compilation_results.h"
 #include <iostream>

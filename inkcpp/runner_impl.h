@@ -108,9 +108,6 @@ namespace ink::runtime::internal
 		template<typename T>
 		inline T read();
 
-		template<>
-		inline const char* read();
-
 		choice& add_choice();
 		void clear_choices();
 
@@ -167,6 +164,9 @@ namespace ink::runtime::internal
 
 		bool _saved = false;
 	};
+
+	template<>
+	inline const char* runner_impl::read();
 
 #ifdef INK_ENABLE_STL
 	std::ostream& operator<<(std::ostream&, runner_impl&);

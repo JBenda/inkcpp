@@ -8,8 +8,8 @@ namespace ink::runtime::internal
 	class basic_restorable_array
 	{
 	public:
-		basic_restorable_array(T* array, size_t capacity)
-			: _saved(false), _array(array), _temp(array + capacity/2), _capacity(capacity/2)
+		basic_restorable_array(T* array, size_t capacity, T nullValue)
+			: _saved(false), _array(array), _temp(array + capacity/2), _capacity(capacity/2), _null(nullValue)
 		{
 			inkAssert(capacity % 2 == 0, "basic_restorable_array requires a datablock of even length to split into two arrays");
 
@@ -30,9 +30,6 @@ namespace ink::runtime::internal
 
 		// size of the array
 		inline size_t capacity() const { return _capacity; }
-
-		// null value
-		static constexpr T null = restorable_type_null<T>::value;
 
 		// only const indexing is supported due to save/restore system
 		inline const T& operator[](size_t index) const { return get(index); }
@@ -63,13 +60,16 @@ namespace ink::runtime::internal
 
 		// size of both _array and _temp
 		const size_t _capacity;
+
+		// null
+		const T _null;
 	};
 
 	template<typename T>
 	inline void basic_restorable_array<T>::set(size_t index, const T& value)
 	{
 		check_index(index);
-		inkAssert(value != null, "Can not add a value considered a 'null' to a restorable_array");
+		inkAssert(value != _null, "Can not add a value considered a 'null' to a restorable_array");
 
 		// If we're saved, store in second half of the array
 		if (_saved)
@@ -85,7 +85,7 @@ namespace ink::runtime::internal
 		check_index(index);
 
 		// If we're in save mode and we have a value at that index, return that instead
-		if (_saved && _temp[index] != null)
+		if (_saved && _temp[index] != _null)
 			return _temp[index];
 
 		// Otherwise, fall back on the real array
@@ -115,11 +115,11 @@ namespace ink::runtime::internal
 		for (size_t i = 0; i < _capacity; i++)
 		{
 			// Copy if there's values
-			if (_temp[i] != null)
+			if (_temp[i] != _null)
 				_array[i] = _temp[i];
 
 			// Clear
-			_temp[i] = null;
+			_temp[i] = _null;
 		}
 	}
 
@@ -130,7 +130,7 @@ namespace ink::runtime::internal
 		for (size_t i = 0; i < _capacity; i++)
 		{
 			// Clear
-			_temp[i] = null;
+			_temp[i] = _null;
 		}
 	}
 
@@ -140,7 +140,7 @@ namespace ink::runtime::internal
 		_saved = false;
 		for (size_t i = 0; i < _capacity; i++)
 		{
-			_temp[i] = null;
+			_temp[i] = _null;
 			_array[i] = value;
 		}
 	}
@@ -149,9 +149,9 @@ namespace ink::runtime::internal
 	class fixed_restorable_array : public basic_restorable_array<T>
 	{
 	public:
-		fixed_restorable_array(const T& initial) : basic_restorable_array<T>(_buffer, SIZE * 2) 
+		fixed_restorable_array(const T& initial, const T &nullValue) : basic_restorable_array<T>(_buffer, SIZE * 2, nullValue) 
 		{ 
-			clear(initial);
+			basic_restorable_array<T>::clear(initial);
 		}
 
 	private:
@@ -162,8 +162,8 @@ namespace ink::runtime::internal
 	class allocated_restorable_array : public basic_restorable_array<T>
 	{
 	public:
-		allocated_restorable_array(size_t capacity)
-			: basic_restorable_array<T>(new T[capacity * 2], capacity * 2)
+		allocated_restorable_array(size_t capacity, const T &nullValue)
+			: basic_restorable_array<T>(new T[capacity * 2], capacity * 2, nullValue)
 		{ 
 			_buffer = this->buffer();
 		}

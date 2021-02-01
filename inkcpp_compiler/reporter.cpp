@@ -62,7 +62,9 @@ namespace ink::compiler::internal
 		_list = list;
 
 		// Make sure our buffer is empty
+#ifdef WIN32
 		_Tidy();
+#endif
 	}
 
 	void error_strbuf::throw_on_sync(bool t)
@@ -82,7 +84,9 @@ namespace ink::compiler::internal
 
 		// Clear our state
 		_list = nullptr;
+#ifdef WIN32
 		_Tidy();
+#endif
 
 		// Should we throw?
 		if (_throw)

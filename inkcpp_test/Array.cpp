@@ -12,7 +12,7 @@ SCENARIO("a restorable array can hold values", "[array]")
 	GIVEN("an empty array")
 	{
 		const ink::size_t length = 10;
-		test_array array = test_array(length);
+		test_array array = test_array(length, ~0);
 
 		THEN("the default values should be zero")
 		{
@@ -50,7 +50,7 @@ SCENARIO("a restorable array can save/restore/forget", "[array]")
 	GIVEN("a saved array with a few values")
 	{
 		// Load up the array
-		test_array array = test_array(5);
+		test_array array = test_array(5, ~0);
 		array.set(0, 0);
 		array.set(1, 1);
 		array.set(2, 2);

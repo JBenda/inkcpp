@@ -55,11 +55,11 @@ namespace ink::runtime::internal
 
 		// argument types
 		template<int index>
-		using arg_type = typename function_traits<F>::argument<index>::type;
+		using arg_type = typename function_traits<F>::template argument<index>::type;
 
 		// pops an argument from the stack using the function-type
 		template<int index>
-		typename arg_type<index> pop_arg(basic_eval_stack* stack)
+		arg_type<index> pop_arg(basic_eval_stack* stack)
 		{
 			// todo - type assert?
 
@@ -74,16 +74,16 @@ namespace ink::runtime::internal
 			static_assert(sizeof...(Is) == traits::arity);
 
 			// void functions
-			if constexpr (is_same<void, traits::return_type>::value)
+			if constexpr (is_same<void, typename traits::return_type>::value)
 			{
-				// Just evalulate
+				// Just evaluevaluatelate
 				functor(pop_arg<Is>(stack)...);
 				
 				// Ink expects us to push something
 				// TODO -- Should be a special "void" value
 				push(stack, 0);
 			}
-			else if constexpr (is_string<traits::return_type>::value)
+			else if constexpr (is_string<typename traits::return_type>::value)
 			{
 				// SPECIAL: The result of the functor is a string type
 				//  in order to store it in the inkcpp interpreter we 
@@ -91,10 +91,10 @@ namespace ink::runtime::internal
 				auto string_result = functor(pop_arg<Is>(stack)...);
 
 				// Get string length
-				size_t len = string_handler<traits::return_type>::length(string_result);
+				size_t len = string_handler<typename traits::return_type>::length(string_result);
 
 				// Get source and allocate buffer
-				const char* src = string_handler<traits::return_type>::src(string_result);
+				const char* src = string_handler<typename traits::return_type>::src(string_result);
 				char* buffer = allocate(strings, len + 1);
 
 				// Copy

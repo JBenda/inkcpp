@@ -6,7 +6,7 @@ namespace ink::runtime::internal
 {
 	globals_impl::globals_impl(const story_impl* story)
 		: _num_containers(story->num_containers())
-		, _visit_counts(_num_containers)
+		, _visit_counts(_num_containers, ~0)
 		, _owner(story)
 		, _runners_start(nullptr)
 		, _globals_initialized(false)

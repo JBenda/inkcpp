@@ -92,7 +92,7 @@ namespace ink
 				// Check the value's current type
 				value_type type() const;
 				bool is_none() const { return _first.type == data_type::none; }
-				data_type data_type() const { return _first.type; }
+				data_type get_data_type() const { return _first.type; }
 
 				// == Getters ==
 				int as_int() const { return _first.integer_value; }
@@ -102,28 +102,10 @@ namespace ink
 				// TODO: String access?
 
 				template<typename T>
-				T get() const { static_assert(false); }
-
-				// == TODO: Asserts?
-
-				template<>
-				int get<int>() const { return as_int(); }
-				template<>
-				float get<float>() const { return as_float(); }
-				template<>
-				uint32_t get<uint32_t>() const { return as_divert(); }
+				T get() const { static_assert(always_false<T>::value, "Type not supported by value class"); }
 
 				// Garbage collection
 				void mark_strings(string_table&) const;
-
-#ifdef INK_ENABLE_STL
-				template<>
-				std::string get<std::string>() const { return _first.string_val; } // TODO: Missing amalgamate?
-#endif
-#ifdef INK_ENABLE_UNREAL
-				template<>
-				FString get<FString>() const { return _first.string_val; } // TODO: Missing amalgamate?
-#endif
 
 				inline operator int() const { return as_int(); }
 				inline operator float() const { return as_float(); }
@@ -197,6 +179,25 @@ namespace ink
 			// == Stream Operators ==
 			basic_stream& operator <<(basic_stream&, const value&);
 			basic_stream& operator >>(basic_stream&, value&);
+
+			// == Specialized get functions ==
+			// TODO: Should these assert?
+
+			template<>
+			inline int value::get<int>() const { return as_int(); }
+			template<>
+			inline float value::get<float>() const { return as_float(); }
+			template<>
+			inline uint32_t value::get<uint32_t>() const { return as_divert(); }
+
+#ifdef INK_ENABLE_STL
+			template<>
+			inline std::string value::get<std::string>() const { return _first.string_val; } // TODO: Missing amalgamate?
+#endif
+#ifdef INK_ENABLE_UNREAL
+			template<>
+			inline FString value::get<FString>() const { return _first.string_val; } // TODO: Missing amalgamate?
+#endif
 		}
 	}
 }

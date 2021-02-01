@@ -4,12 +4,32 @@
 #include <map>
 #include <fstream>
 
+#ifndef WIN32
+#include <cstring>
+#endif
+
 namespace ink::compiler::internal
 {
 	using std::vector;
 	using std::map;
 	using std::string;
 	using std::tuple;
+
+	char* strtok_s(char * s, const char * sep, char** context) {
+#ifdef WIN32
+		return ::strtok_s(s, sep, context);
+#else
+		if (
+				context == nullptr ||
+				sep == nullptr ||
+				s == nullptr && *context == nullptr )
+		{
+			errno = EINVAL;
+			return nullptr;
+		}
+		return ::strtok_r(s, sep, context);
+#endif
+	}
 
 	// holds information about a container
 	struct container_data
@@ -243,7 +263,8 @@ namespace ink::compiler::internal
 			// We need to parse the path
 			offset_t noop_offset = ~0;
 			char* _context = nullptr;
-			const char* token = strtok_s(const_cast<char*>(path_cstr), ".", &_context);
+			const char* token = ink::compiler::internal::strtok_s(
+					const_cast<char*>(path_cstr), ".", &_context);
 			while (token != nullptr)
 			{
 				// Number
@@ -275,7 +296,7 @@ namespace ink::compiler::internal
 				firstParent = false;
 
 				// Get the next token
-				token = strtok_s(nullptr, ".", &_context);
+				token = ink::compiler::internal::strtok_s(nullptr, ".", &_context);
 			}
 
 			if (noop_offset != ~0)
