@@ -102,7 +102,7 @@ namespace ink
 				// TODO: String access?
 
 				template<typename T>
-				T get() const { static_assert(false); }
+				T get() const { static_assert(always_false<T>::value, "Type not supported by value class"); }
 
 				// Garbage collection
 				void mark_strings(string_table&) const;
