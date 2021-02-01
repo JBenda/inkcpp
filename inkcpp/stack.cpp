@@ -37,14 +37,14 @@ namespace ink::runtime::internal
 			}
 
 			// If this is an end thread marker, skip over it
-			if (skip == ~0 && e.data.data_type() == data_type::thread_end) {
+			if (skip == ~0 && e.data.get_data_type() == data_type::thread_end) {
 				skip = e.data.as_divert();
 			}
 
 			// If we're skipping
 			if (skip != ~0) {
 				// Stop if we get to the start of the thread block
-				if (e.data.data_type() == data_type::thread_start && skip == e.data.as_divert()) {
+				if (e.data.get_data_type() == data_type::thread_start && skip == e.data.as_divert()) {
 					skip = ~0;
 				}
 
@@ -53,7 +53,7 @@ namespace ink::runtime::internal
 			}
 
 			// Is it a thread start or a jump marker
-			if (e.name == InvalidHash && (e.data.data_type() == data_type::thread_start || e.data.data_type() == data_type::jump_marker))
+			if (e.name == InvalidHash && (e.data.get_data_type() == data_type::thread_start || e.data.get_data_type() == data_type::jump_marker))
 			{
 				// If this thread start has a jump value
 				uint32_t jump = e.data.thread_jump();
@@ -189,7 +189,7 @@ namespace ink::runtime::internal
 			if (frame->data.is_thread_marker() || frame->data.is_jump_marker())
 			{
 				// End of thread marker, we need to create a jump marker
-				if (frame->data.data_type() == data_type::thread_end)
+				if (frame->data.get_data_type() == data_type::thread_end)
 				{
 					// Push a new jump marker after the thread end
 					entry& jump = push({ InvalidHash, value(0, data_type::jump_marker) });
@@ -209,7 +209,7 @@ namespace ink::runtime::internal
 				}
 
 				// Popping past thread start
-				if (frame->data.data_type() == data_type::thread_start)
+				if (frame->data.get_data_type() == data_type::thread_start)
 				{
 					returnedFrame = do_thread_jump_pop(iter);
 					break;
@@ -225,13 +225,13 @@ namespace ink::runtime::internal
 		inkAssert(returnedFrame, "Attempting to pop_frame when no frames exist! Stack reset.");
 
 		// Make sure we're not somehow trying to "return" from a thread
-		inkAssert(returnedFrame->data.data_type() != data_type::thread_start && returnedFrame->data.data_type() != data_type::thread_end,
+		inkAssert(returnedFrame->data.get_data_type() != data_type::thread_start && returnedFrame->data.get_data_type() != data_type::thread_end,
 			"Can not return from a thread! How did this happen?");
 
 		// Store frame type
 		if (type != nullptr)
 		{
-			*type = get_frame_type(returnedFrame->data.data_type());
+			*type = get_frame_type(returnedFrame->data.get_data_type());
 		}
 
 		// Return the offset stored in the frame record
@@ -282,7 +282,7 @@ namespace ink::runtime::internal
 		});
 
 		if (frame != nullptr && returnType != nullptr)
-			*returnType = get_frame_type(frame->data.data_type());
+			*returnType = get_frame_type(frame->data.get_data_type());
 
 		// Return true if a frame was found
 		return frame != nullptr;
@@ -331,7 +331,7 @@ namespace ink::runtime::internal
 			// Keep popping until we find the requested thread's end marker
 			const entry* top = pop();
 			while (!(
-				top->data.data_type() == data_type::thread_end &&
+				top->data.get_data_type() == data_type::thread_end &&
 				top->data.as_divert() == thread))
 			{
 				inkAssert(!is_empty(), "Ran out of stack while searching for end of thread marker. Did you call complete_thread?");
@@ -360,7 +360,7 @@ namespace ink::runtime::internal
 			// If we're deleting a useless thread block
 			if (nulling != ~0) {
 				// If this is the start of the block, stop deleting
-				if (elem.name == InvalidHash && elem.data.data_type() == data_type::thread_start && elem.data.as_divert() == nulling) {
+				if (elem.name == InvalidHash && elem.data.get_data_type() == data_type::thread_start && elem.data.as_divert() == nulling) {
 					nulling = ~0;
 				}
 
@@ -379,7 +379,7 @@ namespace ink::runtime::internal
 				}
 
 				// Clear thread frame markers. We can't use them anymore
-				if (elem.name == InvalidHash && elem.data.data_type() == data_type::thread_frame) {
+				if (elem.name == InvalidHash && elem.data.get_data_type() == data_type::thread_frame) {
 					elem.name = NulledHashId;
 				}
 			}

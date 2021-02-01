@@ -92,7 +92,7 @@ namespace ink
 				// Check the value's current type
 				value_type type() const;
 				bool is_none() const { return _first.type == data_type::none; }
-				data_type data_type() const { return _first.type; }
+				data_type get_data_type() const { return _first.type; }
 
 				// == Getters ==
 				int as_int() const { return _first.integer_value; }
