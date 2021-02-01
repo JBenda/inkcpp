@@ -26,14 +26,6 @@ namespace ink
 				}
 
 				// Write a string plus a null terminator
-				template<>
-				size_t write(const std::string& value)
-				{
-					const byte_t ZERO = 0;
-					size_t len = write((const byte_t*)value.c_str(), value.length());
-					len += write(&ZERO, 1);
-					return len;
-				}
 
 				// Writes data to the end of the stream
 				size_t write(const byte_t* data, size_t len);
@@ -71,6 +63,8 @@ namespace ink
 				// Write head
 				byte_t* _ptr = nullptr;
 			};
+			template<>
+			size_t binary_stream::write(const std::string& value);
 		}
 	}
 }

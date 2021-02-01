@@ -13,5 +13,6 @@ namespace ink::runtime
 	public:
 		// No public interface yet
 		virtual void dummy() = 0;
+		virtual ~globals_interface() = default;
 	};
 }

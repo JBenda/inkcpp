@@ -1,11 +1,22 @@
 #include "binary_stream.h"
 
+#include <cstring>
+
 namespace ink
 {
 	namespace compiler
 	{
 		namespace internal
 		{
+			template<>
+			size_t binary_stream::write(const std::string& value)
+			{
+				constexpr byte_t ZERO = 0;
+				size_t len = write((const byte_t*)value.c_str(), value.length());
+				len += write(&ZERO, 1);
+				return len;
+			}
+
 			binary_stream::binary_stream()
 				: _currentSlab(nullptr)
 				, _ptr(nullptr)

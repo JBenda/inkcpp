@@ -126,6 +126,6 @@ namespace ink
 	constexpr unsigned int CommandSize = sizeof(Command) + sizeof(CommandFlag) + sizeof(PayloadType);
 
 #ifdef INK_COMPILER
-	const char* CommandStrings[];
+	extern const char* CommandStrings[];
 #endif
 }

@@ -10,6 +10,7 @@
 #endif
 #ifdef INK_ENABLE_STL
 #include <exception>
+#include <stdexcept>
 #endif
 
 #undef assert
@@ -103,7 +104,7 @@ namespace ink
 #endif
 
 #ifdef INK_ENABLE_STL
-	using ink_exception = std::exception;
+	using ink_exception = std::runtime_error;
 #else 
 	// Non-STL exception class
 	class ink_exception
