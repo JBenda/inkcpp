@@ -17,7 +17,7 @@ namespace ink::runtime::internal
 	template<typename Arg, typename... Args>
 	struct get<0, Arg, Args...>
 	{
-		using type = typename Arg;
+		using type = Arg;
 	};
 
 	// constant and is_same from http://www.cppreference.com
@@ -69,7 +69,14 @@ namespace ink::runtime::internal
 		static const char* src(const TYPE& x) { return SRC; } \
 	};
 
-	MARK_AS_STRING(char*, strlen(x), x);
+	inline size_t c_str_len(const char* c) {
+		const char* i = c;
+		while (*i != 0)
+			i++;
+		return i - c;
+	}
+
+	MARK_AS_STRING(char*, c_str_len(x), x);
 #ifdef INK_ENABLE_STL
 	MARK_AS_STRING(std::string, x.size(), x.c_str());
 #endif
