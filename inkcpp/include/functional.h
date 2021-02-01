@@ -55,7 +55,7 @@ namespace ink::runtime::internal
 
 		// argument types
 		template<int index>
-		using arg_type = typename function_traits<F>::argument<index>::type;
+		using arg_type = typename function_traits<F>::template argument<index>::type;
 
 		// pops an argument from the stack using the function-type
 		template<int index>
@@ -76,7 +76,7 @@ namespace ink::runtime::internal
 			// void functions
 			if constexpr (is_same<void, typename traits::return_type>::value)
 			{
-				// Just evalulate
+				// Just evaluevaluatelate
 				functor(pop_arg<Is>(stack)...);
 				
 				// Ink expects us to push something

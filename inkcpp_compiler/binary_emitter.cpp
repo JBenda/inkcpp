@@ -17,7 +17,7 @@ namespace ink::compiler::internal
 
 	char* strtok_s(char * s, const char * sep, char** context) {
 #ifdef WIN32
-		return strtok_s(s, sep, context);
+		return ::strtok_s(s, sep, context);
 #else
 		if (
 				context == nullptr ||
@@ -27,7 +27,7 @@ namespace ink::compiler::internal
 			errno = EINVAL;
 			return nullptr;
 		}
-		return strtok_r(s, sep, context);
+		return ::strtok_r(s, sep, context);
 #endif
 	}
 
