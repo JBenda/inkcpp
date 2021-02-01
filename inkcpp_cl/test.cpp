@@ -173,7 +173,7 @@ bool test_directory(const std::string& directory)
 	{
 		if (p.path().extension() == ".ink")
 		{
-			bool success = test(p.path().u8string());
+			bool success = test(p.path().string());
 			if (!success)
 				return false;
 		}
