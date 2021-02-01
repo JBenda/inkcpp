@@ -151,7 +151,7 @@ namespace ink::runtime::internal
 	public:
 		fixed_restorable_array(const T& initial, const T &nullValue) : basic_restorable_array<T>(_buffer, SIZE * 2, nullValue) 
 		{ 
-			clear(initial);
+			basic_restorable_array<T>::clear(initial);
 		}
 
 	private:

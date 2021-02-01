@@ -11,13 +11,13 @@
 namespace ink::runtime::internal
 {
 	template<typename T>
-	static T function_base::pop(basic_eval_stack* stack)
+	T function_base::pop(basic_eval_stack* stack)
 	{
 		return stack->pop().get<T>();
 	}
 
 	template<typename T>
-	static void function_base::push(basic_eval_stack* stack, const T& value)
+	void function_base::push(basic_eval_stack* stack, const T& value)
 	{
 		stack->push(value);
 	}
