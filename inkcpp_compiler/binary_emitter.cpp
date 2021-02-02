@@ -16,7 +16,7 @@ namespace ink::compiler::internal
 	using std::tuple;
 
 	char* strtok_s(char * s, const char * sep, char** context) {
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64)
 		return ::strtok_s(s, sep, context);
 #else
 		if (
@@ -268,7 +268,7 @@ namespace ink::compiler::internal
 			while (token != nullptr)
 			{
 				// Number
-				if (std::isdigit(token[0]))
+				if (isdigit(token[0]))
 				{
 					// Check if we have a nop registered at that index
 					int index = atoi(token);
