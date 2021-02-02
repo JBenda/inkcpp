@@ -28,6 +28,9 @@ namespace ink::runtime::internal
 
 		// Read memory
 		T val = *(const T*)_ptr;
+		if (_story->get_header().endien == story_impl::Header::ENDENSE::DIFFER) {
+			val = story_impl::Header::swap_bytes(val);
+		}
 
 		// Advance ip
 		_ptr += sizeof(T);

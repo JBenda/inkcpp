@@ -29,8 +29,8 @@ namespace ink::runtime::internal
 	{
 		Header res =  *reinterpret_cast<const Header*>(data);
 		if (res.endien == Header::ENDENSE::DIFFER) {
-			res.inkVersionNumber = swapBytes(res.inkVersionNumber);
-			res.inkCppVersionNumber = swapBytes(res.inkCppVersionNumber);
+			res.inkVersionNumber = swap_bytes(res.inkVersionNumber);
+			res.inkCppVersionNumber = swap_bytes(res.inkCppVersionNumber);
 		}
 		return res;
 	}
@@ -188,7 +188,7 @@ namespace ink::runtime::internal
 
 	void story_impl::setup_pointers()
 	{
-		_header = Header::parseHeader(reinterpret_cast<char*>(_file));
+		_header = Header::parse_header(reinterpret_cast<char*>(_file));
 
 		// String table is after the header
 		_string_table = (char*)_file + sizeof(Header);

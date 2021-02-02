@@ -12,10 +12,10 @@ namespace ink::runtime::internal
 	{
 	public:
 		struct Header {
-			static Header parseHeader(const char* data);
+			static Header parse_header(const char* data);
 
 			template<typename T>
-			static T swapBytes(T value) {
+			static T swap_bytes(const T& value) {
 				char data[sizeof(T)];
 				for (int i = 0; i < sizeof(T); ++i) {
 					data[i] = reinterpret_cast<char*>(&value)[sizeof(T)-1-i];
@@ -55,6 +55,8 @@ namespace ink::runtime::internal
 		virtual globals new_globals() override;
 		virtual runner new_runner(globals store = nullptr) override;
 
+
+		const Header& get_header() const { return _header; }
 	private:
 		void setup_pointers();
 
