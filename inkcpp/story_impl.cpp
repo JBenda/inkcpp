@@ -25,18 +25,13 @@ namespace ink::runtime
 namespace ink::runtime::internal
 {
 
-	template<typename T, int I = 0>
-	void readTuple(T& tuple, const char* data) {
-		if constexpr (I < std::tuple_size<T>::value) {
-			using type = typename std::tuple_element<I,T>::type;
-			std::get<I>(tuple) = *reinterpret_cast<const type*>(data);
-			readTuple<T,I+1>(tuple, data + sizeof(type));
-		}
-	}
 	story_impl::Header story_impl::Header::parseHeader(const char *data)
 	{
-		Header res;
-		readTuple(res._data, data);
+		Header res =  *reinterpret_cast<const Header*>(data);
+		if (res.endien == Header::ENDENSE::DIFFER) {
+			res.inkVersionNumber = swapBytes(res.inkVersionNumber);
+			res.inkCppVersionNumber = swapBytes(res.inkCppVersionNumber);
+		}
 		return res;
 	}
 
