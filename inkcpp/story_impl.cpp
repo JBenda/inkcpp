@@ -11,13 +11,29 @@ namespace ink {
 	// FIXME: find appropriate place to define
 	Header Header::parse_header(const char *data)
 	{
-		Header res =  *reinterpret_cast<const Header*>(data);
-		if (res.endien == Header::ENDENSE::DIFFER) {
-			res.inkVersionNumber = swap_bytes(res.inkVersionNumber);
-			res.inkCppVersionNumber = swap_bytes(res.inkCppVersionNumber);
-		} else if (res.endien != Header::ENDENSE::SAME){
-			// FIXME: throw appropriate error
-			throw ink_exception("Can't parse endian from inkBin file!");
+		Header res;
+		const char* ptr = data;
+		res.endien = *reinterpret_cast<const Header::ENDENSE*>(ptr);
+		ptr += sizeof(Header::ENDENSE);
+
+		using v_t = decltype(Header::inkVersionNumber);
+		using vcpp_t = decltype(Header::inkCppVersionNumber);
+
+		if (res.endien == Header::ENDENSE::SAME) {
+			res.inkVersionNumber =
+				*reinterpret_cast<const v_t*>(ptr);
+			ptr += sizeof(v_t);
+			res.inkCppVersionNumber =
+				*reinterpret_cast<const vcpp_t*>(ptr);
+
+		} else if (res.endien == Header::ENDENSE::DIFFER) {
+			res.inkVersionNumber =
+				swap_bytes(*reinterpret_cast<const v_t*>(ptr));
+			ptr += sizeof(v_t);
+			res.inkCppVersionNumber =
+				swap_bytes(*reinterpret_cast<const vcpp_t*>(ptr));
+		} else {
+			throw ink_exception("Failed to parse endian encoding!");
 		}
 		return res;
 	}
@@ -197,7 +213,7 @@ namespace ink::runtime::internal
 		_header = Header::parse_header(reinterpret_cast<char*>(_file));
 
 		// String table is after the header
-		_string_table = (char*)_file + sizeof(Header);
+		_string_table = (char*)_file + Header::SIZE;
 
 		// Pass over strings
 		const char* ptr = _string_table;

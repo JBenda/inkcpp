@@ -22,5 +22,9 @@ namespace ink {
 			} endien = ENDENSE::NONE;
 			uint32_t inkVersionNumber = 0;
 			uint32_t inkCppVersionNumber = 0;
+			static constexpr size_t SIZE = ///< actual data size of Header,
+										   ///   because padding of struct may
+										   ///   differ between platforms
+				sizeof(uint16_t) + 2 * sizeof(uint32_t);
 		};
 }
