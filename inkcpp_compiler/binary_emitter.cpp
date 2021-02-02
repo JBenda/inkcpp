@@ -1,5 +1,7 @@
 #include "binary_emitter.h"
 
+#include "header.h"
+
 #include <vector>
 #include <map>
 #include <fstream>
@@ -173,7 +175,10 @@ namespace ink::compiler::internal
 	void binary_emitter::output(std::ostream& out)
 	{
 		// Write the ink version
-		out.write((const char*)&_ink_version, sizeof(int));
+		out.write((const char*)&_ink_version, sizeof(decltype(_ink_version)));
+		out.write((const char*)&ink::VERSION, sizeof(decltype(ink::VERSION)));
+		Header::ENDENSE same = Header::ENDENSE::SAME;
+		out.write((const char*)&same, sizeof(decltype(same)));
 
 		// Write the string table
 		_strings.write_to(out);

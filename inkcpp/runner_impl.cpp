@@ -3,6 +3,7 @@
 #include "command.h"
 #include "choice.h"
 #include "globals_impl.h"
+#include "header.h"
 
 namespace ink::runtime
 {
@@ -28,8 +29,8 @@ namespace ink::runtime::internal
 
 		// Read memory
 		T val = *(const T*)_ptr;
-		if (_story->get_header().endien == story_impl::Header::ENDENSE::DIFFER) {
-			val = story_impl::Header::swap_bytes(val);
+		if (_story->get_header().endien == Header::ENDENSE::DIFFER) {
+			val = Header::swap_bytes(val);
 		}
 
 		// Advance ip

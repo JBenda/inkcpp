@@ -7,6 +7,22 @@
 #include <iostream>
 #endif
 
+namespace ink {
+	// FIXME: find appropriate place to define
+	Header Header::parse_header(const char *data)
+	{
+		Header res =  *reinterpret_cast<const Header*>(data);
+		if (res.endien == Header::ENDENSE::DIFFER) {
+			res.inkVersionNumber = swap_bytes(res.inkVersionNumber);
+			res.inkCppVersionNumber = swap_bytes(res.inkCppVersionNumber);
+		} else if (res.endien != Header::ENDENSE::SAME){
+			// FIXME: throw appropriate error
+			throw ink_exception("Can't parse endian from inkBin file!");
+		}
+		return res;
+	}
+}
+
 namespace ink::runtime
 {
 #ifdef INK_ENABLE_STL
@@ -24,16 +40,6 @@ namespace ink::runtime
 
 namespace ink::runtime::internal
 {
-
-	story_impl::Header story_impl::Header::parseHeader(const char *data)
-	{
-		Header res =  *reinterpret_cast<const Header*>(data);
-		if (res.endien == Header::ENDENSE::DIFFER) {
-			res.inkVersionNumber = swap_bytes(res.inkVersionNumber);
-			res.inkCppVersionNumber = swap_bytes(res.inkCppVersionNumber);
-		}
-		return res;
-	}
 
 #ifdef INK_ENABLE_STL
 	unsigned char* read_file_into_memory(const char* filename, size_t* read)
