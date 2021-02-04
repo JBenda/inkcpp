@@ -19,7 +19,7 @@ namespace ink::runtime::internal
 
 		// Add to the tree
 		bool success = _table.insert(data, true); // TODO: Should it start as used?
-		assert(success, "Duplicate string pointer in the string_table. How is that possible?");
+		inkAssert(success, "Duplicate string pointer in the string_table. How is that possible?");
 		if (!success)
 		{
 			delete[] data;

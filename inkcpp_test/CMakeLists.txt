@@ -7,3 +7,5 @@ add_executable(inkcpp_test catch.hpp Main.cpp
     )
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp)
+
+add_test(NAME UnitTests COMMAND $<TARGET_FILE:inkcpp_test>)

@@ -1,0 +1,47 @@
+name: 🏁 MacOS Builds
+on:
+  push:
+    branches: [ master, main, github_actions_brook ]
+
+env:
+  BUILD_TYPE: release
+
+jobs:
+  windows-compilation:
+    name: MacOS Compilation
+    runs-on: "macos-latest"
+    steps:
+
+    # Checkout project
+    - uses: actions/checkout@v2
+
+    # Create a build directory to store all the CMake generated files
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      # Execute the build.  You can specify a specific target with "--target <NAME>"
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Tests
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: ctest . -C $BUILD_TYPE -V
+
+    - name: Install
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --install . --config $BUILD_TYPE --prefix bin
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: win64
+        path: build/bin/
