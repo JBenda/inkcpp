@@ -97,10 +97,10 @@ namespace ink
 
 	// assert	
 #ifndef INK_ENABLE_UNREAL
-	void assert(bool condition, const char* msg = nullptr);
-	[[ noreturn ]] inline void assert(const char* msg = nullptr) { assert(false, msg); }
+	void ink_assert(bool condition, const char* msg = nullptr);
+	[[ noreturn ]] inline void ink_assert(const char* msg = nullptr) { ink_assert(false, msg); }
 #else
-	[[ noreturn ]] inline void fail(const char*) { check(false); throw nullptr; }
+	[[ noreturn ]] inline void ink_fail(const char*) { check(false); throw nullptr; }
 #endif
 
 #ifdef INK_ENABLE_STL
@@ -130,9 +130,9 @@ namespace ink
 #ifdef INK_ENABLE_UNREAL
 #define inkZeroMemory(buff, len) FMemory::Memset(buff, 0, len)
 #define inkAssert(condition, text) checkf(condition, TEXT(text))
-#define inkFail(text) ink::fail(text)
+#define inkFail(text) ink::ink_fail(text)
 #else
 #define inkZeroMemory ink::zero_memory
-#define inkAssert ink::assert
-#define inkFail(text) ink::assert(text)
+#define inkAssert ink::ink_assert
+#define inkFail(text) ink::ink_assert(text)
 #endif

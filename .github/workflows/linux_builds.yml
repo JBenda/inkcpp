@@ -9,7 +9,7 @@ env:
 jobs:
   windows-compilation:
     name: Linux Compilation
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-20.04"
     steps:
 
     # Checkout project
