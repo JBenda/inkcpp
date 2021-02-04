@@ -30,6 +30,11 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
 
+    - name: Tests
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: ctest . -C $BUILD_TYPE -V
+
     - name: Install
       working-directory: ${{github.workspace}}/build
       shell: bash

@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Testing enabled
+enable_testing()
+
 # Project setup
 project(inkcpp VERSION 0.1)
 
