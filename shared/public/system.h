@@ -13,8 +13,6 @@
 #include <stdexcept>
 #endif
 
-#undef assert
-
 namespace ink
 {
 	typedef unsigned int uint32_t;
