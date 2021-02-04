@@ -2,6 +2,7 @@
 #include "platform.h"
 #include "runner_impl.h"
 #include "globals_impl.h"
+#include "version.h"
 
 #ifdef INK_ENABLE_STL
 #include <iostream>
@@ -34,6 +35,10 @@ namespace ink {
 				swap_bytes(*reinterpret_cast<const vcpp_t*>(ptr));
 		} else {
 			throw ink_exception("Failed to parse endian encoding!");
+		}
+
+		if (res.inkCppVersionNumber != VERSION) {
+			throw ink_exception("InkCpp-version mismatch: file was compiled with different InkCpp-version!");
 		}
 		return res;
 	}
