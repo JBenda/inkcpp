@@ -14,7 +14,8 @@ Here's some quick guidelines when writing code for the project.
 
 Broadly, the interface style of inkcpp should resemble that of the C++ standard library.
 
-* All type names (classes, structs, typedefs, namespaces, etc.) should be written in snake_case (lowercase, words seperated by underlines).
+* All type names (classes, structs, enums, typedefs, namespaces, etc.) should be written in snake_case (lowercase, words seperated by underlines).
+* All enums should be C++11 "class" enums.
 * Typedefs/usings to integral types should have the suffix `_t`. E.g. `hash_t` and `uint32_t`.
 * When defining content in a nested namespace, use the new C++ syntax (`namespace a::b::c { ... }`) to reduce the amount of indentation
 
@@ -24,6 +25,14 @@ Broadly, the interface style of inkcpp should resemble that of the C++ standard 
 * Shared code lives in the `ink` namespace
 * Any non-user facing code should live in the corresponding `internal` namespace.
 ** For example, the `restorable_array` class is never exposed outside the library, and thus lives in `ink::runtime::internal`
+
+## Folder Structure
+
+* Runtime code goes in the inkcpp folder
+* Compiler code goes in the inkcpp_compiler folder
+* Code for the inkcpp_cl executable goes in inkcpp_cl
+* User facing headers should go in the corresponding `include` directory in the parent folder
+* Shared headers live in `shared`, either in the `public` or `private` folder. Private is for headers that will only be used internally. Public is for user-facing headers.
 
 ## Unit Tests
 
