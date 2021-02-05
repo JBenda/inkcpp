@@ -22,45 +22,63 @@ namespace ink::runtime
 		 */
 		template<typename T>
 		T* get(const char* name) {
-			return get_impl<T>(hash_string(name));
+			static_assert(
+					internal::always_false<T>::value,
+					"Requested Type is not supported");
 		}
 		template<typename T>
 		const T* get(const char* name) const {
-			return get_impl<T>(hash_string(name));
+			static_assert(
+					internal::always_false<T>::value,
+					"Requested Type is not supported");
 		}
 
 		virtual ~globals_interface() = default;
 
 	protected:
-		template<typename T>
-		T* get_impl(hash_t name) const {
-			static_assert(
-					internal::always_false<T>::value,
-					"Requested Type is not supported");
-		}
-		virtual uint32_t* getUInt(hash_t name) const = 0;
-		virtual int32_t* getInt(hash_t name) const = 0;
-		virtual float* getFloat(hash_t name) const = 0;
-		virtual char* getStr(hash_t name) const = 0;
+		virtual const uint32_t* getUInt(hash_t name) const = 0;
+		virtual uint32_t* getUInt(hash_t name) = 0;
+		virtual const int32_t* getInt(hash_t name) const = 0;
+		virtual int32_t* getInt(hash_t name) = 0;
+		virtual const float* getFloat(hash_t name) const = 0;
+		virtual float* getFloat(hash_t name) = 0;
+		virtual const char* getStr(hash_t name) const = 0;
+		virtual char* getStr(hash_t name) = 0;
 	};
 
 	template<>
-	inline uint32_t* globals_interface::get_impl<uint32_t>(hash_t name) const {
-		return getUInt(name);
+	inline const uint32_t* globals_interface::get<uint32_t>(const char* name) const {
+		return getUInt(hash_string(name));
+	}
+	template<>
+	inline uint32_t* globals_interface::get<uint32_t>(const char* name) {
+		return getUInt(hash_string(name));
 	}
 
 	template<>
-	inline int32_t* globals_interface::get_impl<int32_t>(hash_t name) const {
-		return getInt(name);
+	inline const int32_t* globals_interface::get<int32_t>(const char* name) const {
+		return getInt(hash_string(name));
+	}
+	template<>
+	inline int32_t* globals_interface::get<int32_t>(const char* name) {
+		return getInt(hash_string(name));
 	}
 
 	template<>
-	inline float* globals_interface::get_impl<float>(hash_t name) const {
-		return getFloat(name);
+	inline const float* globals_interface::get<float>(const char* name) const {
+		return getFloat(hash_string(name));
+	}
+	template<>
+	inline float* globals_interface::get<float>(const char* name) {
+		return getFloat(hash_string(name));
 	}
 
 	template<>
-	inline char* globals_interface::get_impl<char>(hash_t name) const {
-		return getStr(name);
+	inline const char* globals_interface::get<char>(const char* name) const {
+		return getStr(hash_string(name));
+	}
+	template<>
+	inline char* globals_interface::get<char>(const char* name) {
+		return getStr(hash_string(name));
 	}
 }

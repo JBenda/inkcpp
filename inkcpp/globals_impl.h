@@ -20,13 +20,17 @@ namespace ink::runtime::internal
 		virtual ~globals_impl() { }
 
 	protected:
-		uint32_t* getUInt(hash_t name) const override;
+		const uint32_t* getUInt(hash_t name) const override;
+		uint32_t* getUInt(hash_t name) override;
 
-		int32_t* getInt(hash_t name) const override;
+	  	const int32_t* getInt(hash_t name) const override;
+	  	int32_t* getInt(hash_t name) override;
 
-		float* getFloat(hash_t name) const override;
+		const float* getFloat(hash_t name) const override;
+		float* getFloat(hash_t name) override;
 
-		char* getStr(hash_t name) const override;
+		const char* getStr(hash_t name) const override;
+		char* getStr(hash_t name) override;
 
 	public:
 		// Records a visit to a container
@@ -89,7 +93,7 @@ namespace ink::runtime::internal
 		// Global variables (TODO: Max 50?)
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.
 		//  If I could create an avl tree with save/restore, that'd be great but seems super complex.
-		mutable internal::stack<50> _variables;
+		internal::stack<50> _variables;
 		bool _globals_initialized;
 	};
 }
