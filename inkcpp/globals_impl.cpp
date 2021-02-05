@@ -72,28 +72,40 @@ namespace ink::runtime::internal
 		return _variables.get(name);
 	}
 
-	uint32_t* globals_impl::getUInt(hash_t name) const {
-		value* v = _variables.get(name);
-		return v && v->get_data_type() == data_type::uint32
-			? v->as_uint_ptr()
+	template<auto (value::*FN)()>
+	auto fetchVariable(auto stack, hash_t name, data_type type) {
+		auto v = stack.get(name);
+		return v && v->get_data_type() == type
+			? (v->*FN)()
 			: nullptr;
 	}
 
-	int32_t* globals_impl::getInt(hash_t name) const {
-		value* v = _variables.get(name);
-		return v && v->get_data_type() == data_type::int32
-			? v->as_int_ptr()
-			: nullptr;
+	const uint32_t* globals_impl::getUInt(hash_t name) const {
+		return fetchVariable<&value::as_uint_ptr>(_variables, name, data_type::uint32);
+	}
+	uint32_t* globals_impl::getUInt(hash_t name) {
+		return fetchVariable<&value::as_uint_ptr>(_variables, name, data_type::uint32);
 	}
 
-	float* globals_impl::getFloat(hash_t name) const {
-		value* v =  _variables.get(name);
-		return v && v->get_data_type() == data_type::float32
-			? v->as_float_ptr()
-			: nullptr;
+	const int32_t* globals_impl::getInt(hash_t name) const {
+		return fetchVariable<&value::as_int_ptr>(_variables, name, data_type::int32);
+	}
+	int32_t* globals_impl::getInt(hash_t name) {
+		return fetchVariable<&value::as_int_ptr>(_variables, name, data_type::int32);
 	}
 
-	char* globals_impl::getStr(hash_t name) const {
+	const float* globals_impl::getFloat(hash_t name) const {
+		return fetchVariable<&value::as_float_ptr>(_variables, name, data_type::float32);
+	}
+	float* globals_impl::getFloat(hash_t name) {
+		return fetchVariable<&value::as_float_ptr>(_variables, name, data_type::float32);
+	}
+
+	char* globals_impl::getStr(hash_t name) {
+		// TODO: add string support
+		throw ink_exception("String handling is not supported yet!");
+	}
+	const char* globals_impl::getStr(hash_t name) const {
 		// TODO: add string support
 		throw ink_exception("String handling is not supported yet!");
 	}
