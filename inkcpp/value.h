@@ -96,9 +96,12 @@ namespace ink
 
 				// == Getters ==
 				int as_int() const { return _first.integer_value; }
+				int* as_int_ptr() { return &_first.integer_value; }
 				float as_float() const { return _first.float_value; }
+				float* as_float_ptr() { return &_first.float_value; }
 				uint32_t as_divert() const { return _first.uint_value; }
 				uint32_t as_thread_id() const { return _first.uint_value; }
+				uint32_t* as_uint_ptr() { return &_first.uint_value; }
 				// TODO: String access?
 
 				template<typename T>

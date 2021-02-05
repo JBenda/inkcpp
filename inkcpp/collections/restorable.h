@@ -287,30 +287,13 @@ namespace ink::runtime::internal
 
 		// Reverse find
 		template<typename Predicate>
-		const ElementType* reverse_find(Predicate predicate) const
-		{
-			if (_pos == 0) {
-				return nullptr;
-			}
+		ElementType* reverse_find(Predicate predicate) {
+			return reverse_find_impl(predicate);
+		}
 
-			// Start at the end
-			size_t i = _pos;
-			do
-			{
-				// Move back one element
-				i--;
-
-				// Run callback
-				if (predicate(_buffer[i]))
-					return &_buffer[i];
-
-				// Jump over saved data
-				if (i == _save)
-					i = _jump;
-
-			} while (i > 0);
-
-			return nullptr;
+		template<typename Predicate>
+		const ElementType* reverse_find(Predicate predicate) const {
+			return reverse_find_impl(predicate);
 		}
 
 		template<typename IsNullPredicate>
@@ -347,6 +330,33 @@ namespace ink::runtime::internal
 		virtual void overflow(ElementType*& buffer, size_t& size) { throw 0; /* TODO: What to do here? Throw something more useful? */ }
 
 	private:
+		template<typename Predicate>
+		ElementType* reverse_find_impl(Predicate predicate) const
+		{
+			if (_pos == 0) {
+				return nullptr;
+			}
+
+			// Start at the end
+			size_t i = _pos;
+			do
+			{
+				// Move back one element
+				i--;
+
+				// Run callback
+				if (predicate(_buffer[i]))
+					return &_buffer[i];
+
+				// Jump over saved data
+				if (i == _save)
+					i = _jump;
+
+			} while (i > 0);
+
+			return nullptr;
+		}
+
 		// Data buffer. Collection is stored here
 		ElementType* _buffer;
 

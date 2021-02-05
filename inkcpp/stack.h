@@ -36,6 +36,7 @@ namespace ink
 
 				// Gets an existing value, or nullptr
 				const value* get(hash_t name) const;
+				value* get(hash_t name);
 
 				// pushes a new frame onto the stack
 				void push_frame(offset_t return_to, frame_type type);
