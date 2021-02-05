@@ -18,6 +18,8 @@ Broadly, the interface style of inkcpp should resemble that of the C++ standard 
 * All enums should be C++11 "class" enums.
 * Typedefs/usings to integral types should have the suffix `_t`. E.g. `hash_t` and `uint32_t`.
 * When defining content in a nested namespace, use the new C++ syntax (`namespace a::b::c { ... }`) to reduce the amount of indentation
+* Private class member variables should be prepended with an underscore (`_`)
+* Compile-time constants should be written in PascalCase (e.g. `InvalidHash`)
 
 ## Namespaces
 * Compiler code lives in the `ink::compiler` namespace
