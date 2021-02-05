@@ -68,6 +68,37 @@ namespace ink::runtime::internal
 		return _variables.get(name);
 	}
 
+	value* globals_impl::get_variable(hash_t name) {
+		return _variables.get(name);
+	}
+
+	uint32_t* globals_impl::getUInt(hash_t name) const {
+		value* v = _variables.get(name);
+		return v && v->get_data_type() == data_type::uint32
+			? v->as_uint_ptr()
+			: nullptr;
+	}
+
+	int32_t* globals_impl::getInt(hash_t name) const {
+		value* v = _variables.get(name);
+		return v && v->get_data_type() == data_type::int32
+			? v->as_int_ptr()
+			: nullptr;
+	}
+
+	float* globals_impl::getFloat(hash_t name) const {
+		value* v =  _variables.get(name);
+		return v && v->get_data_type() == data_type::float32
+			? v->as_float_ptr()
+			: nullptr;
+	}
+
+	char* globals_impl::getStr(hash_t name) const {
+		// TODO: add string support
+		throw ink_exception("String handling is not supported yet!");
+	}
+
+
 	void globals_impl::initialize_globals(runner_impl* run)
 	{
 		// If no way to move there, then there are no globals.

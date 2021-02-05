@@ -19,7 +19,14 @@ namespace ink::runtime::internal
 		globals_impl(const story_impl*);
 		virtual ~globals_impl() { }
 
-		virtual void dummy() override { }
+	protected:
+		uint32_t* getUInt(hash_t name) const override;
+
+		int32_t* getInt(hash_t name) const override;
+
+		float* getFloat(hash_t name) const override;
+
+		char* getStr(hash_t name) const override;
 
 	public:
 		// Records a visit to a container
@@ -37,6 +44,7 @@ namespace ink::runtime::internal
 
 		// gets a global variable
 		const value* get_variable(hash_t name) const;
+		value* get_variable(hash_t name);
 
 		// checks if globals are initialized
 		bool are_globals_initialized() const { return _globals_initialized; }
@@ -46,7 +54,7 @@ namespace ink::runtime::internal
 
 		// gets the allocated string table
 		inline string_table& strings() { return _strings; }
-		
+
 		// run garbage collection
 		void gc();
 
@@ -54,10 +62,11 @@ namespace ink::runtime::internal
 		void save();
 		void restore();
 		void forget();
+
 	private:
 		// Store the number of containers. This is the length of most of our lists
 		const uint32_t _num_containers;
-		
+
 		// Visit count array
 		internal::allocated_restorable_array<uint32_t> _visit_counts;
 
@@ -80,7 +89,7 @@ namespace ink::runtime::internal
 		// Global variables (TODO: Max 50?)
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.
 		//  If I could create an avl tree with save/restore, that'd be great but seems super complex.
-		internal::stack<50> _variables;
+		mutable internal::stack<50> _variables;
 		bool _globals_initialized;
 	};
 }

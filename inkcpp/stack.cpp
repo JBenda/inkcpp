@@ -24,12 +24,8 @@ namespace ink::runtime::internal
 			*existing = val;
 	}
 
-	const value* basic_stack::get(hash_t name) const
-	{
-		// Find whatever comes first: a matching entry or a stack frame entry
-		thread_t skip = ~0;
-		uint32_t jumping = 0;
-		const entry* found = base::reverse_find([name, &skip, &jumping](entry& e) {
+	auto reverse_find_predicat_constructor(hash_t name, thread_t& skip, uint32_t& jumping) {
+		return [name, &skip, &jumping](entry& e) {
 			// Jumping
 			if (jumping > 0) {
 				jumping--;
@@ -66,7 +62,31 @@ namespace ink::runtime::internal
 			}
 
 			return e.name == name || e.name == InvalidHash;
-		});
+		};
+	}
+
+	const value* basic_stack::get(hash_t name) const {
+		// Find whatever comes first: a matching entry or a stack frame entry
+		thread_t skip = ~0;
+		uint32_t jumping = 0;
+		const entry* found = base::reverse_find(reverse_find_predicat_constructor(name, skip, jumping));
+
+		// If nothing found, no value
+		if (found == nullptr)
+			return nullptr;
+
+		// If we found something of that name, return the value
+		if (found->name == name)
+			return &found->data;
+
+		// Otherwise, nothing in this stack frame
+		return nullptr;
+	}
+	value* basic_stack::get(hash_t name) {
+		// Find whatever comes first: a matching entry or a stack frame entry
+		thread_t skip = ~0;
+		uint32_t jumping = 0;
+		entry* found = base::reverse_find(reverse_find_predicat_constructor(name, skip, jumping));
 
 		// If nothing found, no value
 		if (found == nullptr)
