@@ -61,17 +61,31 @@ Many, but not all features of the Ink language are supported (see Glaring Omissi
 * Tunnels and internal functions
 * Ink threads (probably incredibly unstable though)
 
-## CMake
-Project is organized using `cmake`. Just run `cmake` and it should configure all the projects properly into a runtime, compiler, and command line project.
+## Configuring and Building (CMake)
+
+To configure the project...
+
+1. Install CMake
+2. Create a folder called `build`
+3. From the build folder, run `cmake ..`
+
+CMake will then generate the necessary build files for your environment. By default, it generates Visual Studio projects and solutions on Windows and Makefiles on Mac and Linux. You can change this using CMake's command line options (see `cmake --help`). It supports pretty much anything.
+
+To build, either run the generated buildfiles OR you can use `cmake --build` from the build folder to automatically execute the relevant toolchain.
+
+### Running Tests
+
+Run `ctest` from the build folder to execute unit tests configured with CMake. Use `ctest -V` for more verbose error output.
+
+Right now this only executes the internal unit tests which test the functions of particular classes. Soon it'll run more complex tests on .ink files using ink-proof.
 
 ## Unreal Plugin
+
 Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run `cmake --install . --component unreal --prefix Path/To/Unreal/Plugins/` which will add an `inkcpp` folder there with the `.uplugin`, the code for the UClasses, and all the inkcpp source files required. `config.h` will automatically detect it is being built in an Unreal plugin environment and disable STL and enable Unreal extensions (FString support, Unreal asserts, CityHash, etc.).
 
 ## Next Steps
 
 I am currently working toward a 1.0 release. You can track my progress here: https://github.com/brwarner/inkcpp/projects/1
-
-Part of that involves slowly migrating all the unit tests from the main inkle ink C# repository over to my new testing system. You can see the tests in the `tests` folder.
 
 ### Glaring Omissions
 
@@ -80,8 +94,7 @@ The big things we're missing right now are:
 * Fallback functions for externals.
 * Variable observers
 * Lists and whatever cool, crazy stuff Ink has been adding recently.
-
-There are unit tests using `catch` for some of the underlying types (restorable stacks, arrays, and the shared-ish pointer) but not for any of the ink implementation.
+* Robust tests using ink-proof.
 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
