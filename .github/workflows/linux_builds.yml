@@ -78,6 +78,7 @@ jobs:
           chmod +x drivers/inkcpp_runtime_driver
           mkdir deps/inkcpp
           cp -v $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
+          ls deps
           chmod +x deps/inkcpp/inkcpp_cl
           python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
 
