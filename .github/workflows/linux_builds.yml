@@ -43,5 +43,5 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v1
       with:
-        name: win64
+        name: linux
         path: build/bin/

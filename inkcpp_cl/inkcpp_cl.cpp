@@ -54,7 +54,7 @@ int main(int argc, const char** argv)
 		}
 		else
 		{
-			std::cerr << "Unrecognized option '" << option << "'\n";
+			std::cerr << "Unrecognized option: '" << option << "'\n";
 		}
 	}
 
@@ -87,13 +87,22 @@ int main(int argc, const char** argv)
 		std::string jsonFile = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".tmp");
 
 		// Then we need to do a compilation with inklecate
-		inklecate(inputFilename, jsonFile);
+		try
+		{
+			inklecate(inputFilename, jsonFile);
+		}
+		catch (const std::exception& e)
+		{
+			std::cerr << "Inklecate Error: " << e.what() << std::endl;
+			return 1;
+		}
 
 		// New input is the json file
 		inputFilename = jsonFile;
 	}
 
 	// Open file and compile
+	try
 	{
 		ink::compiler::compilation_results results;
 		std::ofstream fout(outputFilename, std::ios::binary | std::ios::out);
@@ -112,11 +121,17 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Unhandled InkBin compiler exception: " << e.what() << std::endl;
+		return 1;
+	}
 
 	if (!playMode)
 		return 0;
 
 	// Run the story
+	try
 	{
 		using namespace ink::runtime;
 
@@ -151,5 +166,10 @@ int main(int argc, const char** argv)
 		}
 
 		return 0;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "Unhandled ink runtime exception: " << e.what() << std::endl;
+		return 1;
 	}
 }
