@@ -60,7 +60,7 @@ jobs:
       # Download build result from previous step
       - uses: actions/download-artifact@v2
         with:
-          name: win64
+          name: linux
 
       # Setup python
       - uses: actions/setup-python@v2
