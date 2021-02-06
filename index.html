@@ -1,0 +1,568 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Ink Proof</title>
+    <link rel="stylesheet" href="tachyons.min.css"/>
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    <style>
+      main {
+        display: grid;
+        grid:
+                "nav" fit-content(100px)
+                "overview" fit-content(100px)
+                "focus" 1fr
+              / 1fr;
+      }
+      @media screen and (min-width: 1024px) {
+        main {
+          grid:
+             "overview nav" auto
+             "overview focus" 1fr
+           / auto 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="sans-serif vh-100 w-100"></main>
+    <script src="mithril.min.js"></script>
+    <script>
+      const Rollover = {
+        current: null,
+      };
+
+      const Data = {
+        data: {},
+        examples: [],
+        programs: [],
+        results: [],
+        statuses: {},
+        exampleByName: {},
+        programByName: {},
+        resultByProgramExample: {},
+
+        getResult(program, example) {
+          if (this.resultByProgramExample[program.name] === undefined) {
+            return null;
+          }
+          if (this.resultByProgramExample[program.name][example.name] === undefined) {
+            return null;
+          }
+          return this.resultByProgramExample[program.name][example.name];
+        },
+
+        load() {
+          return m.request({
+            method: "GET",
+            url: "summary.json",
+          }).then(result => {
+            Data.data = result;
+            Data.examples = result.examples;
+            Data.programs = result.programs;
+            Data.results = result.results;
+            Data.statuses = result.statuses;
+            Data.metadata = result.metadata;
+
+            const exampleByName = {};
+            const programByName = {};
+            const resultByProgramExample = {};
+            for (const example of result.examples) {
+              exampleByName[example.name] = example;
+            }
+            for (const program of result.programs) {
+              programByName[program.name] = program;
+              resultByProgramExample[program.name] = {};
+            }
+            for (const r of result.results) {
+              if (resultByProgramExample[r.program] === undefined) {
+                resultByProgramExample[r.program] = {};
+              }
+              resultByProgramExample[r.program][r.example] = r;
+            }
+            Data.exampleByName = exampleByName;
+            Data.programByName = programByName;
+            Data.resultByProgramExample = resultByProgramExample;
+          });
+        },
+      };
+
+      const Files = {
+        cached: {},
+        pending: {},
+
+        get(path) {
+          if (this.cached[path] !== undefined) {
+            return this.cached[path];
+          }
+          if (this.pending[path]) {
+            return '';
+          }
+          this.pending[path] = true;
+          m.request({
+            method: "GET",
+            responseType: "text",
+            url: path,
+          }).then(result => {
+            Files.pending[path] = false;
+            Files.cached[path] = result;
+          });
+        },
+
+        isLoading(path) {
+          return !!this.pending[path];
+        },
+      };
+
+      const FocusExample = {
+        view(vnode) {
+          const example = Data.exampleByName[vnode.attrs.exampleName];
+          return [
+            m("h1",
+              "Example ",
+              vnode.attrs.exampleName, " ",
+              m("span.f3.gray", example.metadata.oneLineDescription)),
+            m(".fl.w-50.pr2",
+              m("p", example.sourcePath.endsWith(".json") ? "Bytecode" : "Ink"),
+              m(FileView, {path: example.sourcePath}),
+            ),
+            m(".fl.w-50",
+              m("p", "Input"),
+              m(FileView, {path: example.inputPath}),
+              m("p", "Expected output"),
+              m(FileView, {path: example.expectedPath}),
+            ),
+          ];
+        }
+      };
+
+      const FocusNothing = {
+        view() {
+          return null;
+        }
+      };
+
+      const FileView = {
+        view(vnode) {
+          const text = Files.get(vnode.attrs.path);
+          const isLoading = Files.isLoading(vnode.attrs.path);
+          return text === "" ? m('p', m("i.gray", isLoading ? "Loading" : "Empty file")) : m("pre.f6", {
+            style: "white-space: pre-wrap; tab-size: 4;",
+                }, text ? text.split("\n").map(l => [l, m('span', {title: "newline", style: "user-select: none; color: #eaeaea;"}, "↵"), "\n"]) : "");
+        },
+      };
+
+      const FocusFile = {
+        view(vnode) {
+          return [
+            m("p", m("a[href=''].link", {onclick: e => {
+              e.preventDefault();
+              history.back();
+            }}, "Back")),
+            m("code", vnode.attrs.path),
+            m(FileView, {path: vnode.attrs.path}),
+          ];
+        },
+      };
+
+      const FocusGolden = {
+        view(vnode) {
+          const example = Data.exampleByName[vnode.attrs.exampleName];
+          return [
+            m('h1', "Expected output for ", vnode.attrs.exampleName),
+            m(FileView, {path: example.expectedPath}),
+          ];
+        }
+      };
+
+      const FocusProgram = {
+        view(vnode) {
+          const programName = vnode.attrs.programName;
+          const program = Data.programByName[programName];
+          return [
+            m('h1', program.kind, " ", program.name),
+            m("p", Data.results.filter(r => r.program === programName).map(r => {
+              const status = Data.statuses[r.status];
+              return m(m.route.Link, {
+                    href: `/result/${Data.results.indexOf(r)}`,
+                    class: 'link',
+                  }, status.symbol);
+            })),
+          ];
+        }
+      };
+
+      const FocusMetadata = {
+        view(vnode) {
+          return [
+            m(".code", JSON.stringify(Data.metadata)),
+          ];
+        }
+      };
+
+      const FocusTestCases = {
+        view(vnode) {
+          return [
+            m("table",
+              m("tr",
+                m("th.fw6.pa.pb2.pr3.tl", "Name"),
+                m("th.fw6.pa.pb2.pr3.tl", "Description"),
+              ),
+              Data.examples.map(e => {
+                return m("tr",
+                  m("td.code", m(m.route.Link, {
+                    href: `/example/${e.name}`,
+                    class: 'link code db',
+                  }, e.name)),
+                  m("td", e.metadata.oneLineDescription, e.metadata.tags.map(t => {
+                    return m("span.code.ml2.ph1.ba.b--black-10.bg-washed-blue.br1.w3.f7", t);
+                  })),
+                );
+              }),
+            ),
+          ];
+        },
+      };
+
+      const FocusHelp = {
+        view(vnode) {
+          const program = Data.programByName[vnode.attrs.programName];
+          return [
+            m("p.mw6",
+              "This is ink-proof, a tool for conformance testing of Ink compilers and runtimes.", " ",
+              "On the left you can see the output of a round of ink-proof testing.", " ",
+              "Each row is a test case and each column is a compiler or runtime.", " ",
+              "Try clicking on an item in the table for more detail on it.", " ",
+            ),
+            m("p.mw6",
+              "For more information see the ",
+              m("a[href=https://github.com/chromy/ink-proof]", "ink-proof github page"), "."
+            ),
+
+            m("p.f6",
+              m("b", "Key"),
+                Object.values(Data.statuses).map(s => m("", [s.symbol, "=", s.name])),
+              ),
+
+          ];
+        }
+      };
+
+      const ResultKeyValueRow = {
+        view(vnode) {
+          const k = vnode.attrs.k;
+          const v = vnode.attrs.v;
+          const kind = resultItemKind(k, v);
+
+          if (kind === "null") {
+            return m("tr",
+              m("td", k),
+              m("td", m(".code.gray", "NULL")),
+            );
+          } else if (kind === "file") {
+            return m("tr", m("td", k), m("td", m(m.route.Link, {
+              href: `/file/${v}`,
+              class: 'link',
+              }, v),
+            ));
+          } else if (kind === "list") {
+            return m("tr", m("td", k), m("td.code", v.join(" ")));
+          } else {
+            return m("tr", m("td", k), m("td", v));
+          }
+        },
+      };
+
+      function resultItemKind(key, value) {
+        const isPath = key.endsWith("Path");
+        const isList = value instanceof Array;
+        const isNullValue = value === null;
+        if (isNullValue) {
+          return 'null';
+        }
+        if (isPath) {
+          return 'file';
+        }
+        if (isList) {
+          return 'list';
+        }
+        return 'unknown';
+      }
+
+      const ResultEverything = {
+        view(vnode) {
+          const resultIndex = vnode.attrs.resultIndex;
+          const result = Data.results[resultIndex];
+          const program = Data.programByName[result.program];
+          const example = Data.exampleByName[result.example];
+          const status = Data.statuses[result.status];
+          return m("table", Object.entries(result).map(([k, v]) => {
+            return m(ResultKeyValueRow, {k, v})
+          }));
+        },
+      };
+
+      const ResultSummaryItem = {
+        view(vnode) {
+          const resultIndex = vnode.attrs.resultIndex;
+          const result = Data.results[resultIndex];
+          const item = vnode.attrs.item;
+          const k = item.name;
+          const v = result[k];
+          const kind = resultItemKind(k, v);
+          if (kind === "null") {
+            return m("p", item.humanName, ": " , m(".code.gray", "NULL"));
+          }
+
+          if (kind === "file") {
+            return m("p", item.humanName, ": " , m("span.code", m(FileView, {path: v})));
+          }
+
+          if (kind === "list") {
+            return m("p", item.humanName, ": " , m("span.code", v.join(" ")));
+          }
+
+          return m("p", item.humanName, ": " , m("span.code", v));
+        }
+      };
+
+      const ResultSummary = {
+        view(vnode) {
+          const resultIndex = vnode.attrs.resultIndex;
+          const result = Data.results[resultIndex]
+          const program = Data.programByName[result.program];
+          const example = Data.exampleByName[result.example];
+          const status = Data.statuses[result.status];
+          return status.summary.map(item => m(ResultSummaryItem, {resultIndex, item}));
+        },
+      };
+
+      const FocusResult = {
+        view(vnode) {
+          const resultIndex = vnode.attrs.resultIndex;
+          const showEverything = vnode.attrs.showEverything;
+          const result = Data.results[resultIndex];
+          const program = Data.programByName[result.program];
+          const example = Data.exampleByName[result.example];
+          const status = Data.statuses[result.status];
+
+          return [
+            m("h1",
+
+                m(m.route.Link, {
+                  href: `/program/${program.name}`,
+                  class: 'link',
+                  }, program.name),
+
+              " x ",
+
+                m(m.route.Link, {
+                  href: `/example/${example.name}`,
+                  class: 'link',
+                  }, example.name),
+              " ",
+              m("span.f3.gray", example.metadata.oneLineDescription),
+            ),
+            m("h1", result.status, " ", m("span.f4.gray", status.description)),
+
+            m(m.route.Link, {
+              href: m.buildPathname("/result/:resultIndex", showEverything ? {
+                resultIndex,
+              } : {
+                resultIndex,
+                showEverything: true,
+              }),
+              class: 'link',
+            }, showEverything ? "Show what the test harness believes is relevant" : "Show all information from the test"),
+            showEverything ? m(ResultEverything, {resultIndex}) : m(ResultSummary, {resultIndex}),
+          ];
+        }
+      };
+
+      const Nav = {
+        view() {
+          return m(".bb",
+              m("span.f5.f4-l.black-80.pa3.ph4-l.baskerville", "ink-proof"),
+              m(m.route.Link, {
+                href: `/help`,
+                class: 'f6 f5-l link bg-animate black-80 hover-bg-lightest-blue dib pa3 ph4-l small-caps' + (m.route.get() === "/help" ? " bg-lightest-blue" : ""),
+              }, "help"), " ",
+              m(m.route.Link, {
+                href: `/tests`,
+                class: 'f6 f5-l link bg-animate black-80 hover-bg-lightest-blue dib pa3 ph4-l small-caps'
+                + (m.route.get() === "/tests" ? " bg-lightest-blue" : ""),
+              }, "test cases"),
+              m(m.route.Link, {
+                href: `/metadata`,
+                class: 'f6 f5-l link bg-animate black-80 hover-bg-lightest-blue dib pa3 ph4-l small-caps'
+                + (m.route.get() === "/metadata" ? " bg-lightest-blue" : ""),
+              }, "metadata"),
+            );
+        }
+      }
+
+      const Overview = {
+        view() {
+          return [
+            m("table.center",
+              m("tr", m("th"), m("th"), Data.programs.map(p => m("th", {
+                    class: m.route.param("programName") === p.name
+                    ? "bg-light-yellow"
+                    : "hover-bg-light-yellow",
+                  },
+                m(m.route.Link, {
+                  href: `/program/${p.name}`,
+                  class: 'link db',
+                  style: "max-width: 5rem;",
+                  }, p.name.split("_").join("\n"))),
+              )),
+              Data.examples.map((e, i) => m("tr",
+                m("td", {
+                    class: m.route.param("exampleName") === e.name
+                    ? "bg-light-yellow"
+                    : "hover-bg-light-yellow",
+                  },
+                  m(m.route.Link, {
+                    href: `/example/${e.name}`,
+                    class: 'link code db',
+                  }, e.name),
+                ),
+                m("td.tc", m(m.route.Link, {
+                  href: `/golden/${e.name}`,
+                  class: 'link db',
+                }, "💛")),
+                Data.programs.map(p => {
+                  const result = Data.getResult(p, e);
+                  if (result === null) {
+                    return m("td");
+                  }
+                  const statusName = result.status;
+                  const status = Data.statuses[statusName];
+                  const resultIndex = m.route.param("resultIndex");
+                  const index = Data.results.indexOf(result);
+                  return m("td.tc", {
+                    class: index == resultIndex
+                    ? "bg-light-yellow"
+                    : "hover-bg-light-yellow",
+                  }, m(m.route.Link, {
+                    href: `/result/${index}`,
+                    class: 'link db',
+                  }, status.symbol));
+                }),
+              )),
+            ),
+
+          ];
+         }
+      };
+
+      const OverviewWithFocus = {
+        view(vnode) {
+          return [
+            m(".overflow-y-scroll-ns.vh-100-ns", { style: "grid-area: overview;"} ,
+              m(".pa3", m(Overview)),
+            ),
+            m(".bl", { style: "grid-area: nav;"}, m(Nav)),
+            m(".bl", { style: "grid-area: focus;"}, m(".pa3", vnode.children)),
+          ];
+        },
+      }
+
+      async function main() {
+        Data.load();
+        const result = await fetch('summary.json');
+        const data = await result.json();
+        const root = document.querySelector('main');
+        m.route(root, "/help", {
+
+          // "/": {
+          //   render() {
+          //     return m(OverviewWithFocus, m(FocusNothing));
+          //   },
+          // },
+
+          "/example/:exampleName": {
+            render(vnode) {
+              return m(OverviewWithFocus, m(FocusExample, {
+                exampleName: vnode.attrs.exampleName,
+              }));
+            },
+          },
+
+          "/golden/:exampleName": {
+            onmatch(args, requestedPath, route) {
+              if (Data.exampleByName[args.exampleName] === undefined) {
+                m.route.set("/");
+              }
+            },
+
+            render(vnode) {
+              return m(OverviewWithFocus, m(FocusGolden, {
+                exampleName: vnode.attrs.exampleName,
+              }));
+            },
+          },
+
+          "/program/:programName": {
+            onmatch(args, requestedPath, route) {
+              if (Data.programByName[args.programName] === undefined) {
+                m.route.set("/");
+              }
+            },
+
+            render(vnode) {
+              return m(OverviewWithFocus, m(FocusProgram, {
+                programName: vnode.attrs.programName,
+              }));
+            },
+          },
+
+          "/result/:resultIndex": {
+            onmatch(args, requestedPath, route) {
+              if (Data.results[args.resultIndex] === undefined) {
+                m.route.set("/");
+              }
+            },
+
+            render(vnode) {
+              return m(OverviewWithFocus, m(FocusResult, {
+                resultIndex: vnode.attrs.resultIndex,
+                showEverything: vnode.attrs.showEverything,
+              }));
+            },
+          },
+
+          "/help": {
+            render(vnode) {
+              return m(OverviewWithFocus, m(FocusHelp));
+            },
+          },
+
+          "/metadata": {
+            render(vnode) {
+              return m(OverviewWithFocus, m(FocusMetadata));
+            },
+          },
+
+          "/tests": {
+            render(vnode) {
+              return m(OverviewWithFocus, m(FocusTestCases));
+            },
+          },
+
+          "/file/:path...": {
+            render(vnode) {
+              return m(OverviewWithFocus, m(FocusFile, {
+                path: vnode.attrs.path,
+              }));
+            },
+          },
+
+        });
+      }
+
+      main();
+
+    </script>
+  </body>
+</html>

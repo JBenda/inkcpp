@@ -1,0 +1,12 @@
+{
+  "inkVersion": 19,
+  "root": [
+    "^This is not printed:\n",
+    42,
+    "^Neither is this:\n",
+    3.145,
+    "done",
+    null
+  ],
+  "listDefs": {}
+}

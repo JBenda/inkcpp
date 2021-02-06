@@ -1,0 +1,13 @@
+{
+  "inkVersion": 19,
+  "root": [
+    [
+      "^Hello, world!",
+      "\n",
+      null
+    ],
+    "done",
+    null
+  ],
+  "listDefs": {}
+}

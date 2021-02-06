@@ -1,0 +1,13 @@
+{
+  "inkVersion": 19,
+  "root": [
+    "ev",
+    42,
+    "out",
+    "/ev",
+    "^\n",
+    "done",
+    null
+  ],
+  "listDefs": {}
+}
