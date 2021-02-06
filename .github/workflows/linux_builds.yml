@@ -75,6 +75,7 @@ jobs:
           cd $GITHUB_WORKSPACE/proofing/ink-proof
           python3 install_deps.py
           cp ../inkcpp_runtime_driver drivers/
+          chmod u+x drivers/inkcpp_runtime_driver
           mkdir deps/inkcpp
           cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
           python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
