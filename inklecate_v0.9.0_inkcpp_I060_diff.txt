@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I060/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I060_stdout.txt@@ -1 +0,0 @@-8

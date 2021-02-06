@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I078/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I078_stdout.txt@@ -1,3 +1,2 @@- 1: Option ?> Text

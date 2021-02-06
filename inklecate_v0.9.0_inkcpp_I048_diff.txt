@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I048/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I048_stdout.txt@@ -1 +1 @@-Some content with glue.+Somecontent with glue.

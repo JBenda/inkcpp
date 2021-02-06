@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I047/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I047_stdout.txt@@ -1 +1 @@-I have five eggs.+I have five

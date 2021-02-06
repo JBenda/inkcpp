@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I053/transcript.txt+++ out/inkcpp_I053_stdout.txt@@ -1,2 +1,2 @@ This is A-Now in B.+We will never return to here!

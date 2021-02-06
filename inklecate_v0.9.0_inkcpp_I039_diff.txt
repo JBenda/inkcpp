@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I039/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I039_stdout.txt@@ -1,5 +1,4 @@ first gather- 1: option 1 2: option 2 ?> the main gather

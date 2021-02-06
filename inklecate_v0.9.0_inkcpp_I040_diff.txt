@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I040/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I040_stdout.txt@@ -1,7 +1,5 @@- 1: First ?> First- 1: Very indented ?> Very indented End

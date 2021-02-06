@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I041/transcript.txt+++ out/inkcpp_I041_stdout.txt@@ -1,8 +1,6 @@- 1: one 2: four ?> one- 1: two ?> two three

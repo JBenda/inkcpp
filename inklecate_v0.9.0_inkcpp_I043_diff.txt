@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I043/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I043_stdout.txt@@ -1,4 +1,3 @@- 1: choice ?> choice nextline

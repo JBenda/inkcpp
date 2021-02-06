@@ -1,4 +1,1 @@
-Traceback (most recent call last):
-  File "/home/runner/work/inkcpp/inkcpp/proofing/ink-proof/drivers/inkcpp_runtime_driver", line 10, in <module>
-    os.execv(PATH, ARGS)
-PermissionError: [Errno 13] Permission denied
+Unhandled ink runtime exception: Could not find variable!

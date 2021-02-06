@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I059/transcript.txt+++ out/inkcpp_I059_stdout.txt@@ -1,10 +1,8 @@- 1: A 2: B ?> A Finished tunnel. Starting thread.- 1: C 2: D 3: E
