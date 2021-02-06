@@ -49,6 +49,7 @@ jobs:
   linux-ink-proof:
     name: Ink Proof Page Generation
     runs-on: "ubuntu-latest"
+    needs: "linux-compilation"
 
     steps:
       # Checkout project with submodules
