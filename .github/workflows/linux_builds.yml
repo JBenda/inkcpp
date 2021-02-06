@@ -84,4 +84,4 @@ jobs:
         with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: inkproof-page
-          FOLDER: $GITHUB_WORKSPACE/proofing/ink-proof/out
+          FOLDER: proofing/ink-proof/out
