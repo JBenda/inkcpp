@@ -1,6 +1,8 @@
 # inkcpp
 Inkle Ink C++ Runtime with JSON -> Binary Compiler.
 
+Ink Proofing Test Results: https://brwarner.github.io/inkcpp
+
 ## Project Goals
 * Fast, simple, clean syntax
 * No heap allocations during execution (unless in emergencies)
