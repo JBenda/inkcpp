@@ -61,6 +61,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: linux
+          path: build
 
       # Setup python
       - uses: actions/setup-python@v2
