@@ -1,0 +1,3 @@
+[submodule "proofing/ink-proof"]
+	path = proofing/ink-proof
+	url = https://github.com/chromy/ink-proof.git

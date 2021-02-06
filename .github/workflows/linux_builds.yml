@@ -1,13 +1,13 @@
 name: 🏁 Linux Builds
 on:
   push:
-    branches: [ master, main, github_actions_brook ]
+    branches: [ master, main ]
 
 env:
   BUILD_TYPE: release
 
 jobs:
-  windows-compilation:
+  linux-compilation:
     name: Linux Compilation
     runs-on: "ubuntu-20.04"
     steps:
@@ -43,5 +43,47 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v1
       with:
-        name: win64
+        name: linux
         path: build/bin/
+
+  linux-ink-proof:
+    name: Ink Proof Page Generation
+    runs-on: "ubuntu-latest"
+    needs: "linux-compilation"
+
+    steps:
+      # Checkout project with submodules
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      # Download build result from previous step
+      - uses: actions/download-artifact@v2
+        with:
+          name: linux
+          path: build
+
+      # Setup python
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      # Run ink proof
+      - name: Build Ink Proof Website
+        shell: bash
+        run: |
+          cd $GITHUB_WORKSPACE/proofing/ink-proof
+          python3 install_deps.py
+          cp ../inkcpp_runtime_driver drivers/
+          chmod +x drivers/inkcpp_runtime_driver
+          mkdir deps/inkcpp
+          cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
+          chmod +x deps/inkcpp/inkcpp_cl
+          python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
+
+      - name: Deploy Page
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: inkproof-page
+          FOLDER: proofing/ink-proof/out
