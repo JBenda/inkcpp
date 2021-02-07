@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I081/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I081_stdout.txt@@ -1,6 +1,4 @@- 1: hello ?> hello- 1: world ?> world
