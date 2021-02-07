@@ -148,6 +148,9 @@ int main(int argc, const char** argv)
 
 			if (thread->has_choices())
 			{
+				// Extra end line
+				std::cout << std::endl;
+
 				int index = 1;
 				for (const ink::runtime::choice& c : *thread)
 				{
