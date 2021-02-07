@@ -2,7 +2,6 @@
 
 #include "command.h"
 #include "system.h"
-#include "version.h"
 #include "reporter.h"
 #include <string>
 #include <vector>

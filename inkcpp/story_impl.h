@@ -37,7 +37,7 @@ namespace ink::runtime::internal
 		virtual runner new_runner(globals store = nullptr) override;
 
 
-		const Header& get_header() const { return _header; }
+		const ink::internal::header& get_header() const { return _header; }
 	private:
 		void setup_pointers();
 
@@ -46,7 +46,7 @@ namespace ink::runtime::internal
 		unsigned char* _file;
 		size_t _length;
 
-		Header _header;
+		ink::internal::header  _header;
 
 		// string table
 		const char* _string_table;

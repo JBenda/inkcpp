@@ -8,42 +8,6 @@
 #include <iostream>
 #endif
 
-namespace ink {
-	// FIXME: find appropriate place to define
-	Header Header::parse_header(const char *data)
-	{
-		Header res;
-		const char* ptr = data;
-		res.endien = *reinterpret_cast<const Header::ENDENSE*>(ptr);
-		ptr += sizeof(Header::ENDENSE);
-
-		using v_t = decltype(Header::inkVersionNumber);
-		using vcpp_t = decltype(Header::inkCppVersionNumber);
-
-		if (res.endien == Header::ENDENSE::SAME) {
-			res.inkVersionNumber =
-				*reinterpret_cast<const v_t*>(ptr);
-			ptr += sizeof(v_t);
-			res.inkCppVersionNumber =
-				*reinterpret_cast<const vcpp_t*>(ptr);
-
-		} else if (res.endien == Header::ENDENSE::DIFFER) {
-			res.inkVersionNumber =
-				swap_bytes(*reinterpret_cast<const v_t*>(ptr));
-			ptr += sizeof(v_t);
-			res.inkCppVersionNumber =
-				swap_bytes(*reinterpret_cast<const vcpp_t*>(ptr));
-		} else {
-			throw ink_exception("Failed to parse endian encoding!");
-		}
-
-		if (res.inkCppVersionNumber != VERSION) {
-			throw ink_exception("InkCpp-version mismatch: file was compiled with different InkCpp-version!");
-		}
-		return res;
-	}
-}
-
 namespace ink::runtime
 {
 #ifdef INK_ENABLE_STL
@@ -215,10 +179,11 @@ namespace ink::runtime::internal
 
 	void story_impl::setup_pointers()
 	{
-		_header = Header::parse_header(reinterpret_cast<char*>(_file));
+		using header = ink::internal::header;
+		_header = header::parse_header(reinterpret_cast<char*>(_file));
 
 		// String table is after the header
-		_string_table = (char*)_file + Header::SIZE;
+		_string_table = (char*)_file + header::Size;
 
 		// Pass over strings
 		const char* ptr = _string_table;

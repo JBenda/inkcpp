@@ -3,5 +3,5 @@
 #include "system.h"
 
 namespace ink {
-	constexpr uint32_t VERSION = 0;
+	constexpr uint32_t InkBinVersion = 0;
 };

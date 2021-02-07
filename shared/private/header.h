@@ -2,9 +2,10 @@
 
 #include "system.h"
 
-namespace ink {
-		struct Header {
-			static Header parse_header(const char* data);
+namespace ink::internal {
+
+		struct header {
+			static header parse_header(const char* data);
 
 			template<typename T>
 			static T swap_bytes(const T& value) {
@@ -15,14 +16,14 @@ namespace ink {
 				return *reinterpret_cast<const T*>(data);
 			}
 
-			enum class ENDENSE : uint16_t {
-				NONE = 0,
-				SAME = 0x0001,
-				DIFFER = 0x0100
-			} endien = ENDENSE::NONE;
-			uint32_t inkVersionNumber = 0;
-			uint32_t inkCppVersionNumber = 0;
-			static constexpr size_t SIZE = ///< actual data size of Header,
+			enum class  endian_types: uint16_t {
+				none = 0,
+				same = 0x0001,
+				differ = 0x0100
+			} endien = endian_types::none;
+			uint32_t ink_version_number = 0;
+			uint32_t ink_bin_version_number = 0;
+			static constexpr size_t Size = ///< actual data size of Header,
 										   ///   because padding of struct may
 										   ///   differ between platforms
 				sizeof(uint16_t) + 2 * sizeof(uint32_t);

@@ -24,13 +24,14 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline T runner_impl::read()
 	{
+		using header = ink::internal::header;
 		// Sanity
 		inkAssert(_ptr + sizeof(T) <= _story->end(), "Unexpected EOF in Ink execution");
 
 		// Read memory
 		T val = *(const T*)_ptr;
-		if (_story->get_header().endien == Header::ENDENSE::DIFFER) {
-			val = Header::swap_bytes(val);
+		if (_story->get_header().endien == header::endian_types::differ) {
+			val = header::swap_bytes(val);
 		}
 
 		// Advance ip
