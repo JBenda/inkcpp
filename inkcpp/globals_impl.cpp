@@ -73,39 +73,39 @@ namespace ink::runtime::internal
 	}
 
 	template<auto (value::*FN)()>
-	auto fetchVariable(auto stack, hash_t name, data_type type) {
+	auto fetch_variable(auto stack, hash_t name, data_type type) {
 		auto v = stack.get(name);
 		return v && v->get_data_type() == type
 			? (v->*FN)()
 			: nullptr;
 	}
 
-	const uint32_t* globals_impl::getUInt(hash_t name) const {
-		return fetchVariable<&value::as_uint_ptr>(_variables, name, data_type::uint32);
+	const uint32_t* globals_impl::get_uint(hash_t name) const {
+		return fetch_variable<&value::as_uint_ptr>(_variables, name, data_type::uint32);
 	}
-	uint32_t* globals_impl::getUInt(hash_t name) {
-		return fetchVariable<&value::as_uint_ptr>(_variables, name, data_type::uint32);
-	}
-
-	const int32_t* globals_impl::getInt(hash_t name) const {
-		return fetchVariable<&value::as_int_ptr>(_variables, name, data_type::int32);
-	}
-	int32_t* globals_impl::getInt(hash_t name) {
-		return fetchVariable<&value::as_int_ptr>(_variables, name, data_type::int32);
+	uint32_t* globals_impl::get_uint(hash_t name) {
+		return fetch_variable<&value::as_uint_ptr>(_variables, name, data_type::uint32);
 	}
 
-	const float* globals_impl::getFloat(hash_t name) const {
-		return fetchVariable<&value::as_float_ptr>(_variables, name, data_type::float32);
+	const int32_t* globals_impl::get_int(hash_t name) const {
+		return fetch_variable<&value::as_int_ptr>(_variables, name, data_type::int32);
 	}
-	float* globals_impl::getFloat(hash_t name) {
-		return fetchVariable<&value::as_float_ptr>(_variables, name, data_type::float32);
+	int32_t* globals_impl::get_int(hash_t name) {
+		return fetch_variable<&value::as_int_ptr>(_variables, name, data_type::int32);
 	}
 
-	char* globals_impl::getStr(hash_t name) {
+	const float* globals_impl::get_float(hash_t name) const {
+		return fetch_variable<&value::as_float_ptr>(_variables, name, data_type::float32);
+	}
+	float* globals_impl::get_float(hash_t name) {
+		return fetch_variable<&value::as_float_ptr>(_variables, name, data_type::float32);
+	}
+
+	char* globals_impl::get_str(hash_t name) {
 		// TODO: add string support
 		throw ink_exception("String handling is not supported yet!");
 	}
-	const char* globals_impl::getStr(hash_t name) const {
+	const char* globals_impl::get_str(hash_t name) const {
 		// TODO: add string support
 		throw ink_exception("String handling is not supported yet!");
 	}

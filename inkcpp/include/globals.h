@@ -36,49 +36,49 @@ namespace ink::runtime
 		virtual ~globals_interface() = default;
 
 	protected:
-		virtual const uint32_t* getUInt(hash_t name) const = 0;
-		virtual uint32_t* getUInt(hash_t name) = 0;
-		virtual const int32_t* getInt(hash_t name) const = 0;
-		virtual int32_t* getInt(hash_t name) = 0;
-		virtual const float* getFloat(hash_t name) const = 0;
-		virtual float* getFloat(hash_t name) = 0;
-		virtual const char* getStr(hash_t name) const = 0;
-		virtual char* getStr(hash_t name) = 0;
+		virtual const uint32_t* get_uint(hash_t name) const = 0;
+		virtual uint32_t* get_uint(hash_t name) = 0;
+		virtual const int32_t* get_int(hash_t name) const = 0;
+		virtual int32_t* get_int(hash_t name) = 0;
+		virtual const float* get_float(hash_t name) const = 0;
+		virtual float* get_float(hash_t name) = 0;
+		virtual const char* get_str(hash_t name) const = 0;
+		virtual char* get_str(hash_t name) = 0;
 	};
 
 	template<>
 	inline const uint32_t* globals_interface::get<uint32_t>(const char* name) const {
-		return getUInt(hash_string(name));
+		return get_uint(hash_string(name));
 	}
 	template<>
 	inline uint32_t* globals_interface::get<uint32_t>(const char* name) {
-		return getUInt(hash_string(name));
+		return get_uint(hash_string(name));
 	}
 
 	template<>
 	inline const int32_t* globals_interface::get<int32_t>(const char* name) const {
-		return getInt(hash_string(name));
+		return get_int(hash_string(name));
 	}
 	template<>
 	inline int32_t* globals_interface::get<int32_t>(const char* name) {
-		return getInt(hash_string(name));
+		return get_int(hash_string(name));
 	}
 
 	template<>
 	inline const float* globals_interface::get<float>(const char* name) const {
-		return getFloat(hash_string(name));
+		return get_float(hash_string(name));
 	}
 	template<>
 	inline float* globals_interface::get<float>(const char* name) {
-		return getFloat(hash_string(name));
+		return get_float(hash_string(name));
 	}
 
 	template<>
 	inline const char* globals_interface::get<char>(const char* name) const {
-		return getStr(hash_string(name));
+		return get_str(hash_string(name));
 	}
 	template<>
 	inline char* globals_interface::get<char>(const char* name) {
-		return getStr(hash_string(name));
+		return get_str(hash_string(name));
 	}
 }
