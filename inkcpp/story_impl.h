@@ -4,6 +4,7 @@
 #include <config.h>
 #include "types.h"
 #include "story.h"
+#include "header.h"
 
 namespace ink::runtime::internal
 {
@@ -11,6 +12,7 @@ namespace ink::runtime::internal
 	class story_impl : public story
 	{
 	public:
+
 #ifdef INK_ENABLE_STL
 		story_impl(const char* filename);
 #endif
@@ -34,6 +36,8 @@ namespace ink::runtime::internal
 		virtual globals new_globals() override;
 		virtual runner new_runner(globals store = nullptr) override;
 
+
+		const ink::internal::header& get_header() const { return _header; }
 	private:
 		void setup_pointers();
 
@@ -41,6 +45,8 @@ namespace ink::runtime::internal
 		// file information
 		unsigned char* _file;
 		size_t _length;
+
+		ink::internal::header  _header;
 
 		// string table
 		const char* _string_table;
