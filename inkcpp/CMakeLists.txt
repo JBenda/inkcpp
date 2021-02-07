@@ -17,6 +17,7 @@ list(APPEND SOURCES
     system.cpp
     value.h value.cpp
     string_table.h string_table.cpp avl_array.h
+	header.cpp
 )
 source_group(Collections REGULAR_EXPRESSION collections/.*)
 add_library(inkcpp ${SOURCES})

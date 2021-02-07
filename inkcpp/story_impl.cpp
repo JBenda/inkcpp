@@ -2,6 +2,7 @@
 #include "platform.h"
 #include "runner_impl.h"
 #include "globals_impl.h"
+#include "version.h"
 
 #ifdef INK_ENABLE_STL
 #include <iostream>
@@ -24,6 +25,7 @@ namespace ink::runtime
 
 namespace ink::runtime::internal
 {
+
 #ifdef INK_ENABLE_STL
 	unsigned char* read_file_into_memory(const char* filename, size_t* read)
 	{
@@ -177,8 +179,11 @@ namespace ink::runtime::internal
 
 	void story_impl::setup_pointers()
 	{
-		// String table is after the version information
-		_string_table = (char*)_file + sizeof(int);
+		using header = ink::internal::header;
+		_header = header::parse_header(reinterpret_cast<char*>(_file));
+
+		// String table is after the header
+		_string_table = (char*)_file + header::Size;
 
 		// Pass over strings
 		const char* ptr = _string_table;

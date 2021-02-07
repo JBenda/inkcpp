@@ -1,5 +1,8 @@
 #include "binary_emitter.h"
 
+#include "header.h"
+#include "version.h"
+
 #include <vector>
 #include <map>
 #include <fstream>
@@ -173,7 +176,12 @@ namespace ink::compiler::internal
 	void binary_emitter::output(std::ostream& out)
 	{
 		// Write the ink version
-		out.write((const char*)&_ink_version, sizeof(int));
+		// TODO: define this order in header?
+		using header = ink::internal::header;
+		header::endian_types same = header::endian_types::same;
+		out.write((const char*)&same, sizeof(decltype(same)));
+		out.write((const char*)&_ink_version, sizeof(decltype(_ink_version)));
+		out.write((const char*)&ink::InkBinVersion, sizeof(decltype(ink::InkBinVersion)));
 
 		// Write the string table
 		_strings.write_to(out);

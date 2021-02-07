@@ -3,6 +3,7 @@
 #include "command.h"
 #include "choice.h"
 #include "globals_impl.h"
+#include "header.h"
 
 namespace ink::runtime
 {
@@ -23,11 +24,15 @@ namespace ink::runtime::internal
 	template<typename T>
 	inline T runner_impl::read()
 	{
+		using header = ink::internal::header;
 		// Sanity
 		inkAssert(_ptr + sizeof(T) <= _story->end(), "Unexpected EOF in Ink execution");
 
 		// Read memory
 		T val = *(const T*)_ptr;
+		if (_story->get_header().endien == header::endian_types::differ) {
+			val = header::swap_bytes(val);
+		}
 
 		// Advance ip
 		_ptr += sizeof(T);
