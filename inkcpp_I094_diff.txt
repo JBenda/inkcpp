@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I094/transcript.txt+++ out/inkcpp_I094_stdout.txt@@ -1,6 +1 @@-. four .-. fifteen .-. thirty-seven .-. one hundred and one .-. two hundred and twenty-two .-. one thousand two hundred and thirty-four .+. four

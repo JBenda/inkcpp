@@ -1,0 +1,1 @@
+--- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I098/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I098_stdout.txt@@ -2,5 +2,6 @@ When should this get printed?  1: I’m an option+2: I’m an option ?> I’m an option Finishing thread.
