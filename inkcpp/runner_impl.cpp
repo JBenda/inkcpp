@@ -482,7 +482,7 @@ namespace ink::runtime::internal
 			if (_output.ends_with(data_type::newline))
 			{
 				// TODO: REMOVE
-				return true;
+				// return true;
 
 				// Unless we are out of content, we are going to try
 				//  to continue a little further. This is to check for
@@ -613,7 +613,21 @@ namespace ink::runtime::internal
 
 				// If we're falling out of the story, then we're hitting an implied done 
 				if (_is_falling && _story->instructions() + target == _story->end()) {
-					on_done(false);
+					// Wait! We may be returning from a function!
+					frame_type type;
+					if (_stack.has_frame(&type) && type == frame_type::function) // implicit return is only for functions
+					{
+						// push null and return
+						_eval.push(value());
+
+						// HACK
+						_ptr += sizeof(Command) + sizeof(CommandFlag);
+						execute_return();
+					}
+					else 
+					{
+						on_done(false);
+					}
 					break;
 				}
 
