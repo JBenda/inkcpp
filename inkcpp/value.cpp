@@ -303,6 +303,82 @@ namespace ink
 				inkFail("Invalid type for mod");
 			}
 
+			void convert(const char*& c, const data& d, char* number) {
+				switch(d.type) {
+				case data_type::int32:
+					snprintf(number, 32, "%d", d.integer_value);
+					break;
+				case data_type::uint32:
+					snprintf(number, 32, "%d", d.uint_value);
+					break;
+				case data_type::float32:
+					snprintf(number, 32, "%f", d.float_value);
+					break;
+				case data_type::newline:
+					number[0] = '\n';
+					number[1] = 0;
+					break;
+				case data_type::string_table_pointer:
+				case data_type::allocated_string_pointer:
+					c = d.string_val;
+					break;
+				default: number[0] = 0;
+				}
+			}
+			bool value::compare_string(const value& left, const value& right) {
+				size_t l_i = 0;
+				size_t r_i = 0;
+				char l_number[32]; l_number[0] = 0;
+				char r_number[32]; r_number[0] = 0;
+				const char* l_c = l_number;
+				const char* r_c = r_number;
+				bool res = true;
+				while(res && l_i < VALUE_DATA_LENGTH && r_i < VALUE_DATA_LENGTH) {
+					if (*l_c || *r_c) {
+						if (*l_c) {
+							r_c = r_number;
+							convert(r_c, right._data[r_i], r_number);
+						} else {
+							l_c = l_number;
+							convert(l_c, left._data[l_i], l_number);
+						}
+					} else if (left._data[l_i].type == right._data[r_i].type) {
+						switch(left._data[l_i].type) {
+						case data_type::int32:
+							res = left._data[l_i].integer_value == right._data[r_i].integer_value;
+							break;
+						case data_type::uint32:
+							res = left._data[l_i].uint_value == right._data[r_i].uint_value;
+							break;
+						case data_type::float32:
+							res = left._data[l_i].float_value == right._data[r_i].float_value;
+							break;
+						case data_type::string_table_pointer:
+							l_c = left._data[l_i].string_val;
+							r_c = right._data[r_i].string_val;
+						case data_type::allocated_string_pointer:
+							break;
+						default: break;
+						}
+					} else {
+						r_c = r_number;
+						convert(r_c, right._data[r_i], r_number);
+						l_c = l_number;
+						convert(l_c, left._data[l_i], l_number);
+					}
+					while(*l_c && *r_c) {
+						if (*l_c != *r_c) {
+							res = false; break;
+						}
+						++l_c; ++r_c;
+					}
+					if (!*l_c){ ++l_i; }
+					if (!*r_c){ ++r_i; }
+				}
+				if (l_i != r_i) { return false; }
+				return res;
+			}
+
 			value value::is_equal(value left, value right)
 			{
 				// Cast as needed
@@ -315,7 +391,7 @@ namespace ink
 				case value_type::decimal:
 					return left.as_float() == right.as_float();
 				case value_type::string:
-					break; // TODO: data[] operators?
+					return compare_string(left, right);
 				case value_type::divert:
 					return left.as_divert() == right.as_divert();
 				}

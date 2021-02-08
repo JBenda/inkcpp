@@ -141,6 +141,7 @@ namespace ink
 			private:
 				static void cast(value&, value_type, value_type);
 				static value_type maybe_cast(value& left, value& right);
+				static bool compare_string(const value& left, const value& right);
 
 			private:
 				// Maximum sequential data a value can have
