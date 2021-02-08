@@ -72,6 +72,13 @@ namespace ink::runtime::internal
 		return _variables.get(name);
 	}
 
+	template<auto (value::*FN)() const>
+	auto fetch_variable(auto stack, hash_t name, data_type type) {
+		auto v = stack.get(name);
+		return v && v->get_data_type() == type
+			? (v->*FN)()
+			: nullptr;
+	}
 	template<auto (value::*FN)()>
 	auto fetch_variable(auto stack, hash_t name, data_type type) {
 		auto v = stack.get(name);
@@ -101,13 +108,20 @@ namespace ink::runtime::internal
 		return fetch_variable<&value::as_float_ptr>(_variables, name, data_type::float32);
 	}
 
-	char* globals_impl::get_str(hash_t name) {
-		// TODO: add string support
-		throw ink_exception("String handling is not supported yet!");
+	global_string<true> globals_impl::get_str(hash_t name) {
+		const char* s = fetch_variable<&value::as_str>(_variables, name, data_type::string_table_pointer);
+		if (!s) s = fetch_variable<&value::as_str>(_variables, name, data_type::allocated_string_pointer);
+		return global_string<true>(
+			*this,
+			s,
+			name
+		);
 	}
-	const char* globals_impl::get_str(hash_t name) const {
-		// TODO: add string support
-		throw ink_exception("String handling is not supported yet!");
+	global_string<false> globals_impl::get_str(hash_t name) const {
+		return global_string<false>(
+			*this,
+			fetch_variable<&value::as_str>(_variables, name, data_type::string_table_pointer)
+		);
 	}
 
 

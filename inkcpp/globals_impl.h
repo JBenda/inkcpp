@@ -29,8 +29,8 @@ namespace ink::runtime::internal
 		const float* get_float(hash_t name) const override;
 		float* get_float(hash_t name) override;
 
-		const char* get_str(hash_t name) const override;
-		char* get_str(hash_t name) override;
+		global_string<false> get_str(hash_t name) const override;
+		global_string<true> get_str(hash_t name) override;
 
 	public:
 		// Records a visit to a container

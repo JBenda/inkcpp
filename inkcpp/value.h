@@ -102,7 +102,7 @@ namespace ink
 				uint32_t as_divert() const { return _first.uint_value; }
 				uint32_t as_thread_id() const { return _first.uint_value; }
 				uint32_t* as_uint_ptr() { return &_first.uint_value; }
-				// TODO: String access?
+				const char* as_str() const { return _first.string_val; }
 
 				template<typename T>
 				T get() const { static_assert(always_false<T>::value, "Type not supported by value class"); }

@@ -21,6 +21,7 @@ SCENARIO("run story with global variable", "[global variables]")
 			{
 				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Jackie. I'm 23 years old.\n");
 				REQUIRE(*globStore->get<int32_t>("age") == 23);
+				REQUIRE(globStore->get<global_string<true>>("friendly_name_of_player").data() == std::string{"Jackie"});
 			}
 		}
 		WHEN ("edit number")
@@ -28,10 +29,12 @@ SCENARIO("run story with global variable", "[global variables]")
 			globals globStore = ink->new_globals();
 			runner thread = ink->new_runner(globStore);
 			*globStore->get<int32_t>("age") = 30;
+			globStore->get<global_string<true>>("friendly_name_of_player").set("Freddy");
 			THEN("variable should contain new value")
 			{
-				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Jackie. I'm 30 years old.\n");
+				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Freddy. I'm 30 years old.\n");
 				REQUIRE(*globStore->get<int32_t>("age") == 30);
+				REQUIRE(globStore->get<global_string<true>>("friendly_name_of_player").data() == std::string{"Freddy"});
 			}
 		}
 		WHEN ("name or type not exist")
