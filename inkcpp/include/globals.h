@@ -54,9 +54,15 @@ namespace ink::runtime
 	template<typename T>
 	using return_type_ct = typename return_type<T>::c_type;
 
-	template<bool B>
-	struct return_type<global_string<B>> {
+	template<>
+	struct return_type<global_string<true>> {
 		using type = global_string<true>;
+		using c_type = global_string<false>;
+	};
+
+	template<>
+	struct return_type<global_string<false>> {
+		using type = global_string<false>;
 		using c_type = global_string<false>;
 	};
 
@@ -131,6 +137,11 @@ namespace ink::runtime
 
 	template<>
 	inline global_string<false> globals_interface::get<global_string<false>>(const char* name) const {
+		return get_str(hash_string(name));
+	}
+
+	template<>
+	inline global_string<false> globals_interface::get<global_string<false>>(const char* name) {
 		return get_str(hash_string(name));
 	}
 	template<>
