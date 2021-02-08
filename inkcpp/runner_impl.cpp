@@ -545,8 +545,7 @@ namespace ink::runtime::internal
 				int val = read<int>();
 				if (bEvaluationMode)
 					_eval.push(val);
-				else
-					_output << val;
+				// TEST-CASE B006 don't print integers
 			}
 			break;
 			case Command::FLOAT:
@@ -554,8 +553,7 @@ namespace ink::runtime::internal
 				float val = read<float>();
 				if (bEvaluationMode)
 					_eval.push(val);
-				else
-					_output << val;
+				// TEST-CASE B006 don't print floats
 			}
 			break;
 

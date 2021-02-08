@@ -158,7 +158,7 @@ namespace ink
 				const char* iter = str;
 				while (*iter != '\0')
 				{
-					if (is_whitespace(*iter))
+					if (is_whitespace(*iter, false)) // newlines are required (B006)
 					{
 						// pass over whitespace
 						bool start = iter == str;
