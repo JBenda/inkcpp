@@ -141,6 +141,9 @@ namespace ink
 			private:
 				static void cast(value&, value_type, value_type);
 				static value_type maybe_cast(value& left, value& right);
+				/**
+				 * @brief compare if the string representation of values are equal.
+				 */
 				static bool compare_string(const value& left, const value& right);
 
 			private:

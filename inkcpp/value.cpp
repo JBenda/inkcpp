@@ -303,7 +303,8 @@ namespace ink
 				inkFail("Invalid type for mod");
 			}
 
-			void convert(const char*& c, const data& d, char* number) {
+			void convert_to_string(const char*& c, const data& d, char* number) {
+				c = number;
 				switch(d.type) {
 				case data_type::int32:
 					snprintf(number, 32, "%d", d.integer_value);
@@ -325,24 +326,38 @@ namespace ink
 				default: number[0] = 0;
 				}
 			}
+
+			
 			bool value::compare_string(const value& left, const value& right) {
+				// convert fields to string representation and start comparison
+				// when the end of one field is reached, the other still has
+				// bytes left -> convert the next field and continue comparison
+
+				// iterator for data fields of left and right value
 				size_t l_i = 0;
 				size_t r_i = 0;
+				// buffer to store string representation of numeric fields
 				char l_number[32]; l_number[0] = 0;
 				char r_number[32]; r_number[0] = 0;
+				// current compare position, if *l = 0 -> field compare finish
 				const char* l_c = l_number;
 				const char* r_c = r_number;
 				bool res = true;
+				// while no different found and fields to check remain
 				while(res && l_i < VALUE_DATA_LENGTH && r_i < VALUE_DATA_LENGTH) {
-					if (*l_c || *r_c) {
+					// if one field has left overs
+					if (*l_c || *r_c)
+					{
+						// fetch the next field of the value without leftover
 						if (*l_c) {
-							r_c = r_number;
-							convert(r_c, right._data[r_i], r_number);
+							convert_to_string(r_c, right._data[r_i], r_number);
 						} else {
-							l_c = l_number;
-							convert(l_c, left._data[l_i], l_number);
+							convert_to_string(l_c, left._data[l_i], l_number);
 						}
-					} else if (left._data[l_i].type == right._data[r_i].type) {
+					}
+					// if both values are aligned: check if both have the same type
+					else if (left._data[l_i].type == right._data[r_i].type)
+					{
 						switch(left._data[l_i].type) {
 						case data_type::int32:
 							res = left._data[l_i].integer_value == right._data[r_i].integer_value;
@@ -354,27 +369,32 @@ namespace ink
 							res = left._data[l_i].float_value == right._data[r_i].float_value;
 							break;
 						case data_type::string_table_pointer:
+						case data_type::allocated_string_pointer:
 							l_c = left._data[l_i].string_val;
 							r_c = right._data[r_i].string_val;
-						case data_type::allocated_string_pointer:
 							break;
 						default: break;
 						}
-					} else {
-						r_c = r_number;
-						convert(r_c, right._data[r_i], r_number);
-						l_c = l_number;
-						convert(l_c, left._data[l_i], l_number);
 					}
+					// convert both to string and compare
+					else
+					{
+						convert_to_string(r_c, right._data[r_i], r_number);
+						convert_to_string(l_c, left._data[l_i], l_number);
+					}
+					// compare string representation until one reaches the end
 					while(*l_c && *r_c) {
+						// if different found: stop and set result to false
 						if (*l_c != *r_c) {
 							res = false; break;
 						}
 						++l_c; ++r_c;
 					}
+					// if field is finished advance to the next
 					if (!*l_c){ ++l_i; }
 					if (!*r_c){ ++r_i; }
 				}
+				// if one value not complete compared -> leftover witch not match
 				if (l_i != r_i) { return false; }
 				return res;
 			}
