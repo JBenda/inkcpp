@@ -358,15 +358,16 @@ namespace ink
 					// if both values are aligned: check if both have the same type
 					else if (left._data[l_i].type == right._data[r_i].type)
 					{
+						bool tmp_res = true;
 						switch(left._data[l_i].type) {
 						case data_type::int32:
-							res = left._data[l_i].integer_value == right._data[r_i].integer_value;
+							tmp_res = left._data[l_i].integer_value == right._data[r_i].integer_value;
 							break;
 						case data_type::uint32:
-							res = left._data[l_i].uint_value == right._data[r_i].uint_value;
+							tmp_res = left._data[l_i].uint_value == right._data[r_i].uint_value;
 							break;
 						case data_type::float32:
-							res = left._data[l_i].float_value == right._data[r_i].float_value;
+							tmp_res = left._data[l_i].float_value == right._data[r_i].float_value;
 							break;
 						case data_type::string_table_pointer:
 						case data_type::allocated_string_pointer:
@@ -374,6 +375,11 @@ namespace ink
 							r_c = right._data[r_i].string_val;
 							break;
 						default: break;
+						}
+						// check if maybe the missing part is in next data
+						if (!tmp_res) {
+							convert_to_string(r_c, right._data[r_i], r_number);
+							convert_to_string(l_c, left._data[l_i], l_number);
 						}
 					}
 					// convert both to string and compare
@@ -395,7 +401,22 @@ namespace ink
 					if (!*r_c){ ++r_i; }
 				}
 				// if one value not complete compared -> leftover witch not match
-				if (l_i != r_i) { return false; }
+				if (res && l_i != r_i) {
+					const value& v = l_i < r_i ? left : right;
+					int i = l_i < r_i ? l_i : r_i;
+					// check if leftover fields all empty
+					while(v._data[i].type != data_type::none) {
+						if (v._data[i].type != data_type::string_table_pointer
+								&& v._data[i].type != data_type::allocated_string_pointer) {
+							if (*v._data[i].string_val != 0) {
+								return false;
+							}
+						} else {
+							return false;
+						}
+						++i;
+					}
+				}
 				return res;
 			}
 
