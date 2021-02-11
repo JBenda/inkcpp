@@ -192,7 +192,7 @@ namespace ink
 					// Copy left values into new
 					int i = 0, j = 0;
 					bool overflow = false;
-					while (left._data[j].type != data_type::none && j < VALUE_DATA_LENGTH && !overflow)
+					while (j < VALUE_DATA_LENGTH && left._data[j].type != data_type::none && !overflow)
 					{
 						if (i >= VALUE_DATA_LENGTH)
 						{
@@ -204,7 +204,7 @@ namespace ink
 
 					// Copy right values into new
 					j = 0;
-					while (right._data[j].type != data_type::none && j < VALUE_DATA_LENGTH && !overflow)
+					while (j < VALUE_DATA_LENGTH && right._data[j].type != data_type::none && !overflow)
 					{
 						if (i >= VALUE_DATA_LENGTH)
 						{
@@ -222,10 +222,10 @@ namespace ink
 
 						// Push everything into the stream
 						j = 0;
-						while (left._data[j].type != data_type::none && j < VALUE_DATA_LENGTH)
+						while (j < VALUE_DATA_LENGTH && left._data[j].type != data_type::none)
 							stream << left._data[j++];
 						j = 0;
-						while (right._data[j].type != data_type::none && j < VALUE_DATA_LENGTH)
+						while (j < VALUE_DATA_LENGTH && right._data[j].type != data_type::none)
 							stream << right._data[j++];
 
 						// Pull out into a new string
