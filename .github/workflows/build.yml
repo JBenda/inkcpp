@@ -1,15 +1,27 @@
-name: 🏁 Linux Builds
-on:
-  push:
-    branches: [ master, main ]
+name: 🏁 Builds and Tests
+on: 
+  push: 
+    branches: 
+      - master
+  pull_request:
 
 env:
   BUILD_TYPE: release
 
 jobs:
-  linux-compilation:
-    name: Linux Compilation
-    runs-on: "ubuntu-20.04"
+  compilation:
+    name: Compilation and Unit Tests
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: macos
+          - os: windows-latest
+            artifact: win64
+          - os: "ubuntu-20.04"
+            artifact: linux
+    
     steps:
 
     # Checkout project
@@ -19,37 +31,43 @@ jobs:
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
+    # Run CMake configuration to create build files
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
+    # Build using CMake and OS toolkit
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
 
-    - name: Tests
+    # Run CMake tests (unit tests, etc.)
+    - name: CTests
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: ctest . -C $BUILD_TYPE -V
 
+    # Copy all build artifacts to the bin directory
     - name: Install
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: cmake --install . --config $BUILD_TYPE --prefix bin
 
+    # Upload bin directory as artifact
     - name: Upload Artifacts
       uses: actions/upload-artifact@v1
       with:
-        name: linux
+        name: ${{ matrix.artifact }}
         path: build/bin/
 
-  linux-ink-proof:
+  # Run Ink Proof and Generate a GitHub page
+  ink-proof-pages:
     name: Ink Proof Page Generation
     runs-on: "ubuntu-latest"
-    needs: "linux-compilation"
+    needs: compilation
+    if: github.ref == 'refs/heads/master'
 
     steps:
       # Checkout project with submodules
