@@ -21,16 +21,16 @@ namespace ink::runtime::internal
 
 	protected:
 		const uint32_t* get_uint(hash_t name) const override;
-		uint32_t* get_uint(hash_t name) override;
+		bool set_uint(hash_t name, uint32_t value) override;
 
 	  	const int32_t* get_int(hash_t name) const override;
-	  	int32_t* get_int(hash_t name) override;
+		bool set_int(hash_t name, int32_t value) override;
 
 		const float* get_float(hash_t name) const override;
-		float* get_float(hash_t name) override;
+		bool set_float(hash_t name, float value) override;
 
-		global_string<false> get_str(hash_t name) const override;
-		global_string<true> get_str(hash_t name) override;
+		const char * const * get_str(hash_t name) const override;
+		bool set_str(hash_t name, const char* value) override;
 
 	public:
 		// Records a visit to a container

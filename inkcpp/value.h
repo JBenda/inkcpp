@@ -97,12 +97,17 @@ namespace ink
 				// == Getters ==
 				int as_int() const { return _first.integer_value; }
 				int* as_int_ptr() { return &_first.integer_value; }
+				const int* as_int_ptr() const { return &_first.integer_value; }
 				float as_float() const { return _first.float_value; }
 				float* as_float_ptr() { return &_first.float_value; }
+				const float* as_float_ptr() const { return &_first.float_value; }
 				uint32_t as_divert() const { return _first.uint_value; }
 				uint32_t as_thread_id() const { return _first.uint_value; }
 				uint32_t* as_uint_ptr() { return &_first.uint_value; }
+				const uint32_t* as_uint_ptr() const { return &_first.uint_value; }
+				// FIXME: we should compress the value before
 				const char* as_str() const { return _first.string_val; }
+				const char* const * as_str_ptr() const { return &_first.string_val; }
 
 				template<typename T>
 				T get() const { static_assert(always_false<T>::value, "Type not supported by value class"); }
