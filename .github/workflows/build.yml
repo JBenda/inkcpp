@@ -18,13 +18,18 @@ jobs:
           - os: macos-latest
             artifact: macos
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_mac.zip
+            inklecate: "${{github.workspace}}/inklecate"
           - os: windows-latest
             artifact: win64
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
+            inklecate: "${{github.workspace}}/inklecate"
           - os: "ubuntu-20.04"
             artifact: linux
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
-    
+            inklecate: "mono ${{github.workspace}}/inklecate"
+    env:
+      INKLECATE: ${{ matrix.inklecate }}
+
     steps:
 
     # Checkout project
@@ -44,7 +49,6 @@ jobs:
       run: |
         cd inklecate
         unzip *.zip
-        echo "${{github.workspace}}/inklecate" >> $GITHUB_PATH
 
     # Create a build directory to store all the CMake generated files
     - name: Create Build Environment

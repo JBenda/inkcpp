@@ -4,6 +4,7 @@
 #include <sstream>
 #include <regex>
 #include <filesystem>
+#include <cstdlib>
 
 #include <globals.h>
 #include <runner.h>
@@ -13,12 +14,21 @@
 
 void inklecate(const std::string& inkFilename, const std::string& jsonFilename)
 {
-#ifdef __unix__
-	std::string command = "mono inklecate -o " + jsonFilename + " " + inkFilename;
-#else
-	std::string command = "inklecate -o " + jsonFilename + " " + inkFilename;
-#endif
-	std::system(command.c_str());
+	// Get environment specific inklecate invocation command
+	const char* inklecateCmd = std::getenv("INKLECATE");
+	if (inklecateCmd == nullptr)
+		inklecateCmd = "inklecate";
+
+	// Create command
+	std::stringstream cmd;
+	cmd << inklecateCmd << " -o " << jsonFilename << " " << inkFilename;
+
+	// Run
+	int result = std::system(cmd.str().c_str());
+	if (result != 0) {
+		std::stringstream msg; msg << "Inklecate failed with exit code " << result;
+		throw std::runtime_error(msg.str());
+	}
 }
 
 void load_file(const std::string& filename, std::string& result)
