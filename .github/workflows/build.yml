@@ -82,7 +82,7 @@ jobs:
     - name: Test Inklecate
       shell: bash
       run: | 
-        echo $PATH
+        echo $INKLECATE
         echo "Hello World!" > mytest.ink
         ./build/bin/bin/inkcpp_cl mytest.ink
 
