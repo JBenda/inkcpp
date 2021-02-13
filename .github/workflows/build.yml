@@ -76,14 +76,6 @@ jobs:
       shell: bash
       run: cmake --install . --config $BUILD_TYPE --prefix bin
 
-    # Quick inklecate test
-    - name: Test Inklecate
-      shell: bash
-      run: | 
-        echo $INKLECATE
-        echo "Hello World!" > mytest.ink
-        ./build/bin/bin/inkcpp_cl mytest.ink
-
     # Upload bin directory as artifact
     - name: Upload Artifacts
       uses: actions/upload-artifact@v1
