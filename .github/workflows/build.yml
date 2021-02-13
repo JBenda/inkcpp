@@ -49,7 +49,7 @@ jobs:
       run: |
         cd inklecate
         unzip *.zip
-        echo "INKLECATE=${${{ matrix.inklecate }}/ROOT/$GITHUB_WORKSPACE}" >> $GITHUB_ENV
+        echo "INKLECATE=${{ matrix.inklecate }}" | sed "s|ROOT|$GITHUB_WORKSPACE|" >> $GITHUB_ENV
 
     # Create a build directory to store all the CMake generated files
     - name: Create Build Environment
