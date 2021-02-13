@@ -26,7 +26,7 @@ jobs:
           - os: "ubuntu-20.04"
             artifact: linux
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
-            inklecate: "mono ${{github.workspace}}/inklecate"
+            inklecate: "mono ${{github.workspace}}/inklecate.exe"
     env:
       INKLECATE: ${{ matrix.inklecate }}
 
