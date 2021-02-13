@@ -13,7 +13,11 @@
 
 void inklecate(const std::string& inkFilename, const std::string& jsonFilename)
 {
+#ifdef __unix__
+	std::string command = "mono inklecate -o " + jsonFilename + " " + inkFilename;
+#else
 	std::string command = "inklecate -o " + jsonFilename + " " + inkFilename;
+#endif
 	std::system(command.c_str());
 }
 
