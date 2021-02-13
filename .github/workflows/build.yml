@@ -17,15 +17,26 @@ jobs:
         include:
           - os: macos-latest
             artifact: macos
+            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_mac.zip
           - os: windows-latest
             artifact: win64
+            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
           - os: "ubuntu-20.04"
             artifact: linux
+            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
     
     steps:
 
     # Checkout project
     - uses: actions/checkout@v2
+
+    # Install Inklecate
+    - name: Install Inkelcate 
+      run: |
+        mkdir -p inklecate; cd inklecate
+        wget ${{ matrix.inklecate_url }}
+        unzip *.zip
+        echo "${{github.workspace}}/inklecate" >> $GITHUB_PATH
 
     # Create a build directory to store all the CMake generated files
     - name: Create Build Environment
@@ -54,6 +65,12 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: cmake --install . --config $BUILD_TYPE --prefix bin
+
+    # Quick inklecate test
+    - name: Test Inklecate
+      run: | 
+        echo "Hello World!" > mytest.ink
+        ./bin/inkcpp_cl mytest.ink
 
     # Upload bin directory as artifact
     - name: Upload Artifacts
