@@ -45,7 +45,6 @@ jobs:
         cd inklecate
         unzip *.zip
         echo "${{github.workspace}}/inklecate" >> $GITHUB_PATH
-        echo $PATH
 
     # Create a build directory to store all the CMake generated files
     - name: Create Build Environment
@@ -79,6 +78,7 @@ jobs:
     - name: Test Inklecate
       shell: bash
       run: | 
+        echo $PATH
         echo "Hello World!" > mytest.ink
         ./build/bin/bin/inkcpp_cl mytest.ink
 
