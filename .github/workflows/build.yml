@@ -30,12 +30,19 @@ jobs:
     # Checkout project
     - uses: actions/checkout@v2
 
+    # Download inklecate
+    - uses: suisei-cn/actions-download-file@v1
+      name: Download Inklecate 
+      id: download_inklecate 
+      with:
+        url: ${{ matrix.inklecate_url }}
+        target: "inklecate/"
+
     # Install Inklecate
-    - name: Install Inkelcate 
+    - name: Deploy Inkelcate 
       shell: bash
       run: |
-        mkdir -p inklecate; cd inklecate
-        wget ${{ matrix.inklecate_url }}
+        cd inklecate
         unzip *.zip
         echo "${{github.workspace}}/inklecate" >> $GITHUB_PATH
 
