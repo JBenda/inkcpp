@@ -32,6 +32,7 @@ jobs:
 
     # Install Inklecate
     - name: Install Inkelcate 
+      shell: bash
       run: |
         mkdir -p inklecate; cd inklecate
         wget ${{ matrix.inklecate_url }}
@@ -68,6 +69,7 @@ jobs:
 
     # Quick inklecate test
     - name: Test Inklecate
+      shell: bash
       run: | 
         echo "Hello World!" > mytest.ink
         ./bin/inkcpp_cl mytest.ink
