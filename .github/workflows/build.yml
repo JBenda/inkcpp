@@ -79,7 +79,7 @@ jobs:
       shell: bash
       run: | 
         echo "Hello World!" > mytest.ink
-        ./build/bin/inkcpp_cl mytest.ink
+        ./build/bin/bin/inkcpp_cl mytest.ink
 
     # Upload bin directory as artifact
     - name: Upload Artifacts
