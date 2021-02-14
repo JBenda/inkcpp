@@ -1,4 +1,6 @@
 # inkcpp
+![build](https://github.com/brwarner/inkcpp/workflows/build/badge.svg "Build Status")
+
 Inkle Ink C++ Runtime with JSON -> Binary Compiler.
 
 Ink Proofing Test Results: https://brwarner.github.io/inkcpp
