@@ -132,9 +132,18 @@ jobs:
           cp ../inkcpp_runtime_driver drivers/
           chmod +x drivers/inkcpp_runtime_driver
           mkdir deps/inkcpp
+          ls $GITHUB_WORKSPACE/build
+          ls $GITHUB_WORKSPACE/build/bin
           cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
           chmod +x deps/inkcpp/inkcpp_cl
           python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
+          
+      # Upload bin directory as artifact
+      - name: Upload Proof Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ matrix.os }}-proof
+          path: ${{ github.workspace }}/proofing/ink-proof/out
           
       - name: Summarize Results
         shell: bash
@@ -143,3 +152,14 @@ jobs:
           SUCCESSES=$(jq "[.results[] | select(.status==\"SUCCESS\" and .program == \"inkcpp\")] | length" summary.json)
           TOTAL=$(jq "[.results[] | select(.program == \"inkcpp\")] | length" summary.json)
           echo "$SUCCESSES / $TOTAL"
+          echo "SUCCESSES=$SUCCESSES" >> $GITHUB_ENV
+          echo "TOTAL=$TOTAL" >> $GITHUB_ENV
+          
+      - name: Make Badge
+        uses: RubbaBoy/BYOB@v1.2.0
+        with:
+          NAME: ${{ matrix.os }}-proof
+          LABEL: "Proof ${{ matrix.os }}"
+          STATUS: "${{ env.SUCCESSES }} / ${{ env.TOTAL }}"
+          COLOR: 00EEFF
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
