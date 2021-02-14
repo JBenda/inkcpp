@@ -8,7 +8,7 @@ add_executable(inkcpp_test catch.hpp Main.cpp
 	Globals.cpp
     )
 
-target_link_libraries(inkcpp_test PUBLIC inkcpp)
+target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler)
 
 add_test(NAME UnitTests COMMAND $<TARGET_FILE:inkcpp_test>)
 set (source "${CMAKE_CURRENT_SOURCE_DIR}/ink")
