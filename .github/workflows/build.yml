@@ -129,10 +129,10 @@ jobs:
           python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
           
       - name: Summarize Results
-        shell: bash
-        run: |
-          cd $GITHUB_WORKSPACE/proofing/ink-proof/out
-          sudo apt-get install jp
-          jp "[.results[] | select(.status=="SUCCESS" and .program == "inkcpp")] | length" summary.json >> $SUCCESSES
-          jp "[.results[] | select(.program == "inkcpp")] | length" summary.json >> $TOTAL
-          echo $SUCCESSES / $TOTAL
+        uses: r26d/jq-action@master
+        with:
+          cmd: |
+            cd $GITHUB_WORKSPACE/proofing/ink-proof/out
+            jp "[.results[] | select(.status=="SUCCESS" and .program == "inkcpp")] | length" summary.json >> $SUCCESSES
+            jp "[.results[] | select(.program == "inkcpp")] | length" summary.json >> $TOTAL
+            echo $SUCCESSES / $TOTAL
