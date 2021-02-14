@@ -22,7 +22,7 @@ SCENARIO("run story with global variable", "[global variables]")
 			runner thread = ink->new_runner(globStore);
 			THEN("variables should contain values as in inkScript")
 			{
-				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Jackie. I'm 23 years old.\n");
+				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Jackie. I'm 23 years old.\nFoo:23\n");
 				REQUIRE(*globStore->get<int32_t>("age") == 23);
 				REQUIRE(*globStore->get<const char*>("friendly_name_of_player") == std::string{"Jackie"});
 			}
@@ -42,9 +42,17 @@ SCENARIO("run story with global variable", "[global variables]")
 			}
 			THEN("variable should contain new value")
 			{
-				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Freddy. I'm 30 years old.\n");
+				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Freddy. I'm 30 years old.\nFoo:30\n");
 				REQUIRE(*globStore->get<int32_t>("age") == 30);
 				REQUIRE(*globStore->get<const char*>("friendly_name_of_player") == std::string{"Freddy"});
+			}
+			WHEN ("something added to string")
+			{
+				// concat in GlobalsStory.ink
+				THEN("get should return the whole string")
+				{
+					REQUIRE(*globStore->get<const char*>("concat") == std::string{"Foo:30"});
+				}
 			}
 		}
 		WHEN ("name or type not exist")
