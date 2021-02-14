@@ -107,7 +107,7 @@ jobs:
       # Download build result from previous step
       - uses: actions/download-artifact@v2
         with:
-          name: ${{ matrix.arifact }}
+          name: ${{ matrix.artifact }}
           path: build
 
       # Setup python
