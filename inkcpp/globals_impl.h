@@ -88,7 +88,7 @@ namespace ink::runtime::internal
 		runner_entry* _runners_start;
 
 		// Allocated string table (shared by all runners using this global store)
-		string_table _strings;
+		mutable string_table _strings;
 
 		// Global variables (TODO: Max 50?)
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.

@@ -106,8 +106,8 @@ namespace ink
 				uint32_t* as_uint_ptr() { return &_first.uint_value; }
 				const uint32_t* as_uint_ptr() const { return &_first.uint_value; }
 				// FIXME: we should compress the value before
-				const char* as_str() const { return _first.string_val; }
-				const char* const * as_str_ptr() const { return &_first.string_val; }
+				const char* as_str(string_table&) const;
+				const char* const * as_str_ptr(string_table&) const;
 
 				template<typename T>
 				T get() const { static_assert(always_false<T>::value, "Type not supported by value class"); }
@@ -153,6 +153,10 @@ namespace ink
 				 * @brief compare if the string representation of values are equal.
 				 */
 				static bool compare_string(const value& left, const value& right);
+				/**
+				 * @brief compress string values to one data field
+				 */
+				void finalize_string(string_table&) const;
 
 			private:
 				// Maximum sequential data a value can have
@@ -161,16 +165,16 @@ namespace ink
 				union
 				{
 					// Quick access struct
-					struct 
+					struct
 					{
-						data _first; 
+						data _first;
 						data _second;
 					};
-					
+
 					// Data array
-					data _data[VALUE_DATA_LENGTH];
+					mutable data _data[VALUE_DATA_LENGTH];
 				};
-				
+
 			};
 
 			// == Binary Operators ==

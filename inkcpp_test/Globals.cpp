@@ -15,11 +15,11 @@ SCENARIO("run story with global variable", "[global variables]")
 		inklecate("ink/GlobalStory.ink", "GlobalsStory.tmp");
 		ink::compiler::run("GlobalsStory.tmp", "GlobalsStory.bin");
 		auto ink = story::from_file("GlobalsStory.bin");
+		globals globStore = ink->new_globals();
+		runner thread = ink->new_runner(globStore);
 
 		WHEN( "just runs")
 		{
-			globals globStore = ink->new_globals();
-			runner thread = ink->new_runner(globStore);
 			THEN("variables should contain values as in inkScript")
 			{
 				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Jackie. I'm 23 years old.\nFoo:23\n");
@@ -29,8 +29,6 @@ SCENARIO("run story with global variable", "[global variables]")
 		}
 		WHEN ("edit number")
 		{
-			globals globStore = ink->new_globals();
-			runner thread = ink->new_runner(globStore);
 			bool resi
 				= globStore->set<int32_t>("age", 30);
 			bool resc
@@ -49,6 +47,7 @@ SCENARIO("run story with global variable", "[global variables]")
 			WHEN ("something added to string")
 			{
 				// concat in GlobalsStory.ink
+				thread->getall();
 				THEN("get should return the whole string")
 				{
 					REQUIRE(*globStore->get<const char*>("concat") == std::string{"Foo:30"});
@@ -57,8 +56,6 @@ SCENARIO("run story with global variable", "[global variables]")
 		}
 		WHEN ("name or type not exist")
 		{
-			globals globStore = ink->new_globals();
-			runner thread = ink->new_runner(globStore);
 			auto wrongType = globStore->get<uint32_t>("age");
 			auto notExistingName = globStore->get<int32_t>("foo");
 			THEN("should return nullptr")

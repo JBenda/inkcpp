@@ -116,10 +116,9 @@ namespace ink::runtime::internal
 	}
 
 	const char * const * globals_impl::get_str(hash_t name) const {
-		return fetch_variable<const char*, &value::as_str_ptr>(
-				get_variable(name),
-				data_type::allocated_string_pointer,
-				data_type::string_table_pointer);
+		const value* v = get_variable(name);
+		if (v->type() != value_type::string) { return nullptr; }
+		return v->as_str_ptr(_strings);
 	}
 	bool globals_impl::set_str(hash_t name, const char* val) {
 		value* v = get_variable(name);
