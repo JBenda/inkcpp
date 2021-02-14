@@ -140,6 +140,6 @@ jobs:
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE/proofing/ink-proof/out
-          jp "[.results[] | select(.status=="SUCCESS" and .program == "inkcpp")] | length" summary.json >> $SUCCESSES
-          jp "[.results[] | select(.program == "inkcpp")] | length" summary.json >> $TOTAL
-          echo $SUCCESSES / $TOTAL
+          SUCCESSES=$(jp "[.results[] | select(.status=="SUCCESS" and .program == "inkcpp")] | length" summary.json)
+          TOTAL=$(jp "[.results[] | select(.program == "inkcpp")] | length" summary.json)
+          echo "$SUCCESSES / $TOTAL"
