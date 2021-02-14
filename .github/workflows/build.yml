@@ -84,11 +84,19 @@ jobs:
         path: build/bin/
 
   # Run Ink Proof and Generate a GitHub page
-  ink-proof-pages:
-    name: Ink Proof Page Generation
-    runs-on: "ubuntu-latest"
+  ink-proof:
+    name: Ink Proof Testing
     needs: compilation
-    if: github.ref == 'refs/heads/master'
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: macos
+          - os: windows-latest
+            artifact: win64
+          - os: "ubuntu-20.04"
+            artifact: linux
 
     steps:
       # Checkout project with submodules
@@ -99,7 +107,7 @@ jobs:
       # Download build result from previous step
       - uses: actions/download-artifact@v2
         with:
-          name: linux
+          name: ${{ matrix.arifact }}
           path: build
 
       # Setup python
@@ -119,10 +127,12 @@ jobs:
           cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
           chmod +x deps/inkcpp/inkcpp_cl
           python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
-
-      - name: Deploy Page
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: inkproof-page
-          FOLDER: proofing/ink-proof/out
+          
+      - name: Summarize Results
+        shell: bash
+        run: |
+          cd $GITHUB_WORKSPACE/proofing/ink-proof/out
+          sudo apt-get install jp
+          jp "[.results[] | select(.status=="SUCCESS" and .program == "inkcpp")] | length" summary.json >> $SUCCESSES
+          jp "[.results[] | select(.program == "inkcpp")] | length" summary.json >> $TOTAL
+          echo $SUCCESSES / $TOTAL
