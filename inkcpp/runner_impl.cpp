@@ -851,14 +851,17 @@ namespace ink::runtime::internal
 
 				// Use a marker to start compiling the choice text
 				_output << marker;
+				value stack[2];
+				int sc = 0;
 
 				if (flag & CommandFlag::CHOICE_HAS_START_CONTENT) {
-					_output << _eval.pop();
+					stack[sc++] = _eval.pop();
 				}
 				if (flag & CommandFlag::CHOICE_HAS_CHOICE_ONLY_CONTENT) {
-					_output << _eval.pop();
+					stack[sc++] = _eval.pop();
 				}
 				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
+				for(;sc;--sc) { _output << stack[sc-1]; }
 
 				// Create choice and record it
 				add_choice().setup(_output, _globals->strings(), _num_choices, path, current_thread());
