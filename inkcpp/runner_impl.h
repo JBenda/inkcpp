@@ -11,6 +11,7 @@
 #include "functions.h"
 #include "string_table.h"
 #include "array.h"
+#include "random.h"
 
 #include "runner.h"
 #include "choice.h"
@@ -163,6 +164,8 @@ namespace ink::runtime::internal
 		bool _is_falling = false;
 
 		bool _saved = false;
+
+		prng _rng{};
 	};
 
 	template<>

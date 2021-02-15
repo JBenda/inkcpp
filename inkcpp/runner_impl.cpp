@@ -929,13 +929,13 @@ namespace ink::runtime::internal
 				int sequenceLength = _eval.pop();
 				int index = _eval.pop();
 
-				_eval.push(rand() % sequenceLength); // TODO: platform independance?
+				_eval.push(_rng.rand(sequenceLength));
 			} break;
 			case Command::SEED:
 			{
 				// TODO: Platform independance
-				int seed = _eval.pop();
-				srand(seed);
+				int32_t seed = _eval.pop();
+				_rng.srand(seed);
 
 				// push void (TODO)
 				_eval.push(0);

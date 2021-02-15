@@ -2,9 +2,6 @@
 #include "output.h"
 #include "string_table.h"
 
-// TODO
-#include <cstdlib>
-
 namespace ink
 {
 	namespace runtime
