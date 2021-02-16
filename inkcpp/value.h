@@ -8,11 +8,17 @@
 
 namespace ink
 {
-	namespace runtime 
+	namespace runtime
 	{
-		namespace internal 
+		namespace internal
 		{
 			class string_table;
+			class list_table;
+
+			struct list_element {
+				uint16_t list_id;
+				uint16_t flag_id;
+			};
 
 			// Data types that can be held internally within the ink runtime
 			enum class data_type
@@ -23,6 +29,8 @@ namespace ink
 				uint32,							// 32-bit unsigned integer value
 				string_table_pointer,			// Represents an offset within the story's constant string table
 				allocated_string_pointer,		// Represents an offset within the runner's allocated string table
+				list, 							// list: referenced in list_table
+				list_element, 					// one flag of one list
 				marker,							// Special marker (used in output stream)
 				glue,							// Glue.
 				newline,						// \n
@@ -49,6 +57,7 @@ namespace ink
 					uint32_t uint_value;
 					float float_value;
 					const char* string_val;
+					list_element list_element_value;
 					// TODO: Do we need a marker type?
 				};
 
@@ -57,6 +66,7 @@ namespace ink
 				inline void set_int(int val) { type = data_type::int32; integer_value = val; }
 				inline void set_uint(uint32_t val) { type = data_type::uint32; uint_value = val; }
 				inline void set_float(float val) { type = data_type::float32; float_value = val; }
+				inline void set_list_element(list_element elm) { type = data_type::list_element; list_element_value = elm; }
 				inline void set_string(const char* val, bool allocated) { type = allocated ? data_type::allocated_string_pointer : data_type::string_table_pointer; string_val = val; }
 			};
 
@@ -70,6 +80,8 @@ namespace ink
 				divert,
 				integer,
 				decimal,
+				list_element,
+				list,
 				string,
 			};
 
@@ -83,6 +95,7 @@ namespace ink
 				value(int);							// Create a new int value
 				value(float);						// Create a new float value
 				value(uint32_t);					// Create a new divert value
+				value(list_element);
 				value(const data&);					// Create value from data
 				value(uint32_t, data_type);			// Create divert with type
 
@@ -107,6 +120,7 @@ namespace ink
 				const uint32_t* as_uint_ptr() const { return &_first.uint_value; }
 				const char* as_str(string_table&) const;
 				const char* const * as_str_ptr(string_table&) const;
+				uint32_t as_list_id() const { return _first.uint_value; }
 
 				template<typename T>
 				T get() const { static_assert(always_false<T>::value, "Type not supported by value class"); }
