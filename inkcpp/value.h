@@ -105,7 +105,6 @@ namespace ink
 				uint32_t as_thread_id() const { return _first.uint_value; }
 				uint32_t* as_uint_ptr() { return &_first.uint_value; }
 				const uint32_t* as_uint_ptr() const { return &_first.uint_value; }
-				// FIXME: we should compress the value before
 				const char* as_str(string_table&) const;
 				const char* const * as_str_ptr(string_table&) const;
 
