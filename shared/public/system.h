@@ -11,6 +11,7 @@
 #ifdef INK_ENABLE_STL
 #include <exception>
 #include <stdexcept>
+#include <optional>
 #endif
 
 namespace ink
@@ -121,6 +122,47 @@ namespace ink
 		template<typename T>
 		struct always_false { static constexpr bool value = false; };
 	}
+
+#ifdef INK_ENABLE_STL
+	template<typename T>
+	using optional = std::optional<T>;
+	constexpr std::nullopt_t nullopt = std::nullopt;
+#else
+	struct nullopt_t{};
+	constexpr nullopt_t nullopt;
+
+	template<typename T>
+	class optional {
+	public:
+		optional() {}
+		optional(nullopt_t) {}
+		optional(T&& val) _has_value{true}, _value{std::forward(val)}{}
+		optional(const T& val) _has_value{true}, _value{val}{}
+
+		const T& operator*() const { return _value; }
+		T& operator*() { return _value; }
+		const T* operator->() const { return &_value; }
+		T* operator->() { return &_value; }
+
+		constexpr bool has_value() const { return _has_value; }
+		constexpr T& value() { check(); return _value; }
+		constexpr const T& value() const { check(); return _value; }
+		constexpr operator bool() const { return has_value(); }
+		template<typename U>
+		constexpr T value_or(U&& u) const {
+			return _has_value ? _value : static_cast<T>(std::forward(u));
+		}
+	private:
+		void check() const {
+			if ( ! _has_value) {
+				throw ink_exception("Can't access empty optional!");
+			}
+		}
+
+		bool _has_value = false;
+		T _value;
+	};
+#endif
 }
 
 // Platform specific defines //

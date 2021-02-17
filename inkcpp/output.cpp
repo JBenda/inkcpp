@@ -1,13 +1,11 @@
 #include "output.h"
 #include "string_table.h"
+#include <system.h>
+#include "string_utils.h"
 
 #ifdef INK_ENABLE_STL
 #include <iomanip>
 #endif
-
-#include <cstdio>
-#include <errno.h>
-#include <type_traits>
 
 namespace ink
 {
@@ -15,42 +13,9 @@ namespace ink
 	{
 		namespace internal
 		{
-			template<typename T>
-			int toStr(char * buffer, size_t size, T value) {
-				static_assert(!std::is_same<T,T>::value, "Type not supported for conversion!");
-				return EINVAL;
-			}
-
-			// error behavior from: https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/itoa-s-itow-s?view=msvc-160
-			template<>
-			int toStr(char * buffer, size_t size, int value) {
-#ifdef WIN32
-				return _itoa_s(value, buffer, size, 10);
-#else
-				if ( buffer == nullptr || size < 1 ){ return EINVAL; }
-				int res = snprintf(buffer, size, "%d", value);
-				if (res > 0 && res < size) { return 0; }
-				return EINVAL;
-#endif
-			}
-
-			// error behavior from: https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/gcvt-s?view=msvc-160
-			template<>
-			int toStr(char * buffer, size_t size, float value) {
-#ifdef WIN32
-				return _gcvt_s(buffer, size, value, 11);
-#else
-				if ( buffer == nullptr || size < 1 ) { return EINVAL; }
-				int res = snprintf(buffer, size, "%f.10", value);
-				if (res > 0 && res < size) { return 0; }
-				return EINVAL;
-#endif
-			}
 			basic_stream::basic_stream(data* buffer, size_t len)
 				: _data(buffer), _max(len), _size(0), _save(~0)
-			{
-
-			}
+			{}
 
 			void basic_stream::append(const data& in)
 			{
@@ -62,7 +27,7 @@ namespace ink
 					if (_data[_size - 1].type == data_type::func_start)
 						return;
 				}
-				
+
 				// Ignore leading newlines
 				if (in.type == data_type::newline && _size == 0)
 					return;
@@ -114,7 +79,7 @@ namespace ink
 			template<typename OUT>
 			inline void write_char(OUT& output, char c)
 			{
-				static_assert(! std::is_same<OUT,OUT>::value, "Invalid output type");
+				static_assert(always_false<OUT>::value, "Invalid output type");
 			}
 
 			template<>
@@ -421,10 +386,10 @@ namespace ink
 					switch (_data[i].type)
 					{
 					case data_type::int32:
-						length += 11;
+						length += decimal_digits(_data[i].integer_value);
 						break;
 					case data_type::float32:
-						length += 11; // ???
+						length += decimal_digits(_data[i].float_value);
 						break;
 					case data_type::string_table_pointer:
 					case data_type::allocated_string_pointer:
