@@ -72,53 +72,44 @@ namespace ink::runtime::internal
 		return _variables.get(name);
 	}
 
-	template<typename T, const T* (value::*FN)() const, typename ... TYPES>
-	auto fetch_variable( const value* v, TYPES ... types) {
-		return v && ((v->get_data_type() == types) || ...)
-			? (v->*FN)()
-			: nullptr;
-	}
-	template<typename T, T* (value::*FN)(), typename ... TYPES>
-	auto fetch_variable(value* v, TYPES ... types) {
-		return v && ((v->get_data_type() == types) || ...)
-			? (v->*FN)()
-			: nullptr;
+	template<value_type ty, typename T>
+	optional<T> fetch_variable(const value* val) {
+		if (val && val->type() == ty) {
+			return optional<T>(val->get<ty>());
+		}
+		return {nullopt};
 	}
 
-	const uint32_t* globals_impl::get_uint(hash_t name) const {
-		return fetch_variable<uint32_t, &value::as_uint_ptr>(get_variable(name), data_type::uint32);
-	}
-	bool globals_impl::set_uint(hash_t name, uint32_t val) {
-		uint32_t* p = fetch_variable<uint32_t, &value::as_uint_ptr>(get_variable(name), data_type::uint32);
-		if (p == nullptr) { return false; }
-		*p = val;
-		return true;
-	}
-
-	const int32_t* globals_impl::get_int(hash_t name) const {
-		return fetch_variable<int32_t, &value::as_int_ptr>(get_variable(name), data_type::int32);
-	}
-	bool globals_impl::set_int(hash_t name, int32_t val) {
-		int32_t* p = fetch_variable<int32_t, &value::as_int_ptr>(get_variable(name), data_type::int32);
-		if (p == nullptr) { return false; }
-		*p = val;
-		return true;
+	template<value_type ty, typename T>
+	bool try_set_value(value* val, T x) {
+		if (val && val->type() == ty) {
+			val->set<ty>(x);
+			return true;
+		}
+		return false;
 	}
 
-	const float* globals_impl::get_float(hash_t name) const {
-		return fetch_variable<float, &value::as_float_ptr>(get_variable(name), data_type::float32);
+	optional<int32_t> globals_impl::get_int(hash_t name) const {
+		return fetch_variable<value_type::int32,int32_t>(get_variable(name));
 	}
-	bool globals_impl::set_float(hash_t name, float val) {
-		float* p = fetch_variable<float, &value::as_float_ptr>(get_variable(name), data_type::float32);
-		if (p == nullptr) { return false; }
-		*p = val;
-		return true;
+	bool globals_impl::set_int(hash_t name, int32_t i) {
+		return try_set_value<value_type::int32, int32_t>(get_variable(name), i);
+	}
+	optional<uint32_t> globals_impl::get_uint(hash_t name) const {
+		return fetch_variable<value_type::uint32,uint32_t>(get_variable(name));
+	}
+	bool globals_impl::set_uint(hash_t name, uint32_t i) {
+		return try_set_value<value_type::uint32, uint32_t>(get_variable(name), i);
+	}
+	optional<float> globals_impl::get_float(hash_t name) const {
+		return fetch_variable<value_type::float32,float>(get_variable(name));
+	}
+	bool globals_impl::set_float(hash_t name, float i) {
+		return try_set_value<value_type::float32, float>(get_variable(name), i);
 	}
 
-	const char * const * globals_impl::get_str(hash_t name) const {
-		const value* v = get_variable(name);
-		if (v->type() != value_type::string) { return nullptr; }
-		return v->as_str_ptr(_strings);
+	optional<const char*> globals_impl::get_str(hash_t name) const {
+		return fetch_variable<value_type::string, const char*>(get_variable(name));
 	}
 	bool globals_impl::set_str(hash_t name, const char* val) {
 		value* v = get_variable(name);
@@ -134,9 +125,7 @@ namespace ink::runtime::internal
 				*ptr++ = *i;
 			}
 			*ptr = 0;
-			internal::data d;
-			d.set_string(new_string, true);
-			*v = internal::value(d);
+			*v = value{}.set<value_type::string>(static_cast<const char*>(new_string), true);
 			return true;
 		}
 		return false;

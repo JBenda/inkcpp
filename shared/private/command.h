@@ -53,7 +53,8 @@ namespace ink
 		THREAD,
 
 		// == Binary operators
-		BINARY_OPERATORS_START,
+		OP_BEGIN,
+		BINARY_OPERATORS_START = OP_BEGIN,
 		ADD = BINARY_OPERATORS_START,
 		SUBTRACT,
 		DIVIDE,
@@ -76,9 +77,10 @@ namespace ink
 		NOT = UNARY_OPERATORS_START,
 		NEGATE,
 		UNARY_OPERATORS_END = NEGATE,
+		OP_END = NEGATE + 1,
 
 		// == Container tracking
-		START_CONTAINER_MARKER,
+		START_CONTAINER_MARKER = OP_END,
 		END_CONTAINER_MARKER,
 
 		// == Function calls

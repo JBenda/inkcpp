@@ -9,6 +9,7 @@ namespace ink
 	{
 		namespace internal
 		{
+			class string_table;
 			struct entry
 			{
 				hash_t name;
@@ -39,7 +40,8 @@ namespace ink
 				value* get(hash_t name);
 
 				// pushes a new frame onto the stack
-				void push_frame(offset_t return_to, frame_type type);
+				template<frame_type>
+				void push_frame(offset_t return_to);
 
 				// Pops a frame (and all temporary variables) from the callstack.
 				offset_t pop_frame(frame_type* type);
@@ -125,9 +127,9 @@ namespace ink
 				void forget();
 			};
 
-			template<size_t N>
 			class eval_stack : public basic_eval_stack
 			{
+				static constexpr size_t N = 20;
 			public:
 				eval_stack() : basic_eval_stack(&_stack[0], N) { }
 			private:

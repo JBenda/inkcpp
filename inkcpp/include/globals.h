@@ -45,21 +45,19 @@ namespace ink::runtime
 		virtual ~globals_interface() = default;
 
 	protected:
-		virtual const uint32_t* get_uint(hash_t name) const = 0;
+		virtual optional<uint32_t> get_uint(hash_t name) const = 0;
 		virtual bool set_uint(hash_t name, uint32_t val) = 0;
-		virtual const int32_t* get_int(hash_t name) const = 0;
+		virtual optional<int32_t> get_int(hash_t name) const = 0;
 		virtual bool set_int(hash_t name, int32_t val) = 0;
-		virtual const float* get_float(hash_t name) const = 0;
+		virtual optional<float> get_float(hash_t name) const = 0;
 		virtual bool set_float(hash_t name, float val) = 0;
-		virtual const char* const *  get_str(hash_t name) const = 0;
+		virtual optional<const char *>  get_str(hash_t name) const = 0;
 		virtual bool set_str(hash_t name, const char* val) = 0;
 	};
 
 	template<>
 	inline optional<uint32_t>  globals_interface::get<uint32_t>(const char* name) const {
-		const uint32_t* p =  get_uint(hash_string(name));
-		if (p) { return {*p}; }
-		return {nullopt};
+		return get_uint(hash_string(name));
 	}
 	template<>
 	inline bool globals_interface::set<uint32_t>(const char* name, const uint32_t& val) {
@@ -68,9 +66,7 @@ namespace ink::runtime
 
 	template<>
 	inline optional<int32_t> globals_interface::get<int32_t>(const char* name) const {
-		const int32_t* p =  get_int(hash_string(name));
-		if (p) { return {*p}; }
-		return {nullopt};
+		return get_int(hash_string(name));
 	}
 	template<>
 	inline bool globals_interface::set<int32_t>(const char* name, const int32_t& val) {
@@ -79,9 +75,7 @@ namespace ink::runtime
 
 	template<>
 	inline optional<float> globals_interface::get<float>(const char* name) const {
-		const float* p =  get_float(hash_string(name));
-		if (p) { return {*p}; }
-		return {nullopt};
+		return get_float(hash_string(name));
 	}
 	template<>
 	inline bool globals_interface::set<float>(const char* name, const float& val) {
@@ -90,9 +84,7 @@ namespace ink::runtime
 
 	template<>
 	inline optional<const char*>globals_interface::get<const char*>(const char* name) const {
-		const char * const * p = get_str(hash_string(name));
-		if (p) { return {*p}; }
-		return {nullopt};
+		return get_str(hash_string(name));
 	}
 	template<>
 	inline bool globals_interface::set<const char*>(const char* name, const char * const & val) {

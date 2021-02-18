@@ -138,86 +138,6 @@ namespace ink::runtime::internal
 		_ptr = dest;
 	}
 
-	void runner_impl::run_binary_operator(unsigned char cmd)
-	{
-		// Pop
-		value rhs = _eval.pop(), lhs = _eval.pop();
-		value result;
-
-		switch ((Command)cmd)
-		{
-		case Command::ADD:
-			result = value::add(lhs, rhs, _output, _globals->strings());
-			break;
-		case Command::SUBTRACT:
-			result = lhs - rhs;
-			break;
-		case Command::DIVIDE:
-			result = lhs / rhs;
-			break;
-		case Command::MULTIPLY:
-			result = lhs * rhs;
-			break;
-		case Command::MOD:
-			result = lhs % rhs;
-			break;
-		case Command::IS_EQUAL:
-			result = lhs == rhs;
-			break;
-		case Command::GREATER_THAN:
-			result = lhs > rhs;
-			break;
-		case Command::LESS_THAN:
-			result = lhs < rhs;
-			break;
-		case Command::GREATER_THAN_EQUALS:
-			result = lhs >= rhs;
-			break;
-		case Command::LESS_THAN_EQUALS:
-			result = lhs <= rhs;
-			break;
-		case Command::NOT_EQUAL:
-			result = lhs != rhs;
-			break;
-		case Command::AND:
-			result = lhs && rhs;
-			break;
-		case Command::OR:
-			result = lhs || rhs;
-			break;
-		case Command::MIN:
-			result = lhs < rhs ? lhs : rhs;
-			break;
-		case Command::MAX:
-			result = lhs > rhs ? lhs : rhs;
-			break;
-		}
-
-		// Push result onto the stack
-		_eval.push(result);
-	}
-
-	void runner_impl::run_unary_operator(unsigned char cmd)
-	{
-		// Pop
-		value v = _eval.pop();
-		value result;
-
-		// Run command
-		switch ((Command)cmd)
-		{
-		case Command::NEGATE:
-			result = -v;
-			break;
-		case Command::NOT:
-			result = !v;
-			break;
-		}
-
-		// Push to the stack
-		_eval.push(result);
-	}
-
 	frame_type runner_impl::execute_return()
 	{
 		// Pop the callstack
@@ -226,7 +146,7 @@ namespace ink::runtime::internal
 
 		// SPECIAL: On function, do a trim
 		if (type == frame_type::function)
-			_output << func_end;
+			_output << values::func_end;
 
 		// Jump to the old offset
 		inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
@@ -237,7 +157,9 @@ namespace ink::runtime::internal
 	}
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
-		: _story(data), _globals(global.cast<globals_impl>()), _container(~0), _threads(~0), 
+		:
+		_story(data), _globals(global.cast<globals_impl>()), _container(~0), _threads(~0), 
+		_operations(_globals->strings()),
 		_threadDone(nullptr, (ip_t)~0), _backup(nullptr), _done(nullptr), _choices()
 	{
 		_ptr = _story->instructions();
@@ -520,13 +442,9 @@ namespace ink::runtime::internal
 				set_done_ptr(nullptr);
 			}
 
-			if (cmd >= Command::BINARY_OPERATORS_START && cmd <= Command::BINARY_OPERATORS_END)
+			if (cmd >= Command::OP_BEGIN && cmd < Command::OP_END)
 			{
-				run_binary_operator((unsigned char)cmd);
-			}
-			else if (cmd >= Command::UNARY_OPERATORS_START && cmd <= Command::UNARY_OPERATORS_END)
-			{
-				run_unary_operator((unsigned char)cmd);
+				_operations(cmd, _eval);
 			}
 			else switch (cmd)
 			{
@@ -535,16 +453,16 @@ namespace ink::runtime::internal
 			{
 				const char* str = read<const char*>();
 				if (bEvaluationMode)
-					_eval.push(str);
+					_eval.push(value{}.set<value_type::string>(str));
 				else
-					_output << str;
+					_output << value{}.set<value_type::string>(str);
 			}
 			break;
 			case Command::INT:
 			{
 				int val = read<int>();
 				if (bEvaluationMode)
-					_eval.push(val);
+					_eval.push(value{}.set<value_type::int32>(val));
 				// TEST-CASE B006 don't print integers
 			}
 			break;
@@ -552,7 +470,7 @@ namespace ink::runtime::internal
 			{
 				float val = read<float>();
 				if (bEvaluationMode)
-					_eval.push(val);
+					_eval.push(value{}.set<value_type::float32>(val));
 				// TEST-CASE B006 don't print floats
 			}
 			break;
@@ -563,29 +481,29 @@ namespace ink::runtime::internal
 
 				// Push the divert target onto the stack
 				uint32_t target = read<uint32_t>();
-				_eval.push(value(target));
+				_eval.push(value{}.set<value_type::divert>(target));
 			}
 			break;
 			case Command::NEWLINE:
 			{
 				if (bEvaluationMode)
-					_eval.push(newline);
+					_eval.push(values::newline);
 				else
-					_output << newline;
+					_output << values::newline;
 			}
 			break;
 			case Command::GLUE:
 			{
 				if (bEvaluationMode)
-					_eval.push(glue);
+					_eval.push(values::glue);
 				else
-					_output << glue;
+					_output << values::glue;
 			}
 			break;
 			case Command::VOID:
 			{
 				if (bEvaluationMode)
-					_eval.push(0); // TODO: void type?
+					_eval.push(values::null); // TODO: void type?
 			}
 			break;
 
@@ -596,7 +514,7 @@ namespace ink::runtime::internal
 				uint32_t target = read<uint32_t>();
 
 				// Check for condition
-				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop())
+				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().get<value_type::boolean>())
 					break;
 
 				// SPECIAL: Fallthrough divert. We're starting to fall out of containers
@@ -616,7 +534,7 @@ namespace ink::runtime::internal
 					if (_stack.has_frame(&type) && type == frame_type::function) // implicit return is only for functions
 					{
 						// push null and return
-						_eval.push(value());
+						_eval.push(values::null);
 
 						// HACK
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
@@ -640,13 +558,13 @@ namespace ink::runtime::internal
 				hash_t variable = read<hash_t>();
 
 				// Check for condition
-				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop())
+				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().get<value_type::boolean>())
 					break;
 
 				const value& val = *_stack.get(variable);
 
 				// Move to location
-				jump(_story->instructions() + val.as_divert());
+				jump(_story->instructions() + val.get<value_type::divert>());
 				inkAssert(_ptr < _story->end(), "Diverted past end of story data!");
 			}
 			break;
@@ -666,14 +584,20 @@ namespace ink::runtime::internal
 			{
 				// add a function start marker
 				if (cmd == Command::FUNCTION)
-					_output << func_start;
+					_output << values::func_start;
 
 				// Find divert address
 				uint32_t target = read<uint32_t>();
 
 				// Push next address onto the callstack
-				_stack.push_frame(_ptr - _story->instructions(), 
-					cmd == Command::FUNCTION ? frame_type::function : frame_type::tunnel);
+				{
+				size_t address = _ptr - _story->instructions();
+					if (cmd == Command::FUNCTION) {
+						_stack.push_frame<frame_type::function>(address);
+					} else {
+						_stack.push_frame<frame_type::tunnel>(address);
+					}
+				}
 
 				// Do the jump
 				inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
@@ -692,7 +616,7 @@ namespace ink::runtime::internal
 				// Push a thread frame so we can return easily
 				// TODO We push ahead of a single divert. Is that correct in all cases....?????
 				auto returnTo = _ptr + CommandSize<uint32_t>;
-				_stack.push_frame(returnTo - _story->instructions(), frame_type::thread);
+				_stack.push_frame<frame_type::thread>(returnTo - _story->instructions());
 
 				// Fork a new thread on the callstack
 				thread_t thread = _stack.fork_thread();
@@ -803,7 +727,7 @@ namespace ink::runtime::internal
 			{
 				inkAssert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
 				bEvaluationMode = false;
-				_output << marker;
+				_output << values::marker;
 			} break;
 			case Command::END_STR:
 			{
@@ -845,12 +769,12 @@ namespace ink::runtime::internal
 				// Choice is conditional
 				if (flag & CommandFlag::CHOICE_HAS_CONDITION) {
 					// Only show if the top of the eval stack is 'truthy'
-					if (!_eval.pop())
+					if (!_eval.pop().get<value_type::boolean>())
 						break;
 				}
 
 				// Use a marker to start compiling the choice text
-				_output << marker;
+				_output << values::marker;
 				value stack[2];
 				int sc = 0;
 
@@ -918,7 +842,7 @@ namespace ink::runtime::internal
 			{
 				// Push the visit count for the current container to the top
 				//  is 0-indexed for some reason. idk why but this is what ink expects
-				_eval.push((int)_globals->visits(_container.top()) - 1);
+				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(_container.top()) - 1));
 			} break;
 			case Command::SEQUENCE:
 			{
@@ -926,19 +850,18 @@ namespace ink::runtime::internal
 				//  to make sure each element is picked at least once in every
 				//  iteration loop. I don't feel like replicating that right now.
 				// So, let's just return a random number and *shrug*
-				int sequenceLength = _eval.pop();
-				int index = _eval.pop();
+				int sequenceLength = _eval.pop().get<value_type::int32>();
+				int index = _eval.pop().get<value_type::int32>();
 
-				_eval.push(_rng.rand(sequenceLength));
+				_eval.push(value{}.set<value_type::int32>(_rng.rand(sequenceLength)));
 			} break;
 			case Command::SEED:
 			{
 				// TODO: Platform independance
-				int32_t seed = _eval.pop();
+				int32_t seed = _eval.pop().get<value_type::int32>();
 				_rng.srand(seed);
 
-				// push void (TODO)
-				_eval.push(0);
+				_eval.push(values::null);
 			} break;
 			case Command::READ_COUNT:
 			{
@@ -946,7 +869,7 @@ namespace ink::runtime::internal
 				container_t container = read<container_t>();
 
 				// Push the read count for the requested container index
-				_eval.push((int)_globals->visits(container));
+				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(container)));
 			} break;
 			default:
 				inkAssert(false, "Unrecognized command!");
