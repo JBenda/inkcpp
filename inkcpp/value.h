@@ -20,10 +20,10 @@ namespace ink::runtime::internal {
 		int32,
 		float32,
 		string,
+		newline,
 		PRINT_END,
 		marker = PRINT_END,
 		glue,
-		newline,
 		func_start,
 		func_end,
 		null,
@@ -34,6 +34,15 @@ namespace ink::runtime::internal {
 		thread_end,
 		jump_marker,
 		END};
+	template<value_type ty>
+	using is_numeric_t = typename std::enable_if<
+		ty == value_type::int32
+		|| ty == value_type::uint32
+		|| ty == value_type::float32, void>::type;
+	template<value_type ty>
+	using is_integral_t = typename std::enable_if<
+		ty == value_type::int32
+		|| ty == value_type::uint32, void>::type;
 	constexpr value_type operator+(value_type t, int i) {
 		return static_cast<value_type>(static_cast<int>(t)+i);
 	}
@@ -85,19 +94,19 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 
-	template<> struct value::ret<value_type::divert> { using type = uint32_t; };
-	template<> inline uint32_t value::get<value_type::divert>() const { return uint32_value; }
-	template<>
-	inline constexpr value& value::set<value_type::divert, uint32_t>(uint32_t v) {
-		uint32_value = v;
-		_type = value_type::divert;
-		return *this;
-	}
 
 	template<> struct value::ret<value_type::uint32> { using type = uint32_t; };
 	template<> inline uint32_t value::get<value_type::uint32>() const { return uint32_value; }
 	template<>
 	inline constexpr value& value::set<value_type::uint32, uint32_t>(uint32_t v) {
+		uint32_value = v;
+		_type = value_type::uint32;
+		return *this;
+	}
+	template<> struct value::ret<value_type::divert> { using type = uint32_t; };
+	template<> inline uint32_t value::get<value_type::divert>() const { return uint32_value; }
+	template<>
+	inline constexpr value& value::set<value_type::divert, uint32_t>(uint32_t v) {
 		uint32_value = v;
 		_type = value_type::divert;
 		return *this;
@@ -131,7 +140,21 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 	template<>
+	inline constexpr value& value::set<value_type::string,char*>(char* v) {
+		// TODO: decode allocw
+		str_value = v;
+		_type = value_type::string;
+		return *this;
+	}
+	template<>
 	inline constexpr value& value::set<value_type::string, const char*, bool>(const char* v, bool allocated) {
+		// TODO use bool
+		str_value = v;
+		_type = value_type::string;
+		return *this;
+	}
+	template<>
+	inline constexpr value& value::set<value_type::string, char*, bool>( char* v, bool allocated) {
 		// TODO use bool
 		str_value = v;
 		_type = value_type::string;
@@ -179,6 +202,12 @@ namespace ink::runtime::internal {
 	inline constexpr value& value::set<value_type::newline>() {
 		_type = value_type::newline;
 		return *this;
+	}
+	template<> struct value::ret<value_type::newline> { using type = const char*; };
+	template<>
+	inline const char* value::get<value_type::newline>() const {
+		static const char line_break[] = "\n";
+		return line_break;
 	}
 	template<>
 	inline constexpr value& value::set<value_type::func_start>() {

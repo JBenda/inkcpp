@@ -128,9 +128,9 @@ namespace ink::runtime::internal
 		inline thread_t current_thread() const { return _threads.empty() ? ~0 : _threads.top(); }
 
 	private:
-		executer _operations;
 		const story_impl* const _story;
 		story_ptr<globals_impl> _globals;
+		executer _operations;
 
 		// == State ==
 

@@ -17,6 +17,7 @@ list(APPEND SOURCES
     system.cpp
     value.cpp value.h
     string_table.h string_table.cpp avl_array.h
+	string_operations.cpp
 	header.cpp
 )
 source_group(Collections REGULAR_EXPRESSION collections/.*)

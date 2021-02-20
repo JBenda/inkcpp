@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tuple>
+
 namespace ink::runtime::internal {
 	class string_table;
 
@@ -23,7 +25,7 @@ namespace ink::runtime::internal {
 		template<typename T>
 		operation_base(const T& t) : _string_table{*std::get<string_table*>(t)} {}
 
-	private:
+	protected:
 		string_table& _string_table;
 	};
 }
