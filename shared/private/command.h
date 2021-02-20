@@ -13,6 +13,7 @@ namespace ink
 		NEWLINE,
 		GLUE,
 		VOID,
+		TAG,
 
 		// == Diverts
 		DIVERT,

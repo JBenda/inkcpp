@@ -60,6 +60,11 @@ namespace ink::runtime::internal
 		_num_choices = 0;
 	}
 
+	void runner_impl::clear_tags()
+	{
+		_num_tags = 0;
+	}
+
 	void runner_impl::jump(ip_t dest, bool record_visits)
 	{
 		// Optimization: if we are _is_falling, then we can
@@ -388,6 +393,7 @@ namespace ink::runtime::internal
 		// Jump to destination and clear choice list
 		jump(_story->instructions() + _choices[index].path());
 		clear_choices();
+		clear_tags();
 	}
 
 	void runner_impl::getline_silent()
@@ -395,6 +401,22 @@ namespace ink::runtime::internal
 		// advance and clear output stream
 		advance_line();
 		_output.clear();
+	}
+
+	bool runner_impl::has_tags()
+	{
+		return _num_tags > 0;
+	}
+
+	size_t runner_impl::num_tags()
+	{
+		return _num_tags;
+	}
+
+	const char* runner_impl::get_tag(size_t index)
+	{
+		inkAssert(index < _num_tags, "Tag index exceeds _num_tags");
+		return _tags[index];
 	}
 
 #ifdef INK_ENABLE_CSTD
@@ -947,6 +969,10 @@ namespace ink::runtime::internal
 
 				// Push the read count for the requested container index
 				_eval.push((int)_globals->visits(container));
+			} break;
+			case Command::TAG:
+			{
+				_tags[_num_tags++] = read<const char*>();
 			} break;
 			default:
 				inkAssert(false, "Unrecognized command!");

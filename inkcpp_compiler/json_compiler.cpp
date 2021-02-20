@@ -299,7 +299,7 @@ namespace ink::compiler::internal
 		else if (get(command, "CNT?", val))
 		{
 			// TODO: Why is this true again?
-			_emitter->write_path(Command::READ_COUNT, CommandFlag::NO_FLAGS, val, true);
+			_emitter->write_path(Command::READ_COUNT, CommandFlag::NO_FLAGS, val, false);
 		}
 
 		// Internal function call
@@ -317,6 +317,10 @@ namespace ink::compiler::internal
 
 			// Encode argument count into command flag and write out the hash of the function name
 			_emitter->write(Command::CALL_EXTERNAL, hash_string(val.c_str()), (CommandFlag)numArgs);
+		}
+		else if (get(command, "#", val))
+		{
+			_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);
 		}
 	}
 }
