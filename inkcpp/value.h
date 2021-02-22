@@ -187,7 +187,7 @@ namespace ink::runtime::internal {
 	inline constexpr value& value::set<value_type::thread_start,decltype(value::jump)>(decltype(value::jump) v)
 	{
 		jump = v;
-		_type = value_type::jump_marker;
+		_type = value_type::thread_start;
 		return *this;
 	}
 	template<>
