@@ -79,7 +79,7 @@ namespace ink::runtime::internal {
 			uint32_t uint32_value;
 			float float_value;
 			struct {
-				uint32_t todo;
+				uint32_t jump;
 				uint32_t thread_id;
 			} jump;
 		};
@@ -175,7 +175,7 @@ namespace ink::runtime::internal {
 	}
 	template<>
 	inline constexpr value& value::set<value_type::jump_marker,uint32_t,uint32_t>(uint32_t v, uint32_t j) {
-		jump.todo = v;
+		jump.jump = v;
 		jump.thread_id = j;
 		_type = value_type::jump_marker;
 		return *this;
@@ -192,7 +192,7 @@ namespace ink::runtime::internal {
 	}
 	template<>
 	inline constexpr value& value::set<value_type::thread_start,uint32_t,uint32_t>(uint32_t v, uint32_t j) {
-		jump.todo = v;
+		jump.jump = v;
 		jump.thread_id = j;
 		_type = value_type::thread_start;
 		return *this;

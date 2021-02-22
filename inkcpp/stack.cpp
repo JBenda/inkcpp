@@ -154,7 +154,7 @@ namespace ink::runtime::internal
 				// We basically want to skip until we get to the start of this thread (leave the block alone)
 				thread_t tid = e->data.get<value_type::thread_end>();
 				while (threadIter.get()->data.type() != value_type::thread_start
-						|| threadIter.get()->data.get<value_type::thread_start>().todo != tid)
+						|| threadIter.get()->data.get<value_type::thread_start>().jump != tid)
 				{
 					jump.thread_id++;
 					threadIter.next();
@@ -272,7 +272,7 @@ namespace ink::runtime::internal
 
 		// Return the offset stored in the frame record
 		// FIXME: correct type?
-		return returnedFrame->data.get<value_type::jump_marker>().todo;
+		return returnedFrame->data.get<value_type::jump_marker>().jump;
 	}
 
 	bool basic_stack::has_frame(frame_type* returnType) const
@@ -297,7 +297,7 @@ namespace ink::runtime::internal
 
 			// If we're skipping over a thread, wait until we hit its start before checking
 			if (thread != ~0) {
-				if (elem.data.type() == value_type::thread_start && elem.data.get<value_type::thread_start>().todo == thread)
+				if (elem.data.type() == value_type::thread_start && elem.data.get<value_type::thread_start>().jump == thread)
 					thread = ~0;
 
 				return false;
@@ -401,7 +401,7 @@ namespace ink::runtime::internal
 			// If we're deleting a useless thread block
 			if (nulling != ~0) {
 				// If this is the start of the block, stop deleting
-				if (elem.name == InvalidHash && elem.data.type() == data_type::thread_start && elem.data.get<value_type::thread_start>().todo == nulling) {
+				if (elem.name == InvalidHash && elem.data.type() == data_type::thread_start && elem.data.get<value_type::thread_start>().jump == nulling) {
 					nulling = ~0;
 				}
 
