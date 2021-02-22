@@ -78,6 +78,10 @@ namespace ink::runtime::internal {
 			const char* str_value;
 			uint32_t uint32_value;
 			float float_value;
+			struct {
+				uint32_t todo;
+				uint32_t thread_id;
+			} jump;
 		};
 		value_type _type;
 	};
@@ -161,20 +165,35 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 
-	template<> struct value::ret<value_type::jump_marker> { using type = uint32_t; };
-	template<> inline uint32_t value::get<value_type::jump_marker>() const { return uint32_value; }
+	template<> struct value::ret<value_type::jump_marker> { using type = decltype(value::jump); };
+	template<> inline value::ret<value_type::jump_marker>::type value::get<value_type::jump_marker>() const { return jump; }
 	template<>
-	inline constexpr value& value::set<value_type::jump_marker,uint32_t>(uint32_t v) {
-		uint32_value = v;
+	inline constexpr value& value::set<value_type::jump_marker,decltype(value::jump)>(decltype(value::jump) v) {
+		jump = v;
+		_type = value_type::jump_marker;
+		return *this;
+	}
+	template<>
+	inline constexpr value& value::set<value_type::jump_marker,uint32_t,uint32_t>(uint32_t v, uint32_t j) {
+		jump.todo = v;
+		jump.thread_id = j;
 		_type = value_type::jump_marker;
 		return *this;
 	}
 
-	template<> struct value::ret<value_type::thread_start> { using type = uint32_t; };
-	template<> inline uint32_t value::get<value_type::thread_start>() const { return uint32_value; }
+	template<> struct value::ret<value_type::thread_start> { using type = decltype(value::jump); };
+	template<> inline value::ret<value_type::thread_start>::type value::get<value_type::thread_start>() const { return jump; }
 	template<>
-	inline constexpr value& value::set<value_type::thread_start,uint32_t>(uint32_t v) {
-		uint32_value = v;
+	inline constexpr value& value::set<value_type::thread_start,decltype(value::jump)>(decltype(value::jump) v)
+	{
+		jump = v;
+		_type = value_type::jump_marker;
+		return *this;
+	}
+	template<>
+	inline constexpr value& value::set<value_type::thread_start,uint32_t,uint32_t>(uint32_t v, uint32_t j) {
+		jump.todo = v;
+		jump.thread_id = j;
 		_type = value_type::thread_start;
 		return *this;
 	}

@@ -98,7 +98,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 						THEN("we can still collapse to the first thread")
 						{
 							stack.collapse_to_thread(thread);
-							REQUIRE(stack.get(Y)->get<value_type::int32>() == 100);
+							REQUIRE(stack.get(Y)->get<value_type::int32>() == 200);
 							REQUIRE(stack.get(Z) == nullptr);
 						}
 					}
