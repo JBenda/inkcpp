@@ -23,12 +23,12 @@ namespace ink::runtime::internal
 	}
 #endif
 
-	basic_stream& operator<<(basic_stream& os, value val) {
+	basic_stream& operator<<(basic_stream& os, const value& val) {
 		os.append(val);
 		return os;
 	}
 
-	basic_stream& operator>>(basic_stream& is, value val) {
+	basic_stream& operator>>(basic_stream& is, value& val) {
 		is.get(&val, 1);
 		return is;
 	}

@@ -15,7 +15,7 @@ list(APPEND SOURCES
     story_impl.h story_impl.cpp
     story_ptr.cpp
     system.cpp
-    value.cpp value.h
+    value.h value.cpp
     string_table.h string_table.cpp avl_array.h
 	string_operations.cpp
 	header.cpp

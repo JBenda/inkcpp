@@ -67,8 +67,8 @@ namespace ink::runtime::internal {
 		}
 
 		value_type type() const { return _type; }
-		friend basic_stream& operator<<(basic_stream& os, value);
-		friend basic_stream& operator>>(basic_stream& is, value);
+		friend basic_stream& operator<<(basic_stream& os, const value&);
+		friend basic_stream& operator>>(basic_stream& is, value&);
 
 		constexpr bool printable() const { return _type >= value_type::PRINT_BEGIN && _type < value_type::PRINT_END; }
 	private:
