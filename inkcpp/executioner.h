@@ -25,7 +25,7 @@ namespace ink::runtime::internal {
 		operation<cmd, ty> _op;
 	};
 	template<Command cmd>
-	class typed_executer<cmd, value_type::END> {
+	class typed_executer<cmd, value_type::OP_END> {
 	public:
 		template<typename T>
 		typed_executer(const T& t) {}

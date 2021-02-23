@@ -26,7 +26,7 @@ namespace ink::runtime::internal {
 		int to_string(char data[N], const value& v) {
 			if (v.type() == ty) {
 				return cast_to_string<ty>(data, N, v);
-			} else if constexpr (ty < value_type::END) {
+			} else if constexpr (ty < value_type::OP_END) {
 				return to_string<N,ty+1>(data, v);
 			} else {
 				throw ink_exception("cast target not exist!");

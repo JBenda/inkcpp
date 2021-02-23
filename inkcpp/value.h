@@ -20,7 +20,8 @@ namespace ink::runtime::internal {
 		int32,
 		float32,
 		string,
-		newline,
+		OP_END,
+		newline = OP_END,
 		PRINT_END,
 		marker = PRINT_END,
 		glue,
@@ -32,8 +33,8 @@ namespace ink::runtime::internal {
 		thread_start,
 		thread_frame,
 		thread_end,
-		jump_marker,
-		END};
+		jump_marker
+		};
 
 	constexpr value_type operator+(value_type t, int i) {
 		return static_cast<value_type>(static_cast<int>(t)+i);
