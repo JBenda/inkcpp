@@ -34,15 +34,7 @@ namespace ink::runtime::internal {
 		thread_end,
 		jump_marker,
 		END};
-	template<value_type ty>
-	using is_numeric_t = typename std::enable_if<
-		ty == value_type::int32
-		|| ty == value_type::uint32
-		|| ty == value_type::float32, void>::type;
-	template<value_type ty>
-	using is_integral_t = typename std::enable_if<
-		ty == value_type::int32
-		|| ty == value_type::uint32, void>::type;
+
 	constexpr value_type operator+(value_type t, int i) {
 		return static_cast<value_type>(static_cast<int>(t)+i);
 	}

@@ -2,11 +2,48 @@
 
 namespace ink::runtime::internal {
 	template<value_type ty>
+	using is_numeric_t = typename std::enable_if<
+		ty == value_type::int32
+		|| ty == value_type::uint32
+		|| ty == value_type::float32, void>::type;
+
+	template<value_type ty>
+	using is_integral_t = typename std::enable_if<
+		ty == value_type::int32
+		|| ty == value_type::uint32, void>::type;
+
+	namespace casting {
+		template<>
+		constexpr value_type cast<value_type::int32, value_type::float32> = value_type::float32;
+		template<value_type to>
+		inline value::ret<to>::type numeric_cast(const value& v) {
+			if (to == v.type()) { return v.get<to>(); }
+			else {
+				throw ink_exception("invalid numeric_cast!");
+			}
+		}
+
+		template<>
+		inline float numeric_cast<value_type::float32>(const value& v) {
+			switch(v.type()) {
+				case value_type::float32:
+					return v.get<value_type::float32>();
+				case value_type::int32:
+					return static_cast<float>(v.get<value_type::int32>());
+				default:
+					throw ink_exception("invalid numeric_cast!");
+			}
+		}
+	}
+
+	template<value_type ty>
 	class operation<Command::ADD, ty, is_numeric_t<ty>> : operation_base<void> {
 	public:
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
-			stack.push(value{}.set<ty>( vals[0].get<ty>() + vals[1].get<ty>() ));
+			stack.push(value{}.set<ty>(
+						casting::numeric_cast<ty>(vals[0]) +
+						casting::numeric_cast<ty>(vals[1]) ));
 		}
 	};
 
@@ -15,7 +52,9 @@ namespace ink::runtime::internal {
 	public:
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
-			stack.push(value{}.set<ty>( vals[0].get<ty>() - vals[1].get<ty>() ));
+			stack.push(value{}.set<ty>(
+						casting::numeric_cast<ty>(vals[0]) -
+						casting::numeric_cast<ty>(vals[1]) ));
 		}
 	};
 
@@ -24,7 +63,9 @@ namespace ink::runtime::internal {
 	public:
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
-			stack.push(value{}.set<ty>( vals[0].get<ty>() / vals[1].get<ty>() ));
+			stack.push(value{}.set<ty>(
+						casting::numeric_cast<ty>(vals[0]) /
+						casting::numeric_cast<ty>(vals[1]) ));
 		}
 	};
 
@@ -33,7 +74,9 @@ namespace ink::runtime::internal {
 	public:
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
-			stack.push(value{}.set<ty>( vals[0].get<ty>() * vals[1].get<ty>() ));
+			stack.push(value{}.set<ty>(
+						casting::numeric_cast<ty>(vals[0]) *
+						casting::numeric_cast<ty>(vals[1]) ));
 		}
 	};
 
@@ -52,7 +95,8 @@ namespace ink::runtime::internal {
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
-				vals[0].get<ty>() == vals[1].get<ty>()
+				casting::numeric_cast<ty>(vals[0]) ==
+				casting::numeric_cast<ty>(vals[1])
 			));
 		}
 	};
@@ -63,7 +107,8 @@ namespace ink::runtime::internal {
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
-				vals[0].get<ty>() > vals[1].get<ty>()
+				casting::numeric_cast<ty>(vals[0]) >
+				casting::numeric_cast<ty>(vals[1])
 			));
 		}
 	};
@@ -75,7 +120,8 @@ namespace ink::runtime::internal {
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
-				vals[0].get<ty>() < vals[1].get<ty>()
+				casting::numeric_cast<ty>(vals[0]) <
+				casting::numeric_cast<ty>(vals[1])
 			));
 		}
 	};
@@ -86,7 +132,8 @@ namespace ink::runtime::internal {
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
-				vals[0].get<ty>() >= vals[1].get<ty>()
+				casting::numeric_cast<ty>(vals[0]) >=
+				casting::numeric_cast<ty>(vals[1])
 			));
 		}
 	};
@@ -98,7 +145,8 @@ namespace ink::runtime::internal {
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
-				vals[0].get<ty>() <= vals[1].get<ty>()
+				casting::numeric_cast<ty>(vals[0]) <=
+				casting::numeric_cast<ty>(vals[1])
 			));
 		}
 	};
@@ -109,7 +157,8 @@ namespace ink::runtime::internal {
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
-				vals[0].get<ty>() != vals[1].get<ty>()
+				casting::numeric_cast<ty>(vals[0]) !=
+				casting::numeric_cast<ty>(vals[1])
 			));
 		}
 	};
@@ -137,7 +186,11 @@ namespace ink::runtime::internal {
 	public:
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
-			stack.push(vals[0].get<ty>() < vals[1].get<ty>() ? vals[0] : vals[1]);
+			typename value::ret<ty>::type n[2] = {
+				casting::numeric_cast<ty>(vals[0]),
+				casting::numeric_cast<ty>(vals[1])
+			};
+			stack.push(value{}.set<ty>(n[0] < n[1] ? n[0] : n[1]));
 		}
 	};
 
@@ -146,7 +199,11 @@ namespace ink::runtime::internal {
 	public:
 		using operation_base::operation_base;
 		void operator()(eval_stack& stack, value* vals) {
-			stack.push(vals[0].get<ty>() > vals[1].get<ty>() ? vals[0] : vals[1]);
+			typename value::ret<ty>::type n[2] = {
+				casting::numeric_cast<ty>(vals[0]),
+				casting::numeric_cast<ty>(vals[1])
+			};
+			stack.push(value{}.set<ty>(n[0] > n[1] ? n[0] : n[1]));
 		}
 	};
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "value.h"
-#include "casting.h"
 #include "stack.h"
 #include "operations.h"
 

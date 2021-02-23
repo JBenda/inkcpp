@@ -118,4 +118,71 @@ SCENARIO("compare concatenated values")
 			}
 		}
 	}
+	GIVEN("numbers")
+	{
+		int i5 = 5;
+		int i8 = 8;
+		float f5 = 5.f;
+		WHEN("numbers are same")
+		{
+			stack.push(value{}.set<value_type::int32>(i8));
+			stack.push(value{}.set<value_type::int32>(i8));
+			ops(Command::IS_EQUAL, stack);
+			value res1 = stack.pop();
+			stack.push(value{}.set<value_type::float32>(f5));
+			stack.push(value{}.set<value_type::float32>(f5));
+			ops(Command::IS_EQUAL, stack);
+			value res2 = stack.pop();
+			THEN("== returns true")
+			{
+				REQUIRE(res1.type() == data_type::boolean);
+				REQUIRE(res1.get<value_type::boolean>() == true);
+				REQUIRE(res2.type() == data_type::boolean);
+				REQUIRE(res2.get<value_type::boolean>() == true);
+			}
+		}
+		WHEN("numbers equal, but different encoding")
+		{
+			stack.push(value{}.set<value_type::int32>(i5));
+			stack.push(value{}.set<value_type::float32>(f5));
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
+			THEN("== returns true")
+			{
+				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == true);
+			}
+		}
+		WHEN("numbers value and encoding differs")
+		{
+			stack.push(value{}.set<value_type::float32>(f5));
+			stack.push(value{}.set<value_type::int32>(i8));
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
+			THEN("== returns false")
+			{
+				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == false);
+			}
+		}
+		WHEN("calculate with float and int (5.,8)")
+		{
+			stack.push(value{}.set<value_type::float32>(f5));
+			stack.push(value{}.set<value_type::int32>(i8));
+			THEN("adding results 13.")
+			{
+				ops(Command::ADD, stack);
+				value res = stack.pop();
+				REQUIRE(res.type() == data_type::float32);
+				REQUIRE(res.get<value_type::float32>() == 13.f);
+			}
+			THEN("dividing results in 0.625")
+			{
+				ops(Command::DIVIDE, stack);
+				value res = stack.pop();
+				REQUIRE(res.type() == data_type::float32);
+				REQUIRE(res.get<value_type::float32>() == 0.625f);
+			}
+		}
+	}
 }
