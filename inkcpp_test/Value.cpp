@@ -7,7 +7,6 @@
 
 using ink::runtime::internal::value;
 using ink::runtime::internal::value_type;
-using ink::runtime::internal::data_type;
 using ink::runtime::internal::string_table;
 using stream = ink::runtime::internal::stream<128>;
 using ink::runtime::internal::executer;
@@ -37,7 +36,7 @@ SCENARIO("compare concatenated values")
 			value res = stack.pop();
 			THEN("== results in true")
 			{
-				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.type() == value_type::boolean);
 				REQUIRE(res.get<value_type::boolean>() == true);
 			}
 		}
@@ -49,7 +48,7 @@ SCENARIO("compare concatenated values")
 			value res = stack.pop();
 			THEN("== results in false")
 			{
-				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.type() == value_type::boolean);
 				REQUIRE(res.get<value_type::boolean>() == false);
 			}
 		}
@@ -81,7 +80,7 @@ SCENARIO("compare concatenated values")
 			value res = stack.pop();
 			THEN("== returns true")
 			{
-				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.type() == value_type::boolean);
 				REQUIRE(res.get<value_type::boolean>() == true);
 			}
 		}
@@ -97,7 +96,7 @@ SCENARIO("compare concatenated values")
 			value res = stack.pop();
 			THEN("== results true")
 			{
-				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.type() == value_type::boolean);
 				REQUIRE(res.get<value_type::boolean>() == true);
 			}
 		}
@@ -113,7 +112,7 @@ SCENARIO("compare concatenated values")
 			value res = stack.pop();
 			THEN("== returns false")
 			{
-				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.type() == value_type::boolean);
 				REQUIRE(res.get<value_type::boolean>() == false);
 			}
 		}
@@ -135,9 +134,9 @@ SCENARIO("compare concatenated values")
 			value res2 = stack.pop();
 			THEN("== returns true")
 			{
-				REQUIRE(res1.type() == data_type::boolean);
+				REQUIRE(res1.type() == value_type::boolean);
 				REQUIRE(res1.get<value_type::boolean>() == true);
-				REQUIRE(res2.type() == data_type::boolean);
+				REQUIRE(res2.type() == value_type::boolean);
 				REQUIRE(res2.get<value_type::boolean>() == true);
 			}
 		}
@@ -149,7 +148,7 @@ SCENARIO("compare concatenated values")
 			value res = stack.pop();
 			THEN("== returns true")
 			{
-				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.type() == value_type::boolean);
 				REQUIRE(res.get<value_type::boolean>() == true);
 			}
 		}
@@ -161,7 +160,7 @@ SCENARIO("compare concatenated values")
 			value res = stack.pop();
 			THEN("== returns false")
 			{
-				REQUIRE(res.type() == data_type::boolean);
+				REQUIRE(res.type() == value_type::boolean);
 				REQUIRE(res.get<value_type::boolean>() == false);
 			}
 		}
@@ -173,14 +172,14 @@ SCENARIO("compare concatenated values")
 			{
 				ops(Command::ADD, stack);
 				value res = stack.pop();
-				REQUIRE(res.type() == data_type::float32);
+				REQUIRE(res.type() == value_type::float32);
 				REQUIRE(res.get<value_type::float32>() == 13.f);
 			}
 			THEN("dividing results in 0.625")
 			{
 				ops(Command::DIVIDE, stack);
 				value res = stack.pop();
-				REQUIRE(res.type() == data_type::float32);
+				REQUIRE(res.type() == value_type::float32);
 				REQUIRE(res.get<value_type::float32>() == 0.625f);
 			}
 		}

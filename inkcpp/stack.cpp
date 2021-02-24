@@ -371,7 +371,7 @@ namespace ink::runtime::internal
 			// Keep popping until we find the requested thread's end marker
 			const entry* top = pop();
 			while (!(
-				top->data.type() == data_type::thread_end &&
+				top->data.type() == value_type::thread_end &&
 				top->data.get<value_type::thread_end>() == thread))
 			{
 				inkAssert(!is_empty(), "Ran out of stack while searching for end of thread marker. Did you call complete_thread?");
@@ -400,7 +400,7 @@ namespace ink::runtime::internal
 			// If we're deleting a useless thread block
 			if (nulling != ~0) {
 				// If this is the start of the block, stop deleting
-				if (elem.name == InvalidHash && elem.data.type() == data_type::thread_start && elem.data.get<value_type::thread_start>().jump == nulling) {
+				if (elem.name == InvalidHash && elem.data.type() == value_type::thread_start && elem.data.get<value_type::thread_start>().jump == nulling) {
 					nulling = ~0;
 				}
 
@@ -420,7 +420,7 @@ namespace ink::runtime::internal
 				}
 
 				// Clear thread frame markers. We can't use them anymore
-				if (elem.name == InvalidHash && elem.data.type() == data_type::thread_frame) {
+				if (elem.name == InvalidHash && elem.data.type() == value_type::thread_frame) {
 					elem.name = NulledHashId;
 				}
 			}
@@ -511,7 +511,7 @@ namespace ink::runtime::internal
 	void basic_eval_stack::forget()
 	{
 		// Clear out
-		data x; x.set<value_type::none>();
+		value x; x.set<value_type::none>();
 		value none = value(x);
 		base::forget([&none](value& elem) { elem = none; });
 	}

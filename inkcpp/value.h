@@ -59,7 +59,7 @@ namespace ink::runtime::internal {
 			return *this;
 		}
 
-		value_type type() const { return _type; }
+		constexpr value_type type() const { return _type; }
 		friend basic_stream& operator<<(basic_stream& os, const value&);
 		friend basic_stream& operator>>(basic_stream& is, value&);
 

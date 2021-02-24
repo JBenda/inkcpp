@@ -10,7 +10,17 @@
 
 namespace ink::runtime::internal {
 
-	template<Command cmd, value_type ty = value_type::BEGIN>
+	template<Command cmd, value_type ty>
+	constexpr value_type next_operatable_type() {
+		if constexpr (operation<cmd,ty>::enabled) {
+			return ty;
+		} else if constexpr (ty >= value_type::OP_END){
+			return value_type::OP_END;
+		} else {
+			return next_operatable_type<cmd,ty+1>();
+		}
+	}
+	template<Command cmd, value_type ty = next_operatable_type<cmd,value_type::BEGIN>()>
 	class typed_executer {
 	public:
 		template<typename T>
@@ -21,7 +31,7 @@ namespace ink::runtime::internal {
 			else { _typed_exe(t, s, v); }
 		}
 	private:
-		typed_executer<cmd, ty+1> _typed_exe;
+		typed_executer<cmd, next_operatable_type<cmd,ty+1>()> _typed_exe;
 		operation<cmd, ty> _op;
 	};
 	template<Command cmd>

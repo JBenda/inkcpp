@@ -11,10 +11,10 @@ namespace ink
 			if (in.queued() == 2)
 			{
 				// If it's a string, just grab it. Otherwise, use allocation
-				const internal::data& data = in.peek();
+				const internal::value& data = in.peek();
 				switch (data.type())
 				{
-				case internal::data_type::string:
+				case internal::value_type::string:
 					_text = data.get<internal::value_type::string>();
 					in.discard(2);
 					break;

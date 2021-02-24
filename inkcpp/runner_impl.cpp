@@ -354,7 +354,7 @@ namespace ink::runtime::internal
 	{
 		// Check if the old newline is still present (hasn't been glu'd) and
 		//  if there is new text (non-whitespace) in the stream since saving
-		bool stillHasNewline = _output.saved_ends_with(data_type::newline);
+		bool stillHasNewline = _output.saved_ends_with(value_type::newline);
 		bool hasAddedNewText = _output.text_past_save();
 
 		// Newline is still there and there's no new text
@@ -401,7 +401,7 @@ namespace ink::runtime::internal
 			}
 
 			// If we're on a newline
-			if (_output.ends_with(data_type::newline))
+			if (_output.ends_with(value_type::newline))
 			{
 				// TODO: REMOVE
 				// return true;
