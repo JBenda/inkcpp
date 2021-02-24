@@ -10,6 +10,8 @@ namespace ink::runtime::internal {
 		constexpr value_type cast<value_type::int32, value_type::string> = value_type::string;
 		template<>
 		constexpr value_type cast<value_type::uint32, value_type::string> = value_type::string;
+		template<>
+		constexpr value_type cast<value_type::string, value_type::newline> = value_type::string;
 	}
 
 	template<>

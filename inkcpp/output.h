@@ -10,23 +10,20 @@ namespace ink
 		namespace internal
 		{
 			class string_table;
-			using data = value;
-			using data_type = value_type;
-
 			class basic_stream
 			{
 			protected:
-				basic_stream(data*, size_t);
+				basic_stream(value*, size_t);
 			public:
 				// Append data to stream
-				void append(const data&);
+				void append(const value&);
 
 				// Append data array to stream
-				void append(const data*, unsigned int length);
+				void append(const value*, unsigned int length);
 
 				// Append fixed sized data array to stream
 				template<unsigned int N>
-				void append(const data in[N])
+				void append(const value in[N])
 				{
 					append(&in[0], N);
 				}
@@ -35,13 +32,13 @@ namespace ink
 				int queued() const;
 
 				// Peeks the top entry
-				const data& peek() const;
+				const value& peek() const;
 
 				// discards data
 				void discard(size_t length);
 
 				// Extract into a data array
-				void get(data*, size_t length);
+				void get(value*, size_t length);
 
 				// Extract to a newly allocated string
 				const char* get_alloc(string_table&);
@@ -62,10 +59,10 @@ namespace ink
 				bool has_marker() const;
 
 				// Checks if the stream ends with a specific type
-				bool ends_with(data_type) const;
+				bool ends_with(value_type) const;
 
 				// Checks if the last element when save()'d was this type
-				bool saved_ends_with(data_type) const;
+				bool saved_ends_with(value_type) const;
 
 				// Checks if there are any elements past the save that
 				//  are non-whitespace strings
@@ -91,7 +88,7 @@ namespace ink
 				
 			private:
 				// data stream
-				data* _data;
+				value* _data;
 				size_t _max;
 
 				// size
@@ -116,7 +113,7 @@ namespace ink
 				stream() : basic_stream(&_buffer[0], N) { }
 
 			private:
-				data _buffer[N];
+				value _buffer[N];
 			};
 		}
 	}

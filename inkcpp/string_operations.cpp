@@ -45,6 +45,10 @@ namespace ink::runtime::internal {
 		int cast_to_string<value_type::float32>(char* data, size_t size, const value& v) {
 			return toStr(data, size, v.get<value_type::float32>());
 		}
+		template<>
+		int cast_to_string<value_type::newline>(char* data, size_t size, const value& v) {
+			return toStr(data, size, "\n");
+		}
 
 
 		string_cast::string_cast(const value& val) : _val{val}, _str{nullptr} {

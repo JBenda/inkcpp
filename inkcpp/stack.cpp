@@ -3,8 +3,6 @@
 
 namespace ink::runtime::internal
 {
-	using data = value;
-	using data_type = value_type;
 	basic_stack::basic_stack(entry* data, size_t size)
 		: base(data, size)
 	{
@@ -181,15 +179,15 @@ namespace ink::runtime::internal
 		return threadIter.get();
 	}
 
-	frame_type get_frame_type(data_type type)
+	frame_type get_frame_type(value_type type)
 	{
 		switch (type)
 		{
-		case data_type::tunnel_frame:
+		case value_type::tunnel_frame:
 			return frame_type::tunnel;
-		case data_type::function_frame:
+		case value_type::function_frame:
 			return frame_type::function;
-		case data_type::thread_frame:
+		case value_type::thread_frame:
 			return frame_type::thread;
 		default:
 			inkAssert(false, "Unknown frame type detected");
@@ -226,7 +224,7 @@ namespace ink::runtime::internal
 				)
 			{
 				// End of thread marker, we need to create a jump marker
-				if (frame->data.type() == data_type::thread_end)
+				if (frame->data.type() == value_type::thread_end)
 				{
 					// Push a new jump marker after the thread end
 					entry& jump = push({ InvalidHash, value{}.set<value_type::jump_marker>(0u,0u) });
@@ -245,7 +243,7 @@ namespace ink::runtime::internal
 				}
 
 				// Popping past thread start
-				if (frame->data.type() == data_type::thread_start)
+				if (frame->data.type() == value_type::thread_start)
 				{
 					returnedFrame = do_thread_jump_pop(iter);
 					break;
@@ -261,7 +259,8 @@ namespace ink::runtime::internal
 		inkAssert(returnedFrame, "Attempting to pop_frame when no frames exist! Stack reset.");
 
 		// Make sure we're not somehow trying to "return" from a thread
-		inkAssert(returnedFrame->data.type() != data_type::thread_start && returnedFrame->data.type() != data_type::thread_end,
+		inkAssert(returnedFrame->data.type() != value_type::thread_start
+				&& returnedFrame->data.type() != value_type::thread_end,
 			"Can not return from a thread! How did this happen?");
 
 		// Store frame type
