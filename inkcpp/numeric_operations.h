@@ -15,6 +15,8 @@ namespace ink::runtime::internal {
 	namespace casting {
 		template<>
 		constexpr value_type cast<value_type::int32, value_type::float32> = value_type::float32;
+		template<>
+		constexpr value_type cast<value_type::boolean, value_type::uint32> = value_type::uint32;
 		template<value_type to>
 		inline value::ret<to>::type numeric_cast(const value& v) {
 			if (to == v.type()) { return v.get<to>(); }
@@ -23,6 +25,17 @@ namespace ink::runtime::internal {
 			}
 		}
 
+		template<>
+		inline value::ret<value_type::uint32>::type numeric_cast(const value& v) {
+			switch(v.type()) {
+				case value_type::uint32:
+					return v.get<value_type::uint32>();
+				case value_type::boolean:
+					return static_cast<uint32_t>(v.get<value_type::boolean>());
+				default:
+					throw ink_exception("invalid cast to uint!");
+			}
+		}
 		template<>
 		inline float numeric_cast<value_type::float32>(const value& v) {
 			switch(v.type()) {
