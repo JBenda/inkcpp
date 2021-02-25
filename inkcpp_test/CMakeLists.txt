@@ -6,6 +6,7 @@ add_executable(inkcpp_test catch.hpp Main.cpp
     Restorable.cpp
 	Value.cpp
 	Globals.cpp
+	Tags.cpp
     )
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler)
