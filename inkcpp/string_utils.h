@@ -1,6 +1,7 @@
 #pragma once
 
 #include "system.h"
+#include "traits.h"
 #include "value.h"
 
 #include <cstdio>
@@ -68,14 +69,6 @@ namespace ink::runtime::internal {
 		}
 	}
 
-	inline size_t strlen(const char* str) {
-		size_t len = 0;
-		for(const char* c = str; *c; ++c) {
-			++len;
-		}
-		return len;
-	}
-
 	// return a upper bound for the string representation of the number
 	inline constexpr size_t decimal_digits(uint32_t number) {
 		size_t length = 1;
@@ -102,7 +95,7 @@ namespace ink::runtime::internal {
 			case value_type::float32:
 				return decimal_digits(v.get<value_type::float32>());
 			case value_type::string:
-				return strlen(v.get<value_type::string>());
+				return c_str_len(v.get<value_type::string>());
 			case value_type::newline:
 				return 1;
 			default:

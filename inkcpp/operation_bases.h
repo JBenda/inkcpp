@@ -1,6 +1,7 @@
 #pragma once
 
 #include "system.h"
+#include "./tuple.hpp"
 
 namespace ink::runtime::internal {
 	class string_table;
@@ -29,7 +30,7 @@ namespace ink::runtime::internal {
 	public:
 		static constexpr bool enabled = true;
 		template<typename T>
-		operation_base(const T& t) : _string_table{*t_get<string_table*>(t)} {
+		operation_base(const T& t) : _string_table{*get<string_table*,T>(t)} {
 			static_assert(has_type<string_table*,T>::value, "Executioner "
 					"constructor needs a string table to instantiate "
 					"some operations!");

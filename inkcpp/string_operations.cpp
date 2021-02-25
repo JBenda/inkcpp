@@ -90,7 +90,7 @@ namespace ink::runtime::internal {
 		casting::string_cast rh (vals[1]);
 
 		// create new string with needed size
-		char* str = _string_table.create(strlen(lh.get()) + strlen(rh.get()) + 1);
+		char* str = _string_table.create(c_str_len(lh.get()) + c_str_len(rh.get()) + 1);
 
 		// copy to new string
 		char* dst = str;
