@@ -9,17 +9,18 @@
 
 namespace ink::runtime::internal {
 
-	template<Command cmd, value_type ty>
+	template<Command cmd, value_type t, size_t Offset>
 	constexpr value_type next_operatable_type() {
+		constexpr value_type ty = t + Offset;
 		if constexpr (operation<cmd,ty>::enabled) {
 			return ty;
 		} else if constexpr (ty >= value_type::OP_END){
 			return value_type::OP_END;
 		} else {
-			return next_operatable_type<cmd,ty+1>();
+			return next_operatable_type<cmd,ty,1>();
 		}
 	}
-	template<Command cmd, value_type ty = next_operatable_type<cmd,value_type::BEGIN>()>
+	template<Command cmd, value_type ty = next_operatable_type<cmd,value_type::BEGIN,0>()>
 	class typed_executer {
 	public:
 		static constexpr bool enabled = true;
@@ -31,7 +32,7 @@ namespace ink::runtime::internal {
 			else { _typed_exe(t, s, v); }
 		}
 	private:
-		typed_executer<cmd, next_operatable_type<cmd,ty+1>()> _typed_exe;
+		typed_executer<cmd, next_operatable_type<cmd,static_cast<value_type>(ty),1>()> _typed_exe;
 		operation<cmd, ty> _op;
 	};
 	template<Command cmd>
@@ -46,17 +47,18 @@ namespace ink::runtime::internal {
 		}
 	};
 
-	template<Command cmd>
+	template<Command c, size_t Offset>
 	constexpr Command next_operatable_command() {
+		constexpr Command cmd = c + Offset;
 		if constexpr (typed_executer<cmd>::enabled) {
 			return cmd;
 		} else if constexpr (cmd >= Command::OP_END){
 			return Command::OP_END;
 		} else {
-			return next_operatable_command<cmd+1>();
+			return next_operatable_command<cmd,1>();
 		}
 	}
-	template<Command cmd = next_operatable_command<Command::OP_BEGIN>()>
+	template<Command cmd = next_operatable_command<Command::OP_BEGIN,0>()>
 	class executer_imp {
 	public:
 		template<typename T>
@@ -74,7 +76,7 @@ namespace ink::runtime::internal {
 			} else { _exe(c, s); }
 		}
 	private:
-		executer_imp<next_operatable_command<cmd + 1>()> _exe;
+		executer_imp<next_operatable_command<cmd,1>()> _exe;
 		typed_executer<cmd> _typed_exe;
 	};
 	template<>
