@@ -12,6 +12,7 @@
 #include <exception>
 #include <stdexcept>
 #include <optional>
+#include <tuple>
 #endif
 
 namespace ink
@@ -117,16 +118,27 @@ namespace ink
 	};
 #endif
 
+#ifdef INK_ENABLE_STL
+	template<typename ... Tys>
+	using tuple = std::tuple<Tys...>;
+#else
+#endif
+
 	namespace runtime::internal
 	{
+		struct false_type { static constexpr bool value = false; };
+		struct true_type { static constexpr bool value = true; };
 		template<typename T>
-		struct always_false { static constexpr bool value = false; };
-		template<bool B, typename T, T V1, T V2>
-		struct if_else { static constexpr T value{}; };
-		template<typename T, T V1, T V2>
-		struct if_else<true, T, V1, V2>{ static constexpr T value = V1; };
-		template<typename T, T V1, T V2>
-		struct if_else<false, T, V1, V2>{ static constexpr T value = V2; };
+		struct always_false : false_type {};
+
+		template<typename T, typename Tuple>
+		struct has_type;
+		template<typename T>
+		struct has_type<T,tuple<>> : false_type {};
+		template<typename T, typename U, typename ... Tys>
+		struct has_type<T, tuple<U, Tys...>> : has_type<T,tuple<Tys...>> {};
+		template<typename T, typename ... Tys>
+		struct has_type<T, tuple<T, Tys...>> : true_type {};
 	}
 
 #ifdef INK_ENABLE_STL

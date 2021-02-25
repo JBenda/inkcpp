@@ -35,13 +35,13 @@ namespace ink::runtime::internal
 
 			// If this is an end thread marker, skip over it
 			if (skip == ~0 && e.data.type() == value_type::thread_end) {
-				skip = e.data.get<value_type::divert>();
+				skip = e.data.get<value_type::thread_end>();
 			}
 
 			// If we're skipping
 			if (skip != ~0) {
 				// Stop if we get to the start of the thread block
-				if (e.data.type() == value_type::thread_start && skip == e.data.get<value_type::divert>()) {
+				if (e.data.type() == value_type::thread_start && skip == e.data.get<value_type::thread_start>().jump) {
 					skip = ~0;
 				}
 
@@ -493,7 +493,10 @@ namespace ink::runtime::internal
 		// Iterate everything (including what we have saved) and mark strings
 		base::for_each_all([&strings](const value& elem) {
 				if (elem.type() == value_type::string) {
-					strings.mark_used(elem.get<value_type::string>());
+					string_type str = elem.get<value_type::string>();
+					if (str.allocated) {
+						strings.mark_used(str.str);
+					}
 				}
 			});
 	}

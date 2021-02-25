@@ -4,6 +4,7 @@
 namespace ink::runtime::internal {
 
 	namespace casting {
+		// define valid castings
 		template<>
 		constexpr value_type cast<value_type::float32, value_type::string> = value_type::string;
 		template<>
@@ -14,6 +15,7 @@ namespace ink::runtime::internal {
 		constexpr value_type cast<value_type::string, value_type::newline> = value_type::string;
 	}
 
+	// operation declaration add
 	template<>
 	class operation<Command::ADD, value_type::string, void> : public operation_base<string_table> {
 	public:
@@ -21,6 +23,7 @@ namespace ink::runtime::internal {
 		void operator()(eval_stack& stack, value* vals);
 	};
 
+	// operation declaration equality
 	template<>
 	class operation<Command::IS_EQUAL, value_type::string, void> : public operation_base<void> {
 	public:

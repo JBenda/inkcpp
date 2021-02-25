@@ -468,9 +468,12 @@ namespace ink
 				// Find all allocated strings and mark them as used
 				for (int i = 0; i < _size; i++)
 				{
-					// FIXME: only allocated strings!!
-					if (_data[i].type() == value_type::string)
-						strings.mark_used(_data[i].get<value_type::string>());
+					if (_data[i].type() == value_type::string) {
+						string_type str = _data[i].get<value_type::string>();
+						if (str.allocated) {
+							strings.mark_used(str.str);
+						}
+					}
 				}
 			}
 

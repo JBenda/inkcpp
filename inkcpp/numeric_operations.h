@@ -1,22 +1,27 @@
 #pragma once
 
 namespace ink::runtime::internal {
+	/// define numeric value types
 	template<value_type ty>
 	using is_numeric_t = typename std::enable_if<
 		ty == value_type::int32
 		|| ty == value_type::uint32
 		|| ty == value_type::float32, void>::type;
 
+	/// define integral value types
 	template<value_type ty>
 	using is_integral_t = typename std::enable_if<
 		ty == value_type::int32
 		|| ty == value_type::uint32, void>::type;
 
 	namespace casting {
+		/// define valid casts
 		template<>
 		constexpr value_type cast<value_type::int32, value_type::float32> = value_type::float32;
 		template<>
 		constexpr value_type cast<value_type::boolean, value_type::uint32> = value_type::uint32;
+
+		/// defined numeric cast
 		template<value_type to>
 		inline value::ret<to>::type numeric_cast(const value& v) {
 			if (to == v.type()) { return v.get<to>(); }
@@ -25,8 +30,9 @@ namespace ink::runtime::internal {
 			}
 		}
 
+		/// specialisation for uint32
 		template<>
-		inline value::ret<value_type::uint32>::type numeric_cast(const value& v) {
+		inline value::ret<value_type::uint32>::type numeric_cast<value_type::uint32>(const value& v) {
 			switch(v.type()) {
 				case value_type::uint32:
 					return v.get<value_type::uint32>();
@@ -36,6 +42,8 @@ namespace ink::runtime::internal {
 					throw ink_exception("invalid cast to uint!");
 			}
 		}
+
+		/// specialisation for float32
 		template<>
 		inline float numeric_cast<value_type::float32>(const value& v) {
 			switch(v.type()) {

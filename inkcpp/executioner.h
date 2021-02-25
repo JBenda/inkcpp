@@ -1,10 +1,9 @@
 #pragma once
 
+#include "system.h"
 #include "value.h"
 #include "stack.h"
 #include "operations.h"
-
-#include <tuple>
 
 
 
@@ -23,6 +22,7 @@ namespace ink::runtime::internal {
 	template<Command cmd, value_type ty = next_operatable_type<cmd,value_type::BEGIN>()>
 	class typed_executer {
 	public:
+		static constexpr bool enabled = true;
 		template<typename T>
 		typed_executer(const T& t) : _typed_exe{t}, _op{t} {}
 
@@ -37,6 +37,7 @@ namespace ink::runtime::internal {
 	template<Command cmd>
 	class typed_executer<cmd, value_type::OP_END> {
 	public:
+		static constexpr bool enabled = false;
 		template<typename T>
 		typed_executer(const T& t) {}
 
@@ -45,7 +46,17 @@ namespace ink::runtime::internal {
 		}
 	};
 
-	template<Command cmd = Command::OP_BEGIN>
+	template<Command cmd>
+	constexpr Command next_operatable_command() {
+		if constexpr (typed_executer<cmd>::enabled) {
+			return cmd;
+		} else if constexpr (cmd >= Command::OP_END){
+			return Command::OP_END;
+		} else {
+			return next_operatable_command<cmd+1>();
+		}
+	}
+	template<Command cmd = next_operatable_command<Command::OP_BEGIN>()>
 	class executer_imp {
 	public:
 		template<typename T>
@@ -53,9 +64,9 @@ namespace ink::runtime::internal {
 
 		void operator()(Command c, eval_stack& s) {
 			if (c == cmd) {
-				static constexpr size_t N = CommandNumArguments<cmd>;
+				static constexpr size_t N = command_num_args(cmd);
 				value args[N];
-				for (int i = CommandNumArguments<cmd>-1; i >= 0 ; --i) {
+				for (int i = command_num_args(cmd)-1; i >= 0 ; --i) {
 					args[i] = s.pop();
 				}
 				value_type ty = casting::common_base<N>(args);
@@ -63,7 +74,7 @@ namespace ink::runtime::internal {
 			} else { _exe(c, s); }
 		}
 	private:
-		executer_imp<cmd + 1> _exe;
+		executer_imp<next_operatable_command<cmd + 1>()> _exe;
 		typed_executer<cmd> _typed_exe;
 	};
 	template<>
@@ -79,7 +90,7 @@ namespace ink::runtime::internal {
 	class executer {
 	public:
 		template<typename ... Args>
-		executer(Args& ... args) : _executer{std::tuple<Args*...>(&args...)} {}
+		executer(Args& ... args) : _executer{tuple<Args*...>(&args...)} {}
 		void operator()(Command cmd, eval_stack& stack) {
 			_executer(cmd, stack);
 		}

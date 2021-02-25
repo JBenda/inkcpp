@@ -10,65 +10,94 @@
 
 namespace ink::runtime::internal {
 	class basic_stream;
+
+	/// different existing value_types
 	enum class value_type {
-		BEGIN,
-		none = BEGIN,
-		divert,
-		uint32,
-		PRINT_BEGIN,
-		boolean = PRINT_BEGIN,
-		int32,
-		float32,
-		string,
-		OP_END,
-		newline = OP_END,
-		PRINT_END,
-		marker = PRINT_END,
-		glue,
-		func_start,
-		func_end,
-		null,
-		tunnel_frame,
-		function_frame,
-		thread_start,
-		thread_frame,
-		thread_end,
-		jump_marker
+		BEGIN, 						// To find the start of list
+		none = BEGIN,               // no type -> invalid
+		divert,                     // divert to different story position
+		PRINT_BEGIN,                // first printable value
+		boolean = PRINT_BEGIN,      // boolean variable
+		uint32,                     // 32bit unsigned integer variable
+		int32,                      // 32bit integer variable
+		float32,                    // 32bit floating point value 
+		string,                     // Pointer to string
+		OP_END,                     // END of types where we can operate on
+		newline = OP_END,           // newline symbol
+		PRINT_END,                  // END of printable values
+		marker = PRINT_END,         // special marker (used in output stream)
+		glue,                       // glue symbol
+		func_start,                 // start of function marker
+		func_end,                   // end of function marker
+		null,                       // void value, for function returns
+		tunnel_frame,               // return from tunnel
+		function_frame,             // return from function
+		thread_frame,               // return from thread
+		thread_start,               // start of thread frame
+		thread_end,                 // end of thread frame
+		jump_marker                 // callstack jump
 		};
 
+	// add operator for value_type (to simplify usage templates).
 	constexpr value_type operator+(value_type t, int i) {
 		return static_cast<value_type>(static_cast<int>(t)+i);
 	}
+	// add operator for Command (to simplify usage in templates).
 	constexpr Command operator+(Command c, int i) {
 		return static_cast<Command>(static_cast<int>(c)+i);
 	}
 
 
+	struct string_type{
+		constexpr string_type(const char* string, bool allocated)
+			: str{string}, allocated{allocated}{}
+		constexpr string_type(const char* string)
+			: str{string}, allocated{true} {}
+		operator const char*() const {
+			return str;
+		}
+		const char* str;
+		bool allocated;
+	};
+	/**
+	 * @brief class to wrap stack value to common type.
+	 */
 	class value {
 	public:
+		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };
 
 		constexpr value() : _type{value_type::none}, uint32_value{0}{}
+
+		/// get value of the type (if possible)
 		template<value_type ty>
 		typename ret<ty>::type
 		get() const { static_assert(ty != ty, "No getter for this type defined!"); }
 
+		/// set value of type (if possible)
 		template<value_type ty, typename ...Args>
 		constexpr value& set(Args ...args) {
 			static_assert(sizeof...(Args)!=sizeof...(Args), "No setter for this type defined!");
 			return *this;
 		}
 
+		/// get type of value
 		constexpr value_type type() const { return _type; }
+
 		friend basic_stream& operator<<(basic_stream& os, const value&);
 		friend basic_stream& operator>>(basic_stream& is, value&);
 
-		constexpr bool printable() const { return _type >= value_type::PRINT_BEGIN && _type < value_type::PRINT_END; }
+		/// returns if type is printable (see value_type)
+		constexpr bool printable() const {
+			return _type >= value_type::PRINT_BEGIN && _type < value_type::PRINT_END;
+		}
+
 	private:
+		/// actual storage
 		union {
 			bool bool_value;
 			int32_t int32_value;
-			const char* str_value;
+			string_type string_value;
 			uint32_t uint32_value;
 			float float_value;
 			struct {
@@ -82,6 +111,8 @@ namespace ink::runtime::internal {
 #ifdef INK_ENABLE_STL
 	std::ostream& operator<<(std::ostream&,const value&);
 #endif
+
+	// define get and set for int32
 	template<> struct value::ret<value_type::int32> { using type = int32_t; };
 	template<> inline int32_t value::get<value_type::int32>() const { return int32_value; }
 	template<>
@@ -92,6 +123,7 @@ namespace ink::runtime::internal {
 	}
 
 
+	// define get and set for uint32
 	template<> struct value::ret<value_type::uint32> { using type = uint32_t; };
 	template<> inline uint32_t value::get<value_type::uint32>() const { return uint32_value; }
 	template<>
@@ -100,6 +132,8 @@ namespace ink::runtime::internal {
 		_type = value_type::uint32;
 		return *this;
 	}
+
+	// define get and set for divert
 	template<> struct value::ret<value_type::divert> { using type = uint32_t; };
 	template<> inline uint32_t value::get<value_type::divert>() const { return uint32_value; }
 	template<>
@@ -109,6 +143,7 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 
+	// define get and set for float
 	template<> struct value::ret<value_type::float32> { using type = float; };
 	template<> inline float value::get<value_type::float32>() const { return float_value; }
 	template<>
@@ -118,6 +153,7 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 
+	// define get and set for boolean
 	template<> struct value::ret<value_type::boolean> { using type = bool; };
 	template<> inline bool value::get<value_type::boolean>() const { return bool_value; }
 	template<>
@@ -127,37 +163,35 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 
-	template<> struct value::ret<value_type::string> { using type = const char*; };
-	template<> inline const char* value::get<value_type::string>() const { return str_value; }
+	// define get and set for string
+	template<> struct value::ret<value_type::string> { using type = string_type; };
+	template<> inline string_type value::get<value_type::string>() const { return string_value; }
 	template<>
 	inline constexpr value& value::set<value_type::string, const char*>(const char* v) {
-		// TODO: decode allocw
-		str_value = v;
+		string_value = {v};
 		_type = value_type::string;
 		return *this;
 	}
 	template<>
 	inline constexpr value& value::set<value_type::string,char*>(char* v) {
-		// TODO: decode allocw
-		str_value = v;
+		string_value = {v};
 		_type = value_type::string;
 		return *this;
 	}
 	template<>
 	inline constexpr value& value::set<value_type::string, const char*, bool>(const char* v, bool allocated) {
-		// TODO use bool
-		str_value = v;
+		string_value = {v, allocated};
 		_type = value_type::string;
 		return *this;
 	}
 	template<>
 	inline constexpr value& value::set<value_type::string, char*, bool>( char* v, bool allocated) {
-		// TODO use bool
-		str_value = v;
+		string_value = {v, allocated};
 		_type = value_type::string;
 		return *this;
 	}
 
+	// define getter and setter for jump_marker
 	template<> struct value::ret<value_type::jump_marker> { using type = decltype(value::jump); };
 	template<> inline value::ret<value_type::jump_marker>::type value::get<value_type::jump_marker>() const { return jump; }
 	template<>
@@ -174,6 +208,7 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 
+	// define getter and setter for thread_start
 	template<> struct value::ret<value_type::thread_start> { using type = decltype(value::jump); };
 	template<> inline value::ret<value_type::thread_start>::type value::get<value_type::thread_start>() const { return jump; }
 	template<>
@@ -191,6 +226,7 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 
+	// define getter and setter for thread_end
 	template<> struct value::ret<value_type::thread_end> { using type = uint32_t; };
 	template<> inline uint32_t value::get<value_type::thread_end>() const { return uint32_value; }
 	template<>
@@ -200,6 +236,7 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 
+	// define setter for values without storage
 	template<>
 	inline constexpr value& value::set<value_type::marker>() {
 		_type = value_type::marker;
@@ -236,45 +273,42 @@ namespace ink::runtime::internal {
 		_type = value_type::null;
 		return *this;
 	}
+	template<>
+	inline constexpr value& value::set<value_type::none>() {
+		_type = value_type::none;
+		return *this;
+	}
 
+	// getter and setter for different frame types
+	// FIXME: the getter are not used?
+	/* template<> struct value::ret<value_type::function_frame>{ using type = uint32_t; }; */
+	/* template<> inline uint32_t value::get<value_type::function_frame>() const { return uint32_value; } */
 	template<>
 	inline constexpr value& value::set<value_type::function_frame,uint32_t>(uint32_t v) {
 		uint32_value = v;
 		_type = value_type::function_frame;
 		return *this;
 	}
+	// FIXME: the getter are not used?
+	/* template<> struct value::ret<value_type::tunnel_frame>{ using type = uint32_t; }; */
+	/* template<> inline uint32_t value::get<value_type::tunnel_frame>() const { return uint32_value; } */
 	template<>
 	inline constexpr value& value::set<value_type::tunnel_frame,uint32_t>(uint32_t v) {
 		uint32_value = v;
 		_type = value_type::tunnel_frame;
 		return *this;
 	}
+	// FIXME: the getter are not used?
+	/* template<> struct value::ret<value_type::thread_frame>{ using type = uint32_t; }; */
+	/* template<> inline uint32_t value::get<value_type::thread_frame>() const { return uint32_value; } */
 	template<>
 	inline constexpr value& value::set<value_type::thread_frame,uint32_t>(uint32_t v) {
 		uint32_value = v;
 		_type = value_type::thread_frame;
 		return *this;
 	}
-	template<>
-	inline constexpr value& value::set<value_type::tunnel_frame>() {
-		_type = value_type::tunnel_frame;
-		return *this;
-	}
-	template<>
-	inline constexpr value& value::set<value_type::function_frame>() {
-		_type = value_type::function_frame;
-		return *this;
-	}
-	template<>
-	inline constexpr value& value::set<value_type::thread_end>() {
-		_type = value_type::thread_end;
-		return *this;
-	}
-	template<>
-	inline constexpr value& value::set<value_type::none>() {
-		_type = value_type::none;
-		return *this;
-	}
+
+	// static constexpr instantiations of flag values
 	namespace values {
 		static constexpr value marker = value{}.set<value_type::marker>();
 		static constexpr value glue = value{}.set<value_type::glue>();
@@ -282,8 +316,5 @@ namespace ink::runtime::internal {
 		static constexpr value func_start = value{}.set<value_type::func_start>();
 		static constexpr value func_end = value{}.set<value_type::func_end>();
 		static constexpr value null = value{}.set<value_type::null>();
-		static constexpr value tunnel_frame = value{}.set<value_type::tunnel_frame>();
-		static constexpr value function_frame = value{}.set<value_type::function_frame>();
-		static constexpr value thread_end = value{}.set<value_type::thread_end>();
 	}
 }
