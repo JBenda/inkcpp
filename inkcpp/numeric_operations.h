@@ -23,7 +23,7 @@ namespace ink::runtime::internal {
 
 		/// defined numeric cast
 		template<value_type to>
-		inline value::ret<to>::type numeric_cast(const value& v) {
+		inline typename value::ret<to>::type numeric_cast(const value& v) {
 			if (to == v.type()) { return v.get<to>(); }
 			else {
 				throw ink_exception("invalid numeric_cast!");
@@ -32,7 +32,7 @@ namespace ink::runtime::internal {
 
 		/// specialisation for uint32
 		template<>
-		inline value::ret<value_type::uint32>::type numeric_cast<value_type::uint32>(const value& v) {
+		inline typename value::ret<value_type::uint32>::type numeric_cast<value_type::uint32>(const value& v) {
 			switch(v.type()) {
 				case value_type::uint32:
 					return v.get<value_type::uint32>();

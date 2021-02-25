@@ -9,17 +9,19 @@ namespace ink::runtime::internal::casting {
 	 */
 	struct casting_matrix_type {
 	public:
+		constexpr casting_matrix_type() : _data{value_type::none}{};
 		constexpr value_type get(value_type t1, value_type t2) const {
-			return _data[static_cast<size_t>(t1)][static_cast<size_t>(t2)];
+			return _data[static_cast<size_t>(t1)*N+static_cast<size_t>(t2)];
 		}
 		static constexpr size_t N = static_cast<size_t>(value_type::OP_END);
-		value_type _data[N][N];
+		value_type _data[N*N];
 	};
 
 	// iterate through each value_type combination and populate the
 	// casting_matrix
 	template<value_type t1 = value_type::BEGIN, value_type t2 = value_type::BEGIN>
-	constexpr void set_cast (value_type data[static_cast<size_t>(value_type::OP_END)][static_cast<size_t>(value_type::OP_END)]){
+	constexpr void set_cast (value_type data[casting_matrix_type::N*casting_matrix_type::N]){
+
 		if constexpr (t2 == value_type::OP_END) {
 			// end reached
 		} else if constexpr (t1 == value_type::OP_END) {
@@ -30,9 +32,9 @@ namespace ink::runtime::internal::casting {
 			constexpr size_t n1 = static_cast<size_t>(t1);
 			constexpr size_t n2 = static_cast<size_t>(t2);
 			if constexpr (n1 < n2) {
-				data[n1][n2] = cast<t1,t2>;
+				data[n1*casting_matrix_type::N + n2] = cast<t1,t2>;
 			} else {
-				data[n1][n2] = cast<t2,t1>;
+				data[n1*casting_matrix_type::N + n2] = cast<t2,t1>;
 			}
 			set_cast<t1+1,t2>(data);
 		}
