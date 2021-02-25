@@ -48,9 +48,9 @@ namespace ink::runtime::internal
 		// runs silently
 		void getline_silent();
 
-		virtual bool has_tags() override;
-		virtual size_t num_tags() override;
-		virtual const char* get_tag(size_t index) override;
+		virtual bool has_tags() const override;
+		virtual size_t num_tags() const override;
+		virtual const char* get_tag(size_t index) const override;
 
 
 #ifdef INK_ENABLE_CSTD
