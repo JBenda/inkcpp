@@ -29,7 +29,7 @@ namespace ink::runtime::internal {
 	public:
 		static constexpr bool enabled = true;
 		template<typename T>
-		operation_base(const T& t) : _string_table{*std::get<string_table*>(t)} {
+		operation_base(const T& t) : _string_table{*t_get<string_table*>(t)} {
 			static_assert(has_type<string_table*,T>::value, "Executioner "
 					"constructor needs a string table to instantiate "
 					"some operations!");
