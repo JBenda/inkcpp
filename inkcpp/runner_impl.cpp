@@ -397,6 +397,7 @@ namespace ink::runtime::internal
 					// Newline was removed. Proceed as if we never hit it
 					forget();
 					break;
+				case change_type::no_change: break;
 				}
 			}
 

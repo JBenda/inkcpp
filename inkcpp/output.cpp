@@ -382,6 +382,7 @@ namespace ink
 					case value_type::newline:
 						*ptr = '\n'; ptr++;
 						break;
+					default: throw ink_exception("cant convert expression to string!");
 					}
 				}
 
@@ -434,6 +435,7 @@ namespace ink
 				case value_type::glue:
 					hasGlue = true;
 					break;
+				default: break;
 				}
 
 				return false;

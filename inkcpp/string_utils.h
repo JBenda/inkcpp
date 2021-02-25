@@ -6,8 +6,11 @@
 
 #include <cstdio>
 
-namespace ink::runtime::internal {
+#ifndef EINVAL
+#define EINVAL -1
+#endif
 
+namespace ink::runtime::internal {
 	// error behavior from: https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/itoa-s-itow-s?view=msvc-160
 	inline int toStr(char * buffer, size_t size, uint32_t value) {
 #ifdef WIN32
