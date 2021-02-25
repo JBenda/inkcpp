@@ -17,9 +17,11 @@ namespace ink::runtime::internal {
 	namespace casting {
 		/// define valid casts
 		template<>
-		constexpr value_type cast<value_type::int32, value_type::float32> = value_type::float32;
+		struct cast<value_type::int32, value_type::float32>
+		{	static constexpr value_type value = value_type::float32; };
 		template<>
-		constexpr value_type cast<value_type::boolean, value_type::uint32> = value_type::uint32;
+		struct cast<value_type::boolean, value_type::uint32>
+		{ 	static constexpr value_type value = value_type::uint32; };
 
 		/// defined numeric cast
 		template<value_type to>

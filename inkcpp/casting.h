@@ -32,9 +32,9 @@ namespace ink::runtime::internal::casting {
 			constexpr size_t n1 = static_cast<size_t>(t1);
 			constexpr size_t n2 = static_cast<size_t>(t2);
 			if constexpr (n1 < n2) {
-				data[n1*casting_matrix_type::N + n2] = cast<t1,t2>;
+				data[n1*casting_matrix_type::N + n2] = cast<t1,t2>::value;
 			} else {
-				data[n1*casting_matrix_type::N + n2] = cast<t2,t1>;
+				data[n1*casting_matrix_type::N + n2] = cast<t2,t1>::value;
 			}
 			set_cast<t1+1,t2>(data);
 		}

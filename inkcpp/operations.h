@@ -7,11 +7,15 @@ namespace ink::runtime::internal {
 	namespace casting {
 		// default cast to none (invalid cast)
 		template<value_type t1, value_type t2>
-		constexpr value_type cast = value_type::none;
+		struct cast {
+			static constexpr value_type value = value_type::none;
+		};
 
 		// no cast for same type
 		template<value_type t>
-		constexpr value_type cast<t,t> = t;
+		struct cast<t,t> {
+			static constexpr value_type value = t;
+		};
 	}
 
 	/**
