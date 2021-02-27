@@ -68,7 +68,7 @@ namespace ink::runtime::internal
 	const char* story_impl::string(uint32_t index) const
 	{
 		const char* str = _string_list;
-		ink_assert(index <= _header.num_strings);
+		ink_assert(index <= _header.num_strings, "static string index out of bounce!");
 		for (int i = 0; i < index; ++i) {
 			while(*str++);
 		}
@@ -161,6 +161,10 @@ namespace ink::runtime::internal
 	{
 		// String table is after the header
 		_string_list = (char*)_text_file.data();
+		uint32_t string_count = 0;
+		const char* str = _string_list;
+		while(*str){++string_count; while(*str++);}
+		ink_assert(string_count >= _header.num_strings, "string list don' provide enough strings!");
 
 
 		char* ptr = reinterpret_cast<char*>(_inkbin.data());
