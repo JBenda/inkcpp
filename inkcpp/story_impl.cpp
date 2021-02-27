@@ -67,7 +67,12 @@ namespace ink::runtime::internal
 
 	const char* story_impl::string(uint32_t index) const
 	{
-		return _string_table + index;
+		const char* str = _string_table;
+		for (int i = 0; i < index; ++i) {
+			while(*str++);
+			ink_assert(*str, "index out of bounds!");
+		}
+		return str;
 	}
 
 	bool story_impl::iterate_containers(const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse) const

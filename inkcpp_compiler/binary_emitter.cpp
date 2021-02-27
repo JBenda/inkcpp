@@ -155,9 +155,6 @@ namespace ink::compiler::internal
 
 	void binary_emitter::write_string(Command command, CommandFlag flag, const std::string& string)
 	{
-		// Save current position in table
-		uint32_t pos = _strings.pos();
-
 		// Write string to table (omit ^ if it begins with one)
 		if (string.length() > 0 && string[0] == '^')
 			_strings.write(string.substr(1));
@@ -165,7 +162,7 @@ namespace ink::compiler::internal
 			_strings.write(string);
 
 		// Written position is what we write out in our command
-		write(command, pos, flag);
+		write(command, _num_strings++, flag);
 	}
 
 	void binary_emitter::handle_nop(int index_in_parent)
