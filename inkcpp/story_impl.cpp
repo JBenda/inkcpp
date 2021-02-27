@@ -10,21 +10,6 @@
 
 namespace ink::runtime
 {
-#ifdef INK_ENABLE_STL
-	story* story::from_file(const char* filename)
-	{
-		return new internal::story_impl(filename);
-	}
-#endif
-
-	story* story::from_binary(unsigned char* data, size_t length, bool freeOnDestroy)
-	{
-		return new internal::story_impl(data, length, freeOnDestroy);
-	}
-}
-
-namespace ink::runtime::internal
-{
 
 #ifdef INK_ENABLE_STL
 	unsigned char* read_file_into_memory(const char* filename, size_t* read)
@@ -43,27 +28,22 @@ namespace ink::runtime::internal
 		return data;
 	}
 
-	story_impl::story_impl(const char* filename)
-		: _file(nullptr)
-		, _length(0)
-		, _string_table(nullptr)
-		, _instruction_data(nullptr)
-		, _managed(true)
-	{
-		// Load file into memory
-		_file = read_file_into_memory(filename, &_length);
-
-		// Find all the right data sections
-		setup_pointers();
-
-		// create story block
-		_block = new internal::ref_block();
-		_block->references = 1;
+	story::input::input(const char* filename) {
+		_data = read_file_into_memory(filename, &_length);
+		_freeOnDestroy = true;
 	}
 #endif
 
-	story_impl::story_impl(unsigned char* binary, size_t len, bool manage /*= true*/)
-		: _file(binary), _length(len), _managed(manage)
+	story* story::create(input&& inkbin, input&& text)
+	{
+		return new internal::story_impl(std::move(inkbin), std::move(text));
+	}
+}
+
+namespace ink::runtime::internal
+{
+	story_impl::story_impl(story::input&& inkbin, story::input&& text)
+		: _inkbin{std::move(inkbin)}, _text_file{std::move(text)}
 	{
 		// Setup data section pointers
 		setup_pointers();
@@ -75,12 +55,7 @@ namespace ink::runtime::internal
 
 	story_impl::~story_impl()
 	{
-		// delete file memory if we're responsible for it
-		if (_file != nullptr && _managed)
-			delete[] _file;
-
 		// clear pointers
-		_file = nullptr;
 		_instruction_data = nullptr;
 		_string_table = nullptr;
 
@@ -179,44 +154,24 @@ namespace ink::runtime::internal
 
 	void story_impl::setup_pointers()
 	{
-		using header = ink::internal::header;
-		_header = header::parse_header(reinterpret_cast<char*>(_file));
-
 		// String table is after the header
-		_string_table = (char*)_file + header::Size;
+		_string_table = (char*)_text_file.data();
 
-		// Pass over strings
-		const char* ptr = _string_table;
-		if (*ptr == 0) // SPECIAL: No strings
-		{
-			ptr++;
-		}
-		else while (true)
-		{
-			// Read until null terminator
-			while (*ptr != 0)
-				ptr++;
 
-			// Check next character
-			ptr++;
+		char* ptr = reinterpret_cast<char*>(_inkbin.data());
+		using header = ink::internal::header;
+		_header = header::parse_header(ptr);
+		ptr += header::Size;
 
-			// Second null. Strings are done.
-			if (*ptr == 0)
-			{
-				ptr++;
-				break;
-			}
-		}
-
-		_num_containers = *(uint32_t*)(ptr);
+		_num_containers = *reinterpret_cast<uint32_t*>(ptr);
 		ptr += sizeof(uint32_t);
 
 		// Pass over the container data
 		_container_list_size = 0;
-		_container_list = (uint32_t*)(ptr);
+		_container_list = reinterpret_cast<uint32_t*>(ptr);
 		while (true)
 		{
-			uint32_t val = *(uint32_t*)ptr;
+			uint32_t val = *reinterpret_cast<uint32_t*>(ptr);
 			if (val == ~0)
 			{
 				ptr += sizeof(uint32_t);

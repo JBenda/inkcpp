@@ -33,14 +33,15 @@ int main(int argc, const char** argv)
 	}
 
 	// Parse options
-	std::string outputFilename;
+	std::string inkbinFilename;
+	std::string stringListFilename;
 	bool playMode = false, testMode = false, testDirectory = false;
 	for (int i = 1; i < argc - 1; i++)
 	{
 		std::string option = argv[i];
 		if (option == "-o")
 		{
-			outputFilename = argv[i + 1];
+			inkbinFilename = argv[i + 1];
 			i += 1;
 		}
 		else if (option == "-p")
@@ -74,9 +75,10 @@ int main(int argc, const char** argv)
 	}
 
 	// If output filename not specified, use input filename as guideline
-	if (outputFilename.empty())
+	if (inkbinFilename.empty())
 	{
-		outputFilename = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".bin");
+		inkbinFilename = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".bin");
+		stringListFilename = inkbinFilename + ".str";
 	}
 
 	// If input filename is an .ink file
@@ -107,8 +109,8 @@ int main(int argc, const char** argv)
 		ink::compiler::compilation_results results;
 		ink::compiler::run(
 				inputFilename.c_str(),
-				outputFilename.c_str(),
-				(outputFilename+".str").c_str(),
+				inkbinFilename.c_str(),
+				stringListFilename.c_str(),
 				&results);
 
 		// Report errors
@@ -138,7 +140,7 @@ int main(int argc, const char** argv)
 		using namespace ink::runtime;
 
 		// Load story
-		story* myInk = story::from_file(outputFilename.c_str());
+		story* myInk = story::create(inkbinFilename.c_str(), stringListFilename.c_str());
 
 		// Start runner
 		runner thread = myInk->new_runner();

@@ -116,7 +116,7 @@ bool test(const std::string& inkFilename)
 	}
 
 	// Load story
-	auto file = story::from_file("test.bin");
+	auto file = story::create("test.bin", "test.bin.str");
 	auto runner = file->new_runner();
 
 	while (true)
