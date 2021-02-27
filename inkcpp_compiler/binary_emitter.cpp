@@ -179,6 +179,7 @@ namespace ink::compiler::internal
 		bin.write((const char*)&same, sizeof(decltype(same)));
 		bin.write((const char*)&_ink_version, sizeof(decltype(_ink_version)));
 		bin.write((const char*)&ink::InkBinVersion, sizeof(decltype(ink::InkBinVersion)));
+		bin.write((const char*)&_num_strings, sizeof(uint32_t));
 
 		// Write the string table
 		_strings.write_to(strings);

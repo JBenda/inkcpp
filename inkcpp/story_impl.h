@@ -45,7 +45,8 @@ namespace ink::runtime::internal
 		ink::internal::header  _header;
 
 		// string table
-		const char* _string_table;
+		const char* _string_list;
+		uint32_t _num_strings; ///< number of strings required by story
 
 		// container info
 		uint32_t* _container_list;

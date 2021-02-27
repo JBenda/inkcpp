@@ -45,7 +45,7 @@ namespace ink::compiler::internal
 		compilation_results* _results;
 
 		binary_stream _strings;
-		size_t _num_strings = 0;
+		uint32_t _num_strings = 0;
 		binary_stream _containers;
 
 		std::vector<std::tuple<size_t, std::string, container_data*, bool>> _paths;

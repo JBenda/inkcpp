@@ -57,7 +57,7 @@ namespace ink::runtime::internal
 	{
 		// clear pointers
 		_instruction_data = nullptr;
-		_string_table = nullptr;
+		_string_list = nullptr;
 
 		// clear out our reference block
 		_block->valid = false;
@@ -67,10 +67,10 @@ namespace ink::runtime::internal
 
 	const char* story_impl::string(uint32_t index) const
 	{
-		const char* str = _string_table;
+		const char* str = _string_list;
+		ink_assert(index <= _header.num_strings);
 		for (int i = 0; i < index; ++i) {
 			while(*str++);
-			ink_assert(*str, "index out of bounds!");
 		}
 		return str;
 	}
@@ -160,7 +160,7 @@ namespace ink::runtime::internal
 	void story_impl::setup_pointers()
 	{
 		// String table is after the header
-		_string_table = (char*)_text_file.data();
+		_string_list = (char*)_text_file.data();
 
 
 		char* ptr = reinterpret_cast<char*>(_inkbin.data());

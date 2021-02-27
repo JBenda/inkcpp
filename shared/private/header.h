@@ -23,9 +23,10 @@ namespace ink::internal {
 			} endien = endian_types::none;
 			uint32_t ink_version_number = 0;
 			uint32_t ink_bin_version_number = 0;
+			uint32_t num_strings = 0; ///< number of strings needed for story
 			static constexpr size_t Size = ///< actual data size of Header,
 										   ///   because padding of struct may
 										   ///   differ between platforms
-				sizeof(uint16_t) + 2 * sizeof(uint32_t);
+				sizeof(uint16_t) + 3 * sizeof(uint32_t);
 		};
 }
