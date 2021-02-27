@@ -27,7 +27,7 @@ namespace ink::compiler::internal
 		// End emitter
 
 		// write out the emitters data
-		virtual void output(std::ostream&);
+		virtual void output(std::ostream& bin, std::ostream& strings);
 
 	protected:
 		virtual void initialize() override;

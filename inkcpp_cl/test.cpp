@@ -59,7 +59,7 @@ bool test(const std::string& inkFilename)
 
 	// Compile into binary
 	ink::compiler::compilation_results results;
-	ink::compiler::run("test.tmp", "test.bin", &results);
+	ink::compiler::run("test.tmp", "test.bin", "test.bin.str", &results);
 
 	std::vector<std::string> expectations;
 	std::vector<int> choices;

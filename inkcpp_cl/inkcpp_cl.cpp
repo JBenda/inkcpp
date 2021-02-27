@@ -105,9 +105,11 @@ int main(int argc, const char** argv)
 	try
 	{
 		ink::compiler::compilation_results results;
-		std::ofstream fout(outputFilename, std::ios::binary | std::ios::out);
-		ink::compiler::run(inputFilename.c_str(), fout, &results);
-		fout.close();
+		ink::compiler::run(
+				inputFilename.c_str(),
+				outputFilename.c_str(),
+				(outputFilename+".str").c_str(),
+				&results);
 
 		// Report errors
 		for (auto& warn : results.warnings)
