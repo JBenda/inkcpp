@@ -4,10 +4,8 @@
 
 namespace ink::runtime::internal
 {
-	template<typename T, int N>
+	template<typename T, bool dynamic, size_t initialCapacity>
 	class managed_array {
-		static constexpr uint32_t initialCapacity = N > 0 ? N : -N;
-		static constexpr bool dynamic = N < 0;
 	public:
 		managed_array() : _capacity{initialCapacity}, _size{0}{
 			if constexpr (dynamic) {
@@ -27,29 +25,35 @@ namespace ink::runtime::internal
 		T* end() { return _data + _size; }
 
 		const size_t size() const { return _size; }
-		// void push(const T& t) { if (_size == _capacity) { extend(); } _data[_size++] = t; }
+		const size_t capacity() const { return _capacity; }
 		T& push() { if (_size == _capacity) { extend(); } return _data[_size++]; }
 		void clear() { _size = 0; }
+
+		void extend();
 	private:
-		void extend() {
-			size_t new_capacity = 1.5f * _capacity;
-			if (new_capacity < 5) { new_capacity = 5; }
-			T* new_data = new T[new_capacity];
-
-			for(size_t i = 0; i < _capacity; ++i) {
-				new_data[i] = _data[i];
-			}
-
-			delete[] _data;
-			_data = new_data;
-			_capacity = new_capacity;
-		}
 
 		T _buffer[dynamic ? 0 : initialCapacity];
 		T* _data;
 		size_t _capacity;
 		size_t _size;
 	};
+
+	template<typename T, bool dynamic, size_t initialCapacity>
+	void managed_array<T, dynamic, initialCapacity>::extend()
+	{
+		size_t new_capacity = 1.5f * _capacity;
+		if (new_capacity < 5) { new_capacity = 5; }
+		T* new_data = new T[new_capacity];
+
+		for(size_t i = 0; i < _capacity; ++i) {
+			new_data[i] = _data[i];
+		}
+
+		delete[] _data;
+		_data = new_data;
+		_capacity = new_capacity;
+	}
+
 	template<typename T>
 	class basic_restorable_array
 	{

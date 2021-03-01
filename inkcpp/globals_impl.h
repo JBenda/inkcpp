@@ -92,7 +92,7 @@ namespace ink::runtime::internal
 
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.
 		//  If I could create an avl tree with save/restore, that'd be great but seems super complex.
-		internal::stack<ink::config::limitGlobalVariables> _variables;
+		internal::stack<abs(config::limitGlobalVariables), config::limitGlobalVariables < 0> _variables;
 		bool _globals_initialized;
 	};
 }

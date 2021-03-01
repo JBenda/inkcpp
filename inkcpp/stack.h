@@ -2,6 +2,7 @@
 
 #include "value.h"
 #include "collections/restorable.h"
+#include "array.h"
 
 namespace ink
 {
@@ -82,8 +83,12 @@ namespace ink
 				static const hash_t NulledHashId = ~0;
 			};
 
-			// stack for call history and temporary variables
-			template<size_t N>
+			/**
+			 * @brief stack for call history and temporary variables
+			 * @tparam N initial capacity of stack
+			 * @tparam Dynamic weather or not expand if stack is full
+			 */
+			template<size_t N, bool Dynamic = false>
 			class stack : public basic_stack
 			{
 			public:
@@ -91,6 +96,26 @@ namespace ink
 			private:
 				// stack
 				entry _stack[N];
+			};
+
+			template<size_t N>
+			class stack<N, true> : public basic_stack
+			{
+			public:
+				stack() : basic_stack(nullptr, 0) {}
+			protected:
+				virtual void overflow(entry*& buffer, size_t& size) override {
+					if (!buffer) {
+						buffer = _stack.data();
+						size = _stack.capacity();
+					} else {
+						_stack.extend();
+						buffer = _stack.data();
+						size = _stack.capacity();
+					}
+				}
+			private:
+				managed_array<entry, true, N> _stack;
 			};
 
 			class basic_eval_stack : protected restorable<value>
@@ -125,13 +150,27 @@ namespace ink
 				void forget();
 			};
 
-			template<size_t N>
+			template<size_t N, bool dynamic = false>
 			class eval_stack : public basic_eval_stack
 			{
 			public:
-				eval_stack() : basic_eval_stack(&_stack[0], N) { }
+				eval_stack() : basic_eval_stack(_stack, N) { }
 			private:
 				value _stack[N];
+			};
+			template<size_t N>
+			class eval_stack<N, true> : public basic_eval_stack
+			{
+			public:
+				eval_stack() : basic_eval_stack(nullptr, 0) {}
+			protected:
+				virtual void overflow(value*& buffer, size_t& size) override {
+					_stack.extend();
+					buffer = _stack.data();
+					size = _stack.capacity();
+				}
+			private:
+				managed_array<value, true, N> _stack;
 			};
 		}
 	}

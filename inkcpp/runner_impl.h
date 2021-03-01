@@ -147,11 +147,11 @@ namespace ink::runtime::internal
 		internal::stream<config::limitOutputSize> _output;
 
 		// Runtime stack. Used to store temporary variables and callstack
-		internal::stack<config::limitRuntimeStack> _stack;
+		internal::stack<abs(config::limitRuntimeStack), config::limitRuntimeStack < 0> _stack;
 
 		// Evaluation stack
 		bool bEvaluationMode = false;
-		internal::eval_stack<config::limitEvalStackDepth> _eval;
+		internal::eval_stack<abs(config::limitEvalStackDepth), config::limitEvalStackDepth < 0> _eval;
 		bool bSavedEvaluationMode = false;
 
 		// Keeps track of what threads we're inside
@@ -159,7 +159,7 @@ namespace ink::runtime::internal
 		internal::fixed_restorable_array<ip_t, config::limitThreadDepth> _threadDone;
 
 		// Choice list
-		managed_array<choice, config::maxChoices> _choices;
+		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
 
 		// Tag list
 		static const size_t MAX_TAGS = 100;
