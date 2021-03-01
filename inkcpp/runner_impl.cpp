@@ -50,14 +50,15 @@ namespace ink::runtime::internal
 
 	choice& runner_impl::add_choice()
 	{
-		inkAssert(_num_choices < config::maxChoices, "Ran out of choice storage!");
-		return _choices[_num_choices++];
+		inkAssert(config::maxChoices < 0 || _choices.size() < config::maxChoices,
+				"Ran out of choice storage!");
+		return _choices.push();
 	}
 
 	void runner_impl::clear_choices()
 	{
-		// TODO: Garbage collection?
-		_num_choices = 0;
+		// TODO: Garbage collection? ? which garbage ?
+		_choices.clear();
 	}
 
 	void runner_impl::clear_tags()
@@ -367,7 +368,7 @@ namespace ink::runtime::internal
 
 	void runner_impl::choose(size_t index)
 	{
-		inkAssert(index < _num_choices, "Choice index out of range");
+		inkAssert(index < _choices.size(), "Choice index out of range");
 
 		// Get the choice
 		const auto& c = _choices[index];
@@ -892,7 +893,7 @@ namespace ink::runtime::internal
 				for(;sc;--sc) { _output << stack[sc-1]; }
 
 				// Create choice and record it
-				add_choice().setup(_output, _globals->strings(), _num_choices, path, current_thread());
+				add_choice().setup(_output, _globals->strings(), _choices.size(), path, current_thread());
 			} break;
 			case Command::START_CONTAINER_MARKER:
 			{
@@ -1036,7 +1037,7 @@ namespace ink::runtime::internal
 		_threadDone.clear(nullptr);
 		bEvaluationMode = false;
 		_saved = false;
-		_num_choices = 0;
+		_choices.clear();
 		_ptr = nullptr;
 		_done = nullptr;
 		_container.clear();
@@ -1050,7 +1051,7 @@ namespace ink::runtime::internal
 		_eval.mark_strings(strings);
 
 		// Take into account choice text
-		for (int i = 0; i < _num_choices; i++)
+		for (int i = 0; i < _choices.size(); i++)
 			strings.mark_used(_choices[i]._text);
 	}
 

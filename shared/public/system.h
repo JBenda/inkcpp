@@ -121,6 +121,12 @@ namespace ink
 	{
 		template<typename T>
 		struct always_false { static constexpr bool value = false; };
+		template<bool Enable, typename T>
+		struct enable_if {
+			using type = T;
+		};
+		template<typename T>
+		struct enable_if<false, T> {};
 	}
 
 #ifdef INK_ENABLE_STL

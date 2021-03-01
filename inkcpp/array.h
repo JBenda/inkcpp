@@ -4,6 +4,52 @@
 
 namespace ink::runtime::internal
 {
+	template<typename T, int N>
+	class managed_array {
+		static constexpr uint32_t initialCapacity = N > 0 ? N : -N;
+		static constexpr bool dynamic = N < 0;
+	public:
+		managed_array() : _capacity{initialCapacity}, _size{0}{
+			if constexpr (dynamic) {
+				_data = new T[initialCapacity];
+			} else {
+				_data = _buffer;
+			}
+		}
+
+		const T& operator[](size_t i) const { return _data[i]; }
+		T& operator[](size_t i) { return _data[i]; }
+		const T* data() const { return _data; }
+		T* data() { return _data; }
+		const T* begin() const { return _data; }
+		T* begin() { return _data; }
+		const T* end() const { return _data + _size; }
+		T* end() { return _data + _size; }
+
+		const size_t size() const { return _size; }
+		// void push(const T& t) { if (_size == _capacity) { extend(); } _data[_size++] = t; }
+		T& push() { if (_size == _capacity) { extend(); } return _data[_size++]; }
+		void clear() { _size = 0; }
+	private:
+		void extend() {
+			size_t new_capacity = 1.5f * _capacity;
+			if (new_capacity < 5) { new_capacity = 5; }
+			T* new_data = new T[new_capacity];
+
+			for(size_t i = 0; i < _capacity; ++i) {
+				new_data[i] = _data[i];
+			}
+
+			delete[] _data;
+			_data = new_data;
+			_capacity = new_capacity;
+		}
+
+		T _buffer[dynamic ? 0 : initialCapacity];
+		T* _data;
+		size_t _capacity;
+		size_t _size;
+	};
 	template<typename T>
 	class basic_restorable_array
 	{
