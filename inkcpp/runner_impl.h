@@ -39,10 +39,10 @@ namespace ink::runtime::internal
 		virtual bool can_continue() const override;
 
 		// Begin iterating choices
-		virtual const choice* begin() const override { return _choices; }
+		virtual const choice* begin() const override { return _choices.begin(); }
 
 		// End iterating choices
-		virtual const choice* end() const override { return _choices + _num_choices; }
+		virtual const choice* end() const override { return _choices.end(); }
 
 		// Chooses a choice by index
 		virtual void choose(size_t index) override;
@@ -155,8 +155,7 @@ namespace ink::runtime::internal
 		internal::fixed_restorable_array<ip_t, config::limitThreadDepth> _threadDone;
 
 		// Choice list
-		choice _choices[config::maxChoices];
-		size_t _num_choices = 0;
+		managed_array<choice, config::maxChoices> _choices;
 
 		// TODO: Move to story? Both?
 		functions _functions;
