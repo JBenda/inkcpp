@@ -117,13 +117,9 @@ namespace ink
 	};
 #endif
 
-	namespace runtime::internal {
-		template<typename T>
-		struct always_false {
-			static constexpr bool value = false;
-		};
-		template<bool con, typename T>
-		struct enable_if {};
+	namespace runtime::internal
+	{
+		constexpr unsigned abs(int i) { return i < 0 ? -i : i; }
 		template<typename T>
 		struct always_false { static constexpr bool value = false; };
 		template<bool Enable, typename T>
