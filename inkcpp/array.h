@@ -94,6 +94,10 @@ namespace ink::runtime::internal
 
 	protected:
 		inline T* buffer() { return _array; }
+		void set_new_buffer(T* buffer, size_t capacity) {
+			_array = buffer;
+			_capacity = capacity;
+		}
 
 	private:
 		inline void check_index(size_t index) const { inkAssert(index < capacity(), "Index out of range!"); }
@@ -102,14 +106,14 @@ namespace ink::runtime::internal
 		bool _saved;
 
 		// real values live here
-		T* const _array;
+		T* _array;
 
 		// we store values here when we're in save mode
 		//  they're copied on a call to forget()
 		T* const _temp;
 
 		// size of both _array and _temp
-		const size_t _capacity;
+		size_t _capacity;
 
 		// null
 		const T _null;
@@ -211,11 +215,31 @@ namespace ink::runtime::internal
 	template<typename T>
 	class allocated_restorable_array : public basic_restorable_array<T>
 	{
+		using base = basic_restorable_array<T>;
 	public:
-		allocated_restorable_array(size_t capacity, const T &nullValue)
-			: basic_restorable_array<T>(new T[capacity * 2], capacity * 2, nullValue)
-		{ 
+		allocated_restorable_array(const T& initial, const T& nullValue)
+			: basic_restorable_array<T>(0, 0, nullValue), _initialValue{initial}
+		{}
+		allocated_restorable_array(size_t capacity, const T& initial, const T &nullValue)
+			: basic_restorable_array<T>(new T[capacity * 2], capacity * 2, nullValue),
+			_initialValue{initial}
+		{
 			_buffer = this->buffer();
+			this->clear(_initialValue);
+		}
+
+		void resize(size_t n) {
+			size_t new_capacity = 2 * n;
+			T* new_buffer = new T[new_capacity];
+			for(size_t i = 0; i < base::capacity(); ++i) {
+				new_buffer[i] = _buffer[i];
+			}
+			for(size_t i = base::capacity(); i < new_capacity; ++i) {
+				new_buffer[i] = _initialValue;
+			}
+			delete[] _buffer;
+			_buffer = new_buffer;
+			this->set_new_buffer(_buffer, new_capacity);
 		}
 
 		~allocated_restorable_array()
@@ -225,6 +249,7 @@ namespace ink::runtime::internal
 		}
 
 	private:
+		T _initialValue;
 		T* _buffer;
 	};
 }
