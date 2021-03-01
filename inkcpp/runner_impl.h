@@ -155,8 +155,53 @@ namespace ink::runtime::internal
 		bool bSavedEvaluationMode = false;
 
 		// Keeps track of what threads we're inside
-		internal::restorable_stack<thread_t, config::limitThreadDepth> _threads;
-		internal::fixed_restorable_array<ip_t, config::limitThreadDepth> _threadDone;
+		class threads : public internal::simple_restorable_stack<thread_t> {
+			using base = internal::simple_restorable_stack<thread_t>;
+			static constexpr bool dynamic = config::limitThreadDepth < 0;
+			static constexpr size_t N = abs(config::limitThreadDepth);
+		public:
+			threads()
+				: base(nullptr, 0, ~0),
+				_threadDone(nullptr, reinterpret_cast<ip_t>(~0)) {
+					_threadDone.clear(nullptr);
+				}
+			void clear() {
+				base::clear();
+				_threadDone.clear(nullptr);
+			}
+			void save() {
+				base::save();
+				_threadDone.save();
+			}
+			void restore() {
+				base::restore();
+				_threadDone.restore();
+			}
+			void forget() {
+				base::forget();
+				_threadDone.forget();
+			}
+
+			void set(size_t index, const ip_t& value) {
+				_threadDone.set(index, value);
+			}
+			const ip_t& get(size_t index) const {
+				return _threadDone.get(index);
+			}
+			const ip_t& operator[](size_t index) const { return get(index); }
+
+		protected:
+			virtual void overflow(thread_t*& buffer, size_t& size) override;
+		private:
+			managed_array<thread_t, dynamic, N> _stack;
+			template<bool>
+			void resize(size_t size) {}
+			if_t<dynamic,
+				internal::allocated_restorable_array<ip_t>,
+				internal::fixed_restorable_array<ip_t, N>> _threadDone;
+			using resize_fn = void(internal::allocated_restorable_array<ip_t>::*)(size_t);
+			static constexpr resize_fn _resize = &allocated_restorable_array<ip_t>::resize;
+		} _threads;
 
 		// Choice list
 		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
@@ -177,6 +222,20 @@ namespace ink::runtime::internal
 
 		prng _rng{};
 	};
+	template<>
+	inline void runner_impl::threads::resize<true>(size_t size) { _threadDone.resize(size); }
+	inline void runner_impl::threads::overflow(thread_t*& buffer, size_t& size) {
+		if constexpr (dynamic) {
+			if(buffer) {
+				_stack.extend();
+			}
+			buffer = _stack.data();
+			size = _stack.capacity();
+			resize<dynamic>(size);
+		} else {
+			base::overflow(buffer, size);
+		}
+	}
 
 	template<>
 	inline const char* runner_impl::read();

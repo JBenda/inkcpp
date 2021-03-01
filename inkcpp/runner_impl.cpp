@@ -247,8 +247,8 @@ namespace ink::runtime::internal
 	}
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
-		: _story(data), _globals(global.cast<globals_impl>()), _container(~0), _threads(~0), 
-		_threadDone(nullptr, (ip_t)~0), _backup(nullptr), _done(nullptr), _choices()
+		: _story(data), _globals(global.cast<globals_impl>()), _container(~0),
+		_backup(nullptr), _done(nullptr), _choices()
 	{
 		_ptr = _story->instructions();
 		bEvaluationMode = false;
@@ -381,7 +381,7 @@ namespace ink::runtime::internal
 		if (choiceThread == ~0)
 			prev = _done;
 		else
-			prev = _threadDone.get(choiceThread);
+			prev = _threads.get(choiceThread);
 
 		// Make sure we have a previous pointer
 		inkAssert(prev != nullptr, "No 'done' point recorded before finishing choice output");
@@ -393,7 +393,6 @@ namespace ink::runtime::internal
 		// Collapse callstacks to the correct thread
 		_stack.collapse_to_thread(choiceThread);
 		_threads.clear();
-		_threadDone.clear(nullptr);
 
 		// Jump to destination and clear choice list
 		jump(_story->instructions() + _choices[index].path());
@@ -1024,7 +1023,7 @@ namespace ink::runtime::internal
 			_done = ptr;
 		}
 		else {
-			_threadDone.set(curr, ptr);
+			_threads.set(curr, ptr);
 		}
 	}
 
@@ -1034,7 +1033,6 @@ namespace ink::runtime::internal
 		_output.clear();
 		_stack.clear();
 		_threads.clear();
-		_threadDone.clear(nullptr);
 		bEvaluationMode = false;
 		_saved = false;
 		_choices.clear();
@@ -1067,7 +1065,6 @@ namespace ink::runtime::internal
 		_globals->save();
 		_eval.save();
 		_threads.save();
-		_threadDone.save();
 		bSavedEvaluationMode = bEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1085,7 +1082,6 @@ namespace ink::runtime::internal
 		_globals->restore();
 		_eval.restore();
 		_threads.restore();
-		_threadDone.restore();
 		bEvaluationMode = bSavedEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1106,7 +1102,6 @@ namespace ink::runtime::internal
 		_globals->forget();
 		_eval.forget();
 		_threads.forget();
-		_threadDone.forget();
 
 		// Nothing to do for eval stack. It should just stay as it is
 

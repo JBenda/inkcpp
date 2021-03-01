@@ -25,9 +25,13 @@ namespace ink::runtime::internal
 		void save();
 		void restore();
 		void forget();
+
+		virtual void overflow(T*& buffer, size_t& size) {
+			throw ink_exception("Stack overflow!");
+		}
 	private:
-		T* const _buffer;
-		const size_t _size;
+		T* _buffer;
+		size_t _size;
 		const T _null;
 
 		const static size_t InvalidIndex = ~0;
@@ -58,7 +62,9 @@ namespace ink::runtime::internal
 			_pos = _save;
 		}
 
-		inkAssert(_pos < _size, "Stack overflow!");
+		if (_pos >= _size) {
+			overflow(_buffer, _size);
+		}
 
 		// Push onto the top of the stack
 		_buffer[_pos++] = value;
