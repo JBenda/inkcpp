@@ -90,10 +90,9 @@ namespace ink::runtime::internal
 		// Allocated string table (shared by all runners using this global store)
 		mutable string_table _strings;
 
-		// Global variables (TODO: Max 50?)
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.
 		//  If I could create an avl tree with save/restore, that'd be great but seems super complex.
-		internal::stack<50> _variables;
+		internal::stack<ink::config::limitGlobalVariables> _variables;
 		bool _globals_initialized;
 	};
 }

@@ -140,30 +140,29 @@ namespace ink::runtime::internal
 		ip_t _done; // when we last hit a done
 
 		// Output stream
-		internal::stream<200> _output;
+		internal::stream<config::limitOutputSize> _output;
 
 		// Runtime stack. Used to store temporary variables and callstack
-		internal::stack<50> _stack;
+		internal::stack<config::limitRuntimeStack> _stack;
 
 		// Evaluation stack
 		bool bEvaluationMode = false;
-		internal::eval_stack _eval;
+		internal::eval_stack<config::limitEvalStackDepth> _eval;
 		bool bSavedEvaluationMode = false;
 
 		// Keeps track of what threads we're inside
-		internal::restorable_stack<thread_t, 20> _threads;
-		internal::fixed_restorable_array<ip_t, 20> _threadDone;
+		internal::restorable_stack<thread_t, config::limitThreadDepth> _threads;
+		internal::fixed_restorable_array<ip_t, config::limitThreadDepth> _threadDone;
 
 		// Choice list
-		static const size_t MAX_CHOICES = 10;
-		choice _choices[MAX_CHOICES];
+		choice _choices[config::maxChoices];
 		size_t _num_choices = 0;
 
 		// TODO: Move to story? Both?
 		functions _functions;
 
 		// Container set
-		internal::restorable_stack<container_t, 20> _container;
+		internal::restorable_stack<container_t, config::limitContainerDepth> _container;
 		bool _is_falling = false;
 
 		bool _saved = false;
