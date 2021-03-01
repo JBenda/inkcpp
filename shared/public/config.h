@@ -14,7 +14,7 @@ namespace ink::config {
 	static constexpr unsigned limitGlobalVariables = 50;
 	static constexpr unsigned limitThreadDepth = 20;
 	static constexpr unsigned limitEvalStackDepth = 20;
-	static constexpr unsigned limitContainerDepth = 20
+	static constexpr unsigned limitContainerDepth = 20;
 	// temporary variables and callstack;
 	static constexpr unsigned limitRuntimeStack = 50;
 	// max number of elements in one output (a string is one element)
