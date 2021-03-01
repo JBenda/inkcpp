@@ -50,7 +50,7 @@ namespace ink::runtime::internal
 
 	choice& runner_impl::add_choice()
 	{
-		inkAssert(_num_choices < MAX_CHOICES, "Ran out of choice storage!");
+		inkAssert(_num_choices < config::maxChoices, "Ran out of choice storage!");
 		return _choices[_num_choices++];
 	}
 
