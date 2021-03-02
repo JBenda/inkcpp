@@ -1,6 +1,7 @@
 #pragma once
 
 #include "system.h"
+#include "array.h"
 
 namespace ink::runtime::internal
 {
@@ -40,15 +41,31 @@ namespace ink::runtime::internal
 		size_t _save = InvalidIndex, _jump = InvalidIndex;
 	};
 
-	template<typename T, size_t N>
-	class restorable_stack : public simple_restorable_stack<T>
+	template<typename T, bool dynamic, size_t N>
+	class managed_restorable_stack : public simple_restorable_stack<T>
 	{
+		using base = simple_restorable_stack<T>;
 	public:
-		restorable_stack(const T& null) : simple_restorable_stack<T>(_stack, N, null) { }
+		template<bool ... D, bool con = dynamic, enable_if_t<con, bool> = true>
+		managed_restorable_stack(const T& null) : simple_restorable_stack<T>(nullptr, 0, null) { }
+		template<bool ... D, bool con = dynamic, enable_if_t<!con, bool> = true>
+		managed_restorable_stack(const T& null) :
+			_stack{}, simple_restorable_stack<T>(_stack.data(), N, null) {}
+		virtual void overflow(T*& buffer, size_t& size) override final {
+			if constexpr (dynamic) {
+				if (buffer) {
+					_stack.extend();
+				}
+				buffer = _stack.data();
+				size = _stack.capacity();
+			} else {
+				base::overflow(buffer, size);
+			}
+		}
 	private:
-		// stack
-		T _stack[N];
+		managed_array<T, dynamic, N> _stack;
 	};
+
 
 	template<typename T>
 	inline void simple_restorable_stack<T>::push(const T& value)
