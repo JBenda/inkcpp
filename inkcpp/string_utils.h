@@ -67,6 +67,8 @@ namespace ink::runtime::internal {
 				return toStr(buffer, size, v.get<value_type::uint32>());
 			case value_type::float32:
 				return toStr(buffer, size, v.get<value_type::float32>());
+			case value_type::newline:
+				return toStr(buffer, size, "\n");
 			default:
 				throw ink_exception("only support toStr for numeric types");
 		}

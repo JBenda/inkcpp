@@ -1,5 +1,16 @@
 #pragma once
 
+/// Managing casting between value types.
+/// The casting is defined by an NxN matrix where N = |value_types|.
+/// The entry m,n is the type where we cast to when rh = value_type(m) and
+/// lh = value_type(n).
+/// for that the matrix is symmetric.
+/// `value_type::none` is used to mark an invalid cast
+///
+/// The entries are set in the `set_cast` function, which iterates over all
+/// value_types combination. For each combination it checks the value of
+/// `cast<v1,v2>` (with v1 < v2). When not other defined it is none.
+
 #include "value.h"
 
 namespace ink::runtime::internal::casting {
@@ -31,6 +42,7 @@ namespace ink::runtime::internal::casting {
 			// get entry from cast<t1,t2>
 			constexpr size_t n1 = static_cast<size_t>(t1);
 			constexpr size_t n2 = static_cast<size_t>(t2);
+			// set matrix entry
 			if constexpr (n1 < n2) {
 				data[n1*casting_matrix_type::N + n2] = cast<t1,t2>::value;
 			} else {

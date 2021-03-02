@@ -1,10 +1,12 @@
 #pragma once
 
+/// defines operations allowed on strings.
 
 namespace ink::runtime::internal {
 
 	namespace casting {
 		// define valid castings
+		// when operate on float and string, the result is a string
 		template<>
 		struct cast<value_type::float32, value_type::string>
 		{ static constexpr value_type value = value_type::string; };

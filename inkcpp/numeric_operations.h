@@ -1,29 +1,41 @@
 #pragma once
 
+/// Define operation for numeric types.
+/// use generalized types numeric and integral to keep redundancy minimal.
+/// define a cast to support operations like int + float, bool + uint etc.
+
 namespace ink::runtime::internal {
-	/// define numeric value types
+
+	/// list of numeric value types
+	/// produces a SFINAE error if type is not part of list
 	template<value_type ty>
-	using is_numeric_t = typename std::enable_if<
+	using is_numeric_t = typename enable_if<
 		ty == value_type::int32
 		|| ty == value_type::uint32
 		|| ty == value_type::float32, void>::type;
 
-	/// define integral value types
+	/// list of internal value types
+	/// produces a SFINAE error if type is not part of list
 	template<value_type ty>
-	using is_integral_t = typename std::enable_if<
+	using is_integral_t = typename enable_if<
 		ty == value_type::int32
 		|| ty == value_type::uint32, void>::type;
 
 	namespace casting {
 		/// define valid casts
+
+		/// result of operation with int and float is float.
 		template<>
 		struct cast<value_type::int32, value_type::float32>
 		{	static constexpr value_type value = value_type::float32; };
+
+		/// result of operation with uint and bool is uint
 		template<>
 		struct cast<value_type::boolean, value_type::uint32>
 		{ 	static constexpr value_type value = value_type::uint32; };
 
 		/// defined numeric cast
+		/// generic numeric_cast only allow casting to its one type
 		template<value_type to>
 		inline typename value::ret<to>::type numeric_cast(const value& v) {
 			if (to == v.type()) { return v.get<to>(); }
@@ -38,6 +50,7 @@ namespace ink::runtime::internal {
 			switch(v.type()) {
 				case value_type::uint32:
 					return v.get<value_type::uint32>();
+				/// bool value can cast to uint32
 				case value_type::boolean:
 					return static_cast<uint32_t>(v.get<value_type::boolean>());
 				default:
@@ -51,6 +64,7 @@ namespace ink::runtime::internal {
 			switch(v.type()) {
 				case value_type::float32:
 					return v.get<value_type::float32>();
+				// int value can cast to float
 				case value_type::int32:
 					return static_cast<float>(v.get<value_type::int32>());
 				default:

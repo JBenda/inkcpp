@@ -1,5 +1,7 @@
 #pragma once
 
+/// very basic flat tuple implementation, only use for trivial data types.
+
 #include "./include/traits.h"
 
 namespace ink::runtime::internal {

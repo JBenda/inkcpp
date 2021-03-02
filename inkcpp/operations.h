@@ -1,5 +1,7 @@
 #pragma once
 
+/// Define base constructs to specify by operation headers.
+
 #include "../shared/private/command.h"
 
 namespace ink::runtime::internal {
@@ -54,6 +56,8 @@ namespace ink::runtime::internal {
 		}
 	};
 }
+
+// include header here to ensure correct order
 
 #include "operation_bases.h"
 #include "numeric_operations.h"

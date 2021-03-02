@@ -1,5 +1,10 @@
 #pragma once
 
+/// The value class contains the information which type its hold and a small
+/// piece of information to access the data.
+/// use explicit getter and setter to make access more uniform.
+/// define different value_types, and the mapping between type and data.
+
 #include "system.h"
 #include "../shared/private/command.h"
 

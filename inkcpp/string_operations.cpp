@@ -1,3 +1,8 @@
+/// implementation for commands on strings
+/// string_cast is a class which convert an value to a string.
+/// if the value is already a string it dose nothing (just serve the pointer),
+/// else it convert the value to a string and store it, in it internal storage.
+
 #include "stack.h"
 #include "value.h"
 #include "string_utils.h"
@@ -20,58 +25,6 @@ namespace ink::runtime::internal {
 			char _data[512]; //TODO define central
 		};
 
-		/**
-		 * @brief template for string conversion.
-		 * @param buffer to store the string
-		 * @param n length of buffer
-		 * @param v value to convert
-		 * @tparam ty value type of v
-		 */
-		template<value_type ty>
-		int cast_to_string(char* buffer, size_t n, const value& v){
-			ink_exception("cast not implemented");
-			return -1;
-		}
-
-		/**
-		 * @brief wrapper to call correct cast_to_string function.
-		 */
-		template<size_t N, value_type ty = value_type::BEGIN>
-		int to_string(char data[N], const value& v) {
-			if (v.type() == ty) {
-				return cast_to_string<ty>(data, N, v);
-			} else if constexpr (ty < value_type::OP_END) {
-				return to_string<N,ty+1>(data, v);
-			} else {
-				throw ink_exception("cast target not exist!");
-			}
-		}
-
-		// cast for int32
-		template<>
-		int cast_to_string<value_type::int32>(char* data, size_t size, const value& v) {
-			return toStr(data, size, v.get<value_type::int32>());
-		}
-
-		// cast for uint32
-		template<>
-		int cast_to_string<value_type::uint32>(char* data, size_t size, const value& v) {
-			return toStr(data, size, v.get<value_type::uint32>());
-		}
-
-		// cast for float32
-		template<>
-		int cast_to_string<value_type::float32>(char* data, size_t size, const value& v) {
-			return toStr(data, size, v.get<value_type::float32>());
-		}
-
-		// cast for newline
-		template<>
-		int cast_to_string<value_type::newline>(char* data, size_t size, const value& v) {
-			return toStr(data, size, "\n");
-		}
-
-
 		// constructor for string_cast class
 		string_cast::string_cast(const value& val) : _val{val}, _str{nullptr} {
 			if (val.type() == value_type::string) {
@@ -80,7 +33,7 @@ namespace ink::runtime::internal {
 			} else {
 				// convert else
 				_str = _data;
-				to_string<512>(_data, val);
+				toStr(_data, 512, val);
 			}
 		}
 	}

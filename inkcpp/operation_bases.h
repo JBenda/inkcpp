@@ -1,5 +1,9 @@
 #pragma once
 
+/// defines data storage for operations.
+/// provide constructor and handle the data member.
+/// the data member therefore are protected accessible
+
 #include "system.h"
 #include "./tuple.hpp"
 
