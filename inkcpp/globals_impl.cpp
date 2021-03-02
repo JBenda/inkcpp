@@ -133,6 +133,7 @@ namespace ink::runtime::internal
 			for(const char* i = val; *i; ++i) {
 				*ptr++ = *i;
 			}
+			*ptr = 0;
 			internal::data d;
 			d.set_string(new_string, true);
 			*v = internal::value(d);
