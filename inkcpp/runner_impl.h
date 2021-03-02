@@ -160,11 +160,21 @@ namespace ink::runtime::internal
 			static constexpr bool dynamic = config::limitThreadDepth < 0;
 			static constexpr size_t N = abs(config::limitThreadDepth);
 		public:
+			template<bool ... D, bool con = dynamic,  enable_if_t<con, bool> = true >
 			threads()
 				: base(nullptr, 0, ~0),
 				_threadDone(nullptr, reinterpret_cast<ip_t>(~0)) {
+					static_assert(sizeof...(D) == 0, "Don't use explicit template arguments!");
+			}
+			template<bool ... D, bool con = dynamic, enable_if_t<!con, bool> = true >
+			threads()
+				: _stack{},
+				base(_stack.data(), N, ~0),
+				_threadDone(nullptr, reinterpret_cast<ip_t>(~0)) {
+					static_assert(sizeof...(D) == 0, "Don't use explicit template arguments");
 					_threadDone.clear(nullptr);
 				}
+
 			void clear() {
 				base::clear();
 				_threadDone.clear(nullptr);
@@ -191,16 +201,18 @@ namespace ink::runtime::internal
 			const ip_t& operator[](size_t index) const { return get(index); }
 
 		protected:
-			virtual void overflow(thread_t*& buffer, size_t& size) override;
+			virtual void overflow(thread_t*& buffer, size_t& size) override final;
 		private:
-			managed_array<thread_t, dynamic, N> _stack;
-			template<bool>
-			void resize(size_t size) {}
-			if_t<dynamic,
+			using array_type = if_t<dynamic,
 				internal::allocated_restorable_array<ip_t>,
-				internal::fixed_restorable_array<ip_t, N>> _threadDone;
-			using resize_fn = void(internal::allocated_restorable_array<ip_t>::*)(size_t);
-			static constexpr resize_fn _resize = &allocated_restorable_array<ip_t>::resize;
+				internal::fixed_restorable_array<ip_t, N>>;
+			template<typename con = array_type, void (con::*A)(size_t) = &con::resize>
+			void resize(size_t size, int) { (_threadDone.*A)(size); }
+			void resize(size_t size, long) {}
+
+
+			managed_array<thread_t, dynamic, N> _stack;
+			array_type _threadDone;
 		} _threads;
 
 		// Choice list
@@ -215,15 +227,14 @@ namespace ink::runtime::internal
 		functions _functions;
 
 		// Container set
-		internal::restorable_stack<container_t, config::limitContainerDepth> _container;
+		internal::managed_restorable_stack<container_t, config::limitContainerDepth < 0,abs(config::limitContainerDepth)> _container;
 		bool _is_falling = false;
 
 		bool _saved = false;
 
 		prng _rng{};
 	};
-	template<>
-	inline void runner_impl::threads::resize<true>(size_t size) { _threadDone.resize(size); }
+
 	inline void runner_impl::threads::overflow(thread_t*& buffer, size_t& size) {
 		if constexpr (dynamic) {
 			if(buffer) {
@@ -231,7 +242,7 @@ namespace ink::runtime::internal
 			}
 			buffer = _stack.data();
 			size = _stack.capacity();
-			resize<dynamic>(size);
+			resize(size, 0);
 		} else {
 			base::overflow(buffer, size);
 		}

@@ -9,31 +9,48 @@ namespace ink::runtime::internal
 	public:
 		managed_array() : _capacity{initialCapacity}, _size{0}{
 			if constexpr (dynamic) {
-				_data = new T[initialCapacity];
-			} else {
-				_data = _buffer;
+				_dynamic_data = new T[initialCapacity];
 			}
 		}
 
-		const T& operator[](size_t i) const { return _data[i]; }
-		T& operator[](size_t i) { return _data[i]; }
-		const T* data() const { return _data; }
-		T* data() { return _data; }
-		const T* begin() const { return _data; }
-		T* begin() { return _data; }
-		const T* end() const { return _data + _size; }
-		T* end() { return _data + _size; }
+		const T& operator[](size_t i) const { return data()[i]; }
+		T& operator[](size_t i) { return data()[i]; }
+		const T* data() const {
+			if constexpr (dynamic) {
+				return _dynamic_data;
+			} else {
+				return _static_data;
+			}
+		}
+		T* data() {
+			if constexpr (dynamic) {
+				return _dynamic_data;
+			} else {
+				return _static_data;
+			}
+		}
+		const T* begin() const { return data(); }
+		T* begin() { return data(); }
+		const T* end() const { return data() + _size; }
+		T* end() { return data() + _size; }
 
 		const size_t size() const { return _size; }
 		const size_t capacity() const { return _capacity; }
-		T& push() { if (_size == _capacity) { extend(); } return _data[_size++]; }
+		T& push() {
+			if constexpr (dynamic) {
+				if (_size == _capacity) { extend(); }
+			} else {
+				ink_assert(_size <= _capacity, "Stack Overflow!");
+			}
+			return data()[_size++];
+		}
 		void clear() { _size = 0; }
 
 		void extend();
 	private:
 
-		T _buffer[dynamic ? 0 : initialCapacity];
-		T* _data;
+		T _static_data[dynamic ? 0 : initialCapacity];
+		T* _dynamic_data = nullptr;
 		size_t _capacity;
 		size_t _size;
 	};
@@ -41,16 +58,17 @@ namespace ink::runtime::internal
 	template<typename T, bool dynamic, size_t initialCapacity>
 	void managed_array<T, dynamic, initialCapacity>::extend()
 	{
+		static_assert(dynamic, "Can only extend if array is dynamic!");
 		size_t new_capacity = 1.5f * _capacity;
 		if (new_capacity < 5) { new_capacity = 5; }
 		T* new_data = new T[new_capacity];
 
 		for(size_t i = 0; i < _capacity; ++i) {
-			new_data[i] = _data[i];
+			new_data[i] = _dynamic_data[i];
 		}
 
-		delete[] _data;
-		_data = new_data;
+		delete[] _dynamic_data;
+		_dynamic_data = new_data;
 		_capacity = new_capacity;
 	}
 
