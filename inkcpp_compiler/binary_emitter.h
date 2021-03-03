@@ -27,7 +27,7 @@ namespace ink::compiler::internal
 		// End emitter
 
 		// write out the emitters data
-		virtual void output(std::ostream&);
+		virtual void output(std::ostream& bin, std::ostream& strings);
 
 	protected:
 		virtual void initialize() override;
@@ -45,6 +45,7 @@ namespace ink::compiler::internal
 		compilation_results* _results;
 
 		binary_stream _strings;
+		uint32_t _num_strings = 0;
 		binary_stream _containers;
 
 		std::vector<std::tuple<size_t, std::string, container_data*, bool>> _paths;

@@ -17,9 +17,11 @@ void usage()
 {
 	using namespace std;
 	cout
-		<< "Usage: inkcpp_cl <options> <json file>\n"
-		<< "\t-o <filename>:\tOutput file name\n"
+		<< "Usage: inkcpp_cl <options> [<json file>]\n"
 		<< "\t-p:\tPlay mode\n"
+		<< "\t--no-compile:\tdon't compile the json file\n"
+		<< "\t-b <filename>:\tIn/Output filename InkBin\n"
+		<< "\t-s <filename>:\tIn/Output filename StringList\n"
 		<< endl;
 }
 
@@ -33,14 +35,21 @@ int main(int argc, const char** argv)
 	}
 
 	// Parse options
-	std::string outputFilename;
+	std::string inkbinFilename;
+	std::string stringListFilename;
 	bool playMode = false, testMode = false, testDirectory = false;
-	for (int i = 1; i < argc - 1; i++)
+	bool compileMode = true;
+	for (int i = 1; i < argc - (compileMode ? 1 : 0); i++)
 	{
 		std::string option = argv[i];
-		if (option == "-o")
+		if (option == "-b")
 		{
-			outputFilename = argv[i + 1];
+			inkbinFilename = argv[i + 1];
+			i += 1;
+		}
+		else if (option == "-s")
+		{
+			stringListFilename = argv[i+1];
 			i += 1;
 		}
 		else if (option == "-p")
@@ -52,6 +61,8 @@ int main(int argc, const char** argv)
 			testMode = true;
 			testDirectory = true;
 		}
+		else if (option == "--no-compile")
+		{ compileMode = false; }
 		else
 		{
 			std::cerr << "Unrecognized option: '" << option << "'\n";
@@ -60,6 +71,10 @@ int main(int argc, const char** argv)
 
 	// Get input filename
 	std::string inputFilename = argv[argc - 1];
+	if (inputFilename == "--no-compile") {
+		inputFilename = "";
+		compileMode = false;
+	}
 
 	// Test mode
 	if (testMode)
@@ -74,57 +89,64 @@ int main(int argc, const char** argv)
 	}
 
 	// If output filename not specified, use input filename as guideline
-	if (outputFilename.empty())
+	if (inkbinFilename.empty())
 	{
-		outputFilename = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".bin");
+		inkbinFilename = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".bin");
+	}
+	if (stringListFilename.empty()) {
+		stringListFilename = inkbinFilename+".str";
 	}
 
-	// If input filename is an .ink file
-	int val = inputFilename.find(".ink");
-	if (val == inputFilename.length() - 4)
-	{
-		// Create temporary filename
-		std::string jsonFile = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".tmp");
+	if (compileMode) {
+		// If input filename is an .ink file
+		int val = inputFilename.find(".ink");
+		if (val == inputFilename.length() - 4)
+		{
+			// Create temporary filename
+			std::string jsonFile = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".tmp");
 
-		// Then we need to do a compilation with inklecate
+			// Then we need to do a compilation with inklecate
+			try
+			{
+				inklecate(inputFilename, jsonFile);
+			}
+			catch (const std::exception& e)
+			{
+				std::cerr << "Inklecate Error: " << e.what() << std::endl;
+				return 1;
+			}
+
+			// New input is the json file
+			inputFilename = jsonFile;
+		}
+
+		// Open file and compile
 		try
 		{
-			inklecate(inputFilename, jsonFile);
+			ink::compiler::compilation_results results;
+			ink::compiler::run(
+					inputFilename.c_str(),
+					inkbinFilename.c_str(),
+					stringListFilename.c_str(),
+					&results);
+
+			// Report errors
+			for (auto& warn : results.warnings)
+				std::cerr << "WARNING: " << warn << '\n';
+			for (auto& err : results.errors)
+				std::cerr << "ERROR: " << err << '\n';
+
+			if (results.errors.size() > 0 && playMode)
+			{
+				std::cerr << "Cancelling play mode. Errors detected in compilation" << std::endl;
+				return -1;
+			}
 		}
-		catch (const std::exception& e)
+		catch (std::exception& e)
 		{
-			std::cerr << "Inklecate Error: " << e.what() << std::endl;
+			std::cerr << "Unhandled InkBin compiler exception: " << e.what() << std::endl;
 			return 1;
 		}
-
-		// New input is the json file
-		inputFilename = jsonFile;
-	}
-
-	// Open file and compile
-	try
-	{
-		ink::compiler::compilation_results results;
-		std::ofstream fout(outputFilename, std::ios::binary | std::ios::out);
-		ink::compiler::run(inputFilename.c_str(), fout, &results);
-		fout.close();
-
-		// Report errors
-		for (auto& warn : results.warnings)
-			std::cerr << "WARNING: " << warn << '\n';
-		for (auto& err : results.errors)
-			std::cerr << "ERROR: " << err << '\n';
-
-		if (results.errors.size() > 0 && playMode)
-		{
-			std::cerr << "Cancelling play mode. Errors detected in compilation" << std::endl;
-			return -1;
-		}
-	}
-	catch (std::exception& e)
-	{
-		std::cerr << "Unhandled InkBin compiler exception: " << e.what() << std::endl;
-		return 1;
 	}
 
 	if (!playMode)
@@ -136,7 +158,7 @@ int main(int argc, const char** argv)
 		using namespace ink::runtime;
 
 		// Load story
-		story* myInk = story::from_file(outputFilename.c_str());
+		story* myInk = story::create(inkbinFilename.c_str(), stringListFilename.c_str());
 
 		// Start runner
 		runner thread = myInk->new_runner();

@@ -13,8 +13,8 @@ SCENARIO("run story with global variable", "[global variables]")
 	GIVEN ("a story with global variables")
 	{
 		inklecate("ink/GlobalStory.ink", "GlobalsStory.tmp");
-		ink::compiler::run("GlobalsStory.tmp", "GlobalsStory.bin");
-		auto ink = story::from_file("GlobalsStory.bin");
+		ink::compiler::run("GlobalsStory.tmp", "GlobalsStory.bin", "GlobalsStory.bin.str");
+		auto ink = story::create("GlobalsStory.bin", "GlobalsStory.bin.str");
 		globals globStore = ink->new_globals();
 		runner thread = ink->new_runner(globStore);
 

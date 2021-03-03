@@ -59,7 +59,7 @@ bool test(const std::string& inkFilename)
 
 	// Compile into binary
 	ink::compiler::compilation_results results;
-	ink::compiler::run("test.tmp", "test.bin", &results);
+	ink::compiler::run("test.tmp", "test.bin", "test.bin.str", &results);
 
 	std::vector<std::string> expectations;
 	std::vector<int> choices;
@@ -116,7 +116,7 @@ bool test(const std::string& inkFilename)
 	}
 
 	// Load story
-	auto file = story::from_file("test.bin");
+	auto file = story::create("test.bin", "test.bin.str");
 	auto runner = file->new_runner();
 
 	while (true)

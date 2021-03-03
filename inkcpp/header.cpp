@@ -12,6 +12,7 @@ namespace ink::internal {
 
 		using v_t = decltype(header::ink_version_number);
 		using vcpp_t = decltype(header::ink_bin_version_number);
+		using num_t = decltype(header::num_strings);
 
 		if (res.endien == header::endian_types::same) {
 			res.ink_version_number =
@@ -19,6 +20,10 @@ namespace ink::internal {
 			ptr += sizeof(v_t);
 			res.ink_bin_version_number =
 				*reinterpret_cast<const vcpp_t*>(ptr);
+			ptr += sizeof(vcpp_t);
+			res.num_strings =
+				*reinterpret_cast<const num_t*>(ptr);
+			ptr += sizeof(num_t);
 
 		} else if (res.endien == header::endian_types::differ) {
 			res.ink_version_number =
@@ -26,6 +31,10 @@ namespace ink::internal {
 			ptr += sizeof(v_t);
 			res.ink_bin_version_number =
 				swap_bytes(*reinterpret_cast<const vcpp_t*>(ptr));
+			ptr += sizeof(vcpp_t);
+			res.num_strings =
+				swap_bytes(*reinterpret_cast<const num_t*>(ptr));
+			ptr += sizeof(num_t);
 		} else {
 			throw ink_exception("Failed to parse endian encoding!");
 		}

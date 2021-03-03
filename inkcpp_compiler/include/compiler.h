@@ -11,24 +11,31 @@ namespace ink
 {
 	namespace compiler
 	{
-		// file -> file
-		void run(const char* filenameIn, const char* filenameOut, compilation_results* results = nullptr);
-
-		// file -> stream
-		void run(const char* filenameIn, std::ostream& out, compilation_results* results = nullptr);
-
+		struct json;
+		class output {
+		public:
+			output(const char*const& filename): _name{&filename}{}
+			output(std::ostream& out) : _stream{&out}{}
+			std::ostream& get(std::ofstream& out) const;
+		private:
+			std::ostream* _stream = nullptr;
+			const char*const* _name = nullptr;
+		};
+		class input{
+		public:
+			input(const char*const& filename) : _name{&filename} {}
+			input(std::istream& in) : _stream{&in} {}
 #ifdef INK_EXPOSE_JSON
-		// JSON -> file
-		void run(const nlohmann::json&, const char* filenameOut, compilation_results* results = nullptr);
-
-		// JSON -> stream
-		void run(const nlohmann::json&, std::ostream& out, compilation_results* results = nullptr);
+			input(const json& j) : _json{&j} {}
 #endif
+			const json& get(json& in) const;
+		private:
+			std::istream* _stream = nullptr;
+			const char*const* _name = nullptr;
+			const json* _json = nullptr;
+		};
 
-		// stream -> stream
-		void run(std::istream& in, std::ostream& out, compilation_results* results = nullptr);
+		void run(const input&, const output& bin_out, const output& str_out, compilation_results* results = nullptr);
 
-		// stream -> file
-		void run(std::istream& in, const char* filenameOut, compilation_results* results = nullptr);
 	}
 }

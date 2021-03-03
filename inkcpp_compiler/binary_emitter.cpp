@@ -155,9 +155,6 @@ namespace ink::compiler::internal
 
 	void binary_emitter::write_string(Command command, CommandFlag flag, const std::string& string)
 	{
-		// Save current position in table
-		uint32_t pos = _strings.pos();
-
 		// Write string to table (omit ^ if it begins with one)
 		if (string.length() > 0 && string[0] == '^')
 			_strings.write(string.substr(1));
@@ -165,7 +162,7 @@ namespace ink::compiler::internal
 			_strings.write(string);
 
 		// Written position is what we write out in our command
-		write(command, pos, flag);
+		write(command, _num_strings++, flag);
 	}
 
 	void binary_emitter::handle_nop(int index_in_parent)
@@ -173,38 +170,40 @@ namespace ink::compiler::internal
 		_current->noop_offsets.insert({ index_in_parent, _containers.pos() });
 	}
 
-	void binary_emitter::output(std::ostream& out)
+	void binary_emitter::output(std::ostream& bin, std::ostream& strings)
 	{
 		// Write the ink version
 		// TODO: define this order in header?
 		using header = ink::internal::header;
 		header::endian_types same = header::endian_types::same;
-		out.write((const char*)&same, sizeof(decltype(same)));
-		out.write((const char*)&_ink_version, sizeof(decltype(_ink_version)));
-		out.write((const char*)&ink::InkBinVersion, sizeof(decltype(ink::InkBinVersion)));
+		bin.write((const char*)&same, sizeof(decltype(same)));
+		bin.write((const char*)&_ink_version, sizeof(decltype(_ink_version)));
+		bin.write((const char*)&ink::InkBinVersion, sizeof(decltype(ink::InkBinVersion)));
+		bin.write((const char*)&_num_strings, sizeof(uint32_t));
 
 		// Write the string table
-		_strings.write_to(out);
+		_strings.write_to(strings);
 
 		// Write a separator
-		out << (char)0;
+		strings << (char)0;
+		strings.flush();
 
 		// Write out container map
-		write_container_map(out, _container_map, _max_container_index);
+		write_container_map(bin, _container_map, _max_container_index);
 
 		// Write a separator
 		uint32_t END_MARKER = ~0;
-		out.write((const char*)&END_MARKER, sizeof(uint32_t));
+		bin.write((const char*)&END_MARKER, sizeof(uint32_t));
 
 		// Write container hash list
-		write_container_hash_map(out);
-		out.write((const char*)&END_MARKER, sizeof(uint32_t));
+		write_container_hash_map(bin);
+		bin.write((const char*)&END_MARKER, sizeof(uint32_t));
 
 		// Write the container data
-		_containers.write_to(out);
+		_containers.write_to(bin);
 
 		// Flush the file
-		out.flush();
+		bin.flush();
 	}
 
 	void binary_emitter::initialize()

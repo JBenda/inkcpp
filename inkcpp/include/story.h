@@ -44,31 +44,63 @@ namespace ink::runtime
 #pragma endregion
 
 #pragma region Factory Methods
-		/**
-		 * Creates a new story object from a file.
-		 *
-		 * Requires STL or other extension which allows files
-		 * to be loaded and read. Will allocate all the data
-		 * necessary to load the file and close it.
-		 *
-		 * @param filename filename of the binary ink data
-		 * @return new story object
-		*/
-		static story* from_file(const char* filename);
+		class input {
+		public:
+			/**
+			 * @brief Create an input object from a file.
+			 *
+			 * Requires STL or other extension which allows files
+			 * to be loaded and read. Will allocate all the data
+			 * necessary to load the file and close it.
+			 * @param filename of file to load data from
+			 */
+			input(const char*const filename);
 
+			/**
+			 * @brief Create input object from memory-segment
+			 * @param data pointer to begin of segment
+			 * @param length of the segment
+			 * @param freeOnDestroy wither or not free memory when no longer needed.
+			 *        on story destruction or when destroy input before usage.
+			 */
+			input(unsigned char* data, size_t length, bool freeOnDestroy = false)
+				: _data{data}, _length{length}, _freeOnDestroy{freeOnDestroy}{}
+
+			unsigned char* data() const { return _data; }
+			size_t length() const { return _length; }
+			/// @brief claim ownership for memory segment in input.
+			/// @return false when memory segment is not owned by input
+			/// @return true otherwise
+			bool get_ctrl() {
+				bool res = _freeOnDestroy;
+				_freeOnDestroy = false;
+				return _freeOnDestroy;
+			}
+			~input() {
+				if (_data && _freeOnDestroy) {
+					free(_data);
+					_data = nullptr;
+				}
+			}
+			input(input&& o)
+				: _data{o._data},
+				_length{o._length},
+				_freeOnDestroy{o.get_ctrl()}
+			{}
+
+		private:
+			input(const input&) = delete;
+			input& operator=(const input&) = delete;
+			unsigned char* _data;
+			size_t _length;
+			bool _freeOnDestroy;
+		};
 		/**
-		 * Create a new story object from binary buffer
-		 *
-		 * No extensions required. Creates the story from binary
-		 * data already loaded into memory. By default, the story
-		 * will free this buffer when it is destroyed.
-		 *
-		 * @param data binary data
-		 * @param length of the binary data in bytes
-		 * @param freeOnDestroy if true, free this buffer once the story is destroyed
-		 * @return new story object
+		 * Create a new story object from two inputs
+		 * @param inkbin input containing InkBin file data
+		 * @param text input containing strings/translated strings
 		*/
-		static story* from_binary(unsigned char* data, size_t length, bool freeOnDestroy = true);
+		static story* create(input&& inkbin, input&& text);
 #pragma endregion
 	};
 }
