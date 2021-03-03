@@ -49,7 +49,7 @@ namespace ink::runtime::internal
 		void extend();
 	private:
 
-		T _static_data[dynamic ? 0 : initialCapacity];
+		if_t<dynamic, char, T> _static_data[dynamic ? 1 : initialCapacity];
 		T* _dynamic_data = nullptr;
 		size_t _capacity;
 		size_t _size;
