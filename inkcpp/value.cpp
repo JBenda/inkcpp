@@ -96,6 +96,8 @@ namespace ink
 					if (new_type == value_type::integer)
 						val = value((int)val._first.float_value);
 					return;
+				default:
+					break;
 				}
 
 				inkAssert(false, "Invalid value cast");
@@ -131,6 +133,8 @@ namespace ink
 						break;
 					case data_type::none:
 						return;
+					default:
+						break;
 					}
 				}
 			}
@@ -150,6 +154,8 @@ namespace ink
 				case data_type::string_table_pointer:
 				case data_type::allocated_string_pointer:
 					return _first.string_val[0] != '\0';
+				default:
+					break;
 				}
 
 				inkFail("Invalid type to check for truthy");
@@ -232,6 +238,8 @@ namespace ink
 
 					return new_value;
 				}
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for add");
@@ -250,6 +258,8 @@ namespace ink
 					return left.as_int() - right.as_int();
 				case value_type::decimal:
 					return left.as_float() - right.as_float();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for subtract");
@@ -266,6 +276,8 @@ namespace ink
 					return left.as_int() * right.as_int();
 				case value_type::decimal:
 					return left.as_float() * right.as_float();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for multiply");
@@ -282,6 +294,8 @@ namespace ink
 					return left.as_int() / right.as_int();
 				case value_type::decimal:
 					return left.as_float() / right.as_float();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for divide");
@@ -296,6 +310,8 @@ namespace ink
 				{
 				case value_type::integer:
 					return left.as_int() % right.as_int();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for mod");
@@ -485,6 +501,8 @@ namespace ink
 					return compare_string(left, right);
 				case value_type::divert:
 					return left.as_divert() == right.as_divert();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for is_equal");
@@ -501,6 +519,8 @@ namespace ink
 					return left.as_int() < right.as_int();
 				case value_type::decimal:
 					return left.as_float() < right.as_float();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for less_than");
@@ -516,6 +536,8 @@ namespace ink
 					return -val._first.integer_value;
 				case data_type::float32:
 					return -val._first.float_value;
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for negate");
