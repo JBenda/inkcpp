@@ -60,7 +60,7 @@ namespace ink::runtime::internal {
 		template<typename T>
 		typed_executer(const T& t) : _typed_exe{t}, _op{t} {}
 
-		void operator()(value_type t, eval_stack& s, value* v) {
+		void operator()(value_type t, basic_eval_stack& s, value* v) {
 			if (t == ty) { _op(s, v); }
 			else { _typed_exe(t, s, v); }
 		}
@@ -78,7 +78,7 @@ namespace ink::runtime::internal {
 		template<typename T>
 		typed_executer(const T& t) {}
 
-		void operator()(value_type, eval_stack&, value*) {
+		void operator()(value_type, basic_eval_stack&, value*) {
 			throw ink_exception("Operation for value not supported!");
 		}
 	};
@@ -112,7 +112,7 @@ namespace ink::runtime::internal {
 		template<typename T>
 		executer_imp(const T& t) : _exe{t}, _typed_exe{t}{}
 
-		void operator()(Command c, eval_stack& s) {
+		void operator()(Command c, basic_eval_stack& s) {
 			if (c == cmd) {
 				static constexpr size_t N = command_num_args(cmd);
 				value args[N];
@@ -134,7 +134,7 @@ namespace ink::runtime::internal {
 	public:
 		template<typename T>
 		executer_imp(const T& t) {}
-		void operator()(Command, eval_stack&) {
+		void operator()(Command, basic_eval_stack&) {
 			throw ink_exception("requested command was not found!");
 		}
 	};
@@ -158,7 +158,7 @@ namespace ink::runtime::internal {
 		 * @param cmd command to execute
 		 * @param stack stack to operate on
 		 */
-		void operator()(Command cmd, eval_stack& stack) {
+		void operator()(Command cmd, basic_eval_stack& stack) {
 			_executer(cmd, stack);
 		}
 	private:

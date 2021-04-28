@@ -51,7 +51,7 @@ namespace ink::runtime::internal {
 		 * @param stack were the result(s) get pushed
 		 * @param vs array of values, first one = first argument etc
 		 */
-		void operator()(eval_stack& stack, value* vs) {
+		void operator()(basic_eval_stack& stack, value* vs) {
 			throw ink_exception("operation not implemented!");
 		}
 	};

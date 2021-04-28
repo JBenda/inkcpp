@@ -155,7 +155,6 @@ namespace ink
 			template<size_t N, bool dynamic = false>
 			class eval_stack : public basic_eval_stack
 			{
-				static constexpr size_t N = 20;
 			public:
 				eval_stack() : basic_eval_stack(_stack, N) { }
 			private:

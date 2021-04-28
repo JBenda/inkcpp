@@ -77,7 +77,7 @@ namespace ink::runtime::internal {
 	class operation<Command::ADD, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<ty>(
 						casting::numeric_cast<ty>(vals[0]) +
 						casting::numeric_cast<ty>(vals[1]) ));
@@ -88,7 +88,7 @@ namespace ink::runtime::internal {
 	class operation<Command::SUBTRACT, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<ty>(
 						casting::numeric_cast<ty>(vals[0]) -
 						casting::numeric_cast<ty>(vals[1]) ));
@@ -99,7 +99,7 @@ namespace ink::runtime::internal {
 	class operation<Command::DIVIDE, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<ty>(
 						casting::numeric_cast<ty>(vals[0]) /
 						casting::numeric_cast<ty>(vals[1]) ));
@@ -110,7 +110,7 @@ namespace ink::runtime::internal {
 	class operation<Command::MULTIPLY, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<ty>(
 						casting::numeric_cast<ty>(vals[0]) *
 						casting::numeric_cast<ty>(vals[1]) ));
@@ -121,7 +121,7 @@ namespace ink::runtime::internal {
 	class operation<Command::MOD, ty, is_integral_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<ty>( vals[0].get<ty>() % vals[1].get<ty>() ));
 		}
 	};
@@ -130,7 +130,7 @@ namespace ink::runtime::internal {
 	class operation<Command::IS_EQUAL, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
 				casting::numeric_cast<ty>(vals[0]) ==
 				casting::numeric_cast<ty>(vals[1])
@@ -142,7 +142,7 @@ namespace ink::runtime::internal {
 	class operation<Command::GREATER_THAN, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
 				casting::numeric_cast<ty>(vals[0]) >
 				casting::numeric_cast<ty>(vals[1])
@@ -155,7 +155,7 @@ namespace ink::runtime::internal {
 	class operation<Command::LESS_THAN, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
 				casting::numeric_cast<ty>(vals[0]) <
 				casting::numeric_cast<ty>(vals[1])
@@ -167,7 +167,7 @@ namespace ink::runtime::internal {
 	class operation<Command::GREATER_THAN_EQUALS, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
 				casting::numeric_cast<ty>(vals[0]) >=
 				casting::numeric_cast<ty>(vals[1])
@@ -180,7 +180,7 @@ namespace ink::runtime::internal {
 	class operation<Command::LESS_THAN_EQUALS, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
 				casting::numeric_cast<ty>(vals[0]) <=
 				casting::numeric_cast<ty>(vals[1])
@@ -192,7 +192,7 @@ namespace ink::runtime::internal {
 	class operation<Command::NOT_EQUAL, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(
 				casting::numeric_cast<ty>(vals[0]) !=
 				casting::numeric_cast<ty>(vals[1])
@@ -204,7 +204,7 @@ namespace ink::runtime::internal {
 	class operation<Command::AND, ty, is_integral_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>( vals[0].get<ty>() && vals[1].get<ty>() ));
 		}
 	};
@@ -213,7 +213,7 @@ namespace ink::runtime::internal {
 	class operation<Command::OR, ty, is_integral_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>( vals[0].get<ty>() || vals[1].get<ty>() ));
 		}
 	};
@@ -222,7 +222,7 @@ namespace ink::runtime::internal {
 	class operation<Command::MIN, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			typename value::ret<ty>::type n[2] = {
 				casting::numeric_cast<ty>(vals[0]),
 				casting::numeric_cast<ty>(vals[1])
@@ -235,7 +235,7 @@ namespace ink::runtime::internal {
 	class operation<Command::MAX, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			typename value::ret<ty>::type n[2] = {
 				casting::numeric_cast<ty>(vals[0]),
 				casting::numeric_cast<ty>(vals[1])
@@ -248,7 +248,7 @@ namespace ink::runtime::internal {
 	class operation<Command::NOT, ty, is_integral_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(!vals[0].get<ty>()));
 		}
 	};
@@ -257,7 +257,7 @@ namespace ink::runtime::internal {
 	class operation<Command::NEGATE, ty,  is_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(eval_stack& stack, value* vals) {
+		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<ty>(-vals[0].get<ty>()));
 		}
 	};

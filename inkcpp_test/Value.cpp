@@ -10,7 +10,7 @@ using ink::runtime::internal::value_type;
 using ink::runtime::internal::string_table;
 using stream = ink::runtime::internal::stream<128>;
 using ink::runtime::internal::executer;
-using eval_stack = ink::runtime::internal::eval_stack;
+using eval_stack = ink::runtime::internal::eval_stack<28, false>;
 using ink::Command;
 
 void cp_str(char* dst, const char* src) {

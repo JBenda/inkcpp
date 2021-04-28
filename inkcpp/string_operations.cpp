@@ -37,7 +37,7 @@ namespace ink::runtime::internal {
 			}
 		}
 	}
-	void operation<Command::ADD, value_type::string, void>::operator()(eval_stack& stack, value* vals) {
+	void operation<Command::ADD, value_type::string, void>::operator()(basic_eval_stack& stack, value* vals) {
 		// convert values to strings
 		casting::string_cast lh(vals[0]);
 		casting::string_cast rh (vals[1]);
@@ -54,7 +54,7 @@ namespace ink::runtime::internal {
 		stack.push(value{}.set<value_type::string>(str));
 	}
 
-	void operation<Command::IS_EQUAL, value_type::string, void>::operator()(eval_stack& stack, value* vals) {
+	void operation<Command::IS_EQUAL, value_type::string, void>::operator()(basic_eval_stack& stack, value* vals) {
 		// convert values to string
 		casting::string_cast lh (vals[0]);
 		casting::string_cast rh(vals[1]);
