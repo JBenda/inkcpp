@@ -10,6 +10,7 @@
 #include "types.h"
 #include "functions.h"
 #include "string_table.h"
+#include "list_table.h"
 #include "array.h"
 #include "random.h"
 

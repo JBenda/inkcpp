@@ -17,6 +17,7 @@ list(APPEND SOURCES
     system.cpp
     value.h value.cpp
     string_table.h string_table.cpp avl_array.h
+	list_table.h list_table.cpp
 	string_operations.cpp
 	header.cpp
 )
