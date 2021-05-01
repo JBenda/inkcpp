@@ -8,6 +8,7 @@ namespace ink
 			"INT",
 			"FLOAT",
 			"DIVERT_VAL",
+			"LIST",
 			"\n",
 			"<>",
 			"void",
@@ -55,9 +56,16 @@ namespace ink
 			"||",
 			"MIN",
 			"MAX",
+			"?",
 
 			"!",
 			"~",
+			"LIST_COUNT",
+			"LIST_MIN",
+			"LIST_MAX",
+			"lrnd",
+			"LIST_ALL",
+			"LIST_INVERT",
 
 			"START_CONTAINER",
 			"END_CONTAINER",
@@ -65,5 +73,10 @@ namespace ink
 			"CALL_EXTERNAL"
 	};
 
-	static_assert(sizeof(CommandStrings) / sizeof(const char*) == (int)Command::NUM_COMMANDS, "CommandStrings list much match Command enumeration");
+	template<unsigned A, unsigned B>
+	struct equal {
+		static_assert(A == B, "Not equal!");
+	};
+	equal<sizeof(CommandStrings) / sizeof(const char*), (int)(Command::NUM_COMMANDS)> dum;
+	static_assert(sizeof(CommandStrings) / sizeof(const char*) == (int)Command::NUM_COMMANDS, "CommandStrings list muss match Command enumeration");
 }

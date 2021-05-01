@@ -8,6 +8,8 @@
 
 namespace ink::compiler::internal
 {
+	class list_data;
+
 	// Abstract base class for emitters which write ink commands to a file
 	class emitter : public reporter
 	{
@@ -52,6 +54,9 @@ namespace ink::compiler::internal
 
 		// Adds a container end marker to the container map
 		void add_end_to_container_map(uint32_t offset, container_t index);
+
+		// add list definitions
+		virtual void add_list_definitions(const list_data& list_defs) = 0;
 
 		// Helpers
 		template<typename T>

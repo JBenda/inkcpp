@@ -10,6 +10,7 @@ namespace ink
 		INT,
 		FLOAT,
 		DIVERT_VAL,
+		LIST,
 		NEWLINE,
 		GLUE,
 		VOID,
@@ -70,14 +71,21 @@ namespace ink
 		OR,
 		MIN,
 		MAX,
-		BINARY_OPERATORS_END = MAX,
+		HAS,
+		BINARY_OPERATORS_END = HAS,
 
 		// == Unary operators
 		UNARY_OPERATORS_START,
 		NOT = UNARY_OPERATORS_START,
 		NEGATE,
-		UNARY_OPERATORS_END = NEGATE,
-		OP_END = NEGATE + 1,
+		LIST_COUNT,
+		LIST_MIN,
+		LIST_MAX,
+		lrnd,
+		LIST_ALL,
+		LIST_INVERT,
+		UNARY_OPERATORS_END = LIST_INVERT,
+		OP_END,
 
 		// == Container tracking
 		START_CONTAINER_MARKER = OP_END,

@@ -2,6 +2,7 @@
 
 #include "header.h"
 #include "version.h"
+#include "list_data.h"
 
 #include <vector>
 #include <map>
@@ -367,5 +368,9 @@ namespace ink::compiler::internal
 		{
 			write_container_hash_map(out, name, child.second);
 		}
+	}
+
+	void binary_emitter::add_list_definitions(const list_data& list_defs)
+	{
 	}
 }

@@ -6,6 +6,7 @@
 namespace ink::compiler::internal
 {
 	struct container_data;
+	class list_data;
 
 	// binary emitter
 	class binary_emitter : public emitter
@@ -24,6 +25,7 @@ namespace ink::compiler::internal
 		virtual void handle_nop(int index_in_parent) override;
 		virtual uint32_t fallthrough_divert() override;
 		virtual void patch_fallthroughs(uint32_t position) override;
+		virtual void add_list_definitions(const list_data& list_defs) override;
 		// End emitter
 
 		// write out the emitters data
@@ -45,6 +47,7 @@ namespace ink::compiler::internal
 		compilation_results* _results;
 
 		binary_stream _strings;
+		binary_stream _list_meta;
 		binary_stream _containers;
 
 		std::vector<std::tuple<size_t, std::string, container_data*, bool>> _paths;

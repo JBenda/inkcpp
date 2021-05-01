@@ -40,7 +40,9 @@ namespace ink::runtime::internal
 
 	void list_table::clear_usage() {
 		for(state& s : _entry_state) {
-			s = state::unused;
+			if(s == state::used) {
+				s = state::unused;
+			}
 		}
 	}
 
@@ -135,16 +137,18 @@ namespace ink::runtime::internal
 		return res;
 	}
 
-	list_table::list list_table::add(list lh, entry rh) {
+	list_table::list list_table::create_permament()
+	{
 		list res = create();
-		data_t* l = getPtr(lh.lid);
-		data_t* o = getPtr(res.lid);
-		for(int i = 0; i < _entrySize; ++i) {
-			o[i] = l[i];
-		}
-		setList(o, rh.lid);
-		setFlag(o, toFid(rh));
+		_entry_state[res.lid] = state::permanent;
 		return res;
+	}
+
+	list_table::list& list_table::add_inplace(list& lh, entry rh) {
+		data_t* l = getPtr(lh.lid);
+		setList(l, rh.lid);
+		setFlag(l, toFid(rh));
+		return lh;
 	}
 	
 	list_table::list list_table::sub(list lh, list rh) {
@@ -181,32 +185,8 @@ namespace ink::runtime::internal
 		return res;
 	}
 
-	list_table::list list_table::sub(list lh, entry rh) {
-		list res = create();
-		data_t* l = getPtr(lh.lid);
-		data_t* o = getPtr(res.lid);
-		for(int i = 0; i < _entrySize; ++i) {
-			o[i] = l[i];
-		}
-		setBit(o, toFid(rh), false);
-		for(int i = listBegin(rh.lid); i < _list_end[rh.lid];++i)
-		{
-			if(hasFlag(o,i)) {
-				return res;
-			}
-		}
-		setList(o, rh.lid, false);
 
-		for(int i = 0; i < numLists(); ++i) {
-			if(hasList(o,i)) {
-				return res;
-			}
-		}
-		copy_lists(l, o);
-		return res;
-	}
-
-	list_table::list list_table::increment(list arg) {
+	list_table::list list_table::add(list arg, int i) {
 		list res = create();
 		data_t* l = getPtr(arg.lid);
 		data_t* o = getPtr(res.lid);
@@ -214,10 +194,10 @@ namespace ink::runtime::internal
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(l, i)) {
 				bool has_flag = false;
-				for(int j = listBegin(i); j < _list_end[i] - 1;++j)
+				for(int j = listBegin(i); j < _list_end[i] - i;++j)
 				{
 					if(hasFlag(l, j)) {
-						setFlag(o,j+1);
+						setFlag(o,j+i);
 						has_flag = true;
 					}
 				}
@@ -233,7 +213,7 @@ namespace ink::runtime::internal
 		return res;
 	}
 
-	list_table::list list_table::decrement(list arg) {
+	list_table::list list_table::sub(list arg, int i) {
 		list res = create();
 		data_t* l = getPtr(arg.lid);
 		data_t* o = getPtr(res.lid);
@@ -241,10 +221,10 @@ namespace ink::runtime::internal
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(l, i)) {
 				bool has_flag = false;
-				for(int j = listBegin(i) + 1; j < _list_end[i]; ++j)
+				for(int j = listBegin(i) + i; j < _list_end[i]; ++j)
 				{
 					if(hasFlag(l,j)) {
-						setFlag(o,j-1);
+						setFlag(o,j-i);
 						has_flag = true;
 					}
 				}
@@ -348,6 +328,16 @@ namespace ink::runtime::internal
 			}
 		}
 		return res;
+	}
+
+	void list_table::copy_lists(const data_t* src, data_t* dst) {
+		data_t mask =
+			~static_cast<data_t>(0) << (bits_per_data - (numLists() % bits_per_data));
+		int mask_pos = numLists() / bits_per_data;
+		for(int i = 0; i < mask_pos; ++i) {
+			dst[i] = src[i];
+		}
+		dst[mask_pos] |= mask & src[mask_pos];
 	}
 }
 

@@ -18,8 +18,8 @@
 + `+(list, element)` add the element to the list
 + `-(list lh, list rh)` remove elements lh = lh / (lh ∩ rh)
 + `-(list lh, list rh)` removes element from list
-+ `++(list l)` `l = l << 1` (bits get shifted out)
-+ `--(list l)` `l = l >> 1` (bits get shifted out)
++ `+(list l, int i)` l << i (bits get shifted out)
++ `-(list l, int i)` l >> i (bits get shifted out)
 + `LIST_COUNT(list l)` returns the number of flags sets
 + `LIST_MIN(list l)` returns the flag with the lowest numerical representation which is set
 + `LIST_MAX(list l)` return the flag with the highest numerical representation which is set

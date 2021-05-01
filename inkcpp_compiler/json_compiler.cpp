@@ -1,4 +1,8 @@
 #include "json_compiler.h"
+
+#include "list_data.h"
+
+#include <string_view>
 #include <iostream>
 
 namespace ink::compiler::internal
@@ -27,6 +31,10 @@ namespace ink::compiler::internal
 
 		// Compile the root container
 		compile_container(input["root"], 0);
+		if(auto itr = input.find("listDefs"); itr != input.end()) {
+			compile_lists_definition(*itr);
+
+		}
 
 		// finalize
 		_emitter->finish(_next_container_index);
@@ -316,14 +324,42 @@ namespace ink::compiler::internal
 			get(command, "exArgs", numArgs);
 
 			// Encode argument count into command flag and write out the hash of the function name
-			_emitter->write(Command::CALL_EXTERNAL, hash_string(val.c_str()), (CommandFlag)numArgs);
+			_emitter->write(Command::CALL_EXTERNAL, hash_string(val.c_str()),
+					static_cast<CommandFlag>(numArgs));
 		}
 
 		// list initialisation
 		else if (has(command, "list"))
 		{
-			for ( const auto& entry : command["list"]) {
-				
+			_emitter->write(Command::LIST, static_cast<int>(_lists.size()), CommandFlag::NO_FLAGS);
+			_lists.push_back({});	
+			std::vector<list_data::entry>& entries = _lists.back();
+			auto& list = command["list"];
+			if(list.size()) {
+				for ( const auto& [key,value] : list.items()) {
+					entries.push_back({
+							.lid = _list_meta.get_lid(key.substr(0,key.find('.'))),
+							.flag = value,
+					});
+
+				}
+			} else {
+				for( const auto& origin_list : command["origins"]) {
+					entries.push_back({
+							.lid = _list_meta.get_lid(origin_list.get<std::string>()),
+							.flag = -1,
+					});
+				}
+			}
+		}
+	}
+
+	void json_compiler::compile_lists_definition(const nlohmann::json& list_defs)
+	{
+		for(auto& [list_name, flags] : list_defs.items())	{
+			_list_meta.new_list(list_name);
+			for(auto& [flag_name, value] : flags.items()) {
+				_list_meta.new_flag(flag_name, value.get<int>());
 			}
 		}
 	}

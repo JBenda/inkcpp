@@ -22,6 +22,7 @@ namespace ink::runtime::internal
 		enum class state : char {
 			unused,
 			used,
+			permanent,
 			empty
 		};
 	public:
@@ -61,7 +62,10 @@ namespace ink::runtime::internal
 		/// delete unused lists
 		void gc();
 
+		// function to setup list_table
 		list_table(const int* list_len, int num_lists);
+		list create_permament();
+		list& add_inplace(list& lh, entry rh);
 
 		/** set name for an flag
 		 * @param lid id of list(type) to set list
@@ -82,11 +86,9 @@ namespace ink::runtime::internal
 		char* toString(char* out, const list& l) const;
 		
 		list add(list lh, list rh);
-		list add(list lh, entry rh);
+		list add(list l, int i);
 		list sub(list lh, list rh);
-		list sub(list lh, entry rh);
-		list increment(list l);
-		list decrement(list l);
+		list sub(list l, int i);
 		int count(list l);
 		entry min(list l);
 		entry max(list l);
