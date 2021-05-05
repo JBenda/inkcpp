@@ -51,6 +51,5 @@ namespace ink::compiler::internal
 		container_t _next_container_index;
 
 		list_data _list_meta;
-		std::vector<std::vector<list_data::entry>> _lists;
 	};
 }

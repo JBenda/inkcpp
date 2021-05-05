@@ -40,6 +40,9 @@ namespace ink::compiler::internal
 		// Writes a command with a string payload
 		virtual void write_string(Command command, CommandFlag flag, const std::string& string) = 0;
 
+		// write a command with a list payload
+		virtual void write_list(Command commmand, CommandFlag flag, const std::vector<list_flag>& list) = 0;
+
 		// Callback for nop commands
 		virtual void handle_nop(int index_in_parent) = 0;
 
@@ -56,7 +59,7 @@ namespace ink::compiler::internal
 		void add_end_to_container_map(uint32_t offset, container_t index);
 
 		// add list definitions
-		virtual void add_list_definitions(const list_data& list_defs) = 0;
+		virtual void set_list_meta(const list_data& lists_defs) = 0;
 
 		// Helpers
 		template<typename T>

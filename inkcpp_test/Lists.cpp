@@ -1,8 +1,9 @@
-#inlcude "catch.hpp"
-#include "../inkcpp_cl/test.cpp"
+#include "catch.hpp"
+#include "../inkcpp_cl/test.h"
 
 #include <story.h>
 #include <runner.h>
+#include <globals.h>
 #include <compiler.h>
 
 using namespace ink::runtime;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "system.h"
+
 #include <vector>
 #include <string>
 #include <map>
@@ -9,10 +11,6 @@ namespace ink::compiler::internal
 {
 	class list_data {
 	public:
-		struct entry {
-			int lid;
-			int flag;
-		};
 
 		// add new list and set it to current
 		void new_list(const std::string& list_name);
@@ -22,7 +20,7 @@ namespace ink::compiler::internal
 
 		int get_lid(const std::string_view& list_name) {
 			auto itr = _lists.find(list_name);
-			return itr->second;
+			return static_cast<decltype(list_flag::list_id)>(itr->second);
 		}
 
 	private:

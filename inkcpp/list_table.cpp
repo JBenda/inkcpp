@@ -3,6 +3,18 @@
 
 namespace ink::runtime::internal
 {
+
+	void  list_table::copy_lists(const data_t* src, data_t* dst) {
+		int len = numLists() / bits_per_data;
+		int rest = numLists() / bits_per_data;
+		for(int i = 0; i < len; ++i) {
+			dst[i] = src[i];
+		}
+		if (rest) {
+			dst[len] |= src[len] & (~static_cast<data_t>(0) << (bits_per_data - rest));
+		}
+	}
+
 	list_table::list_table(const int* list_len, int num_lists)
 	{
 		int sum = 0;
@@ -33,10 +45,6 @@ namespace ink::runtime::internal
 		return new_entry;
 	}
 
-	list_table::entry list_table::create(size_t list_id, size_t flag)
-	{
-		return entry(list_id, flag);
-	}
 
 	void list_table::clear_usage() {
 		for(state& s : _entry_state) {
@@ -62,11 +70,11 @@ namespace ink::runtime::internal
 		}
 	}
 
-	int list_table::toFid(entry e) const {
-		return listBegin(e.lid) + e.flag;
+	int list_table::toFid(list_flag e) const {
+		return listBegin(e.list_id) + e.flag;
 	}
 
-	void list_table::setFlagName(entry e, const char* name) {
+	void list_table::setFlagName(list_flag e, const char* name) {
 		int slot = toFid(e);
 		while(slot >= _flag_names.size()) {
 			_flag_names.push() = nullptr;
@@ -74,10 +82,13 @@ namespace ink::runtime::internal
 		_flag_names[slot] = name;
 	}
 
-	size_t list_table::stringLen(const entry& e) const {
-		return c_str_len(_flag_names[toFid(e)]);
+	size_t list_table::stringLen(const list_flag& e) const {
+		return c_str_len(toString(e));
 	}
-	const char*  list_table::toString(const entry &e) const {
+	const char*  list_table::toString(const list_flag &e) const {
+		if(e.list_id < 0 || e.flag < 0 ) {
+			return nullptr;
+		}
 		return _flag_names[toFid(e)];
 	}
 
@@ -144,11 +155,23 @@ namespace ink::runtime::internal
 		return res;
 	}
 
-	list_table::list& list_table::add_inplace(list& lh, entry rh) {
+	list_table::list& list_table::add_inplace(list& lh, list_flag rh) {
 		data_t* l = getPtr(lh.lid);
-		setList(l, rh.lid);
+		setList(l, rh.list_id);
 		setFlag(l, toFid(rh));
 		return lh;
+	}
+
+	list_table::list list_table::add(list lh, list_flag rh) {
+		list res = create();
+		data_t* l = getPtr(lh.lid);
+		data_t* o = getPtr(res.lid);
+		for(int i = 0; i < _entrySize; ++i) {
+			o[i] = l[i];
+		}
+		setList(o, rh.list_id);
+		setFlag(o, toFid(rh));
+		return res;
 	}
 	
 	list_table::list list_table::sub(list lh, list rh) {
@@ -176,6 +199,29 @@ namespace ink::runtime::internal
 			}
 		}
 		if(active_flag) { return res; }
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(o,i)) {
+				return res;
+			}
+		}
+		copy_lists(l, o);
+		return res;
+	}
+
+	list_table::list list_table::sub(list lh, list_flag rh) {
+		list res = create();
+		data_t* l = getPtr(lh.lid);
+		data_t* o = getPtr(res.lid);
+		for(int i = 0; i < numLists(); ++i) {
+			o[i] = l[i];
+		}
+		setFlag(o, toFid(rh), false);
+		for(int i = listBegin(rh.list_id); i < _list_end[rh.list_id]; ++i) {
+			if(hasFlag(o, i)) {
+				return res;
+			}
+		}
+		setList(l, rh.list_id, false);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(o,i)) {
 				return res;
@@ -256,17 +302,17 @@ namespace ink::runtime::internal
 		return count;
 	}
 
-	list_table::entry list_table::min(list l) {
-		entry res(-1,numFlags());
+	list_flag list_table::min(list l) {
+		list_flag res{-1,-1};
 		data_t* data = getPtr(l.lid);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(data, i)) {
 				for(int j = listBegin(i); j < _list_end[j]; ++j) {
 					if(hasFlag(data, j)) {
 						int value = j - listBegin(i);
-						if(value < res.flag) {
+						if(res.flag < 0 || value < res.flag) {
 							res.flag = value;
-							res.lid = i;
+							res.list_id = i;
 						}
 						break;
 					}
@@ -276,8 +322,8 @@ namespace ink::runtime::internal
 		return res;
 	}
 
-	list_table::entry list_table::max(list l) {
-		entry res(-1,-1);
+	list_flag list_table::max(list l) {
+		list_flag res{-1,-1};
 		data_t* data = getPtr(l.lid);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(data, i)) {
@@ -287,7 +333,7 @@ namespace ink::runtime::internal
 						int value = j - listBegin(i);
 						if (value > res.flag) {
 							res.flag = value;
-							res.lid = i;
+							res.list_id = i;
 						}
 						break;
 					}
@@ -328,16 +374,6 @@ namespace ink::runtime::internal
 			}
 		}
 		return res;
-	}
-
-	void list_table::copy_lists(const data_t* src, data_t* dst) {
-		data_t mask =
-			~static_cast<data_t>(0) << (bits_per_data - (numLists() % bits_per_data));
-		int mask_pos = numLists() / bits_per_data;
-		for(int i = 0; i < mask_pos; ++i) {
-			dst[i] = src[i];
-		}
-		dst[mask_pos] |= mask & src[mask_pos];
 	}
 }
 

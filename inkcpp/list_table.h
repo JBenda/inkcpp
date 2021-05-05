@@ -3,6 +3,10 @@
 #include "system.h"
 #include "array.h"
 
+#ifdef INKCPP_ENABLE_STL
+#include <iosfwd>
+#endif
+
 
 namespace ink::runtime::internal
 {
@@ -25,6 +29,7 @@ namespace ink::runtime::internal
 			permanent,
 			empty
 		};
+
 	public:
 		/// handle to acces a list
 		class list{
@@ -33,25 +38,11 @@ namespace ink::runtime::internal
 			int lid; ///< id of list to handle
 		};
 		/// handle for an single list flag
-		class entry {
-			friend class list_table;
-			int lid; ///< id of list
-			int flag; ///< value of flag
-		public:
-			explicit entry(int lid, int flag) : lid{lid}, flag{flag} {}
-		};
 
 		~list_table();
 
 		/// creates an empty list
 		list create();
-
-		/** creates an entry which contains a flag
-		 *  of an given list
-		 *  @param list_id of list 
-		 *  @param flag value in list
-		 */
-		entry create(size_t list_id, size_t flag);
 
 		/// zeros all usage values
 		void clear_usage();
@@ -65,15 +56,15 @@ namespace ink::runtime::internal
 		// function to setup list_table
 		list_table(const int* list_len, int num_lists);
 		list create_permament();
-		list& add_inplace(list& lh, entry rh);
+		list& add_inplace(list& lh, list_flag rh);
 
 		/** set name for an flag
 		 * @param lid id of list(type) to set list
 		 * @param fid value of flag for this type
 		 */
-		void setFlagName(entry e, const char* name);
-		size_t stringLen(const entry& e) const;
-		const char* toString(const entry& e) const;
+		void setFlagName(list_flag e, const char* name);
+		size_t stringLen(const list_flag& e) const;
+		const char* toString(const list_flag& e) const;
 
 		/** returns len of string representation of list */
 		size_t stringLen(const list& l) const;
@@ -87,12 +78,14 @@ namespace ink::runtime::internal
 		
 		list add(list lh, list rh);
 		list add(list l, int i);
+		list add(list lh ,list_flag rh);
 		list sub(list lh, list rh);
 		list sub(list l, int i);
+		list sub(list lh, list_flag rh);
 		int count(list l);
-		entry min(list l);
-		entry max(list l);
-		entry lrnd(list l);
+		list_flag min(list l);
+		list_flag max(list l);
+		list_flag lrnd(list l);
 		list all(list l);
 		list invert(list l);
 		bool less(list lh, list rh);
@@ -101,6 +94,7 @@ namespace ink::runtime::internal
 		bool not_equal(list lh, list rh){ return equal(lh, rh); }
 		bool greater_equal(list lh, list rh);
 		bool less_equal(list lh, list rh);
+
 	private:
 		void copy_lists(const data_t* src, data_t* dst);
 		static constexpr int bits_per_data = sizeof(data_t) * 8;
@@ -143,7 +137,7 @@ namespace ink::runtime::internal
 		void setFlag(data_t* data, int fid, bool value = true) {
 			setBit(data, fid + numLists(), value);
 		}
-		int toFid(entry e) const;
+		int toFid(list_flag e) const;
 		auto flagStartMask() const {
 			struct { int segment; data_t mask; }
 			res {
@@ -176,4 +170,9 @@ namespace ink::runtime::internal
 		managed_array<int, config::maxListTypes> _list_end;
 		managed_array<const char*,config::maxFlags> _flag_names;
 	};
+
+#ifdef INK_ENABLE_STL
+	std::ostream& operator<<(std::ostream&, const list_table::list&);
+	std::ostream& operator<<(std::ostream&, const list_flag&);
+#endif
 }

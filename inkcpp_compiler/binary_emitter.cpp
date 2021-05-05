@@ -169,6 +169,9 @@ namespace ink::compiler::internal
 		write(command, pos, flag);
 	}
 
+	void binary_emitter::write_list(Command command, CommandFlag flag, const std::vector<list_flag>& entries) {
+	}
+
 	void binary_emitter::handle_nop(int index_in_parent)
 	{
 		_current->noop_offsets.insert({ index_in_parent, _containers.pos() });
@@ -370,7 +373,4 @@ namespace ink::compiler::internal
 		}
 	}
 
-	void binary_emitter::add_list_definitions(const list_data& list_defs)
-	{
-	}
 }

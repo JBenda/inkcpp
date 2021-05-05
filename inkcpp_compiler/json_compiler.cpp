@@ -29,12 +29,12 @@ namespace ink::compiler::internal
 		// Initialize emitter
 		_emitter->start(inkVersion, results);
 
-		// Compile the root container
-		compile_container(input["root"], 0);
 		if(auto itr = input.find("listDefs"); itr != input.end()) {
 			compile_lists_definition(*itr);
-
+			_emitter->set_list_meta(_list_meta);
 		}
+		// Compile the root container
+		compile_container(input["root"], 0);
 
 		// finalize
 		_emitter->finish(_next_container_index);
@@ -331,14 +331,13 @@ namespace ink::compiler::internal
 		// list initialisation
 		else if (has(command, "list"))
 		{
-			_emitter->write(Command::LIST, static_cast<int>(_lists.size()), CommandFlag::NO_FLAGS);
-			_lists.push_back({});	
-			std::vector<list_data::entry>& entries = _lists.back();
+			std::vector<list_flag> entries;
 			auto& list = command["list"];
+
 			if(list.size()) {
 				for ( const auto& [key,value] : list.items()) {
 					entries.push_back({
-							.lid = _list_meta.get_lid(key.substr(0,key.find('.'))),
+							.list_id = _list_meta.get_lid(key.substr(0,key.find('.'))),
 							.flag = value,
 					});
 
@@ -346,11 +345,13 @@ namespace ink::compiler::internal
 			} else {
 				for( const auto& origin_list : command["origins"]) {
 					entries.push_back({
-							.lid = _list_meta.get_lid(origin_list.get<std::string>()),
+							.list_id = _list_meta.get_lid(origin_list.get<std::string>()),
 							.flag = -1,
 					});
 				}
 			}
+
+			_emitter->write_list(Command::LIST, CommandFlag::NO_FLAGS, entries);
 		}
 	}
 

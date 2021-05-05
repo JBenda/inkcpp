@@ -7,6 +7,7 @@
 
 #include "system.h"
 #include "../shared/private/command.h"
+#include "list_table.h"
 
 #ifdef INK_ENABLE_STL
 #include <iosfwd>
@@ -26,6 +27,8 @@ namespace ink::runtime::internal {
 		uint32,                     // 32bit unsigned integer variable
 		int32,                      // 32bit integer variable
 		float32,                    // 32bit floating point value 
+		list,						// id of list in list_table
+		list_flag,					// a single list flag
 		string,                     // Pointer to string
 		OP_END,                     // END of types where we can operate on
 		newline = OP_END,           // newline symbol
@@ -109,6 +112,8 @@ namespace ink::runtime::internal {
 				uint32_t jump;
 				uint32_t thread_id;
 			} jump;
+			list_table::list list_value;
+			list_table::entry list_flag;
 		};
 		value_type _type;
 	};
@@ -165,6 +170,27 @@ namespace ink::runtime::internal {
 	inline constexpr value& value::set<value_type::boolean, bool>(bool v) {
 		bool_value = v;
 		_type = value_type::boolean;
+		return *this;
+	}
+
+	// define get and set for list
+	template<> struct value::ret<value_type::list> { using type = list_table::list };
+	template<> inline list_table::list value::get<value_type::list>() const { return list_value; }
+	template<>
+	inline constexpr value& value::set<value_type::list, list_table::list>(list_table::list list) const  {
+		list_value = list;
+		_type = value_type::list;
+		return *this;
+	}
+
+	// define get and set for list_flag
+	template<> struct value::ret<value_type::list_flag> { using type = list_table::entry };
+	template<> inline list_table::entry value::get<value_type::list_flag>() const { return list_flag; }
+	template<>
+	inline constexpr value& value::set<value_type::list_flag, list_table::entry>(list_table::entry flag)
+	{
+		list_flag = flag;
+		_type = value_type::list_flag;
 		return *this;
 	}
 

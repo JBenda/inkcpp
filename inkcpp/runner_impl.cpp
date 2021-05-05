@@ -473,6 +473,14 @@ namespace ink::runtime::internal
 				// TEST-CASE B006 don't print floats
 			}
 			break;
+			case Command::LIST:
+			{
+				int id = read<int>();
+				if(bEvaluationMode)
+					_eval.push(value{}.set<value_type::list>(id))
+				else
+					_output << value{}.set<value_type::list>(str);
+			}
 
 			case Command::DIVERT_VAL:
 			{

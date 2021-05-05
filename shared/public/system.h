@@ -52,6 +52,9 @@ namespace ink
 	// Used to uniquely identify threads
 	typedef uint32_t thread_t;
 
+	// Used to unique identify a list flag
+	struct list_flag { int16_t list_id; int16_t flag; };
+
 	// Checks if a string is only whitespace
 	static bool is_whitespace(const char* string, bool includeNewline = true)
 	{
