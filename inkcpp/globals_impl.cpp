@@ -9,8 +9,29 @@ namespace ink::runtime::internal
 		, _visit_counts(_num_containers, 0, ~0)
 		, _owner(story)
 		, _runners_start(nullptr)
+		, _lists(story->list_meta(), story->get_header())
 		, _globals_initialized(false)
 	{
+		if (_lists) {
+			// initelize static lists
+			const list_flag* flags = story->lists();
+			while(*flags != null_flag) {
+				list_table::list l = _lists.create_permament();
+				++flags;
+				while(*flags != null_flag) {
+					_lists.add_inplace(l, *flags);
+					++flags;
+				}
+				++flags;
+			}
+			for(const auto& flag : _lists.named_flags()) {
+				set_variable(hash_string(flag.name), value{}.set<value_type::list_flag>(
+						list_flag{
+							.list_id = flag.flag.list_id,
+							.flag = flag.flag.flag
+						}));
+			}
+		}
 	}
 
 	void globals_impl::visit(uint32_t container_id)

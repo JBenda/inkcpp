@@ -7,7 +7,9 @@
 #include <iosfwd>
 #endif
 
-
+namespace ink::internal {
+	class header;
+}
 namespace ink::runtime::internal
 {
 	// TODO: move to utils
@@ -36,9 +38,6 @@ namespace ink::runtime::internal
 			constexpr explicit list(int id) : lid{id} {}
 			int lid; ///< id of list to handle
 		};
-		/// handle for an single list flag
-
-		~list_table();
 
 		/// creates an empty list
 		list create();
@@ -52,16 +51,13 @@ namespace ink::runtime::internal
 		/// delete unused lists
 		void gc();
 
+
 		// function to setup list_table
-		list_table(const int* list_len, int num_lists);
 		list create_permament();
 		list& add_inplace(list& lh, list_flag rh);
 
-		/** set name for an flag
-		 * @param lid id of list(type) to set list
-		 * @param fid value of flag for this type
-		 */
-		void setFlagName(list_flag e, const char* name);
+		// parse binary list meta data
+		list_table(const char* data, const ink::internal::header&);
 		size_t stringLen(const list_flag& e) const;
 		const char* toString(const list_flag& e) const;
 
@@ -93,6 +89,9 @@ namespace ink::runtime::internal
 		bool not_equal(list lh, list rh){ return equal(lh, rh); }
 		bool greater_equal(list lh, list rh);
 		bool less_equal(list lh, list rh);
+		operator bool (){
+			return _valid;
+		}
 
 	private:
 		void copy_lists(const data_t* src, data_t* dst);
@@ -107,7 +106,8 @@ namespace ink::runtime::internal
 			return _data.begin() + _entrySize * eid;
 		}
 		int numFlags() const {
-			return _list_end.end()[-1];
+			return _flag_names.size();
+			// return _list_end.end()[-1]; TODO: 
 		}
 		int numLists() const {
 			return _list_end.size();
@@ -168,6 +168,69 @@ namespace ink::runtime::internal
 		// defined list (meta data)
 		managed_array<int, config::maxListTypes> _list_end;
 		managed_array<const char*,config::maxFlags> _flag_names;
+
+		bool _valid;
+	public:
+		class named_flag_itr {
+			using list_size_t = decltype(list_table::_list_end);
+			using flag_name_t = decltype(list_table::_flag_names);
+			const list_size_t* _list_end = nullptr;
+			const flag_name_t* _flag_names = nullptr;
+			struct {
+				list_flag flag;
+				const char* name;
+			} _pos;
+		public:
+			bool operator!=(const named_flag_itr& o) const  {
+				return _pos.flag != o._pos.flag;
+			}
+			named_flag_itr() = default;
+			named_flag_itr(const list_size_t& ls, const flag_name_t& fn)
+				: _list_end{&ls}, _flag_names{&fn}, _pos{{0,0},fn[0]}{
+					while(_pos.name == nullptr) {
+						++_pos.flag.flag;
+						_pos.name = (*_flag_names)[_pos.flag.flag];
+					}
+				}
+			const auto* operator->() const { return &_pos; }
+			const auto& operator*() const { return _pos; }
+			const named_flag_itr& operator++() {
+				if(_pos.flag != null_flag) return *this;
+add:
+				++_pos.flag.flag;
+				if(_pos.flag.flag == 
+						(*_list_end)[_pos.flag.list_id]
+						- (_pos.flag.list_id > 0 ? (*_list_end)[_pos.flag.list_id] : 0)) {
+					++_pos.flag.list_id;
+					_pos.flag.flag = 0;
+					if(_pos.flag.list_id == _flag_names->size()) {
+						_pos.flag = null_flag;
+						_pos.name = nullptr;
+						return *this;
+					}
+				}
+				_pos.name = (*_flag_names)[(*_list_end)[_pos.flag.list_id] + _pos.flag.flag];
+				if (_pos.name == nullptr) {
+					goto add;
+				}
+				return *this;
+			}
+		};
+		auto named_flags() const {
+			struct {
+					named_flag_itr _begin;
+					named_flag_itr _end;
+					named_flag_itr begin() const {
+						return _begin;
+					}
+					named_flag_itr end() const {
+						return _end;
+					}
+			} res {
+				named_flag_itr(_list_end, _flag_names),
+				named_flag_itr()};
+			return res;
+		}
 	};
 
 #ifdef INK_ENABLE_STL

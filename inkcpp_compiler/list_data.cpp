@@ -27,11 +27,13 @@ namespace ink::compiler::internal
 		size_t begin = 0;
 		for(size_t i = 0; i < _list_end.size(); ++i) {
 			for(size_t j = begin; j < _list_end[i]; ++j) {
-				result.push_back({
-						_flag_names[j],
-						{.list_id = static_cast<lid_t>(i),
-						.flag = static_cast<flag_t>(j - begin)}
-						});
+				if (_flag_names[j] != "") {
+					result.push_back({
+							_flag_names[j],
+							{.list_id = static_cast<lid_t>(i),
+							.flag = static_cast<flag_t>(j - begin)}
+							});
+				}
 			}
 			begin = _list_end[i];
 		}

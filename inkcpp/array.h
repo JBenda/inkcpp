@@ -33,6 +33,8 @@ namespace ink::runtime::internal
 		T* begin() { return data(); }
 		const T* end() const { return data() + _size; }
 		T* end() { return data() + _size; }
+		const T& back() const { return end()[-1]; }
+		T& back() { return end()[-1]; }
 
 		const size_t size() const { return _size; }
 		const size_t capacity() const { return _capacity; }

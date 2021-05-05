@@ -5,6 +5,7 @@
 #include "types.h"
 #include "story.h"
 #include "header.h"
+#include "list_table.h"
 
 namespace ink::runtime::internal
 {
@@ -27,6 +28,11 @@ namespace ink::runtime::internal
 
 		inline uint32_t num_containers() const { return _num_containers; }
 
+		const list_flag* lists() const { return _lists; }
+		const char* list_meta() const {
+			return _list_meta;
+		}
+
 		bool iterate_containers(const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false) const;
 		bool get_container_id(ip_t offset, container_t& container_id) const;
 
@@ -40,8 +46,6 @@ namespace ink::runtime::internal
 		const ink::internal::header& get_header() const { return _header; }
 	private:
 		void setup_pointers();
-		/** read list_flag from current position and advance pointer */
-		list_flag read_list_flag(const char*& ptr);
 
 	private:
 		// file information
@@ -53,8 +57,8 @@ namespace ink::runtime::internal
 		// string table
 		const char* _string_table;
 
-		const void* _list_meta;
-		const void* _lists;
+		const char* _list_meta;
+		const list_flag* _lists;
 
 		// container info
 		uint32_t* _container_list;

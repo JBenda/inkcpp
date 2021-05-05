@@ -4,6 +4,7 @@
 #include "array.h"
 #include "globals.h"
 #include "string_table.h"
+#include "list_table.h"
 #include "stack.h"
 
 namespace ink::runtime::internal
@@ -89,6 +90,7 @@ namespace ink::runtime::internal
 
 		// Allocated string table (shared by all runners using this global store)
 		mutable string_table _strings;
+		mutable list_table _lists;
 
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.
 		//  If I could create an avl tree with save/restore, that'd be great but seems super complex.

@@ -1,5 +1,6 @@
 #include "list_table.h"
 #include "traits.h"
+#include "header.h"
 
 namespace ink::runtime::internal
 {
@@ -15,16 +16,30 @@ namespace ink::runtime::internal
 		}
 	}
 
-	list_table::list_table(const int* list_len, int num_lists)
+	list_table::list_table(const char* data, const ink::internal::header& header)
+		: _valid{false}
 	{
-		int sum = 0;
-		for (int i = 0; i < num_lists; ++i) {
-			sum += list_len[i];
-			_list_end.push() = sum;
+		if (data == nullptr) { return; }
+		list_flag flag;
+		const char* ptr = data;
+		int start = 0;
+		while((flag = header.read_list_flag(ptr)) != null_flag) {
+			_list_end.push() = start;
+			while(flag != null_flag) {
+				while(_list_end.back() - start < flag.flag) {
+					_flag_names.push() = nullptr;
+					++_list_end.back();
+				}
+				_flag_names.push() = ptr;
+				++_list_end.back();
+				while(*ptr != 0) {++ptr;}++ptr;
+				flag = header.read_list_flag(ptr);			}
+			start = _list_end.back();
 		}
 		_entrySize = segmentsFromBits(
-				num_lists + sum,
+				_list_end.size() + _flag_names.size(),
 				sizeof(data_t));
+		_valid = true;
 	}
 
 	list_table::list list_table::create()
@@ -74,13 +89,6 @@ namespace ink::runtime::internal
 		return listBegin(e.list_id) + e.flag;
 	}
 
-	void list_table::setFlagName(list_flag e, const char* name) {
-		int slot = toFid(e);
-		while(slot >= _flag_names.size()) {
-			_flag_names.push() = nullptr;
-		}
-		_flag_names[slot] = name;
-	}
 
 	size_t list_table::stringLen(const list_flag& e) const {
 		return c_str_len(toString(e));

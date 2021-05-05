@@ -55,10 +55,10 @@ namespace ink
 	// Used to unique identify a list flag
 	struct list_flag {
 		int16_t list_id; int16_t flag;
-		bool operator==(const list_flag& o) {
+		bool operator==(const list_flag& o) const {
 			return list_id == o.list_id && flag == o.flag;
 		}
-		bool operator!=(const list_flag& o) {
+		bool operator!=(const list_flag& o) const {
 			return !(*this == o);
 		}
 	};

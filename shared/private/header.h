@@ -15,6 +15,15 @@ namespace ink::internal {
 				}
 				return *reinterpret_cast<const T*>(data);
 			}
+			list_flag read_list_flag(const char*& ptr) const {
+				list_flag result = *reinterpret_cast<const list_flag*>(ptr);
+				ptr += sizeof(list_flag);
+				if (endien == ink::internal::header::endian_types::differ) {
+					result.flag = swap_bytes(result.flag);
+					result.list_id = swap_bytes(result.list_id);
+				}
+				return result;
+			}
 
 			enum class  endian_types: uint16_t {
 				none = 0,
