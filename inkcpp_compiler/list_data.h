@@ -10,6 +10,9 @@
 namespace ink::compiler::internal
 {
 	class list_data {
+		using flag_t = decltype(list_flag::flag);
+		using lid_t = decltype(list_flag::list_id);
+
 	public:
 
 		// add new list and set it to current
@@ -23,10 +26,15 @@ namespace ink::compiler::internal
 			return static_cast<decltype(list_flag::list_id)>(itr->second);
 		}
 
+		struct named_list_flag {
+			const std::string& name;
+			list_flag flag;
+		};
+		std::vector<named_list_flag> get_flags() const;
 	private:
 		std::map<std::string, int,std::less<>> _lists;
-		std::vector<std::string> _flag_names;
-		std::vector<int> _list_len;
+		std::vector<int> _list_end;
 		int _current_list_start = 0;
+		std::vector<std::string> _flag_names;
 	};
 }

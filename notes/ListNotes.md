@@ -33,6 +33,10 @@
 + `!=(list lh, list rh)` return true if `lh == rh` returns false
 + `>=(list lh, list rh)` returns true if `LIST_MAX(lh) >= LIST_MAX(rh) && LIST_MIN(lh) >= LIST_MIN(rh)`
 + `<=(list lh, list rh)` returns true if `LIST_MAX(lh) <= LIST_MAX(rh) && LIST_MIN(lh) <= LIST_MIN(rh)`
++ `?(list lh, entry rh)` returns true if rh is element of lh
++ `?(list lh, list rh)` returns true if every flag of rh is set in lh
++ `!?(list lh, entry rh)` returns `not ?(lh,rh)`
++ `!?(list lh, list rh)` returns `not ? (lh,rh)`
 
 ## Datatype
 

@@ -48,6 +48,7 @@ namespace ink::compiler::internal
 		compilation_results* _results;
 
 		binary_stream _strings;
+		uint32_t _list_count = 0;
 		binary_stream _lists;
 		binary_stream _containers;
 

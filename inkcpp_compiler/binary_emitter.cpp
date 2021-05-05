@@ -170,6 +170,12 @@ namespace ink::compiler::internal
 	}
 
 	void binary_emitter::write_list(Command command, CommandFlag flag, const std::vector<list_flag>& entries) {
+		uint32_t id = _list_count++;
+		for(const list_flag& flag : entries) {
+			_lists.write(flag);
+		}
+		_lists.write(null_flag);
+		write(command, id, flag);
 	}
 
 	void binary_emitter::handle_nop(int index_in_parent)
@@ -193,6 +199,11 @@ namespace ink::compiler::internal
 		// Write a separator
 		out << (char)0;
 
+		// Write lists meta data and defined lists
+		_lists.write_to(out);
+		// Write a seperator
+		out.write(reinterpret_cast<const char*>(&null_flag), sizeof(null_flag));
+
 		// Write out container map
 		write_container_map(out, _container_map, _max_container_index);
 
@@ -215,6 +226,8 @@ namespace ink::compiler::internal
 	{
 		// Reset binary data stores
 		_strings.reset();
+		_list_count = 0;
+		_lists.reset();
 		_containers.reset();
 
 		// clear other data
@@ -373,4 +386,12 @@ namespace ink::compiler::internal
 		}
 	}
 
+	void binary_emitter::set_list_meta(const list_data &list_defs) {
+		auto flags = list_defs.get_flags();
+		for(const auto& flag : flags) {
+			_lists.write(flag.flag);
+			_lists.write(reinterpret_cast<const byte_t*>(flag.name.c_str()), flag.name.size() + 1);
+		}
+		_lists.write(null_flag);
+	}
 }

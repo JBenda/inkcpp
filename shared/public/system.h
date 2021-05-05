@@ -54,6 +54,7 @@ namespace ink
 
 	// Used to unique identify a list flag
 	struct list_flag { int16_t list_id; int16_t flag; };
+	constexpr list_flag null_flag{-1,-1};
 
 	// Checks if a string is only whitespace
 	static bool is_whitespace(const char* string, bool includeNewline = true)
