@@ -40,6 +40,8 @@ namespace ink::runtime::internal
 		const ink::internal::header& get_header() const { return _header; }
 	private:
 		void setup_pointers();
+		/** read list_flag from current position and advance pointer */
+		list_flag read_list_flag(const char*& ptr);
 
 	private:
 		// file information
@@ -50,6 +52,9 @@ namespace ink::runtime::internal
 
 		// string table
 		const char* _string_table;
+
+		const void* _list_meta;
+		const void* _lists;
 
 		// container info
 		uint32_t* _container_list;

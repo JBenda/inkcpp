@@ -113,7 +113,7 @@ namespace ink::runtime::internal {
 				uint32_t thread_id;
 			} jump;
 			list_table::list list_value;
-			list_flag list_flag;
+			list_flag list_flag_value;
 		};
 		value_type _type;
 	};
@@ -174,22 +174,23 @@ namespace ink::runtime::internal {
 	}
 
 	// define get and set for list
-	template<> struct value::ret<value_type::list> { using type = list_table::list };
+	template<> struct value::ret<value_type::list> { using type = list_table::list; };
 	template<> inline list_table::list value::get<value_type::list>() const { return list_value; }
 	template<>
-	inline constexpr value& value::set<value_type::list, list_table::list>(list_table::list list) const  {
+	inline constexpr value& value::set<value_type::list, list_table::list>(list_table::list list)
+	{
 		list_value = list;
 		_type = value_type::list;
 		return *this;
 	}
 
 	// define get and set for list_flag
-	template<> struct value::ret<value_type::list_flag> { using type = list_flag };
-	template<> inline list_flag value::get<value_type::list_flag>() const { return list_flag; }
+	template<> struct value::ret<value_type::list_flag> { using type = list_flag; };
+	template<> inline list_flag value::get<value_type::list_flag>() const { return list_flag_value; }
 	template<>
 	inline constexpr value& value::set<value_type::list_flag, list_flag>(list_flag flag)
 	{
-		list_flag = flag;
+		list_flag_value = flag;
 		_type = value_type::list_flag;
 		return *this;
 	}

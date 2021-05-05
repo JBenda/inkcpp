@@ -176,7 +176,15 @@ namespace ink::runtime::internal
 			store = new_globals();
 		return runner(new runner_impl(this, store), _block);
 	}
-
+	list_flag story_impl::read_list_flag(const char*& ptr) {
+		list_flag result = *reinterpret_cast<const list_flag*>(ptr);
+		ptr += sizeof(list_flag);
+		if (_header.endien == ink::internal::header::endian_types::differ) {
+			result.flag = _header.swap_bytes(result.flag);
+			result.list_id = _header.swap_bytes(result.list_id);
+		}
+		return result;
+	}
 	void story_impl::setup_pointers()
 	{
 		using header = ink::internal::header;
@@ -207,6 +215,26 @@ namespace ink::runtime::internal
 				break;
 			}
 		}
+
+		// check if lists are defined
+		_list_meta = ptr;
+		if(read_list_flag(ptr) != null_flag) {
+			// skip list definitions
+			do{
+				while(*ptr != 0) { ++ptr; } ++ptr; // skip flag name
+			} while  (read_list_flag(ptr) != null_flag);
+
+			_lists = ptr;
+			// skip predefined lists
+			while(read_list_flag(ptr) != null_flag) {
+				while(read_list_flag(ptr) != null_flag);
+			}
+		} else {
+			_list_meta = nullptr;
+			_lists = nullptr;
+		}
+
+
 
 		_num_containers = *(uint32_t*)(ptr);
 		ptr += sizeof(uint32_t);

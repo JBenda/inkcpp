@@ -53,7 +53,15 @@ namespace ink
 	typedef uint32_t thread_t;
 
 	// Used to unique identify a list flag
-	struct list_flag { int16_t list_id; int16_t flag; };
+	struct list_flag {
+		int16_t list_id; int16_t flag;
+		bool operator==(const list_flag& o) {
+			return list_id == o.list_id && flag == o.flag;
+		}
+		bool operator!=(const list_flag& o) {
+			return !(*this == o);
+		}
+	};
 	constexpr list_flag null_flag{-1,-1};
 
 	// Checks if a string is only whitespace

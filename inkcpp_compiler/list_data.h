@@ -21,11 +21,12 @@ namespace ink::compiler::internal
 		// add flag to current list
 		void new_flag(const std::string& flag_name, int value);
 
-		int get_lid(const std::string_view& list_name) {
+		lid_t get_lid(const std::string_view& list_name) {
 			auto itr = _lists.find(list_name);
-			return static_cast<decltype(list_flag::list_id)>(itr->second);
+			return static_cast<lid_t>(itr->second);
 		}
 
+		bool empty() const { return _lists.empty(); }
 		struct named_list_flag {
 			const std::string& name;
 			list_flag flag;

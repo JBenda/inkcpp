@@ -477,11 +477,11 @@ namespace ink::runtime::internal
 			{
 				int id = read<int>();
 				if(bEvaluationMode)
-					_eval.push(value{}.set<value_type::list>(id))
-				else
-					_output << value{}.set<value_type::list>(str);
-			}
+					_eval.push(value{}.set<value_type::list>(list_table::list(id)));
+				// else TODO: implement list output
 
+			}
+			break;
 			case Command::DIVERT_VAL:
 			{
 				inkAssert(bEvaluationMode, "Can not push divert value into the output stream!");

@@ -32,9 +32,8 @@ namespace ink::runtime::internal
 
 	public:
 		/// handle to acces a list
-		class list{
-			friend class list_table;
-			explicit list(int id) : lid{id} {}
+		struct list{
+			constexpr explicit list(int id) : lid{id} {}
 			int lid; ///< id of list to handle
 		};
 		/// handle for an single list flag

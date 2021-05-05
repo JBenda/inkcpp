@@ -54,9 +54,9 @@ namespace ink
 		THREAD,
 
 		// == Binary operators
-		OP_BEGIN,
+		ADD,
+		OP_BEGIN = ADD,
 		BINARY_OPERATORS_START = OP_BEGIN,
-		ADD = BINARY_OPERATORS_START,
 		SUBTRACT,
 		DIVIDE,
 		MULTIPLY,

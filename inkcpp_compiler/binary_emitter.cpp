@@ -387,6 +387,10 @@ namespace ink::compiler::internal
 	}
 
 	void binary_emitter::set_list_meta(const list_data &list_defs) {
+		if (list_defs.empty()) {
+			return;
+		}
+
 		auto flags = list_defs.get_flags();
 		for(const auto& flag : flags) {
 			_lists.write(flag.flag);

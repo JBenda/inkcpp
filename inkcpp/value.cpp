@@ -14,6 +14,24 @@ namespace ink::runtime::internal
 			}
 		}
 	}
+
+	template<>
+	void append<value_type::list_flag>(std::ostream& os, const value& val) {
+		if (val.type() == value_type::list_flag) {
+			os << "No list flag serilasation implementet yet!"; // TODO: implement
+		} else {
+			append<value_type::list_flag + 1>(os, val);
+		}
+	}
+	template<>
+	void append<value_type::list>(std::ostream& os, const value& val) {
+		if (val.type() == value_type::list) {
+			os << "No list serilasation implementet yet!"; // TODO: implement
+		} else {
+			append<value_type::list +1>(os, val);
+		}
+	}
+
 	std::ostream& operator<<(std::ostream& os, const value& val) {
 		if (val.type() < value_type::PRINT_BEGIN || val.type() >= value_type::PRINT_END) {
 			throw ink_exception("printing this type is not supported");
