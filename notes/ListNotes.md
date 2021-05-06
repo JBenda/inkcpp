@@ -15,9 +15,11 @@
 ## List operators
 
 + `+(list lh,list rh)` lh = lh ∪ rh
-+ `+(list, element)` add the element to the list
++ `+(list, fag)` add the element to the list
++ `L^(list lh, flag rh)` (interesection) creates an empty list or a list with rh set if it's part of lh
++ `L^(list lh, list rh)` (interesection) = lh ∩ rh
 + `-(list lh, list rh)` remove elements lh = lh / (lh ∩ rh)
-+ `-(list lh, list rh)` removes element from list
++ `-(list lh, flag rh)` removes element from list
 + `+(list l, int i)` l << i (bits get shifted out)
 + `-(list l, int i)` l >> i (bits get shifted out)
 + `LIST_COUNT(list l)` returns the number of flags sets

@@ -77,6 +77,8 @@ namespace ink::runtime::internal
 		list sub(list lh, list rh);
 		list sub(list l, int i);
 		list sub(list lh, list_flag rh);
+		list intersect(list lh, list rh);
+		list intersect(list lh, list_flag rh);
 		int count(list l);
 		list_flag min(list l);
 		list_flag max(list l);
@@ -89,6 +91,10 @@ namespace ink::runtime::internal
 		bool not_equal(list lh, list rh){ return equal(lh, rh); }
 		bool greater_equal(list lh, list rh);
 		bool less_equal(list lh, list rh);
+		bool has(list lh, list_flag rh);
+		bool has(list lh, list rh);
+		bool hasnt(list lh, list_flag rh) { return !has(lh,rh); }
+		bool hasnt(list lh, list rh) { return !has(lh,rh); }
 		operator bool (){
 			return _valid;
 		}

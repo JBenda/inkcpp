@@ -72,7 +72,9 @@ namespace ink
 		MIN,
 		MAX,
 		HAS,
-		BINARY_OPERATORS_END = HAS,
+		HASNT,
+		INTERSECTION,
+		BINARY_OPERATORS_END = INTERSECTION,
 
 		// == Unary operators
 		UNARY_OPERATORS_START,

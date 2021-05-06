@@ -57,6 +57,8 @@ namespace ink
 			"MIN",
 			"MAX",
 			"?",
+			"!?",
+			"L^",
 
 			"!",
 			"~",
