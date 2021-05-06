@@ -475,11 +475,15 @@ namespace ink::runtime::internal
 			break;
 			case Command::LIST:
 			{
-				int id = read<int>();
+				list_table::list list(read<int>());
 				if(bEvaluationMode)
-					_eval.push(value{}.set<value_type::list>(list_table::list(id)));
-				// else TODO: implement list output
-
+					_eval.push(value{}.set<value_type::list>(list));
+				else {
+					char* str = _globals->strings().create(_globals->lists().stringLen(
+								list)+1);
+					_globals->lists().toString(str, list)[0] = 0;
+					_output << value{}.set<value_type::string>(str);
+				}
 			}
 			break;
 			case Command::DIVERT_VAL:
@@ -743,11 +747,10 @@ namespace ink::runtime::internal
 				bEvaluationMode = true;
 
 				// Load value from output stream
-				value val;
-				_output >> val;
-
 				// Push onto stack
-				_eval.push(val);
+				_eval.push(value{}.set<value_type::string>(_output.get_alloc(
+								_globals->strings(),
+								_globals->lists())));
 			} break;
 
 			// == Choice commands
@@ -795,7 +798,7 @@ namespace ink::runtime::internal
 				for(;sc;--sc) { _output << stack[sc-1]; }
 
 				// Create choice and record it
-				add_choice().setup(_output, _globals->strings(), _choices.size(), path, current_thread());
+				add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
 			} break;
 			case Command::START_CONTAINER_MARKER:
 			{

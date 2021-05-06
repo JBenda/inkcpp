@@ -1,5 +1,6 @@
 #include "output.h"
 #include "string_table.h"
+#include "list_table.h"
 #include <system.h>
 #include "string_utils.h"
 
@@ -337,9 +338,7 @@ namespace ink
 				_save = ~0;
 			}
 
-			// TODO: This uses C STD library methods. Move to my own.
-//#ifdef INK_ENABLE_CSTD
-			const char* basic_stream::get_alloc(string_table& strings)
+			const char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			{
 				size_t start = find_start();
 
@@ -352,7 +351,14 @@ namespace ink
 						continue;
 
 					if (_data[i].printable()) {
-						length += value_length(_data[i]);
+						switch(_data[i].type()) {
+							case value_type::list:
+								length += lists.stringLen(_data[i].get<value_type::list>());
+								break;
+							case value_type::list_flag:
+								length += lists.stringLen(_data[i].get<value_type::list_flag>());
+							default: length += value_length(_data[i]);
+						}
 					}
 				}
 
@@ -365,6 +371,7 @@ namespace ink
 				{
 					if (should_skip(i, hasGlue, lastNewline))
 						continue;
+					if(!_data[i].printable()) { continue; }
 					switch (_data[i].type())
 					{
 					case value_type::int32:
@@ -382,6 +389,12 @@ namespace ink
 					case value_type::newline:
 						*ptr = '\n'; ptr++;
 						break;
+					case value_type::list:
+						ptr = lists.toString(ptr, _data[i].get<value_type::list>());
+						break;
+					case value_type::list_flag:
+						ptr = lists.toString(ptr, _data[i].get<value_type::list>());
+						break;
 					default: throw ink_exception("cant convert expression to string!");
 					}
 				}
@@ -395,7 +408,6 @@ namespace ink
 				// Return processed string
 				return buffer;
 			}
-//#endif
 
 			size_t basic_stream::find_start() const
 			{

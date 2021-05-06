@@ -47,6 +47,7 @@ namespace ink::runtime::internal
 	}
 
 	basic_stream& operator>>(basic_stream& is, value& val) {
+		// FIXME: bullshit!
 		is.get(&val, 1);
 		return is;
 	}

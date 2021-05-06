@@ -10,6 +10,7 @@ namespace ink
 		namespace internal
 		{
 			class string_table;
+			class list_table;
 			class basic_stream
 			{
 			protected:
@@ -40,8 +41,12 @@ namespace ink
 				// Extract into a data array
 				void get(value*, size_t length);
 
-				// Extract to a newly allocated string
-				const char* get_alloc(string_table&);
+				/** Extract to a newly allocated string
+				 * @param string_table place to allocate new string in
+				 * @param list_table needed do parse list values to string
+				 * @return newly allocated string
+				 */
+				const char* get_alloc(string_table&, list_table&);
 
 #ifdef INK_ENABLE_STL
 				// Extract into a string

@@ -5,7 +5,7 @@ namespace ink
 {
 	namespace runtime
 	{
-		void choice::setup(internal::basic_stream& in, internal::string_table& strings, int index, uint32_t path, thread_t thread)
+		void choice::setup(internal::basic_stream& in, internal::string_table& strings, internal::list_table& lists, int index, uint32_t path, thread_t thread)
 		{
 			// if we only have one item in our output stream
 			if (in.queued() == 2)
@@ -19,13 +19,13 @@ namespace ink
 					in.discard(2);
 					break;
 				default:
-					_text = in.get_alloc(strings);
+					_text = in.get_alloc(strings, lists);
 				}
 			}
 			else
 			{
 				// Non-string. Must allocate
-				_text = in.get_alloc(strings);
+				_text = in.get_alloc(strings, lists);
 			}
 
 			// Index/path

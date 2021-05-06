@@ -5,6 +5,7 @@
 #include <runner.h>
 #include <globals.h>
 #include <compiler.h>
+#include <choice.h>
 
 using namespace ink::runtime;
 
@@ -20,9 +21,10 @@ SCENARIO("run a story with lists", "[lists]")
 		WHEN("just run")
 		{
 			std::string out = thread->getall();
+			std::string choice1 = thread->get_choice(0)->text();
 			THEN("should output expected")
 			{
-			REQUIRE(out == "TODO: replace");
+				REQUIRE(choice1 == "list: [ bird, red, yellow ]");
 			}
 		}
 	}

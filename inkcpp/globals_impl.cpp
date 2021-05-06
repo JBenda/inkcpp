@@ -17,7 +17,6 @@ namespace ink::runtime::internal
 			const list_flag* flags = story->lists();
 			while(*flags != null_flag) {
 				list_table::list l = _lists.create_permament();
-				++flags;
 				while(*flags != null_flag) {
 					_lists.add_inplace(l, *flags);
 					++flags;

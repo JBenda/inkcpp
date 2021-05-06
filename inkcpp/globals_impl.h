@@ -60,6 +60,9 @@ namespace ink::runtime::internal
 		// gets the allocated string table
 		inline string_table& strings() { return _strings; }
 
+		// gets list entries
+		list_table& lists() { return _lists; }
+
 		// run garbage collection
 		void gc();
 

@@ -1,6 +1,7 @@
 #include "list_table.h"
 #include "traits.h"
 #include "header.h"
+#include <iostream>
 
 namespace ink::runtime::internal
 {
@@ -24,17 +25,20 @@ namespace ink::runtime::internal
 		const char* ptr = data;
 		int start = 0;
 		while((flag = header.read_list_flag(ptr)) != null_flag) {
-			_list_end.push() = start;
-			while(flag != null_flag) {
-				while(_list_end.back() - start < flag.flag) {
-					_flag_names.push() = nullptr;
-					++_list_end.back();
-				}
-				_flag_names.push() = ptr;
+			if (_list_end.size() == flag.list_id) {
+				start = _list_end.size() == 0 ? 0 : _list_end.back();
+				_list_end.push() = start;
+			}
+			while(_list_end.back() - start < flag.flag) {
+				_flag_names.push() = nullptr;
 				++_list_end.back();
-				while(*ptr != 0) {++ptr;}++ptr;
-				flag = header.read_list_flag(ptr);			}
-			start = _list_end.back();
+			}
+			_flag_names.push() = ptr;
+			++_list_end.back();
+			while(*ptr) {
+				++ptr;
+			}
+			++ptr;
 		}
 		_entrySize = segmentsFromBits(
 				_list_end.size() + _flag_names.size(),
@@ -166,7 +170,9 @@ namespace ink::runtime::internal
 	list_table::list& list_table::add_inplace(list& lh, list_flag rh) {
 		data_t* l = getPtr(lh.lid);
 		setList(l, rh.list_id);
-		setFlag(l, toFid(rh));
+		if(rh.flag >= 0) {  // origin entry
+			setFlag(l, toFid(rh));
+		}
 		return lh;
 	}
 

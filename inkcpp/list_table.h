@@ -100,7 +100,7 @@ namespace ink::runtime::internal
 			return lid == 0 ? 0 : _list_end[lid-1];
 		}
 		const data_t* getPtr(int eid) const {
-			return _data.begin();
+			return _data.begin() + _entrySize * eid;
 		}
 		data_t* getPtr(int eid)	 {
 			return _data.begin() + _entrySize * eid;
