@@ -92,13 +92,19 @@ namespace ink::runtime::internal {
 		/// get type of value
 		constexpr value_type type() const { return _type; }
 
-		friend basic_stream& operator<<(basic_stream& os, const value&);
-		friend basic_stream& operator>>(basic_stream& is, value&);
-
 		/// returns if type is printable (see value_type)
 		constexpr bool printable() const {
 			return _type >= value_type::PRINT_BEGIN && _type < value_type::PRINT_END;
 		}
+
+		friend basic_stream& operator<<(basic_stream& os, const value&);
+		// friend basic_stream& operator>>(basic_stream& is, value&); // TODO: implement
+#ifdef INK_ENABLE_STL
+		/** write  value string to ostream
+		 * @param lists may set to list_table if list serelasation needed
+		 */
+		std::ostream& write(std::ostream&, const list_table* lists = nullptr) const;
+#endif
 
 	private:
 		/// actual storage
@@ -117,10 +123,6 @@ namespace ink::runtime::internal {
 		};
 		value_type _type;
 	};
-
-#ifdef INK_ENABLE_STL
-	std::ostream& operator<<(std::ostream&,const value&);
-#endif
 
 	// define get and set for int32
 	template<> struct value::ret<value_type::int32> { using type = int32_t; };

@@ -166,6 +166,9 @@ namespace ink::runtime::internal
 
 		// register with globals
 		_globals->add_runner(this);
+		if(_globals->lists()) {
+			_output.set_list_meta(_globals->lists());
+		}
 
 		// initialize globals if necessary
 		if (!_globals->are_globals_initialized())
@@ -322,8 +325,9 @@ namespace ink::runtime::internal
 	{
 		// TODO
 		return nullptr;
-	}
+
 #endif
+	}
 
 	bool runner_impl::move_to(hash_t path)
 	{

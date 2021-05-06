@@ -51,10 +51,12 @@ namespace ink
 #ifdef INK_ENABLE_STL
 				// Extract into a string
 				std::string get();
-#endif
-#ifdef INK_ENABLE_UNREAL
+#else
+				// will conflict with stl definition
+#	ifdef INK_ENABLE_UNREAL
 				// Extract into a string
 				FString get();
+#	endif
 #endif
 
 				// Check if the stream is empty
@@ -84,6 +86,11 @@ namespace ink
 				void restore();
 				void forget();
 
+				// add lists definitions, needed to print lists
+				void set_list_meta(const list_table& lists) {
+					_lists_table = &lists;
+				}
+
 			private:
 				size_t find_start() const;
 				bool should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
@@ -101,6 +108,8 @@ namespace ink
 
 				// save point
 				size_t _save;
+
+				const list_table* _lists_table = nullptr;
 			};
 
 #ifdef INK_ENABLE_STL

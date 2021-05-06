@@ -51,10 +51,8 @@ namespace ink::runtime::internal
 		// runs silently
 		void getline_silent();
 
-#ifdef INK_ENABLE_CSTD
 		// c-style getline
 		virtual char* getline_alloc() override;
-#endif
 
 		// move to path
 		virtual bool move_to(hash_t path) override;

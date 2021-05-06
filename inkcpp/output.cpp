@@ -181,7 +181,7 @@ namespace ink
 					if (should_skip(i, hasGlue, lastNewline))
 						continue;
 					if (_data[i].printable()){
-						str << _data[i];
+						_data[i].write(str, _lists_table);
 					}
 
 				}

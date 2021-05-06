@@ -389,5 +389,19 @@ namespace ink::runtime::internal
 		}
 		return res;
 	}
+
+#ifdef INK_ENABLE_STL
+	std::ostream& list_table::write(std::ostream& os, list l) const {
+		os << "[ ";
+		bool first = true;
+		for(const auto& entry : named_flags(l)) {
+			if(first) { first = false; } else { os << ", "; }
+			os << entry.name;
+		}
+		os << " ]";
+		return os;
+	}
+#endif
+
 }
 

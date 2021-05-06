@@ -171,70 +171,79 @@ namespace ink::runtime::internal
 
 		bool _valid;
 	public:
+		friend class name_flag_itr;
 		class named_flag_itr {
-			using list_size_t = decltype(list_table::_list_end);
-			using flag_name_t = decltype(list_table::_flag_names);
-			const list_size_t* _list_end = nullptr;
-			const flag_name_t* _flag_names = nullptr;
+			const list_table& _list;
+			const data_t* _data;
 			struct {
 				list_flag flag;
 				const char* name;
 			} _pos;
+			void carry() {
+				if (_pos.flag.flag == 
+						_list._list_end[_pos.flag.list_id] - _list.listBegin(_pos.flag.list_id)) {
+					_pos.flag.flag = 0;
+					++_pos.flag.list_id;
+				}
+				if(_pos.flag.list_id == _list.numLists()) {
+					_pos.flag = null_flag;
+				} else {
+					_pos.name = _list._flag_names[_list.toFid(_pos.flag)];
+				}
+			}
+			void goToValid() {
+				bool valid;
+				do { 
+					valid = true;
+					int fid = _list.toFid(_pos.flag);
+					if (_data == nullptr) {
+						if(_list._flag_names[fid] == nullptr) {
+							valid = false;
+							++_pos.flag.flag;
+						}
+					} else if(!_list.hasList(_data, _pos.flag.list_id)) {
+						valid = false;
+						++_pos.flag.list_id;
+					} else if (!_list.hasFlag(_data, fid) || _list._flag_names[fid] == nullptr) {
+						valid = false;
+						++_pos.flag.flag;
+					}			
+					carry();
+				} while(_pos.flag != null_flag && !valid);
+			}
 		public:
 			bool operator!=(const named_flag_itr& o) const  {
 				return _pos.flag != o._pos.flag;
 			}
-			named_flag_itr() = default;
-			named_flag_itr(const list_size_t& ls, const flag_name_t& fn)
-				: _list_end{&ls}, _flag_names{&fn}, _pos{{0,0},fn[0]}{
-					while(_pos.name == nullptr) {
-						++_pos.flag.flag;
-						_pos.name = (*_flag_names)[_pos.flag.flag];
-					}
-				}
+			named_flag_itr(const list_table& list, const data_t* filter)
+				: _list{list}, _data{filter}, _pos{null_flag, nullptr} {};
+			named_flag_itr(const list_table& list, const data_t* filter, int)
+				: _list{list}, _data{filter}, _pos{{0,0},list._flag_names[0]}{
+					goToValid();
+			}
 			const auto* operator->() const { return &_pos; }
 			const auto& operator*() const { return _pos; }
 			const named_flag_itr& operator++() {
-				if(_pos.flag != null_flag) return *this;
-add:
+				if (_pos.flag == null_flag) return *this;
 				++_pos.flag.flag;
-				if(_pos.flag.flag == 
-						(*_list_end)[_pos.flag.list_id]
-						- (_pos.flag.list_id > 0 ? (*_list_end)[_pos.flag.list_id] : 0)) {
-					++_pos.flag.list_id;
-					_pos.flag.flag = 0;
-					if(_pos.flag.list_id == _flag_names->size()) {
-						_pos.flag = null_flag;
-						_pos.name = nullptr;
-						return *this;
-					}
-				}
-				_pos.name = (*_flag_names)[(*_list_end)[_pos.flag.list_id] + _pos.flag.flag];
-				if (_pos.name == nullptr) {
-					goto add;
-				}
+				carry();
+				if (_pos.flag == null_flag) return *this;
+				goToValid();
 				return *this;
 			}
 		};
-		auto named_flags() const {
-			struct {
-					named_flag_itr _begin;
-					named_flag_itr _end;
-					named_flag_itr begin() const {
-						return _begin;
-					}
-					named_flag_itr end() const {
-						return _end;
-					}
+		auto named_flags(list filter = list(-1)) const {
+			const data_t* f = filter.lid < 0 ? nullptr : getPtr(filter.lid);
+			struct { named_flag_itr _begin; named_flag_itr _end;
+					named_flag_itr begin() const { return _begin; }
+					named_flag_itr end() const { return _end; }
 			} res {
-				named_flag_itr(_list_end, _flag_names),
-				named_flag_itr()};
+				named_flag_itr(*this, f, 0),
+				named_flag_itr(*this, f)};
 			return res;
 		}
-	};
-
 #ifdef INK_ENABLE_STL
-	std::ostream& operator<<(std::ostream&, const list_table::list&);
-	std::ostream& operator<<(std::ostream&, const list_flag&);
+		std::ostream& write(std::ostream&,list) const;
 #endif
+	};
 }

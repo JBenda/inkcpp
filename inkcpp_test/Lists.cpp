@@ -24,6 +24,7 @@ SCENARIO("run a story with lists", "[lists]")
 			std::string choice1 = thread->get_choice(0)->text();
 			THEN("should output expected")
 			{
+				REQUIRE(out == "[ cat, snake ]\n");
 				REQUIRE(choice1 == "list: [ bird, red, yellow ]");
 			}
 		}
