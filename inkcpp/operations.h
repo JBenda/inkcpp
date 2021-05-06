@@ -62,4 +62,5 @@ namespace ink::runtime::internal {
 #include "operation_bases.h"
 #include "numeric_operations.h"
 #include "string_operations.h"
+#include "list_operations.h"
 #include "casting.h"

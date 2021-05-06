@@ -12,6 +12,8 @@ namespace ink::internal {
 }
 namespace ink::runtime::internal
 {
+	class prng;
+
 	// TODO: move to utils
 	// memory segments
 	// @param bits size in bits
@@ -71,31 +73,70 @@ namespace ink::runtime::internal
 		 */
 		char* toString(char* out, const list& l) const;
 		
-		list add(list lh, list rh);
 		list add(list l, int i);
+		list_flag add(list_flag f, int i);
+
+		list add(list lh, list rh);
 		list add(list lh ,list_flag rh);
-		list sub(list lh, list rh);
+		list add(list_flag lh, list rh) { return add(rh, lh); }
+		list add(list_flag lh, list_flag rh);
+
 		list sub(list l, int i);
+		list_flag sub(list_flag l, int i);
+		list sub(list lh, list rh);
 		list sub(list lh, list_flag rh);
+		list_flag sub(list_flag lh, list rh) {
+			const data_t* r = getPtr(rh.lid);
+			if(hasList(r, lh.list_id) && hasFlag(r, toFid(lh))) {
+				lh.flag = -1;
+			}
+			return lh;
+		}
+		list_flag sub(list_flag lh, list_flag rh) {
+			return lh == rh ? list_flag{.list_id = lh.list_id, .flag = -1} : lh;
+		}
 		list intersect(list lh, list rh);
-		list intersect(list lh, list_flag rh);
-		int count(list l);
-		list_flag min(list l);
-		list_flag max(list l);
-		list_flag lrnd(list l);
+		list_flag intersect(list lh, list_flag rh);
+		list_flag intersect(list_flag lh, list rh) { return intersect(rh, lh); }
+		list_flag intersect(list_flag lh, list_flag rh) {
+			return lh == rh ? lh : null_flag;
+		}
+		int count(list l) const;
+		int count(list_flag f) const { return f.flag < 0 ? 0 : 1; }
+		list_flag min(list l) const;
+		list_flag min(list_flag f) const { return f; }
+		list_flag max(list l) const;
+		list_flag max(list_flag f) const { return f; }
+		list_flag lrnd(list l, prng&) const;
+		list_flag lrnd(list_flag f) const { return f; }
 		list all(list l);
+		list all(list_flag l);
 		list invert(list l);
-		bool less(list lh, list rh);
-		bool greater(list lh, list rh);
-		bool equal(list lh, list rh);
-		bool not_equal(list lh, list rh){ return equal(lh, rh); }
-		bool greater_equal(list lh, list rh);
-		bool less_equal(list lh, list rh);
-		bool has(list lh, list_flag rh);
-		bool has(list lh, list rh);
-		bool hasnt(list lh, list_flag rh) { return !has(lh,rh); }
-		bool hasnt(list lh, list rh) { return !has(lh,rh); }
-		operator bool (){
+		list invert(list_flag f);
+		template<typename L, typename R>
+		bool less(L lh, R rh) const { return max(lh).flag < min(rh).flag; }
+		template<typename L, typename R>
+		bool greater(L lh, R rh) const { return min(lh).flag > max(rh).flag; }
+		bool equal(list lh, list rh) const;
+		bool equal(list lh, list_flag rh) const;
+		bool equal(list_flag lh, list_flag rh) const { return lh == rh; }
+		template<typename L, typename R>
+		bool not_equal(L lh, R rh) const { return equal(lh, rh); }
+		template<typename L, typename R>
+		bool greater_equal(L lh, R rh) const {
+			return max(lh).flag >= max(rh).flag && min(lh).flag >= min(rh).flag;
+		}
+		template<typename L, typename R>
+		bool less_equal(L lh, R rh) const {
+			return max(lh).flag <= max(rh).flag && min(lh).flag <= min(rh).flag;
+		}
+		bool has(list lh, list rh) const;
+		bool has(list lh, list_flag rh) const;
+		bool has(list_flag lh, list rh) const { return has(rh, lh); } 
+		bool has(list_flag lh, list_flag rh) const { return lh == rh; }
+		template<typename T>
+		bool hasnt(list lh, T rh) const { return !has(lh,rh); }
+		operator bool () const{
 			return _valid;
 		}
 

@@ -247,6 +247,7 @@ namespace ink::runtime::internal
 
 
 	list_table::list list_table::add(list arg, int i) {
+		inkAssert(i > 0);
 		list res = create();
 		data_t* l = getPtr(arg.lid);
 		data_t* o = getPtr(res.lid);
@@ -274,6 +275,7 @@ namespace ink::runtime::internal
 	}
 
 	list_table::list list_table::sub(list arg, int i) {
+		inkAssert(i > 0);
 		list res = create();
 		data_t* l = getPtr(arg.lid);
 		data_t* o = getPtr(res.lid);
@@ -299,10 +301,10 @@ namespace ink::runtime::internal
 		}
 		return res;
 	}
-
-	int list_table::count(list l) {
+	
+	int list_table::count(list l) const {
 		int count = 0;
-		data_t* data = getPtr(l.lid);
+		const data_t* data = getPtr(l.lid);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(data, i)) {
 				for(int j = listBegin(i); j < _list_end[j]; ++j)
@@ -316,9 +318,9 @@ namespace ink::runtime::internal
 		return count;
 	}
 
-	list_flag list_table::min(list l) {
+	list_flag list_table::min(list l) const {
 		list_flag res{-1,-1};
-		data_t* data = getPtr(l.lid);
+		const data_t* data = getPtr(l.lid);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(data, i)) {
 				for(int j = listBegin(i); j < _list_end[j]; ++j) {
@@ -336,9 +338,9 @@ namespace ink::runtime::internal
 		return res;
 	}
 
-	list_flag list_table::max(list l) {
+	list_flag list_table::max(list l) const{
 		list_flag res{-1,-1};
-		data_t* data = getPtr(l.lid);
+		const data_t* data = getPtr(l.lid);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(data, i)) {
 				for(int j = _list_end[j] - 1; j >= listBegin(i); --j)
@@ -356,6 +358,23 @@ namespace ink::runtime::internal
 		}
 		return res;
 	}
+
+	bool list_table::equal(list lh, list rh) const {
+		const data_t* l = getPtr(lh.lid);
+		const data_t* r = getPtr(rh.lid);
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(l, i) != hasList(r,i)) { return false; }
+			if (hasList(l,i)) {
+				for(int j = listBegin(i); j < _list_end[i]; ++j) {
+					if(hasFlag(l,j) != hasFlag(r,j)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 
 	list_table::list list_table::all(list arg) {
 		list res = create();
@@ -388,6 +407,44 @@ namespace ink::runtime::internal
 			}
 		}
 		return res;
+	}
+
+	list_table::list list_table::intersect(list lh, list rh) {
+		list res = create();
+		data_t* l = getPtr(lh.lid);
+		data_t* r = getPtr(rh.lid);
+		data_t* o = getPtr(res.lid);
+		for(int i = 0; i < _entrySize; ++i) {
+			o[i] = l[i] & r[i];
+		}
+		return res;
+	}
+
+	list_flag list_table::intersect(list lh, list_flag rh) {
+		const data_t* l = getPtr(lh.lid);
+		if(hasList(l, rh.list_id) && hasFlag(l, toFid(rh))) {
+			return rh;
+		}
+		return null_flag;
+	}
+
+	bool list_table::has(list lh, list_flag rh) const {
+		const data_t* l = getPtr(lh.lid);
+		return hasList(l, rh.list_id) && hasFlag(l, toFid(rh));
+	}
+
+	bool list_table::has(list lh, list rh) const {
+		const data_t* r = getPtr(rh.lid);
+		const data_t* l = getPtr(lh.lid);
+		for(int i = 0; i < numLists(); ++i) {
+			if (hasList(r, i)) {
+				if(!hasList(l, i)) { return false; }
+				for(int j = listBegin(i); j < _list_end[i]; ++j) {
+					if(hasFlag(r, j) && !hasFlag(l,j)) { return false; }
+				}
+			}
+		}
+		return true;
 	}
 
 #ifdef INK_ENABLE_STL
