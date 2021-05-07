@@ -85,13 +85,7 @@ namespace ink::runtime::internal
 		list_flag sub(list_flag l, int i);
 		list sub(list lh, list rh);
 		list sub(list lh, list_flag rh);
-		list_flag sub(list_flag lh, list rh) {
-			const data_t* r = getPtr(rh.lid);
-			if(hasList(r, lh.list_id) && hasFlag(r, toFid(lh))) {
-				lh.flag = -1;
-			}
-			return lh;
-		}
+		list_flag sub(list_flag lh, list rh);
 		list_flag sub(list_flag lh, list_flag rh) {
 			return lh == rh ? list_flag{.list_id = lh.list_id, .flag = -1} : lh;
 		}
@@ -175,13 +169,17 @@ namespace ink::runtime::internal
 			return getBit(data, lid);
 		}
 		void setList(data_t* data, int lid, bool value = true) {
-			setBit(data, lid, value);
+			if(lid >= 0) {
+				setBit(data, lid, value);
+			}
 		}
 		bool hasFlag(const data_t* data, int fid) const {
 			return getBit(data, fid + numLists());
 		}
 		void setFlag(data_t* data, int fid, bool value = true) {
-			setBit(data, fid + numLists(), value);
+			if (fid >= 0) {
+				setBit(data, fid + numLists(), value);
+			}
 		}
 		int toFid(list_flag e) const;
 		auto flagStartMask() const {

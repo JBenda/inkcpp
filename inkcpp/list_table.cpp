@@ -149,13 +149,22 @@ namespace ink::runtime::internal
 		return itr;
 	}
 
+	list_table::list list_table::add(list_flag lh, list_flag rh) {
+		list res = create();
+		data_t* o = getPtr(res.lid);
+		setList(o, lh.list_id);
+		setFlag(o, toFid(lh));
+		setList(o, rh.list_id);
+		setFlag(o, toFid(rh));
+		return res;
+	}
 	list_table::list list_table::add(list lh, list rh) {
 		list res = create();
 		data_t* l = getPtr(lh.lid);
 		data_t* r = getPtr(rh.lid);
 		data_t* o = getPtr(res.lid);
 		for(int i = 0; i < _entrySize; ++i) {
-			o[i] = l[i] & r[i];
+			o[i] = l[i] | r[i];
 		}
 		return res;
 	}
@@ -245,9 +254,20 @@ namespace ink::runtime::internal
 		return res;
 	}
 
+	list_flag list_table::sub(list_flag lh, list rh) {
+		data_t* r = getPtr(rh.lid);
+		if(hasList(r, lh.list_id) && hasFlag(r, toFid(lh))) {
+			return list_flag{.list_id = lh.list_id, .flag = -1};
+		}
+		return lh;
+	}
+
 
 	list_table::list list_table::add(list arg, int i) {
-		inkAssert(i > 0);
+		// TODO: handle i == 0 (for performance only)
+		if (i < 0) {
+			return sub(arg, -i);
+		}
 		list res = create();
 		data_t* l = getPtr(arg.lid);
 		data_t* o = getPtr(res.lid);
@@ -274,8 +294,20 @@ namespace ink::runtime::internal
 		return res;
 	}
 
+	list_flag list_table::add(list_flag arg, int i) {
+		arg.flag += i;
+		if (arg.flag < 0 || arg.flag > _list_end[arg.list_id] - listBegin(arg.list_id))
+		{
+			arg.flag = -1;
+		}
+		return arg;
+	}
+
 	list_table::list list_table::sub(list arg, int i) {
-		inkAssert(i > 0);
+		// TODO: handle i == 0 (for perofrgmance only)
+		if(i < 0) {
+			return add(arg, -i);
+		}
 		list res = create();
 		data_t* l = getPtr(arg.lid);
 		data_t* o = getPtr(res.lid);
@@ -392,7 +424,7 @@ namespace ink::runtime::internal
 		return res;
 	}
 
-	// ATTENTION: can produce an list without setted flag list
+	// ATTENTION: can produce an list without setted flag list (same behavior than inklecate)
 	list_table::list list_table::invert(list arg) {
 		list res = create();
 		data_t* l = getPtr(arg.lid);
@@ -400,10 +432,21 @@ namespace ink::runtime::internal
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(l, i)) {
 				setList(o,i);
-				for(int j = listBegin(i); i < _list_end[i]; ++j)
+				for(int j = listBegin(i); j < _list_end[i]; ++j)
 				{
 					setBit(o, j, !getBit(l,j));
 				}
+			}
+		}
+		return res;
+	}
+
+	list_table::list list_table::invert(list_flag arg) {
+		list res = create();
+		if(arg != null_flag) {
+			data_t* o = getPtr(res.lid);
+			for(int i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
+				setBit(o, i, i - listBegin(arg.list_id) != arg.flag);
 			}
 		}
 		return res;
