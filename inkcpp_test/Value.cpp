@@ -1,6 +1,8 @@
 #include "catch.hpp"
 
 #include "../inkcpp/string_table.h"
+#include "../inkcpp/list_table.h"
+#include "../inkcpp/random.h"
 #include "../inkcpp/output.h"
 #include "../inkcpp/executioner.h"
 #include "../shared/private/command.h"
@@ -8,6 +10,8 @@
 using ink::runtime::internal::value;
 using ink::runtime::internal::value_type;
 using ink::runtime::internal::string_table;
+using ink::runtime::internal::list_table;
+using ink::runtime::internal::prng;
 using stream = ink::runtime::internal::stream<128>;
 using ink::runtime::internal::executer;
 using eval_stack = ink::runtime::internal::eval_stack<28, false>;
@@ -21,7 +25,9 @@ void cp_str(char* dst, const char* src) {
 SCENARIO("compare concatenated values")
 {
 	string_table str_table;
-	executer ops(str_table);
+	list_table lst_table{};
+	prng rng;
+	executer ops(str_table, lst_table, rng);
 	eval_stack stack;
 	GIVEN("just single strings")
 	{

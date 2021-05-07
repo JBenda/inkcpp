@@ -60,6 +60,7 @@ namespace ink::runtime::internal
 
 		// parse binary list meta data
 		list_table(const char* data, const ink::internal::header&);
+		explicit list_table() : _valid{false} {}
 		size_t stringLen(const list_flag& e) const;
 		const char* toString(const list_flag& e) const;
 
@@ -113,6 +114,7 @@ namespace ink::runtime::internal
 		bool greater(L lh, R rh) const { return min(lh).flag > max(rh).flag; }
 		bool equal(list lh, list rh) const;
 		bool equal(list lh, list_flag rh) const;
+		bool equal(list_flag lh, list rh) const { return equal(rh, lh); }
 		bool equal(list_flag lh, list_flag rh) const { return lh == rh; }
 		template<typename L, typename R>
 		bool not_equal(L lh, R rh) const { return equal(lh, rh); }
@@ -128,8 +130,8 @@ namespace ink::runtime::internal
 		bool has(list lh, list_flag rh) const;
 		bool has(list_flag lh, list rh) const { return has(rh, lh); } 
 		bool has(list_flag lh, list_flag rh) const { return lh == rh; }
-		template<typename T>
-		bool hasnt(list lh, T rh) const { return !has(lh,rh); }
+		template<typename L, typename R>
+		bool hasnt(L lh, R rh) const { return !has(lh,rh); }
 		operator bool () const{
 			return _valid;
 		}

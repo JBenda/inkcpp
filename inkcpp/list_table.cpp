@@ -1,6 +1,7 @@
 #include "list_table.h"
 #include "traits.h"
 #include "header.h"
+#include "random.h"
 #include <iostream>
 
 namespace ink::runtime::internal
@@ -333,6 +334,14 @@ namespace ink::runtime::internal
 		}
 		return res;
 	}
+	list_flag list_table::sub(list_flag arg, int i) {
+		arg.flag -= i;
+		if (arg.flag < 0 || arg.flag > _list_end[arg.list_id] - listBegin(arg.list_id))
+		{
+			arg.flag = -1;
+		}
+		return arg;
+	}
 	
 	int list_table::count(list l) const {
 		int count = 0;
@@ -407,6 +416,19 @@ namespace ink::runtime::internal
 		return true;
 	}
 
+	bool list_table::equal(list lh, list_flag rh) const {
+		const data_t* l = getPtr(lh.lid);
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(l,i) != (rh.list_id == i)) { return false; }
+		}
+		for(int i = listBegin(rh.list_id); i < _list_end[rh.list_id]; ++i) {
+			if(hasFlag(l,i) != (rh.flag == i - listBegin(rh.list_id))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 	list_table::list list_table::all(list arg) {
 		list res = create();
@@ -415,10 +437,22 @@ namespace ink::runtime::internal
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(l, i)) {
 				setList(o,i);
-				for(int j = listBegin(i); i < _list_end[i]; ++j)
+				for(int j = listBegin(i); j < _list_end[i]; ++j)
 				{
 					setBit(o, j);
 				}
+			}
+		}
+		return res;
+	}
+
+	list_table::list list_table::all(list_flag arg) {
+		list res = create();
+		if(arg != null_flag) {
+			data_t* o = getPtr(res.lid);
+			setList(o, arg.list_id);
+			for(int i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
+				setFlag(o, i);
 			}
 		}
 		return res;
@@ -474,6 +508,28 @@ namespace ink::runtime::internal
 	bool list_table::has(list lh, list_flag rh) const {
 		const data_t* l = getPtr(lh.lid);
 		return hasList(l, rh.list_id) && hasFlag(l, toFid(rh));
+	}
+
+	list_flag list_table::lrnd(list lh, prng& rng) const {
+		const data_t* l = getPtr(lh.lid);
+		int i = count(lh);
+		rng.rand(i);		
+		int count = 0;
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(l, i)) {
+				for(int j = listBegin(i); j < _list_end[i]; ++j) {
+					if(hasFlag(l,j)) {
+						if(count++ == i) {
+							return list_flag{
+								.list_id = static_cast<decltype(list_flag::list_id)>(i),
+								.flag = static_cast<decltype(list_flag::flag)>(
+										j - listBegin(i))};
+						}
+					}
+				}
+			}
+		}
+		return null_flag;
 	}
 
 	bool list_table::has(list lh, list rh) const {
