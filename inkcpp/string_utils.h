@@ -41,9 +41,12 @@ namespace ink::runtime::internal {
 		return _gcvt_s(buffer, size, value, 7); // number of significant digits
 #else
 		if ( buffer == nullptr || size < 1 ) { return EINVAL; }
-		int res = snprintf(buffer, size, "%f.7", value);
-		if (res > 0 && res < size) { return 0; }
-		return EINVAL;
+		int res = snprintf(buffer, size, "%f", value);
+		if (res < 0 || res >= size) { return EINVAL; }
+		// trunc cat zeros B007
+		char* itr = buffer + res - 1;
+		while(*itr == '0') { *itr--=0; --res; }
+		return 0;
 #endif
 	}
 
@@ -88,7 +91,7 @@ namespace ink::runtime::internal {
 	}
 
 	inline constexpr size_t decimal_digits(float number) {
-		return 16;
+		return 8;
 	}
 
 	inline constexpr size_t value_length(const value& v) {

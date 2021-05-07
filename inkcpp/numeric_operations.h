@@ -18,7 +18,8 @@ namespace ink::runtime::internal {
 	/// produces a SFINAE error if type is not part of list
 	template<value_type ty>
 	using is_integral_t = typename enable_if<
-		ty == value_type::int32
+		ty == value_type::boolean
+		|| ty == value_type::int32
 		|| ty == value_type::uint32, void>::type;
 
 	namespace casting {
@@ -33,6 +34,11 @@ namespace ink::runtime::internal {
 		template<>
 		struct cast<value_type::boolean, value_type::uint32>
 		{ 	static constexpr value_type value = value_type::uint32; };
+		
+		// result of operation with bool and int is int
+		template<>
+		struct cast<value_type::boolean, value_type::int32>
+		{ static constexpr value_type value = value_type::int32; };
 
 		/// defined numeric cast
 		/// generic numeric_cast only allow casting to its one type
@@ -55,6 +61,18 @@ namespace ink::runtime::internal {
 					return static_cast<uint32_t>(v.get<value_type::boolean>());
 				default:
 					throw ink_exception("invalid cast to uint!");
+			}
+		}
+
+		template<>
+		inline typename value::ret<value_type::int32>::type numeric_cast<value_type::int32>(const value& v) {
+			switch(v.type()) {
+				case value_type::int32:
+					return v.get<value_type::int32>();
+				case value_type::boolean:
+					return static_cast<int32_t>(v.get<value_type::boolean>());
+				default:
+					throw ink_exception("invalid cast to int!");
 			}
 		}
 

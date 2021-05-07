@@ -174,6 +174,12 @@ namespace ink::runtime::internal {
 		_type = value_type::boolean;
 		return *this;
 	}
+	template<>
+	inline constexpr value& value::set<value_type::boolean, int>(int v) {
+		bool_value = static_cast<bool>(v);
+		_type = value_type::boolean;
+		return *this;
+	}
 
 	// define get and set for list
 	template<> struct value::ret<value_type::list> { using type = list_table::list; };

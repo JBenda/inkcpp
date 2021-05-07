@@ -62,9 +62,22 @@ namespace ink::runtime::internal {
 		// compare strings char wise
 		const char* li = lh.get();
 		const char* ri = rh.get();
-		while(*li && *ri && *li++ == *ri++);
+		while(*li && *ri && *li == *ri) { ++li; ++ri; }
 
 		stack.push(value{}.set<value_type::boolean>(*li == *ri));
+	}
+
+	void operation<Command::NOT_EQUAL, value_type::string, void>::operator()(basic_eval_stack& stack, value* vals) {
+		// convert values to string
+		casting::string_cast lh (vals[0]);
+		casting::string_cast rh(vals[1]);
+
+		// compare strings char wise
+		const char* li = lh.get();
+		const char* ri = rh.get();
+		while(*li && *ri && *li == *ri){ ++li; ++ri; }
+
+		stack.push(value{}.set<value_type::boolean>(*li != *ri));
 	}
 
 }
