@@ -61,6 +61,7 @@ namespace ink
 		DIVIDE,
 		MULTIPLY,
 		MOD,
+		RANDOM,
 		IS_EQUAL,
 		GREATER_THAN,
 		LESS_THAN,

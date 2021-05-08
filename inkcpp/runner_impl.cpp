@@ -872,12 +872,12 @@ namespace ink::runtime::internal
 			} break;
 			case Command::SEED:
 			{
-				// TODO: Platform independance
 				int32_t seed = _eval.pop().get<value_type::int32>();
 				_rng.srand(seed);
 
 				_eval.push(values::null);
 			} break;
+
 			case Command::READ_COUNT:
 			{
 				// Get container index

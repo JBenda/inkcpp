@@ -62,6 +62,23 @@ namespace ink::runtime::internal {
 		list_table& _list_table;
 	};
 
+	// base class for operations which needs a list_table
+	template<>
+	class operation_base<prng> {
+	public:
+		static constexpr bool enabled = true;
+		template<typename T>
+		operation_base(const T& t) : _prng{*get<prng*,T>(t)} {
+			static_assert(has_type<prng*,T>::value, "Executioner "
+					"constructor needs a list table to instantiate "
+					"some operations!");
+		}
+
+	protected:
+		prng& _prng;
+	};
+
+
 	template<>
 	class operation_base<list_table, prng> {
 	public:
