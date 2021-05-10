@@ -102,19 +102,19 @@ namespace ink::runtime::internal
 	}
 
 	template<>
-	void basic_stack::push_frame<frame_type::function>(offset_t return_to)
+	void basic_stack::push_frame<frame_type::function>(offset_t return_to, bool eval)
 	{
-		add(InvalidHash, value{}.set<value_type::function_frame>(return_to));
+		add(InvalidHash, value{}.set<value_type::function_frame>(return_to, eval));
 	}
 	template<>
-	void basic_stack::push_frame<frame_type::tunnel>(offset_t return_to)
+	void basic_stack::push_frame<frame_type::tunnel>(offset_t return_to, bool eval)
 	{
-		add(InvalidHash, value{}.set<value_type::tunnel_frame>(return_to));
+		add(InvalidHash, value{}.set<value_type::tunnel_frame>(return_to, eval));
 	}
 	template<>
-	void basic_stack::push_frame<frame_type::thread>(offset_t return_to)
+	void basic_stack::push_frame<frame_type::thread>(offset_t return_to, bool eval)
 	{
-		add(InvalidHash, value{}.set<value_type::thread_frame>(return_to));
+		add(InvalidHash, value{}.set<value_type::thread_frame>(return_to, eval));
 	}
 
 	const entry* basic_stack::pop()
@@ -195,7 +195,7 @@ namespace ink::runtime::internal
 		}
 	}
 
-	offset_t basic_stack::pop_frame(frame_type* type)
+	offset_t basic_stack::pop_frame(frame_type* type, bool& eval)
 	{
 		inkAssert(!base::is_empty(), "Can not pop frame from empty callstack.");
 
@@ -271,7 +271,9 @@ namespace ink::runtime::internal
 
 		// Return the offset stored in the frame record
 		// FIXME: correct type?
-		return returnedFrame->data.get<value_type::jump_marker>().jump;
+		const auto& frame = returnedFrame->data.get<value_type::function_frame>();
+		eval = frame.eval;
+		return frame.addr;
 	}
 
 	bool basic_stack::has_frame(frame_type* returnType) const

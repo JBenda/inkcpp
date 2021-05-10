@@ -41,11 +41,12 @@ namespace ink
 				value* get(hash_t name);
 
 				// pushes a new frame onto the stack
+				// @param eval if evaluation mode was active
 				template<frame_type>
-				void push_frame(offset_t return_to);
+				void push_frame(offset_t return_to, bool eval);
 
 				// Pops a frame (and all temporary variables) from the callstack.
-				offset_t pop_frame(frame_type* type);
+				offset_t pop_frame(frame_type* type, bool& eval);
 
 				// Returns true if there are any frames on the stack
 				bool has_frame(frame_type* type = nullptr) const;

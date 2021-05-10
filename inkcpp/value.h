@@ -120,6 +120,10 @@ namespace ink::runtime::internal {
 			} jump;
 			list_table::list list_value;
 			list_flag list_flag_value;
+			struct {
+				uint32_t addr;
+				bool eval; // was eval mode active in frame above
+			} frame_value;
 		};
 		value_type _type;
 	};
@@ -321,11 +325,12 @@ namespace ink::runtime::internal {
 
 	// getter and setter for different frame types
 	// FIXME: the getter are not used?
-	/* template<> struct value::ret<value_type::function_frame>{ using type = uint32_t; }; */
-	/* template<> inline uint32_t value::get<value_type::function_frame>() const { return uint32_value; } */
+	template<> struct value::ret<value_type::function_frame>{ using type = decltype(frame_value); };
+	template<> inline typename value::ret<value_type::function_frame>::type value::get<value_type::function_frame>() const { return frame_value; }
 	template<>
-	inline constexpr value& value::set<value_type::function_frame,uint32_t>(uint32_t v) {
-		uint32_value = v;
+	inline constexpr value& value::set<value_type::function_frame,uint32_t>(uint32_t v, bool evalOn) {
+		frame_value.addr = v;
+		frame_value.eval = evalOn;
 		_type = value_type::function_frame;
 		return *this;
 	}
@@ -333,8 +338,9 @@ namespace ink::runtime::internal {
 	/* template<> struct value::ret<value_type::tunnel_frame>{ using type = uint32_t; }; */
 	/* template<> inline uint32_t value::get<value_type::tunnel_frame>() const { return uint32_value; } */
 	template<>
-	inline constexpr value& value::set<value_type::tunnel_frame,uint32_t>(uint32_t v) {
-		uint32_value = v;
+	inline constexpr value& value::set<value_type::tunnel_frame,uint32_t>(uint32_t v, bool evalOn) {
+		frame_value.addr = v;
+		frame_value.eval = evalOn;
 		_type = value_type::tunnel_frame;
 		return *this;
 	}
@@ -342,8 +348,9 @@ namespace ink::runtime::internal {
 	/* template<> struct value::ret<value_type::thread_frame>{ using type = uint32_t; }; */
 	/* template<> inline uint32_t value::get<value_type::thread_frame>() const { return uint32_value; } */
 	template<>
-	inline constexpr value& value::set<value_type::thread_frame,uint32_t>(uint32_t v) {
-		uint32_value = v;
+	inline constexpr value& value::set<value_type::thread_frame,uint32_t>(uint32_t v, bool evalOn) {
+		frame_value.addr = v;
+		frame_value.eval = evalOn;
 		_type = value_type::thread_frame;
 		return *this;
 	}

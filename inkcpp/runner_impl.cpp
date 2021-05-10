@@ -143,7 +143,7 @@ namespace ink::runtime::internal
 	{
 		// Pop the callstack
 		frame_type type;
-		offset_t offset = _stack.pop_frame(&type);
+		offset_t offset = _stack.pop_frame(&type,bEvaluationMode);
 
 		// SPECIAL: On function, do a trim
 		if (type == frame_type::function)
@@ -609,9 +609,10 @@ namespace ink::runtime::internal
 				{
 				size_t address = _ptr - _story->instructions();
 					if (cmd == Command::FUNCTION) {
-						_stack.push_frame<frame_type::function>(address);
+						_stack.push_frame<frame_type::function>(address, bEvaluationMode);
+						bEvaluationMode = false; // unset eval mode when enter function
 					} else {
-						_stack.push_frame<frame_type::tunnel>(address);
+						_stack.push_frame<frame_type::tunnel>(address, bEvaluationMode);
 					}
 				}
 
@@ -632,7 +633,7 @@ namespace ink::runtime::internal
 				// Push a thread frame so we can return easily
 				// TODO We push ahead of a single divert. Is that correct in all cases....?????
 				auto returnTo = _ptr + CommandSize<uint32_t>;
-				_stack.push_frame<frame_type::thread>(returnTo - _story->instructions());
+				_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), bEvaluationMode);
 
 				// Fork a new thread on the callstack
 				thread_t thread = _stack.fork_thread();
