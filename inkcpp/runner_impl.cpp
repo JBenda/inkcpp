@@ -67,11 +67,11 @@ namespace ink::runtime::internal
 		//  _should be_ able to safely assume that there is nothing to do here. A falling
 		//  divert should only be taking us from a container to that same container's end point
 		//  without entering any other containers
-		if (_is_falling)
+		/*if (_is_falling)
 		{
 			_ptr = dest;
 			return;
-		}
+		}*/
 
 		// Check which direction we are jumping
 		bool reverse = dest < _ptr;
