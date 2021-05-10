@@ -121,7 +121,7 @@ namespace ink::runtime::internal {
 		auto dst = begin;
 		for(auto src = begin; src != end; ++src){
 			if((src == begin || src[-1] == '\n')
-					&& src[0] == ' ') {
+					&& (src[0] == ' ' || src[0] == '\n')) {
 				continue;
 			}
 			if(src[0] == ' ' &&
