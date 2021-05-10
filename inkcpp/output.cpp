@@ -192,21 +192,8 @@ namespace ink
 				// Return processed string
 				// remove mulitple accourencies of ' '
 				std::string result = str.str();
-				auto dst = result.begin();
-				for(auto src = result.begin(); src != result.end(); ++src){
-					if((src == result.begin() || src[-1] == '\n')
-							&& src[0] == ' ') {
-						continue;
-					}
-					if(src[0] == ' ' &&
-							( src+1 == result.end()
-							 || src[1] == ' '
-							 || src[1] == '\n')) {
-						continue;
-					}
-					*dst++ = *src;
-				}
-				result.resize(dst - result.begin());
+				auto end = clean_string(result.begin(), result.end());
+				result.resize(end - result.begin());
 				return result;
 			}
 #endif
@@ -355,7 +342,7 @@ namespace ink
 				_save = ~0;
 			}
 
-			const char* basic_stream::get_alloc(string_table& strings, list_table& lists)
+			char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			{
 				size_t start = find_start();
 

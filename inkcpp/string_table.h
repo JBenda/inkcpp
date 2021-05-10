@@ -13,6 +13,7 @@ namespace ink::runtime::internal
 
 		// Create a dynmaic string of a particular length
 		char* create(size_t length);
+		char* duplicate(const char* str);
 
 		// zeroes all usage values
 		void clear_usage();

@@ -46,7 +46,7 @@ namespace ink
 				 * @param list_table needed do parse list values to string
 				 * @return newly allocated string
 				 */
-				const char* get_alloc(string_table&, list_table&);
+				char* get_alloc(string_table&, list_table&);
 
 #ifdef INK_ENABLE_STL
 				// Extract into a string

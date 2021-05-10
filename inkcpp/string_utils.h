@@ -110,4 +110,28 @@ namespace ink::runtime::internal {
 				throw ink_exception("Can't determine length of this value type");
 		}
 	}
+
+	/** removes leading & tailing spaces as wide spaces
+	 * @param begin iterator of string
+	 * @param end iterator of string
+	 * @return new end iterator
+	 */
+	template<typename ITR>
+	inline constexpr ITR clean_string(ITR begin, ITR end) {
+		auto dst = begin;
+		for(auto src = begin; src != end; ++src){
+			if((src == begin || src[-1] == '\n')
+					&& src[0] == ' ') {
+				continue;
+			}
+			if(src[0] == ' ' &&
+					( src+1 == end
+					 || src[1] == ' '
+					 || src[1] == '\n')) {
+				continue;
+			}
+			*dst++ = *src;
+		}
+		return dst;
+	}
 }
