@@ -47,6 +47,14 @@ namespace ink::runtime::internal
 			append<value_type::float32+1>(os, val, lists);
 		}
 	}
+	template<>
+	void append<value_type::boolean>(std::ostream& os, const value& val, const list_table* lists) {
+		if(val.type() == value_type::boolean) {
+			os << (val.get<value_type::boolean>() ? "true" : "false");
+		} else {
+			append<value_type::boolean + 1>(os, val, lists);
+		}
+	}
 
 	std::ostream& value::write(std::ostream& os, const list_table* lists) const {
 		if (type() < value_type::PRINT_BEGIN || type() >= value_type::PRINT_END) {
