@@ -1,6 +1,7 @@
 #include "value.h"
 #include "output.h"
 #include "list_table.h"
+#include "string_utils.h"
 
 namespace ink::runtime::internal
 {
@@ -34,6 +35,16 @@ namespace ink::runtime::internal
 			lists->write(os, val.get<value_type::list>());
 		} else {
 			append<value_type::list +1>(os, val, lists);
+		}
+	}
+	template<>
+	void append<value_type::float32>(std::ostream& os, const value& val, const list_table* lists) {
+		if(val.type() == value_type::float32) {
+			char number[32];
+			ink::runtime::internal::toStr(number, 32, val.get<value_type::float32>());
+			os << number;
+		} else {
+			append<value_type::float32+1>(os, val, lists);
 		}
 	}
 
