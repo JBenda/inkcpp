@@ -33,6 +33,8 @@ namespace ink::runtime::internal
 		T* begin() { return data(); }
 		const T* end() const { return data() + _size; }
 		T* end() { return data() + _size; }
+		const T& back() const { return end()[-1]; }
+		T& back() { return end()[-1]; }
 
 		const size_t size() const { return _size; }
 		const size_t capacity() const { return _capacity; }
@@ -236,7 +238,8 @@ namespace ink::runtime::internal
 		using base = basic_restorable_array<T>;
 	public:
 		allocated_restorable_array(const T& initial, const T& nullValue)
-			: basic_restorable_array<T>(0, 0, nullValue), _initialValue{initial}
+			: basic_restorable_array<T>(0, 0, nullValue), _initialValue{initial},
+				_buffer{nullptr}
 		{}
 		allocated_restorable_array(size_t capacity, const T& initial, const T &nullValue)
 			: basic_restorable_array<T>(new T[capacity * 2], capacity * 2, nullValue),
@@ -249,21 +252,26 @@ namespace ink::runtime::internal
 		void resize(size_t n) {
 			size_t new_capacity = 2 * n;
 			T* new_buffer = new T[new_capacity];
-			for(size_t i = 0; i < base::capacity(); ++i) {
-				new_buffer[i] = _buffer[i];
+			if (_buffer) {
+				for(size_t i = 0; i < base::capacity(); ++i) {
+					new_buffer[i] = _buffer[i];
+				}
+				delete[] _buffer;
 			}
 			for(size_t i = base::capacity(); i < new_capacity; ++i) {
 				new_buffer[i] = _initialValue;
 			}
-			delete[] _buffer;
+
 			_buffer = new_buffer;
 			this->set_new_buffer(_buffer, new_capacity);
 		}
 
 		~allocated_restorable_array()
 		{
-			delete[] _buffer;
-			_buffer = nullptr;
+			if(_buffer) {
+				delete[] _buffer;
+				_buffer = nullptr;
+			}
 		}
 
 	private:

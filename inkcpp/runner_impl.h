@@ -219,9 +219,7 @@ namespace ink::runtime::internal
 		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
 
 		// Tag list
-		static const size_t MAX_TAGS = 100;
-		const char* _tags[MAX_TAGS];
-		size_t _num_tags = 0;
+		managed_array<const char*, config::limitActiveTags < 0, abs(config::limitActiveTags)> _tags;
 
 		// TODO: Move to story? Both?
 		functions _functions;

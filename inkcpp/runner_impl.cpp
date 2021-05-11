@@ -63,7 +63,7 @@ namespace ink::runtime::internal
 
 	void runner_impl::clear_tags()
 	{
-		_num_tags = 0;
+		_tags.clear();
 	}
 
 	void runner_impl::jump(ip_t dest, bool record_visits)
@@ -409,17 +409,17 @@ namespace ink::runtime::internal
 
 	bool runner_impl::has_tags() const
 	{
-		return _num_tags > 0;
+		return _tags.size() > 0;
 	}
 
 	size_t runner_impl::num_tags() const
 	{
-		return _num_tags;
+		return _tags.size();
 	}
 
 	const char* runner_impl::get_tag(size_t index) const
 	{
-		inkAssert(index < _num_tags, "Tag index exceeds _num_tags");
+		inkAssert(index < _tags.size(), "Tag index exceeds _num_tags");
 		return _tags[index];
 	}
 
@@ -978,7 +978,7 @@ namespace ink::runtime::internal
 			} break;
 			case Command::TAG:
 			{
-				_tags[_num_tags++] = read<const char*>();
+				_tags.push() = read<const char*>();
 			} break;
 			default:
 				inkAssert(false, "Unrecognized command!");
