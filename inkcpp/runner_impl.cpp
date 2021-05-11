@@ -191,6 +191,8 @@ namespace ink::runtime::internal
 		case Command::MAX:
 			result = lhs > rhs ? lhs : rhs;
 			break;
+		default:
+			break;
 		}
 
 		// Push result onto the stack
@@ -211,6 +213,8 @@ namespace ink::runtime::internal
 			break;
 		case Command::NOT:
 			result = !v;
+			break;
+		default:
 			break;
 		}
 
@@ -474,6 +478,8 @@ namespace ink::runtime::internal
 				case change_type::newline_removed:
 					// Newline was removed. Proceed as if we never hit it
 					forget();
+					break;
+				default:
 					break;
 				}
 			}

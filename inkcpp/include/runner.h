@@ -29,6 +29,8 @@ namespace ink::runtime
 	class runner_interface
 	{
 	public:
+		virtual ~runner_interface(){};
+
 #pragma region Interface Methods
 
 		/**

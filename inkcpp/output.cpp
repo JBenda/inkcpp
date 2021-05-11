@@ -109,6 +109,8 @@ namespace ink
 					case data_type::allocated_string_pointer:
 					case data_type::newline:
 						return true;
+					default:
+						break;
 					}
 
 					i++;
@@ -206,6 +208,8 @@ namespace ink
 					case data_type::newline:
 						str << std::endl;
 						break;
+					default:
+						break;
 					}
 				}
 
@@ -247,6 +251,8 @@ namespace ink
 						break;
 					case data_type::newline:
 						str += "\n";
+						break;
+					default:
 						break;
 					}
 				}
@@ -306,6 +312,8 @@ namespace ink
 					case data_type::allocated_string_pointer:
 					case data_type::newline:
 						*(ptr++) = _data[i];
+						break;
+					default:
 						break;
 					}
 				}
@@ -398,6 +406,8 @@ namespace ink
 					case data_type::newline:
 						length += 1;
 						break;
+					default:
+						break;
 					}
 				}
 
@@ -432,6 +442,8 @@ namespace ink
 						break;
 					case data_type::newline:
 						*ptr = '\n'; ptr++;
+						break;
+					default:
 						break;
 					}
 				}
@@ -485,6 +497,8 @@ namespace ink
 					break;
 				case data_type::glue:
 					hasGlue = true;
+					break;
+				default:
 					break;
 				}
 

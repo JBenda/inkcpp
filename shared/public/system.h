@@ -97,7 +97,7 @@ namespace ink
 	// assert	
 #ifndef INK_ENABLE_UNREAL
 	void ink_assert(bool condition, const char* msg = nullptr);
-	[[ noreturn ]] inline void ink_assert(const char* msg = nullptr) { ink_assert(false, msg); }
+	[[ noreturn ]] inline void ink_assert(const char* msg = nullptr) { ink_assert(false, msg); exit(EXIT_FAILURE);}
 #else
 	[[ noreturn ]] inline void ink_fail(const char*) { check(false); throw nullptr; }
 #endif
