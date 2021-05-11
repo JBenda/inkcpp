@@ -299,7 +299,7 @@ namespace ink::compiler::internal
 		else if (get(command, "CNT?", val))
 		{
 			// TODO: Why is this true again?
-			_emitter->write_path(Command::READ_COUNT, CommandFlag::NO_FLAGS, val, false);
+			_emitter->write_path(Command::READ_COUNT, CommandFlag::NO_FLAGS, val, true);
 		}
 
 		// Internal function call
