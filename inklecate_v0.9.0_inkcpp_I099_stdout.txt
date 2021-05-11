@@ -1,1 +1,2 @@
 This is the content
+# tags: author: Joe, title: My Great Story, 
