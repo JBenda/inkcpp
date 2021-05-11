@@ -18,6 +18,8 @@ namespace ink::config {
 	static constexpr int limitThreadDepth = -10;
 	static constexpr int limitEvalStackDepth = -20;
 	static constexpr int limitContainerDepth = -20;
+	/// number of simultaneous active tags
+	static constexpr int limitActiveTags = 10;
 	// temporary variables and callstack;
 	static constexpr int limitRuntimeStack = -20;
 	// max number of elements in one output (a string is one element)

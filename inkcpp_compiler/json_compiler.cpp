@@ -353,6 +353,11 @@ namespace ink::compiler::internal
 
 			_emitter->write_list(Command::LIST, CommandFlag::NO_FLAGS, entries);
 		}
+
+		else if (get(command, "#", val))
+		{
+			_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);
+		}
 	}
 
 	void json_compiler::compile_lists_definition(const nlohmann::json& list_defs)

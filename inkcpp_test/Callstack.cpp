@@ -154,7 +154,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 		WHEN("there is a fork with a tunnel that finishes")
 		{
 			thread_t thread = stack.fork_thread();
-			stack.push_frame<frame_type::tunnel>(555);
+			stack.push_frame<frame_type::tunnel>(555, false);
 			stack.complete_thread(thread);
 
 			THEN("there should be no frames on the stack")
@@ -174,11 +174,13 @@ SCENARIO("threading with the callstack", "[callstack]")
 		stack.set(Y, 200_v);
 
 		// Push a tunnel
-		stack.push_frame<frame_type::tunnel>(505);
+		stack.push_frame<frame_type::tunnel>(505, false);
 
 		// Push some more temps
 		stack.set(X, 101_v);
 		stack.set(Y, 201_v);
+
+		bool eval_mode;
 
 		WHEN("a thread is forked")
 		{
@@ -187,7 +189,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 			WHEN("that thread does a tunnel return")
 			{
 				frame_type type;
-				auto offset = stack.pop_frame(&type);
+				auto offset = stack.pop_frame(&type, eval_mode);
 				
 				THEN("that thread should be outside the tunnel")
 				{
@@ -226,7 +228,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 					WHEN("we do a tunnel return")
 					{
 						frame_type type;
-						auto offset = stack.pop_frame(&type);
+						auto offset = stack.pop_frame(&type, eval_mode);
 
 						THEN("we should be back outside")
 						{
@@ -245,7 +247,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 			{
 				stack.complete_thread(thread);
 				frame_type type;
-				auto offset = stack.pop_frame(&type);
+				auto offset = stack.pop_frame(&type, eval_mode);
 
 				THEN("we should be outside the tunnel")
 				{
@@ -281,11 +283,13 @@ SCENARIO("threading with the callstack", "[callstack]")
 		stack.set(Y, 200_v);
 
 		// Push a tunnel
-		stack.push_frame<frame_type::tunnel>(505);
+		stack.push_frame<frame_type::tunnel>(505, false);
 
 		// Push some more temps
 		stack.set(X, 101_v);
 		stack.set(Y, 201_v);
+
+		bool eval_mode;
 
 		WHEN("a second thread is forked off the first")
 		{
@@ -298,7 +302,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 				WHEN("the first thread does a pop")
 				{
 					frame_type _ignore;
-					stack.pop_frame(&_ignore);
+					stack.pop_frame(&_ignore, eval_mode);
 
 					THEN("accessing the variable should return the original")
 					{
@@ -340,14 +344,14 @@ SCENARIO("threading with the callstack", "[callstack]")
 		stack.set(Y, 200_v);
 
 		// Push a tunnel
-		stack.push_frame<frame_type::tunnel>(505);
+		stack.push_frame<frame_type::tunnel>(505, false);
 
 		// Push some more temps
 		stack.set(X, 101_v);
 		stack.set(Y, 201_v);
 
 		// Push another tunnel
-		stack.push_frame<frame_type::tunnel>(505);
+		stack.push_frame<frame_type::tunnel>(505, false);
 
 		// Push some more temps
 		stack.set(X, 102_v);
@@ -361,8 +365,9 @@ SCENARIO("threading with the callstack", "[callstack]")
 			WHEN("we then try to pop both frames")
 			{
 				frame_type _ignore;
-				stack.pop_frame(&_ignore);
-				stack.pop_frame(&_ignore);
+				bool eval_mode;
+				stack.pop_frame(&_ignore, eval_mode);
+				stack.pop_frame(&_ignore, eval_mode);
 
 				THEN("we should have access to the original variables")
 				{

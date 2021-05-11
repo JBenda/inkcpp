@@ -116,7 +116,8 @@ namespace ink::runtime::internal
 		inline T* buffer() { return _array; }
 		void set_new_buffer(T* buffer, size_t capacity) {
 			_array = buffer;
-			_capacity = capacity;
+			_temp = buffer + capacity/2;
+			_capacity = capacity/2;
 		}
 
 	private:
@@ -130,7 +131,7 @@ namespace ink::runtime::internal
 
 		// we store values here when we're in save mode
 		//  they're copied on a call to forget()
-		T* const _temp;
+		T* _temp;
 
 		// size of both _array and _temp
 		size_t _capacity;
@@ -238,12 +239,13 @@ namespace ink::runtime::internal
 		using base = basic_restorable_array<T>;
 	public:
 		allocated_restorable_array(const T& initial, const T& nullValue)
-			: basic_restorable_array<T>(0, 0, nullValue), _initialValue{initial},
+			: basic_restorable_array<T>(0, 0, nullValue), _initialValue{initial}, _nullValue{nullValue},
 				_buffer{nullptr}
 		{}
 		allocated_restorable_array(size_t capacity, const T& initial, const T &nullValue)
 			: basic_restorable_array<T>(new T[capacity * 2], capacity * 2, nullValue),
-			_initialValue{initial}
+			_initialValue{initial},
+			_nullValue{nullValue}
 		{
 			_buffer = this->buffer();
 			this->clear(_initialValue);
@@ -255,11 +257,14 @@ namespace ink::runtime::internal
 			if (_buffer) {
 				for(size_t i = 0; i < base::capacity(); ++i) {
 					new_buffer[i] = _buffer[i];
+					// copy temp
+					new_buffer[i + base::capacity()] = _buffer[i + base::capacity()];
 				}
 				delete[] _buffer;
 			}
 			for(size_t i = base::capacity(); i < new_capacity; ++i) {
 				new_buffer[i] = _initialValue;
+				new_buffer[i+base::capacity()] = _nullValue;
 			}
 
 			_buffer = new_buffer;
@@ -276,6 +281,7 @@ namespace ink::runtime::internal
 
 	private:
 		T _initialValue;
+		T _nullValue;
 		T* _buffer;
 	};
 }

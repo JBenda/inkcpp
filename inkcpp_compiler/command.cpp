@@ -12,6 +12,7 @@ namespace ink
 			"\n",
 			"<>",
 			"void",
+			"#",
 			"DIVERT",
 			"DIVERT_TO_VARIABLE",
 			"TUNNEL",

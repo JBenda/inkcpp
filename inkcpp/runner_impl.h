@@ -51,8 +51,15 @@ namespace ink::runtime::internal
 		// runs silently
 		void getline_silent();
 
+		virtual bool has_tags() const override;
+		virtual size_t num_tags() const override;
+		virtual const char* get_tag(size_t index) const override;
+
+
+#ifdef INK_ENABLE_CSTD
 		// c-style getline
 		virtual char* getline_alloc() override;
+#endif
 
 		// move to path
 		virtual bool move_to(hash_t path) override;
@@ -112,6 +119,8 @@ namespace ink::runtime::internal
 
 		choice& add_choice();
 		void clear_choices();
+
+		void clear_tags();
 
 		// Special code for jumping from the current IP to another
 		void jump(ip_t, bool record_visits = true);
@@ -214,6 +223,9 @@ namespace ink::runtime::internal
 
 		// Choice list
 		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
+
+		// Tag list
+		managed_array<const char*, config::limitActiveTags < 0, abs(config::limitActiveTags)> _tags;
 
 		// TODO: Move to story? Both?
 		functions _functions;

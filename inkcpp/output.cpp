@@ -228,6 +228,8 @@ namespace ink
 					case data_type::newline:
 						str += "\n";
 						break;
+					default:
+						break;
 					}
 				}
 
