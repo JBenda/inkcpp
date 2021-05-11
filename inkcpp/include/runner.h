@@ -151,6 +151,10 @@ namespace ink::runtime
 		*/
 		virtual void choose(size_t index) = 0;
 
+		virtual bool has_tags() const = 0;
+		virtual size_t num_tags() const = 0;
+		virtual const char* get_tag(size_t index) const = 0;
+
 	protected:
 		// internal bind implementation. not for calling.
 		virtual void internal_bind(hash_t name, internal::function_base* function) = 0;
