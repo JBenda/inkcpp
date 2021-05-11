@@ -149,7 +149,8 @@ int main(int argc, const char** argv)
 			if (thread->has_tags()){
 				std::cout << "# tags: ";
 				for (int i = 0; i < thread->num_tags(); ++i) {
-					std::cout << thread->get_tag(i) << ", ";
+					if(i != 0) std::cout << ", ";
+					std::cout << thread->get_tag(i);
 				}
 				std::cout << std::endl;
 			}
