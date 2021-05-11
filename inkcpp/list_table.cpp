@@ -107,7 +107,6 @@ namespace ink::runtime::internal
 
 	size_t list_table::stringLen(const list &l) const {
 		size_t len = 0;
-		len += 2; // '[ '
 		const data_t* entry = getPtr(l.lid);
 		bool first = true;
 		for(int i = 0; i < numLists(); ++i) {
@@ -122,20 +121,26 @@ namespace ink::runtime::internal
 				}
 			}
 		}
-		len += 2; // ' ]'
 		return len;
 	}
 
 	char* list_table::toString(char* out, const list& l) const {
 		char* itr = out;
-		*itr++ = '['; *itr++ = ' ';
 
 		const data_t* entry = getPtr(l.lid);
 		bool first = true;
+		int max_list_len = 0;
 		for(int i = 0; i < numLists(); ++i) {
-			if(hasList(entry, i)) {
-				for(int j = listBegin(i); j < _list_end[i]; ++j) {
-					if(hasFlag(entry, j)) {
+			if(hasList(entry,i)) {
+				int len = _list_end[i] - listBegin(i);
+				if (len > max_list_len) max_list_len = len;
+			}
+		}
+		for(int j = 0; j < max_list_len; ++j) {
+			for(int i = 0; i < numLists(); ++i) {
+				int len = _list_end[i] - listBegin(i);
+				if(i < len && hasList(entry, i)) {
+					if(hasFlag(entry,j)) {
 						if(!first) {
 							*itr++ = ','; *itr++ = ' ';
 						} else { first = false; }
@@ -146,7 +151,6 @@ namespace ink::runtime::internal
 				}
 			}
 		}
-		*itr++ = ' '; *itr++ = ']';
 		return itr;
 	}
 
@@ -548,13 +552,30 @@ namespace ink::runtime::internal
 
 #ifdef INK_ENABLE_STL
 	std::ostream& list_table::write(std::ostream& os, list l) const {
-		os << "[ ";
 		bool first = true;
-		for(const auto& entry : named_flags(l)) {
-			if(first) { first = false; } else { os << ", "; }
-			os << entry.name;
+
+		const data_t* entry = getPtr(l.lid);
+		int max_list_len = 0;
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(entry,i)) {
+				int len = _list_end[i] - listBegin(i);
+				if (len > max_list_len) max_list_len = len;
+			}
 		}
-		os << " ]";
+		for(int j = 0; j < max_list_len; ++j) {
+			for(int i = 0; i < numLists(); ++i) {
+				int len = _list_end[i] - listBegin(i);
+				if(i < len && hasList(entry, i)) {
+					int flag = listBegin(i) + j;
+					if(hasFlag(entry,flag)) {
+						if(!first) {
+							os << ", ";
+						} else { first = false; }
+						os << _flag_names[flag];
+					}
+				}
+			}
+		}
 		return os;
 	}
 #endif
