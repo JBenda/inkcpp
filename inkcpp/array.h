@@ -116,7 +116,8 @@ namespace ink::runtime::internal
 		inline T* buffer() { return _array; }
 		void set_new_buffer(T* buffer, size_t capacity) {
 			_array = buffer;
-			_capacity = capacity;
+			_temp = buffer + capacity/2;
+			_capacity = capacity/2;
 		}
 
 	private:
@@ -130,7 +131,7 @@ namespace ink::runtime::internal
 
 		// we store values here when we're in save mode
 		//  they're copied on a call to forget()
-		T* const _temp;
+		T* _temp;
 
 		// size of both _array and _temp
 		size_t _capacity;
