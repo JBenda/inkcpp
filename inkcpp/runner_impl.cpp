@@ -165,6 +165,16 @@ namespace ink::runtime::internal
 		// SPECIAL: On function, do a trim
 		if (type == frame_type::function)
 			_output << values::func_end;
+		else if(type == frame_type::tunnel) {
+			// if we return but there is a divert target on top of 
+			// the evaluation stack, we should follow this instead
+			// inkproof: I060
+			if(_eval.top().type() == value_type::divert) {
+				start_frame<frame_type::tunnel>(_eval.pop().get<value_type::divert>());
+				return type;
+			}
+		}
+
 
 		// Jump to the old offset
 		inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
