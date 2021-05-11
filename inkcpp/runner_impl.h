@@ -120,6 +120,8 @@ namespace ink::runtime::internal
 		void run_unary_operator(unsigned char cmd);
 
 		frame_type execute_return();
+		template<frame_type type>
+		void start_frame(uint32_t target);
 
 		void on_done(bool setDone);
 		void set_done_ptr(ip_t ptr);

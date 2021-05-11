@@ -138,6 +138,23 @@ namespace ink::runtime::internal
 		// Jump
 		_ptr = dest;
 	}
+	template<frame_type type>
+	void runner_impl::start_frame(uint32_t target) {
+		if constexpr (type == frame_type::function) {
+			// add a function start marker
+			_output << values::func_start;
+		}
+		// Push next address onto the callstack
+		{
+		size_t address = _ptr - _story->instructions();
+			_stack.push_frame<type>(address, bEvaluationMode);
+		}
+		bEvaluationMode = false; // unset eval mode when enter function or tunnel
+
+		// Do the jump
+		inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
+		jump(_story->instructions() + target);
+	}
 
 	frame_type runner_impl::execute_return()
 	{
@@ -596,29 +613,17 @@ namespace ink::runtime::internal
 
 			// == Tunneling
 			case Command::TUNNEL:
+			{
+				uint32_t target = read<uint32_t>();
+				start_frame<frame_type::tunnel>(target);
+				bEvaluationMode = false;
+			}
+			break;
 			case Command::FUNCTION:
 			{
-				// add a function start marker
-				if (cmd == Command::FUNCTION)
-					_output << values::func_start;
-
 				// Find divert address
 				uint32_t target = read<uint32_t>();
-
-				// Push next address onto the callstack
-				{
-				size_t address = _ptr - _story->instructions();
-					if (cmd == Command::FUNCTION) {
-						_stack.push_frame<frame_type::function>(address, bEvaluationMode);
-						bEvaluationMode = false; // unset eval mode when enter function
-					} else {
-						_stack.push_frame<frame_type::tunnel>(address, bEvaluationMode);
-					}
-				}
-
-				// Do the jump
-				inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
-				jump(_story->instructions() + target);
+				start_frame<frame_type::function>(target);
 			}
 			break;
 			case Command::TUNNEL_RETURN:
