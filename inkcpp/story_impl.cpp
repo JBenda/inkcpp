@@ -216,7 +216,7 @@ namespace ink::runtime::internal
 			while(*ptr != 0) {++ptr;} ++ptr; // skip list name
 			do{
 				if(flag.list_id != list_id) {
-					flag.list_id = list_id;
+					list_id = flag.list_id;
 					while(*ptr != 0) {++ptr;} ++ptr; // skip list name
 				}
 				while(*ptr != 0) { ++ptr; } ++ptr; // skip flag name

@@ -399,6 +399,7 @@ namespace ink::compiler::internal
 			if(flag.flag.list_id != list_id) {
 				list_id = flag.flag.list_id;
 				_lists.write(reinterpret_cast<const byte_t*>(list_names->data()), list_names->size());
+				++list_names;
 				_lists.write('\0');
 			}
 			_lists.write(reinterpret_cast<const byte_t*>(flag.name.c_str()), flag.name.size() + 1);
