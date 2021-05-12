@@ -91,6 +91,27 @@ namespace ink::runtime::internal {
 		}
 	}
 
+	template<>
+	class operation<Command::IS_EQUAL, value_type::divert, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals) {
+			stack.push(value{}.set<value_type::boolean>(
+						vals[0].get<value_type::divert>()
+						== vals[1].get<value_type::divert>()));
+		}
+	};
+	template<>
+	class operation<Command::NOT_EQUAL, value_type::divert, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals) {
+			stack.push(value{}.set<value_type::boolean>(
+						vals[0].get<value_type::divert>()
+						!= vals[1].get<value_type::divert>()));
+		}
+	};
+
 	template<value_type ty>
 	class operation<Command::ADD, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
