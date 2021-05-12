@@ -67,7 +67,7 @@ SCENARIO("run story with tags", "[tags]")
 						}
 						WHEN("proceed")
 						{
-							std::string line = thread->getline();
+							std::string line = thread->getall();
 							THEN("new knot tag and now line tag, also choice tag. AND dont print tag in choice")
 							{
 								REQUIRE(line == "bKnot2\n");
@@ -80,7 +80,7 @@ SCENARIO("run story with tags", "[tags]")
 							WHEN("choose choice without tag, and proceed to end")
 							{
 								thread->choose(0);
-								thread->getline();
+								thread->getall();
 								THEN("no tags, tags behind END are ignored")
 								{
 									REQUIRE(thread->has_tags() == false);

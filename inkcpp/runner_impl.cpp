@@ -250,16 +250,16 @@ namespace ink::runtime::internal
 	std::string runner_impl::getall()
 	{
 		// Advance interpreter until we're stopped
-		while(can_continue())
-			advance_line();
+		std::stringstream str;
+		while(can_continue()) {
+			getline(str);
+		}
 
 		// Read output into std::string
-		std::string result;
-		_output >> result;
 
 		// Return result
 		inkAssert(_output.is_empty(), "Output should be empty after getall!");
-		return result;
+		return str.str();
 	}
 
 	void runner_impl::getall(std::ostream& out)
