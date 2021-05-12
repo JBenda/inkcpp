@@ -7,6 +7,7 @@ namespace ink::compiler::internal
 	void list_data::new_list(const std::string& list_name)
 	{
 		_lists.insert({list_name, static_cast<int>(_list_end.size())});
+		_list_name.emplace_back(list_name);
 		int current_back = _list_end.empty() ? 0 : _list_end.back();
 		_current_list_start = current_back;
 		_list_end.push_back(current_back);

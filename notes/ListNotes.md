@@ -1,4 +1,4 @@
-## general construction:
+[##](##) general construction:
 
 + A list is a bit vector!
 + Further we will call each bit vector which represents a list a _flag_.

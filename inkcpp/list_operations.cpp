@@ -166,5 +166,15 @@ namespace ink::runtime::internal {
 			_list_table.lrnd(vals[0].get<value_type::list_flag>())
 		));
 	}
+
+	void operation<Command::LIST_INT, value_type::list_flag, void>::operator()(
+			basic_eval_stack& stack, value* vals)
+	{
+		inkAssert(vals[0].type() == value_type::string);
+		inkAssert(vals[1].type() == value_type::int32);
+		list_flag entry = _list_table.get_list_id(vals[0].get<value_type::string>());
+		entry.flag = vals[1].get<value_type::int32>();
+		stack.push(value{}.set<value_type::list_flag>(entry));
+	}
 }
 

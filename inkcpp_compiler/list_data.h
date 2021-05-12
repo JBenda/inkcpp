@@ -32,9 +32,13 @@ namespace ink::compiler::internal
 			list_flag flag;
 		};
 		std::vector<named_list_flag> get_flags() const;
+		const std::vector<std::string_view>& get_list_names() const {
+			return _list_name;
+		}
 	private:
 		std::map<std::string, int,std::less<>> _lists;
 		std::vector<int> _list_end;
+		std::vector<std::string_view> _list_name;
 		int _current_list_start = 0;
 		std::vector<std::string> _flag_names;
 	};

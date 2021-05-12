@@ -61,6 +61,7 @@ namespace ink
 			"?",
 			"!?",
 			"L^",
+			"listInt",
 
 			"!",
 			"~",
@@ -70,6 +71,7 @@ namespace ink
 			"lrnd",
 			"LIST_ALL",
 			"LIST_INVERT",
+			"LIST_VALUE",
 
 			"START_CONTAINER",
 			"END_CONTAINER",

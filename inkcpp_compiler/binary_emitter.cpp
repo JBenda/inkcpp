@@ -392,8 +392,15 @@ namespace ink::compiler::internal
 		}
 
 		auto flags = list_defs.get_flags();
+		auto list_names = list_defs.get_list_names().begin();
+		int list_id = -1;
 		for(const auto& flag : flags) {
 			_lists.write(flag.flag);
+			if(flag.flag.list_id != list_id) {
+				list_id = flag.flag.list_id;
+				_lists.write(reinterpret_cast<const byte_t*>(list_names->data()), list_names->size());
+				_lists.write('\0');
+			}
 			_lists.write(reinterpret_cast<const byte_t*>(flag.name.c_str()), flag.name.size() + 1);
 		}
 		_lists.write(null_flag);

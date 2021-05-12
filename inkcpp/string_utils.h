@@ -111,6 +111,11 @@ namespace ink::runtime::internal {
 		}
 	}
 
+	inline constexpr bool str_equal(const char* lh, const char* rh) {
+		while(*lh && *rh && *lh == *rh) { ++lh; ++rh; }
+		return *lh == *rh;
+	}
+
 	/** removes leading & tailing spaces as wide spaces
 	 * @param begin iterator of string
 	 * @param end iterator of string

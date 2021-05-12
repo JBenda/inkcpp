@@ -2,6 +2,7 @@
 #include "traits.h"
 #include "header.h"
 #include "random.h"
+#include "string_utils.h"
 #include <iostream>
 
 namespace ink::runtime::internal
@@ -29,6 +30,8 @@ namespace ink::runtime::internal
 			if (_list_end.size() == flag.list_id) {
 				start = _list_end.size() == 0 ? 0 : _list_end.back();
 				_list_end.push() = start;
+				_list_names.push() = ptr;
+				while(*ptr) { ++ptr; } ++ptr; // skip string
 			}
 			while(_list_end.back() - start < flag.flag) {
 				_flag_names.push() = nullptr;
@@ -36,10 +39,7 @@ namespace ink::runtime::internal
 			}
 			_flag_names.push() = ptr;
 			++_list_end.back();
-			while(*ptr) {
-				++ptr;
-			}
-			++ptr;
+			while(*ptr) { ++ptr; } ++ptr; // skip string
 		}
 		_entrySize = segmentsFromBits(
 				_list_end.size() + _flag_names.size(),
@@ -140,11 +140,12 @@ namespace ink::runtime::internal
 			for(int i = 0; i < numLists(); ++i) {
 				int len = _list_end[i] - listBegin(i);
 				if(i < len && hasList(entry, i)) {
-					if(hasFlag(entry,j)) {
+					int flag = j + listBegin(i);
+					if(hasFlag(entry,flag)) {
 						if(!first) {
 							*itr++ = ','; *itr++ = ' ';
 						} else { first = false; }
-						for(const char* c = _flag_names[j]; *c; ++c) {
+						for(const char* c = _flag_names[flag]; *c; ++c) {
 							*itr++ = *c;
 						}
 					}
@@ -548,6 +549,17 @@ namespace ink::runtime::internal
 			}
 		}
 		return true;
+	}
+
+	list_flag list_table::get_list_id(const char *list_name) const {
+		using int_t = decltype(list_flag::list_id);
+		for(int_t i = 0; i < static_cast<int_t>(_list_names.size()); ++i) {
+			if(str_equal(list_name, _list_names[i])) {
+				return list_flag{.list_id = i, .flag = -1};
+			}
+		}
+		inkAssert(false, "No list with name found!");
+		return null_flag;
 	}
 
 #ifdef INK_ENABLE_STL

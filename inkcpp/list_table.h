@@ -43,6 +43,9 @@ namespace ink::runtime::internal
 
 		/// creates an empty list
 		list create();
+		
+		/** @return list_flag with list_id set to list with name list_name */
+		list_flag get_list_id(const char* list_name) const;
 
 		/// zeros all usage values
 		void clear_usage();
@@ -215,6 +218,7 @@ namespace ink::runtime::internal
 		// defined list (meta data)
 		managed_array<int, config::maxListTypes> _list_end;
 		managed_array<const char*,config::maxFlags> _flag_names;
+		managed_array<const char*,config::maxListTypes> _list_names;
 
 		bool _valid;
 	public:

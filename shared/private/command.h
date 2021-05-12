@@ -76,7 +76,8 @@ namespace ink
 		HAS,
 		HASNT,
 		INTERSECTION,
-		BINARY_OPERATORS_END = INTERSECTION,
+		LIST_INT,
+		BINARY_OPERATORS_END = LIST_INT,
 
 		// == Unary operators
 		UNARY_OPERATORS_START,
@@ -88,7 +89,8 @@ namespace ink
 		lrnd,
 		LIST_ALL,
 		LIST_INVERT,
-		UNARY_OPERATORS_END = LIST_INVERT,
+		LIST_VALUE,
+		UNARY_OPERATORS_END = LIST_VALUE,
 		OP_END,
 
 		// == Container tracking
