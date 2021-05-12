@@ -210,12 +210,12 @@ namespace ink::runtime::internal {
 		void operator()(basic_eval_stack& stack, value* vals) {
 			inkAssert(vals[0].type() == value_type::list_flag, "LIST_VALUE only works on list_flag values");
 			stack.push(value{}.set<value_type::int32>(static_cast<int32_t>(
-							vals[0].get<value_type::list_flag>().flag)));
+							vals[0].get<value_type::list_flag>().flag) + 1));
 		}
 	};
 
 	template<>
-	class operation<Command::LIST_INT, value_type::list_flag, void> : public operation_base<list_table> {
+	class operation<Command::LIST_INT, value_type::string, void> : public operation_base<list_table> {
 	public:
 		using operation_base::operation_base;
 		void operator()(basic_eval_stack& stack, value* vals);

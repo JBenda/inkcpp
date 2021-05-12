@@ -210,11 +210,17 @@ namespace ink::runtime::internal
 
 		// check if lists are defined
 		_list_meta = ptr;
-		if(_header.read_list_flag(ptr) != null_flag) {
+		if(list_flag flag = _header.read_list_flag(ptr); flag != null_flag) {
 			// skip list definitions
+			auto list_id = flag.list_id;
+			while(*ptr != 0) {++ptr;} ++ptr; // skip list name
 			do{
+				if(flag.list_id != list_id) {
+					flag.list_id = list_id;
+					while(*ptr != 0) {++ptr;} ++ptr; // skip list name
+				}
 				while(*ptr != 0) { ++ptr; } ++ptr; // skip flag name
-			} while  (_header.read_list_flag(ptr) != null_flag);
+			} while  ((flag = _header.read_list_flag(ptr)) != null_flag);
 
 			_lists = reinterpret_cast<const list_flag*>(ptr);
 			// skip predefined lists

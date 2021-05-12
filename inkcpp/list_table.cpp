@@ -112,7 +112,7 @@ namespace ink::runtime::internal
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(entry, i)) {
 				for(int j = listBegin(i); j < _list_end[i]; ++j) {
-					if (hasFlag(entry,j)) {
+					if (hasFlag(entry,j) && _flag_names[j]) {
 						if(!first) {
 							len += 2; // ', '	
 						} else {first = false;}
@@ -141,7 +141,7 @@ namespace ink::runtime::internal
 				int len = _list_end[i] - listBegin(i);
 				if(i < len && hasList(entry, i)) {
 					int flag = j + listBegin(i);
-					if(hasFlag(entry,flag)) {
+					if(hasFlag(entry,flag) && _flag_names[flag]) {
 						if(!first) {
 							*itr++ = ','; *itr++ = ' ';
 						} else { first = false; }
@@ -444,7 +444,7 @@ namespace ink::runtime::internal
 				setList(o,i);
 				for(int j = listBegin(i); j < _list_end[i]; ++j)
 				{
-					setBit(o, j);
+					setFlag(o, j);
 				}
 			}
 		}
@@ -470,10 +470,17 @@ namespace ink::runtime::internal
 		data_t* o = getPtr(res.lid);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(l, i)) {
-				setList(o,i);
+				bool hasList = false;
 				for(int j = listBegin(i); j < _list_end[i]; ++j)
 				{
-					setBit(o, j, !getBit(l,j));
+					bool have = hasFlag(l,j);
+					if(!have) {
+						hasList = true;
+						setFlag(o,j);
+					}
+				}
+				if(hasList) {
+					setList(o,i);
 				}
 			}
 		}
@@ -485,7 +492,7 @@ namespace ink::runtime::internal
 		if(arg != null_flag) {
 			data_t* o = getPtr(res.lid);
 			for(int i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
-				setBit(o, i, i - listBegin(arg.list_id) != arg.flag);
+				setFlag(o, i, i - listBegin(arg.list_id) != arg.flag);
 			}
 		}
 		return res;
@@ -579,7 +586,7 @@ namespace ink::runtime::internal
 				int len = _list_end[i] - listBegin(i);
 				if(i < len && hasList(entry, i)) {
 					int flag = listBegin(i) + j;
-					if(hasFlag(entry,flag)) {
+					if(hasFlag(entry,flag) && _flag_names[flag]) {
 						if(!first) {
 							os << ", ";
 						} else { first = false; }
