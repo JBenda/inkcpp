@@ -698,21 +698,29 @@ namespace ink::runtime::internal
 				hash_t variableName = read<hash_t>();
 
 				// Check if it's a redefinition (not yet used, seems important for pointers later?)
-				// bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
+				bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
 
 				// Check if there's a local variable of this name
 				const value* local = _stack.get(variableName);
 
 				// If not, we're setting a global (temporary variables are explicitely defined as such,
 				//  where globals are defined using SET_VARIABLE).
+				value val = _eval.pop();
 				if (local == nullptr)
 				{
-					_globals->set_variable(variableName, _eval.pop());
+					if(is_redef) {
+						val = _globals->get_variable(variableName)->redefine(
+								val, _globals->lists());
+					}
+					_globals->set_variable(variableName, val);
 				}
 				else
 				{
 					// Otherwise, it's a temporary variable
-					_stack.set(variableName, _eval.pop());
+					if(is_redef) {
+						val = local->redefine(val, _globals->lists());
+					}
+					_stack.set(variableName, val);
 				}
 			}
 			break;

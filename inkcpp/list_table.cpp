@@ -3,14 +3,17 @@
 #include "header.h"
 #include "random.h"
 #include "string_utils.h"
-#include <iostream>
+
+#ifdef INK_ENABLE_STL
+#include <ostream>
+#endif
 
 namespace ink::runtime::internal
 {
 
 	void  list_table::copy_lists(const data_t* src, data_t* dst) {
 		int len = numLists() / bits_per_data;
-		int rest = numLists() / bits_per_data;
+		int rest = numLists() % bits_per_data;
 		for(int i = 0; i < len; ++i) {
 			dst[i] = src[i];
 		}
@@ -183,6 +186,7 @@ namespace ink::runtime::internal
 	}
 
 	list_table::list& list_table::add_inplace(list& lh, list_flag rh) {
+		if(rh.list_id < 0) return lh; // empty or null flag (skip)
 		data_t* l = getPtr(lh.lid);
 		setList(l, rh.list_id);
 		if(rh.flag >= 0) {  // origin entry
@@ -567,6 +571,25 @@ namespace ink::runtime::internal
 		}
 		inkAssert(false, "No list with name found!");
 		return null_flag;
+	}
+
+	list_table::list list_table::redefine(list lh, list rh) {
+		data_t* l = getPtr(lh.lid);
+		data_t* r = getPtr(rh.lid);
+
+		// if the new list has no origin: give it the origin of the old value
+		bool has_origin = false;
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(r, i)) { has_origin = true; break; }
+		}
+		if(!has_origin) {
+			copy_lists(l, r);
+		}
+
+		for(int i = 0; i < _entrySize; ++i) {
+			l[i] = r[i];
+		}
+		return lh;
 	}
 
 #ifdef INK_ENABLE_STL

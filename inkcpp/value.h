@@ -8,6 +8,7 @@
 #include "system.h"
 #include "../shared/private/command.h"
 #include "list_table.h"
+#include "tuple.hpp"
 
 #ifdef INK_ENABLE_STL
 #include <iosfwd>
@@ -21,7 +22,8 @@ namespace ink::runtime::internal {
 	enum class value_type {
 		BEGIN, 						// To find the start of list
 		none = BEGIN,               // no type -> invalid
-		divert,                     // divert to different story position
+		OP_BEGIN,					// first type to operate on
+		divert = OP_BEGIN,          // divert to different story position
 		PRINT_BEGIN,                // first printable value
 		boolean = PRINT_BEGIN,      // boolean variable
 		uint32,                     // 32bit unsigned integer variable
@@ -67,6 +69,15 @@ namespace ink::runtime::internal {
 		const char* str;
 		bool allocated;
 	};
+
+	class value;
+	template<value_type ty, typename T, typename ENV>
+	class redefine {
+	public:
+		redefine(const ENV&) {}
+		value operator()(const T& lh, const T& rh);
+	};
+
 	/**
 	 * @brief class to wrap stack value to common type.
 	 */
@@ -106,7 +117,26 @@ namespace ink::runtime::internal {
 		std::ostream& write(std::ostream&, const list_table* lists = nullptr) const;
 #endif
 
+		/// execute the type exclusive overwrite function and return a new value with
+		/// this new type
+		template<typename ... T>
+		value redefine(const value& oth, T& ... env) const {
+			inkAssert(type() == oth.type());
+			return redefine<value_type::OP_BEGIN, T...>(oth, {&env...});
+		}
+
 	private:
+		template<value_type ty, typename ... T>
+		value redefine(const value& oth, const tuple<T*...>& env) const {
+			if constexpr ( ty == value_type::OP_END) {
+				throw ink_exception("Can't redefine value with this type! (It is not an variable type!)");
+			} else if (ty != type()) {
+				return redefine<ty + 1>(oth, env);
+			} else {
+				return internal::redefine<ty, typename ret<ty>::type, tuple<T*...>>(env)(get<ty>(), oth.get<ty>());
+			}
+		}
+
 		/// actual storage
 		union {
 			bool bool_value;
@@ -127,6 +157,11 @@ namespace ink::runtime::internal {
 		};
 		value_type _type;
 	};
+
+	template<value_type ty, typename T, typename ENV>
+	value redefine<ty,T,ENV>::operator()(const T& lh, const T& rh) {
+		return value{}.set<ty>(rh);
+	}
 
 	// define get and set for int32
 	template<> struct value::ret<value_type::int32> { using type = int32_t; };
@@ -231,6 +266,13 @@ namespace ink::runtime::internal {
 	template<>
 	inline constexpr value& value::set<value_type::string, char*, bool>( char* v, bool allocated) {
 		string_value = {v, allocated};
+		_type = value_type::string;
+		return *this;
+	}
+	template<>
+	inline constexpr value& value::set<value_type::string, string_type>(
+			string_type str) {
+		string_value = str;
 		_type = value_type::string;
 		return *this;
 	}

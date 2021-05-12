@@ -63,6 +63,7 @@ namespace ink
 		}
 	};
 	constexpr list_flag null_flag{-1,-1};
+	constexpr list_flag empty_flag{-1,0};
 
 	// Checks if a string is only whitespace
 	static bool is_whitespace(const char* string, bool includeNewline = true)

@@ -3,7 +3,7 @@
 #include "system.h"
 #include "array.h"
 
-#ifdef INKCPP_ENABLE_STL
+#ifdef INK_ENABLE_STL
 #include <iosfwd>
 #endif
 
@@ -76,6 +76,12 @@ namespace ink::runtime::internal
 		 * @return pointer to end of insierted string
 		 */
 		char* toString(char* out, const list& l) const;
+
+		/** special traitment when a list get assignet again
+		 * when a list get assigned and would have no origin, it gets the origin of the base with origin
+		 * eg. I072
+		 */
+		list redefine(list lh, list rh);
 		
 		list add(list l, int i);
 		list_flag add(list_flag f, int i);

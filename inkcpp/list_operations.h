@@ -31,6 +31,15 @@ namespace ink::runtime::internal {
 
 	}
 
+	template<typename T>
+	class redefine<value_type::list, list_table::list, T> : public operation_base<list_table> {
+	public:
+		using operation_base::operation_base;
+		value operator()(const list_table::list& lh, const list_table::list& rh)  {
+			return value{}.set<value_type::list>(_list_table.redefine(lh,rh));
+		}
+	};
+
 	template<>
 	class operation<Command::ADD, value_type::list, void> : public operation_base<list_table> {
 	public:

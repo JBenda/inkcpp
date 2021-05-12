@@ -343,11 +343,15 @@ namespace ink::compiler::internal
 
 				}
 			} else {
-				for( const auto& origin_list : command["origins"]) {
-					entries.push_back({
-							.list_id = _list_meta.get_lid(origin_list.get<std::string>()),
-							.flag = -1,
-					});
+				if(has(command, "origins")) {
+					for( const auto& origin_list : command["origins"]) {
+						entries.push_back({
+								.list_id = _list_meta.get_lid(origin_list.get<std::string>()),
+								.flag = -1,
+						});
+					}
+				} else {
+					entries.push_back(empty_flag);
 				}
 			}
 
