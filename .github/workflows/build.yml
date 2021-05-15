@@ -173,6 +173,13 @@ jobs:
           name: ${{ matrix.os }}-summary
           path: summary.txt
 
+      - name: Leave Comment
+        uses: thollander/actions-comment-pull-request@master
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          message: 'Reporting from ${{ matrix.os }}. Ink Proof Result: ${{ env.SUCCESSES }} / ${{ env.TOTAL }}.'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Deploy Page
         uses: JamesIves/github-pages-deploy-action@releases/v3
         if: github.ref == 'refs/heads/master'
@@ -189,13 +196,13 @@ jobs:
         include:
           - summary: macos-latest-summary
             name: MacOSX
-            os: macos-latest
+            os: macos
           - summary: windows-latest-summary
             name: Win64
-            os: windows-latest
+            os: windows
           - summary: "ubuntu-20.04-summary"
             name: Ubuntu
-            os: "ubuntu-20.04"
+            os: ubuntu
     steps:
       # Download inkproof summary
       - uses: actions/download-artifact@v2
@@ -213,8 +220,8 @@ jobs:
       - name: Make Badge
         uses: RubbaBoy/BYOB@v1.2.0
         with:
-          NAME: ${{ matrix.os }}-proof
-          LABEL: "Proof ${{ matrix.os }}"
+          NAME: ${{ matrix.os }}proof
+          LABEL: "Proof ${{ matrix.name }}"
           STATUS: "${{ env.SUCCESSES }} / ${{ env.TOTAL }}"
-          COLOR: 00EEFF
+          COLOR: blue
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
