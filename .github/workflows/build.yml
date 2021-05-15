@@ -152,6 +152,7 @@ jobs:
           SUCCESSES=$(jq "[.results[] | select(.status==\"SUCCESS\" and .program == \"inkcpp\")] | length" summary.json)
           TOTAL=$(jq "[.results[] | select(.program == \"inkcpp\")] | length" summary.json)
           echo "Results Summary: $SUCCESSES / $TOTAL"
+          cd $GITHUB_WORKSPACE
           echo -e "SUCCESSES=$SUCCESSES\nTOTAL=$TOTAL" > summary.txt
 
       - name: Upload Summary
@@ -159,6 +160,14 @@ jobs:
         with:
           name: ${{ matrix.os }}-summary
           path: summary.txt
+
+      - name: Deploy Page
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        if: github.ref == 'refs/heads/master'
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: inkproof-page
+          FOLDER: proofing/ink-proof/out
 
   make-badge:
     runs-on: ubuntu-latest
