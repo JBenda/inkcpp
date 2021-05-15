@@ -124,7 +124,8 @@ jobs:
         run: ${{ matrix.install }}
 
       # Run ink proof
-      - name: Build Ink Proof Website
+      - name: Build Ink Proof Website (Windows)
+        if: ${{ matrix.os }} == 'windows-latest'
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE/proofing/ink-proof
@@ -132,8 +133,21 @@ jobs:
           cp ../inkcpp_runtime_driver drivers/
           chmod +x drivers/inkcpp_runtime_driver
           mkdir deps/inkcpp
-          cp $GITHUB_WORKSPACE\\build\\bin\\* deps/inkcpp/
+          cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
           chmod +x deps/inkcpp/inkcpp_cl
+          python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
+
+      - name: Build Ink Proof Website (Unix)
+        if: ${{ matrix.os }} != 'windows-latest'
+        shell: bash
+        run: |
+          cd $GITHUB_WORKSPACE\\proofing\\ink-proof
+          python3 install_deps.py
+          cp ..\\inkcpp_runtime_driver drivers\\
+          chmod +x drivers\\inkcpp_runtime_driver
+          mkdir deps/inkcpp
+          cp $GITHUB_WORKSPACE\\build\\bin\\* deps\\inkcpp\\
+          chmod +x deps\\inkcpp\\inkcpp_cl
           python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
           
       # Upload bin directory as artifact
