@@ -173,13 +173,6 @@ jobs:
           name: ${{ matrix.os }}-summary
           path: summary.txt
 
-      - name: Leave Comment
-        uses: thollander/actions-comment-pull-request@master
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
-          message: 'Reporting from ${{ matrix.os }}. Ink Proof Result: ${{ env.SUCCESSES }} / ${{ env.TOTAL }}.'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Deploy Page
         uses: JamesIves/github-pages-deploy-action@releases/v3
         if: github.ref == 'refs/heads/master'
@@ -215,6 +208,13 @@ jobs:
         shell: bash
         run: |
           cat summary.txt >> $GITHUB_ENV
+
+      - name: Leave Comment
+        uses: thollander/actions-comment-pull-request@master
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          message: 'Reporting from ${{ matrix.os }}. Ink Proof Result: ${{ env.SUCCESSES }} / ${{ env.TOTAL }}.'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Create badge for OS
       - name: Make Badge
