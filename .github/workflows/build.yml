@@ -151,10 +151,44 @@ jobs:
           cd $GITHUB_WORKSPACE/proofing/ink-proof/out
           SUCCESSES=$(jq "[.results[] | select(.status==\"SUCCESS\" and .program == \"inkcpp\")] | length" summary.json)
           TOTAL=$(jq "[.results[] | select(.program == \"inkcpp\")] | length" summary.json)
-          echo "$SUCCESSES / $TOTAL"
-          echo "SUCCESSES=$SUCCESSES" >> $GITHUB_ENV
-          echo "TOTAL=$TOTAL" >> $GITHUB_ENV
-          
+          echo "Results Summary: $SUCCESSES / $TOTAL"
+          echo -e "SUCCESSES=$SUCCESSES\nTOTAL=$TOTAL" > summary.txt
+
+      - name: Upload Summary
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ matrix.os }}-summary
+          path: summary.txt
+
+  make-badge:
+    runs-on: ubuntu-latest
+    needs: ink-proof
+    strategy: 
+      matrix:
+        include:
+          - summary: macos-latest-summary
+            name: MacOSX
+            os: macos-latest
+          - summary: windows-latest-summary
+            name: Win64
+            os: windows-latest
+          - summary: "ubuntu-20.04-summary"
+            name: Ubuntu
+            os: "ubuntu-20.04"
+    steps:
+      # Download inkproof summary
+      - uses: actions/download-artifact@v2
+        with:
+          name: ${{ matrix.summary }}
+          path: "."
+
+      # Read summary into ENV
+      - name: Read Summary Into Env
+        shell: bash
+        run: |
+          cat summary.txt >> $GITHUB_ENV
+
+      # Create badge for OS
       - name: Make Badge
         uses: RubbaBoy/BYOB@v1.2.0
         with:
