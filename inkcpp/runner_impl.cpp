@@ -60,6 +60,11 @@ namespace ink::runtime::internal
 		_num_choices = 0;
 	}
 
+	void runner_impl::clear_tags()
+	{
+		_num_tags = 0;
+	}
+
 	void runner_impl::jump(ip_t dest, bool record_visits)
 	{
 		// Optimization: if we are _is_falling, then we can
@@ -191,6 +196,8 @@ namespace ink::runtime::internal
 		case Command::MAX:
 			result = lhs > rhs ? lhs : rhs;
 			break;
+		default:
+			break;
 		}
 
 		// Push result onto the stack
@@ -211,6 +218,8 @@ namespace ink::runtime::internal
 			break;
 		case Command::NOT:
 			result = !v;
+			break;
+		default:
 			break;
 		}
 
@@ -388,6 +397,7 @@ namespace ink::runtime::internal
 		// Jump to destination and clear choice list
 		jump(_story->instructions() + _choices[index].path());
 		clear_choices();
+		clear_tags();
 	}
 
 	void runner_impl::getline_silent()
@@ -395,6 +405,22 @@ namespace ink::runtime::internal
 		// advance and clear output stream
 		advance_line();
 		_output.clear();
+	}
+
+	bool runner_impl::has_tags() const
+	{
+		return _num_tags > 0;
+	}
+
+	size_t runner_impl::num_tags() const
+	{
+		return _num_tags;
+	}
+
+	const char* runner_impl::get_tag(size_t index) const
+	{
+		inkAssert(index < _num_tags, "Tag index exceeds _num_tags");
+		return _tags[index];
 	}
 
 #ifdef INK_ENABLE_CSTD
@@ -474,6 +500,8 @@ namespace ink::runtime::internal
 				case change_type::newline_removed:
 					// Newline was removed. Proceed as if we never hit it
 					forget();
+					break;
+				default:
 					break;
 				}
 			}
@@ -929,13 +957,13 @@ namespace ink::runtime::internal
 				int sequenceLength = _eval.pop();
 				int index = _eval.pop();
 
-				_eval.push(rand() % sequenceLength); // TODO: platform independance?
+				_eval.push(_rng.rand(sequenceLength));
 			} break;
 			case Command::SEED:
 			{
 				// TODO: Platform independance
-				int seed = _eval.pop();
-				srand(seed);
+				int32_t seed = _eval.pop();
+				_rng.srand(seed);
 
 				// push void (TODO)
 				_eval.push(0);
@@ -947,6 +975,10 @@ namespace ink::runtime::internal
 
 				// Push the read count for the requested container index
 				_eval.push((int)_globals->visits(container));
+			} break;
+			case Command::TAG:
+			{
+				_tags[_num_tags++] = read<const char*>();
 			} break;
 			default:
 				inkAssert(false, "Unrecognized command!");

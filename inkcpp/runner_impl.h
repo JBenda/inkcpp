@@ -11,6 +11,7 @@
 #include "functions.h"
 #include "string_table.h"
 #include "array.h"
+#include "random.h"
 
 #include "runner.h"
 #include "choice.h"
@@ -46,6 +47,11 @@ namespace ink::runtime::internal
 
 		// runs silently
 		void getline_silent();
+
+		virtual bool has_tags() const override;
+		virtual size_t num_tags() const override;
+		virtual const char* get_tag(size_t index) const override;
+
 
 #ifdef INK_ENABLE_CSTD
 		// c-style getline
@@ -111,6 +117,8 @@ namespace ink::runtime::internal
 		choice& add_choice();
 		void clear_choices();
 
+		void clear_tags();
+
 		// Special code for jumping from the current IP to another
 		void jump(ip_t, bool record_visits = true);
 
@@ -155,6 +163,11 @@ namespace ink::runtime::internal
 		choice _choices[MAX_CHOICES];
 		size_t _num_choices = 0;
 
+		// Tag list
+		static const size_t MAX_TAGS = 100;
+		const char* _tags[MAX_TAGS];
+		size_t _num_tags = 0;
+
 		// TODO: Move to story? Both?
 		functions _functions;
 
@@ -163,6 +176,8 @@ namespace ink::runtime::internal
 		bool _is_falling = false;
 
 		bool _saved = false;
+
+		prng _rng{};
 	};
 
 	template<>

@@ -19,7 +19,18 @@ namespace ink::runtime::internal
 		globals_impl(const story_impl*);
 		virtual ~globals_impl() { }
 
-		virtual void dummy() override { }
+	protected:
+		const uint32_t* get_uint(hash_t name) const override;
+		bool set_uint(hash_t name, uint32_t value) override;
+
+	  	const int32_t* get_int(hash_t name) const override;
+		bool set_int(hash_t name, int32_t value) override;
+
+		const float* get_float(hash_t name) const override;
+		bool set_float(hash_t name, float value) override;
+
+		const char * const * get_str(hash_t name) const override;
+		bool set_str(hash_t name, const char* value) override;
 
 	public:
 		// Records a visit to a container
@@ -37,6 +48,7 @@ namespace ink::runtime::internal
 
 		// gets a global variable
 		const value* get_variable(hash_t name) const;
+		value* get_variable(hash_t name);
 
 		// checks if globals are initialized
 		bool are_globals_initialized() const { return _globals_initialized; }
@@ -46,7 +58,7 @@ namespace ink::runtime::internal
 
 		// gets the allocated string table
 		inline string_table& strings() { return _strings; }
-		
+
 		// run garbage collection
 		void gc();
 
@@ -54,10 +66,11 @@ namespace ink::runtime::internal
 		void save();
 		void restore();
 		void forget();
+
 	private:
 		// Store the number of containers. This is the length of most of our lists
 		const uint32_t _num_containers;
-		
+
 		// Visit count array
 		internal::allocated_restorable_array<uint32_t> _visit_counts;
 
@@ -75,7 +88,7 @@ namespace ink::runtime::internal
 		runner_entry* _runners_start;
 
 		// Allocated string table (shared by all runners using this global store)
-		string_table _strings;
+		mutable string_table _strings;
 
 		// Global variables (TODO: Max 50?)
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.

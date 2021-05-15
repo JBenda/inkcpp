@@ -1,9 +1,7 @@
 #include "value.h"
 #include "output.h"
 #include "string_table.h"
-
-// TODO
-#include <cstdlib>
+#include "string_utils.h"
 
 namespace ink
 {
@@ -98,6 +96,8 @@ namespace ink
 					if (new_type == value_type::integer)
 						val = value((int)val._first.float_value);
 					return;
+				default:
+					break;
 				}
 
 				inkAssert(false, "Invalid value cast");
@@ -133,6 +133,8 @@ namespace ink
 						break;
 					case data_type::none:
 						return;
+					default:
+						break;
 					}
 				}
 			}
@@ -152,6 +154,8 @@ namespace ink
 				case data_type::string_table_pointer:
 				case data_type::allocated_string_pointer:
 					return _first.string_val[0] != '\0';
+				default:
+					break;
 				}
 
 				inkFail("Invalid type to check for truthy");
@@ -234,6 +238,8 @@ namespace ink
 
 					return new_value;
 				}
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for add");
@@ -252,6 +258,8 @@ namespace ink
 					return left.as_int() - right.as_int();
 				case value_type::decimal:
 					return left.as_float() - right.as_float();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for subtract");
@@ -268,6 +276,8 @@ namespace ink
 					return left.as_int() * right.as_int();
 				case value_type::decimal:
 					return left.as_float() * right.as_float();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for multiply");
@@ -284,6 +294,8 @@ namespace ink
 					return left.as_int() / right.as_int();
 				case value_type::decimal:
 					return left.as_float() / right.as_float();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for divide");
@@ -298,6 +310,8 @@ namespace ink
 				{
 				case value_type::integer:
 					return left.as_int() % right.as_int();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for mod");
@@ -327,7 +341,59 @@ namespace ink
 				}
 			}
 
-			
+			void value::finalize_string(string_table& table) const {
+				constexpr size_t MaxSize = 256; // max size for no string element
+				char buffer[VALUE_DATA_LENGTH][MaxSize];
+				const char* strs[VALUE_DATA_LENGTH];
+				char null = 0;
+
+				size_t len = 0;
+				for (int i = 0; i < VALUE_DATA_LENGTH; ++i) {
+					switch(_data[i].type) {
+					case data_type::float32:
+						strs[i] = buffer[i];
+						toStr(buffer[i], MaxSize, _data[i].float_value);
+						break;
+					case data_type::uint32:
+						strs[i] = buffer[i];
+						toStr(buffer[i], MaxSize, _data[i].uint_value);
+						break;
+					case data_type::int32:
+						strs[i] = buffer[i];
+						toStr(buffer[i], MaxSize, _data[i].integer_value);
+						break;
+					case data_type::string_table_pointer:
+					case data_type::allocated_string_pointer:
+						strs[i] = _data[i].string_val;
+						break;
+					default: strs[i] = &null;
+					}
+					_data[i].set_none();
+					len += strlen(strs[i]);
+				}
+				char* str = table.create(len+1);
+				table.mark_used(str);
+
+				char* ptr = str;
+				for (int i = 0; i < VALUE_DATA_LENGTH; ++i) {
+					for(const char* c = strs[i]; *c; ++c){
+						*ptr++ = *c;
+					}
+				}
+				*ptr = 0;
+				_data[0].set_string(str, true);
+			}
+
+			const char* value::as_str(string_table& table) const {
+				finalize_string(table);
+				return _first.string_val;
+			}
+
+			const char * const * value::as_str_ptr(string_table& table) const {
+				finalize_string(table);
+				return &_first.string_val;
+			}
+
 			bool value::compare_string(const value& left, const value& right) {
 				// convert fields to string representation and start comparison
 				// when the end of one field is reached, the other still has
@@ -435,6 +501,8 @@ namespace ink
 					return compare_string(left, right);
 				case value_type::divert:
 					return left.as_divert() == right.as_divert();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for is_equal");
@@ -451,6 +519,8 @@ namespace ink
 					return left.as_int() < right.as_int();
 				case value_type::decimal:
 					return left.as_float() < right.as_float();
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for less_than");
@@ -466,6 +536,8 @@ namespace ink
 					return -val._first.integer_value;
 				case data_type::float32:
 					return -val._first.float_value;
+				default:
+					break;
 				}
 
 				inkFail("Invalid type for negate");
