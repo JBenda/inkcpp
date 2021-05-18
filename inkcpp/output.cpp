@@ -435,25 +435,25 @@ namespace ink
 
 			bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const
 			{
+				if (_data[iter].printable()) {
+					lastNewline = false;
+					hasGlue = false; 
+				} else {
 				switch (_data[iter].type())
 				{
-				case value_type::int32:
-				case value_type::float32:
-				case value_type::string:
-					hasGlue = false;
-					lastNewline = false;
-					break;
-				case value_type::newline:
-					if (lastNewline)
-						return true;
-					if (hasGlue)
-						return true;
-					lastNewline = true;
-					break;
-				case value_type::glue:
-					hasGlue = true;
-					break;
-				default: break;
+					case value_type::newline:
+						if (lastNewline)
+							return true;
+						if (hasGlue)
+							return true;
+						lastNewline = true;
+						break;
+					case value_type::glue:
+						hasGlue = true;
+						break;
+					default:
+						break;
+					}
 				}
 
 				return false;
