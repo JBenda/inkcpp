@@ -293,7 +293,12 @@ namespace ink::compiler::internal
 			while (token != nullptr)
 			{
 				// Number
-				if (isdigit(token[0]))
+				// variable names can start with a number
+				bool isNumber = true;
+				for(const char* i = token; *i; ++i) {
+					if(!isdigit(*i)) { isNumber = false; break; }
+				}
+				if(isNumber)
 				{
 					// Check if we have a nop registered at that index
 					int index = atoi(token);
