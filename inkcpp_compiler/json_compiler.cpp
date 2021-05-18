@@ -313,7 +313,14 @@ namespace ink::compiler::internal
 		// Internal function call
 		else if (get(command, "f()", val))
 		{
-			_emitter->write_path(Command::FUNCTION, CommandFlag::NO_FLAGS, val);
+			bool is_var; // function address is stored in jump
+			if(get(command, "var", is_var) && is_var) {
+				_emitter->write_variable(Command::FUNCTION,
+						CommandFlag::FUNCTION_TO_VARIABLE,
+						val);
+			} else {
+				_emitter->write_path(Command::FUNCTION, CommandFlag::NO_FLAGS, val);
+			}
 		}
 
 		// External function call

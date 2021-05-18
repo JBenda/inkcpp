@@ -655,8 +655,19 @@ namespace ink::runtime::internal
 			break;
 			case Command::FUNCTION:
 			{
+				uint32_t target;
 				// Find divert address
-				uint32_t target = read<uint32_t>();
+				if(flag & CommandFlag::FUNCTION_TO_VARIABLE) {
+					hash_t var_name = read<hash_t>();
+					const value* value = _stack.get(var_name);
+					if(value == nullptr) {
+						value = _globals->get_variable(var_name);
+					}
+					inkAssert(value != nullptr);
+					target  = value->get<value_type::divert>();
+				} else {
+					target = read<uint32_t>();
+				}
 				start_frame<frame_type::function>(target);
 			}
 			break;
@@ -888,7 +899,7 @@ namespace ink::runtime::internal
 					else if (_stack.has_frame(&type) && type == frame_type::function) // implicit return is only for functions
 					{
 						// push null and return
-						_eval.push(value());
+						_eval.push(values::null);
 
 						// HACK
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
