@@ -652,9 +652,20 @@ namespace ink::runtime::internal
 			// == Tunneling
 			case Command::TUNNEL:
 			{
-				uint32_t target = read<uint32_t>();
+				uint32_t target;
+				// Find divert address
+				if(flag & CommandFlag::TUNNEL_TO_VARIABLE) {
+					hash_t var_name = read<hash_t>();
+					const value* val = _stack.get(var_name);
+					if(val == nullptr) {
+						val = _globals->get_variable(var_name);
+					}
+					inkAssert(val != nullptr);
+					target = val->get<value_type::divert>();
+				} else {
+					target = read<uint32_t>();
+				}
 				start_frame<frame_type::tunnel>(target);
-				bEvaluationMode = false;
 			}
 			break;
 			case Command::FUNCTION:
@@ -663,12 +674,12 @@ namespace ink::runtime::internal
 				// Find divert address
 				if(flag & CommandFlag::FUNCTION_TO_VARIABLE) {
 					hash_t var_name = read<hash_t>();
-					const value* value = _stack.get(var_name);
-					if(value == nullptr) {
-						value = _globals->get_variable(var_name);
+					const value* val = _stack.get(var_name);
+					if(val == nullptr) {
+						val = _globals->get_variable(var_name);
 					}
-					inkAssert(value != nullptr);
-					target  = value->get<value_type::divert>();
+					inkAssert(val != nullptr);
+					target  = val->get<value_type::divert>();
 				} else {
 					target = read<uint32_t>();
 				}

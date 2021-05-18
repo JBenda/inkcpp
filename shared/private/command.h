@@ -126,8 +126,9 @@ namespace ink
 		// == Variable assignment
 		ASSIGNMENT_IS_REDEFINE = 1 << 0,
 
-		// == Function flags
+		// == Function/Tunnel flags
 		FUNCTION_TO_VARIABLE = 1 << 0,
+		TUNNEL_TO_VARIABLE = 1 << 0,
 	};
 
 	inline bool operator& (CommandFlag lhs, CommandFlag rhs)

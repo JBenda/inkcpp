@@ -264,7 +264,14 @@ namespace ink::compiler::internal
 		// Tunnel
 		else if (get(command, "->t->", val))
 		{
-			_emitter->write_path(Command::TUNNEL, CommandFlag::NO_FLAGS, val);
+			bool is_var;
+			if(get(command, "var", is_var) && is_var) {
+				_emitter->write_variable(Command::TUNNEL,
+						CommandFlag::TUNNEL_TO_VARIABLE,
+						val);
+			} else {
+				_emitter->write_path(Command::TUNNEL, CommandFlag::NO_FLAGS, val);
+			}
 		}
 
 		// Declare temporary variable
