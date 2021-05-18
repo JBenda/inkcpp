@@ -521,6 +521,15 @@ namespace ink::runtime::internal
 				// TEST-CASE B006 don't print integers
 			}
 			break;
+			case Command::BOOL:
+			{
+				bool val = read<int>() ? true : false;
+				if(bEvaluationMode)
+					_eval.push(value{}.set<value_type::boolean>(val));
+				else
+					_output << value{}.set<value_type::boolean>(val);
+			}
+			break;
 			case Command::FLOAT:
 			{
 				float val = read<float>();

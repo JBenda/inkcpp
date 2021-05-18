@@ -6,6 +6,7 @@ namespace ink
 	const char* CommandStrings[] = {
 			"inkcpp_STR",
 			"inkcpp_INT",
+			"inkcpp_BOOL",
 			"inkcpp_FLOAT",
 			"inkcpp_DIVERT_VAL",
 			"inkcpp_LIST",

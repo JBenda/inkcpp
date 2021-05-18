@@ -192,7 +192,7 @@ namespace ink
 				// Return processed string
 				// remove mulitple accourencies of ' '
 				std::string result = str.str();
-				auto end = clean_string(result.begin(), result.end());
+				auto end = clean_string<false>(result.begin(), result.end());
 				result.resize(end - result.begin());
 				return result;
 			}
@@ -436,7 +436,8 @@ namespace ink
 			bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const
 			{
 				if (_data[iter].printable()
-						&& _data[iter].type() != value_type::newline) {
+						&& _data[iter].type() != value_type::newline
+						&& _data[iter].type() != value_type::string) {
 					lastNewline = false;
 					hasGlue = false; 
 				} else {
@@ -451,6 +452,17 @@ namespace ink
 						break;
 					case value_type::glue:
 						hasGlue = true;
+						break;
+					case value_type::string:
+						lastNewline = false;
+						// an empty string don't count as glued I095
+						for(const char* i=_data[iter].get<value_type::string>();
+								*i; ++i) {
+							if (!isspace(*i)) {
+								hasGlue = false;
+								break;
+							}
+						}
 						break;
 					default:
 						break;

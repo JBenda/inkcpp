@@ -142,7 +142,7 @@ namespace ink::compiler::internal
 			// Arrays are child containers. Recurse.
 			if (iter->is_array())
 				compile_container(*iter, index);
-
+			
 			// Strings are either commands, nops, or raw strings
 			else if (iter->is_string())
 			{
@@ -172,10 +172,21 @@ namespace ink::compiler::internal
 				}
 			}
 
+			// Booleans
+			else if (iter->is_boolean())
+			{
+				int value = iter->get<bool>() ? 1 : 0;
+				_emitter->write(Command::BOOL, value);
+			}
+
 			// Complex commands
 			else if (iter->is_object())
 			{
 				compile_complex_command(*iter);
+			}
+
+			else {
+				throw ink_exception("Failed to container member!");
 			}
 		}
 

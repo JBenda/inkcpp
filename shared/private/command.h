@@ -8,6 +8,7 @@ namespace ink
 		// == Value Commands: Push values onto the stack
 		STR,
 		INT,
+		BOOL,
 		FLOAT,
 		DIVERT_VAL,
 		LIST,

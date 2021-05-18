@@ -122,7 +122,7 @@ namespace ink::runtime::internal {
 	 * @param end iterator of string
 	 * @return new end iterator
 	 */
-	template<typename ITR>
+	template<bool TAILING_SPACES, typename ITR>
 	inline constexpr ITR clean_string(ITR begin, ITR end) {
 		auto dst = begin;
 		for(auto src = begin; src != end; ++src){
@@ -131,7 +131,7 @@ namespace ink::runtime::internal {
 				continue;
 			}
 			if(src[0] == ' ' &&
-					( src+1 == end
+					( (src+1 == end && TAILING_SPACES)
 					 || src[1] == ' '
 					 || src[1] == '\n')) {
 				continue;
