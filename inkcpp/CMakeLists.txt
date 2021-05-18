@@ -20,6 +20,7 @@ list(APPEND SOURCES
 	list_table.h list_table.cpp
 	list_operations.h list_operations.cpp
 	string_operations.cpp
+	numeric_operations.cpp
 	header.cpp
 )
 source_group(Collections REGULAR_EXPRESSION collections/.*)

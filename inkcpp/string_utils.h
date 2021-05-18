@@ -46,6 +46,7 @@ namespace ink::runtime::internal {
 		// trunc cat zeros B007
 		char* itr = buffer + res - 1;
 		while(*itr == '0') { *itr--=0; --res; }
+		if (*itr == '.') { *itr-- = 0; --res;}
 		return 0;
 #endif
 	}

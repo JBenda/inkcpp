@@ -10,7 +10,8 @@ namespace ink::runtime::internal {
 	/// produces a SFINAE error if type is not part of list
 	template<value_type ty>
 	using is_numeric_t = typename enable_if<
-		ty == value_type::int32
+		ty == value_type::boolean
+		|| ty == value_type::int32
 		|| ty == value_type::uint32
 		|| ty == value_type::float32, void>::type;
 
@@ -92,6 +93,31 @@ namespace ink::runtime::internal {
 	}
 
 	template<>
+	class operation<Command::FLOOR, value_type::float32, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
+
+	template<>
+	class operation<Command::CEILING, value_type::float32, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
+
+	template<value_type ty>
+	class operation<Command::INT_CAST, ty, is_numeric_t<ty>> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals) {
+			stack.push(value{}.set<value_type::int32>(
+						static_cast<int32_t>(vals->get<ty>())
+					));
+		}
+	};
+
+	template<>
 	class operation<Command::IS_EQUAL, value_type::divert, void> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
@@ -109,6 +135,26 @@ namespace ink::runtime::internal {
 			stack.push(value{}.set<value_type::boolean>(
 						vals[0].get<value_type::divert>()
 						!= vals[1].get<value_type::divert>()));
+		}
+	};
+
+	template<value_type ty>
+	class operation<Command::FLOOR, ty, is_integral_t<ty>> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals) {
+			// for integral types floor(i) == i
+			stack.push(vals[0]);
+		}
+	};
+
+	template<value_type ty>
+	class operation<Command::CEILING, ty, is_integral_t<ty>> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals) {
+			// for integral types ceil(i) == i
+			stack.push(vals[0]);
 		}
 	};
 
