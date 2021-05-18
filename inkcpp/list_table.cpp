@@ -245,7 +245,7 @@ namespace ink::runtime::internal
 		list res = create();
 		data_t* l = getPtr(lh.lid);
 		data_t* o = getPtr(res.lid);
-		for(int i = 0; i < numLists(); ++i) {
+		for(int i = 0; i < _entrySize; ++i) {
 			o[i] = l[i];
 		}
 		setFlag(o, toFid(rh), false);
@@ -576,6 +576,8 @@ namespace ink::runtime::internal
 	list_table::list list_table::redefine(list lh, list rh) {
 		data_t* l = getPtr(lh.lid);
 		data_t* r = getPtr(rh.lid);
+		list res = create();
+		data_t* o = getPtr(res.lid);
 
 		// if the new list has no origin: give it the origin of the old value
 		bool has_origin = false;
@@ -587,9 +589,9 @@ namespace ink::runtime::internal
 		}
 
 		for(int i = 0; i < _entrySize; ++i) {
-			l[i] = r[i];
+			o[i] = r[i];
 		}
-		return lh;
+		return res;
 	}
 
 #ifdef INK_ENABLE_STL
