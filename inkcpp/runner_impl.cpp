@@ -628,10 +628,14 @@ namespace ink::runtime::internal
 				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().get<value_type::boolean>())
 					break;
 
-				const value& val = *_stack.get(variable);
+				const value* val = _stack.get(variable);
+				if (!val) {
+					val = _globals->get_variable(variable);
+				}
+				inkAssert(val, "Jump destiniation needs to be defined!");
 
 				// Move to location
-				jump(_story->instructions() + val.get<value_type::divert>());
+				jump(_story->instructions() + val->get<value_type::divert>());
 				inkAssert(_ptr < _story->end(), "Diverted past end of story data!");
 			}
 			break;
