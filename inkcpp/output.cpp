@@ -435,7 +435,8 @@ namespace ink
 
 			bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const
 			{
-				if (_data[iter].printable()) {
+				if (_data[iter].printable()
+						&& _data[iter].type() != value_type::newline) {
 					lastNewline = false;
 					hasGlue = false; 
 				} else {
