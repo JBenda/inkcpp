@@ -451,7 +451,7 @@ namespace ink::runtime::internal
 					break;
 				case change_type::no_change:
 					restore();
-					return true;
+					return false;
 				}
 			}
 
@@ -848,6 +848,7 @@ namespace ink::runtime::internal
 				}
 
 				// Use a marker to start compiling the choice text
+
 				_output << values::marker;
 				value stack[2];
 				int sc = 0;
@@ -1034,6 +1035,7 @@ namespace ink::runtime::internal
 		_globals->save();
 		_eval.save();
 		_threads.save();
+		_backup_choice_len = _choices.size();
 		bSavedEvaluationMode = bEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1051,6 +1053,7 @@ namespace ink::runtime::internal
 		_globals->restore();
 		_eval.restore();
 		_threads.restore();
+		_choices.resize(_backup_choice_len);
 		bEvaluationMode = bSavedEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns

@@ -47,6 +47,10 @@ namespace ink::runtime::internal
 			return data()[_size++];
 		}
 		void clear() { _size = 0; }
+		void resize(size_t size) {
+			ink_assert(size <= _size, "Only allow to reduce size");
+			_size = size;
+		}
 
 		void extend();
 	private:
