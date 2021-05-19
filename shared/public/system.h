@@ -87,7 +87,15 @@ namespace ink
 		}
 	}
 
-	static bool is_whitespace(char character, bool includeNewline = true)
+
+	// check if character can be only part of a word, when two part of word characters put together the
+	// will be a space inserted I049
+	inline bool is_part_of_word(char character)
+	{
+		return isalpha(character) || isdigit(character);
+	}
+
+	inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{
 		switch (character)
 		{

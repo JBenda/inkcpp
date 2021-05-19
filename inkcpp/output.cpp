@@ -111,60 +111,8 @@ namespace ink
 			template<typename OUT>
 			void basic_stream::copy_string(const char* str, size_t& dataIter, OUT& output)
 			{
-				const char* iter = str;
-				while (*iter != '\0')
-				{
-					if (is_whitespace(*iter, false)) // newlines are required (B006)
-					{
-						// pass over whitespace
-						bool start = iter == str;
-						const char* iter2 = iter;
-						while (*iter2 != '\0' && is_whitespace(*iter2))
-							iter2++;
-
-						// terminating whitespace
-						if (*iter2 == '\0')
-						{
-							// Whitespace at the start of the stream. Trim.
-							if (start && dataIter == 0)
-							{
-								return;
-							}
-
-							// check what the next item
-							const value* next = nullptr;
-							if (get_next(_data, dataIter, _size, &next))
-							{
-								// If it's a newline, ignore all our whitespace
-								if (next->type() == value_type::newline)
-									return;
-
-								// If it's another string, check if it starts with whitespace
-								if (next->type() == value_type::string )
-								{
-									if (is_whitespace(next->get<value_type::string>()[0]))
-										return;
-								}
-
-								// Otherwise, add the whitespace
-								write_char(output, ' ');
-								iter = iter2;
-							}
-
-							// Last element. Trim
-							return;
-						}
-						else
-						{
-							// collapse whitespace into single space
-							write_char(output, ' ');
-							iter = iter2;
-						}
-					}
-					else
-					{
-						write_char(output, *iter++);
-					}
+				while(*str != 0) {
+				write_char(output, *str++);
 				}
 			}
 
@@ -192,7 +140,7 @@ namespace ink
 				// Return processed string
 				// remove mulitple accourencies of ' '
 				std::string result = str.str();
-				auto end = clean_string<false>(result.begin(), result.end());
+				auto end = clean_string<true, false>(result.begin(), result.end());
 				_last_char = *(end-1);
 				result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
 				return result;
@@ -344,7 +292,11 @@ namespace ink
 				// Just null the save point and continue as normal
 				_save = ~0;
 			}
+			
+			template char* basic_stream::get_alloc<true>(string_table& strings, list_table& lists);
+			template char* basic_stream::get_alloc<false>(string_table& strings, list_table& lists);
 
+			template<bool RemoveTail>
 			char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			{
 				size_t start = find_start();
@@ -356,7 +308,7 @@ namespace ink
 				{
 					if (should_skip(i, hasGlue, lastNewline))
 						continue;
-
+					++length; // potenzial space to sperate 
 					if (_data[i].printable()) {
 						switch(_data[i].type()) {
 							case value_type::list:
@@ -390,9 +342,11 @@ namespace ink
 
 						break;
 					case value_type::string:
+					{
 						// Copy string and advance
-						copy_string(_data[i].get<value_type::string>(), i, ptr);
-						break;
+						const char* value = _data[i].get<value_type::string>(); 
+						copy_string(value, i, ptr);
+					}	break;
 					case value_type::newline:
 						*ptr = '\n'; ptr++;
 						break;
@@ -414,10 +368,12 @@ namespace ink
 
 				// Return processed string
 				{
-				 auto end = clean_string<false>(buffer, buffer+length);
+				 auto end = clean_string<false,false>(buffer, buffer+length);
 				 *end = 0;
 				 _last_char = end[-1];
-				 if (_last_char == ' ') { end[-1] = 0; }
+				 if constexpr (RemoveTail) {
+					 if (_last_char == ' ') { end[-1] = 0; }
+				 }
 				}
 				return buffer;
 			}

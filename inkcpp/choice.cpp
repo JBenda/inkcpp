@@ -32,7 +32,7 @@ namespace ink
 			}
 			char* end = text;
 			while(*end) { ++end; }
-			end = ink::runtime::internal::clean_string<true>(text, end);
+			end = ink::runtime::internal::clean_string<true, true>(text, end);
 			*end = 0;
 			_text = text;
 			// Index/path

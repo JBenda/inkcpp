@@ -849,7 +849,7 @@ namespace ink::runtime::internal
 
 				// Load value from output stream
 				// Push onto stack
-				_eval.push(value{}.set<value_type::string>(_output.get_alloc(
+				_eval.push(value{}.set<value_type::string>(_output.get_alloc<false>(
 								_globals->strings(),
 								_globals->lists())));
 			} break;

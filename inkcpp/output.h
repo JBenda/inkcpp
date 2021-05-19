@@ -44,8 +44,10 @@ namespace ink
 				/** Extract to a newly allocated string
 				 * @param string_table place to allocate new string in
 				 * @param list_table needed do parse list values to string
+				 * @tparam RemoveTail if we should remove a tailing space
 				 * @return newly allocated string
 				 */
+				template<bool RemoveTail = true>
 				char* get_alloc(string_table&, list_table&);
 
 #ifdef INK_ENABLE_STL
