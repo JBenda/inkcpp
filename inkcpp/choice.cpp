@@ -7,7 +7,7 @@ namespace ink
 {
 	namespace runtime
 	{
-		void choice::setup(internal::basic_stream& in, internal::string_table& strings, internal::list_table& lists, int index, uint32_t path, thread_t thread)
+		choice& choice::setup(internal::basic_stream& in, internal::string_table& strings, internal::list_table& lists, int index, uint32_t path, thread_t thread)
 		{
 			char* text = nullptr;
 			// if we only have one item in our output stream
@@ -39,6 +39,7 @@ namespace ink
 			_index = index;
 			_path = path;
 			_thread = thread;
+			return *this;
 		}
 	}
 }

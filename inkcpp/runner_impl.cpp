@@ -59,6 +59,7 @@ namespace ink::runtime::internal
 	void runner_impl::clear_choices()
 	{
 		// TODO: Garbage collection? ? which garbage ?
+		_fallback_choice = nullopt;
 		_choices.clear();
 	}
 
@@ -239,6 +240,9 @@ namespace ink::runtime::internal
 			fill = _output.last_char() == ' ';
 		} while(_ptr != nullptr && _output.last_char() != '\n');
 
+		// TODO: fallback choice = no choice
+		if(!has_choices() && _fallback_choice) { choose(~0); }
+
 		// Return result
 		inkAssert(_output.is_empty(), "Output should be empty after getline!");
 		return result;
@@ -255,6 +259,9 @@ namespace ink::runtime::internal
 			out << _output;
 			fill = _output.last_char() == ' ';
 		} while(_ptr != nullptr && _output.last_char() != '\n');
+
+		// TODO: fallback choice = no choice
+		if(!has_choices() && _fallback_choice) { choose(~0); }
 
 		// Make sure we read everything
 		inkAssert(_output.is_empty(), "Output should be empty after getline!");
@@ -292,6 +299,7 @@ namespace ink::runtime::internal
 #ifdef INK_ENABLE_UNREAL
 	FString runner_impl::getline()
 	{
+		inkAssert(false, "Fix (see getline for std)");
 		// Advance interpreter one line
 		advance_line();
 
@@ -328,10 +336,12 @@ namespace ink::runtime::internal
 
 	void runner_impl::choose(size_t index)
 	{
-		inkAssert(index < _choices.size(), "Choice index out of range");
+		if(has_choices()) {
+			inkAssert(index < _choices.size(), "Choice index out of range");
+		}
 
 		// Get the choice
-		const auto& c = _choices[index];
+		const auto& c = has_choices() ? _choices[index] : _fallback_choice.value();
 
 		// Get its thread
 		thread_t choiceThread = c._thread;
@@ -355,7 +365,7 @@ namespace ink::runtime::internal
 		_threads.clear();
 
 		// Jump to destination and clear choice list
-		jump(_story->instructions() + _choices[index].path());
+		jump(_story->instructions() + c.path());
 		clear_choices();
 		clear_tags();
 	}
@@ -896,11 +906,15 @@ namespace ink::runtime::internal
 				if (flag & CommandFlag::CHOICE_HAS_CHOICE_ONLY_CONTENT) {
 					stack[sc++] = _eval.pop();
 				}
-				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
 				for(;sc;--sc) { _output << stack[sc-1]; }
 
 				// Create choice and record it
-				add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
+				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
+					_fallback_choice
+						= choice{}.setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
+				} else {
+					add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
+				}
 			} break;
 			case Command::START_CONTAINER_MARKER:
 			{

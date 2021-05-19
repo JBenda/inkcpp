@@ -223,6 +223,7 @@ namespace ink::runtime::internal
 
 		// Choice list
 		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
+		optional<choice> _fallback_choice;
 		size_t _backup_choice_len;
 
 		// Tag list

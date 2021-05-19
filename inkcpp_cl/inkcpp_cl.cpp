@@ -170,6 +170,7 @@ int main(int argc, const char** argv)
 				thread->choose(c - 1);
 				std::cout << "?> ";
 				continue;
+				continue;
 			}
 
 			// out of content
