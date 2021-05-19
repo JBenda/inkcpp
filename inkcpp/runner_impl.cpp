@@ -4,6 +4,7 @@
 #include "choice.h"
 #include "globals_impl.h"
 #include "header.h"
+#include "string_utils.h"
 
 namespace ink::runtime
 {
@@ -223,12 +224,20 @@ namespace ink::runtime::internal
 #ifdef INK_ENABLE_STL
 	std::string runner_impl::getline()
 	{
-		// Advance interpreter one line
-		advance_line();
-
-		// Read line into std::string
-		std::string result;
-		_output >> result;
+		std::string result{""};
+		bool fill = false;
+		do {
+			if (fill) {
+				result += " ";
+			}
+			// Advance interpreter one line
+			advance_line();
+			// Read line into std::string
+			std::string part;
+			_output >> part;
+			result += part;
+			fill = _output.last_char() == ' ';
+		} while(_ptr != nullptr && _output.last_char() != '\n');
 
 		// Return result
 		inkAssert(_output.is_empty(), "Output should be empty after getline!");
@@ -237,11 +246,15 @@ namespace ink::runtime::internal
 
 	void runner_impl::getline(std::ostream& out)
 	{
-		// Advance interpreter one line
-		advance_line();
-
-		// Write into out
-		out << _output;
+		bool fill = false;
+		do {
+			if (fill) { out << " "; }
+			// Advance interpreter one line
+			advance_line();
+			// Write into out
+			out << _output;
+			fill = _output.last_char() == ' ';
+		} while(_ptr != nullptr && _output.last_char() != '\n');
 
 		// Make sure we read everything
 		inkAssert(_output.is_empty(), "Output should be empty after getline!");

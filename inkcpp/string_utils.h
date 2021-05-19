@@ -126,7 +126,7 @@ namespace ink::runtime::internal {
 	inline constexpr ITR clean_string(ITR begin, ITR end) {
 		auto dst = begin;
 		for(auto src = begin; src != end; ++src){
-			if((src == begin || src[-1] == '\n')
+			if(((src == begin) || src[-1] == '\n')
 					&& (src[0] == ' ' || src[0] == '\n')) {
 				continue;
 			}

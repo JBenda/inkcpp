@@ -91,6 +91,10 @@ namespace ink
 					_lists_table = &lists;
 				}
 
+				char last_char() const {
+					return _last_char;
+				}
+
 			private:
 				size_t find_start() const;
 				bool should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
@@ -99,6 +103,8 @@ namespace ink
 				void copy_string(const char* str, size_t& dataIter, OUT& output);
 				
 			private:
+				char _last_char;
+
 				// data stream
 				value* _data;
 				size_t _max;

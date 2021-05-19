@@ -193,7 +193,8 @@ namespace ink
 				// remove mulitple accourencies of ' '
 				std::string result = str.str();
 				auto end = clean_string<false>(result.begin(), result.end());
-				result.resize(end - result.begin());
+				_last_char = *(end-1);
+				result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
 				return result;
 			}
 #endif
@@ -412,6 +413,12 @@ namespace ink
 				_size = start;
 
 				// Return processed string
+				{
+				 auto end = clean_string<false>(buffer, buffer+length);
+				 *end = 0;
+				 _last_char = end[-1];
+				 if (_last_char == ' ') { end[-1] = 0; }
+				}
 				return buffer;
 			}
 
@@ -454,16 +461,18 @@ namespace ink
 						hasGlue = true;
 						break;
 					case value_type::string:
+					{
 						lastNewline = false;
 						// an empty string don't count as glued I095
 						for(const char* i=_data[iter].get<value_type::string>();
-								*i; ++i) {
+								*i; ++i)
+						{
 							if (!isspace(*i)) {
 								hasGlue = false;
 								break;
 							}
 						}
-						break;
+					} break;
 					default:
 						break;
 					}
