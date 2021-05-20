@@ -559,6 +559,15 @@ namespace ink::runtime::internal
 				if (bEvaluationMode)
 					_eval.push(value{}.set<value_type::float32>(val));
 				// TEST-CASE B006 don't print floats
+			} break;
+			case Command::VALUE_POINTER:
+			{
+				hash_t val = read<hash_t>();
+				if(bEvaluationMode) {
+					_eval.push(value{}.set<value_type::value_pointer>(val, static_cast<char>(flag) - 1));
+				} else {
+					throw ink_exception("never conciderd what should happend here! (value pointer print)");
+				}
 			}
 			break;
 			case Command::LIST:

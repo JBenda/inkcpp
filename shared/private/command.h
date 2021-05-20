@@ -10,6 +10,7 @@ namespace ink
 		INT,
 		BOOL,
 		FLOAT,
+		VALUE_POINTER,
 		DIVERT_VAL,
 		LIST,
 		NEWLINE,

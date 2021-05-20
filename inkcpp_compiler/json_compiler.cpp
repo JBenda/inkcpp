@@ -304,6 +304,14 @@ namespace ink::compiler::internal
 				val);
 		}
 
+		// create pointer value
+		else if (get(command, "^var", val)) {
+			int cid;
+			if(!get(command, "cid", cid)) { throw ink_exception("failed to parse cid for pointer!");}
+			inkAssert(cid < 255, "only support until 255 stack hight for refernces");
+			_emitter->write_variable(Command::VALUE_POINTER, static_cast<CommandFlag>(cid+1), val);
+		}
+
 		// Push variable
 		else if (get(command, "VAR?", val))
 		{
@@ -386,6 +394,10 @@ namespace ink::compiler::internal
 		else if (get(command, "#", val))
 		{
 			_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);
+		}
+
+		else {
+			throw ink_exception("failed to parse complex command!");
 		}
 	}
 

@@ -8,6 +8,7 @@ namespace ink
 			"inkcpp_INT",
 			"inkcpp_BOOL",
 			"inkcpp_FLOAT",
+			"inkcpp_VALUE_POINTER",
 			"inkcpp_DIVERT_VAL",
 			"inkcpp_LIST",
 			"\n",
