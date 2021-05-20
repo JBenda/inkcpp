@@ -33,6 +33,7 @@ namespace ink::runtime::internal {
 		list_flag,					// a single list flag
 		string,                     // Pointer to string
 		OP_END,                     // END of types where we can operate on
+		value_pointer,				// a pointer to an value
 		newline = OP_END,           // newline symbol
 		PRINT_END,                  // END of printable values
 		marker = PRINT_END,         // special marker (used in output stream)
@@ -154,6 +155,10 @@ namespace ink::runtime::internal {
 				uint32_t addr;
 				bool eval; // was eval mode active in frame above
 			} frame_value;
+			struct {
+				hash_t name;
+				char cid;
+			} pointer;
 		};
 		value_type _type;
 	};
@@ -274,6 +279,18 @@ namespace ink::runtime::internal {
 			string_type str) {
 		string_value = str;
 		_type = value_type::string;
+		return *this;
+	}
+
+	// define get and set for pointer
+	template<> struct value::ret<value_type::value_pointer> { using type = decltype(value::pointer); }; 
+	template<> inline value::ret<value_type::value_pointer>::type value::get<value_type::value_pointer>() const
+	{ return pointer; }
+	template<>
+	inline constexpr value& value::set<value_type::value_pointer,hash_t,int>(hash_t name, int cid) {
+		_type = value_type::value_pointer;
+		pointer.name = name;
+		pointer.cid = cid;
 		return *this;
 	}
 
