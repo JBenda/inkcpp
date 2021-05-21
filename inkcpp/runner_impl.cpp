@@ -52,8 +52,13 @@ namespace ink::runtime::internal
 	}
 
 	template<>
-	void runner_impl::set_var<runner_impl::Scope::GLOBAL>(hash_t variableName, const value& val, bool) {
-		_globals->set_variable(variableName, val);
+	void runner_impl::set_var<runner_impl::Scope::GLOBAL>(hash_t variableName, const value& val, bool is_redef) {
+		if(is_redef) {
+			value* src = _globals->get_variable(variableName);
+			_globals->set_variable(variableName, src->redefine(val, _globals->lists()));
+		} else {
+			_globals->set_variable(variableName, val);
+		}
 	}
 
 	const value& runner_impl::dereference(const value& val) {
