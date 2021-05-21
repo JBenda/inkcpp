@@ -111,7 +111,7 @@ namespace ink::runtime::internal
 		const value* get_var(hash_t variableName) const;
 		template<Scope Hint = Scope::NONE>
 		void set_var(hash_t variableName, const value& val, bool is_redef);
-		const value& dereference(const value& val);
+		const value* dereference(const value& val);
 
 		enum class change_type
 		{

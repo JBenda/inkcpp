@@ -61,12 +61,12 @@ namespace ink::runtime::internal
 		}
 	}
 
-	const value& runner_impl::dereference(const value& val) {
-		if(val.type() != value_type::value_pointer) { return val; }
+	const value* runner_impl::dereference(const value& val) {
+		if(val.type() != value_type::value_pointer) { return &val; }
 		
 		auto [name, ci] = val.get<value_type::value_pointer>();
-		if(ci == 0) { return *get_var<Scope::GLOBAL>(name); }
-		return *_stack.get_from_frame(ci, name);
+		if(ci == 0) { return get_var<Scope::GLOBAL>(name); }
+		return _stack.get_from_frame(ci, name);
 	}
 
 	template<>
@@ -76,8 +76,16 @@ namespace ink::runtime::internal
 			auto [name, ci] = val.get<value_type::value_pointer>();
 			if(ci == 0) { _stack.set(variableName, val); }
 			else {
-				_ref_stack.set(variableName, val);
-				_stack.set(variableName, dereference(val));
+				const value* dref = dereference(val);
+				if(dref == nullptr) {
+					value v = val;
+					auto ref = v.get<value_type::value_pointer>();
+					v.set<value_type::value_pointer>(ref.name, 0);
+					_stack.set(variableName, v);
+				} else {
+					_ref_stack.set(variableName, val);
+					_stack.set(variableName, *dref);
+				}
 			}
 		} else {
 			if(is_redef) {
