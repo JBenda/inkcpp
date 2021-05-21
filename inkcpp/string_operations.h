@@ -44,4 +44,18 @@ namespace ink::runtime::internal {
 		void operator()(basic_eval_stack& stack, value* vals);
 	};
 
+	template<>
+	class operation<Command::HAS, value_type::string, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
+
+	template<>
+	class operation<Command::HASNT, value_type::string, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
+
 }

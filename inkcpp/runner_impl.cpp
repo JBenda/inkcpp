@@ -98,6 +98,17 @@ namespace ink::runtime::internal
 		}
 	}
 
+	template<>
+	void runner_impl::set_var<runner_impl::Scope::NONE>(hash_t variableName, const value& val, bool is_redef) 	
+	{
+		inkAssert(is_redef, "define set scopeless variables!");
+		if(_stack.get(variableName)) {
+			return set_var<Scope::LOCAL>(variableName, val, is_redef);
+		} else {
+			return set_var<Scope::GLOBAL>(variableName, val, is_redef);
+		}
+	}
+
 
 
 	template<typename T>
@@ -855,7 +866,11 @@ namespace ink::runtime::internal
 				// If not, we're setting a global (temporary variables are explicitely defined as such,
 				//  where globals are defined using SET_VARIABLE).
 				value val = _eval.pop();
-				set_var<Scope::GLOBAL>(variableName, val, is_redef);
+				if(is_redef) {
+					set_var(variableName, val, is_redef);
+				} else {
+					set_var<Scope::GLOBAL>(variableName, val, is_redef);
+				}
 			}
 			break;
 

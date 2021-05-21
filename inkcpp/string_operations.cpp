@@ -80,4 +80,40 @@ namespace ink::runtime::internal {
 		stack.push(value{}.set<value_type::boolean>(*li != *ri));
 	}
 
+	bool has(const char* lh, const char* rh) {
+		while(isspace(*lh)) { ++lh; }
+		while(isspace(*rh)) { ++rh; }
+		if(!*lh && !*rh) { return true; }
+		for(const char* li = lh; *li; ++li) {
+			const char* ri = rh;
+			bool match = true;
+			int offset = 0;
+			for(int i = 0; ri[i] != 0; ++i) {
+				if(li[i + offset] != ri[i]) {
+					if(isspace(ri[i])) {
+						--offset;
+						continue;
+					}
+					match = false; break;
+				}
+			}
+			if(match) { return true; }
+		}
+		return false;
+	}
+
+	void operation<Command::HAS, value_type::string, void>::operator()(basic_eval_stack& stack, value* vals)
+	{
+		casting::string_cast lh(vals[0]);
+		casting::string_cast rh(vals[1]);
+		stack.push(value{}.set<value_type::boolean>(has(lh.get(), rh.get())));
+	}
+
+	void operation<Command::HASNT, value_type::string, void>::operator()(basic_eval_stack& stack, value* vals)
+	{
+		casting::string_cast lh(vals[0]);
+		casting::string_cast rh(vals[1]);
+		stack.push(value{}.set<value_type::boolean>(!has(lh.get(), rh.get())));
+	}
+
 }

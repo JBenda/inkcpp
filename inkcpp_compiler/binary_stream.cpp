@@ -12,8 +12,13 @@ namespace ink
 			size_t binary_stream::write(const std::string& value)
 			{
 				constexpr byte_t ZERO = 0;
-				size_t len = write((const byte_t*)value.c_str(), value.length());
-				len += write(&ZERO, 1);
+				size_t len;
+				if(value.length()) {
+					len = write((const byte_t*)value.c_str(), value.length());
+				} else {
+					len = write(' ');
+				}
+				len += write(ZERO);
 				return len;
 			}
 
