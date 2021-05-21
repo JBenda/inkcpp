@@ -31,6 +31,7 @@ namespace ink::runtime::internal
 	template<>
 	value* runner_impl::get_var<runner_impl::Scope::LOCAL>(hash_t variableName) {
 		value* ret = _stack.get(variableName);
+		if(!ret) { return nullptr; }
 		if(ret->type() == value_type::value_pointer) {
 			auto [name, ci] = ret->get<value_type::value_pointer>();
 			inkAssert(ci == 0, "only Global pointer are allowd on the _stack!");
@@ -83,6 +84,8 @@ namespace ink::runtime::internal
 							name,
 							get_var<Scope::GLOBAL>(name)->redefine(val, _globals->lists()),
 							true);
+				} else {
+					_stack.set(variableName, src->redefine(val, _globals->lists()));
 				}
 			} else {
 				_stack.set(variableName, val);

@@ -89,7 +89,7 @@ namespace ink::runtime::internal
 		}
 	private:
 		int _ci;
-		int _current_frame;
+		int _current_frame = 0;
 		hash_t _name;
 		thread_t _skip = ~0;
 		uint32_t _jumping = 0;
@@ -554,7 +554,7 @@ namespace ink::runtime::internal
 	}
 
 	void basic_stack::fetch_values(basic_stack& stack) {
-		for(auto itr = base::begin(); itr.get()->name != InvalidHash; itr.next([](entry& e){
+		for(auto itr = base::begin(); !itr.done() && itr.get()->name != InvalidHash; itr.next([](entry& e){
 					return e.name == InvalidHash || e.data.type() == value_type::value_pointer;
 				})) {
 			auto [name, ci] = itr.get()->data.get<value_type::value_pointer>();
