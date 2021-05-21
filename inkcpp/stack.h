@@ -39,6 +39,7 @@ namespace ink
 				// Gets an existing value, or nullptr
 				const value* get(hash_t name) const;
 				value* get(hash_t name);
+				value* get_from_frame(int ci, hash_t name);
 
 				// pushes a new frame onto the stack
 				// @param eval if evaluation mode was active
@@ -72,6 +73,11 @@ namespace ink
 				void save();
 				void restore();
 				void forget();
+
+				// replace all pointer in current frame with values from _stack
+				void fetch_values(basic_stack& _stack);
+				// push all values to other _stack
+				void push_values(basic_stack& _stack);
 
 			private:
 				entry& add(hash_t name, const value& val);

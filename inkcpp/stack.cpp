@@ -25,8 +25,7 @@ namespace ink::runtime::internal
 			*existing = val;
 	}
 
-	auto reverse_find_predicat_constructor(hash_t name, thread_t& skip, uint32_t& jumping) {
-		return [name, &skip, &jumping](entry& e) {
+	bool reverse_find_predicat(hash_t name, thread_t& skip, uint32_t& jumping, entry& e) {
 			// Jumping
 			if (jumping > 0) {
 				jumping--;
@@ -63,14 +62,42 @@ namespace ink::runtime::internal
 			}
 
 			return e.name == name || e.name == InvalidHash;
-		};
 	}
+	class reverse_find_predicat_operator {
+	public: 
+		explicit reverse_find_predicat_operator(hash_t name) : _name{name} {}
+		bool operator()(entry& e) {
+			return reverse_find_predicat(_name, _skip, _jumping, e);	
+		}
+	private:
+		hash_t _name;
+		thread_t _skip = ~0;
+		uint32_t _jumping = 0;
+	};
+	class reverse_find_from_frame_predicat_operator {
+	public:
+		reverse_find_from_frame_predicat_operator(int ci, hash_t name) : _name{name}, _ci{ci} {
+			inkAssert(ci != 0, "Can't find global variables on stack!");
+			inkAssert(ci == -1, "only support ci == -1, for now!");
+		}
+		bool operator()(entry& e) {
+			if(reverse_find_predicat(_name, _skip, _jumping, e)) {
+				if(_ci == _current_frame) { return true; }
+				_current_frame -= 1;
+			}
+			return false;
+		}
+	private:
+		int _ci;
+		int _current_frame;
+		hash_t _name;
+		thread_t _skip = ~0;
+		uint32_t _jumping = 0;
+	};
 
 	const value* basic_stack::get(hash_t name) const {
 		// Find whatever comes first: a matching entry or a stack frame entry
-		thread_t skip = ~0;
-		uint32_t jumping = 0;
-		const entry* found = base::reverse_find(reverse_find_predicat_constructor(name, skip, jumping));
+		const entry* found = base::reverse_find(reverse_find_predicat_operator(name));
 
 		// If nothing found, no value
 		if (found == nullptr)
@@ -85,9 +112,7 @@ namespace ink::runtime::internal
 	}
 	value* basic_stack::get(hash_t name) {
 		// Find whatever comes first: a matching entry or a stack frame entry
-		thread_t skip = ~0;
-		uint32_t jumping = 0;
-		entry* found = base::reverse_find(reverse_find_predicat_constructor(name, skip, jumping));
+		entry* found = base::reverse_find(reverse_find_predicat_operator(name));
 
 		// If nothing found, no value
 		if (found == nullptr)
@@ -98,6 +123,13 @@ namespace ink::runtime::internal
 			return &found->data;
 
 		// Otherwise, nothing in this stack frame
+		return nullptr;
+	}
+	
+	value* basic_stack::get_from_frame(int ci, hash_t name) {
+		entry* found = base::reverse_find(reverse_find_from_frame_predicat_operator(ci, name));
+		if(found == nullptr) { return nullptr; }
+		if(found->name == name) { return &found->data; }
 		return nullptr;
 	}
 
@@ -519,5 +551,27 @@ namespace ink::runtime::internal
 		value x; x.set<value_type::none>();
 		value none = value(x);
 		base::forget([&none](value& elem) { elem = none; });
+	}
+
+	void basic_stack::fetch_values(basic_stack& stack) {
+		for(auto itr = base::begin(); itr.get()->name != InvalidHash; itr.next([](entry& e){
+					return e.name == InvalidHash || e.data.type() == value_type::value_pointer;
+				})) {
+			auto [name, ci] = itr.get()->data.get<value_type::value_pointer>();
+			inkAssert(ci != 0, "Global refs should not exists on ref stack!");
+			inkAssert(ci == -1, "only support ci = -1 for now!");
+			if(ci == -1) {
+				set(name, *stack.get(itr.get()->name));
+			}
+		}
+	}
+
+	void basic_stack::push_values(basic_stack& stack) {
+		for(auto itr = base::begin();
+				itr.get()->name != InvalidHash && itr.get()->data.type() != value_type::value_pointer;
+				itr.next())
+		{
+			stack.set(itr.get()->name, itr.get()->data);
+		}
 	}
 }

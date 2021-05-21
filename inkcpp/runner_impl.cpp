@@ -22,6 +22,76 @@ namespace ink::runtime
 
 namespace ink::runtime::internal
 {
+
+	template<>
+	value* runner_impl::get_var<runner_impl::Scope::GLOBAL>(hash_t variableName) {
+		return _globals->get_variable(variableName);
+	}
+
+	template<>
+	value* runner_impl::get_var<runner_impl::Scope::LOCAL>(hash_t variableName) {
+		value* ret = _stack.get(variableName);
+		if(ret->type() == value_type::value_pointer) {
+			auto [name, ci] = ret->get<value_type::value_pointer>();
+			inkAssert(ci == 0, "only Global pointer are allowd on the _stack!");
+			return get_var<runner_impl::Scope::GLOBAL>(name);
+		}
+		return ret;
+	}
+
+	template<>
+	value* runner_impl::get_var<runner_impl::Scope::NONE>(hash_t variableName) {
+		value* ret = get_var<Scope::LOCAL>(variableName);
+		if(ret) { return ret; }
+		return get_var<Scope::GLOBAL>(variableName);
+	}
+	template<runner_impl::Scope Hint>	
+	const value* runner_impl::get_var(hash_t variableName) const {
+		return const_cast<runner_impl*>(this)->get_var<Hint>(variableName);
+	}
+
+	template<>
+	void runner_impl::set_var<runner_impl::Scope::GLOBAL>(hash_t variableName, const value& val, bool) {
+		_globals->set_variable(variableName, val);
+	}
+
+	const value& runner_impl::dereference(const value& val) {
+		if(val.type() != value_type::value_pointer) { return val; }
+		
+		auto [name, ci] = val.get<value_type::value_pointer>();
+		if(ci == 0) { return *get_var<Scope::GLOBAL>(name); }
+		return *_stack.get_from_frame(ci, name);
+	}
+
+	template<>
+	void runner_impl::set_var<runner_impl::Scope::LOCAL>(hash_t variableName, const value& val, bool is_redef) {
+		if(val.type() == value_type::value_pointer) {
+			inkAssert(is_redef == false, "value pointer can only use to initelize variable!");
+			auto [name, ci] = val.get<value_type::value_pointer>();
+			if(ci == 0) { _stack.set(variableName, val); }
+			else {
+				_ref_stack.set(variableName, val);
+				_stack.set(variableName, dereference(val));
+			}
+		} else {
+			if(is_redef) {
+				value* src = _stack.get(variableName);
+				if(src->type() == value_type::value_pointer) {
+					auto [name, ci] = src->get<value_type::value_pointer>();
+					inkAssert(ci == 0, "Only global pointer are allowed on _stack!");
+					set_var<Scope::GLOBAL>(
+							name,
+							get_var<Scope::GLOBAL>(name)->redefine(val, _globals->lists()),
+							true);
+				}
+			} else {
+				_stack.set(variableName, val);
+			}
+		}
+	}
+
+
+
 	template<typename T>
 	inline T runner_impl::read()
 	{
@@ -155,6 +225,7 @@ namespace ink::runtime::internal
 		{
 		size_t address = _ptr - _story->instructions();
 			_stack.push_frame<type>(address, bEvaluationMode);
+			_ref_stack.push_frame<type>(address, bEvaluationMode);
 		}
 		bEvaluationMode = false; // unset eval mode when enter function or tunnel
 
@@ -166,8 +237,16 @@ namespace ink::runtime::internal
 	frame_type runner_impl::execute_return()
 	{
 		// Pop the callstack
+		_ref_stack.fetch_values(_stack);
 		frame_type type;
 		offset_t offset = _stack.pop_frame(&type,bEvaluationMode);
+		_ref_stack.push_values(_stack);
+		{ 	frame_type t; bool eval;
+			// TODO: write all refs to new frame 
+			offset_t o = _ref_stack.pop_frame(&t, eval);
+			inkAssert(o == offset && t == type && eval == bEvaluationMode,
+					"_ref_stack and _stack should be in frame sync!");
+		}
 
 		// SPECIAL: On function, do a trim
 		if (type == frame_type::function)
@@ -362,6 +441,7 @@ namespace ink::runtime::internal
 
 		// Collapse callstacks to the correct thread
 		_stack.collapse_to_thread(choiceThread);
+		_ref_stack.collapse_to_thread(choiceThread);
 		_threads.clear();
 
 		// Jump to destination and clear choice list
@@ -669,10 +749,7 @@ namespace ink::runtime::internal
 				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().get<value_type::boolean>())
 					break;
 
-				const value* val = _stack.get(variable);
-				if (!val) {
-					val = _globals->get_variable(variable);
-				}
+				const value* val = get_var(variable);
 				inkAssert(val, "Jump destiniation needs to be defined!");
 
 				// Move to location
@@ -697,10 +774,7 @@ namespace ink::runtime::internal
 				// Find divert address
 				if(flag & CommandFlag::TUNNEL_TO_VARIABLE) {
 					hash_t var_name = read<hash_t>();
-					const value* val = _stack.get(var_name);
-					if(val == nullptr) {
-						val = _globals->get_variable(var_name);
-					}
+					const value* val = get_var(var_name);
 					inkAssert(val != nullptr);
 					target = val->get<value_type::divert>();
 				} else {
@@ -715,10 +789,7 @@ namespace ink::runtime::internal
 				// Find divert address
 				if(flag & CommandFlag::FUNCTION_TO_VARIABLE) {
 					hash_t var_name = read<hash_t>();
-					const value* val = _stack.get(var_name);
-					if(val == nullptr) {
-						val = _globals->get_variable(var_name);
-					}
+					const value* val = get_var(var_name);
 					inkAssert(val != nullptr);
 					target  = val->get<value_type::divert>();
 				} else {
@@ -740,23 +811,29 @@ namespace ink::runtime::internal
 				// TODO We push ahead of a single divert. Is that correct in all cases....?????
 				auto returnTo = _ptr + CommandSize<uint32_t>;
 				_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), bEvaluationMode);
+				_ref_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), bEvaluationMode);
 
 				// Fork a new thread on the callstack
 				thread_t thread = _stack.fork_thread();
+				{
+					thread_t t = _ref_stack.fork_thread();
+					inkAssert(t == thread, "ref_stack and stack should be in sync!");
+				}
 
 				// Push that thread onto our thread stack
 				_threads.push(thread);
 			}
 			break;
 
-				// == Variable definitions
+			// == set temporärie variable
 			case Command::DEFINE_TEMP:
 			{
 				hash_t variableName = read<hash_t>();
+				bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
 
 				// Get the top value and put it into the variable
 				value v = _eval.pop();
-				_stack.set(variableName, v);
+				set_var<Scope::LOCAL>(variableName, v, is_redef);
 			}
 			break;
 
@@ -767,28 +844,10 @@ namespace ink::runtime::internal
 				// Check if it's a redefinition (not yet used, seems important for pointers later?)
 				bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
 
-				// Check if there's a local variable of this name
-				const value* local = _stack.get(variableName);
-
 				// If not, we're setting a global (temporary variables are explicitely defined as such,
 				//  where globals are defined using SET_VARIABLE).
 				value val = _eval.pop();
-				if (local == nullptr)
-				{
-					if(is_redef) {
-						val = _globals->get_variable(variableName)->redefine(
-								val, _globals->lists());
-					}
-					_globals->set_variable(variableName, val);
-				}
-				else
-				{
-					// Otherwise, it's a temporary variable
-					if(is_redef) {
-						val = local->redefine(val, _globals->lists());
-					}
-					_stack.set(variableName, val);
-				}
+				set_var<Scope::GLOBAL>(variableName, val, is_redef);
 			}
 			break;
 
@@ -844,11 +903,7 @@ namespace ink::runtime::internal
 			{
 				// Try to find in local stack
 				hash_t variableName = read<hash_t>();
-				const value* val = _stack.get(variableName);
-
-				// If not, try global store
-				if (val == nullptr)
-					val = _globals->get_variable(variableName);
+				const value* val = get_var(variableName);
 
 				inkAssert(val != nullptr, "Could not find variable!");
 				_eval.push(*val);
@@ -1033,6 +1088,7 @@ namespace ink::runtime::internal
 
 			// Push in a complete marker
 			_stack.complete_thread(completedThreadId);
+			_ref_stack.complete_thread(completedThreadId);
 
 			// Go to where the thread started
 			frame_type type = execute_return();
@@ -1062,6 +1118,7 @@ namespace ink::runtime::internal
 		_eval.clear();
 		_output.clear();
 		_stack.clear();
+		_ref_stack.clear();
 		_threads.clear();
 		bEvaluationMode = false;
 		_saved = false;
@@ -1076,6 +1133,7 @@ namespace ink::runtime::internal
 		// Find strings in output and stacks
 		_output.mark_strings(strings);
 		_stack.mark_strings(strings);
+		// ref_stack has no strings!
 		_eval.mark_strings(strings);
 
 		// Take into account choice text
@@ -1090,6 +1148,7 @@ namespace ink::runtime::internal
 		_saved = true;
 		_output.save();
 		_stack.save();
+		_ref_stack.save();
 		_backup = _ptr;
 		_container.save();
 		_globals->save();
@@ -1108,6 +1167,7 @@ namespace ink::runtime::internal
 
 		_output.restore();
 		_stack.restore();
+		_ref_stack.restore();
 		_ptr = _backup;
 		_container.restore();
 		_globals->restore();
@@ -1130,6 +1190,7 @@ namespace ink::runtime::internal
 
 		_output.forget();
 		_stack.forget();
+		_ref_stack.forget();
 		_container.forget();
 		_globals->forget();
 		_eval.forget();

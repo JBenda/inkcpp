@@ -288,7 +288,11 @@ namespace ink::compiler::internal
 		// Declare temporary variable
 		else if (get(command, "temp=", val))
 		{
-			_emitter->write_variable(Command::DEFINE_TEMP, CommandFlag::NO_FLAGS, val);
+			bool is_redef = false;
+			get(command, "re", is_redef);
+			_emitter->write_variable(Command::DEFINE_TEMP,
+					is_redef ? CommandFlag::ASSIGNMENT_IS_REDEFINE : CommandFlag::NO_FLAGS,
+					val);
 		}
 
 		// Set variable
@@ -306,10 +310,10 @@ namespace ink::compiler::internal
 
 		// create pointer value
 		else if (get(command, "^var", val)) {
-			int cid;
-			if(!get(command, "cid", cid)) { throw ink_exception("failed to parse cid for pointer!");}
-			inkAssert(cid < 255, "only support until 255 stack hight for refernces");
-			_emitter->write_variable(Command::VALUE_POINTER, static_cast<CommandFlag>(cid+1), val);
+			int ci;
+			if(!get(command, "ci", ci)) { throw ink_exception("failed to parse ci for pointer!");}
+			inkAssert(ci < 255, "only support until 255 stack hight for refernces");
+			_emitter->write_variable(Command::VALUE_POINTER, static_cast<CommandFlag>(ci+1), val);
 		}
 
 		// Push variable

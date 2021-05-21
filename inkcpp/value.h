@@ -157,7 +157,7 @@ namespace ink::runtime::internal {
 			} frame_value;
 			struct {
 				hash_t name;
-				char cid;
+				char ci;
 			} pointer;
 		};
 		value_type _type;
@@ -287,10 +287,10 @@ namespace ink::runtime::internal {
 	template<> inline value::ret<value_type::value_pointer>::type value::get<value_type::value_pointer>() const
 	{ return pointer; }
 	template<>
-	inline constexpr value& value::set<value_type::value_pointer,hash_t,int>(hash_t name, int cid) {
+	inline constexpr value& value::set<value_type::value_pointer,hash_t,int>(hash_t name, int ci) {
 		_type = value_type::value_pointer;
 		pointer.name = name;
-		pointer.cid = cid;
+		pointer.ci = ci;
 		return *this;
 	}
 

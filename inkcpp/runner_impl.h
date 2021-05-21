@@ -104,6 +104,15 @@ namespace ink::runtime::internal
 		void restore();
 		void forget();
 
+		enum class Scope { NONE, GLOBAL, LOCAL};
+		template<Scope Hint = Scope::NONE>	
+		value* get_var(hash_t variableName);
+		template<Scope Hint = Scope::NONE>	
+		const value* get_var(hash_t variableName) const;
+		template<Scope Hint>
+		void set_var(hash_t variableName, const value& val, bool is_redef);
+		const value& dereference(const value& val);
+
 		enum class change_type
 		{
 			no_change,
@@ -154,6 +163,7 @@ namespace ink::runtime::internal
 
 		// Runtime stack. Used to store temporary variables and callstack
 		internal::stack<abs(config::limitRuntimeStack), config::limitRuntimeStack < 0> _stack;
+		internal::stack<abs(config::limitReferenceStack), config::limitReferenceStack < 0> _ref_stack;
 
 		// Evaluation stack
 		bool bEvaluationMode = false;

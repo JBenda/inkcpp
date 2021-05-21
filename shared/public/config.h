@@ -22,6 +22,8 @@ namespace ink::config {
 	static constexpr int limitActiveTags = 10;
 	// temporary variables and callstack;
 	static constexpr int limitRuntimeStack = -20;
+	// references  and callstack
+	static constexpr int limitReferenceStack = -20;
 	// max number of elements in one output (a string is one element)
 	// no dynamic support now! (FIXME)
 	static constexpr int limitOutputSize = 200;

@@ -332,6 +332,7 @@ namespace ink::runtime::internal
 		}
 
 	private:
+
 		template<typename Predicate>
 		ElementType* reverse_find_impl(Predicate predicate) const
 		{
