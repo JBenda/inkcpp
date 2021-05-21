@@ -176,5 +176,23 @@ namespace ink::runtime::internal {
 		entry.flag = vals[1].get<value_type::int32>() - 1;
 		stack.push(value{}.set<value_type::list_flag>(entry));
 	}
+
+	int get_limit(const value& val) {
+		if(val.type() == value_type::int32) {
+			return val.get<value_type::int32>() - 1;
+		} else {
+			inkAssert(val.type() == value_type::list_flag);
+			return val.get<value_type::list_flag>().flag;
+		}
+	}
+	void operation<Command::LIST_RANGE, value_type::list, void>::operator()(
+			basic_eval_stack& stack, value* vals)
+	{
+		inkAssert(vals[0].type() == value_type::list);
+		stack.push(value{}.set<value_type::list>(_list_table.range(
+						vals[0].get<value_type::list>(),
+						get_limit(vals[1]),
+						get_limit(vals[2]))));
+	}
 }
 

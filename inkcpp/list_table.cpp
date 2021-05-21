@@ -142,7 +142,7 @@ namespace ink::runtime::internal
 		for(int j = 0; j < max_list_len; ++j) {
 			for(int i = 0; i < numLists(); ++i) {
 				int len = _list_end[i] - listBegin(i);
-				if(i < len && hasList(entry, i)) {
+				if(j < len && hasList(entry, i)) {
 					int flag = j + listBegin(i);
 					if(hasFlag(entry,flag) && _flag_names[flag]) {
 						if(!first) {
@@ -156,6 +156,32 @@ namespace ink::runtime::internal
 			}
 		}
 		return itr;
+	}
+
+	list_table::list list_table::range(list_table::list l, int min, int max) {
+		list res = create();
+		data_t* in = getPtr(l.lid);
+		data_t* out = getPtr(res.lid);
+		bool has_any_list = false;
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(in, i)) {
+				bool has_flag = false;
+				for(int j = listBegin(i); j < _list_end[i]; ++j) {
+					if(j - listBegin(i) < min || j - listBegin(i) > max) { continue; }
+					if(hasFlag(in, j)) {
+						setFlag(out,j);
+						has_flag = true;
+					}
+				}
+				if(has_flag) {
+					has_any_list = true;
+					setList(out, i);
+				}
+			}
+		}
+		if(has_any_list) { return res; }
+		copy_lists(in, out);
+		return res;
 	}
 
 	list_table::list list_table::add(list_flag lh, list_flag rh) {
@@ -609,7 +635,7 @@ namespace ink::runtime::internal
 		for(int j = 0; j < max_list_len; ++j) {
 			for(int i = 0; i < numLists(); ++i) {
 				int len = _list_end[i] - listBegin(i);
-				if(i < len && hasList(entry, i)) {
+				if(j < len && hasList(entry, i)) {
 					int flag = listBegin(i) + j;
 					if(hasFlag(entry,flag) && _flag_names[flag]) {
 						if(!first) {

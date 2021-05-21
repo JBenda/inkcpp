@@ -55,11 +55,14 @@ namespace ink
 
 		// == Threading
 		THREAD,
-
+		// == thinary operations
+		LIST_RANGE,
+		OP_BEGIN = LIST_RANGE,
+		TERNARY_OPERATORS_START = LIST_RANGE,
+		TERNARY_OPERATORS_END = LIST_RANGE,
 		// == Binary operators
 		ADD,
-		OP_BEGIN = ADD,
-		BINARY_OPERATORS_START = OP_BEGIN,
+		BINARY_OPERATORS_START = ADD,
 		SUBTRACT,
 		DIVIDE,
 		MULTIPLY,

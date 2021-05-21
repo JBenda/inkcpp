@@ -24,7 +24,9 @@ namespace ink::runtime::internal {
 	 * @brief Determines the number of arguments needed for an command.
 	 */
 	constexpr size_t command_num_args(Command cmd) {
-		if (cmd >= Command::BINARY_OPERATORS_START && cmd <= Command::BINARY_OPERATORS_END) {
+		if (cmd >= Command::TERNARY_OPERATORS_START && cmd <= Command::TERNARY_OPERATORS_END) {
+			return 3;
+		} else if (cmd >= Command::BINARY_OPERATORS_START && cmd <= Command::BINARY_OPERATORS_END) {
 			return 2;
 		} else if (cmd >= Command::UNARY_OPERATORS_START && cmd <= Command::UNARY_OPERATORS_END) {
 			return 1;

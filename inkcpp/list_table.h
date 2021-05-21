@@ -144,6 +144,7 @@ namespace ink::runtime::internal
 		operator bool () const{
 			return _valid;
 		}
+		list range(list l, int min, int max);
 
 	private:
 		void copy_lists(const data_t* src, data_t* dst);

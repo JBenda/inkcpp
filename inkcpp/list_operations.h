@@ -229,5 +229,12 @@ namespace ink::runtime::internal {
 		using operation_base::operation_base;
 		void operator()(basic_eval_stack& stack, value* vals);
 	};
+
+	template<>
+	class operation<Command::LIST_RANGE, value_type::list, void> : public operation_base<list_table> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
 }
 

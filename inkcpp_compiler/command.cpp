@@ -44,6 +44,8 @@ namespace ink
 			"inkcpp_CHOICE",
 			"thread",
 
+			"range",
+
 			"+",
 			"-",
 			"/",
