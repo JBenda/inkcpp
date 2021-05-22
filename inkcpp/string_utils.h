@@ -136,6 +136,7 @@ namespace ink::runtime::internal {
 					 || src[1] == '\n')) {
 				continue;
 			}
+			else if(src[0] == '\n' && dst != begin && dst[-1] == '\n') { continue; }
 			*dst++ = *src;
 		}
 		return dst;
