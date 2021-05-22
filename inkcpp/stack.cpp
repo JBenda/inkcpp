@@ -232,9 +232,11 @@ namespace ink::runtime::internal
 		inkAssert(!base::is_empty(), "Can not pop frame from empty callstack.");
 
 		const entry* returnedFrame = nullptr;
+		auto isNull = [](const entry& e) { return e.name == ~0; };
 
 		// Start iterating backwards
 		iterator iter = base::begin();
+		if(isNull(*iter.get())) { iter.next(isNull); }
 		while (!iter.done())
 		{
 			// Keep popping if it's not a frame marker or thread marker of some kind
@@ -243,6 +245,7 @@ namespace ink::runtime::internal
 			{
 				pop();
 				iter = base::begin();
+				if(isNull(*iter.get())) { iter.next(isNull); }
 				continue;
 			}
 
@@ -554,9 +557,12 @@ namespace ink::runtime::internal
 	}
 
 	void basic_stack::fetch_values(basic_stack& stack) {
-		for(auto itr = base::begin(); !itr.done() && itr.get()->name != InvalidHash; itr.next([](entry& e){
-					return e.name == InvalidHash || e.data.type() == value_type::value_pointer;
-				})) {
+		auto itr  = base::begin();
+		auto predicat = [](entry& e)
+			{ return !(e.name == InvalidHash || e.data.type() == value_type::value_pointer); };
+
+		if(!itr.done() && predicat(*itr.get())) { itr.next(predicat); }
+		for(; !itr.done() && itr.get()->name != InvalidHash; itr.next(predicat)) {
 			auto [name, ci] = itr.get()->data.get<value_type::value_pointer>();
 			inkAssert(ci != 0, "Global refs should not exists on ref stack!");
 			inkAssert(ci == -1, "only support ci = -1 for now!");
