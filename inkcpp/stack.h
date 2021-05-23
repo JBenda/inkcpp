@@ -144,6 +144,9 @@ namespace ink
 				// Gets the top value without popping
 				const value& top() const;
 
+				// Gets the top non null value without popping
+				const value& top_value() const;
+
 				// Check if the stack is empty
 				bool is_empty() const;
 

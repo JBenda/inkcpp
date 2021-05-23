@@ -512,7 +512,12 @@ namespace ink::runtime::internal
 
 	const value& basic_eval_stack::top() const
 	{
-		return base::top();
+		return base::top([](const value& v){ return false; });
+	}
+
+	const value& basic_eval_stack::top_value() const 
+	{
+		return base::top([](const value& v){ return v.type() == value_type::none; });
 	}
 
 	bool basic_eval_stack::is_empty() const

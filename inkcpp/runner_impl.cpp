@@ -282,7 +282,7 @@ namespace ink::runtime::internal
 			// if we return but there is a divert target on top of 
 			// the evaluation stack, we should follow this instead
 			// inkproof: I060
-			if(_eval.top().type() == value_type::divert) {
+			if(!_eval.is_empty() && _eval.top().type() == value_type::divert) {
 				start_frame<frame_type::tunnel>(_eval.pop().get<value_type::divert>());
 				return type;
 			}
@@ -580,7 +580,7 @@ namespace ink::runtime::internal
 					forget();
 					break;
 				case change_type::no_change:
-					restore();
+					forget();
 					return false;
 				}
 			}
@@ -933,7 +933,7 @@ namespace ink::runtime::internal
 				_eval.pop();
 				break;
 			case Command::DUPLICATE:
-				_eval.push(_eval.top());
+				_eval.push(_eval.top_value());
 				break;
 			case Command::PUSH_VARIABLE_VALUE:
 			{

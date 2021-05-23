@@ -25,7 +25,7 @@ SCENARIO("a restorable collection can operate like a stack", "[restorable]")
 
 			THEN("the count should be ten") REQUIRE(collection.size(isNull) == 10);
 
-			THEN("The top should be nine") REQUIRE(collection.top() == 9);
+			THEN("The top should be nine") REQUIRE(collection.top(isNull) == 9);
 
 			THEN("We can iterate forward")
 			{
@@ -46,7 +46,7 @@ SCENARIO("a restorable collection can operate like a stack", "[restorable]")
 				REQUIRE(collection.pop(isNull) == 7);
 				REQUIRE(collection.pop(isNull) == 6);
 
-				REQUIRE(collection.top() == 5);
+				REQUIRE(collection.top(isNull) == 5);
 			}
 		}
 	}
