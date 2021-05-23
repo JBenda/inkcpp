@@ -429,8 +429,7 @@ namespace ink::runtime::internal
 				break;
 		}
 
-		inkAssert(!_saved, "Should be no state snapshot at the end of newline");
-
+		// can be in save state becaues of choice
 		// Garbage collection TODO: How often do we want to do this?
 		_globals->gc();
 	}
@@ -445,7 +444,7 @@ namespace ink::runtime::internal
 		if(has_choices()) {
 			inkAssert(index < _choices.size(), "Choice index out of range");
 		}
-
+		restore(); // restore to stack state when choice was maked
 		// Get the choice
 		const auto& c = has_choices() ? _choices[index] : _fallback_choice.value();
 
@@ -566,7 +565,8 @@ namespace ink::runtime::internal
 		if (!_output.has_marker())
 		{
 			// If we have a saved state after a previous newline
-			if (_saved)
+			// don't do this if we behind choice 
+			if (_saved && !has_choices() && !_fallback_choice)
 			{
 				// Check for changes in the output stream
 				switch (detect_change())
@@ -602,8 +602,13 @@ namespace ink::runtime::internal
 					if (!_saved)
 						save();
 				}
-				else // Otherwise, make sure we don't have any snapshots hanging around
+				// Otherwise, make sure we don't have any snapshots hanging around
+				// expect we are in choice handleing
+				else if( !has_choices() && !_fallback_choice)  {
 					forget();
+				} else {
+					_output.forget();
+				}
 			}
 		}
 
@@ -990,7 +995,6 @@ namespace ink::runtime::internal
 				}
 
 				// Use a marker to start compiling the choice text
-
 				_output << values::marker;
 				value stack[2];
 				int sc = 0;
@@ -1010,6 +1014,9 @@ namespace ink::runtime::internal
 				} else {
 					add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
 				}
+				// save stack at last choice
+				if(_saved) { forget(); }
+				save();
 			} break;
 			case Command::START_CONTAINER_MARKER:
 			{
@@ -1124,6 +1131,9 @@ namespace ink::runtime::internal
 			// Go to where the thread started
 			frame_type type = execute_return();
 			inkAssert(type == frame_type::thread, "Expected thread frame marker to hold return to value but none found...");
+			// if thread ends, move stave point with, else the thread end marker is missing
+			// and we can't collect the other threads
+			if(_saved) { forget(); save(); }
 		}
 		else
 		{
@@ -1195,8 +1205,8 @@ namespace ink::runtime::internal
 	void runner_impl::restore()
 	{
 		inkAssert(_saved, "Can't restore. No runner state saved.");
-
-		_output.restore();
+		// the output can be restored without the rest
+		if(_output.saved()) {_output.restore(); }
 		_stack.restore();
 		_ref_stack.restore();
 		_ptr = _backup;

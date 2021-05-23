@@ -97,6 +97,8 @@ namespace ink
 					return _last_char;
 				}
 
+				bool saved() const { return _save != ~0; }
+
 			private:
 				size_t find_start() const;
 				bool should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
