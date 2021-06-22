@@ -2,20 +2,20 @@
 #include "value.h"
 #include "operations.h"
 
-float floor(float f) {
-	if (f >= 0.f) {
-		return static_cast<float>(static_cast<int>(f));
-	}
-	return static_cast<float>(static_cast<int>(f) - 1);
-}
-
-float ceil(float f) {
-	if(f - floor(f) == 0) { return f; }
-	return static_cast<float>(static_cast<int>(f) + 1);
-}
-
 namespace ink::runtime::internal {
 	
+	float floor(float f) {
+		if (f >= 0.f) {
+			return static_cast<float>(static_cast<int>(f));
+		}
+		return static_cast<float>(static_cast<int>(f) - 1);
+	}
+
+	float ceil(float f) {
+		if(f - floor(f) == 0) { return f; }
+		return static_cast<float>(static_cast<int>(f) + 1);
+	}
+
 	void operation<Command::FLOOR, value_type::float32, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
