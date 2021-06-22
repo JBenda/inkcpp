@@ -12,6 +12,7 @@
 #include <exception>
 #include <stdexcept>
 #include <optional>
+#include <cctype>
 #endif
 
 namespace ink

@@ -374,18 +374,15 @@ namespace ink::compiler::internal
 			if(list.size()) {
 				for ( const auto& [key,value] : list.items()) {
 					entries.push_back({
-							.list_id = _list_meta.get_lid(key.substr(0,key.find('.'))),
-							.flag = static_cast<decltype(list_flag::flag)>(value.get<int>() - 1),
+							_list_meta.get_lid(key.substr(0,key.find('.'))),
+							static_cast<decltype(list_flag::flag)>(value.get<int>() - 1)
 					});
 
 				}
 			} else {
 				if(has(command, "origins")) {
 					for( const auto& origin_list : command["origins"]) {
-						entries.push_back({
-								.list_id = _list_meta.get_lid(origin_list.get<std::string>()),
-								.flag = -1,
-						});
+						entries.push_back({ _list_meta.get_lid(origin_list.get<std::string>()), -1 });
 					}
 				} else {
 					entries.push_back(empty_flag);
