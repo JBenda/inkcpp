@@ -293,7 +293,7 @@ namespace ink::runtime::internal
 	list_flag list_table::sub(list_flag lh, list rh) {
 		data_t* r = getPtr(rh.lid);
 		if(hasList(r, lh.list_id) && hasFlag(r, toFid(lh))) {
-			return list_flag{.list_id = lh.list_id, .flag = -1};
+			return list_flag{lh.list_id, -1};
 		}
 		return lh;
 	}
@@ -563,9 +563,9 @@ namespace ink::runtime::internal
 					if(hasFlag(l,j)) {
 						if(count++ == i) {
 							return list_flag{
-								.list_id = static_cast<decltype(list_flag::list_id)>(i),
-								.flag = static_cast<decltype(list_flag::flag)>(
-										j - listBegin(i))};
+								static_cast<decltype(list_flag::list_id)>(i),
+								static_cast<decltype(list_flag::flag)>( j - listBegin(i) )
+							};
 						}
 					}
 				}
@@ -592,7 +592,7 @@ namespace ink::runtime::internal
 		using int_t = decltype(list_flag::list_id);
 		for(int_t i = 0; i < static_cast<int_t>(_list_names.size()); ++i) {
 			if(str_equal(list_name, _list_names[i])) {
-				return list_flag{.list_id = i, .flag = -1};
+				return list_flag{i, -1};
 			}
 		}
 		inkAssert(false, "No list with name found!");

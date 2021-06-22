@@ -26,8 +26,8 @@ namespace ink::runtime::internal
 			for(const auto& flag : _lists.named_flags()) {
 				set_variable(hash_string(flag.name), value{}.set<value_type::list_flag>(
 						list_flag{
-							.list_id = flag.flag.list_id,
-							.flag = flag.flag.flag
+							flag.flag.list_id,
+							flag.flag.flag
 						}));
 			}
 		}

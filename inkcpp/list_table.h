@@ -97,7 +97,7 @@ namespace ink::runtime::internal
 		list sub(list lh, list_flag rh);
 		list_flag sub(list_flag lh, list rh);
 		list_flag sub(list_flag lh, list_flag rh) {
-			return lh == rh ? list_flag{.list_id = lh.list_id, .flag = -1} : lh;
+			return lh == rh ? list_flag{lh.list_id, -1} : lh;
 		}
 		list intersect(list lh, list rh);
 		list_flag intersect(list lh, list_flag rh);
