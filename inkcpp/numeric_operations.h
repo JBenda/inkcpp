@@ -182,10 +182,11 @@ namespace ink::runtime::internal {
 
 	template<>
 	class operation<Command::SUBTRACT, value_type::boolean, void> : public operation_base<void> {
+		operation<Command::SUBTRACT, value_type::int32> op_int;
 	public:
-		using operation_base::operation_base;
+		template<typename T> operation(const T& t) : operation_base{t}, op_int{t} {}
 		void operator()(basic_eval_stack& stack, value* vals) {
-			operation<Command::SUBTRACT, value_type::boolean>(satck, vals);
+			op_int(stack, vals);
 		}
 	};
 
@@ -202,10 +203,11 @@ namespace ink::runtime::internal {
 	
 	template<>
 	class operation<Command::DIVIDE, value_type::boolean, void> : public operation_base<void> {
+		operation<Command::DIVIDE, value_type::int32> op_int;
 	public:
-		using operation_base::operation_base;
-		void operator(basic_eval_stack& stack, value* vals) {
-			operation<Command::DIVIDE, value_type::int32>{}(stack, vals);
+		template<typename T> operation(const T& t) : operation_base{t}, op_int{t} {}
+		void operator()(basic_eval_stack& stack, value* vals) {
+			op_int(stack, vals);
 		}
 	};
 
@@ -231,12 +233,13 @@ namespace ink::runtime::internal {
 
 	template<>
 	class operation<Command::MOD, value_type::boolean, void> : public operation_base<void> {
+		operation<Command::MOD, value_type::int32> op_int;
 	public:
-		using operation_base::operation_base;
+		template<typename T> operation(const T& t) : operation_base{t}, op_int{t} {}
 		void operator()(basic_eval_stack& stack, value* vals) {
-			operation<Command::MOD, value_type::int32>{}(stack, vals);
+			op_int(stack, vals);
 		}
-	}
+	};
 
 	template<value_type ty>
 	class operation<Command::IS_EQUAL, ty, is_numeric_t<ty>> : public operation_base<void> {
