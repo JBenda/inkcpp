@@ -376,6 +376,14 @@ namespace ink::runtime::internal {
 			stack.push(value{}.set<ty>(-vals[0].get<ty>()));
 		}
 	};
+	template<>
+	class operation<Command::NEGATE, value_type::boolean, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals) {
+			stack.push(value{}.set<value_type::boolean>(!vals[0].get<value_type::boolean>()));
+		}
+	}
 
 	template<>
 	class operation<Command::RANDOM, value_type::int32, void> : public operation_base<prng>
