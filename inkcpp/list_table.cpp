@@ -419,7 +419,7 @@ namespace ink::runtime::internal
 		const data_t* data = getPtr(l.lid);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(data, i)) {
-				for(int j = _list_end[j] - 1; j >= listBegin(i); --j)
+				for(int j = _list_end[i] - 1; j >= listBegin(i); --j)
 				{
 					if(hasFlag(data, j)) {
 						int value = j - listBegin(i);

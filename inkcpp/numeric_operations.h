@@ -180,6 +180,15 @@ namespace ink::runtime::internal {
 		}
 	};
 
+	template<>
+	class operation<Command::SUBTRACT, value_type::boolean, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals) {
+			operation<Command::SUBTRACT, value_type::boolean>(satck, vals);
+		}
+	};
+
 	template<value_type ty>
 	class operation<Command::DIVIDE, ty, is_numeric_t<ty>> : public operation_base<void> {
 	public:
@@ -188,6 +197,15 @@ namespace ink::runtime::internal {
 			stack.push(value{}.set<ty>(
 						casting::numeric_cast<ty>(vals[0]) /
 						casting::numeric_cast<ty>(vals[1]) ));
+		}
+	};
+	
+	template<>
+	class operation<Command::DIVIDE, value_type::boolean, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator(basic_eval_stack& stack, value* vals) {
+			operation<Command::DIVIDE, value_type::int32>{}(stack, vals);
 		}
 	};
 
@@ -210,6 +228,15 @@ namespace ink::runtime::internal {
 			stack.push(value{}.set<ty>( vals[0].get<ty>() % vals[1].get<ty>() ));
 		}
 	};
+
+	template<>
+	class operation<Command::MOD, value_type::boolean, void> : public operation_base<void> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals) {
+			operation<Command::MOD, value_type::int32>{}(stack, vals);
+		}
+	}
 
 	template<value_type ty>
 	class operation<Command::IS_EQUAL, ty, is_numeric_t<ty>> : public operation_base<void> {

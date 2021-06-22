@@ -31,8 +31,8 @@ namespace ink::compiler::internal
 				if (_flag_names[j] != "") {
 					result.push_back({
 							_flag_names[j],
-							{.list_id = static_cast<lid_t>(i),
-							.flag = static_cast<flag_t>(j - begin)}
+							{	static_cast<lid_t>(i),
+								static_cast<flag_t>(j - begin)}
 							});
 				}
 			}
