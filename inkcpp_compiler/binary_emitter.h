@@ -35,6 +35,7 @@ namespace ink::compiler::internal
 	protected:
 		virtual void initialize() override;
 		virtual void finalize() override;
+		virtual void setContainerIndex(container_t index) override;
 
 	private:
 		void process_paths();

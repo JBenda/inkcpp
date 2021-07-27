@@ -76,6 +76,9 @@ namespace ink::compiler::internal
 		// Finalize (do any post processing necessary)
 		virtual void finalize() = 0;
 
+		// Set container index for visit tracking
+		virtual void setContainerIndex(container_t index) = 0;
+
 	protected:
 		typedef std::vector<std::pair<uint32_t, container_t>> container_map;
 

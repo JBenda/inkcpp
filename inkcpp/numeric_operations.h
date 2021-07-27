@@ -383,7 +383,7 @@ namespace ink::runtime::internal {
 		void operator()(basic_eval_stack& stack, value* vals) {
 			stack.push(value{}.set<value_type::boolean>(!vals[0].get<value_type::boolean>()));
 		}
-	}
+	};
 
 	template<>
 	class operation<Command::RANDOM, value_type::int32, void> : public operation_base<prng>

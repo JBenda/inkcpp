@@ -127,8 +127,9 @@ namespace ink::compiler::internal
 
 		// tell the emitter we're beginning a new container
 		uint32_t position = _emitter->start_container(index_in_parent, name_override.empty() ? meta.name : name_override);
-		if(meta.recordInContainerMap)
+		if(meta.recordInContainerMap) {
 			_emitter->add_start_to_container_map(position, meta.indexToReturn);
+		}
 
 		// Now, we want to iterate children of this container, save the last
 		//  The last is the settings object handled above

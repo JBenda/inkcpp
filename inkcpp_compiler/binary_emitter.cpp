@@ -246,6 +246,11 @@ namespace ink::compiler::internal
 		process_paths();
 	}
 
+	void binary_emitter::setContainerIndex(container_t index)
+	{
+		_current->counter_index = index;
+	}
+
 	uint32_t binary_emitter::fallthrough_divert()
 	{
 		// write a fallthrough divert ???
