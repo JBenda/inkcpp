@@ -299,7 +299,12 @@ namespace ink::runtime::internal
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
 		: _story(data), _globals(global.cast<globals_impl>()), _container(~0),
-		_operations(global.cast<globals_impl>()->strings(),global.cast<globals_impl>()->lists(), _rng),
+		_operations(
+				global.cast<globals_impl>()->strings(),
+				global.cast<globals_impl>()->lists(),
+				_rng,
+				*global.cast<globals_impl>(),
+				*data),
 		_backup(nullptr), _done(nullptr), _choices()
 	{
 		_ptr = _story->instructions();

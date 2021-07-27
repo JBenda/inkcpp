@@ -11,6 +11,8 @@
 namespace ink::runtime::internal {
 	class string_table;
 	class list_table;
+	class story_impl;
+	class globals_impl;
 
 	/// base class for operations to acquire data and provide flags and
 	/// constructor
@@ -98,5 +100,26 @@ namespace ink::runtime::internal {
 	protected:
 		list_table& _list_table;
 		prng& _prng;
+	};
+
+	template<>
+	class operation_base<const story_impl, globals_impl> {
+	public:
+		static constexpr bool enabled = true;
+		template<typename T>
+		operation_base(const T& t)
+		: _story{*get<const story_impl*,T>(t)}, _visit_counts{*get<globals_impl*,T>(t)}
+		{
+			static_assert(has_type<const story_impl*,T>::value, "Executioner "
+					"constructor needs a story_impl to instantiate "
+					"container related operations!");
+			static_assert(has_type<globals_impl*,T>::value, "Executioner "
+					"constructor needs access to globals to instantiate "
+					"container related operations!");
+		}
+
+	protected:
+		const story_impl& _story;
+		globals_impl& _visit_counts;
 	};
 }

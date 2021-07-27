@@ -91,6 +91,7 @@ namespace ink
 		LIST_COUNT,
 		LIST_MIN,
 		LIST_MAX,
+		READ_COUNT_VAR,
 		lrnd,
 		FLOOR,
 		CEILING,

@@ -192,7 +192,7 @@ namespace ink::runtime::internal
 
 	void globals_impl::restore()
 	{
-		// _visit_counts.restore();
+		// _visit_counts.restore(); // disable to startisfy: I028
 		_variables.restore();
 	}
 
