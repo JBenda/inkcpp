@@ -291,7 +291,7 @@ namespace ink::runtime::internal
 
 		// Jump to the old offset
 		inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
-		jump(_story->instructions() + offset);
+		jump(_story->instructions() + offset, false);
 
 		// Return frame type
 		return type;
