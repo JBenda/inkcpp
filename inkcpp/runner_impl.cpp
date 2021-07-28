@@ -188,7 +188,8 @@ namespace ink::runtime::internal
 
 		// Iterate until we find the container marker just before our own
 		while (_story->iterate_containers(iter, container_id, offset, reverse)) {
-			if (!reverse && offset > _ptr || reverse && offset < _ptr) {
+			if (!reverse && offset > _ptr
+					|| reverse && offset < _ptr) {
 
 				// Step back once in the iteration and break
 				inBound = true;
@@ -200,7 +201,7 @@ namespace ink::runtime::internal
 		size_t pos = _container.size();
 
 		// Start moving forward (or backwards)
-		if(inBound)
+		if(inBound && (offset == nullptr || !reverse&&offset<=dest || reverse&&offset>dest) )
 		while (_story->iterate_containers(iter, container_id, offset, reverse))
 		{
 			// Break when we've past the destination
@@ -480,7 +481,7 @@ namespace ink::runtime::internal
 		_threads.clear();
 
 		// Jump to destination and clear choice list
-		jump(_story->instructions() + c.path());
+		jump(_story->instructions() + c.path(), false);
 		clear_choices();
 		clear_tags();
 	}
