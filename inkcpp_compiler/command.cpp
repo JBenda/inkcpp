@@ -73,6 +73,7 @@ namespace ink
 			"LIST_MIN",
 			"LIST_MAX",
 			"readc",
+			"turns",
 			"lrnd",
 			"FLOOR",
 			"CEILING",

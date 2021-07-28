@@ -40,6 +40,13 @@ namespace ink::runtime::internal
 		// Checks the number of visits to a container
 		uint32_t visits(uint32_t container_id) const;
 
+		// Returnn number of turns since container was last visited
+		// \retval -1 if container was never visited before
+		uint32_t turns(uint32_t container_id) const;
+
+		// signal that a turn is habbend (eg. a choice is taken) 
+		void turn();
+
 		// registers/unregisters a runner as using this globals object
 		void add_runner(const runner_impl*);
 		void remove_runner(const runner_impl*);
@@ -76,7 +83,26 @@ namespace ink::runtime::internal
 		const uint32_t _num_containers;
 
 		// Visit count array
-		internal::allocated_restorable_array<uint32_t> _visit_counts;
+		struct visit_count {
+			uint32_t visits = 0;
+			int32_t turns = -1;
+			bool operator==(const visit_count& vc) const {
+				return visits == vc.visits && turns == vc.turns;
+			}
+			bool operator!=(const visit_count& vc) const {
+				return !(*this == vc);
+			}
+		};
+		class visit_counts{
+			visit_count* _data;
+			size_t _len;
+		public:
+			visit_counts(size_t len) 
+			: _data{new visit_count[len]}, _len{len} {}
+			size_t size() const { return _len; }
+			visit_count& operator[](size_t i) { return _data[i]; }
+			const visit_count& operator[](size_t i) const { return _data[i]; }
+		} _visit_counts;
 
 		// Pointer back to owner story.
 		const story_impl* const _owner;

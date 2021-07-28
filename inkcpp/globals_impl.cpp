@@ -6,7 +6,7 @@ namespace ink::runtime::internal
 {
 	globals_impl::globals_impl(const story_impl* story)
 		: _num_containers(story->num_containers())
-		, _visit_counts(_num_containers, 0, ~0)
+		, _visit_counts(_num_containers)
 		, _owner(story)
 		, _runners_start(nullptr)
 		, _lists(story->list_meta(), story->get_header())
@@ -35,13 +35,31 @@ namespace ink::runtime::internal
 
 	void globals_impl::visit(uint32_t container_id)
 	{
-		_visit_counts.set(container_id, _visit_counts[container_id] + 1);
+		_visit_counts[container_id].visits += 1;
+		_visit_counts[container_id].turns  = 0;
 	}
 
 	uint32_t globals_impl::visits(uint32_t container_id) const
 	{
-		return _visit_counts[container_id];
+		return _visit_counts[container_id].visits;
 	}
+
+	void globals_impl::turn()
+	{
+		for(size_t i = 0; i < _visit_counts.size(); ++i)
+		{
+			if(_visit_counts[i].turns != -1) {
+				_visit_counts[i].turns += 1;
+			}
+		}
+	}
+
+	uint32_t globals_impl::turns(uint32_t container_id) const
+	{
+		return _visit_counts[container_id].turns;
+	}
+
+
 
 	void globals_impl::add_runner(const runner_impl* runner)
 	{
@@ -186,19 +204,16 @@ namespace ink::runtime::internal
 
 	void globals_impl::save()
 	{
-		_visit_counts.save();
 		_variables.save();
 	}
 
 	void globals_impl::restore()
 	{
-		// _visit_counts.restore(); // disable to startisfy: I028
 		_variables.restore();
 	}
 
 	void globals_impl::forget()
 	{
-		_visit_counts.forget();
 		_variables.forget();
 	}
 }

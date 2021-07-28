@@ -184,12 +184,14 @@ namespace ink::runtime::internal
 		const uint32_t* iter = nullptr;
 		container_t container_id;
 		ip_t offset;
+		bool inBound = false;
 
 		// Iterate until we find the container marker just before our own
 		while (_story->iterate_containers(iter, container_id, offset, reverse)) {
 			if (!reverse && offset > _ptr || reverse && offset < _ptr) {
 
 				// Step back once in the iteration and break
+				inBound = true;
 				_story->iterate_containers(iter, container_id, offset, !reverse);
 				break;
 			}
@@ -198,6 +200,7 @@ namespace ink::runtime::internal
 		size_t pos = _container.size();
 
 		// Start moving forward (or backwards)
+		if(inBound)
 		while (_story->iterate_containers(iter, container_id, offset, reverse))
 		{
 			// Break when we've past the destination
@@ -450,6 +453,7 @@ namespace ink::runtime::internal
 			inkAssert(index < _choices.size(), "Choice index out of range");
 		}
 		restore(); // restore to stack state when choice was maked
+		_globals->turn();
 		// Get the choice
 		const auto& c = has_choices() ? _choices[index] : _fallback_choice.value();
 
@@ -636,7 +640,6 @@ namespace ink::runtime::internal
 				_is_falling = false;
 				set_done_ptr(nullptr);
 			}
-
 			if (cmd >= Command::OP_BEGIN && cmd < Command::OP_END)
 			{
 				_operations(cmd, _eval);

@@ -92,6 +92,7 @@ namespace ink
 		LIST_MIN,
 		LIST_MAX,
 		READ_COUNT_VAR,
+		TURNS,
 		lrnd,
 		FLOOR,
 		CEILING,
