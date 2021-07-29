@@ -322,7 +322,8 @@ namespace ink::runtime::internal
 				global.cast<globals_impl>()->lists(),
 				_rng,
 				*global.cast<globals_impl>(),
-				*data),
+				*data,
+				static_cast<const runner_interface&>(*this)),
 		_backup(nullptr), _done(nullptr), _choices()
 	{
 		_ptr = _story->instructions();

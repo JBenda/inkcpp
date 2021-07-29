@@ -8,6 +8,9 @@
 #include "./tuple.hpp"
 #include "random.h"
 
+namespace ink::runtime {
+	class runner_interface;
+}
 namespace ink::runtime::internal {
 	class string_table;
 	class list_table;
@@ -121,5 +124,20 @@ namespace ink::runtime::internal {
 	protected:
 		const story_impl& _story;
 		globals_impl& _visit_counts;
+	};
+
+	template<>
+	class operation_base<const runner_interface> {
+	public:
+		static constexpr bool enabled = true;
+		template<typename T>
+		operation_base(const T& t)
+		: _runner{*get<const runner_interface*,T>(t)}
+		{
+			static_assert(has_type<const runner_interface*,T>::value,
+					"Executioner constructor needs a runner to instantiate.");
+		}
+	protected:
+		const runner_interface& _runner;
 	};
 }

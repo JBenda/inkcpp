@@ -81,6 +81,7 @@ namespace ink
 			"LIST_ALL",
 			"LIST_INVERT",
 			"LIST_VALUE",
+			"choiceCnt",
 
 			"START_CONTAINER",
 			"END_CONTAINER",

@@ -3,6 +3,7 @@
 #include "operations.h"
 #include "story_impl.h"
 #include "globals_impl.h"
+#include "runner.h"
 
 #include <iostream>
 
@@ -42,6 +43,14 @@ namespace ink::runtime::internal {
 								_story,
 								vals[0].get<value_type::divert>()
 								))
+					)));
+	}
+
+	void operation<Command::CHOICE_COUNT, value_type::none, void>::operator()
+		(basic_eval_stack& stack, value* vals)
+	{
+		stack.push(value{}.set<value_type::int32>(static_cast<int32_t>(
+						_runner.num_choices()
 					)));
 	}
 

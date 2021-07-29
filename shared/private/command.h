@@ -101,6 +101,7 @@ namespace ink
 		LIST_INVERT,
 		LIST_VALUE,
 		UNARY_OPERATORS_END = LIST_VALUE,
+		CHOICE_COUNT,
 		OP_END,
 
 		// == Container tracking
