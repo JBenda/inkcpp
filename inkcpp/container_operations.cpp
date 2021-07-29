@@ -9,40 +9,27 @@
 
 namespace ink::runtime::internal {
 
-	container_t containerAddressToId(const story_impl& story, uint32_t address) {
-		ip_t offset
-			= story.instructions() + address;
-		const uint32_t* iter = nullptr;
-		ip_t iter_offset = nullptr;
-		container_t container_id;
-		while(story.iterate_containers(iter, container_id, iter_offset))
-		{
-			if(iter_offset == offset)
-			{
-				return container_id;
-			}
-		}
-		inkAssert(0, "failed to find read count target!");
-		return ~0;
-	}
-
 	void operation<Command::READ_COUNT_VAR, value_type::divert, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
+		container_t id;
+		inkAssert(_story.get_container_id(
+				_story.instructions() + vals[0].get<value_type::divert>(),
+				id), "failed to find container to read visit count!");
 		stack.push(value{}.set<value_type::int32>(
-			static_cast<int32_t>(_visit_counts.visits(
-					containerAddressToId(_story, vals[0].get<value_type::divert>())
-					))));
+				static_cast<int32_t>(_visit_counts.visits( id )
+			)));
 	}
 
 	void operation<Command::TURNS, value_type::divert, void>::operator()(
 		basic_eval_stack& stack, value* vals)
 	{
+		container_t id;
+		inkAssert(_story.get_container_id(
+				_story.instructions() + vals[0].get<value_type::divert>(),
+				id), "failed to find container to read turn count!");
 		stack.push(value{}.set<value_type::int32>(
-						static_cast<int32_t>(_visit_counts.turns(containerAddressToId(
-								_story,
-								vals[0].get<value_type::divert>()
-								))
+						static_cast<int32_t>(_visit_counts.turns(id)
 					)));
 	}
 
