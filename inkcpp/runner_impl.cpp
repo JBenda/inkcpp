@@ -200,13 +200,27 @@ namespace ink::runtime::internal
 
 		size_t pos = _container.size();
 
+		bool first = true;
 		// Start moving forward (or backwards)
 		if(inBound && (offset == nullptr || !reverse&&offset<=dest || reverse&&offset>dest) )
 		while (_story->iterate_containers(iter, container_id, offset, reverse))
 		{
 			// Break when we've past the destination
-			if (!reverse && offset > dest || reverse && offset <= dest)
+			if (!reverse && offset > dest || reverse && offset <= dest) {
+				// jump back to start of same container
+				if(first && reverse && offset == dest
+						&& _container.top() == container_id)  {
+					// check if it was start flag
+					auto con_id = container_id;
+					_story->iterate_containers(iter, container_id, offset, true);
+					if(offset == nullptr || con_id == container_id) 
+					{
+						_globals->visit(container_id);
+					}
+				}
 				break;
+			}
+			first = false;
 
 			// Two cases:
 
@@ -236,10 +250,10 @@ namespace ink::runtime::internal
 			size_t num_new = _container.size() - pos;
 			while (_container.iter(iter))
 			{
-				if (num_new == 0)
+				if (num_new <= 0)
 					break;
 				_globals->visit(*iter);
-				num_new--;
+				--num_new;
 			}
 		}
 
