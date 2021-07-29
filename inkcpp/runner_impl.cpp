@@ -497,6 +497,7 @@ namespace ink::runtime::internal
 
 		// Jump to destination and clear choice list
 		jump(_story->instructions() + c.path(), false);
+		if(!_container.empty()){ _globals->visit(_container.top()); }
 		clear_choices();
 		clear_tags();
 	}
