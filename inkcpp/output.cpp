@@ -390,8 +390,12 @@ namespace ink
 				}
 
 				// Make sure we're not violating a save point
-				if (_save != ~0 && start < _save)
-					inkAssert(false, "Trying to access output stream prior to save point!");
+				if (_save != ~0 && start < _save) {
+					// TODO: check if we don't reset save correct
+					// at some point we can modifiy the output even behind save (probally discard?) and push a new element -> invalid save point
+					// inkAssert(false, "Trying to access output stream prior to save point!");
+					const_cast<basic_stream&>(*this).clear();
+				}
 
 				return start;
 			}
