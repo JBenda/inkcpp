@@ -77,8 +77,7 @@ namespace ink::runtime::internal
 	class reverse_find_from_frame_predicat_operator {
 	public:
 		reverse_find_from_frame_predicat_operator(int ci, hash_t name) : _name{name}, _ci{ci} {
-			inkAssert(ci != 0, "Can't find global variables on stack!");
-			inkAssert(ci == -1, "only support ci == -1, for now!");
+			inkAssert(ci == -1 || ci == 0, "only support ci == -1, for now!");
 		}
 		bool operator()(entry& e) {
 			if(reverse_find_predicat(_name, _skip, _jumping, e)) {
@@ -128,6 +127,9 @@ namespace ink::runtime::internal
 	
 	value* basic_stack::get_from_frame(int ci, hash_t name) {
 		entry* found = base::reverse_find(reverse_find_from_frame_predicat_operator(ci, name));
+		if(found == nullptr && ci == -1) {
+			found = base::reverse_find(reverse_find_from_frame_predicat_operator(0, name));
+		}
 		if(found == nullptr) { return nullptr; }
 		if(found->name == name) { return &found->data; }
 		return nullptr;
