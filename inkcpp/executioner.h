@@ -115,12 +115,17 @@ namespace ink::runtime::internal {
 		void operator()(Command c, basic_eval_stack& s) {
 			if (c == cmd) {
 				static constexpr size_t N = command_num_args(cmd);
-				value args[N];
-				for (int i = command_num_args(cmd)-1; i >= 0 ; --i) {
-					args[i] = s.pop();
+				if constexpr (N == 0) {
+					value_type ty  = casting::common_base<0>(nullptr);
+					_typed_exe(ty, s, nullptr);
+				} else {
+					value args[N];
+					for (int i = command_num_args(cmd)-1; i >= 0 ; --i) {
+						args[i] = s.pop();
+					}
+					value_type ty = casting::common_base<N>(args);
+					_typed_exe(ty, s, args);
 				}
-				value_type ty = casting::common_base<N>(args);
-				_typed_exe(ty, s, args);
 			} else { _exe(c, s); }
 		}
 	private:
