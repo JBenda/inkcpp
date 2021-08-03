@@ -1,4 +1,8 @@
 #include "catch.hpp"
+#include "../inkcpp_cl/test.h"
+
+#include <compiler.h>
+#include <story.h>
 
 #include "../inkcpp/string_table.h"
 #include "../inkcpp/list_table.h"
@@ -6,6 +10,10 @@
 #include "../inkcpp/output.h"
 #include "../inkcpp/executioner.h"
 #include "../shared/private/command.h"
+
+#include "../inkcpp/story_impl.h"
+#include "../inkcpp/runner_impl.h"
+#include "../inkcpp/globals_impl.h"
 
 using ink::runtime::internal::value;
 using ink::runtime::internal::value_type;
@@ -17,6 +25,12 @@ using ink::runtime::internal::executer;
 using eval_stack = ink::runtime::internal::eval_stack<28, false>;
 using ink::Command;
 
+using ink::runtime::internal::story_impl;
+using ink::runtime::internal::runner_impl;
+using ink::runtime::internal::globals_impl;
+using ink::runtime::globals;
+using ink::runtime::runner;
+
 void cp_str(char* dst, const char* src) {
 	while(*src) { *dst++ = *src++; }
 	*dst = 0;
@@ -27,8 +41,15 @@ SCENARIO("compare concatenated values")
 	string_table str_table;
 	list_table lst_table{};
 	prng rng;
-	executer ops(str_table, lst_table, rng);
 	eval_stack stack;
+	inklecate("ink/ListStory.ink", "ListStory_value.tmp");
+	ink::compiler::run("ListStory_value.tmp", "ListStory_value.bin");
+	story_impl story("ListStory_value.bin");
+	globals globs_ptr = story.new_globals();
+	runner run = story.new_runner(globs_ptr);
+	globals_impl& globs = *globs_ptr.cast<globals_impl>();
+	executer ops(rng, story, globs, globs.strings(), globs.lists(), *run);
+		
 	GIVEN("just single strings")
 	{
 		const char str_1[] = "Hello World!";
