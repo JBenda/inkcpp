@@ -9,6 +9,20 @@ namespace ink::runtime::internal
 			delete[] iter.key();
 		_table.clear();
 	}
+	char* string_table::duplicate(const char* str)
+	{
+		int len = 0;
+		for(const char* i = str; *i != 0; ++i) {
+			++len;
+		}
+		char* res = create(len + 1);
+		char* out = res;
+		for(const char* i = str; *i != 0; ++i, ++out) {
+			*out = *i;
+		}
+		*out = 0;
+		return res;
+	}
 
 	char* string_table::create(size_t length)
 	{

@@ -9,20 +9,22 @@ namespace ink
 	{
 		namespace internal
 		{
+			class string_table;
+			class list_table;
 			class basic_stream
 			{
 			protected:
-				basic_stream(data*, size_t);
+				basic_stream(value*, size_t);
 			public:
 				// Append data to stream
-				void append(const data&);
+				void append(const value&);
 
 				// Append data array to stream
-				void append(const data*, unsigned int length);
+				void append(const value*, unsigned int length);
 
 				// Append fixed sized data array to stream
 				template<unsigned int N>
-				void append(const data in[N])
+				void append(const value in[N])
 				{
 					append(&in[0], N);
 				}
@@ -31,24 +33,32 @@ namespace ink
 				int queued() const;
 
 				// Peeks the top entry
-				const data& peek() const;
+				const value& peek() const;
 
 				// discards data
 				void discard(size_t length);
 
 				// Extract into a data array
-				void get(data*, size_t length);
+				void get(value*, size_t length);
 
-				// Extract to a newly allocated string
-				const char* get_alloc(string_table&);
+				/** Extract to a newly allocated string
+				 * @param string_table place to allocate new string in
+				 * @param list_table needed do parse list values to string
+				 * @tparam RemoveTail if we should remove a tailing space
+				 * @return newly allocated string
+				 */
+				template<bool RemoveTail = true>
+				char* get_alloc(string_table&, list_table&);
 
 #ifdef INK_ENABLE_STL
 				// Extract into a string
 				std::string get();
-#endif
-#ifdef INK_ENABLE_UNREAL
+#else
+				// will conflict with stl definition
+#	ifdef INK_ENABLE_UNREAL
 				// Extract into a string
 				FString get();
+#	endif
 #endif
 
 				// Check if the stream is empty
@@ -58,10 +68,10 @@ namespace ink
 				bool has_marker() const;
 
 				// Checks if the stream ends with a specific type
-				bool ends_with(data_type) const;
+				bool ends_with(value_type) const;
 
 				// Checks if the last element when save()'d was this type
-				bool saved_ends_with(data_type) const;
+				bool saved_ends_with(value_type) const;
 
 				// Checks if there are any elements past the save that
 				//  are non-whitespace strings
@@ -78,6 +88,17 @@ namespace ink
 				void restore();
 				void forget();
 
+				// add lists definitions, needed to print lists
+				void set_list_meta(const list_table& lists) {
+					_lists_table = &lists;
+				}
+
+				char last_char() const {
+					return _last_char;
+				}
+
+				bool saved() const { return _save != ~0; }
+
 			private:
 				size_t find_start() const;
 				bool should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
@@ -86,8 +107,10 @@ namespace ink
 				void copy_string(const char* str, size_t& dataIter, OUT& output);
 				
 			private:
+				char _last_char;
+
 				// data stream
-				data* _data;
+				value* _data;
 				size_t _max;
 
 				// size
@@ -95,6 +118,8 @@ namespace ink
 
 				// save point
 				size_t _save;
+
+				const list_table* _lists_table = nullptr;
 			};
 
 #ifdef INK_ENABLE_STL
@@ -105,14 +130,6 @@ namespace ink
 			basic_stream& operator >>(basic_stream&, FString&);
 #endif
 
-			basic_stream& operator<<(basic_stream&, const data&);
-
-			const data marker = { data_type::marker, 0 };
-			const data newline = { data_type::newline, 0 };
-			const data glue = { data_type::glue, 0 };
-			const data func_start = { data_type::func_start, 0 };
-			const data func_end = { data_type::func_end, 0 };
-
 			template<size_t N>
 			class stream : public basic_stream
 			{
@@ -120,7 +137,7 @@ namespace ink
 				stream() : basic_stream(&_buffer[0], N) { }
 
 			private:
-				data _buffer[N];
+				value _buffer[N];
 			};
 		}
 	}

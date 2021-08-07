@@ -4,6 +4,7 @@
 #include "compilation_results.h"
 #include "emitter.h"
 #include "reporter.h"
+#include "list_data.h"
 
 #include <vector>
 
@@ -26,6 +27,7 @@ namespace ink::compiler::internal
 		void compile_container(const nlohmann::json& container, int index_in_parent, const std::string& name_override = "");
 		void compile_command(const std::string& command);
 		void compile_complex_command(const nlohmann::json& command);
+		void compile_lists_definition(const nlohmann::json& list_defs);
 
 	private: // == JSON Helpers ==
 		inline bool has(const nlohmann::json& json, const std::string& key)
@@ -47,5 +49,7 @@ namespace ink::compiler::internal
 	private: // == Private members ==
 		emitter* _emitter;
 		container_t _next_container_index;
+
+		list_data _list_meta;
 	};
 }

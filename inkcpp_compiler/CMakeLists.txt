@@ -5,6 +5,7 @@ list(APPEND SOURCES
     reporter.h reporter.cpp
     text_emitter.h text_emitter.cpp
     binary_emitter.h binary_emitter.cpp
+	list_data.h list_data.cpp
     command.cpp
     )
 add_definitions(-DINK_COMPILER -DINK_EXPOSE_JSON)

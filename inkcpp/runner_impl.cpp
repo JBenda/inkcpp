@@ -4,6 +4,7 @@
 #include "choice.h"
 #include "globals_impl.h"
 #include "header.h"
+#include "string_utils.h"
 
 namespace ink::runtime
 {
@@ -21,6 +22,103 @@ namespace ink::runtime
 
 namespace ink::runtime::internal
 {
+
+	template<>
+	value* runner_impl::get_var<runner_impl::Scope::GLOBAL>(hash_t variableName) {
+		return _globals->get_variable(variableName);
+	}
+
+	template<>
+	value* runner_impl::get_var<runner_impl::Scope::LOCAL>(hash_t variableName) {
+		value* ret = _stack.get(variableName);
+		if(!ret) { return nullptr; }
+		if(ret->type() == value_type::value_pointer) {
+			auto [name, ci] = ret->get<value_type::value_pointer>();
+			inkAssert(ci == 0, "only Global pointer are allowd on the _stack!");
+			return get_var<runner_impl::Scope::GLOBAL>(name);
+		}
+		return ret;
+	}
+
+	template<>
+	value* runner_impl::get_var<runner_impl::Scope::NONE>(hash_t variableName) {
+		value* ret = get_var<Scope::LOCAL>(variableName);
+		if(ret) { return ret; }
+		return get_var<Scope::GLOBAL>(variableName);
+	}
+	template<runner_impl::Scope Hint>	
+	const value* runner_impl::get_var(hash_t variableName) const {
+		return const_cast<runner_impl*>(this)->get_var<Hint>(variableName);
+	}
+
+	template<>
+	void runner_impl::set_var<runner_impl::Scope::GLOBAL>(hash_t variableName, const value& val, bool is_redef) {
+		if(is_redef) {
+			value* src = _globals->get_variable(variableName);
+			_globals->set_variable(variableName, src->redefine(val, _globals->lists()));
+		} else {
+			_globals->set_variable(variableName, val);
+		}
+	}
+
+	const value* runner_impl::dereference(const value& val) {
+		if(val.type() != value_type::value_pointer) { return &val; }
+		
+		auto [name, ci] = val.get<value_type::value_pointer>();
+		if(ci == 0) { return get_var<Scope::GLOBAL>(name); }
+		return _stack.get_from_frame(ci, name);
+	}
+
+	template<>
+	void runner_impl::set_var<runner_impl::Scope::LOCAL>(hash_t variableName, const value& val, bool is_redef) {
+		if(val.type() == value_type::value_pointer) {
+			inkAssert(is_redef == false, "value pointer can only use to initelize variable!");
+			auto [name, ci] = val.get<value_type::value_pointer>();
+			if(ci == 0) { _stack.set(variableName, val); }
+			else {
+				const value* dref = dereference(val);
+				if(dref == nullptr) {
+					value v = val;
+					auto ref = v.get<value_type::value_pointer>();
+					v.set<value_type::value_pointer>(ref.name, 0);
+					_stack.set(variableName, v);
+				} else {
+					_ref_stack.set(variableName, val);
+					_stack.set(variableName, *dref);
+				}
+			}
+		} else {
+			if(is_redef) {
+				value* src = _stack.get(variableName);
+				if(src->type() == value_type::value_pointer) {
+					auto [name, ci] = src->get<value_type::value_pointer>();
+					inkAssert(ci == 0, "Only global pointer are allowed on _stack!");
+					set_var<Scope::GLOBAL>(
+							name,
+							get_var<Scope::GLOBAL>(name)->redefine(val, _globals->lists()),
+							true);
+				} else {
+					_stack.set(variableName, src->redefine(val, _globals->lists()));
+				}
+			} else {
+				_stack.set(variableName, val);
+			}
+		}
+	}
+
+	template<>
+	void runner_impl::set_var<runner_impl::Scope::NONE>(hash_t variableName, const value& val, bool is_redef) 	
+	{
+		inkAssert(is_redef, "define set scopeless variables!");
+		if(_stack.get(variableName)) {
+			return set_var<Scope::LOCAL>(variableName, val, is_redef);
+		} else {
+			return set_var<Scope::GLOBAL>(variableName, val, is_redef);
+		}
+	}
+
+
+
 	template<typename T>
 	inline T runner_impl::read()
 	{
@@ -50,19 +148,21 @@ namespace ink::runtime::internal
 
 	choice& runner_impl::add_choice()
 	{
-		inkAssert(_num_choices < MAX_CHOICES, "Ran out of choice storage!");
-		return _choices[_num_choices++];
+		inkAssert(config::maxChoices < 0 || _choices.size() < config::maxChoices,
+				"Ran out of choice storage!");
+		return _choices.push();
 	}
 
 	void runner_impl::clear_choices()
 	{
-		// TODO: Garbage collection?
-		_num_choices = 0;
+		// TODO: Garbage collection? ? which garbage ?
+		_fallback_choice = nullopt;
+		_choices.clear();
 	}
 
 	void runner_impl::clear_tags()
 	{
-		_num_tags = 0;
+		_tags.clear();
 	}
 
 	void runner_impl::jump(ip_t dest, bool record_visits)
@@ -71,11 +171,11 @@ namespace ink::runtime::internal
 		//  _should be_ able to safely assume that there is nothing to do here. A falling
 		//  divert should only be taking us from a container to that same container's end point
 		//  without entering any other containers
-		if (_is_falling)
+		/*if (_is_falling)
 		{
 			_ptr = dest;
 			return;
-		}
+		}*/
 
 		// Check which direction we are jumping
 		bool reverse = dest < _ptr;
@@ -84,12 +184,15 @@ namespace ink::runtime::internal
 		const uint32_t* iter = nullptr;
 		container_t container_id;
 		ip_t offset;
+		bool inBound = false;
 
 		// Iterate until we find the container marker just before our own
 		while (_story->iterate_containers(iter, container_id, offset, reverse)) {
-			if (!reverse && offset > _ptr || reverse && offset < _ptr) {
+			if (!reverse && offset > _ptr
+					|| reverse && offset < _ptr) {
 
 				// Step back once in the iteration and break
+				inBound = true;
 				_story->iterate_containers(iter, container_id, offset, !reverse);
 				break;
 			}
@@ -97,12 +200,27 @@ namespace ink::runtime::internal
 
 		size_t pos = _container.size();
 
+		bool first = true;
 		// Start moving forward (or backwards)
+		if(inBound && (offset == nullptr || !reverse&&offset<=dest || reverse&&offset>dest) )
 		while (_story->iterate_containers(iter, container_id, offset, reverse))
 		{
 			// Break when we've past the destination
-			if (!reverse && offset > dest || reverse && offset <= dest)
+			if (!reverse && offset > dest || reverse && offset <= dest) {
+				// jump back to start of same container
+				if(first && reverse && offset == dest
+						&& _container.top() == container_id)  {
+					// check if it was start flag
+					auto con_id = container_id;
+					_story->iterate_containers(iter, container_id, offset, true);
+					if(offset == nullptr || con_id == container_id) 
+					{
+						_globals->visit(container_id);
+					}
+				}
 				break;
+			}
+			first = false;
 
 			// Two cases:
 
@@ -132,128 +250,90 @@ namespace ink::runtime::internal
 			size_t num_new = _container.size() - pos;
 			while (_container.iter(iter))
 			{
-				if (num_new == 0)
+				if (num_new <= 0)
 					break;
 				_globals->visit(*iter);
-				num_new--;
+				--num_new;
 			}
 		}
 
 		// Jump
 		_ptr = dest;
 	}
-
-	void runner_impl::run_binary_operator(unsigned char cmd)
-	{
-		// Pop
-		value rhs = _eval.pop(), lhs = _eval.pop();
-		value result;
-
-		switch ((Command)cmd)
-		{
-		case Command::ADD:
-			result = value::add(lhs, rhs, _output, _globals->strings());
-			break;
-		case Command::SUBTRACT:
-			result = lhs - rhs;
-			break;
-		case Command::DIVIDE:
-			result = lhs / rhs;
-			break;
-		case Command::MULTIPLY:
-			result = lhs * rhs;
-			break;
-		case Command::MOD:
-			result = lhs % rhs;
-			break;
-		case Command::IS_EQUAL:
-			result = lhs == rhs;
-			break;
-		case Command::GREATER_THAN:
-			result = lhs > rhs;
-			break;
-		case Command::LESS_THAN:
-			result = lhs < rhs;
-			break;
-		case Command::GREATER_THAN_EQUALS:
-			result = lhs >= rhs;
-			break;
-		case Command::LESS_THAN_EQUALS:
-			result = lhs <= rhs;
-			break;
-		case Command::NOT_EQUAL:
-			result = lhs != rhs;
-			break;
-		case Command::AND:
-			result = lhs && rhs;
-			break;
-		case Command::OR:
-			result = lhs || rhs;
-			break;
-		case Command::MIN:
-			result = lhs < rhs ? lhs : rhs;
-			break;
-		case Command::MAX:
-			result = lhs > rhs ? lhs : rhs;
-			break;
-		default:
-			break;
+	template<frame_type type>
+	void runner_impl::start_frame(uint32_t target) {
+		if constexpr (type == frame_type::function) {
+			// add a function start marker
+			_output << values::func_start;
 		}
-
-		// Push result onto the stack
-		_eval.push(result);
-	}
-
-	void runner_impl::run_unary_operator(unsigned char cmd)
-	{
-		// Pop
-		value v = _eval.pop();
-		value result;
-
-		// Run command
-		switch ((Command)cmd)
+		// Push next address onto the callstack
 		{
-		case Command::NEGATE:
-			result = -v;
-			break;
-		case Command::NOT:
-			result = !v;
-			break;
-		default:
-			break;
+		size_t address = _ptr - _story->instructions();
+			_stack.push_frame<type>(address, bEvaluationMode);
+			_ref_stack.push_frame<type>(address, bEvaluationMode);
 		}
+		bEvaluationMode = false; // unset eval mode when enter function or tunnel
 
-		// Push to the stack
-		_eval.push(result);
+		// Do the jump
+		inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
+		jump(_story->instructions() + target);
 	}
 
 	frame_type runner_impl::execute_return()
 	{
 		// Pop the callstack
+		_ref_stack.fetch_values(_stack);
 		frame_type type;
-		offset_t offset = _stack.pop_frame(&type);
+		offset_t offset = _stack.pop_frame(&type,bEvaluationMode);
+		_ref_stack.push_values(_stack);
+		{ 	frame_type t; bool eval;
+			// TODO: write all refs to new frame 
+			offset_t o = _ref_stack.pop_frame(&t, eval);
+			inkAssert(o == offset && t == type && eval == bEvaluationMode,
+					"_ref_stack and _stack should be in frame sync!");
+		}
 
 		// SPECIAL: On function, do a trim
 		if (type == frame_type::function)
-			_output << func_end;
+			_output << values::func_end;
+		else if(type == frame_type::tunnel) {
+			// if we return but there is a divert target on top of 
+			// the evaluation stack, we should follow this instead
+			// inkproof: I060
+			if(!_eval.is_empty() && _eval.top().type() == value_type::divert) {
+				start_frame<frame_type::tunnel>(_eval.pop().get<value_type::divert>());
+				return type;
+			}
+		}
+
 
 		// Jump to the old offset
 		inkAssert(_story->instructions() + offset < _story->end(), "Callstack return is outside bounds of story!");
-		jump(_story->instructions() + offset);
+		jump(_story->instructions() + offset, false);
 
 		// Return frame type
 		return type;
 	}
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
-		: _story(data), _globals(global.cast<globals_impl>()), _container(~0), _threads(~0), 
-		_threadDone(nullptr, (ip_t)~0), _backup(nullptr), _done(nullptr), _choices()
+		: _story(data), _globals(global.cast<globals_impl>()), _container(~0),
+		_operations(
+				global.cast<globals_impl>()->strings(),
+				global.cast<globals_impl>()->lists(),
+				_rng,
+				*global.cast<globals_impl>(),
+				*data,
+				static_cast<const runner_interface&>(*this)),
+		_backup(nullptr), _done(nullptr), _choices()
 	{
 		_ptr = _story->instructions();
 		bEvaluationMode = false;
 
 		// register with globals
 		_globals->add_runner(this);
+		if(_globals->lists()) {
+			_output.set_list_meta(_globals->lists());
+		}
 
 		// initialize globals if necessary
 		if (!_globals->are_globals_initialized())
@@ -275,12 +355,23 @@ namespace ink::runtime::internal
 #ifdef INK_ENABLE_STL
 	std::string runner_impl::getline()
 	{
-		// Advance interpreter one line
-		advance_line();
+		std::string result{""};
+		bool fill = false;
+		do {
+			if (fill) {
+				result += " ";
+			}
+			// Advance interpreter one line
+			advance_line();
+			// Read line into std::string
+			std::string part;
+			_output >> part;
+			result += part;
+			fill = _output.last_char() == ' ';
+		} while(_ptr != nullptr && _output.last_char() != '\n');
 
-		// Read line into std::string
-		std::string result;
-		_output >> result;
+		// TODO: fallback choice = no choice
+		if(!has_choices() && _fallback_choice) { choose(~0); }
 
 		// Return result
 		inkAssert(_output.is_empty(), "Output should be empty after getline!");
@@ -289,11 +380,18 @@ namespace ink::runtime::internal
 
 	void runner_impl::getline(std::ostream& out)
 	{
-		// Advance interpreter one line
-		advance_line();
+		bool fill = false;
+		do {
+			if (fill) { out << " "; }
+			// Advance interpreter one line
+			advance_line();
+			// Write into out
+			out << _output;
+			fill = _output.last_char() == ' ';
+		} while(_ptr != nullptr && _output.last_char() != '\n');
 
-		// Write into out
-		out << _output;
+		// TODO: fallback choice = no choice
+		if(!has_choices() && _fallback_choice) { choose(~0); }
 
 		// Make sure we read everything
 		inkAssert(_output.is_empty(), "Output should be empty after getline!");
@@ -302,16 +400,16 @@ namespace ink::runtime::internal
 	std::string runner_impl::getall()
 	{
 		// Advance interpreter until we're stopped
-		while(can_continue())
-			advance_line();
+		std::stringstream str;
+		while(can_continue()) {
+			getline(str);
+		}
 
 		// Read output into std::string
-		std::string result;
-		_output >> result;
 
 		// Return result
 		inkAssert(_output.is_empty(), "Output should be empty after getall!");
-		return result;
+		return str.str();
 	}
 
 	void runner_impl::getall(std::ostream& out)
@@ -331,6 +429,7 @@ namespace ink::runtime::internal
 #ifdef INK_ENABLE_UNREAL
 	FString runner_impl::getline()
 	{
+		inkAssert(false, "Fix (see getline for std)");
 		// Advance interpreter one line
 		advance_line();
 
@@ -354,8 +453,7 @@ namespace ink::runtime::internal
 				break;
 		}
 
-		inkAssert(!_saved, "Should be no state snapshot at the end of newline");
-
+		// can be in save state becaues of choice
 		// Garbage collection TODO: How often do we want to do this?
 		_globals->gc();
 	}
@@ -367,10 +465,13 @@ namespace ink::runtime::internal
 
 	void runner_impl::choose(size_t index)
 	{
-		inkAssert(index < _num_choices, "Choice index out of range");
-
+		if(has_choices()) {
+			inkAssert(index < _choices.size(), "Choice index out of range");
+		}
+		restore(); // restore to stack state when choice was maked
+		_globals->turn();
 		// Get the choice
-		const auto& c = _choices[index];
+		const auto& c = has_choices() ? _choices[index] : _fallback_choice.value();
 
 		// Get its thread
 		thread_t choiceThread = c._thread;
@@ -380,7 +481,7 @@ namespace ink::runtime::internal
 		if (choiceThread == ~0)
 			prev = _done;
 		else
-			prev = _threadDone.get(choiceThread);
+			prev = _threads.get(choiceThread);
 
 		// Make sure we have a previous pointer
 		inkAssert(prev != nullptr, "No 'done' point recorded before finishing choice output");
@@ -391,11 +492,12 @@ namespace ink::runtime::internal
 
 		// Collapse callstacks to the correct thread
 		_stack.collapse_to_thread(choiceThread);
+		_ref_stack.collapse_to_thread(choiceThread);
 		_threads.clear();
-		_threadDone.clear(nullptr);
 
 		// Jump to destination and clear choice list
-		jump(_story->instructions() + _choices[index].path());
+		jump(_story->instructions() + c.path(), false);
+		if(!_container.empty()){ _globals->visit(_container.top()); }
 		clear_choices();
 		clear_tags();
 	}
@@ -409,17 +511,17 @@ namespace ink::runtime::internal
 
 	bool runner_impl::has_tags() const
 	{
-		return _num_tags > 0;
+		return _tags.size() > 0;
 	}
 
 	size_t runner_impl::num_tags() const
 	{
-		return _num_tags;
+		return _tags.size();
 	}
 
 	const char* runner_impl::get_tag(size_t index) const
 	{
-		inkAssert(index < _num_tags, "Tag index exceeds _num_tags");
+		inkAssert(index < _tags.size(), "Tag index exceeds _num_tags");
 		return _tags[index];
 	}
 
@@ -428,8 +530,9 @@ namespace ink::runtime::internal
 	{
 		// TODO
 		return nullptr;
-	}
+
 #endif
+	}
 
 	bool runner_impl::move_to(hash_t path)
 	{
@@ -458,7 +561,7 @@ namespace ink::runtime::internal
 	{
 		// Check if the old newline is still present (hasn't been glu'd) and
 		//  if there is new text (non-whitespace) in the stream since saving
-		bool stillHasNewline = _output.saved_ends_with(data_type::newline);
+		bool stillHasNewline = _output.saved_ends_with(value_type::newline);
 		bool hasAddedNewText = _output.text_past_save();
 
 		// Newline is still there and there's no new text
@@ -488,7 +591,8 @@ namespace ink::runtime::internal
 		if (!_output.has_marker())
 		{
 			// If we have a saved state after a previous newline
-			if (_saved)
+			// don't do this if we behind choice 
+			if (_saved && !has_choices() && !_fallback_choice)
 			{
 				// Check for changes in the output stream
 				switch (detect_change())
@@ -501,13 +605,14 @@ namespace ink::runtime::internal
 					// Newline was removed. Proceed as if we never hit it
 					forget();
 					break;
-				default:
-					break;
+				case change_type::no_change:
+					forget();
+					return false;
 				}
 			}
 
 			// If we're on a newline
-			if (_output.ends_with(data_type::newline))
+			if (_output.ends_with(value_type::newline))
 			{
 				// TODO: REMOVE
 				// return true;
@@ -523,8 +628,13 @@ namespace ink::runtime::internal
 					if (!_saved)
 						save();
 				}
-				else // Otherwise, make sure we don't have any snapshots hanging around
+				// Otherwise, make sure we don't have any snapshots hanging around
+				// expect we are in choice handleing
+				else if( !has_choices() && !_fallback_choice)  {
 					forget();
+				} else {
+					_output.forget();
+				}
 			}
 		}
 
@@ -547,14 +657,9 @@ namespace ink::runtime::internal
 				_is_falling = false;
 				set_done_ptr(nullptr);
 			}
-
-			if (cmd >= Command::BINARY_OPERATORS_START && cmd <= Command::BINARY_OPERATORS_END)
+			if (cmd >= Command::OP_BEGIN && cmd < Command::OP_END)
 			{
-				run_binary_operator((unsigned char)cmd);
-			}
-			else if (cmd >= Command::UNARY_OPERATORS_START && cmd <= Command::UNARY_OPERATORS_END)
-			{
-				run_unary_operator((unsigned char)cmd);
+				_operations(cmd, _eval);
 			}
 			else switch (cmd)
 			{
@@ -563,57 +668,87 @@ namespace ink::runtime::internal
 			{
 				const char* str = read<const char*>();
 				if (bEvaluationMode)
-					_eval.push(str);
+					_eval.push(value{}.set<value_type::string>(str));
 				else
-					_output << str;
+					_output << value{}.set<value_type::string>(str);
 			}
 			break;
 			case Command::INT:
 			{
 				int val = read<int>();
 				if (bEvaluationMode)
-					_eval.push(val);
+					_eval.push(value{}.set<value_type::int32>(val));
 				// TEST-CASE B006 don't print integers
+			}
+			break;
+			case Command::BOOL:
+			{
+				bool val = read<int>() ? true : false;
+				if(bEvaluationMode)
+					_eval.push(value{}.set<value_type::boolean>(val));
+				else
+					_output << value{}.set<value_type::boolean>(val);
 			}
 			break;
 			case Command::FLOAT:
 			{
 				float val = read<float>();
 				if (bEvaluationMode)
-					_eval.push(val);
+					_eval.push(value{}.set<value_type::float32>(val));
 				// TEST-CASE B006 don't print floats
+			} break;
+			case Command::VALUE_POINTER:
+			{
+				hash_t val = read<hash_t>();
+				if(bEvaluationMode) {
+					_eval.push(value{}.set<value_type::value_pointer>(val, static_cast<char>(flag) - 1));
+				} else {
+					throw ink_exception("never conciderd what should happend here! (value pointer print)");
+				}
 			}
 			break;
-
+			case Command::LIST:
+			{
+				list_table::list list(read<int>());
+				if(bEvaluationMode)
+					_eval.push(value{}.set<value_type::list>(list));
+				else {
+					char* str = _globals->strings().create(_globals->lists().stringLen(
+								list)+1);
+					_globals->lists().toString(str, list)[0] = 0;
+					_output << value{}.set<value_type::string>(str);
+				}
+			}
+			break;
 			case Command::DIVERT_VAL:
 			{
 				inkAssert(bEvaluationMode, "Can not push divert value into the output stream!");
 
 				// Push the divert target onto the stack
 				uint32_t target = read<uint32_t>();
-				_eval.push(value(target));
+				_eval.push(value{}.set<value_type::divert>(target));
 			}
 			break;
 			case Command::NEWLINE:
 			{
 				if (bEvaluationMode)
-					_eval.push(newline);
+					_eval.push(values::newline);
 				else
-					_output << newline;
+					_output << values::newline;
 			}
 			break;
 			case Command::GLUE:
 			{
 				if (bEvaluationMode)
-					_eval.push(glue);
+					_eval.push(values::glue);
 				else
-					_output << glue;
+					_output << values::glue;
 			}
 			break;
 			case Command::VOID:
 			{
 				if (bEvaluationMode)
-					_eval.push(0); // TODO: void type?
+					_eval.push(values::null); // TODO: void type?
 			}
 			break;
 
@@ -624,7 +759,7 @@ namespace ink::runtime::internal
 				uint32_t target = read<uint32_t>();
 
 				// Check for condition
-				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop())
+				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().get<value_type::boolean>())
 					break;
 
 				// SPECIAL: Fallthrough divert. We're starting to fall out of containers
@@ -644,7 +779,7 @@ namespace ink::runtime::internal
 					if (_stack.has_frame(&type) && type == frame_type::function) // implicit return is only for functions
 					{
 						// push null and return
-						_eval.push(value());
+						_eval.push(values::null);
 
 						// HACK
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
@@ -668,13 +803,14 @@ namespace ink::runtime::internal
 				hash_t variable = read<hash_t>();
 
 				// Check for condition
-				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop())
+				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().get<value_type::boolean>())
 					break;
 
-				const value& val = *_stack.get(variable);
+				const value* val = get_var(variable);
+				inkAssert(val, "Jump destiniation needs to be defined!");
 
 				// Move to location
-				jump(_story->instructions() + val.as_divert());
+				jump(_story->instructions() + val->get<value_type::divert>());
 				inkAssert(_ptr < _story->end(), "Diverted past end of story data!");
 			}
 			break;
@@ -690,22 +826,33 @@ namespace ink::runtime::internal
 
 			// == Tunneling
 			case Command::TUNNEL:
+			{
+				uint32_t target;
+				// Find divert address
+				if(flag & CommandFlag::TUNNEL_TO_VARIABLE) {
+					hash_t var_name = read<hash_t>();
+					const value* val = get_var(var_name);
+					inkAssert(val != nullptr);
+					target = val->get<value_type::divert>();
+				} else {
+					target = read<uint32_t>();
+				}
+				start_frame<frame_type::tunnel>(target);
+			}
+			break;
 			case Command::FUNCTION:
 			{
-				// add a function start marker
-				if (cmd == Command::FUNCTION)
-					_output << func_start;
-
+				uint32_t target;
 				// Find divert address
-				uint32_t target = read<uint32_t>();
-
-				// Push next address onto the callstack
-				_stack.push_frame(_ptr - _story->instructions(), 
-					cmd == Command::FUNCTION ? frame_type::function : frame_type::tunnel);
-
-				// Do the jump
-				inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
-				jump(_story->instructions() + target);
+				if(flag & CommandFlag::FUNCTION_TO_VARIABLE) {
+					hash_t var_name = read<hash_t>();
+					const value* val = get_var(var_name);
+					inkAssert(val != nullptr);
+					target  = val->get<value_type::divert>();
+				} else {
+					target = read<uint32_t>();
+				}
+				start_frame<frame_type::function>(target);
 			}
 			break;
 			case Command::TUNNEL_RETURN:
@@ -720,24 +867,30 @@ namespace ink::runtime::internal
 				// Push a thread frame so we can return easily
 				// TODO We push ahead of a single divert. Is that correct in all cases....?????
 				auto returnTo = _ptr + CommandSize<uint32_t>;
-				_stack.push_frame(returnTo - _story->instructions(), frame_type::thread);
+				_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), bEvaluationMode);
+				_ref_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), bEvaluationMode);
 
 				// Fork a new thread on the callstack
 				thread_t thread = _stack.fork_thread();
+				{
+					thread_t t = _ref_stack.fork_thread();
+					inkAssert(t == thread, "ref_stack and stack should be in sync!");
+				}
 
 				// Push that thread onto our thread stack
 				_threads.push(thread);
 			}
 			break;
 
-				// == Variable definitions
+			// == set temporärie variable
 			case Command::DEFINE_TEMP:
 			{
 				hash_t variableName = read<hash_t>();
+				bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
 
 				// Get the top value and put it into the variable
 				value v = _eval.pop();
-				_stack.set(variableName, v);
+				set_var<Scope::LOCAL>(variableName, v, is_redef);
 			}
 			break;
 
@@ -746,21 +899,15 @@ namespace ink::runtime::internal
 				hash_t variableName = read<hash_t>();
 
 				// Check if it's a redefinition (not yet used, seems important for pointers later?)
-				// bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
-
-				// Check if there's a local variable of this name
-				const value* local = _stack.get(variableName);
+				bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
 
 				// If not, we're setting a global (temporary variables are explicitely defined as such,
 				//  where globals are defined using SET_VARIABLE).
-				if (local == nullptr)
-				{
-					_globals->set_variable(variableName, _eval.pop());
-				}
-				else
-				{
-					// Otherwise, it's a temporary variable
-					_stack.set(variableName, _eval.pop());
+				value val = _eval.pop();
+				if(is_redef) {
+					set_var(variableName, val, is_redef);
+				} else {
+					set_var<Scope::GLOBAL>(variableName, val, is_redef);
 				}
 			}
 			break;
@@ -811,17 +958,13 @@ namespace ink::runtime::internal
 				_eval.pop();
 				break;
 			case Command::DUPLICATE:
-				_eval.push(_eval.top());
+				_eval.push(_eval.top_value());
 				break;
 			case Command::PUSH_VARIABLE_VALUE:
 			{
 				// Try to find in local stack
 				hash_t variableName = read<hash_t>();
-				const value* val = _stack.get(variableName);
-
-				// If not, try global store
-				if (val == nullptr)
-					val = _globals->get_variable(variableName);
+				const value* val = get_var(variableName);
 
 				inkAssert(val != nullptr, "Could not find variable!");
 				_eval.push(*val);
@@ -831,7 +974,7 @@ namespace ink::runtime::internal
 			{
 				inkAssert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
 				bEvaluationMode = false;
-				_output << marker;
+				_output << values::marker;
 			} break;
 			case Command::END_STR:
 			{
@@ -840,11 +983,10 @@ namespace ink::runtime::internal
 				bEvaluationMode = true;
 
 				// Load value from output stream
-				value val;
-				_output >> val;
-
 				// Push onto stack
-				_eval.push(val);
+				_eval.push(value{}.set<value_type::string>(_output.get_alloc<false>(
+								_globals->strings(),
+								_globals->lists())));
 			} break;
 
 			// == Choice commands
@@ -873,12 +1015,12 @@ namespace ink::runtime::internal
 				// Choice is conditional
 				if (flag & CommandFlag::CHOICE_HAS_CONDITION) {
 					// Only show if the top of the eval stack is 'truthy'
-					if (!_eval.pop())
+					if (!_eval.pop().get<value_type::boolean>())
 						break;
 				}
 
 				// Use a marker to start compiling the choice text
-				_output << marker;
+				_output << values::marker;
 				value stack[2];
 				int sc = 0;
 
@@ -888,11 +1030,18 @@ namespace ink::runtime::internal
 				if (flag & CommandFlag::CHOICE_HAS_CHOICE_ONLY_CONTENT) {
 					stack[sc++] = _eval.pop();
 				}
-				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {} // TODO
 				for(;sc;--sc) { _output << stack[sc-1]; }
 
 				// Create choice and record it
-				add_choice().setup(_output, _globals->strings(), _num_choices, path, current_thread());
+				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
+					_fallback_choice
+						= choice{}.setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
+				} else {
+					add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
+				}
+				// save stack at last choice
+				if(_saved) { forget(); }
+				save();
 			} break;
 			case Command::START_CONTAINER_MARKER:
 			{
@@ -929,7 +1078,7 @@ namespace ink::runtime::internal
 					else if (_stack.has_frame(&type) && type == frame_type::function) // implicit return is only for functions
 					{
 						// push null and return
-						_eval.push(value());
+						_eval.push(values::null);
 
 						// HACK
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
@@ -946,7 +1095,7 @@ namespace ink::runtime::internal
 			{
 				// Push the visit count for the current container to the top
 				//  is 0-indexed for some reason. idk why but this is what ink expects
-				_eval.push((int)_globals->visits(_container.top()) - 1);
+				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(_container.top()) - 1));
 			} break;
 			case Command::SEQUENCE:
 			{
@@ -954,31 +1103,30 @@ namespace ink::runtime::internal
 				//  to make sure each element is picked at least once in every
 				//  iteration loop. I don't feel like replicating that right now.
 				// So, let's just return a random number and *shrug*
-				int sequenceLength = _eval.pop();
-				int index = _eval.pop();
+				int sequenceLength = _eval.pop().get<value_type::int32>();
+				int index = _eval.pop().get<value_type::int32>();
 
-				_eval.push(_rng.rand(sequenceLength));
+				_eval.push(value{}.set<value_type::int32>(_rng.rand(sequenceLength)));
 			} break;
 			case Command::SEED:
 			{
-				// TODO: Platform independance
-				int32_t seed = _eval.pop();
+				int32_t seed = _eval.pop().get<value_type::int32>();
 				_rng.srand(seed);
 
-				// push void (TODO)
-				_eval.push(0);
+				_eval.push(values::null);
 			} break;
+
 			case Command::READ_COUNT:
 			{
 				// Get container index
 				container_t container = read<container_t>();
 
 				// Push the read count for the requested container index
-				_eval.push((int)_globals->visits(container));
+				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(container)));
 			} break;
 			case Command::TAG:
 			{
-				_tags[_num_tags++] = read<const char*>();
+				_tags.push() = read<const char*>();
 			} break;
 			default:
 				inkAssert(false, "Unrecognized command!");
@@ -1003,10 +1151,14 @@ namespace ink::runtime::internal
 
 			// Push in a complete marker
 			_stack.complete_thread(completedThreadId);
+			_ref_stack.complete_thread(completedThreadId);
 
 			// Go to where the thread started
 			frame_type type = execute_return();
 			inkAssert(type == frame_type::thread, "Expected thread frame marker to hold return to value but none found...");
+			// if thread ends, move stave point with, else the thread end marker is missing
+			// and we can't collect the other threads
+			if(_saved) { forget(); save(); }
 		}
 		else
 		{
@@ -1023,7 +1175,7 @@ namespace ink::runtime::internal
 			_done = ptr;
 		}
 		else {
-			_threadDone.set(curr, ptr);
+			_threads.set(curr, ptr);
 		}
 	}
 
@@ -1032,11 +1184,11 @@ namespace ink::runtime::internal
 		_eval.clear();
 		_output.clear();
 		_stack.clear();
+		_ref_stack.clear();
 		_threads.clear();
-		_threadDone.clear(nullptr);
 		bEvaluationMode = false;
 		_saved = false;
-		_num_choices = 0;
+		_choices.clear();
 		_ptr = nullptr;
 		_done = nullptr;
 		_container.clear();
@@ -1047,10 +1199,11 @@ namespace ink::runtime::internal
 		// Find strings in output and stacks
 		_output.mark_strings(strings);
 		_stack.mark_strings(strings);
+		// ref_stack has no strings!
 		_eval.mark_strings(strings);
 
 		// Take into account choice text
-		for (int i = 0; i < _num_choices; i++)
+		for (int i = 0; i < _choices.size(); i++)
 			strings.mark_used(_choices[i]._text);
 	}
 
@@ -1061,12 +1214,13 @@ namespace ink::runtime::internal
 		_saved = true;
 		_output.save();
 		_stack.save();
+		_ref_stack.save();
 		_backup = _ptr;
 		_container.save();
 		_globals->save();
 		_eval.save();
 		_threads.save();
-		_threadDone.save();
+		_backup_choice_len = _choices.size();
 		bSavedEvaluationMode = bEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1076,15 +1230,16 @@ namespace ink::runtime::internal
 	void runner_impl::restore()
 	{
 		inkAssert(_saved, "Can't restore. No runner state saved.");
-
-		_output.restore();
+		// the output can be restored without the rest
+		if(_output.saved()) {_output.restore(); }
 		_stack.restore();
+		_ref_stack.restore();
 		_ptr = _backup;
 		_container.restore();
 		_globals->restore();
 		_eval.restore();
 		_threads.restore();
-		_threadDone.restore();
+		_choices.resize(_backup_choice_len);
 		bEvaluationMode = bSavedEvaluationMode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1101,11 +1256,11 @@ namespace ink::runtime::internal
 
 		_output.forget();
 		_stack.forget();
+		_ref_stack.forget();
 		_container.forget();
 		_globals->forget();
 		_eval.forget();
 		_threads.forget();
-		_threadDone.forget();
 
 		// Nothing to do for eval stack. It should just stay as it is
 

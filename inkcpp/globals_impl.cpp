@@ -6,22 +6,60 @@ namespace ink::runtime::internal
 {
 	globals_impl::globals_impl(const story_impl* story)
 		: _num_containers(story->num_containers())
-		, _visit_counts(_num_containers, ~0)
+		, _visit_counts(_num_containers)
 		, _owner(story)
 		, _runners_start(nullptr)
+		, _lists(story->list_meta(), story->get_header())
 		, _globals_initialized(false)
 	{
+		if (_lists) {
+			// initelize static lists
+			const list_flag* flags = story->lists();
+			while(*flags != null_flag) {
+				list_table::list l = _lists.create_permament();
+				while(*flags != null_flag) {
+					_lists.add_inplace(l, *flags);
+					++flags;
+				}
+				++flags;
+			}
+			for(const auto& flag : _lists.named_flags()) {
+				set_variable(hash_string(flag.name), value{}.set<value_type::list_flag>(
+						list_flag{
+							flag.flag.list_id,
+							flag.flag.flag
+						}));
+			}
+		}
 	}
 
 	void globals_impl::visit(uint32_t container_id)
 	{
-		_visit_counts.set(container_id, _visit_counts[container_id] + 1);
+		_visit_counts[container_id].visits += 1;
+		_visit_counts[container_id].turns  = 0;
 	}
 
 	uint32_t globals_impl::visits(uint32_t container_id) const
 	{
-		return _visit_counts[container_id];
+		return _visit_counts[container_id].visits;
 	}
+
+	void globals_impl::turn()
+	{
+		for(size_t i = 0; i < _visit_counts.size(); ++i)
+		{
+			if(_visit_counts[i].turns != -1) {
+				_visit_counts[i].turns += 1;
+			}
+		}
+	}
+
+	uint32_t globals_impl::turns(uint32_t container_id) const
+	{
+		return _visit_counts[container_id].turns;
+	}
+
+
 
 	void globals_impl::add_runner(const runner_impl* runner)
 	{
@@ -72,53 +110,44 @@ namespace ink::runtime::internal
 		return _variables.get(name);
 	}
 
-	template<typename T, const T* (value::*FN)() const, typename ... TYPES>
-	auto fetch_variable( const value* v, TYPES ... types) {
-		return v && ((v->get_data_type() == types) || ...)
-			? (v->*FN)()
-			: nullptr;
-	}
-	template<typename T, T* (value::*FN)(), typename ... TYPES>
-	auto fetch_variable(value* v, TYPES ... types) {
-		return v && ((v->get_data_type() == types) || ...)
-			? (v->*FN)()
-			: nullptr;
+	template<value_type ty, typename T>
+	optional<T> fetch_variable(const value* val) {
+		if (val && val->type() == ty) {
+			return optional<T>(val->get<ty>());
+		}
+		return {nullopt};
 	}
 
-	const uint32_t* globals_impl::get_uint(hash_t name) const {
-		return fetch_variable<uint32_t, &value::as_uint_ptr>(get_variable(name), data_type::uint32);
-	}
-	bool globals_impl::set_uint(hash_t name, uint32_t val) {
-		uint32_t* p = fetch_variable<uint32_t, &value::as_uint_ptr>(get_variable(name), data_type::uint32);
-		if (p == nullptr) { return false; }
-		*p = val;
-		return true;
-	}
-
-	const int32_t* globals_impl::get_int(hash_t name) const {
-		return fetch_variable<int32_t, &value::as_int_ptr>(get_variable(name), data_type::int32);
-	}
-	bool globals_impl::set_int(hash_t name, int32_t val) {
-		int32_t* p = fetch_variable<int32_t, &value::as_int_ptr>(get_variable(name), data_type::int32);
-		if (p == nullptr) { return false; }
-		*p = val;
-		return true;
+	template<value_type ty, typename T>
+	bool try_set_value(value* val, T x) {
+		if (val && val->type() == ty) {
+			val->set<ty>(x);
+			return true;
+		}
+		return false;
 	}
 
-	const float* globals_impl::get_float(hash_t name) const {
-		return fetch_variable<float, &value::as_float_ptr>(get_variable(name), data_type::float32);
+	optional<int32_t> globals_impl::get_int(hash_t name) const {
+		return fetch_variable<value_type::int32,int32_t>(get_variable(name));
 	}
-	bool globals_impl::set_float(hash_t name, float val) {
-		float* p = fetch_variable<float, &value::as_float_ptr>(get_variable(name), data_type::float32);
-		if (p == nullptr) { return false; }
-		*p = val;
-		return true;
+	bool globals_impl::set_int(hash_t name, int32_t i) {
+		return try_set_value<value_type::int32, int32_t>(get_variable(name), i);
+	}
+	optional<uint32_t> globals_impl::get_uint(hash_t name) const {
+		return fetch_variable<value_type::uint32,uint32_t>(get_variable(name));
+	}
+	bool globals_impl::set_uint(hash_t name, uint32_t i) {
+		return try_set_value<value_type::uint32, uint32_t>(get_variable(name), i);
+	}
+	optional<float> globals_impl::get_float(hash_t name) const {
+		return fetch_variable<value_type::float32,float>(get_variable(name));
+	}
+	bool globals_impl::set_float(hash_t name, float i) {
+		return try_set_value<value_type::float32, float>(get_variable(name), i);
 	}
 
-	const char * const * globals_impl::get_str(hash_t name) const {
-		const value* v = get_variable(name);
-		if (v->type() != value_type::string) { return nullptr; }
-		return v->as_str_ptr(_strings);
+	optional<const char*> globals_impl::get_str(hash_t name) const {
+		return fetch_variable<value_type::string, const char*>(get_variable(name));
 	}
 	bool globals_impl::set_str(hash_t name, const char* val) {
 		value* v = get_variable(name);
@@ -134,9 +163,7 @@ namespace ink::runtime::internal
 				*ptr++ = *i;
 			}
 			*ptr = 0;
-			internal::data d;
-			d.set_string(new_string, true);
-			*v = internal::value(d);
+			*v = value{}.set<value_type::string>(static_cast<const char*>(new_string), true);
 			return true;
 		}
 		return false;
@@ -177,19 +204,16 @@ namespace ink::runtime::internal
 
 	void globals_impl::save()
 	{
-		_visit_counts.save();
 		_variables.save();
 	}
 
 	void globals_impl::restore()
 	{
-		_visit_counts.restore();
 		_variables.restore();
 	}
 
 	void globals_impl::forget()
 	{
-		_visit_counts.forget();
 		_variables.forget();
 	}
 }

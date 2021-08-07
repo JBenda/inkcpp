@@ -1,9 +1,11 @@
 #include "catch.hpp"
 
-#include "..//inkcpp/simple_restorable_stack.h"
+#include "../inkcpp/simple_restorable_stack.h"
 
 using ink::runtime::internal::simple_restorable_stack;
-using ink::runtime::internal::restorable_stack;
+
+template<typename T, ink::size_t N>
+using fixed_restorable_stack = ink::runtime::internal::managed_restorable_stack<T,false,N>;
 
 template<typename T, int SIZE>
 void stack_matches(const simple_restorable_stack<T>& stack, T (&expected)[SIZE])
@@ -21,7 +23,7 @@ void stack_matches(const simple_restorable_stack<T>& stack, T (&expected)[SIZE])
 SCENARIO("simple_restorable_stack can be pushed and popped", "[stack]") {
 
 	GIVEN("An empty stack") {
-		restorable_stack<int, 10> stack(~0);
+		fixed_restorable_stack<int, 10> stack(~0);
 
 		WHEN("items are added") {
 			stack.push(1);
@@ -68,7 +70,7 @@ SCENARIO("simple_restorable_stack can be pushed and popped", "[stack]") {
 
 SCENARIO("simple_restorable_stack supports save/restore", "[stack]") {
 	GIVEN("a stack with a few items that has been saved") {
-		restorable_stack<int, 20> stack(~0);
+		fixed_restorable_stack<int, 20> stack(~0);
 
 		stack.push(1); 
 		stack.push(2);
@@ -187,7 +189,7 @@ SCENARIO("simple_restorable_stack supports save/restore", "[stack]") {
 
 	GIVEN("a stack with one entry that has been saved")
 	{
-		restorable_stack<int, 10> stack(~0);
+		fixed_restorable_stack<int, 10> stack(~0);
 		stack.push(0);
 		stack.save();
 

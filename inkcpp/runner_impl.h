@@ -10,11 +10,14 @@
 #include "types.h"
 #include "functions.h"
 #include "string_table.h"
+#include "list_table.h"
 #include "array.h"
 #include "random.h"
 
 #include "runner.h"
 #include "choice.h"
+
+#include "executioner.h"
 
 namespace ink::runtime::internal
 {
@@ -37,10 +40,10 @@ namespace ink::runtime::internal
 		virtual bool can_continue() const override;
 
 		// Begin iterating choices
-		virtual const choice* begin() const override { return _choices; }
+		virtual const choice* begin() const override { return _choices.begin(); }
 
 		// End iterating choices
-		virtual const choice* end() const override { return _choices + _num_choices; }
+		virtual const choice* end() const override { return _choices.end(); }
 
 		// Chooses a choice by index
 		virtual void choose(size_t index) override;
@@ -101,6 +104,15 @@ namespace ink::runtime::internal
 		void restore();
 		void forget();
 
+		enum class Scope { NONE, GLOBAL, LOCAL};
+		template<Scope Hint = Scope::NONE>	
+		value* get_var(hash_t variableName);
+		template<Scope Hint = Scope::NONE>	
+		const value* get_var(hash_t variableName) const;
+		template<Scope Hint = Scope::NONE>
+		void set_var(hash_t variableName, const value& val, bool is_redef);
+		const value* dereference(const value& val);
+
 		enum class change_type
 		{
 			no_change,
@@ -126,6 +138,8 @@ namespace ink::runtime::internal
 		void run_unary_operator(unsigned char cmd);
 
 		frame_type execute_return();
+		template<frame_type type>
+		void start_frame(uint32_t target);
 
 		void on_done(bool setDone);
 		void set_done_ptr(ip_t ptr);
@@ -135,6 +149,7 @@ namespace ink::runtime::internal
 	private:
 		const story_impl* const _story;
 		story_ptr<globals_impl> _globals;
+		executer _operations;
 
 		// == State ==
 
@@ -144,41 +159,110 @@ namespace ink::runtime::internal
 		ip_t _done; // when we last hit a done
 
 		// Output stream
-		internal::stream<200> _output;
+		internal::stream<config::limitOutputSize> _output;
 
 		// Runtime stack. Used to store temporary variables and callstack
-		internal::stack<50> _stack;
+		internal::stack<abs(config::limitRuntimeStack), config::limitRuntimeStack < 0> _stack;
+		internal::stack<abs(config::limitReferenceStack), config::limitReferenceStack < 0> _ref_stack;
 
 		// Evaluation stack
 		bool bEvaluationMode = false;
-		internal::eval_stack<20> _eval;
+		internal::eval_stack<abs(config::limitEvalStackDepth), config::limitEvalStackDepth < 0> _eval;
 		bool bSavedEvaluationMode = false;
 
 		// Keeps track of what threads we're inside
-		internal::restorable_stack<thread_t, 20> _threads;
-		internal::fixed_restorable_array<ip_t, 20> _threadDone;
+		class threads : public internal::simple_restorable_stack<thread_t> {
+			using base = internal::simple_restorable_stack<thread_t>;
+			static constexpr bool dynamic = config::limitThreadDepth < 0;
+			static constexpr size_t N = abs(config::limitThreadDepth);
+		public:
+			template<bool ... D, bool con = dynamic,  enable_if_t<con, bool> = true >
+			threads()
+				: base(nullptr, 0, ~0),
+				_threadDone(nullptr, reinterpret_cast<ip_t>(~0)) {
+					static_assert(sizeof...(D) == 0, "Don't use explicit template arguments!");
+			}
+			template<bool ... D, bool con = dynamic, enable_if_t<!con, bool> = true >
+			threads()
+				: _stack{},
+				base(_stack.data(), N, ~0),
+				_threadDone(nullptr, reinterpret_cast<ip_t>(~0)) {
+					static_assert(sizeof...(D) == 0, "Don't use explicit template arguments");
+					_threadDone.clear(nullptr);
+				}
+
+			void clear() {
+				base::clear();
+				_threadDone.clear(nullptr);
+			}
+			void save() {
+				base::save();
+				_threadDone.save();
+			}
+			void restore() {
+				base::restore();
+				_threadDone.restore();
+			}
+			void forget() {
+				base::forget();
+				_threadDone.forget();
+			}
+
+			void set(size_t index, const ip_t& value) {
+				_threadDone.set(index, value);
+			}
+			const ip_t& get(size_t index) const {
+				return _threadDone.get(index);
+			}
+			const ip_t& operator[](size_t index) const { return get(index); }
+
+		protected:
+			virtual void overflow(thread_t*& buffer, size_t& size) override final;
+		private:
+			using array_type = if_t<dynamic,
+				internal::allocated_restorable_array<ip_t>,
+				internal::fixed_restorable_array<ip_t, N>>;
+			template<typename con = array_type, void (con::*A)(size_t) = &con::resize>
+			void resize(size_t size, int) { (_threadDone.*A)(size); }
+			void resize(size_t size, long) {}
+
+
+			managed_array<thread_t, dynamic, N> _stack;
+			array_type _threadDone;
+		} _threads;
 
 		// Choice list
-		static const size_t MAX_CHOICES = 10;
-		choice _choices[MAX_CHOICES];
-		size_t _num_choices = 0;
+		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
+		optional<choice> _fallback_choice;
+		size_t _backup_choice_len;
 
 		// Tag list
-		static const size_t MAX_TAGS = 100;
-		const char* _tags[MAX_TAGS];
-		size_t _num_tags = 0;
+		managed_array<const char*, config::limitActiveTags < 0, abs(config::limitActiveTags)> _tags;
 
 		// TODO: Move to story? Both?
 		functions _functions;
 
 		// Container set
-		internal::restorable_stack<container_t, 20> _container;
+		internal::managed_restorable_stack<container_t, config::limitContainerDepth < 0,abs(config::limitContainerDepth)> _container;
 		bool _is_falling = false;
 
 		bool _saved = false;
 
 		prng _rng{};
 	};
+
+	inline void runner_impl::threads::overflow(thread_t*& buffer, size_t& size) {
+		if constexpr (dynamic) {
+			if(buffer) {
+				_stack.extend();
+			}
+			buffer = _stack.data();
+			size = _stack.capacity();
+			resize(size, 0);
+		} else {
+			base::overflow(buffer, size);
+		}
+	}
 
 	template<>
 	inline const char* runner_impl::read();

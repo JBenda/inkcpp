@@ -4,6 +4,80 @@
 
 namespace ink::runtime::internal
 {
+	template<typename T, bool dynamic, size_t initialCapacity>
+	class managed_array {
+	public:
+		managed_array() : _capacity{initialCapacity}, _size{0}{
+			if constexpr (dynamic) {
+				_dynamic_data = new T[initialCapacity];
+			}
+		}
+
+		const T& operator[](size_t i) const { return data()[i]; }
+		T& operator[](size_t i) { return data()[i]; }
+		const T* data() const {
+			if constexpr (dynamic) {
+				return _dynamic_data;
+			} else {
+				return _static_data;
+			}
+		}
+		T* data() {
+			if constexpr (dynamic) {
+				return _dynamic_data;
+			} else {
+				return _static_data;
+			}
+		}
+		const T* begin() const { return data(); }
+		T* begin() { return data(); }
+		const T* end() const { return data() + _size; }
+		T* end() { return data() + _size; }
+		const T& back() const { return end()[-1]; }
+		T& back() { return end()[-1]; }
+
+		const size_t size() const { return _size; }
+		const size_t capacity() const { return _capacity; }
+		T& push() {
+			if constexpr (dynamic) {
+				if (_size == _capacity) { extend(); }
+			} else {
+				ink_assert(_size <= _capacity, "Stack Overflow!");
+			}
+			return data()[_size++];
+		}
+		void clear() { _size = 0; }
+		void resize(size_t size) {
+			ink_assert(size <= _size, "Only allow to reduce size");
+			_size = size;
+		}
+
+		void extend();
+	private:
+
+		if_t<dynamic, char, T> _static_data[dynamic ? 1 : initialCapacity];
+		T* _dynamic_data = nullptr;
+		size_t _capacity;
+		size_t _size;
+	};
+
+	template<typename T, bool dynamic, size_t initialCapacity>
+	void managed_array<T, dynamic, initialCapacity>::extend()
+	{
+		static_assert(dynamic, "Can only extend if array is dynamic!");
+		size_t new_capacity = 1.5f * _capacity;
+		if (new_capacity < 5) { new_capacity = 5; }
+		T* new_data = new T[new_capacity];
+
+		for(size_t i = 0; i < _capacity; ++i) {
+			new_data[i] = _dynamic_data[i];
+		}
+
+		delete[] _dynamic_data;
+		_dynamic_data = new_data;
+		_capacity = new_capacity;
+	}
+
 	template<typename T>
 	class basic_restorable_array
 	{
@@ -44,6 +118,11 @@ namespace ink::runtime::internal
 
 	protected:
 		inline T* buffer() { return _array; }
+		void set_new_buffer(T* buffer, size_t capacity) {
+			_array = buffer;
+			_temp = buffer + capacity/2;
+			_capacity = capacity/2;
+		}
 
 	private:
 		inline void check_index(size_t index) const { inkAssert(index < capacity(), "Index out of range!"); }
@@ -52,14 +131,14 @@ namespace ink::runtime::internal
 		bool _saved;
 
 		// real values live here
-		T* const _array;
+		T* _array;
 
 		// we store values here when we're in save mode
 		//  they're copied on a call to forget()
-		T* const _temp;
+		T* _temp;
 
 		// size of both _array and _temp
-		const size_t _capacity;
+		size_t _capacity;
 
 		// null
 		const T _null;
@@ -161,20 +240,52 @@ namespace ink::runtime::internal
 	template<typename T>
 	class allocated_restorable_array : public basic_restorable_array<T>
 	{
+		using base = basic_restorable_array<T>;
 	public:
-		allocated_restorable_array(size_t capacity, const T &nullValue)
-			: basic_restorable_array<T>(new T[capacity * 2], capacity * 2, nullValue)
-		{ 
+		allocated_restorable_array(const T& initial, const T& nullValue)
+			: basic_restorable_array<T>(0, 0, nullValue), _initialValue{initial}, _nullValue{nullValue},
+				_buffer{nullptr}
+		{}
+		allocated_restorable_array(size_t capacity, const T& initial, const T &nullValue)
+			: basic_restorable_array<T>(new T[capacity * 2], capacity * 2, nullValue),
+			_initialValue{initial},
+			_nullValue{nullValue}
+		{
 			_buffer = this->buffer();
+			this->clear(_initialValue);
+		}
+
+		void resize(size_t n) {
+			size_t new_capacity = 2 * n;
+			T* new_buffer = new T[new_capacity];
+			if (_buffer) {
+				for(size_t i = 0; i < base::capacity(); ++i) {
+					new_buffer[i] = _buffer[i];
+					// copy temp
+					new_buffer[i + base::capacity()] = _buffer[i + base::capacity()];
+				}
+				delete[] _buffer;
+			}
+			for(size_t i = base::capacity(); i < new_capacity; ++i) {
+				new_buffer[i] = _initialValue;
+				new_buffer[i+base::capacity()] = _nullValue;
+			}
+
+			_buffer = new_buffer;
+			this->set_new_buffer(_buffer, new_capacity);
 		}
 
 		~allocated_restorable_array()
 		{
-			delete[] _buffer;
-			_buffer = nullptr;
+			if(_buffer) {
+				delete[] _buffer;
+				_buffer = nullptr;
+			}
 		}
 
 	private:
+		T _initialValue;
+		T _nullValue;
 		T* _buffer;
 	};
 }

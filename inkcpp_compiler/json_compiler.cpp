@@ -1,4 +1,8 @@
 #include "json_compiler.h"
+
+#include "list_data.h"
+
+#include <string_view>
 #include <iostream>
 
 namespace ink::compiler::internal
@@ -25,6 +29,10 @@ namespace ink::compiler::internal
 		// Initialize emitter
 		_emitter->start(inkVersion, results);
 
+		if(auto itr = input.find("listDefs"); itr != input.end()) {
+			compile_lists_definition(*itr);
+			_emitter->set_list_meta(_list_meta);
+		}
 		// Compile the root container
 		compile_container(input["root"], 0);
 
@@ -119,8 +127,9 @@ namespace ink::compiler::internal
 
 		// tell the emitter we're beginning a new container
 		uint32_t position = _emitter->start_container(index_in_parent, name_override.empty() ? meta.name : name_override);
-		if(meta.recordInContainerMap)
+		if(meta.recordInContainerMap) {
 			_emitter->add_start_to_container_map(position, meta.indexToReturn);
+		}
 
 		// Now, we want to iterate children of this container, save the last
 		//  The last is the settings object handled above
@@ -134,7 +143,7 @@ namespace ink::compiler::internal
 			// Arrays are child containers. Recurse.
 			if (iter->is_array())
 				compile_container(*iter, index);
-
+			
 			// Strings are either commands, nops, or raw strings
 			else if (iter->is_string())
 			{
@@ -164,10 +173,21 @@ namespace ink::compiler::internal
 				}
 			}
 
+			// Booleans
+			else if (iter->is_boolean())
+			{
+				int value = iter->get<bool>() ? 1 : 0;
+				_emitter->write(Command::BOOL, value);
+			}
+
 			// Complex commands
 			else if (iter->is_object())
 			{
 				compile_complex_command(*iter);
+			}
+
+			else {
+				throw ink_exception("Failed to container member!");
 			}
 		}
 
@@ -256,13 +276,24 @@ namespace ink::compiler::internal
 		// Tunnel
 		else if (get(command, "->t->", val))
 		{
-			_emitter->write_path(Command::TUNNEL, CommandFlag::NO_FLAGS, val);
+			bool is_var;
+			if(get(command, "var", is_var) && is_var) {
+				_emitter->write_variable(Command::TUNNEL,
+						CommandFlag::TUNNEL_TO_VARIABLE,
+						val);
+			} else {
+				_emitter->write_path(Command::TUNNEL, CommandFlag::NO_FLAGS, val);
+			}
 		}
 
 		// Declare temporary variable
 		else if (get(command, "temp=", val))
 		{
-			_emitter->write_variable(Command::DEFINE_TEMP, CommandFlag::NO_FLAGS, val);
+			bool is_redef = false;
+			get(command, "re", is_redef);
+			_emitter->write_variable(Command::DEFINE_TEMP,
+					is_redef ? CommandFlag::ASSIGNMENT_IS_REDEFINE : CommandFlag::NO_FLAGS,
+					val);
 		}
 
 		// Set variable
@@ -276,6 +307,14 @@ namespace ink::compiler::internal
 			_emitter->write_variable(Command::SET_VARIABLE,
 				is_redef ? CommandFlag::ASSIGNMENT_IS_REDEFINE : CommandFlag::NO_FLAGS,
 				val);
+		}
+
+		// create pointer value
+		else if (get(command, "^var", val)) {
+			int ci;
+			if(!get(command, "ci", ci)) { throw ink_exception("failed to parse ci for pointer!");}
+			inkAssert(ci < 255, "only support until 255 stack hight for refernces");
+			_emitter->write_variable(Command::VALUE_POINTER, static_cast<CommandFlag>(ci+1), val);
 		}
 
 		// Push variable
@@ -305,7 +344,14 @@ namespace ink::compiler::internal
 		// Internal function call
 		else if (get(command, "f()", val))
 		{
-			_emitter->write_path(Command::FUNCTION, CommandFlag::NO_FLAGS, val);
+			bool is_var; // function address is stored in jump
+			if(get(command, "var", is_var) && is_var) {
+				_emitter->write_variable(Command::FUNCTION,
+						CommandFlag::FUNCTION_TO_VARIABLE,
+						val);
+			} else {
+				_emitter->write_path(Command::FUNCTION, CommandFlag::NO_FLAGS, val);
+			}
 		}
 
 		// External function call
@@ -316,11 +362,54 @@ namespace ink::compiler::internal
 			get(command, "exArgs", numArgs);
 
 			// Encode argument count into command flag and write out the hash of the function name
-			_emitter->write(Command::CALL_EXTERNAL, hash_string(val.c_str()), (CommandFlag)numArgs);
+			_emitter->write(Command::CALL_EXTERNAL, hash_string(val.c_str()),
+					static_cast<CommandFlag>(numArgs));
 		}
+
+		// list initialisation
+		else if (has(command, "list"))
+		{
+			std::vector<list_flag> entries;
+			auto& list = command["list"];
+
+			if(list.size()) {
+				for ( const auto& [key,value] : list.items()) {
+					entries.push_back({
+							_list_meta.get_lid(key.substr(0,key.find('.'))),
+							static_cast<decltype(list_flag::flag)>(value.get<int>() - 1)
+					});
+
+				}
+			} else {
+				if(has(command, "origins")) {
+					for( const auto& origin_list : command["origins"]) {
+						entries.push_back({ _list_meta.get_lid(origin_list.get<std::string>()), -1 });
+					}
+				} else {
+					entries.push_back(empty_flag);
+				}
+			}
+
+			_emitter->write_list(Command::LIST, CommandFlag::NO_FLAGS, entries);
+		}
+
 		else if (get(command, "#", val))
 		{
 			_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);
+		}
+
+		else {
+			throw ink_exception("failed to parse complex command!");
+		}
+	}
+
+	void json_compiler::compile_lists_definition(const nlohmann::json& list_defs)
+	{
+		for(auto& [list_name, flags] : list_defs.items())	{
+			_list_meta.new_list(list_name);
+			for(auto& [flag_name, value] : flags.items()) {
+				_list_meta.new_flag(flag_name, value.get<int>());
+			}
 		}
 	}
 }

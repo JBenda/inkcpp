@@ -164,9 +164,6 @@ namespace ink::runtime::internal
 		{
 			// Make sure we have something to pop
 			inkAssert(_pos > 0, "Can not pop. No elements to pop!");
-			if (_pos <= 0) {
-				throw 0; // TODO
-			}
 
 			// Jump over save data
 			if (_pos == _save)
@@ -181,12 +178,16 @@ namespace ink::runtime::internal
 			return _buffer[_pos];
 		}
 
-		const ElementType& top() const
+		template<typename IsNullPredicate>
+		const ElementType& top(IsNullPredicate isNull) const
 		{
+			inkAssert(_pos > 0, "Can not top. No elememnts to show!");
+			auto pos = _pos;
 			if (_pos == _save)
-				return _buffer[_jump - 1];
-
-			return _buffer[_pos - 1];
+				pos = _jump;
+			while(isNull(_buffer[pos-1]))
+				--pos;
+			return _buffer[pos-1];
 		}
 
 		bool is_empty() const { return _pos == 0; }
@@ -327,9 +328,12 @@ namespace ink::runtime::internal
 
 	protected:
 		// Called when we run out of space in buffer. 
-		virtual void overflow(ElementType*& buffer, size_t& size) { throw 0; /* TODO: What to do here? Throw something more useful? */ }
+		virtual void overflow(ElementType*& buffer, size_t& size) {
+			throw ink_exception("Restorable run out of memory!");
+		}
 
 	private:
+
 		template<typename Predicate>
 		ElementType* reverse_find_impl(Predicate predicate) const
 		{

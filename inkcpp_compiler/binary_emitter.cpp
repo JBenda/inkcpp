@@ -2,6 +2,7 @@
 
 #include "header.h"
 #include "version.h"
+#include "list_data.h"
 
 #include <vector>
 #include <map>
@@ -168,6 +169,15 @@ namespace ink::compiler::internal
 		write(command, pos, flag);
 	}
 
+	void binary_emitter::write_list(Command command, CommandFlag flag, const std::vector<list_flag>& entries) {
+		uint32_t id = _list_count++;
+		for(const list_flag& flag : entries) {
+			_lists.write(flag);
+		}
+		_lists.write(null_flag);
+		write(command, id, flag);
+	}
+
 	void binary_emitter::handle_nop(int index_in_parent)
 	{
 		_current->noop_offsets.insert({ index_in_parent, _containers.pos() });
@@ -188,6 +198,11 @@ namespace ink::compiler::internal
 
 		// Write a separator
 		out << (char)0;
+
+		// Write lists meta data and defined lists
+		_lists.write_to(out);
+		// Write a seperator
+		out.write(reinterpret_cast<const char*>(&null_flag), sizeof(null_flag));
 
 		// Write out container map
 		write_container_map(out, _container_map, _max_container_index);
@@ -211,6 +226,8 @@ namespace ink::compiler::internal
 	{
 		// Reset binary data stores
 		_strings.reset();
+		_list_count = 0;
+		_lists.reset();
 		_containers.reset();
 
 		// clear other data
@@ -227,6 +244,11 @@ namespace ink::compiler::internal
 	{
 		// post process path commands
 		process_paths();
+	}
+
+	void binary_emitter::setContainerIndex(container_t index)
+	{
+		_current->counter_index = index;
 	}
 
 	uint32_t binary_emitter::fallthrough_divert()
@@ -276,7 +298,12 @@ namespace ink::compiler::internal
 			while (token != nullptr)
 			{
 				// Number
-				if (isdigit(token[0]))
+				// variable names can start with a number
+				bool isNumber = true;
+				for(const char* i = token; *i; ++i) {
+					if(!isdigit(*i)) { isNumber = false; break; }
+				}
+				if(isNumber)
 				{
 					// Check if we have a nop registered at that index
 					int index = atoi(token);
@@ -367,5 +394,26 @@ namespace ink::compiler::internal
 		{
 			write_container_hash_map(out, name, child.second);
 		}
+	}
+
+	void binary_emitter::set_list_meta(const list_data &list_defs) {
+		if (list_defs.empty()) {
+			return;
+		}
+
+		auto flags = list_defs.get_flags();
+		auto list_names = list_defs.get_list_names().begin();
+		int list_id = -1;
+		for(const auto& flag : flags) {
+			_lists.write(flag.flag);
+			if(flag.flag.list_id != list_id) {
+				list_id = flag.flag.list_id;
+				_lists.write(reinterpret_cast<const byte_t*>(list_names->data()), list_names->size());
+				++list_names;
+				_lists.write('\0');
+			}
+			_lists.write(reinterpret_cast<const byte_t*>(flag.name.c_str()), flag.name.size() + 1);
+		}
+		_lists.write(null_flag);
 	}
 }

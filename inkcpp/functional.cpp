@@ -10,21 +10,23 @@
 
 namespace ink::runtime::internal
 {
-	template<typename T>
-	T function_base::pop(basic_eval_stack* stack)
+	template<>
+	int32_t function_base::pop<int32_t>(basic_eval_stack* stack)
 	{
-		return stack->pop().get<T>();
+		value val = stack->pop();
+		inkAssert(val.type() == value_type::int32, "Type missmatch!");
+		return val.get<value_type::int32>();
 	}
 
-	template<typename T>
-	void function_base::push(basic_eval_stack* stack, const T& value)
+	template<>
+	void function_base::push<int32_t>(basic_eval_stack* stack, const int32_t& v)
 	{
-		stack->push(value);
+		stack->push(value{}.set<value_type::int32>(v));
 	}
 
 	void function_base::push_string(basic_eval_stack* stack, const char* dynamic_string)
 	{
-		stack->push(value(dynamic_string, true));
+		stack->push(value{}.set<value_type::string>(dynamic_string, true));
 	}
 
 	char* function_base::allocate(string_table& strings, size_t len)
@@ -34,17 +36,11 @@ namespace ink::runtime::internal
 
 	// Generate template implementations for all significant types
 
-#define SUPPORT_TYPE(TYPE) template TYPE function_base::pop<TYPE>(basic_eval_stack*); template void function_base::push<TYPE>(basic_eval_stack*, const TYPE&)
-#define SUPPORT_TYPE_PARAMETER_ONLY(TYPE) template TYPE function_base::pop<TYPE>(basic_eval_stack*)
-
-	SUPPORT_TYPE(int);
-	SUPPORT_TYPE(float);
-	SUPPORT_TYPE(uint32_t);
-
-	// TODO - Support string return values
-
 #ifdef INK_ENABLE_STL
-	SUPPORT_TYPE_PARAMETER_ONLY(std::string);
+	template<>
+	std::string function_base::pop<std::string>(basic_eval_stack* stack) {
+		return std::string(pop<const char*>(stack));
+	}
 #endif
 #ifdef INK_ENABLE_UNREAL
 	SUPPORT_TYPE_PARAMETER_ONLY(FString);

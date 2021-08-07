@@ -8,6 +8,8 @@
 
 namespace ink::compiler::internal
 {
+	class list_data;
+
 	// Abstract base class for emitters which write ink commands to a file
 	class emitter : public reporter
 	{
@@ -38,6 +40,9 @@ namespace ink::compiler::internal
 		// Writes a command with a string payload
 		virtual void write_string(Command command, CommandFlag flag, const std::string& string) = 0;
 
+		// write a command with a list payload
+		virtual void write_list(Command commmand, CommandFlag flag, const std::vector<list_flag>& list) = 0;
+
 		// Callback for nop commands
 		virtual void handle_nop(int index_in_parent) = 0;
 
@@ -53,6 +58,9 @@ namespace ink::compiler::internal
 		// Adds a container end marker to the container map
 		void add_end_to_container_map(uint32_t offset, container_t index);
 
+		// add list definitions
+		virtual void set_list_meta(const list_data& lists_defs) = 0;
+
 		// Helpers
 		template<typename T>
 		void write(Command command, const T& param, CommandFlag flag = CommandFlag::NO_FLAGS)
@@ -67,6 +75,9 @@ namespace ink::compiler::internal
 
 		// Finalize (do any post processing necessary)
 		virtual void finalize() = 0;
+
+		// Set container index for visit tracking
+		virtual void setContainerIndex(container_t index) = 0;
 
 	protected:
 		typedef std::vector<std::pair<uint32_t, container_t>> container_map;

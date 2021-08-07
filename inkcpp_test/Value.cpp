@@ -1,13 +1,35 @@
 #include "catch.hpp"
+#include "../inkcpp_cl/test.h"
 
-#include "../inkcpp/value.h"
+#include <compiler.h>
+#include <story.h>
+
 #include "../inkcpp/string_table.h"
+#include "../inkcpp/list_table.h"
+#include "../inkcpp/random.h"
 #include "../inkcpp/output.h"
+#include "../inkcpp/executioner.h"
+#include "../shared/private/command.h"
 
-using value = ink::runtime::internal::value;
-using data_type = ink::runtime::internal::data_type;
-using string_table = ink::runtime::internal::string_table;
+#include "../inkcpp/story_impl.h"
+#include "../inkcpp/runner_impl.h"
+#include "../inkcpp/globals_impl.h"
+
+using ink::runtime::internal::value;
+using ink::runtime::internal::value_type;
+using ink::runtime::internal::string_table;
+using ink::runtime::internal::list_table;
+using ink::runtime::internal::prng;
 using stream = ink::runtime::internal::stream<128>;
+using ink::runtime::internal::executer;
+using eval_stack = ink::runtime::internal::eval_stack<28, false>;
+using ink::Command;
+
+using ink::runtime::internal::story_impl;
+using ink::runtime::internal::runner_impl;
+using ink::runtime::internal::globals_impl;
+using ink::runtime::globals;
+using ink::runtime::runner;
 
 void cp_str(char* dst, const char* src) {
 	while(*src) { *dst++ = *src++; }
@@ -16,6 +38,18 @@ void cp_str(char* dst, const char* src) {
 
 SCENARIO("compare concatenated values")
 {
+	string_table str_table;
+	list_table lst_table{};
+	prng rng;
+	eval_stack stack;
+	inklecate("ink/ListStory.ink", "ListStory_value.tmp");
+	ink::compiler::run("ListStory_value.tmp", "ListStory_value.bin");
+	story_impl story("ListStory_value.bin");
+	globals globs_ptr = story.new_globals();
+	runner run = story.new_runner(globs_ptr);
+	globals_impl& globs = *globs_ptr.cast<globals_impl>();
+	executer ops(rng, story, globs, globs.strings(), globs.lists(), *run);
+		
 	GIVEN("just single strings")
 	{
 		const char str_1[] = "Hello World!";
@@ -23,30 +57,31 @@ SCENARIO("compare concatenated values")
 		const char str_2[] = "Bye World!";
 		WHEN("equal")
 		{
-			value v1(str_1);
-			value v2(str_1_again);
-			value res = v1 == v2;
+			stack.push(value{}.set<value_type::string>(str_1));
+			stack.push(value{}.set<value_type::string>(str_1_again));
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
 			THEN("== results in true")
 			{
-				REQUIRE(res.get_data_type() == data_type::int32);
-				REQUIRE(res.get<int32_t>() == 1);
+				REQUIRE(res.type() == value_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == true);
 			}
 		}
 		WHEN("not equal")
 		{
-			value v1(str_1);
-			value v2(str_2);
-			value res = v1 == v2;
+			stack.push(value{}.set<value_type::string>(str_1));
+			stack.push(value{}.set<value_type::string>(str_2));
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
 			THEN("== results in false")
 			{
-				REQUIRE(res.get_data_type() == data_type::int32);
-				REQUIRE(res.get<int32_t>() == 0);
+				REQUIRE(res.type() == value_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == false);
 			}
 		}
 	}
 	GIVEN("string and numbers")
 	{
-		string_table str_table;
 		stream out{};
 		char* str_hello = str_table.create(6);
 		cp_str(str_hello, "hello");
@@ -62,38 +97,117 @@ SCENARIO("compare concatenated values")
 		int int_45 = 45;
 		WHEN("concatenated string representation matches (2 fields)")
 		{
-			value v1 = value::add(value(int_4), value(str_5hello), out, str_table);
-			value v2 = value::add(value(int_45), value(str_hello), out, str_table);
-			value res = v1 == v2;
+			stack.push(value{}.set<value_type::int32>(int_4));
+			stack.push(value{}.set<value_type::string>(str_5hello));
+			ops(Command::ADD, stack);
+			stack.push(value{}.set<value_type::int32>(int_45));
+			stack.push(value{}.set<value_type::string>(str_hello));
+			ops(Command::ADD, stack);
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
 			THEN("== returns true")
 			{
-				REQUIRE(res.get_data_type() == data_type::int32);
-				REQUIRE(res.get<int32_t>() == 1);
+				REQUIRE(res.type() == value_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == true);
 			}
 		}
 		WHEN("concatenated string representation match (many fields)")
 		{
-			value v1 = value(str_4);
+			stack.push(value{}.set<value_type::string>(str_4));
 			for (int i = 0; i < 31; ++i) {
-				v1 = value::add(v1, value(int_4), out, str_table);
+				stack.push(value{}.set<value_type::int32>(int_4));
+				ops(Command::ADD, stack);
 			}
-			value v2 = value(str_32_4);
-			value res = v1 == v2;
+			stack.push(value{}.set<value_type::string>(str_32_4));
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
 			THEN("== results true")
 			{
-				REQUIRE(res.get_data_type() == data_type::int32);
-				REQUIRE(res.get<int32_t>() == 1);
+				REQUIRE(res.type() == value_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == true);
 			}
 		}
 		WHEN("concatenated string representation won't match")
 		{
-			value v1 = value::add(value(int_45), value(str_5hello), out, str_table);
-			value v2 = value::add(value(int_4),value(str_hello), out, str_table);
-			value res = v1 == v2;
+			stack.push(value{}.set<value_type::int32>(int_45));
+			stack.push(value{}.set<value_type::string>(str_5hello));
+			ops(Command::ADD, stack);
+			stack.push(value{}.set<value_type::int32>(int_4));
+			stack.push(value{}.set<value_type::string>(str_hello));
+			ops(Command::ADD, stack);
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
 			THEN("== returns false")
 			{
-				REQUIRE(res.get_data_type() == data_type::int32);
-				REQUIRE(res.get<int32_t>() == 0);
+				REQUIRE(res.type() == value_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == false);
+			}
+		}
+	}
+	GIVEN("numbers")
+	{
+		int i5 = 5;
+		int i8 = 8;
+		float f5 = 5.f;
+		WHEN("numbers are same")
+		{
+			stack.push(value{}.set<value_type::int32>(i8));
+			stack.push(value{}.set<value_type::int32>(i8));
+			ops(Command::IS_EQUAL, stack);
+			value res1 = stack.pop();
+			stack.push(value{}.set<value_type::float32>(f5));
+			stack.push(value{}.set<value_type::float32>(f5));
+			ops(Command::IS_EQUAL, stack);
+			value res2 = stack.pop();
+			THEN("== returns true")
+			{
+				REQUIRE(res1.type() == value_type::boolean);
+				REQUIRE(res1.get<value_type::boolean>() == true);
+				REQUIRE(res2.type() == value_type::boolean);
+				REQUIRE(res2.get<value_type::boolean>() == true);
+			}
+		}
+		WHEN("numbers equal, but different encoding")
+		{
+			stack.push(value{}.set<value_type::int32>(i5));
+			stack.push(value{}.set<value_type::float32>(f5));
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
+			THEN("== returns true")
+			{
+				REQUIRE(res.type() == value_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == true);
+			}
+		}
+		WHEN("numbers value and encoding differs")
+		{
+			stack.push(value{}.set<value_type::float32>(f5));
+			stack.push(value{}.set<value_type::int32>(i8));
+			ops(Command::IS_EQUAL, stack);
+			value res = stack.pop();
+			THEN("== returns false")
+			{
+				REQUIRE(res.type() == value_type::boolean);
+				REQUIRE(res.get<value_type::boolean>() == false);
+			}
+		}
+		WHEN("calculate with float and int (5.,8)")
+		{
+			stack.push(value{}.set<value_type::float32>(f5));
+			stack.push(value{}.set<value_type::int32>(i8));
+			THEN("adding results 13.")
+			{
+				ops(Command::ADD, stack);
+				value res = stack.pop();
+				REQUIRE(res.type() == value_type::float32);
+				REQUIRE(res.get<value_type::float32>() == 13.f);
+			}
+			THEN("dividing results in 0.625")
+			{
+				ops(Command::DIVIDE, stack);
+				value res = stack.pop();
+				REQUIRE(res.type() == value_type::float32);
+				REQUIRE(res.get<value_type::float32>() == 0.625f);
 			}
 		}
 	}

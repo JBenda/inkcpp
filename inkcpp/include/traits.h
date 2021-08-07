@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.h"
+#include "system.h"
 
 #ifdef INK_ENABLE_STL
 #include <string>
@@ -9,19 +10,15 @@
 namespace ink::runtime::internal
 {
 	template<unsigned int N, typename Arg, typename... Args>
-	struct get
-	{
-		using type = typename get<N - 1, Args...>::type;
-	};
+	struct get_ith_type : get_ith_type<N - 1, Args...> {};
 
 	template<typename Arg, typename... Args>
-	struct get<0, Arg, Args...>
+	struct get_ith_type<0, Arg, Args...>
 	{
 		using type = Arg;
 	};
 
 	// constant and is_same from http://www.cppreference.com
-
 	template<typename T, T v>
 	struct constant {
 		static constexpr T value = v;
@@ -31,16 +28,19 @@ namespace ink::runtime::internal
 		constexpr value_type operator()() const noexcept { return value; } //since c++14
 	};
 
+	struct false_type : constant<bool, false> {};
+	struct true_type : constant<bool, true>{};
+
 	template<class T, class U>
-	struct is_same : constant<bool, false> {};
+	struct is_same : false_type {};
 
 	template<class T>
-	struct is_same<T, T> : constant<bool, true> {};
+	struct is_same<T, T> : true_type {};
 
 	// == string testing (from me) ==
 
 	template<typename T>
-	struct is_string : constant<bool, false> { };
+	struct is_string : false_type { };
 
 	template<typename T>
 	struct is_string<T&> : is_string<T> { };
@@ -107,7 +107,7 @@ namespace ink::runtime::internal
 		struct argument
 		{
 			static_assert(N < arity, "error: invalid parameter index.");
-			using type = typename get<N, Args...>::type;
+			using type = typename get_ith_type<N, Args...>::type;
 		};
 	};
 

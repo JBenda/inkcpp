@@ -12,6 +12,7 @@
 #include <exception>
 #include <stdexcept>
 #include <optional>
+#include <cctype>
 #endif
 
 namespace ink
@@ -52,6 +53,19 @@ namespace ink
 	// Used to uniquely identify threads
 	typedef uint32_t thread_t;
 
+	// Used to unique identify a list flag
+	struct list_flag {
+		int16_t list_id; int16_t flag;
+		bool operator==(const list_flag& o) const {
+			return list_id == o.list_id && flag == o.flag;
+		}
+		bool operator!=(const list_flag& o) const {
+			return !(*this == o);
+		}
+	};
+	constexpr list_flag null_flag{-1,-1};
+	constexpr list_flag empty_flag{-1,0};
+
 	// Checks if a string is only whitespace
 	static bool is_whitespace(const char* string, bool includeNewline = true)
 	{
@@ -74,7 +88,15 @@ namespace ink
 		}
 	}
 
-	static bool is_whitespace(char character, bool includeNewline = true)
+
+	// check if character can be only part of a word, when two part of word characters put together the
+	// will be a space inserted I049
+	inline bool is_part_of_word(char character)
+	{
+		return isalpha(character) || isdigit(character);
+	}
+
+	inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{
 		switch (character)
 		{
@@ -119,9 +141,26 @@ namespace ink
 
 	namespace runtime::internal
 	{
+		constexpr unsigned abs(int i) { return i < 0 ? -i : i; }
+
 		template<typename T>
 		struct always_false { static constexpr bool value = false; };
+
+		template<bool Con, typename T1, typename T2>
+		struct if_type { using type = T1; };
+		template<typename T1, typename T2>
+		struct if_type<false, T1, T2> { using type = T2; };
+		template<bool Con, typename T1, typename T2>
+		using if_t = typename if_type<Con, T1, T2>::type;
+
+		template<bool Enable, typename T = void>
+		struct enable_if { };
+		template<typename T>
+		struct enable_if<true, T> { using type = T; };
+		template<bool Enable, typename T = void>
+		using enable_if_t = typename enable_if<Enable, T>::type;
 	}
+
 
 #ifdef INK_ENABLE_STL
 	template<typename T>

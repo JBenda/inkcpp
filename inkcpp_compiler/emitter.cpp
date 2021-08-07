@@ -37,6 +37,7 @@ namespace ink::compiler::internal
 		}
 
 		_container_map.push_back(std::make_pair(offset, index));
+		setContainerIndex(index);
 	}
 
 	void emitter::add_end_to_container_map(uint32_t offset, container_t index)

@@ -208,6 +208,32 @@ namespace ink::runtime::internal
 			}
 		}
 
+		// check if lists are defined
+		_list_meta = ptr;
+		if(list_flag flag = _header.read_list_flag(ptr); flag != null_flag) {
+			// skip list definitions
+			auto list_id = flag.list_id;
+			while(*ptr != 0) {++ptr;} ++ptr; // skip list name
+			do{
+				if(flag.list_id != list_id) {
+					list_id = flag.list_id;
+					while(*ptr != 0) {++ptr;} ++ptr; // skip list name
+				}
+				while(*ptr != 0) { ++ptr; } ++ptr; // skip flag name
+			} while  ((flag = _header.read_list_flag(ptr)) != null_flag);
+
+			_lists = reinterpret_cast<const list_flag*>(ptr);
+			// skip predefined lists
+			while(_header.read_list_flag(ptr) != null_flag) {
+				while(_header.read_list_flag(ptr) != null_flag);
+			}
+		} else {
+			_list_meta = nullptr;
+			_lists = nullptr;
+		}
+
+
+
 		_num_containers = *(uint32_t*)(ptr);
 		ptr += sizeof(uint32_t);
 

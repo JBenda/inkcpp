@@ -2,6 +2,7 @@
 
 #include "value.h"
 #include "collections/restorable.h"
+#include "array.h"
 
 namespace ink
 {
@@ -9,6 +10,7 @@ namespace ink
 	{
 		namespace internal
 		{
+			class string_table;
 			struct entry
 			{
 				hash_t name;
@@ -37,12 +39,15 @@ namespace ink
 				// Gets an existing value, or nullptr
 				const value* get(hash_t name) const;
 				value* get(hash_t name);
+				value* get_from_frame(int ci, hash_t name);
 
 				// pushes a new frame onto the stack
-				void push_frame(offset_t return_to, frame_type type);
+				// @param eval if evaluation mode was active
+				template<frame_type>
+				void push_frame(offset_t return_to, bool eval);
 
 				// Pops a frame (and all temporary variables) from the callstack.
-				offset_t pop_frame(frame_type* type);
+				offset_t pop_frame(frame_type* type, bool& eval);
 
 				// Returns true if there are any frames on the stack
 				bool has_frame(frame_type* type = nullptr) const;
@@ -69,6 +74,11 @@ namespace ink
 				void restore();
 				void forget();
 
+				// replace all pointer in current frame with values from _stack
+				void fetch_values(basic_stack& _stack);
+				// push all values to other _stack
+				void push_values(basic_stack& _stack);
+
 			private:
 				entry& add(hash_t name, const value& val);
 				const entry* pop();
@@ -82,8 +92,12 @@ namespace ink
 				static const hash_t NulledHashId = ~0;
 			};
 
-			// stack for call history and temporary variables
-			template<size_t N>
+			/**
+			 * @brief stack for call history and temporary variables
+			 * @tparam N initial capacity of stack
+			 * @tparam Dynamic weather or not expand if stack is full
+			 */
+			template<size_t N, bool Dynamic = false>
 			class stack : public basic_stack
 			{
 			public:
@@ -91,6 +105,26 @@ namespace ink
 			private:
 				// stack
 				entry _stack[N];
+			};
+
+			template<size_t N>
+			class stack<N, true> : public basic_stack
+			{
+			public:
+				stack() : basic_stack(nullptr, 0) {}
+			protected:
+				virtual void overflow(entry*& buffer, size_t& size) override {
+					if (!buffer) {
+						buffer = _stack.data();
+						size = _stack.capacity();
+					} else {
+						_stack.extend();
+						buffer = _stack.data();
+						size = _stack.capacity();
+					}
+				}
+			private:
+				managed_array<entry, true, N> _stack;
 			};
 
 			class basic_eval_stack : protected restorable<value>
@@ -110,6 +144,9 @@ namespace ink
 				// Gets the top value without popping
 				const value& top() const;
 
+				// Gets the top non null value without popping
+				const value& top_value() const;
+
 				// Check if the stack is empty
 				bool is_empty() const;
 
@@ -125,13 +162,27 @@ namespace ink
 				void forget();
 			};
 
-			template<size_t N>
+			template<size_t N, bool dynamic = false>
 			class eval_stack : public basic_eval_stack
 			{
 			public:
-				eval_stack() : basic_eval_stack(&_stack[0], N) { }
+				eval_stack() : basic_eval_stack(_stack, N) { }
 			private:
 				value _stack[N];
+			};
+			template<size_t N>
+			class eval_stack<N, true> : public basic_eval_stack
+			{
+			public:
+				eval_stack() : basic_eval_stack(nullptr, 0) {}
+			protected:
+				virtual void overflow(value*& buffer, size_t& size) override {
+					_stack.extend();
+					buffer = _stack.data();
+					size = _stack.capacity();
+				}
+			private:
+				managed_array<value, true, N> _stack;
 			};
 		}
 	}

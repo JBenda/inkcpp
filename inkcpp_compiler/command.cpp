@@ -4,48 +4,54 @@ namespace ink
 {
 	// Command strings used by compiler
 	const char* CommandStrings[] = {
-			"STR",
-			"INT",
-			"FLOAT",
-			"DIVERT_VAL",
+			"inkcpp_STR",
+			"inkcpp_INT",
+			"inkcpp_BOOL",
+			"inkcpp_FLOAT",
+			"inkcpp_VALUE_POINTER",
+			"inkcpp_DIVERT_VAL",
+			"inkcpp_LIST",
 			"\n",
 			"<>",
 			"void",
 			"#",
-			"DIVERT",
-			"DIVERT_TO_VARIABLE",
-			"TUNNEL",
-			"FUNCTION",
+			"inkcpp_DIVERT",
+			"inkcpp_DIVERT_TO_VARIABLE",
+			"inkcpp_TUNNEL",
+			"inkcpp_FUNCTION",
 			"done",
 			"end",
 			"->->",
 			"~ret",
 
-			"DEFINE_TEMP",
-			"SET_VARIABLE",
+			"inkcpp_DEFINE_TEMP",
+			"inkcpp_SET_VARIABLE",
 
 			"ev",
 			"/ev",
 			"out",
 			"pop",
 			"du",
-			"PUSH_VARIABLE_VALUE",
+			"inkcpp_PUSH_VARIABLE_VALUE",
 			"visit",
-			"READ_COUNT",
+			"inkcpp_READ_COUNT",
 			"seq",
 			"srnd",
 
 			"str",
 			"/str",
 
-			"CHOICE",
+			"inkcpp_CHOICE",
 			"thread",
+
+			"range",
 
 			"+",
 			"-",
 			"/",
 			"*",
 			"%",
+			"rnd",
 			"==",
 			">",
 			"<",
@@ -56,9 +62,26 @@ namespace ink
 			"||",
 			"MIN",
 			"MAX",
+			"?",
+			"!?",
+			"L^",
+			"listInt",
 
 			"!",
 			"~",
+			"LIST_COUNT",
+			"LIST_MIN",
+			"LIST_MAX",
+			"readc",
+			"turns",
+			"lrnd",
+			"FLOOR",
+			"CEILING",
+			"INT",
+			"LIST_ALL",
+			"LIST_INVERT",
+			"LIST_VALUE",
+			"choiceCnt",
 
 			"START_CONTAINER",
 			"END_CONTAINER",
@@ -66,5 +89,10 @@ namespace ink
 			"CALL_EXTERNAL"
 	};
 
-	static_assert(sizeof(CommandStrings) / sizeof(const char*) == (int)Command::NUM_COMMANDS, "CommandStrings list much match Command enumeration");
+	template<unsigned A, unsigned B>
+	struct equal {
+		static_assert(A == B, "Not equal!");
+	};
+	equal<sizeof(CommandStrings) / sizeof(const char*), (int)(Command::NUM_COMMANDS)> dum;
+	static_assert(sizeof(CommandStrings) / sizeof(const char*) == (int)Command::NUM_COMMANDS, "CommandStrings list muss match Command enumeration");
 }

@@ -8,8 +8,11 @@ namespace ink
 		// == Value Commands: Push values onto the stack
 		STR,
 		INT,
+		BOOL,
 		FLOAT,
+		VALUE_POINTER,
 		DIVERT_VAL,
+		LIST,
 		NEWLINE,
 		GLUE,
 		VOID,
@@ -52,14 +55,19 @@ namespace ink
 
 		// == Threading
 		THREAD,
-
+		// == thinary operations
+		LIST_RANGE,
+		OP_BEGIN = LIST_RANGE,
+		TERNARY_OPERATORS_START = LIST_RANGE,
+		TERNARY_OPERATORS_END = LIST_RANGE,
 		// == Binary operators
-		BINARY_OPERATORS_START,
-		ADD = BINARY_OPERATORS_START,
+		ADD,
+		BINARY_OPERATORS_START = ADD,
 		SUBTRACT,
 		DIVIDE,
 		MULTIPLY,
 		MOD,
+		RANDOM,
 		IS_EQUAL,
 		GREATER_THAN,
 		LESS_THAN,
@@ -70,16 +78,34 @@ namespace ink
 		OR,
 		MIN,
 		MAX,
-		BINARY_OPERATORS_END = MAX,
+		HAS,
+		HASNT,
+		INTERSECTION,
+		LIST_INT,
+		BINARY_OPERATORS_END = LIST_INT,
 
 		// == Unary operators
 		UNARY_OPERATORS_START,
 		NOT = UNARY_OPERATORS_START,
 		NEGATE,
-		UNARY_OPERATORS_END = NEGATE,
+		LIST_COUNT,
+		LIST_MIN,
+		LIST_MAX,
+		READ_COUNT_VAR,
+		TURNS,
+		lrnd,
+		FLOOR,
+		CEILING,
+		INT_CAST,
+		LIST_ALL,
+		LIST_INVERT,
+		LIST_VALUE,
+		UNARY_OPERATORS_END = LIST_VALUE,
+		CHOICE_COUNT,
+		OP_END,
 
 		// == Container tracking
-		START_CONTAINER_MARKER,
+		START_CONTAINER_MARKER = OP_END,
 		END_CONTAINER_MARKER,
 
 		// == Function calls
@@ -110,6 +136,10 @@ namespace ink
 
 		// == Variable assignment
 		ASSIGNMENT_IS_REDEFINE = 1 << 0,
+
+		// == Function/Tunnel flags
+		FUNCTION_TO_VARIABLE = 1 << 0,
+		TUNNEL_TO_VARIABLE = 1 << 0,
 	};
 
 	inline bool operator& (CommandFlag lhs, CommandFlag rhs)

@@ -4,6 +4,7 @@
 #include "array.h"
 #include "globals.h"
 #include "string_table.h"
+#include "list_table.h"
 #include "stack.h"
 
 namespace ink::runtime::internal
@@ -20,16 +21,16 @@ namespace ink::runtime::internal
 		virtual ~globals_impl() { }
 
 	protected:
-		const uint32_t* get_uint(hash_t name) const override;
+		optional<uint32_t> get_uint(hash_t name) const override;
 		bool set_uint(hash_t name, uint32_t value) override;
 
-	  	const int32_t* get_int(hash_t name) const override;
+	  	optional<int32_t> get_int(hash_t name) const override;
 		bool set_int(hash_t name, int32_t value) override;
 
-		const float* get_float(hash_t name) const override;
+		optional<float> get_float(hash_t name) const override;
 		bool set_float(hash_t name, float value) override;
 
-		const char * const * get_str(hash_t name) const override;
+		optional<const char*> get_str(hash_t name) const override;
 		bool set_str(hash_t name, const char* value) override;
 
 	public:
@@ -38,6 +39,13 @@ namespace ink::runtime::internal
 
 		// Checks the number of visits to a container
 		uint32_t visits(uint32_t container_id) const;
+
+		// Returnn number of turns since container was last visited
+		// \retval -1 if container was never visited before
+		uint32_t turns(uint32_t container_id) const;
+
+		// signal that a turn is habbend (eg. a choice is taken) 
+		void turn();
 
 		// registers/unregisters a runner as using this globals object
 		void add_runner(const runner_impl*);
@@ -59,6 +67,9 @@ namespace ink::runtime::internal
 		// gets the allocated string table
 		inline string_table& strings() { return _strings; }
 
+		// gets list entries
+		list_table& lists() { return _lists; }
+
 		// run garbage collection
 		void gc();
 
@@ -72,7 +83,26 @@ namespace ink::runtime::internal
 		const uint32_t _num_containers;
 
 		// Visit count array
-		internal::allocated_restorable_array<uint32_t> _visit_counts;
+		struct visit_count {
+			uint32_t visits = 0;
+			int32_t turns = -1;
+			bool operator==(const visit_count& vc) const {
+				return visits == vc.visits && turns == vc.turns;
+			}
+			bool operator!=(const visit_count& vc) const {
+				return !(*this == vc);
+			}
+		};
+		class visit_counts{
+			visit_count* _data;
+			size_t _len;
+		public:
+			visit_counts(size_t len) 
+			: _data{new visit_count[len]}, _len{len} {}
+			size_t size() const { return _len; }
+			visit_count& operator[](size_t i) { return _data[i]; }
+			const visit_count& operator[](size_t i) const { return _data[i]; }
+		} _visit_counts;
 
 		// Pointer back to owner story.
 		const story_impl* const _owner;
@@ -89,11 +119,11 @@ namespace ink::runtime::internal
 
 		// Allocated string table (shared by all runners using this global store)
 		mutable string_table _strings;
+		mutable list_table _lists;
 
-		// Global variables (TODO: Max 50?)
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.
 		//  If I could create an avl tree with save/restore, that'd be great but seems super complex.
-		internal::stack<50> _variables;
+		internal::stack<abs(config::limitGlobalVariables), config::limitGlobalVariables < 0> _variables;
 		bool _globals_initialized;
 	};
 }
