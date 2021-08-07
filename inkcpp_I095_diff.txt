@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I095/transcript.txt+++ out/inkcpp_I095_stdout.txt@@ -1,2 +1,3 @@ a b-a b+a+b

@@ -2,6 +2,5 @@ I’m in a tunnel
 When should this get printed?
 
 1: I’m an option
-2: I’m an option
 ?> I’m an option
 Finishing thread.

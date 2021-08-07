@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I046/transcript.txt+++ out/inkcpp_I046_stdout.txt@@ -1,2 +1,3 @@ A line.+ Another line.

@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I044/transcript.txt+++ out/inkcpp_I044_stdout.txt@@ -1,2 +1,3 @@ A+ C

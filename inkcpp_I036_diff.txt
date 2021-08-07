@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I036/transcript.txt+++ out/inkcpp_I036_stdout.txt@@ -1,4 +1,5 @@ A+ B A 3

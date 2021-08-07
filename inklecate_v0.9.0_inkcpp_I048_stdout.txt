@@ -1,1 +1,1 @@
-Somecontent with glue.
+Some content with glue.

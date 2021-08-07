@@ -1,11 +1,8 @@
 
 1: Choice 1
 2: Choice 2
-3: 
 ?> After choice
 
 1: Choice 2
-2: 
 ?> After choice
-
-1: 
+This is default.

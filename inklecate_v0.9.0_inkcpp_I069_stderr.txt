@@ -1,5 +1,0 @@
-ERROR: Unknown command 'LIST_VALUE'. Skipping.
-ERROR: Unknown command 'LIST_VALUE'. Skipping.Unknown command 'listInt'. Skipping.
-ERROR: Unknown command 'LIST_VALUE'. Skipping.Unknown command 'listInt'. Skipping.Unknown command 'LIST_ALL'. Skipping.
-ERROR: Unknown command 'LIST_VALUE'. Skipping.Unknown command 'listInt'. Skipping.Unknown command 'LIST_ALL'. Skipping.Unknown command 'LIST_INVERT'. Skipping.
-Cancelling play mode. Errors detected in compilation

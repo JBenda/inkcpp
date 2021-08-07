@@ -1,2 +1,0 @@
-ERROR: Unknown command 'LIST_ALL'. Skipping.
-Cancelling play mode. Errors detected in compilation

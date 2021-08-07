@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I037/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I037_stdout.txt@@ -1,2 +1,2 @@-X+ x

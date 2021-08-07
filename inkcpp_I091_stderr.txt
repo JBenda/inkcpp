@@ -1,2 +1,0 @@
-ERROR: Unknown command 'choiceCnt'. Skipping.
-Cancelling play mode. Errors detected in compilation

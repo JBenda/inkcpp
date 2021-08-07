@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I009/transcript.txt+++ out/inkcpp_I009_stdout.txt@@ -1,5 +1,5 @@ -1: 1+1:  1 ?> 1 End of choice this another

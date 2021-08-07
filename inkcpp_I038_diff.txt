@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I038/transcript.txt+++ out/inkcpp_I038_stdout.txt@@ -2,4 +2,5 @@ gather should be seen  1: go to a stitch+2: go to a stitch ?> result

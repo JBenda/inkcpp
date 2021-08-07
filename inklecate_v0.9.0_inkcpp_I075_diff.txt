@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I075/transcript.txt+++ out/inklecate_v0.9.0_inkcpp_I075_stdout.txt@@ -1,2 +1 @@-The first line.-The second line.+

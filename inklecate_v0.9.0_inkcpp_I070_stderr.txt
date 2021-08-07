@@ -1,1 +1,0 @@
-Unhandled ink runtime exception: Can not pop. No elements to pop!

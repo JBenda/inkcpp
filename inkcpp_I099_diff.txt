@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I099/transcript.txt+++ out/inkcpp_I099_stdout.txt@@ -1,2 +1,2 @@ This is the content-# tags: author: Joe, title: My Great Story+# tags: author: Joe, title: My Great Story, 
