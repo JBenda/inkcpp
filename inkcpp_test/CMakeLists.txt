@@ -29,7 +29,7 @@ set (source "${CMAKE_CURRENT_SOURCE_DIR}/ink")
 set (destination "${CMAKE_CURRENT_BINARY_DIR}/ink")
 add_custom_command(
     TARGET inkcpp_test POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${source} ${destination}
     DEPENDS ${destination}
     COMMENT "symbolic link resources folder from ${source} => ${destination}"
 )
