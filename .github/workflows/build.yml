@@ -146,14 +146,14 @@ jobs:
       - name: Create Comment Text
         shell: bash
         run: |
-          COMMENT = ""
+          COMMENT="### Ink Proof Results\n\nThese results are obtained by running the [Ink-Proof Testing Suite]() on the compiled binaries in this pull request.\n\n| System | Results |\n| --- | --- |\n"
           FILES="/results/*.sh"
           for f in $FILES
           do
             echo "Reading results from $f"
             chmod u+x $f
             ./$f
-            COMMENT=$(echo -e "$(echo $COMMENT)$NAME: $RESULT\n")
+            COMMENT=$(echo -e "$(echo $COMMENT)| $NAME | $RESULT |\n")
           done
           echo "COMMENT=$COMMENT" >> $GITHUB_ENV
       
