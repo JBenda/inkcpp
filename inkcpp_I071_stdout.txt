@@ -1,6 +1,0 @@
-b, d
-a, b, c, e
-b, c
-false
-true
-true

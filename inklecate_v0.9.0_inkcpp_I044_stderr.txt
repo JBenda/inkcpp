@@ -1,1 +1,0 @@
-Unhandled ink runtime exception: Failed to parse endian encoding!

@@ -1,1 +1,0 @@
---- /home/runner/work/inkcpp/inkcpp/proofing/ink-proof/ink/I019/transcript.txt+++ out/inkcpp_I019_stdout.txt@@ -1 +0,0 @@-
