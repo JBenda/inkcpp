@@ -119,7 +119,7 @@ jobs:
       working-directory: proofing/ink-proof
       run: |
         python3 proof.py --examples 'I...' inkcpp inklecate_v0.9.0 > run.out
-        echo -e "NAME=\"${{ matrix.name }}\"\nRESULT=\"$(cat run.out)\"" > ${{ matrix.artifact }}.sh
+        echo -e "| ${{ matrix.name }} | $(cat run.out) |" > ${{ matrix.artifact }}.txt
 
     # Upload results artifact
     - name: Upload Results Artifact
@@ -143,22 +143,25 @@ jobs:
           path: "results"
 
       # Create comment text
-      - name: Create Comment Text
+      - name: Create Comment Text File
         shell: bash
         run: |
-          COMMENT="### Ink Proof Results\n\nThese results are obtained by running the [Ink-Proof Testing Suite]() on the compiled binaries in this pull request.\n\n| System | Results |\n| --- | --- |\n"
-          FILES="results/*.sh"
+          echo "### Ink Proof Results" >> comment.txt
+          echo "" >> comment.txt
+          echo "These results are obtained by running the [Ink-Proof Testing Suite]() on the compiled binaries in this pull request." >> comment.txt
+          echo "" >> comment.txt
+          echo "| System | Results |" >> comment.txt
+          echo "| --- | --- |" >> comment.txt
+          FILES="results/*.txt"
           for f in $FILES
           do
             echo "Reading results from $f"
-            cat "$f" >> $GITHUB_ENV
-            COMMENT=$(echo -e "$(echo $COMMENT)| $NAME | $RESULT |\n")
+            cat "$f" >> comment.txt
           done
-          echo "COMMENT=\"$COMMENT\"" >> $GITHUB_ENV
       
       # Post Comment
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
-          message: ${{ env.COMMENT }}
+          path: comment.txt
         
 
