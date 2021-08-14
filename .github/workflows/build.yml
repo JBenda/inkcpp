@@ -104,7 +104,7 @@ jobs:
     # Make sure Inkproof has everything it needs to run our executable
     - name: Setup Ink Proof
       shell: bash
-      working-directory: $GITHUB_WORKSPACE/proofing/ink-proof
+      working-directory: proofing/ink-proof
       run: |
         python3 install_deps.py
         cp ../inkcpp_runtime_driver drivers/
@@ -117,7 +117,7 @@ jobs:
     - name: Run Ink Proof
       shell: bash
       working-directory: $GITHUB_WORKSPACE/proofing/ink-proof
-      run: echo "NAME=${{ matrix.name }}\nRESULT=$(python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp)" > ${{ matrix.artifact }}.sh
+      run: echo -e "NAME=\"${{ matrix.name }}\"\nRESULT=\"$(python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp)\"" > ${{ matrix.artifact }}.sh
 
     # Upload results artifact
     # TODO: Also upload website?
