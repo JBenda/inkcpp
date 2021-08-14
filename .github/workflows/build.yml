@@ -110,7 +110,7 @@ jobs:
         cp ../inkcpp_runtime_driver drivers/
         chmod +x drivers/inkcpp_runtime_driver
         mkdir deps/inkcpp
-        cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
+        cp $GITHUB_WORKSPACE/build/bin/bin/* deps/inkcpp/
         chmod +x deps/inkcpp/inkcpp_cl
     
     # Run it
