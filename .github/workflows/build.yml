@@ -118,14 +118,47 @@ jobs:
       shell: bash
       working-directory: proofing/ink-proof
       run: |
-        python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 > run.out
+        python3 proof.py --examples 'I...' inkcpp inklecate_v0.9.0 > run.out
         echo -e "NAME=\"${{ matrix.name }}\"\nRESULT=\"$(cat run.out)\"" > ${{ matrix.artifact }}.sh
 
     # Upload results artifact
-    # TODO: Also upload website?
     - name: Upload Results Artifact
       if: ${{ !env.ACT }}
       uses: actions/upload-artifact@v2
       with:
         name: results
         path: proofing/ink-proof/${{ matrix.artifact }}.sh
+
+    # TODO: Also upload website?
+  reporting:
+    name: "Pull Request Report"
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      # Download Ink Proof Results
+      - uses: actions/download-artifact@v2
+        with:
+          name: results
+          path: "results"
+
+      # Create comment text
+      - name: Create Comment Text
+        shell: bash
+        run: |
+          COMMENT = ""
+          FILES="/results/*.sh"
+          for f in $FILES
+          do
+            echo "Reading results from $f"
+            chmod u+x $f
+            ./$f
+            COMMENT=$(echo -e "$(echo $COMMENT)$NAME: $RESULT\n")
+          done
+          echo "COMMENT=$COMMENT" >> $GITHUB_ENV
+      
+      # Post Comment
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: ${{ env.COMMENT }}
+        
+
