@@ -151,8 +151,7 @@ jobs:
           for f in $FILES
           do
             echo "Reading results from $f"
-            chmod u+x $f
-            ./$f
+            cat "$f" >> $GITHUB_ENV
             COMMENT=$(echo -e "$(echo $COMMENT)| $NAME | $RESULT |\n")
           done
           echo "COMMENT=\"$COMMENT\"" >> $GITHUB_ENV
