@@ -17,20 +17,28 @@ jobs:
         include:
           - os: macos-latest
             artifact: macos
+            name: MacOSX
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_mac.zip
+            proof: false
           - os: windows-latest
             artifact: win64
+            name: Windows x64
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
+            proof: false
           - os: "ubuntu-20.04"
             artifact: linux
+            name: Linux x64
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
             inklecate_pre: "mono "
             inklecate_post: ".exe"
+            proof: true
 
     steps:
 
     # Checkout project
     - uses: actions/checkout@v2
+      with:
+        submodules: true
 
     # Download inklecate
     - uses: suisei-cn/actions-download-file@v1
@@ -47,6 +55,18 @@ jobs:
         cd inklecate
         unzip *.zip
         echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
+
+    # Setup python
+    - uses: actions/setup-python@v2
+      if: ${{ matrix.proof }}
+      with:
+        python-version: '3.7'
+
+    # Setup CMake
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.9
+      with:
+        cmake-version: '3.21.x'
 
     # Create a build directory to store all the CMake generated files
     - name: Create Build Environment
@@ -77,52 +97,108 @@ jobs:
       run: cmake --install . --config $BUILD_TYPE --prefix bin
 
     # Upload bin directory as artifact
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v1
+    - name: Upload Binary Artifact
+      uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.artifact }}
         path: build/bin/
 
-  # Run Ink Proof and Generate a GitHub page
-  ink-proof-pages:
-    name: Ink Proof Page Generation
-    runs-on: "ubuntu-latest"
+    # Make sure Inkproof has everything it needs to run our executable
+    - name: Setup Ink Proof
+      if: ${{ matrix.proof }}
+      shell: bash
+      working-directory: proofing/ink-proof
+      run: |
+        python3 install_deps.py
+        cp ../inkcpp_runtime_driver drivers/
+        chmod +x drivers/inkcpp_runtime_driver
+        mkdir deps/inkcpp
+        cp ../../build/bin/bin/* deps/inkcpp/
+        chmod +x deps/inkcpp/inkcpp_cl
+    
+    # Run it
+    - name: Run Ink Proof
+      if: ${{ matrix.proof }}
+      shell: bash
+      working-directory: proofing/ink-proof
+      run: |
+        python3 proof.py --examples 'I...' inkcpp inklecate_v0.9.0 > run.out
+        echo -e "| ${{ matrix.name }} | $(cat run.out) |" > ${{ matrix.artifact }}.txt
+
+    # Creates a "disabled" artifact if ink proofing is disabled
+    - name: Create Disabled InkProof Results File
+      if: ${{ !matrix.proof }}
+      shell: bash
+      run: |
+        mkdir -p proofing/ink-proof
+        echo "| ${{ matrix.name }} | DISABLED |" > proofing/ink-proof/${{ matrix.artifact }}.txt
+
+    # Upload results artifact
+    - name: Upload Results Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: results
+        path: proofing/ink-proof/${{ matrix.artifact }}.txt
+
+    # Upload website artifact
+    - name: Upload Ink-Proof Website Artifact
+      if: ${{ matrix.proof }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.artifact }}-www
+        path: proofing/ink-proof/out
+
+  reporting:
+    name: "Pull Request Report"
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
     needs: compilation
-    if: github.ref == 'refs/heads/master'
-
     steps:
-      # Checkout project with submodules
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-
-      # Download build result from previous step
+      # Download Ink Proof Results
       - uses: actions/download-artifact@v2
         with:
-          name: linux
-          path: build
+          name: results
+          path: "results"
 
-      # Setup python
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-
-      # Run ink proof
-      - name: Build Ink Proof Website
+      # Create comment text
+      - name: Create Comment Text File
         shell: bash
         run: |
-          cd $GITHUB_WORKSPACE/proofing/ink-proof
-          python3 install_deps.py
-          cp ../inkcpp_runtime_driver drivers/
-          chmod +x drivers/inkcpp_runtime_driver
-          mkdir deps/inkcpp
-          cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
-          chmod +x deps/inkcpp/inkcpp_cl
-          python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
+          echo "### Ink Proof Results" >> comment.txt
+          echo "" >> comment.txt
+          echo "These results are obtained by running the [Ink-Proof Testing Suite](https://github.com/chromy/ink-proof) on the compiled binaries in this pull request." >> comment.txt
+          echo "" >> comment.txt
+          echo "| System | Results |" >> comment.txt
+          echo "| --- | --- |" >> comment.txt
+          FILES="results/*.txt"
+          for f in $FILES
+          do
+            echo "Reading results from $f"
+            cat "$f" >> comment.txt
+          done
+      
+      # Post Comment
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          path: comment.txt
+  
+  pages:
+    name: "Upload Ink-Proof to Github Pages"
+    needs: compilation
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      # Download Ink Proof page for Linux
+      - uses: actions/download-artifact@v2
+        with:
+          name: linux-www
+          path: www
 
+      # Deploy to Github Pages
       - name: Deploy Page
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: inkproof-page
-          FOLDER: proofing/ink-proof/out
+          FOLDER: www
