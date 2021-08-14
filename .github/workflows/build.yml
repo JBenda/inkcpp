@@ -19,10 +19,10 @@ jobs:
             artifact: macos
             name: MacOSX
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_mac.zip
-          - os: windows-latest
-            artifact: win64
-            name: Windows x64
-            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
+          #- os: windows-latest
+          #  artifact: win64
+          #  name: Windows x64
+          #  inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
           - os: "ubuntu-20.04"
             artifact: linux
             name: Linux x64
