@@ -189,6 +189,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
+      - uses: actions/checkout@v2
+      
       # Download Ink Proof page for Linux
       - uses: actions/download-artifact@v2
         with:
