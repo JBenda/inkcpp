@@ -147,7 +147,7 @@ jobs:
         shell: bash
         run: |
           COMMENT="### Ink Proof Results\n\nThese results are obtained by running the [Ink-Proof Testing Suite]() on the compiled binaries in this pull request.\n\n| System | Results |\n| --- | --- |\n"
-          FILES="/results/*.sh"
+          FILES="results/*.sh"
           for f in $FILES
           do
             echo "Reading results from $f"
