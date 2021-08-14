@@ -129,7 +129,14 @@ jobs:
         name: results
         path: proofing/ink-proof/${{ matrix.artifact }}.txt
 
-    # TODO: Also upload website?
+    # Upload website artifact
+    - name: Upload Ink-Proof Website Artifact
+      if: ${{ !env.ACT }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.artifact }}-www
+        path: proofing/ink-proof/out
+
   reporting:
     name: "Pull Request Report"
     if: ${{ github.event_name == 'pull_request' }}
@@ -148,7 +155,7 @@ jobs:
         run: |
           echo "### Ink Proof Results" >> comment.txt
           echo "" >> comment.txt
-          echo "These results are obtained by running the [Ink-Proof Testing Suite]() on the compiled binaries in this pull request." >> comment.txt
+          echo "These results are obtained by running the [Ink-Proof Testing Suite](https://github.com/chromy/ink-proof) on the compiled binaries in this pull request." >> comment.txt
           echo "" >> comment.txt
           echo "| System | Results |" >> comment.txt
           echo "| --- | --- |" >> comment.txt
@@ -163,5 +170,23 @@ jobs:
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
           path: comment.txt
-        
+  
+  pages:
+    name: "Upload Ink-Proof to Github Pages"
+    needs: compilation
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      # Download Ink Proof page for Linux
+      - uses: actions/download-artifact@v2
+        with:
+          name: linux-www
+          path: www
 
+      # Deploy to Github Pages
+      - name: Deploy Page
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: inkproof-page
+          FOLDER: www
