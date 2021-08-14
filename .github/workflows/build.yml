@@ -17,12 +17,15 @@ jobs:
         include:
           - os: macos-latest
             artifact: macos
+            name: MacOSX
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_mac.zip
           - os: windows-latest
             artifact: win64
+            name: Windows x64
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
           - os: "ubuntu-20.04"
             artifact: linux
+            name: Linux x64
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
             inklecate_pre: "mono "
             inklecate_post: ".exe"
@@ -31,6 +34,8 @@ jobs:
 
     # Checkout project
     - uses: actions/checkout@v2
+      with:
+        submodules: true
 
     # Download inklecate
     - uses: suisei-cn/actions-download-file@v1
@@ -47,6 +52,17 @@ jobs:
         cd inklecate
         unzip *.zip
         echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
+
+    # Setup python
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+
+    # Setup CMake
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.9
+      with:
+        cmake-version: '3.21.x'
 
     # Create a build directory to store all the CMake generated files
     - name: Create Build Environment
@@ -66,6 +82,7 @@ jobs:
 
     # Run CMake tests (unit tests, etc.)
     - name: CTests
+      if: ${{ !env.ACT }}
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: ctest . -C $BUILD_TYPE -V
@@ -77,52 +94,36 @@ jobs:
       run: cmake --install . --config $BUILD_TYPE --prefix bin
 
     # Upload bin directory as artifact
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v1
+    - name: Upload Binary Artifact
+      if: ${{ !env.ACT }}
+      uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.artifact }}
         path: build/bin/
 
-  # Run Ink Proof and Generate a GitHub page
-  ink-proof-pages:
-    name: Ink Proof Page Generation
-    runs-on: "ubuntu-latest"
-    needs: compilation
-    if: github.ref == 'refs/heads/master'
+    # Make sure Inkproof has everything it needs to run our executable
+    - name: Setup Ink Proof
+      shell: bash
+      working-directory: $GITHUB_WORKSPACE/proofing/ink-proof
+      run: |
+        python3 install_deps.py
+        cp ../inkcpp_runtime_driver drivers/
+        chmod +x drivers/inkcpp_runtime_driver
+        mkdir deps/inkcpp
+        cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
+        chmod +x deps/inkcpp/inkcpp_cl
+    
+    # Run it
+    - name: Run Ink Proof
+      shell: bash
+      working-directory: $GITHUB_WORKSPACE/proofing/ink-proof
+      run: echo "NAME=${{ matrix.name }}\nRESULT=$(python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp)" > ${{ matrix.artifact }}.sh
 
-    steps:
-      # Checkout project with submodules
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-
-      # Download build result from previous step
-      - uses: actions/download-artifact@v2
-        with:
-          name: linux
-          path: build
-
-      # Setup python
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-
-      # Run ink proof
-      - name: Build Ink Proof Website
-        shell: bash
-        run: |
-          cd $GITHUB_WORKSPACE/proofing/ink-proof
-          python3 install_deps.py
-          cp ../inkcpp_runtime_driver drivers/
-          chmod +x drivers/inkcpp_runtime_driver
-          mkdir deps/inkcpp
-          cp $GITHUB_WORKSPACE/build/bin/* deps/inkcpp/
-          chmod +x deps/inkcpp/inkcpp_cl
-          python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp
-
-      - name: Deploy Page
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: inkproof-page
-          FOLDER: proofing/ink-proof/out
+    # Upload results artifact
+    # TODO: Also upload website?
+    - name: Upload Results Artifact
+      if: ${{ !env.ACT }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: results
+        path: proofing/ink-proof/${{ matrix.artifact }}.sh
