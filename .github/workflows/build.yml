@@ -155,7 +155,7 @@ jobs:
             ./$f
             COMMENT=$(echo -e "$(echo $COMMENT)| $NAME | $RESULT |\n")
           done
-          echo "COMMENT=$COMMENT" >> $GITHUB_ENV
+          echo "COMMENT=\"$COMMENT\"" >> $GITHUB_ENV
       
       # Post Comment
       - uses: marocchino/sticky-pull-request-comment@v2
