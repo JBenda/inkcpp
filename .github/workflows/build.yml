@@ -134,6 +134,7 @@ jobs:
     name: "Pull Request Report"
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
+    needs: compilation
     steps:
       # Download Ink Proof Results
       - uses: actions/download-artifact@v2
