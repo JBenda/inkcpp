@@ -169,6 +169,7 @@ jobs:
       # Post Comment
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
+          recreate: true
           path: comment.txt
   
   pages:
