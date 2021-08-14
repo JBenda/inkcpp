@@ -199,6 +199,5 @@ jobs:
       - name: Deploy Page
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: inkproof-page
           FOLDER: www
