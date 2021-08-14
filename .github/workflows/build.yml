@@ -125,9 +125,16 @@ jobs:
         python3 proof.py --examples 'I...' inkcpp inklecate_v0.9.0 > run.out
         echo -e "| ${{ matrix.name }} | $(cat run.out) |" > ${{ matrix.artifact }}.txt
 
+    # Creates a "disabled" artifact if ink proofing is disabled
+    - name: Create Disabled InkProof Results File
+      if: ${{ !matrix.proof }}
+      shell: bash
+      run: |
+        mkdir -p proofing/ink-proof
+        echo "| ${{ matrix.name }} | DISABLED |" > proofing/ink-proof/${{ matrix.artifact }}.txt
+
     # Upload results artifact
     - name: Upload Results Artifact
-      if: ${{ matrix.proof }}
       uses: actions/upload-artifact@v2
       with:
         name: results
