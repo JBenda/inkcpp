@@ -190,7 +190,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2
-      
+
       # Download Ink Proof page for Linux
       - uses: actions/download-artifact@v2
         with:
@@ -199,8 +199,7 @@ jobs:
 
       # Deploy to Github Pages
       - name: Deploy Page
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+        uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
-          ACCESS_TOKEN: ${{ secrets.DEPLOY_KEY }}
-          BRANCH: inkproof-page
-          FOLDER: www
+          branch: inkproof-page
+          folder: www
