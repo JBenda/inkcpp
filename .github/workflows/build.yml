@@ -116,7 +116,7 @@ jobs:
     # Run it
     - name: Run Ink Proof
       shell: bash
-      working-directory: $GITHUB_WORKSPACE/proofing/ink-proof
+      working-directory: proofing/ink-proof
       run: echo -e "NAME=\"${{ matrix.name }}\"\nRESULT=\"$(python3 proof.py --examples 'I0..' inkcpp inklecate_v0.9.0 --reference-runtime inkcpp)\"" > ${{ matrix.artifact }}.sh
 
     # Upload results artifact
