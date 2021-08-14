@@ -15,20 +15,23 @@ jobs:
     strategy: 
       matrix:
         include:
-          #- os: macos-latest
-          #  artifact: macos
-          #  name: MacOSX
-          #  inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_mac.zip
-          #- os: windows-latest
-          #  artifact: win64
-          #  name: Windows x64
-          #  inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
+          - os: macos-latest
+            artifact: macos
+            name: MacOSX
+            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_mac.zip
+            proof: false
+          - os: windows-latest
+            artifact: win64
+            name: Windows x64
+            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
+            proof: false
           - os: "ubuntu-20.04"
             artifact: linux
             name: Linux x64
             inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
             inklecate_pre: "mono "
             inklecate_post: ".exe"
+            proof: true
 
     steps:
 
@@ -55,6 +58,7 @@ jobs:
 
     # Setup python
     - uses: actions/setup-python@v2
+      if: ${{ matrix.proof }}
       with:
         python-version: '3.7'
 
@@ -82,7 +86,6 @@ jobs:
 
     # Run CMake tests (unit tests, etc.)
     - name: CTests
-      if: ${{ !env.ACT }}
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: ctest . -C $BUILD_TYPE -V
@@ -95,7 +98,6 @@ jobs:
 
     # Upload bin directory as artifact
     - name: Upload Binary Artifact
-      if: ${{ !env.ACT }}
       uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.artifact }}
@@ -103,6 +105,7 @@ jobs:
 
     # Make sure Inkproof has everything it needs to run our executable
     - name: Setup Ink Proof
+      if: ${{ matrix.proof }}
       shell: bash
       working-directory: proofing/ink-proof
       run: |
@@ -115,6 +118,7 @@ jobs:
     
     # Run it
     - name: Run Ink Proof
+      if: ${{ matrix.proof }}
       shell: bash
       working-directory: proofing/ink-proof
       run: |
@@ -123,7 +127,7 @@ jobs:
 
     # Upload results artifact
     - name: Upload Results Artifact
-      if: ${{ !env.ACT }}
+      if: ${{ matrix.proof }}
       uses: actions/upload-artifact@v2
       with:
         name: results
@@ -131,7 +135,7 @@ jobs:
 
     # Upload website artifact
     - name: Upload Ink-Proof Website Artifact
-      if: ${{ !env.ACT }}
+      if: ${{ matrix.proof }}
       uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.artifact }}-www
