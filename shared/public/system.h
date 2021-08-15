@@ -118,8 +118,8 @@ namespace ink
 
 	// assert	
 #ifndef INK_ENABLE_UNREAL
-	void ink_assert(bool condition, const char* msg = nullptr);
-	[[ noreturn ]] inline void ink_assert(const char* msg = nullptr) { ink_assert(false, msg); exit(EXIT_FAILURE);}
+	void ink_assert(bool condition, const char* msg);
+	[[ noreturn ]] inline void ink_assert(const char* msg) { ink_assert(false, msg); exit(EXIT_FAILURE); }
 #else
 	[[ noreturn ]] inline void ink_fail(const char*) { check(false); throw nullptr; }
 #endif
@@ -141,7 +141,7 @@ namespace ink
 
 	namespace runtime::internal
 	{
-		constexpr unsigned abs(int i) { return i < 0 ? -i : i; }
+		constexpr unsigned abs(int i) { return static_cast<unsigned>(i < 0 ? -i : i); }
 
 		template<typename T>
 		struct always_false { static constexpr bool value = false; };
@@ -175,8 +175,8 @@ namespace ink
 	public:
 		optional() {}
 		optional(nullopt_t) {}
-		optional(T&& val) _has_value{true}, _value{std::forward(val)}{}
-		optional(const T& val) _has_value{true}, _value{val}{}
+		optional(T&& val): _has_value{true}, _value{std::forward(val)}{}
+		optional(const T& val): _has_value{true}, _value{val}{}
 
 		const T& operator*() const { return _value; }
 		T& operator*() { return _value; }
@@ -184,15 +184,15 @@ namespace ink
 		T* operator->() { return &_value; }
 
 		constexpr bool has_value() const { return _has_value; }
-		constexpr T& value() { check(); return _value; }
-		constexpr const T& value() const { check(); return _value; }
+		constexpr T& value() { check_valid(); return _value; }
+		constexpr const T& value() const { check_valid(); return _value; }
 		constexpr operator bool() const { return has_value(); }
 		template<typename U>
 		constexpr T value_or(U&& u) const {
 			return _has_value ? _value : static_cast<T>(std::forward(u));
 		}
 	private:
-		void check() const {
+		void check_valid() const {
 			if ( ! _has_value) {
 				throw ink_exception("Can't access empty optional!");
 			}

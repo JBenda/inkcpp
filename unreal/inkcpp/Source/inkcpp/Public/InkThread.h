@@ -14,7 +14,7 @@
 
 class UTagList;
 class AInkRuntime;
-class UChoice;
+class UInkChoice;
 
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FTagFunctionDelegate, FString, FirstParameter, FString, SecondParameter, FString, ThirdParameter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FTagFunctionMulticastDelegate, FString, FirstParameter, FString, SecondParameter, FString, ThirdParameter);
@@ -67,7 +67,7 @@ public:
 
 	// Called when the thread has requested a branch
 	UFUNCTION(BlueprintNativeEvent)
-	void OnChoice(const TArray<UChoice*>& choices);
+	void OnChoice(const TArray<UInkChoice*>& choices);
 
 	// Called before the thread is destroyed
 	UFUNCTION(BlueprintNativeEvent)
@@ -91,7 +91,7 @@ protected:
 	virtual void OnStartup_Implementation() { }
 	virtual void OnLineWritten_Implementation(const FString& line, UTagList* tags) { }
 	virtual void OnTag_Implementation(const FString& line) { }
-	virtual void OnChoice_Implementation(const TArray<UChoice*>& choices) { }
+	virtual void OnChoice_Implementation(const TArray<UInkChoice*>& choices) { }
 	virtual void OnShutdown_Implementation() { }
 	
 private:

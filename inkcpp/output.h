@@ -103,8 +103,8 @@ namespace ink
 				size_t find_start() const;
 				bool should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
 
-				template<typename OUT>
-				void copy_string(const char* str, size_t& dataIter, OUT& output);
+				template<typename OutputType>
+				void copy_string(const char* str, size_t& dataIter, OutputType& output);
 				
 			private:
 				char _last_char;

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Object.h"
+#include "UObject/Object.h"
 
-#include "Choice.generated.h"
+#include "InkChoice.generated.h"
 
 namespace ink::runtime { class choice; }
 
 UCLASS(BlueprintType)
-class UChoice : public UObject
+class UInkChoice : public UObject
 {
 	GENERATED_BODY()
 public:

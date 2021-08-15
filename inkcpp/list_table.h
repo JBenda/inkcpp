@@ -8,7 +8,7 @@
 #endif
 
 namespace ink::internal {
-	class header;
+	struct header;
 }
 namespace ink::runtime::internal
 {

@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "../inkcpp/collections/restorable.h"
+#include "../inkcpp/restorable.h"
 
 using ink::runtime::internal::restorable;
 

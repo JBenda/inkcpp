@@ -1,7 +1,7 @@
 #pragma once
 
 #include "value.h"
-#include "collections/restorable.h"
+#include "restorable.h"
 #include "array.h"
 
 namespace ink

@@ -23,7 +23,7 @@
 				) \
 			)); \
 		} else {\
-			inkAssert(vals[1].type()==value_type::list_flag);\
+			inkAssert(vals[1].type()==value_type::list_flag, "Value must be a list!");\
 			stack.push(value{}.set<value_type::RET1>( \
 					_list_table.FUN( \
 						vals[0].get<value_type::list_flag>(), \
@@ -32,7 +32,7 @@
 			)); \
 		} \
 	} else { \
-		inkAssert(vals[0].type() == value_type::list); \
+		inkAssert(vals[0].type() == value_type::list, "Value must be a list!"); \
 		if(vals[1].type() == value_type::list) { \
 			stack.push(value{}.set<value_type::RET2>( \
 				_list_table.FUN( \
@@ -41,7 +41,7 @@
 				) \
 			)); \
 		} else {\
-			inkAssert(vals[1].type()==value_type::list_flag);\
+			inkAssert(vals[1].type()==value_type::list_flag, "Value must be a list!");\
 			stack.push(value{}.set<value_type::RET3>( \
 					_list_table.FUN( \
 						vals[0].get<value_type::list>(), \
@@ -77,7 +77,7 @@ namespace ink::runtime::internal {
 			int i = vals[1].type() == value_type::int32
 				? vals[1].get<value_type::int32>()
 				: vals[1].get<value_type::uint32>();
-			inkAssert(vals[0].type() == value_type::list);
+			inkAssert(vals[0].type() == value_type::list, "Value must be a list!");
 			stack.push(value{}.set<value_type::list>(
 				_list_table.add(vals[0].get<value_type::list>(), i)
 			));
@@ -88,9 +88,9 @@ namespace ink::runtime::internal {
 	void operation<Command::ADD, value_type::list_flag, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::list_flag);
+		inkAssert(vals[0].type() == value_type::list_flag, "Value must be a list!");
 		inkAssert(vals[1].type() == value_type::int32
-				|| vals[1].type() == value_type::uint32);
+				|| vals[1].type() == value_type::uint32, "Second value must be a number!");
 		int i = vals[1].type() == value_type::int32
 			? vals[1].get<value_type::int32>()
 			: vals[1].get<value_type::uint32>();
@@ -108,7 +108,7 @@ namespace ink::runtime::internal {
 			int i = vals[1].type() == value_type::int32
 				? vals[1].get<value_type::int32>()
 				: vals[1].get<value_type::uint32>();
-			inkAssert(vals[0].type() == value_type::list);
+			inkAssert(vals[0].type() == value_type::list, "Value must be a list!");
 			stack.push(value{}.set<value_type::list>(
 				_list_table.sub(vals[0].get<value_type::list>(), i)
 			));
@@ -119,9 +119,9 @@ namespace ink::runtime::internal {
 	void operation<Command::SUBTRACT, value_type::list_flag, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::list_flag);
+		inkAssert(vals[0].type() == value_type::list_flag, "Value must be a list!");
 		inkAssert(vals[1].type() == value_type::int32
-				|| vals[1].type() == value_type::uint32);
+				|| vals[1].type() == value_type::uint32, "Second value must be a number!");
 		int i = vals[1].type() == value_type::int32
 			? vals[1].get<value_type::int32>()
 			: vals[1].get<value_type::uint32>();
@@ -170,8 +170,8 @@ namespace ink::runtime::internal {
 	void operation<Command::LIST_INT, value_type::string, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::string);
-		inkAssert(vals[1].type() == value_type::int32);
+		inkAssert(vals[0].type() == value_type::string, "Value must be a string!");
+		inkAssert(vals[1].type() == value_type::int32, "Second value must be a number!");
 		list_flag entry = _list_table.get_list_id(vals[0].get<value_type::string>());
 		entry.flag = vals[1].get<value_type::int32>() - 1;
 		stack.push(value{}.set<value_type::list_flag>(entry));
@@ -181,14 +181,14 @@ namespace ink::runtime::internal {
 		if(val.type() == value_type::int32) {
 			return val.get<value_type::int32>() - 1;
 		} else {
-			inkAssert(val.type() == value_type::list_flag);
+			inkAssert(val.type() == value_type::list_flag, "Value must be a list!");
 			return val.get<value_type::list_flag>().flag;
 		}
 	}
 	void operation<Command::LIST_RANGE, value_type::list, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::list);
+		inkAssert(vals[0].type() == value_type::list, "Value must be a list!");
 		stack.push(value{}.set<value_type::list>(_list_table.range(
 						vals[0].get<value_type::list>(),
 						get_limit(vals[1]),

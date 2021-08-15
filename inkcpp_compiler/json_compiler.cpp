@@ -90,14 +90,14 @@ namespace ink::compiler::internal
 						container_t myIndex = _next_container_index++;
 
 						// Make appropriate flags
-						CommandFlag flags = CommandFlag::NO_FLAGS;
+						CommandFlag command_flags = CommandFlag::NO_FLAGS;
 						if (visits)
-							flags |= CommandFlag::CONTAINER_MARKER_TRACK_VISITS;
+							command_flags |= CommandFlag::CONTAINER_MARKER_TRACK_VISITS;
 						if (turns)
-							flags |= CommandFlag::CONTAINER_MARKER_TRACK_TURNS;
+							command_flags |= CommandFlag::CONTAINER_MARKER_TRACK_TURNS;
 
 						// Write command out at this position
-						_emitter->write(Command::START_CONTAINER_MARKER, myIndex, flags);
+						_emitter->write(Command::START_CONTAINER_MARKER, myIndex, command_flags);
 
 						data.indexToReturn = myIndex;
 
@@ -196,8 +196,8 @@ namespace ink::compiler::internal
 			std::vector<size_t> divert_positions;
 
 			// Write empty divert to be patched later
-			uint32_t position = _emitter->fallthrough_divert();
-			divert_positions.push_back(position);
+			uint32_t div_pos = _emitter->fallthrough_divert();
+			divert_positions.push_back(div_pos);
 
 			// (2) Write deffered containers
 			for (auto& t : meta.deferred)

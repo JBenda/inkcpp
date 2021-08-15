@@ -9,7 +9,7 @@
 #include "../inkcpp/random.h"
 #include "../inkcpp/output.h"
 #include "../inkcpp/executioner.h"
-#include "../shared/private/command.h"
+#include "command.h"
 
 #include "../inkcpp/story_impl.h"
 #include "../inkcpp/runner_impl.h"

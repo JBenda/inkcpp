@@ -832,7 +832,7 @@ namespace ink::runtime::internal
 				if(flag & CommandFlag::TUNNEL_TO_VARIABLE) {
 					hash_t var_name = read<hash_t>();
 					const value* val = get_var(var_name);
-					inkAssert(val != nullptr);
+					inkAssert(val != nullptr, "Tunnel variable undefined");
 					target = val->get<value_type::divert>();
 				} else {
 					target = read<uint32_t>();
@@ -847,7 +847,7 @@ namespace ink::runtime::internal
 				if(flag & CommandFlag::FUNCTION_TO_VARIABLE) {
 					hash_t var_name = read<hash_t>();
 					const value* val = get_var(var_name);
-					inkAssert(val != nullptr);
+					inkAssert(val != nullptr, "Function variable undefined");
 					target  = val->get<value_type::divert>();
 				} else {
 					target = read<uint32_t>();

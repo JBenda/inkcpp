@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../shared/public/system.h"
+#include "system.h"
 
 namespace ink::runtime::internal {
 	/**

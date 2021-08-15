@@ -6,7 +6,7 @@
 /// define different value_types, and the mapping between type and data.
 
 #include "system.h"
-#include "../shared/private/command.h"
+#include "command.h"
 #include "list_table.h"
 #include "tuple.hpp"
 
@@ -122,7 +122,7 @@ namespace ink::runtime::internal {
 		/// this new type
 		template<typename ... T>
 		value redefine(const value& oth, T& ... env) const {
-			inkAssert(type() == oth.type());
+			inkAssert(type() == oth.type(), "Types must match!");
 			return redefine<value_type::OP_BEGIN, T...>(oth, {&env...});
 		}
 

@@ -482,9 +482,9 @@ public:
 
   /**
    * Integrity (self) check
-   * \return True if the tree intergity is correct, false if error (should not happen normally)
+   * \return True if the tree integrity is correct, false if error (should not happen normally)
    */   
-  bool check() const
+  bool check_integrity() const
   {
     // check root
     if (empty() && (root_ != INVALID_IDX)) {

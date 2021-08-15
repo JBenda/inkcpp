@@ -108,11 +108,11 @@ namespace ink
 				return false;
 			}
 
-			template<typename OUT>
-			void basic_stream::copy_string(const char* str, size_t& dataIter, OUT& output)
+			template<typename OutputType>
+			void basic_stream::copy_string(const char* str, size_t& dataIter, OutputType& output)
 			{
 				while(*str != 0) {
-				write_char(output, *str++);
+					write_char(output, *str++);
 				}
 			}
 

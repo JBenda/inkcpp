@@ -155,10 +155,10 @@ bool UInkThread::ExecuteInternal()
 			// TODO: Record choices somewhere?
 
 			// Forward to handler
-			TArray<UChoice*> choices;
+			TArray<UInkChoice*> choices;
 			for (ink::size_t i = 0; i < mpRunner->num_choices(); i++)
 			{
-				UChoice* choice = NewObject<UChoice>(this);
+				UInkChoice* choice = NewObject<UInkChoice>(this);
 				choice->Initialize(mpRunner->get_choice(i));
 				choices.Add(choice);
 			}

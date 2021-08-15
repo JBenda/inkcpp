@@ -1,8 +1,7 @@
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 list(APPEND SOURCES 
-    collections/restorable.h 
-    collections/restorable.cpp
+    restorable.h
     array.h
     choice.cpp
     functional.cpp
@@ -18,11 +17,16 @@ list(APPEND SOURCES
     value.h value.cpp
     string_table.h string_table.cpp avl_array.h
 	list_table.h list_table.cpp
+    casting.h
+    operations.h operation_bases.h
+    numeric_operations.h string_operations.h
 	list_operations.h list_operations.cpp
 	container_operations.h container_operations.cpp
 	string_operations.cpp
 	numeric_operations.cpp
-	header.cpp
+	header.cpp tuple.hpp
+    string_utils.h random.h
+    executioner.h
 )
 source_group(Collections REGULAR_EXPRESSION collections/.*)
 add_library(inkcpp ${SOURCES})
