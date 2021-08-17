@@ -87,7 +87,7 @@ namespace ink::runtime::internal {
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };
 
-		constexpr value() : _type{value_type::none}, uint32_value{0}{}
+		constexpr value() : uint32_value{0}, _type{value_type::none} { }
 
 		/// get value of the type (if possible)
 		template<value_type ty>

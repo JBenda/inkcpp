@@ -43,7 +43,10 @@ namespace ink::runtime::internal
 	}
 #endif
 #ifdef INK_ENABLE_UNREAL
-	SUPPORT_TYPE_PARAMETER_ONLY(FString);
+	template<>
+	FString function_base::pop<FString>(basic_eval_stack* stack) {
+		return FString(pop<const char*>(stack));
+	}
 
 	template<>
 	FInkVar function_base::pop<FInkVar>(basic_eval_stack* stack)
@@ -51,42 +54,40 @@ namespace ink::runtime::internal
 		value v = stack->pop();
 		switch (v.type())
 		{
-		case value_type::null:
-		case value_type::divert:
-			inkFail("Trying to pass null or divert as ink parameter to external function");
-			break;
-		case value_type::integer:
-			return FInkVar(v.get<int>());
-		case value_type::decimal:
-			return FInkVar(v.get<float>());
+		case value_type::int32:
+			return FInkVar(v.get<value_type::int32>());
+		case value_type::float32:
+			return FInkVar(v.get<value_type::float32>());
 		case value_type::string:
-			return FInkVar(v.get<FString>());
+			return FInkVar(FString(v.get<value_type::string>().str));
 		}
 
+		inkFail("You can only pass integers, floats, or strings into ink functions.");
 		return FInkVar();
 	}
 
 	template<>
 	void function_base::push<FInkVar>(basic_eval_stack* stack, const FInkVar& value)
 	{
+		internal::value v;
+
 		switch (value.type)
 		{
 		case EInkVarType::None:
-			{
-				internal::value v;
-				stack->push(v);
-			}
+			// Set to none
 			break;
 		case EInkVarType::Int:
-			stack->push(value.intVar);
+			v.set<value_type::int32>(value.intVar);
 			break;
 		case EInkVarType::Float:
-			stack->push(value.floatVar);
+			v.set<value_type::float32>(value.floatVar);
 			break;
 		case EInkVarType::String:
 			inkFail("NOT IMPLEMENTED"); // TODO: String support
 			return;
 		}
+
+		stack->push(v);
 	}
 #endif
 }

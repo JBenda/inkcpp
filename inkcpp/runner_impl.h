@@ -191,6 +191,8 @@ namespace ink::runtime::internal
 					_threadDone.clear(nullptr);
 				}
 
+			virtual ~threads() { }
+
 			void clear() {
 				base::clear();
 				_threadDone.clear(nullptr);

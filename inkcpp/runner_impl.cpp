@@ -531,8 +531,8 @@ namespace ink::runtime::internal
 		// TODO
 		return nullptr;
 
-#endif
 	}
+#endif
 
 	bool runner_impl::move_to(hash_t path)
 	{

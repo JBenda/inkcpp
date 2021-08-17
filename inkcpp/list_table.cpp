@@ -52,7 +52,7 @@ namespace ink::runtime::internal
 
 	list_table::list list_table::create()
 	{
-		for(int i = 0; i < _entry_state.size(); ++i) {
+		for(int i = 0; i < (int)_entry_state.size(); ++i) {
 			if (_entry_state[i] == state::empty) {
 				_entry_state[i] = state::used;
 				return list(i);
@@ -82,7 +82,7 @@ namespace ink::runtime::internal
 	}
 
 	void list_table::gc() {
-		for(int i = 0; i < _entry_state.size(); ++i) {
+		for(int i = 0; i < (int)_entry_state.size(); ++i) {
 			if (_entry_state[i] == state::unused) {
 				_entry_state[i] = state::empty;
 				data_t* entry = getPtr(i);
@@ -308,19 +308,19 @@ namespace ink::runtime::internal
 		data_t* l = getPtr(arg.lid);
 		data_t* o = getPtr(res.lid);
 		bool active_flag = false;;
-		for(int i = 0; i < numLists(); ++i) {
-			if(hasList(l, i)) {
+		for(int m = 0; m < numLists(); ++m) {
+			if(hasList(l, m)) {
 				bool has_flag = false;
-				for(int j = listBegin(i); j < _list_end[i] - i;++j)
+				for(int j = listBegin(m); j < _list_end[m] - m;++j)
 				{
 					if(hasFlag(l, j)) {
-						setFlag(o,j+i);
+						setFlag(o,j+m);
 						has_flag = true;
 					}
 				}
 				if(has_flag) {
 					active_flag = true;
-					setList(o,i);
+					setList(o,m);
 				}
 			}
 		}
@@ -348,19 +348,19 @@ namespace ink::runtime::internal
 		data_t* l = getPtr(arg.lid);
 		data_t* o = getPtr(res.lid);
 		bool active_flag = false;
-		for(int i = 0; i < numLists(); ++i) {
-			if(hasList(l, i)) {
+		for(int m = 0; m < numLists(); ++m) {
+			if(hasList(l, m)) {
 				bool has_flag = false;
-				for(int j = listBegin(i) + i; j < _list_end[i]; ++j)
+				for(int j = listBegin(m) + m; j < _list_end[m]; ++j)
 				{
 					if(hasFlag(l,j)) {
-						setFlag(o,j-i);
+						setFlag(o,j-m);
 						has_flag = true;
 					}
 				}
 				if(has_flag) {
 					active_flag = true;
-					setList(o, i);
+					setList(o, m);
 				}
 			}
 		}
@@ -554,8 +554,8 @@ namespace ink::runtime::internal
 
 	list_flag list_table::lrnd(list lh, prng& rng) const {
 		const data_t* l = getPtr(lh.lid);
-		int i = count(lh);
-		rng.rand(i);		
+		int c = count(lh);
+		rng.rand(c);
 		int count = 0;
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(l, i)) {

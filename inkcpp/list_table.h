@@ -215,7 +215,7 @@ namespace ink::runtime::internal
 					abs(config::maxListTypes)
 					+ abs(config::maxFlags),
 					sizeof(data_t)
-			) * abs(config::maxLists);
+			) * (int)abs(config::maxLists);
 
 		int _entrySize; ///< entry size in data_t 
 		// entries (created lists)
