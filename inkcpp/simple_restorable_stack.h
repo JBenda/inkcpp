@@ -27,8 +27,16 @@ namespace ink::runtime::internal
 		void restore();
 		void forget();
 
+	protected:
 		virtual void overflow(T*& buffer, size_t& size) {
 			throw ink_exception("Stack overflow!");
+		}
+
+		void initialize_data(T* buffer, size_t size) {
+			inkAssert(_buffer == nullptr && _size == 0, "Try to double initialize a restorable stack."
+					"To extend the size use overflow()");
+			_buffer = buffer;
+			_size = size;
 		}
 	private:
 		T* _buffer;
@@ -50,7 +58,8 @@ namespace ink::runtime::internal
 		managed_restorable_stack(const T& null) : simple_restorable_stack<T>(nullptr, 0, null) { }
 		template<bool ... D, bool con = dynamic, enable_if_t<!con, bool> = true>
 		managed_restorable_stack(const T& null) :
-			_stack{}, simple_restorable_stack<T>(_stack.data(), N, null) {}
+			simple_restorable_stack<T>(nullptr, 0, null), _stack{}
+		{ base::initialize_data(_stack.data(), N); }
 		virtual void overflow(T*& buffer, size_t& size) override final {
 			if constexpr (dynamic) {
 				if (buffer) {
