@@ -34,7 +34,7 @@ namespace ink::runtime::internal
 		ifstream ifs(filename, ios::binary | ios::ate);
 
 		if (!ifs.is_open()) {
-			throw ink_exception("Failed to open file!");
+			throw ink_exception("Failed to open file: " + std::string(filename));
 		}
 
 		ifstream::pos_type pos = ifs.tellg();
