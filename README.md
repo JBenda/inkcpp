@@ -15,31 +15,35 @@ Ink Proofing Test Results: https://brwarner.github.io/inkcpp
 ## Example
 
 ```cpp
+#include <ink/story.h>
+#include <ink/runner.h>
+#include <ink/choice.h>
+
 using namespace ink::runtime;
 
 int MyInkFunction(int a, int b) { return a + b; }
 
 ...
 
-// Load ink binary story
+// Load ink binary story, generated from the inkCPP compiler
 story* myInk = story::from_file("test.bin");
 
 // Create a new thread
-runner thread = myInk->create_runner();
+runner thread = myInk->new_runner();
 
 // Register external functions (glue automatically generated via templates)
 thread->bind("my_ink_function", &MyInkFunction);
 
 // Write to cout
-while(*thread)
-	std::cout << *thread;
+while(thread->can_continue())
+	std::cout << thread->getline();
 
 // Iterate choices
-for(choice& c : *thread) {
-	std::cout << "* " << c << std::endl;
+for(const choice& c : *thread) {
+	std::cout << "* " << c.text() << std::endl;
 }
 
-// Pick a choice
+// Pick the first choice
 thread->choose(0);
 
 ```
@@ -75,7 +79,39 @@ To configure the project...
 
 CMake will then generate the necessary build files for your environment. By default, it generates Visual Studio projects and solutions on Windows and Makefiles on Mac and Linux. You can change this using CMake's command line options (see `cmake --help`). It supports pretty much anything.
 
-To build, either run the generated buildfiles OR you can use `cmake --build` from the build folder to automatically execute the relevant toolchain.
+To build, either run the generated buildfiles OR you can use `cmake --build . --config <Release|Debug>` from the build folder to automatically execute the relevant toolchain.
+
+## Including in C++ Code
+
+Required software: (CMake)[https://cmake.org/]
+
+Instructions:
+
+1. Clone the repository
+2. Configure and build the project with CMake, as described above
+3. From your newly-created `build` directory, run `cmake --install . --prefix Path/To/Desired/Library/Directory`. Note that this will currently fail if the project was built for Debug instead of Release.
+4. Generated in your chosen directory, you will find a collection of folders. The following must be linked into your build solution for your C++ to compile correctly:
+	- `include/public`: contains important shared headers.
+		+ For a Visual Studio project, link this directory as an Include Directory in VC++ Directories.
+	- `inkcpp/Source/inkcpp/Public`: contains the primary headers for using InkCPP in your code.
+		+ For a Visual Studio project, link this directory as an Include Directory in VC++ Directories.
+	- `lib/inkcpp.lib` and `lib/inkcpp_compiler.lib`: contains the library code for the InkCPP runner and compiler, respectively.
+		+ For a Visual Studio project, link these files as Additional Dependencies in Linker->Input.
+		+ You don't need to link the compiler if you're not using it within your program.
+5. Reference the headers in your code like so:
+
+```cpp
+
+#include <ink/story.h>
+#include <ink/runner.h>
+#include <ink/choice.h>
+```
+
+
+### Troubleshooting
+
+If you recieve an error like "Mismatch Detected for Runtime Library," it means you are probably using the Release version of the `.lib` files, but are running under a Debug configuration. To fix this, you can manually copy the `.lib` and `.pdb` files from `build/inkcpp/Debug` and/or `build/inkcpp_compiler/Debug` after running the build process again with `--config Debug` (see above). Then, you can add separate Debug and Release directories in the installed package folder, and change the paths based on your selected configuration in Visual Studio or otherwise, so that it links the Debug `.lib` for the Debug build, and the Release `.lib` for the Release build.
+
 
 ### Running Tests
 
