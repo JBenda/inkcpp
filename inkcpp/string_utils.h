@@ -130,10 +130,8 @@ namespace ink::runtime::internal {
 				if (LEADING_SPACES && (src[0] == ' ' || src[0] == '\n')) { continue; }
 			}
 			else if(src[-1] == '\n' && (src[0] == ' ' || src[0] == '\n')) { continue;}
-			else if(src[0] == ' ' &&
-					( (src+1 == end && TAILING_SPACES)
-					 || src[1] == ' '
-					 || src[1] == '\n')) {
+			else if ( src[0] == ' ' && ( ( src + 1 == end && TAILING_SPACES ) || (( src + 1 != end ) && ( src[1] == ' ' || src[1] == '\n' ) ) ) )
+			{
 				continue;
 			}
 			else if(src[0] == '\n' && dst != begin && dst[-1] == '\n') { continue; }
