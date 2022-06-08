@@ -16,4 +16,4 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # Install
-install(TARGETS inkcpp_cl DESTINATION bin)
+install(TARGETS inkcpp_cl DESTINATION . COMPONENT cl EXCLUDE_FROM_ALL)
