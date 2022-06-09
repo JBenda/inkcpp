@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.23.2)
-
 list(APPEND SOURCES
     compiler.cpp binary_stream.h binary_stream.cpp json.hpp
     json_compiler.h json_compiler.cpp 
