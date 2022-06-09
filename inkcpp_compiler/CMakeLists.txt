@@ -26,5 +26,5 @@ target_link_libraries(inkcpp_compiler PRIVATE inkcpp_shared)
 target_compile_features(inkcpp_compiler PUBLIC cxx_std_17)
 
 # Unreal installation
-install(DIRECTORY "include/" DESTINATION "inkcpp/Source/inkcpp_editor/Private/ink/" COMPONENT unreal)
-install(FILES ${SOURCES} DESTINATION "inkcpp/Source/inkcpp_editor/Private/ink/" COMPONENT unreal)
+install(DIRECTORY "include/" DESTINATION "inkcpp/Source/inkcpp_editor/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
+install(FILES ${SOURCES} DESTINATION "inkcpp/Source/inkcpp_editor/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
