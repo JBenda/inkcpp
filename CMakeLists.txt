@@ -17,14 +17,6 @@ add_subdirectory(inkcpp_cl)
 add_subdirectory(inkcpp_test)
 add_subdirectory(unreal)
 
-# include(InstallRequiredSystemLibraries)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
-set(CPACK_PACKAGE_VERSION_MAJOR "${inkcpp_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${inkcpp_VERSION_MINOR}")
-set(CPACK_SOURCE_GENERATOR "ZIP")
-set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-set(CPACK_COMPONENTS_GROUPING IGNORE)
-include(CPack)
 
 get_target_property(TEE inkcpp PUBLIC_HEADER)
 install(TARGETS inkcpp inkcpp_compiler inkcpp_shared
@@ -55,3 +47,12 @@ install(FILES
 	DESTINATION lib/cmake/inkcpp COMPONENT lib EXCLUDE_FROM_ALL)
 export(EXPORT inkcppTarget
 	FILE "${CMAKE_CURRENT_BINARY_DIR}/inkcppTargets.cmake")
+
+# include(InstallRequiredSystemLibraries)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
+set(CPACK_PACKAGE_VERSION_MAJOR "${inkcpp_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${inkcpp_VERSION_MINOR}")
+set(CPACK_SOURCE_GENERATOR "ZIP")
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENTS_GROUPING IGNORE)
+include(CPack)
