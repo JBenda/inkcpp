@@ -19,6 +19,14 @@ namespace ink::runtime::internal
 	}
 
 	template<>
+	const char* function_base::pop<const char*>(basic_eval_stack* stack)
+	{
+		value val = stack->pop();
+		inkAssert(val.type() == value_type::string, "Type missmatch!");
+		return val.get<value_type::string>().str;
+	}
+
+	template<>
 	void function_base::push<int32_t>(basic_eval_stack* stack, const int32_t& v)
 	{
 		stack->push(value{}.set<value_type::int32>(v));

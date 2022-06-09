@@ -1,9 +1,13 @@
 add_library(inkcpp_shared INTERFACE)
-target_include_directories(inkcpp_shared INTERFACE public private)
+
+target_include_directories(inkcpp_shared
+	INTERFACE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/public>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/private>
+	$<INSTALL_INTERFACE:inkcpp>
+)
 FILE(GLOB PUBLIC_HEADERS "public/*")
-# Install public files into the include directory
-install(FILES ${PUBLIC_HEADERS}
-	DESTINATION "include/inkcpp" COMPONENT lib EXCLUDE_FROM_ALL)
+set_target_properties(inkcpp_shared PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 # Unreal installation
 install(DIRECTORY "public/" DESTINATION "inkcpp/Source/shared/Public/" COMPONENT unreal EXCLUDE_FROM_ALL)
