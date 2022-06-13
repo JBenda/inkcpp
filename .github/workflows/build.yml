@@ -23,14 +23,12 @@ jobs:
           - os: windows-latest
             artifact: win64
             name: Windows x64
-            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.0.0/inklecate_windows.zip
             proof: false
           - os: "ubuntu-20.04"
             artifact: linux
             name: Linux x64
-            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_windows_and_linux.zip
-            inklecate_pre: "mono "
-            inklecate_post: ".exe"
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.0.0/inklecate_linux.zip
             proof: true
 
     steps:
@@ -94,7 +92,7 @@ jobs:
     - name: Install
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: cmake --install . --config $BUILD_TYPE --prefix bin
+      run: cmake --install . --config $BUILD_TYPE --prefix bin --component cl
 
     # Upload bin directory as artifact
     - name: Upload Binary Artifact
@@ -113,7 +111,7 @@ jobs:
         cp ../inkcpp_runtime_driver drivers/
         chmod +x drivers/inkcpp_runtime_driver
         mkdir deps/inkcpp
-        cp ../../build/bin/bin/* deps/inkcpp/
+        cp ../../build/bin/* deps/inkcpp/
         chmod +x deps/inkcpp/inkcpp_cl
     
     # Run it
