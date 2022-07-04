@@ -607,7 +607,7 @@ namespace ink::runtime::internal
 					break;
 				case change_type::no_change:
 					forget();
-					return false;
+					break;
 				}
 			}
 
