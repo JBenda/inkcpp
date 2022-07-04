@@ -21,9 +21,9 @@ add_subdirectory(unreal)
 get_target_property(TEE inkcpp PUBLIC_HEADER)
 install(TARGETS inkcpp inkcpp_compiler inkcpp_shared
 	EXPORT inkcppTarget
-	ARCHIVE DESTINATION "lib/inkcpp"
+	ARCHIVE DESTINATION "lib/ink"
 	COMPONENT lib EXCLUDE_FROM_ALL
-	PUBLIC_HEADER DESTINATION "include/inkcpp"
+	PUBLIC_HEADER DESTINATION "include/ink"
 	COMPONENT lib EXCLUDE_FROM_ALL
 )
 
