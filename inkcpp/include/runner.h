@@ -3,6 +3,7 @@
 #include "config.h"
 #include "system.h"
 #include "functional.h"
+#include "types.h"
 
 #ifdef INK_ENABLE_UNREAL
 #include "Containers/UnrealString.h"
@@ -64,6 +65,12 @@ namespace ink::runtime
 		 * @return allocated c-style string with the output of a single line of execution
 		*/
 		virtual char* getline_alloc() = 0;
+
+		/**
+		 * @brief creates a snapshot containing the runner, globals and all other runners connected to the globals.
+		 * @sa story::new_runner_from_snapshot, story::new_globals_from_snapshot
+		 */
+		virtual snapshot* create_snapshot() const = 0;
 
 #ifdef INK_ENABLE_STL
 		/**

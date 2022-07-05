@@ -177,6 +177,8 @@ int main(int argc, const char** argv)
 			break;
 		}
 
+		delete myInk;
+
 		return 0;
 	}
 	catch (const std::exception& e)

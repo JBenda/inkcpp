@@ -236,6 +236,8 @@ namespace ink::runtime::internal
 			_list_meta = nullptr;
 			_lists = nullptr;
 		}
+		inkAssert(_header.endien == header::endian_types::same,
+				"different endien support not yet implemented");
 
 
 
