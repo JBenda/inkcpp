@@ -1,17 +1,21 @@
 #include "globals_impl.h"
 #include "story_impl.h"
 #include "runner_impl.h"
+#include "snapshot_impl.h"
+
+#include <cstring>
 
 namespace ink::runtime::internal
 {
 	globals_impl::globals_impl(const story_impl* story)
 		: _num_containers(story->num_containers())
-		, _visit_counts(_num_containers)
+		, _visit_counts()
 		, _owner(story)
 		, _runners_start(nullptr)
 		, _lists(story->list_meta(), story->get_header())
 		, _globals_initialized(false)
 	{
+		_visit_counts.resize(_num_containers);
 		if (_lists) {
 			// initelize static lists
 			const list_flag* flags = story->lists();
@@ -215,5 +219,21 @@ namespace ink::runtime::internal
 	void globals_impl::forget()
 	{
 		_variables.forget();
+	}
+
+	snapshot* globals_impl::create_snapshot() const
+	{
+		return new snapshot_impl(*this);
+	}
+
+	size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr;
+		inkAssert(_num_containers == _visit_counts.size(), "Should be equal!");
+		inkAssert(_globals_initialized, "Only support snapshot of globals with runner! or you don't need a snapshot for this state");
+		ptr += _visit_counts.snap( data ? ptr : nullptr, snapper );
+		ptr += _strings.snap( data ? ptr : nullptr, snapper );
+		ptr += _lists.snap( data ? ptr : nullptr, snapper );
+		return ptr - data;
 	}
 }

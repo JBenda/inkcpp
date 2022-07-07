@@ -5,6 +5,7 @@
 #include "globals_impl.h"
 #include "header.h"
 #include "string_utils.h"
+#include "snapshot_impl.h"
 
 namespace ink::runtime
 {
@@ -269,10 +270,10 @@ namespace ink::runtime::internal
 		// Push next address onto the callstack
 		{
 		size_t address = _ptr - _story->instructions();
-			_stack.push_frame<type>(address, bEvaluationMode);
-			_ref_stack.push_frame<type>(address, bEvaluationMode);
+			_stack.push_frame<type>(address, _evaluation_mode);
+			_ref_stack.push_frame<type>(address, _evaluation_mode);
 		}
-		bEvaluationMode = false; // unset eval mode when enter function or tunnel
+		_evaluation_mode = false; // unset eval mode when enter function or tunnel
 
 		// Do the jump
 		inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
@@ -284,12 +285,12 @@ namespace ink::runtime::internal
 		// Pop the callstack
 		_ref_stack.fetch_values(_stack);
 		frame_type type;
-		offset_t offset = _stack.pop_frame(&type,bEvaluationMode);
+		offset_t offset = _stack.pop_frame(&type,_evaluation_mode);
 		_ref_stack.push_values(_stack);
 		{ 	frame_type t; bool eval;
 			// TODO: write all refs to new frame 
 			offset_t o = _ref_stack.pop_frame(&t, eval);
-			inkAssert(o == offset && t == type && eval == bEvaluationMode,
+			inkAssert(o == offset && t == type && eval == _evaluation_mode,
 					"_ref_stack and _stack should be in frame sync!");
 		}
 
@@ -327,7 +328,7 @@ namespace ink::runtime::internal
 		_backup(nullptr), _done(nullptr), _choices()
 	{
 		_ptr = _story->instructions();
-		bEvaluationMode = false;
+		_evaluation_mode = false;
 
 		// register with globals
 		_globals->add_runner(this);
@@ -525,6 +526,34 @@ namespace ink::runtime::internal
 		return _tags[index];
 	}
 
+	snapshot* runner_impl::create_snapshot() const
+	{
+		return _globals->create_snapshot();
+	}
+
+	size_t runner_impl::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		ptr = snap_write(ptr, _ptr, data);
+		ptr = snap_write(ptr, _backup, data);
+		ptr = snap_write(ptr, _done, data);
+		ptr = snap_write(ptr, _rng.get_state(), data);
+		ptr = snap_write(ptr, _evaluation_mode, data);
+		ptr = snap_write(ptr, _saved_evaluation_mode, data);
+		ptr = snap_write(ptr, _eval, data);
+		ptr = snap_write(ptr, _saved, data);
+		ptr = snap_write(ptr, _is_falling, data);
+		ptr += _output.snap(data ? ptr : nullptr, snapper);
+		// _output
+		// _stack
+		// _ref_stack
+		// _threads
+		// _tags
+		// _choices
+		// _container
+		return ptr - data;
+	}
+
 #ifdef INK_ENABLE_CSTD
 	char* runner_impl::getline_alloc()
 	{
@@ -665,7 +694,7 @@ namespace ink::runtime::internal
 			case Command::STR:
 			{
 				const char* str = read<const char*>();
-				if (bEvaluationMode)
+				if (_evaluation_mode)
 					_eval.push(value{}.set<value_type::string>(str));
 				else
 					_output << value{}.set<value_type::string>(str);
@@ -674,7 +703,7 @@ namespace ink::runtime::internal
 			case Command::INT:
 			{
 				int val = read<int>();
-				if (bEvaluationMode)
+				if (_evaluation_mode)
 					_eval.push(value{}.set<value_type::int32>(val));
 				// TEST-CASE B006 don't print integers
 			}
@@ -682,7 +711,7 @@ namespace ink::runtime::internal
 			case Command::BOOL:
 			{
 				bool val = read<int>() ? true : false;
-				if(bEvaluationMode)
+				if(_evaluation_mode)
 					_eval.push(value{}.set<value_type::boolean>(val));
 				else
 					_output << value{}.set<value_type::boolean>(val);
@@ -691,14 +720,14 @@ namespace ink::runtime::internal
 			case Command::FLOAT:
 			{
 				float val = read<float>();
-				if (bEvaluationMode)
+				if (_evaluation_mode)
 					_eval.push(value{}.set<value_type::float32>(val));
 				// TEST-CASE B006 don't print floats
 			} break;
 			case Command::VALUE_POINTER:
 			{
 				hash_t val = read<hash_t>();
-				if(bEvaluationMode) {
+				if(_evaluation_mode) {
 					_eval.push(value{}.set<value_type::value_pointer>(val, static_cast<char>(flag) - 1));
 				} else {
 					throw ink_exception("never conciderd what should happend here! (value pointer print)");
@@ -708,7 +737,7 @@ namespace ink::runtime::internal
 			case Command::LIST:
 			{
 				list_table::list list(read<int>());
-				if(bEvaluationMode)
+				if(_evaluation_mode)
 					_eval.push(value{}.set<value_type::list>(list));
 				else {
 					char* str = _globals->strings().create(_globals->lists().stringLen(
@@ -720,7 +749,7 @@ namespace ink::runtime::internal
 			break;
 			case Command::DIVERT_VAL:
 			{
-				inkAssert(bEvaluationMode, "Can not push divert value into the output stream!");
+				inkAssert(_evaluation_mode, "Can not push divert value into the output stream!");
 
 				// Push the divert target onto the stack
 				uint32_t target = read<uint32_t>();
@@ -729,7 +758,7 @@ namespace ink::runtime::internal
 			break;
 			case Command::NEWLINE:
 			{
-				if (bEvaluationMode)
+				if (_evaluation_mode)
 					_eval.push(values::newline);
 				else
 					_output << values::newline;
@@ -737,7 +766,7 @@ namespace ink::runtime::internal
 			break;
 			case Command::GLUE:
 			{
-				if (bEvaluationMode)
+				if (_evaluation_mode)
 					_eval.push(values::glue);
 				else
 					_output << values::glue;
@@ -745,7 +774,7 @@ namespace ink::runtime::internal
 			break;
 			case Command::VOID:
 			{
-				if (bEvaluationMode)
+				if (_evaluation_mode)
 					_eval.push(values::null); // TODO: void type?
 			}
 			break;
@@ -865,8 +894,8 @@ namespace ink::runtime::internal
 				// Push a thread frame so we can return easily
 				// TODO We push ahead of a single divert. Is that correct in all cases....?????
 				auto returnTo = _ptr + CommandSize<uint32_t>;
-				_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), bEvaluationMode);
-				_ref_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), bEvaluationMode);
+				_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), _evaluation_mode);
+				_ref_stack.push_frame<frame_type::thread>(returnTo - _story->instructions(), _evaluation_mode);
 
 				// Fork a new thread on the callstack
 				thread_t thread = _stack.fork_thread();
@@ -939,10 +968,10 @@ namespace ink::runtime::internal
 
 			// == Evaluation stack
 			case Command::START_EVAL:
-				bEvaluationMode = true;
+				_evaluation_mode = true;
 				break;
 			case Command::END_EVAL:
-				bEvaluationMode = false;
+				_evaluation_mode = false;
 
 				// Assert stack is empty? Is that necessary?
 				break;
@@ -970,15 +999,15 @@ namespace ink::runtime::internal
 			}
 			case Command::START_STR:
 			{
-				inkAssert(bEvaluationMode, "Can not enter string mode while not in evaluation mode!");
-				bEvaluationMode = false;
+				inkAssert(_evaluation_mode, "Can not enter string mode while not in evaluation mode!");
+				_evaluation_mode = false;
 				_output << values::marker;
 			} break;
 			case Command::END_STR:
 			{
 				// TODO: Assert we really had a marker on there?
-				inkAssert(!bEvaluationMode, "Must be in evaluation mode");
-				bEvaluationMode = true;
+				inkAssert(!_evaluation_mode, "Must be in evaluation mode");
+				_evaluation_mode = true;
 
 				// Load value from output stream
 				// Push onto stack
@@ -1184,7 +1213,7 @@ namespace ink::runtime::internal
 		_stack.clear();
 		_ref_stack.clear();
 		_threads.clear();
-		bEvaluationMode = false;
+		_evaluation_mode = false;
 		_saved = false;
 		_choices.clear();
 		_ptr = nullptr;
@@ -1219,7 +1248,7 @@ namespace ink::runtime::internal
 		_eval.save();
 		_threads.save();
 		_backup_choice_len = _choices.size();
-		bSavedEvaluationMode = bEvaluationMode;
+		_saved_evaluation_mode = _evaluation_mode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
 		// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -1238,7 +1267,7 @@ namespace ink::runtime::internal
 		_eval.restore();
 		_threads.restore();
 		_choices.resize(_backup_choice_len);
-		bEvaluationMode = bSavedEvaluationMode;
+		_evaluation_mode = _saved_evaluation_mode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
 		// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");

@@ -8,6 +8,7 @@
 #include "system.h"
 #include "../shared/private/command.h"
 #include "list_table.h"
+#include "snapshot_impl.h"
 #include "tuple.hpp"
 
 #ifdef INK_ENABLE_STL
@@ -82,8 +83,12 @@ namespace ink::runtime::internal {
 	/**
 	 * @brief class to wrap stack value to common type.
 	 */
-	class value {
+	class value : public snapshot_interface {
 	public:
+		// snapshot interface
+		size_t snap(unsigned char* data, const snapper&) const;
+		const unsigned char* snap_load(const unsigned char* data, const loader&);
+
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };
 

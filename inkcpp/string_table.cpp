@@ -94,4 +94,14 @@ namespace ink::runtime::internal
 			iter++;
 		}
 	}
+
+	size_t string_table::snap(unsigned char* data, const snapper&) const
+	{
+		unsigned char* ptr = data;
+		for(auto itr = _table.begin(); itr != _table.end(); ++itr) {
+			ptr = snap_write(ptr, itr.key(), strlen(itr.key()) + 1, data);
+		}
+		ptr = snap_write(ptr, "\0", 1, data);
+		return ptr - data;
+	}
 }

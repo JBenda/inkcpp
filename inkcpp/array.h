@@ -1,11 +1,12 @@
 #pragma once
 
 #include "system.h"
+#include "snapshot_impl.h"
 
 namespace ink::runtime::internal
 {
 	template<typename T, bool dynamic, size_t initialCapacity>
-	class managed_array {
+		class managed_array : snapshot_interface {
 	public:
 		managed_array() : _capacity{initialCapacity}, _size{0}{
 			if constexpr (dynamic) {
@@ -48,11 +49,28 @@ namespace ink::runtime::internal
 		}
 		void clear() { _size = 0; }
 		void resize(size_t size) {
-			ink_assert(size <= _size, "Only allow to reduce size");
+			if constexpr (dynamic) {
+				if (size > _capacity) {
+					extend(size);
+				}
+			} else {
+				ink_assert(size <= _size, "Only allow to reduce size");
+			}
 			_size = size;
 		}
 
-		void extend();
+		void extend(size_t capacity = 0);
+
+		size_t snap(unsigned char* data, const snapper&) const override
+		{
+			unsigned char* ptr = data;
+			ptr = snap_write(ptr, &_size, data);
+			for(const T& e : *this) {
+				ptr = snap_write(ptr, e, data);
+			}
+			return ptr - data;
+		}
+		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 	private:
 
 		if_t<dynamic, char, T> _static_data[dynamic ? 1 : initialCapacity];
@@ -62,10 +80,12 @@ namespace ink::runtime::internal
 	};
 
 	template<typename T, bool dynamic, size_t initialCapacity>
-	void managed_array<T, dynamic, initialCapacity>::extend()
+	void managed_array<T, dynamic, initialCapacity>::extend(size_t capacity)
 	{
 		static_assert(dynamic, "Can only extend if array is dynamic!");
-		size_t new_capacity = 1.5f * _capacity;
+		size_t new_capacity = capacity > _capacity
+			? 1.5f * _capacity
+			: capacity;
 		if (new_capacity < 5) { new_capacity = 5; }
 		T* new_data = new T[new_capacity];
 

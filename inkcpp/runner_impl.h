@@ -13,6 +13,7 @@
 #include "list_table.h"
 #include "array.h"
 #include "random.h"
+#include "snapshot_impl.h"
 
 #include "runner.h"
 #include "choice.h"
@@ -23,8 +24,10 @@ namespace ink::runtime::internal
 {
 	class story_impl;
 	class globals_impl;
+	class snapshot_impl;
 
-	class runner_impl : public runner_interface
+
+	class runner_impl : public runner_interface, public snapshot_interface
 	{
 	public:
 		// Creates a new runner at the start of a loaded ink story
@@ -54,6 +57,11 @@ namespace ink::runtime::internal
 		virtual bool has_tags() const override;
 		virtual size_t num_tags() const override;
 		virtual const char* get_tag(size_t index) const override;
+
+		snapshot* create_snapshot() const override;	
+
+		size_t snap(unsigned char* data, const snapper&) const override;
+		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 
 #ifdef INK_ENABLE_CSTD
@@ -146,31 +154,7 @@ namespace ink::runtime::internal
 
 		inline thread_t current_thread() const { return _threads.empty() ? ~0 : _threads.top(); }
 
-	private:
-		const story_impl* const _story;
-		story_ptr<globals_impl> _globals;
-		executer _operations;
-
-		// == State ==
-
-		// Instruction pointer
-		ip_t _ptr;
-		ip_t _backup; // backup pointer
-		ip_t _done; // when we last hit a done
-
-		// Output stream
-		internal::stream<config::limitOutputSize> _output;
-
-		// Runtime stack. Used to store temporary variables and callstack
-		internal::stack<abs(config::limitRuntimeStack), config::limitRuntimeStack < 0> _stack;
-		internal::stack<abs(config::limitReferenceStack), config::limitReferenceStack < 0> _ref_stack;
-
-		// Evaluation stack
-		bool bEvaluationMode = false;
-		internal::eval_stack<abs(config::limitEvalStackDepth), config::limitEvalStackDepth < 0> _eval;
-		bool bSavedEvaluationMode = false;
-
-		// Keeps track of what threads we're inside
+	public:
 		class threads : public internal::simple_restorable_stack<thread_t> {
 			using base = internal::simple_restorable_stack<thread_t>;
 			static constexpr bool dynamic = config::limitThreadDepth < 0;
@@ -222,14 +206,40 @@ namespace ink::runtime::internal
 			using array_type = if_t<dynamic,
 				internal::allocated_restorable_array<ip_t>,
 				internal::fixed_restorable_array<ip_t, N>>;
-			template<typename con = array_type, void (con::*A)(size_t) = &con::resize>
-			void resize(size_t size, int) { (_threadDone.*A)(size); }
-			void resize(size_t size, long) {}
+
+			void resize(size_t size, int) { _threadDone.resize(size); }
 
 
 			managed_array<thread_t, dynamic, N> _stack;
 			array_type _threadDone;
-		} _threads;
+		};
+
+	private:
+		const story_impl* const _story;
+		story_ptr<globals_impl> _globals;
+		executer _operations;
+
+		// == State ==
+
+		// Instruction pointer
+		ip_t _ptr;
+		ip_t _backup; // backup pointer
+		ip_t _done; // when we last hit a done
+
+		// Output stream
+		internal::stream<config::limitOutputSize> _output;
+
+		// Runtime stack. Used to store temporary variables and callstack
+		internal::stack<abs(config::limitRuntimeStack), config::limitRuntimeStack < 0> _stack;
+		internal::stack<abs(config::limitReferenceStack), config::limitReferenceStack < 0> _ref_stack;
+
+		// Evaluation stack
+		bool _evaluation_mode = false;
+		internal::eval_stack<abs(config::limitEvalStackDepth), config::limitEvalStackDepth < 0> _eval;
+		bool _saved_evaluation_mode = false;
+
+		// Keeps track of what threads we're inside
+		threads _threads;
 
 		// Choice list
 		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;

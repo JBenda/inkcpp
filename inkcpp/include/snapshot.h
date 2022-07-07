@@ -6,13 +6,14 @@ namespace ink::runtime
 {
 	class snapshot {
 	public:
-		snapshot() = delete;
 		virtual ~snapshot() = 0;
 
-		static snapshot* from_binary(unsigned char* data, size_t length, bool freeOnDestroy = true);
+		static snapshot* from_binary(const unsigned char* data, size_t length, bool freeOnDestroy = true);
+#ifdef INK_ENABLE_STL
 		static snapshot* from_file(const char* filename);
+#endif
 
-		virtual const char* get_data() const = 0;
-		virtual unsigned get_data_len() const = 0;
+		virtual const unsigned char* get_data() const = 0;
+		virtual size_t get_data_len() const = 0;
 	};
 }
