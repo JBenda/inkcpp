@@ -1,4 +1,6 @@
 #include "snapshot_impl.h"
+
+#include "story_impl.h"
 #include "globals_impl.h"
 #include "runner_impl.h"
 
@@ -48,11 +50,15 @@ namespace ink::runtime::internal
 	snapshot_impl::snapshot_impl(const globals_impl& globals)
 		: _managed{true}
 	{
-		_length = globals.snap();
+		snapshot_interface::snapper snapper{
+			.strings = globals.strings(),
+			.story_string_table = globals._owner->string(0)
+		};
+		_length = globals.snap(nullptr, snapper);
 		size_t runner_cnt = 0;
 		for(auto node = globals._runners_start; node; node = node->next)
 		{
-			_length += node->object->snap();
+			_length += node->object->snap(nullptr, snapper);
 			++runner_cnt;
 		}
 		
@@ -68,16 +74,16 @@ namespace ink::runtime::internal
 			size_t offset = 0;
 			for(auto node = globals._runners_start; node; node = node->next)
 			{
-				offset += node->object->snap();
+				offset += node->object->snap(nullptr, snapper);
 				memcpy(ptr, &offset, sizeof(offset));
 				ptr += sizeof(offset);
 			}
 		}
 
-		ptr += globals.snap(ptr);
+		ptr += globals.snap(ptr, snapper);
 		for (auto node = globals._runners_start; node; node = node->next)
 		{
-			ptr += node->object->snap(ptr);
+			ptr += node->object->snap(ptr, snapper);
 		}
 	}
 }

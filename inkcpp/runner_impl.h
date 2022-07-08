@@ -200,6 +200,10 @@ namespace ink::runtime::internal
 			}
 			const ip_t& operator[](size_t index) const { return get(index); }
 
+			// snapshot interface
+			size_t snap(unsigned char* data, const snapper&) const override;
+			const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 		protected:
 			virtual void overflow(thread_t*& buffer, size_t& size) override final;
 		private:

@@ -29,7 +29,7 @@ namespace ink::runtime::internal
 
 		// get position of string when iterate through data
 		// used to enable storing a string table references
-		void get_id(const char* string);
+		size_t get_id(const char* string) const;
 
 		// deletes all unused strings
 		void gc();

@@ -3,6 +3,7 @@
 #include "value.h"
 #include "collections/restorable.h"
 #include "array.h"
+#include "snapshot_impl.h"
 
 namespace ink
 {
@@ -24,7 +25,7 @@ namespace ink
 				thread
 			};
 
-			class basic_stack : protected restorable<entry>
+			class basic_stack : protected restorable<entry> 
 			{
 			protected:
 				basic_stack(entry* data, size_t size);
@@ -78,6 +79,10 @@ namespace ink
 				void fetch_values(basic_stack& _stack);
 				// push all values to other _stack
 				void push_values(basic_stack& _stack);
+
+				// snapshot interface
+				size_t snap(unsigned char* data, const snapper&) const override;
+				const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 			private:
 				entry& add(hash_t name, const value& val);
@@ -135,6 +140,7 @@ namespace ink
 				using base = restorable<value>;
 
 			public:
+
 				// Push value onto the stack
 				void push(const value&);
 
@@ -160,6 +166,12 @@ namespace ink
 				void save();
 				void restore();
 				void forget();
+
+				// snapshot interface
+				size_t snap(unsigned char* data, const snapper& snapper) const override
+				{ return base::snap(data, snapper); }
+				const unsigned char* snap_load(const unsigned char* data, const loader& loader) override
+				{ return base::snap_load(data, loader); }
 			};
 
 			template<size_t N, bool dynamic = false>

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "system.h"
+#include "traits.h"
 #include "snapshot_impl.h"
 
 namespace ink::runtime::internal
@@ -63,6 +64,7 @@ namespace ink::runtime::internal
 
 		size_t snap(unsigned char* data, const snapper&) const override
 		{
+			inkAssert(!is_pointer<T>{}(), "here is a special case oversight");
 			unsigned char* ptr = data;
 			ptr = snap_write(ptr, &_size, data);
 			for(const T& e : *this) {
@@ -99,7 +101,7 @@ namespace ink::runtime::internal
 	}
 
 	template<typename T>
-	class basic_restorable_array
+	class basic_restorable_array : public snapshot_interface
 	{
 	public:
 		basic_restorable_array(T* array, size_t capacity, T nullValue)
@@ -136,6 +138,10 @@ namespace ink::runtime::internal
 		// Resets all values and clears any save points
 		void clear(const T& value);
 
+		// snapshot interface
+		virtual size_t snap(unsigned char* data, const snapper&) const override;
+		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 	protected:
 		inline T* buffer() { return _array; }
 		void set_new_buffer(T* buffer, size_t capacity) {
@@ -163,6 +169,20 @@ namespace ink::runtime::internal
 		// null
 		const T _null;
 	};
+
+	template<typename T>
+	inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		ptr = snap_write(ptr, _saved, data);
+		ptr = snap_write(ptr, _capacity, data);
+		ptr = snap_write(ptr, _null, data);
+		for(size_t i = 0; i < _capacity; ++i) {
+			ptr = snap_write(ptr, _array[i], data);
+			ptr = snap_write(ptr, _temp[i], data);
+		}
+		return ptr - data;
+	}
 
 	template<typename T>
 	inline void basic_restorable_array<T>::set(size_t index, const T& value)

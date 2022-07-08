@@ -544,13 +544,39 @@ namespace ink::runtime::internal
 		ptr = snap_write(ptr, _saved, data);
 		ptr = snap_write(ptr, _is_falling, data);
 		ptr += _output.snap(data ? ptr : nullptr, snapper);
-		// _output
-		// _stack
-		// _ref_stack
-		// _threads
-		// _tags
-		// _choices
-		// _container
+		ptr += _stack.snap(data ? ptr : nullptr, snapper);
+		ptr += _ref_stack.snap(data ? ptr : nullptr, snapper);
+		ptr += _eval.snap(data ? ptr : nullptr, snapper);
+		ptr = snap_write(ptr, _tags.size(), data);
+		for (const auto& tag : _tags) {
+			ptr = snap_write(ptr, tag - snapper.story_string_table, data);
+		}
+		ptr += _container.snap(data ? ptr : nullptr, snapper);
+		ptr += _threads.snap(data ? ptr : nullptr, snapper);
+		ptr = snap_write(ptr, _backup_choice_len, data);
+		ptr = snap_write(ptr, _fallback_choice.has_value(), data);
+		auto snap_choice = [&snapper, write = static_cast<bool>(data)](unsigned char* data, const choice& c) -> size_t {
+			unsigned char* ptr = data;
+			ptr = snap_write(ptr, c._index, write);
+			ptr = snap_write(ptr, c._path, write);
+			ptr = snap_write(ptr, c._thread, write);
+			ptr = snap_write(ptr, snapper.strings.get_id(c._text), write);
+			return ptr - data;
+		};
+		if (_fallback_choice) {
+			ptr += snap_choice(ptr, _fallback_choice.value());
+		}
+		for (const choice& c : _choices) {
+			ptr += snap_choice(ptr, c);
+		}
+		return ptr - data;
+	}
+
+	size_t runner_impl::threads::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		ptr += base::snap(data ? ptr : nullptr, snapper);
+		ptr += _threadDone.snap(data ? ptr : nullptr, snapper);
 		return ptr - data;
 	}
 

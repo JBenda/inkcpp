@@ -24,6 +24,7 @@ namespace ink::runtime::internal
 	public:
 		struct snapper {
 			const string_table& strings;
+			const char* story_string_table;
 		};
 		struct loader {
 			string_table& strings;

@@ -587,4 +587,13 @@ namespace ink::runtime::internal
 			stack.set(itr.get()->name, itr.get()->data);
 		}
 	}
+
+	size_t basic_stack::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		ptr = snap_write(ptr, _next_thread, data);
+		ptr = snap_write(ptr, _backup_next_thread, data);
+		ptr += base::snap(data ? ptr : nullptr, snapper);
+		return ptr - data;
+	}
 }
