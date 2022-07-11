@@ -499,7 +499,6 @@ namespace ink::runtime::internal
 
 	size_t basic_stream::snap(unsigned char* data, const snapper& snapper) const
 	{
-		const string_table& strings = snapper.strings;
 		unsigned char* ptr = data;
 		ptr = snap_write(ptr, _last_char, data);
 		ptr = snap_write(ptr, _size, data);
@@ -509,5 +508,18 @@ namespace ink::runtime::internal
 			ptr += itr->snap(data ? ptr : nullptr, snapper);
 		}
 		return ptr - data;
+	}
+
+	const unsigned char* basic_stream::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		ptr = snap_read(ptr, _last_char);
+		ptr = snap_read(ptr, _size);
+		ptr = snap_read(ptr, _save);
+		inkAssert(_max >= _size, "output is to small to hold stored data");
+		for(auto itr = _data; itr != _data + _size; ++itr)
+		{
+			ptr = itr->snap_load(ptr, loader);
+		}
+		return ptr;
 	}
 }

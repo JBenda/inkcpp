@@ -235,6 +235,7 @@ namespace ink::runtime::internal
 		ptr += _visit_counts.snap( data ? ptr : nullptr, snapper );
 		ptr += _strings.snap( data ? ptr : nullptr, snapper );
 		ptr += _lists.snap( data ? ptr : nullptr, snapper );
+		ptr += _variables.snap(data ? ptr : nullptr, snapper );
 		return ptr - data;
 	}
 
@@ -245,6 +246,7 @@ namespace ink::runtime::internal
 		inkAssert(_num_containers == _visit_counts.size(), "errer when loading visit counts, story file dont match snapshot!");
 		ptr = _strings.snap_load(ptr, loader);
 		ptr = _lists.snap_load(ptr, loader);
+		ptr = _variables.snap_load(ptr, loader);
 		return ptr;
 	}
 }

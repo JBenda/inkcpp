@@ -153,7 +153,7 @@ namespace ink::runtime::internal
 
 		// snapshot interface
 		virtual size_t snap(unsigned char* data, const snapper&) const override;
-		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override { inkAssert(false, "not implemented yet!"); return nullptr; }
+		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 	protected:
 		inline T* buffer() { return _array; }
@@ -195,6 +195,22 @@ namespace ink::runtime::internal
 			ptr = snap_write(ptr, _temp[i], data);
 		}
 		return ptr - data;
+	}
+
+	template<typename T>
+	inline const unsigned char* basic_restorable_array<T>::snap_load(const unsigned char* data, const loader& loader)
+	{
+		auto ptr = data;
+		ptr = snap_read(ptr, _saved);
+		ptr = snap_read(ptr, _capacity);
+		T null;
+		ptr = snap_read(ptr, null);
+		inkAssert(null == _null, "null value is different to snapshot!");
+		for(size_t i = 0; i < _capacity; ++i) {
+			ptr = snap_read(ptr, _array[i]);
+			ptr = snap_read(ptr, _temp[i]);
+		}
+		return ptr;
 	}
 
 	template<typename T>

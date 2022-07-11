@@ -202,7 +202,7 @@ namespace ink::runtime::internal
 
 			// snapshot interface
 			size_t snap(unsigned char* data, const snapper&) const override;
-			const unsigned char* snap_load(const unsigned char* data, const loader&) override { inkAssert(false, "not implemented yet!"); return nullptr; }
+			const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 		protected:
 			virtual void overflow(thread_t*& buffer, size_t& size) override final;

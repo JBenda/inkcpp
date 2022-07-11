@@ -148,9 +148,10 @@ int main(int argc, const char** argv)
 		// Start runner
 		runner thread;
 		if (snapshotFile.size()) {
-			globals	glob = myInk->new_globals_from_snapshot(*snapshot::from_file(snapshotFile.c_str()));
+			thread = myInk->new_runner_from_snapshot(*snapshot::from_file(snapshotFile.c_str()));
+		} else {
+			thread = myInk->new_runner();
 		}
-		thread = myInk->new_runner();
 
 		while (true)
 		{

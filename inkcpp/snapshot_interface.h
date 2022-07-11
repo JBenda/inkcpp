@@ -11,7 +11,7 @@ namespace ink::runtime::internal
 	template<typename,bool,size_t>
 	class managed_array;
 	class snapshot_interface {
-	protected:
+	public:
 		static unsigned char* snap_write(unsigned char* ptr, const void* data, size_t length, bool write)
 		{
 			if (write) { memcpy(ptr, data, length); }
@@ -32,7 +32,7 @@ namespace ink::runtime::internal
 		{
 			return snap_read(ptr, &data, sizeof(data));
 		}
-	public:
+
 		struct snapper {
 			const string_table& strings;
 			const char* story_string_table;

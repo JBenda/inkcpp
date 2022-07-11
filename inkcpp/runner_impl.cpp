@@ -540,7 +540,6 @@ namespace ink::runtime::internal
 		ptr = snap_write(ptr, _rng.get_state(), data);
 		ptr = snap_write(ptr, _evaluation_mode, data);
 		ptr = snap_write(ptr, _saved_evaluation_mode, data);
-		ptr = snap_write(ptr, _eval, data);
 		ptr = snap_write(ptr, _saved, data);
 		ptr = snap_write(ptr, _is_falling, data);
 		ptr += _output.snap(data ? ptr : nullptr, snapper);
@@ -585,7 +584,6 @@ namespace ink::runtime::internal
 		_rng.srand(seed);
 		ptr = snap_read(ptr, _evaluation_mode);
 		ptr = snap_read(ptr, _saved_evaluation_mode);
-		ptr = snap_read(ptr, _eval);
 		ptr = snap_read(ptr, _saved);
 		ptr = snap_read(ptr, _is_falling);
 		ptr = _output.snap_load(ptr, loader);
@@ -632,6 +630,12 @@ namespace ink::runtime::internal
 		ptr += base::snap(data ? ptr : nullptr, snapper);
 		ptr += _threadDone.snap(data ? ptr : nullptr, snapper);
 		return ptr - data;
+	}
+	const unsigned char* runner_impl::threads::snap_load(const unsigned char* ptr, const loader& loader) 
+	{
+		ptr = base::snap_load(ptr, loader);
+		ptr = _threadDone.snap_load(ptr, loader);
+		return ptr;
 	}
 
 #ifdef INK_ENABLE_CSTD

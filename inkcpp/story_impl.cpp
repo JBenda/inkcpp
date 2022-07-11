@@ -197,6 +197,24 @@ namespace ink::runtime::internal
 		return runner(new runner_impl(this, store), _block);
 	}
 
+	runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store, unsigned idx)
+	{
+		const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
+		if (store == nullptr)
+			store = new_globals_from_snapshot(snapshot);
+		auto* run = new runner_impl(this, store);
+		auto end = run->snap_load(snapshot.get_runner_snap(idx),
+				snapshot_interface::loader{
+					.string_table = snapshot.strings(),
+					.story_string_table = _string_table, 
+				});
+		inkAssert(
+			(idx + 1 < snapshot.num_runners() && end == snapshot.get_runner_snap(idx + 1))
+				|| end == snapshot.get_data() + snapshot.get_data_len(), "not all data were used for runner reconstruction"
+			);
+		return runner(run, _block);
+	}
+
 	void story_impl::setup_pointers()
 	{
 		using header = ink::internal::header;

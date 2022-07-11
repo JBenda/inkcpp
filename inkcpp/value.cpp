@@ -92,4 +92,17 @@ namespace ink::runtime::internal
 		}
 		return ptr - data;
 	}
+	const unsigned char* value::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		ptr = snap_read(ptr, _type);
+		ptr = snap_read(ptr, &bool_value, max_value_size);
+		if(_type == value_type::string) {
+			if(string_value.allocated) {
+				string_value.str = loader.string_table[(std::uintptr_t)(string_value.str)];
+			} else {
+				string_value.str = loader.story_string_table +(std::uintptr_t)(string_value.str);
+			}
+		}
+		return ptr;
+	}
 }

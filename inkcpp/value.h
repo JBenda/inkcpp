@@ -87,7 +87,7 @@ namespace ink::runtime::internal {
 	public:
 		// snapshot interface
 		size_t snap(unsigned char* data, const snapper&) const override;
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override { inkAssert(false, "not implemented yet!"); return nullptr; }
+		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };

@@ -334,7 +334,7 @@ namespace ink::runtime::internal
 
 		// snapshot interface
 		virtual size_t snap(unsigned char* data, const snapper&) const override;
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override { inkAssert(false, "not implemented yet!"); return nullptr; }
+		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 	protected:
 		// Called when we run out of space in buffer. 
@@ -390,4 +390,11 @@ namespace ink::runtime::internal
 	size_t restorable<entry>::snap(unsigned char* data, const snapper& snapper) const;
 	template<>
 	size_t restorable<int>::snap(unsigned char* data, const snapper&) const;
+
+	template<>
+	const unsigned char* restorable<value>::snap_load(const unsigned char* data, const loader&);
+	template<>
+	const unsigned char* restorable<entry>::snap_load(const unsigned char* data, const loader&);
+	template<>
+	const unsigned char* restorable<int>::snap_load(const unsigned char* data, const loader&);
 }

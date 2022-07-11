@@ -128,7 +128,7 @@ class avl_array
 	// returns unique number for each entry
 	// the numbers are unique as long no operation are executed
 	// on the avl
-  	inline size_t temp_identifier() const { return idx_; }
+  	inline size_t temp_identifier() const { return instance_->size() - idx_ - 1; }
 
     // preincrement
     tag_avl_array_iterator& operator++()

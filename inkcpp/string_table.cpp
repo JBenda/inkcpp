@@ -98,8 +98,13 @@ namespace ink::runtime::internal
 	size_t string_table::snap(unsigned char* data, const snapper&) const
 	{
 		unsigned char* ptr = data;
-		for(auto itr = _table.begin(); itr != _table.end(); ++itr) {
-			ptr = snap_write(ptr, itr.key(), strlen(itr.key()) + 1, data);
+		for (size_t i = 0; i < _table.size(); ++i) {
+			for(auto itr = _table.begin(); itr != _table.end(); ++itr) {
+				if (itr.temp_identifier() == i) {
+					ptr = snap_write(ptr, itr.key(), strlen(itr.key()) + 1, data);
+					break;
+				}
+			}
 		}
 		ptr = snap_write(ptr, "\0", 1, data);
 		return ptr - data;
@@ -108,6 +113,7 @@ namespace ink::runtime::internal
 	const unsigned char* string_table::snap_load(const unsigned char* data, const loader& loader)
 	{
 		auto* ptr = data;
+		int i = 0;
 		while(*ptr) {
 			size_t len = 0;
 			for(;ptr[len];++len);

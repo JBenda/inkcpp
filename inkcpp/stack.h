@@ -82,7 +82,7 @@ namespace ink
 
 				// snapshot interface
 				size_t snap(unsigned char* data, const snapper&) const override;
-				const unsigned char* snap_load(const unsigned char* data, const loader&) override { inkAssert(false, "not implemented yet!"); return nullptr; }
+				const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 			private:
 				entry& add(hash_t name, const value& val);
