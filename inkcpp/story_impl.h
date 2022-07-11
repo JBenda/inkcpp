@@ -42,7 +42,10 @@ namespace ink::runtime::internal
 		virtual globals new_globals() override;
 		virtual globals new_globals_from_snapshot(const snapshot&) override;
 		virtual runner new_runner(globals store = nullptr) override;
-		virtual runner new_runner_from_snapshot(const snapshot&, globals store = nullptr, unsigned idx = 0) override;
+		virtual runner new_runner_from_snapshot(const snapshot&, globals store = nullptr, unsigned idx = 0) override {
+			inkAssert(false, "not implmented yet!");
+			return nullptr;
+		}
 
 
 		const ink::internal::header& get_header() const { return _header; }

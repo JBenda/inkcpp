@@ -549,7 +549,8 @@ namespace ink::runtime::internal
 		ptr += _eval.snap(data ? ptr : nullptr, snapper);
 		ptr = snap_write(ptr, _tags.size(), data);
 		for (const auto& tag : _tags) {
-			ptr = snap_write(ptr, tag - snapper.story_string_table, data);
+			std::uintptr_t offset = tag - snapper.story_string_table;
+			ptr = snap_write(ptr, offset, data);
 		}
 		ptr += _container.snap(data ? ptr : nullptr, snapper);
 		ptr += _threads.snap(data ? ptr : nullptr, snapper);
@@ -566,10 +567,63 @@ namespace ink::runtime::internal
 		if (_fallback_choice) {
 			ptr += snap_choice(ptr, _fallback_choice.value());
 		}
+		ptr = snap_write(ptr, _choices.size(), data);
 		for (const choice& c : _choices) {
 			ptr += snap_choice(ptr, c);
 		}
 		return ptr - data;
+	}
+
+	const unsigned char* runner_impl::snap_load(const unsigned char* data, const loader& loader)
+	{
+		auto ptr = data;
+		ptr = snap_read(ptr, _ptr);
+		ptr = snap_read(ptr, _backup);
+		ptr = snap_read(ptr, _done);
+		int32_t seed;
+		ptr = snap_read(ptr, seed);
+		_rng.srand(seed);
+		ptr = snap_read(ptr, _evaluation_mode);
+		ptr = snap_read(ptr, _saved_evaluation_mode);
+		ptr = snap_read(ptr, _eval);
+		ptr = snap_read(ptr, _saved);
+		ptr = snap_read(ptr, _is_falling);
+		ptr = _output.snap_load(ptr, loader);
+		ptr = _stack.snap_load(ptr, loader);
+		ptr = _ref_stack.snap_load(ptr, loader);
+		ptr = _eval.snap_load(ptr, loader);
+		size_t num_tags;
+		ptr = snap_read(ptr, num_tags);
+		for(size_t i = 0; i < num_tags; ++i) {
+			std::uintptr_t offset;
+			ptr = snap_read(ptr, offset);
+			_tags.push() = offset + loader.story_string_table;
+		}
+		ptr = _container.snap_load(ptr, loader);
+		ptr = _threads.snap_load(ptr, loader);
+		ptr = snap_read(ptr, _backup_choice_len);
+		auto read_choice = [&ptr,&loader]() -> choice{
+			choice c;
+			ptr = snap_read(ptr, c._index);
+			ptr = snap_read(ptr, c._path);
+			ptr = snap_read(ptr, c._thread);
+			size_t string_id;
+			ptr = snap_read(ptr, string_id);
+			c._text = loader.string_table[string_id];
+			return c;
+		};
+		bool has_fallback_choice;
+		ptr = snap_read(ptr, has_fallback_choice);
+		_fallback_choice = has_fallback_choice
+			? optional<choice>{read_choice()}
+			: nullopt;
+		size_t num_choices;
+		ptr = snap_read(ptr, num_choices);
+		for (size_t i = 0; i < num_choices; ++i) {
+			_choices.push() = read_choice();
+		}
+
+		return ptr;
 	}
 
 	size_t runner_impl::threads::snap(unsigned char* data, const snapper& snapper) const

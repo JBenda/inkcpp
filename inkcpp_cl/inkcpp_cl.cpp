@@ -10,6 +10,7 @@
 #include <compiler.h>
 #include <choice.h>
 #include <globals.h>
+#include <snapshot.h>
 
 #include "test.h"
 
@@ -19,7 +20,7 @@ void usage()
 	cout
 		<< "Usage: inkcpp_cl <options> <json file>\n"
 		<< "\t-o <filename>:\tOutput file name\n"
-		<< "\t-p:\tPlay mode\n"
+		<< "\t-p [<snapshot_file>]:\tPlay mode\n\toptional snapshot file to load\n"
 		<< endl;
 }
 
@@ -35,6 +36,7 @@ int main(int argc, const char** argv)
 	// Parse options
 	std::string outputFilename;
 	bool playMode = false, testMode = false, testDirectory = false;
+	std::string snapshotFile;
 	for (int i = 1; i < argc - 1; i++)
 	{
 		std::string option = argv[i];
@@ -43,8 +45,13 @@ int main(int argc, const char** argv)
 			outputFilename = argv[i + 1];
 			i += 1;
 		}
-		else if (option == "-p")
+		else if (option == "-p") {
 			playMode = true;
+			if (i + 1 < argc - 1 && argv[i+1][0] != '-') {
+				++i;
+				snapshotFile = argv[i];
+			}
+		}
 		else if (option == "-t")
 			testMode = true;
 		else if (option == "-td")
@@ -139,7 +146,11 @@ int main(int argc, const char** argv)
 		story* myInk = story::from_file(outputFilename.c_str());
 
 		// Start runner
-		runner thread = myInk->new_runner();
+		runner thread;
+		if (snapshotFile.size()) {
+			globals	glob = myInk->new_globals_from_snapshot(*snapshot::from_file(snapshotFile.c_str()));
+		}
+		thread = myInk->new_runner();
 
 		while (true)
 		{
@@ -167,17 +178,20 @@ int main(int argc, const char** argv)
 
 				int c = 0;
 				std::cin >> c;
+				if (c == -1) {
+					snapshot* snap = thread->create_snapshot();
+					// snap->write_to_file("test.snap");
+					snap->write_to_file("test.snap");
+					break;
+				}
 				thread->choose(c - 1);
 				std::cout << "?> ";
-				continue;
 				continue;
 			}
 
 			// out of content
 			break;
 		}
-
-		delete myInk;
 
 		return 0;
 	}

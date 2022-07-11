@@ -2,6 +2,8 @@
 #include "platform.h"
 #include "runner_impl.h"
 #include "globals_impl.h"
+#include "snapshot.h"
+#include "snapshot_impl.h"
 #include "version.h"
 
 #ifdef INK_ENABLE_STL
@@ -173,6 +175,19 @@ namespace ink::runtime::internal
 	{
 		// create the new globals store
 		return globals(new globals_impl(this), _block);
+	}
+
+	globals story_impl::new_globals_from_snapshot(const snapshot& data)
+	{
+		const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
+		auto* globs = new globals_impl(this);
+		auto end = globs->snap_load(snapshot.get_globals_snap(), snapshot_interface::loader{
+			.string_table = snapshot.strings(),
+			.story_string_table = _string_table,
+
+		});
+		inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
+		return globals(globs, _block);
 	}
 
 	runner story_impl::new_runner(globals store)

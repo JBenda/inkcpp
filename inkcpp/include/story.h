@@ -19,7 +19,7 @@ namespace ink::runtime
 	class story
 	{
 	public:
-		virtual ~story() = 0;
+		virtual ~story(){};
 #pragma region Interface Methods
 		/**
 		 * Creates a new global store

@@ -29,7 +29,7 @@ namespace ink::runtime::internal
 		void forget();
 
 		virtual size_t snap(unsigned char* data, const snapper&) const override;
-		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override { inkAssert(false, "not implemented yet!"); return nullptr; }
 
 	protected:
 		virtual void overflow(T*& buffer, size_t& size) {
@@ -229,7 +229,7 @@ namespace ink::runtime::internal
 	template<typename T>
 	size_t simple_restorable_stack<T>::snap(unsigned char* data, const snapper&) const
 	{
-		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}());
+		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
 		unsigned char* ptr = data;
 		ptr = snap_write(ptr, _null, data);
 		ptr = snap_write(ptr, _pos, data);

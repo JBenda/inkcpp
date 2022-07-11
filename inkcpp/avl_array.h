@@ -87,11 +87,18 @@ class avl_array
     friend avl_array;         // avl_array may access index pointer
 
   public:
+
     // ctor
     tag_avl_array_iterator(if_t<Const, const avl_array*,avl_array*> instance = nullptr, size_type idx = 0U)
       : instance_(instance)
       , idx_(idx)
     { }
+
+  	template<bool C = Const, typename = ink::runtime::internal::enable_if_t<C>>
+  	tag_avl_array_iterator(const tag_avl_array_iterator<false>& itr)
+  	  : instance_(itr.instance_)
+  	  , idx_(itr.idx_)
+  	{}
 
     inline tag_avl_array_iterator& operator=(const tag_avl_array_iterator& other)
     {
@@ -117,6 +124,11 @@ class avl_array
     // access key
     inline const Key& key() const
     { return instance_->key_[idx_]; }
+
+	// returns unique number for each entry
+	// the numbers are unique as long no operation are executed
+	// on the avl
+  	inline size_t temp_identifier() const { return idx_; }
 
     // preincrement
     tag_avl_array_iterator& operator++()
@@ -193,12 +205,7 @@ public:
 
   inline const_iterator begin() const
   {
-    size_type i = INVALID_IDX;
-    if (root_ != INVALID_IDX) {
-      // find smallest element, it's the farthest node left from root
-      for (i = root_; child_[i].left != INVALID_IDX; i = child_[i].left);
-    }
-	return const_iterator(this, i);
+	return const_iterator(const_cast<avl_array&>(*this).begin());
   }
 
   inline iterator end()
@@ -339,6 +346,11 @@ public:
     }
     // key not found, return end() iterator
     return end();
+  }
+
+  inline const_iterator find(const key_type& key) const
+  {
+	  return const_iterator(const_cast<avl_array&>(*this).find(key));
   }
 
 

@@ -104,4 +104,26 @@ namespace ink::runtime::internal
 		ptr = snap_write(ptr, "\0", 1, data);
 		return ptr - data;
 	}
+
+	const unsigned char* string_table::snap_load(const unsigned char* data, const loader& loader)
+	{
+		auto* ptr = data;
+		while(*ptr) {
+			size_t len = 0;
+			for(;ptr[len];++len);
+			++len;
+			auto str = create(len);
+			loader.string_table.push() = str;
+			ptr = snap_read(ptr, str, len);
+			mark_used(str);
+		}
+		return ptr + 1;
+	}
+
+	size_t string_table::get_id(const char* string) const
+	{
+		auto iter = _table.find(string);
+		inkAssert(iter != _table.end(), "Try to fetch not contained string!");
+		return iter.temp_identifier();
+	}
 }

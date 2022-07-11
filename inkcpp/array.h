@@ -2,7 +2,7 @@
 
 #include "system.h"
 #include "traits.h"
-#include "snapshot_impl.h"
+#include "snapshot_interface.h"
 
 namespace ink::runtime::internal
 {
@@ -66,13 +66,26 @@ namespace ink::runtime::internal
 		{
 			inkAssert(!is_pointer<T>{}(), "here is a special case oversight");
 			unsigned char* ptr = data;
-			ptr = snap_write(ptr, &_size, data);
+			ptr = snap_write(ptr, _size, data);
 			for(const T& e : *this) {
 				ptr = snap_write(ptr, e, data);
 			}
 			return ptr - data;
 		}
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		const unsigned char* snap_load(const unsigned char* ptr, const loader&) override
+		{
+			decltype(_size) size;
+			ptr = snap_read(ptr, size);
+			if constexpr (dynamic) {
+				resize(size);
+			} else {
+				inkAssert(size <= initialCapacity, "capacity of non dynamic array is to small vor snapshot!");
+			}
+			for (T& e : *this) {
+				ptr = snap_read(ptr, e);
+			}
+			return ptr;
+		}
 	private:
 
 		if_t<dynamic, char, T> _static_data[dynamic ? 1 : initialCapacity];
@@ -86,8 +99,8 @@ namespace ink::runtime::internal
 	{
 		static_assert(dynamic, "Can only extend if array is dynamic!");
 		size_t new_capacity = capacity > _capacity
-			? 1.5f * _capacity
-			: capacity;
+			? capacity
+			: 1.5f * _capacity;
 		if (new_capacity < 5) { new_capacity = 5; }
 		T* new_data = new T[new_capacity];
 
@@ -140,7 +153,7 @@ namespace ink::runtime::internal
 
 		// snapshot interface
 		virtual size_t snap(unsigned char* data, const snapper&) const override;
-		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override { inkAssert(false, "not implemented yet!"); return nullptr; }
 
 	protected:
 		inline T* buffer() { return _array; }

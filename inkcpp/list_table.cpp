@@ -658,5 +658,12 @@ namespace ink::runtime::internal
 		return ptr - data;
 	}
 
+	const unsigned char* list_table::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		ptr = _data.snap_load(ptr, loader);
+		ptr = _entry_state.snap_load(ptr, loader);
+		return ptr;
+	}
+
 }
 

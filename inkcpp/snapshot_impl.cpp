@@ -31,13 +31,23 @@ namespace ink::runtime
 
 		return from_binary(data, length);
 	}
+
+	void snapshot::write_to_file(const char* filename) const
+	{
+		std::ofstream ofs(filename, std::ios::binary);
+		if(!ofs.is_open()) {
+			throw ink_exception("Failed to open file to write snapshot: "
+				+ std::string(filename));
+		}
+		ofs.write(reinterpret_cast<const char*>(get_data()), get_data_len());
+	}
 #endif
 }
 
 namespace ink::runtime::internal
 {
 	size_t snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt) {
-		return serialization_length + sizeof(header) + runner_cnt * sizeof(size_t);
+		return serialization_length + sizeof(header) + (runner_cnt + 1) * sizeof(size_t);
 	}
 
 	const unsigned char* snapshot_impl::get_data() const {
@@ -63,6 +73,8 @@ namespace ink::runtime::internal
 		}
 		
 		_length = file_size(_length, runner_cnt);
+		_header.length = _length;
+		_header.num_runners = runner_cnt;
 		unsigned char* data = new unsigned char[_length];
 		_file = data;
 		unsigned char* ptr = data;
@@ -71,12 +83,15 @@ namespace ink::runtime::internal
 		// write lookup table
 		ptr += sizeof(header);
 		{
-			size_t offset = 0;
+			size_t offset = (ptr - data) + (_header.num_runners + 1) * sizeof(size_t);
+			memcpy(ptr, &offset, sizeof(offset));
+			ptr += sizeof(offset);
+			offset += globals.snap(nullptr, snapper);
 			for(auto node = globals._runners_start; node; node = node->next)
 			{
-				offset += node->object->snap(nullptr, snapper);
 				memcpy(ptr, &offset, sizeof(offset));
 				ptr += sizeof(offset);
+				offset += node->object->snap(nullptr, snapper);
 			}
 		}
 
@@ -85,5 +100,13 @@ namespace ink::runtime::internal
 		{
 			ptr += node->object->snap(ptr, snapper);
 		}
+	}
+
+	snapshot_impl::snapshot_impl(const unsigned char* data, size_t length, bool managed)
+	: _file{data}, _length{length}, _managed{managed}
+	{
+		const unsigned char* ptr = data;
+		memcpy(&_header, ptr, sizeof(_header));
+		inkAssert(_header.length == _length, "Corrupted file length");
 	}
 }

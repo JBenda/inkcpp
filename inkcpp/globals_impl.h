@@ -18,9 +18,9 @@ namespace ink::runtime::internal
 	class globals_impl : public globals_interface, public snapshot_interface
 	{
 		friend snapshot_impl;
+	public:
 		size_t snap(unsigned char* data, const snapper&) const override;
 		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
-	public:
 		// Initializes a new global store from the given story
 		globals_impl(const story_impl*);
 		virtual ~globals_impl() { }

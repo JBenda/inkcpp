@@ -184,6 +184,7 @@ namespace ink::runtime::internal
 
 		// execute one line to startup the globals
 		run->getline_silent();
+		_globals_initialized = true;
 	}
 
 	void globals_impl::gc()
@@ -228,12 +229,22 @@ namespace ink::runtime::internal
 
 	size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
 	{
-		unsigned char* ptr;
+		unsigned char* ptr = data;
 		inkAssert(_num_containers == _visit_counts.size(), "Should be equal!");
 		inkAssert(_globals_initialized, "Only support snapshot of globals with runner! or you don't need a snapshot for this state");
 		ptr += _visit_counts.snap( data ? ptr : nullptr, snapper );
 		ptr += _strings.snap( data ? ptr : nullptr, snapper );
 		ptr += _lists.snap( data ? ptr : nullptr, snapper );
 		return ptr - data;
+	}
+
+	const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		_globals_initialized = true;
+		ptr = _visit_counts.snap_load(ptr, loader);
+		inkAssert(_num_containers == _visit_counts.size(), "errer when loading visit counts, story file dont match snapshot!");
+		ptr = _strings.snap_load(ptr, loader);
+		ptr = _lists.snap_load(ptr, loader);
+		return ptr;
 	}
 }
