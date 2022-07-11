@@ -20,7 +20,7 @@ void usage()
 	cout
 		<< "Usage: inkcpp_cl <options> <json file>\n"
 		<< "\t-o <filename>:\tOutput file name\n"
-		<< "\t-p [<snapshot_file>]:\tPlay mode\n\toptional snapshot file to load\n"
+		<< "\t-p [<snapshot_file>]:\tPlay mode\n\toptional snapshot file to load\n\tto create a snapshot file enter '-1' as choice\n"
 		<< endl;
 }
 
@@ -181,8 +181,7 @@ int main(int argc, const char** argv)
 				std::cin >> c;
 				if (c == -1) {
 					snapshot* snap = thread->create_snapshot();
-					// snap->write_to_file("test.snap");
-					snap->write_to_file("test.snap");
+					snap->write_to_file(std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".snap").c_str());
 					break;
 				}
 				thread->choose(c - 1);

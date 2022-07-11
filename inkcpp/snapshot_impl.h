@@ -36,7 +36,7 @@ namespace ink::runtime::internal
 			return _file + get_offset(idx + 1);
 		}
 
-		size_t num_runners() const { return _header.num_runners; }
+		size_t num_runners() override const { return _header.num_runners; }
 
 	private:
 		// file information
