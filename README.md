@@ -81,6 +81,8 @@ CMake will then generate the necessary build files for your environment. By defa
 
 To build, either run the generated buildfiles OR you can use `cmake --build . --config <Release|Debug>` from the build folder to automatically execute the relevant toolchain.
 
+For a more in depth installation description please checkout the (wiki)[https://github.com/brwarner/inkcpp/wiki/building].
+
 ## Including in C++ Code
 
 Required software: (CMake)[https://cmake.org/]
@@ -89,15 +91,15 @@ Instructions:
 
 1. Clone the repository
 2. Configure and build the project with CMake, as described above
-3. From your newly-created `build` directory, run `cmake --install . --prefix Path/To/Desired/Library/Directory`. Note that this will currently fail if the project was built for Debug instead of Release.
+3. From your newly-created `build` directory, run `cmake --install . --prefix Path/To/Desired/Library/Directory --component <lib/cl/unreal>`.
 4. Generated in your chosen directory, you will find a collection of folders. The following must be linked into your build solution for your C++ to compile correctly:
-	- `include/public`: contains important shared headers.
-		+ For a Visual Studio project, link this directory as an Include Directory in VC++ Directories.
-	- `inkcpp/Source/inkcpp/Public`: contains the primary headers for using InkCPP in your code.
+	- `include/ink`: contains important shared headers.
 		+ For a Visual Studio project, link this directory as an Include Directory in VC++ Directories.
 	- `lib/inkcpp.lib` and `lib/inkcpp_compiler.lib`: contains the library code for the InkCPP runner and compiler, respectively.
 		+ For a Visual Studio project, link these files as Additional Dependencies in Linker->Input.
 		+ You don't need to link the compiler if you're not using it within your program.
+	- if you used the `cl` component you will find the `inkcpp_cl` executable in this location
+	- for `unreal` you will find a `Source` directory containing the Unreal needed libs and headers. **Note:** not working for the current unreal version, we are working to fix this.
 5. Reference the headers in your code like so:
 
 ```cpp
@@ -106,6 +108,7 @@ Instructions:
 #include <ink/runner.h>
 #include <ink/choice.h>
 ```
+6. if you use cmake checkout the (wiki)[https://github.com/brwarner/inkcpp/wiki/building#cmake-example] for including the library via cmake
 
 
 ### Troubleshooting

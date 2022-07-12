@@ -26,20 +26,19 @@ list(APPEND SOURCES
 )
 source_group(Collections REGULAR_EXPRESSION collections/.*)
 add_library(inkcpp ${SOURCES})
+target_include_directories(inkcpp PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+)
+FILE(GLOB PUBLIC_HEADERS "include/*")
+set_target_properties(inkcpp PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 # Make sure the include directory is included 
-target_include_directories(inkcpp 
-    PUBLIC include
-    PUBLIC ../shared/public
-    PRIVATE ../shared/private
-    )
-
+target_link_libraries(inkcpp PRIVATE inkcpp_shared)
 # Make sure this project and all dependencies use the C++17 standard
 target_compile_features(inkcpp PUBLIC cxx_std_17)
 
-# Default installation
-install(TARGETS inkcpp DESTINATION lib)
 
 # Unreal installation
-install(DIRECTORY "include/" DESTINATION "inkcpp/Source/inkcpp/Public/ink/" COMPONENT unreal)
-install(FILES ${SOURCES} DESTINATION "inkcpp/Source/inkcpp/Private/ink/" COMPONENT unreal)
+install(DIRECTORY "include/" DESTINATION "inkcpp/Source/inkcpp/Public/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
+install(FILES ${SOURCES} DESTINATION "inkcpp/Source/inkcpp/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)

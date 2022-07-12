@@ -2,7 +2,7 @@
 add_executable(inkcpp_cl inkcpp_cl.cpp test.h test.cpp)
 
 # Include compiler and runtime libraries
-target_link_libraries(inkcpp_cl PUBLIC inkcpp inkcpp_compiler)
+target_link_libraries(inkcpp_cl PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
 
 # For https://en.cppreference.com/w/cpp/filesystem#Notes
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -16,4 +16,4 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # Install
-install(TARGETS inkcpp_cl DESTINATION bin)
+install(TARGETS inkcpp_cl DESTINATION . COMPONENT cl EXCLUDE_FROM_ALL)
