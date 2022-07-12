@@ -612,9 +612,6 @@ namespace ink::runtime::internal
 			// If we're on a newline
 			if (_output.ends_with(value_type::newline))
 			{
-				// TODO: REMOVE
-				// return true;
-
 				// Unless we are out of content, we are going to try
 				//  to continue a little further. This is to check for
 				//  glue (which means there is potentially more content
@@ -850,7 +847,13 @@ namespace ink::runtime::internal
 				} else {
 					target = read<uint32_t>();
 				}
-				start_frame<frame_type::function>(target);
+				if (!(flag & CommandFlag::FALLBACK_FUNCTION)) {
+					start_frame<frame_type::function>(target);
+				} else {
+					if(_eval.top_value().type() == value_type::ex_fn_not_found) {
+						start_frame<frame_type::function>(target);
+					}
+				}
 			}
 			break;
 			case Command::TUNNEL_RETURN:
@@ -930,7 +933,7 @@ namespace ink::runtime::internal
 						_eval.pop();
 
 					// push void
-					_eval.push(value());
+					_eval.push(values::ex_fn_not_found);
 				}
 
 				// TODO: Verify something was found?

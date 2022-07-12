@@ -32,6 +32,12 @@ namespace ink::runtime::internal
 		stack->push(value{}.set<value_type::int32>(v));
 	}
 
+	void function_base::push_void(basic_eval_stack* stack)
+	{
+		stack->push(values::null);
+	}
+
+
 	void function_base::push_string(basic_eval_stack* stack, const char* dynamic_string)
 	{
 		stack->push(value{}.set<value_type::string>(dynamic_string, true));

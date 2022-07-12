@@ -41,6 +41,7 @@ namespace ink::runtime::internal {
 		func_start,                 // start of function marker
 		func_end,                   // end of function marker
 		null,                       // void value, for function returns
+		ex_fn_not_found,			// value for failed external function calls
 		tunnel_frame,               // return from tunnel
 		function_frame,             // return from function
 		thread_frame,               // return from thread
@@ -351,6 +352,11 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 	template<>
+	inline constexpr value& value::set<value_type::ex_fn_not_found>() {
+		_type = value_type::ex_fn_not_found;
+		return *this;
+	}
+	template<>
 	inline constexpr value& value::set<value_type::newline>() {
 		_type = value_type::newline;
 		return *this;
@@ -418,6 +424,7 @@ namespace ink::runtime::internal {
 	namespace values {
 		static constexpr value marker = value{}.set<value_type::marker>();
 		static constexpr value glue = value{}.set<value_type::glue>();
+		static constexpr value ex_fn_not_found = value{}.set<value_type::ex_fn_not_found>();
 		static constexpr value newline = value{}.set<value_type::newline>();
 		static constexpr value func_start = value{}.set<value_type::func_start>();
 		static constexpr value func_end = value{}.set<value_type::func_end>();

@@ -140,6 +140,8 @@ namespace ink
 		// == Function/Tunnel flags
 		FUNCTION_TO_VARIABLE = 1 << 0,
 		TUNNEL_TO_VARIABLE = 1 << 0,
+		FALLBACK_FUNCTION = 1 << 1,
+		// note a internal function which should only be called if external reference is not working
 	};
 
 	inline bool operator& (CommandFlag lhs, CommandFlag rhs)

@@ -2,6 +2,7 @@
 #include "../inkcpp_cl/test.h"
 
 #include <story.h>
+#include <globals.h>
 #include <runner.h>
 #include <compiler.h>
 
