@@ -364,8 +364,16 @@ namespace ink::compiler::internal
 			// Encode argument count into command flag and write out the hash of the function name
 			_emitter->write(Command::CALL_EXTERNAL, hash_string(val.c_str()),
 					static_cast<CommandFlag>(numArgs));
-			_emitter->write_path(Command::FUNCTION, CommandFlag::FALLBACK_FUNCTION, val);
-		}
+			// if internal function with same name exists 
+			int arity = _emitter->function_container_arguments(val);
+			if (arity >= 0) {
+				inkAssert(arity == numArgs,
+					("fallback function for '" + val + "' takes " + std::to_string(arity) +
+					" but the external function is supposed to take " + std::to_string(numArgs) 
+					+ " arguments.").c_str()
+				);
+				_emitter->write_path(Command::FUNCTION, CommandFlag::FALLBACK_FUNCTION, val);
+			}		}
 
 		// list initialisation
 		else if (has(command, "list"))

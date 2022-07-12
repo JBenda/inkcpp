@@ -17,7 +17,6 @@ namespace ink::compiler::internal
 	using std::vector;
 	using std::map;
 	using std::string;
-	using std::tuple;
 
 	char* strtok_s(char * s, const char * sep, char** context) {
 #if defined(_WIN32) || defined(_WIN64)
@@ -125,6 +124,23 @@ namespace ink::compiler::internal
 
 		// Return offset
 		return _containers.pos();
+	}
+
+   	int binary_emitter::function_container_arguments(const std::string& name)
+	{
+		if(_root == nullptr) { return -1; }
+		auto fn = _root->named_children.find(name);
+		if (fn == _root->named_children.end()) { return -1; }
+
+		size_t offset = fn->second->offset;
+		byte_t cmd = _containers.get(offset);
+		int arity = 0;
+		while(static_cast<Command>(cmd) == Command::DEFINE_TEMP) {
+			offset += 6; // command(1) + flag(1) + variable_name_hash(4)
+			cmd = _containers.get(offset);
+			++arity;		  
+		}
+		return arity;
 	}
 
 	void binary_emitter::write_raw(Command command, CommandFlag flag, const char* payload, ink::size_t payload_size)

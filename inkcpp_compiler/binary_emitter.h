@@ -18,6 +18,7 @@ namespace ink::compiler::internal
 		// Begin emitter
 		virtual uint32_t start_container(int index_in_parent, const std::string& name) override;
 		virtual uint32_t end_container() override;
+		virtual int function_container_arguments(const std::string& name) override;
 		virtual void write_raw(Command command, CommandFlag flag = CommandFlag::NO_FLAGS, const char* payload = nullptr, ink::size_t payload_size = 0) override;
 		virtual void write_path(Command command, CommandFlag flag, const std::string& path, bool useCountIndex = false) override;
 		virtual void write_variable(Command command, CommandFlag flag, const std::string& name) override;

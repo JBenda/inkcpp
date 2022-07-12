@@ -646,6 +646,13 @@ namespace ink::runtime::internal
 			Command cmd = read<Command>();
 			CommandFlag flag = read<CommandFlag>();
 
+			if (_eval->top_value().type() == value_type::ex_fn_not_found) {
+				inkAssert(cmd == Command::FUNCTION, "Failed to call external function and no "
+					"local function exists to call instead! Please bind external function or "
+					"add define a dummy function in your story!"
+				);
+			}
+
 			// If we're falling and we hit a non-fallthrough command, stop the fall.
 			if (_is_falling && !((cmd == Command::DIVERT && flag & CommandFlag::DIVERT_IS_FALLTHROUGH) || cmd == Command::END_CONTAINER_MARKER))
 			{
@@ -851,6 +858,7 @@ namespace ink::runtime::internal
 					start_frame<frame_type::function>(target);
 				} else {
 					if(_eval.top_value().type() == value_type::ex_fn_not_found) {
+						_eval.pop();
 						start_frame<frame_type::function>(target);
 					}
 				}
@@ -925,18 +933,11 @@ namespace ink::runtime::internal
 				// find and execute. will automatically push a valid if applicable
 				bool success = _functions.call(functionName, &_eval, numArguments, _globals->strings());
 
-				// If we failed, we need to at least pretend so our state doesn't get fucked
+				// If we failed, notify a potential fallback function
 				if (!success)
 				{
-					// pop arguments
-					for (int i = 0; i < numArguments; i++)
-						_eval.pop();
-
-					// push void
 					_eval.push(values::ex_fn_not_found);
 				}
-
-				// TODO: Verify something was found?
 			}
 			break;
 
