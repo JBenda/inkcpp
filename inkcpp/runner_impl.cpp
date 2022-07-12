@@ -646,7 +646,7 @@ namespace ink::runtime::internal
 			Command cmd = read<Command>();
 			CommandFlag flag = read<CommandFlag>();
 
-			if (_eval->top_value().type() == value_type::ex_fn_not_found) {
+			if (cmd == Command::FUNCTION && _eval.top_value().type() == value_type::ex_fn_not_found) {
 				inkAssert(cmd == Command::FUNCTION, "Failed to call external function and no "
 					"local function exists to call instead! Please bind external function or "
 					"add define a dummy function in your story!"
