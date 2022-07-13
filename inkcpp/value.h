@@ -92,7 +92,7 @@ namespace ink::runtime::internal {
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };
 
-		constexpr value() : _type{value_type::none}, bool_value{0}{}
+		constexpr value() : snapshot_interface(), _type{value_type::none}, bool_value{0}{}
 
 		/// get value of the type (if possible)
 		template<value_type ty>
@@ -165,7 +165,19 @@ namespace ink::runtime::internal {
 				char ci;
 			} pointer;
 		};
-		static constexpr size_t max_value_size = 128;
+		static constexpr size_t max_value_size = 
+			sizeof_largest_type<
+				decltype(bool_value),
+				decltype(int32_value),
+				decltype(string_value),
+				decltype(uint32_value),
+				decltype(float_value),
+				decltype(jump),
+				decltype(list_value),
+				decltype(list_flag_value),
+				decltype(frame_value),
+				decltype(pointer)
+		>();
 		value_type _type;
 	};
 

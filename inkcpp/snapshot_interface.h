@@ -10,8 +10,10 @@ namespace ink::runtime::internal
 	class string_table;
 	template<typename,bool,size_t>
 	class managed_array;
+
 	class snapshot_interface {
 	public:
+		constexpr snapshot_interface(){};
 		static unsigned char* snap_write(unsigned char* ptr, const void* data, size_t length, bool write)
 		{
 			if (write) { memcpy(ptr, data, length); }
