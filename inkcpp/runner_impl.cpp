@@ -646,7 +646,7 @@ namespace ink::runtime::internal
 			Command cmd = read<Command>();
 			CommandFlag flag = read<CommandFlag>();
 
-			if (cmd == Command::FUNCTION && _eval.top_value().type() == value_type::ex_fn_not_found) {
+			if (!_eval.is_empty() && _eval.top().type() == value_type::ex_fn_not_found) {
 				inkAssert(cmd == Command::FUNCTION, "Failed to call external function and no "
 					"local function exists to call instead! Please bind external function or "
 					"add define a dummy function in your story!"
@@ -857,6 +857,7 @@ namespace ink::runtime::internal
 				if (!(flag & CommandFlag::FALLBACK_FUNCTION)) {
 					start_frame<frame_type::function>(target);
 				} else {
+					inkAssert(!_eval.is_empty(), "fallback function but no function call before?");
 					if(_eval.top_value().type() == value_type::ex_fn_not_found) {
 						_eval.pop();
 						start_frame<frame_type::function>(target);
