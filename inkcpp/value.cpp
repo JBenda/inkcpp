@@ -76,7 +76,7 @@ namespace ink::runtime::internal
 		unsigned char* ptr = data;
 		ptr = snap_write(ptr, _type, data);
 		if (_type == value_type::string) {
-			unsigned char buf[max_value_size];
+			unsigned char buf[max_value_size()];
 			string_type* res = reinterpret_cast<string_type*>(buf);
 			auto str = get<value_type::string>();
 			res->allocated = str.allocated;
@@ -88,14 +88,14 @@ namespace ink::runtime::internal
 			ptr = snap_write(ptr, buf, data);
 		} else {
 			// TODO more space efficent?
-			ptr = snap_write(ptr, &bool_value, max_value_size, data);
+			ptr = snap_write(ptr, &bool_value, max_value_size(), data);
 		}
 		return ptr - data;
 	}
 	const unsigned char* value::snap_load(const unsigned char* ptr, const loader& loader)
 	{
 		ptr = snap_read(ptr, _type);
-		ptr = snap_read(ptr, &bool_value, max_value_size);
+		ptr = snap_read(ptr, &bool_value, max_value_size());
 		if(_type == value_type::string) {
 			if(string_value.allocated) {
 				string_value.str = loader.string_table[(std::uintptr_t)(string_value.str)];

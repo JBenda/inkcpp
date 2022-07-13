@@ -165,19 +165,7 @@ namespace ink::runtime::internal {
 				char ci;
 			} pointer;
 		};
-		static constexpr size_t max_value_size =
-			sizeof_largest_type<
-				decltype(bool_value),
-				decltype(int32_value),
-				decltype(string_value),
-				decltype(uint32_value),
-				decltype(float_value),
-				decltype(jump),
-				decltype(list_value),
-				decltype(list_flag_value),
-				decltype(frame_value),
-				decltype(pointer)
-		>();
+		static constexpr size_t max_value_size() { return sizeof(value) - sizeof(value_type); }
 		value_type _type;
 	};
 
