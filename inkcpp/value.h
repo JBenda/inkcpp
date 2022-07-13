@@ -165,7 +165,7 @@ namespace ink::runtime::internal {
 				char ci;
 			} pointer;
 		};
-		static constexpr size_t max_value_size() { return 120; }
+		static constexpr size_t max_value_size = 128;
 		value_type _type;
 	};
 
