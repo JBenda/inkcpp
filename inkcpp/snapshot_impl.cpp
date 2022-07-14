@@ -61,8 +61,8 @@ namespace ink::runtime::internal
 		: _managed{true}
 	{
 		snapshot_interface::snapper snapper{
-			.strings = globals.strings(),
-			.story_string_table = globals._owner->string(0)
+			globals.strings(),
+			globals._owner->string(0)
 		};
 		_length = globals.snap(nullptr, snapper);
 		size_t runner_cnt = 0;

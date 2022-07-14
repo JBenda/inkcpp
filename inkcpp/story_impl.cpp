@@ -182,9 +182,8 @@ namespace ink::runtime::internal
 		const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
 		auto* globs = new globals_impl(this);
 		auto end = globs->snap_load(snapshot.get_globals_snap(), snapshot_interface::loader{
-			.string_table = snapshot.strings(),
-			.story_string_table = _string_table,
-
+			snapshot.strings(),
+			_string_table,
 		});
 		inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
 		return globals(globs, _block);
@@ -205,8 +204,8 @@ namespace ink::runtime::internal
 		auto* run = new runner_impl(this, store);
 		auto end = run->snap_load(snapshot.get_runner_snap(idx),
 				snapshot_interface::loader{
-					.string_table = snapshot.strings(),
-					.story_string_table = _string_table, 
+					snapshot.strings(),
+					_string_table, 
 				});
 		inkAssert(
 			(idx + 1 < snapshot.num_runners() && end == snapshot.get_runner_snap(idx + 1))

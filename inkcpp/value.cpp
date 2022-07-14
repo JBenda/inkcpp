@@ -81,9 +81,9 @@ namespace ink::runtime::internal
 			auto str = get<value_type::string>();
 			res->allocated = str.allocated;
 			if (str.allocated) {
-				res->str = reinterpret_cast<const char*>(snapper.strings.get_id(str.str));
+				res->str = reinterpret_cast<const char*>(static_cast<std::uintptr_t>(snapper.strings.get_id(str.str)));
 			} else {
-				res->str = reinterpret_cast<const char*>(str.str - snapper.story_string_table);
+				res->str = reinterpret_cast<const char*>(static_cast<std::uintptr_t>(str.str - snapper.story_string_table));
 			}
 			ptr = snap_write(ptr, buf, data);
 		} else {

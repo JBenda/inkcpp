@@ -93,6 +93,7 @@ namespace ink::runtime::internal {
 		template<value_type> struct ret { using type = void; };
 
 		constexpr value() : snapshot_interface(), _type{value_type::none}, bool_value{0}{}
+		constexpr explicit value( value_type type ) : _type{ type }, bool_value{0} {}
 
 		/// get value of the type (if possible)
 		template<value_type ty>
@@ -434,11 +435,11 @@ namespace ink::runtime::internal {
 
 	// static constexpr instantiations of flag values
 	namespace values {
-		static constexpr value marker = value{}.set<value_type::marker>();
-		static constexpr value glue = value{}.set<value_type::glue>();
-		static constexpr value newline = value{}.set<value_type::newline>();
-		static constexpr value func_start = value{}.set<value_type::func_start>();
-		static constexpr value func_end = value{}.set<value_type::func_end>();
-		static constexpr value null = value{}.set<value_type::null>();
+		static constexpr value marker = value( value_type::marker );
+		static constexpr value glue = value( value_type::glue );
+		static constexpr value newline = value( value_type::newline );
+		static constexpr value func_start = value( value_type::func_start );
+		static constexpr value func_end = value( value_type::func_end );
+		static constexpr value null = value( value_type::null );
 	}
 }
