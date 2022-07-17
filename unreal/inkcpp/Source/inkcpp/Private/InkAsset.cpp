@@ -1,6 +1,6 @@
 #include "InkAsset.h"
 
-#include "FileHelper.h"
+#include "Misc/FileHelper.h"
 #if WITH_EDITORONLY_DATA
 #include "EditorFramework/AssetImportData.h"
 #endif

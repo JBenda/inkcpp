@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Object.h"
+#include "UObject/Object.h"
 
 #include "Choice.generated.h"
 
@@ -11,10 +11,10 @@ class UChoice : public UObject
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category="Read")
 	FString GetText() const;
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category="Read")
 	int GetIndex() const;
 
 protected:

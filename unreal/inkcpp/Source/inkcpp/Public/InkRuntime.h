@@ -23,24 +23,24 @@ public:
 	AInkRuntime();
 	~AInkRuntime();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Start")
 	UInkThread* Start(TSubclassOf<UInkThread> type, FString path, bool runImmediately = true);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Start")
 	UInkThread* StartExisting(UInkThread* thread, FString path, bool runImmediately = true);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Tags")
 	void RegisterGlobalTagFunction(FName FunctionName, const FGlobalTagFunctionDelegate& Function);
 
 	// Called from UInkThread
 	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
 
 	// Marks a thread as "exclusive". As long as it is running, no other threads will update.
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Exclusive Thread")
 	void PushExclusiveThread(UInkThread* Thread);
 
 	// Removes a thread from the exclusive stack. See PushExclusiveThread.
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Exclusive Thread")
 	void PopExclusiveThread(UInkThread* Thread);
 
 protected:
@@ -52,14 +52,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Story asset used in this level
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Put in correct category")
 	class UInkAsset* InkAsset;
 
 	// Called by threads when they want to register an external function
 	void ExternalFunctionRegistered(FString functionName);
 
 	/* Returns the tags at the specified knot */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category="Tags")
 	UTagList* GetTagsAtPath(FString Path);
 
 private:

@@ -1,8 +1,6 @@
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 list(APPEND SOURCES 
-    collections/restorable.h 
-    collections/restorable.cpp
     array.h
     choice.cpp
     functional.cpp
@@ -16,16 +14,28 @@ list(APPEND SOURCES
     story_ptr.cpp
     system.cpp
     value.h value.cpp
+	tuple.hpp
     string_table.h string_table.cpp avl_array.h
 	list_table.h list_table.cpp
+	operations.h operation_bases.h
 	list_operations.h list_operations.cpp
 	container_operations.h container_operations.cpp
+	numeric_operations.h numeric_operations.cpp
+	string_operations.h string_operations.cpp
 	string_operations.cpp
 	numeric_operations.cpp
+	casting.h
+	executioner.h
+	string_utils.h
 	header.cpp
+	random.h
+)
+list(APPEND COLLECTION_SOURCES
+    collections/restorable.h 
+    collections/restorable.cpp
 )
 source_group(Collections REGULAR_EXPRESSION collections/.*)
-add_library(inkcpp ${SOURCES})
+add_library(inkcpp ${SOURCES} ${COLLECTION_SOURCES})
 target_include_directories(inkcpp PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:include>
@@ -42,3 +52,4 @@ target_compile_features(inkcpp PUBLIC cxx_std_17)
 # Unreal installation
 install(DIRECTORY "include/" DESTINATION "inkcpp/Source/inkcpp/Public/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
 install(FILES ${SOURCES} DESTINATION "inkcpp/Source/inkcpp/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
+install(FILES ${COLLECTION_SOURCES} DESTINATION "inkcpp/Source/inkcpp/Private/ink/collections/" COMPONENT unreal EXCLUDE_FROM_ALL)

@@ -55,10 +55,6 @@ namespace ink
 				std::string get();
 #else
 				// will conflict with stl definition
-#	ifdef INK_ENABLE_UNREAL
-				// Extract into a string
-				FString get();
-#	endif
 #endif
 
 				// Check if the stream is empty
@@ -103,8 +99,8 @@ namespace ink
 				size_t find_start() const;
 				bool should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
 
-				template<typename OUT>
-				void copy_string(const char* str, size_t& dataIter, OUT& output);
+				template<typename T>
+				void copy_string(const char* str, size_t& dataIter, T& output);
 				
 			private:
 				char _last_char;
@@ -126,9 +122,7 @@ namespace ink
 			std::ostream& operator <<(std::ostream&, basic_stream&);
 			basic_stream& operator >>(basic_stream&, std::string&);
 #endif
-#ifdef INK_ENABLE_UNREAL
-			basic_stream& operator >>(basic_stream&, FString&);
-#endif
+
 
 			template<size_t N>
 			class stream : public basic_stream

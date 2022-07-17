@@ -1,6 +1,6 @@
 #include "InkVar.h"
 
-#include "AssertionMacros.h"
+#include "Misc/AssertionMacros.h"
 
 FString UInkVarLibrary::Conv_InkVarString(const FInkVar& InkVar)
 {

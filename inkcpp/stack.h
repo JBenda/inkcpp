@@ -91,6 +91,10 @@ namespace ink
 
 				static const hash_t NulledHashId = ~0;
 			};
+			
+			template<> void basic_stack::push_frame<frame_type::function>(offset_t return_to, bool eval);
+			template<> void basic_stack::push_frame<frame_type::tunnel>(offset_t return_to, bool eval);
+			template<> void basic_stack::push_frame<frame_type::thread>(offset_t return_to, bool eval);
 
 			/**
 			 * @brief stack for call history and temporary variables

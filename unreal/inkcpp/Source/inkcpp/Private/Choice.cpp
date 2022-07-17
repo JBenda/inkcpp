@@ -1,4 +1,5 @@
-#include "Choice.h"
+// name conflict with unreal include
+#include "../Public/Choice.h"
 
 #include "ink/choice.h"
 

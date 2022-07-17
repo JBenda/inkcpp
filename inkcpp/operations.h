@@ -2,7 +2,7 @@
 
 /// Define base constructs to specify by operation headers.
 
-#include "../shared/private/command.h"
+#include "command.h"
 
 namespace ink::runtime::internal {
 

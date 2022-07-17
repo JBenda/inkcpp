@@ -77,10 +77,10 @@ namespace ink
 					append(in[i]);
 			}
 
-			template<typename OUT>
-			inline void write_char(OUT& output, char c)
+			template<typename T>
+			inline void write_char(T& output, char c)
 			{
-				static_assert(always_false<OUT>::value, "Invalid output type");
+				static_assert(always_false<T>::value, "Invalid output type");
 			}
 
 			template<>
@@ -89,11 +89,13 @@ namespace ink
 				(*output++) = c;
 			}
 
+#ifdef INK_ENABLE_STL
 			template<>
 			inline void write_char(std::stringstream& output, char c)
 			{
 				output.put(c);
 			}
+#endif
 
 			inline bool get_next(const value* list, size_t i, size_t size, const value** next)
 			{
@@ -108,8 +110,8 @@ namespace ink
 				return false;
 			}
 
-			template<typename OUT>
-			void basic_stream::copy_string(const char* str, size_t& dataIter, OUT& output)
+			template<typename T>
+			void basic_stream::copy_string(const char* str, size_t& dataIter, T& output)
 			{
 				while(*str != 0) {
 				write_char(output, *str++);
@@ -140,53 +142,10 @@ namespace ink
 				// Return processed string
 				// remove mulitple accourencies of ' '
 				std::string result = str.str();
-				auto end = clean_string<true, false>(result.begin(), result.end());
+				auto end = clean_string<false, false>(result.begin(), result.end());
 				_last_char = *(end-1);
 				result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
 				return result;
-			}
-#endif
-#ifdef INK_ENABLE_UNREAL
-			FString basic_stream::get()
-			{
-				size_t start = find_start();
-
-				// TODO: Slow! FString concatonation.
-				//  Is there really no equivilent of stringstream in Unreal? Some kind of String Builder?
-
-				// Move up from marker
-				bool hasGlue = false;
-				FString str;
-				for (size_t i = start; i < _size; i++)
-				{
-					if (should_skip(i, hasGlue))
-						continue;
-
-					switch (_data[i].type)
-					{
-					case value_type::int32:
-						str += FString::Printf(TEXT("%d"), _data[i].integer_value);
-						break;
-					case value_type::float32:
-						// TODO: Whitespace cleaning
-						str += FString::Printf(TEXT("%f"), _data[i].float_value);
-						break;
-					case value_type::string:
-						str += _data[i].string_val;
-						break;
-					case data_type::newline:
-						str += "\n";
-						break;
-					default:
-						break;
-					}
-				}
-
-				// Reset stream size to where we last held the marker
-				_size = start;
-
-				// Return processed string
-				return str;
 			}
 #endif
 
@@ -367,14 +326,13 @@ namespace ink
 				_size = start;
 
 				// Return processed string
-				{
-				 auto end = clean_string<false,false>(buffer, buffer+length);
-				 *end = 0;
-				 _last_char = end[-1];
-				 if constexpr (RemoveTail) {
-					 if (_last_char == ' ') { end[-1] = 0; }
-				 }
+				end = clean_string<false,false>(buffer, buffer+length);
+				*end = 0;
+				_last_char = end[-1];
+				if constexpr (RemoveTail) {
+					if (_last_char == ' ') { end[-1] = 0; }
 				}
+				
 				return buffer;
 			}
 
@@ -469,7 +427,7 @@ namespace ink
 			void basic_stream::mark_strings(string_table& strings) const
 			{
 				// Find all allocated strings and mark them as used
-				for (int i = 0; i < _size; i++)
+				for (size_t i = 0; i < _size; i++)
 				{
 					if (_data[i].type() == value_type::string) {
 						string_type str = _data[i].get<value_type::string>();
@@ -488,13 +446,6 @@ namespace ink
 			}
 
 			basic_stream& operator>>(basic_stream& in, std::string& out)
-			{
-				out = in.get();
-				return in;
-			}
-#endif
-#ifdef INK_ENABLE_UNREAL
-			basic_stream& operator>>(basic_stream& in, FString& out)
 			{
 				out = in.get();
 				return in;

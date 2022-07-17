@@ -72,7 +72,7 @@ namespace ink::runtime::internal
 	{
 	public:
 		restorable(ElementType* buffer, size_t size)
-			: _buffer(buffer), _size(size), _pos(0), _save(~0), _jump(~0)
+			: _buffer(buffer), _size(size), _pos(0), _jump(~0), _save(~0)
 		{ }
 
 		// Checks if we have a save state

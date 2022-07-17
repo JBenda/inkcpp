@@ -15,7 +15,11 @@ namespace ink::runtime::internal
 		virtual ~function_base() { }
 
 		// calls the underlying function object taking parameters from a stack
-		virtual void call(basic_eval_stack* stack, ink::size_t length, string_table& strings) = 0;
+#ifdef INK_ENABLE_UNREAL
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings) = 0;
+#else
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings) = 0;
+#endif
 
 	protected:
 		// used to hide basic_eval_stack and value definitions
@@ -122,7 +126,7 @@ namespace ink::runtime::internal
 		function_array_delegate(const D& del) : invocableDelegate(del) { }
 
 		// calls the underlying delegate using arguments on the stack
-		virtual void call(basic_eval_stack* stack, size_t length) override
+		virtual void call(basic_eval_stack* stack, size_t length, string_table&) override
 		{
 			// Create variable array
 			TArray<FInkVar> variables;

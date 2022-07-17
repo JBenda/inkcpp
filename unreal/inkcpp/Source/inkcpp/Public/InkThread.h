@@ -35,56 +35,56 @@ public:
 	UInkThread();
 
 	// Yields the thread immediately. Will wait until Resume().
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Controle")
 	void Yield();
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category="Controle")
 	bool IsYielding();
 
 	// Causes the thread to resume if yielded.
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Controle")
 	void Resume();
 
 	// Kills the thread, regardless of state
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Controle")
 	void Stop();
 
 	// Returns the runtime which owns this thread.
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category="Setup")
 	AInkRuntime* GetRuntime() const { return mpRuntime; }
 
 	// Called before the thread begins executing
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, Category="Events")
 	void OnStartup();
 
 	// Called when the thread has printed a new line
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, Category="Events")
 	void OnLineWritten(const FString& line, UTagList* tags);
 
 	// Called when a tag has been processed on the current line
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, Category="Events")
 	void OnTag(const FString& line);
 
 	// Called when the thread has requested a branch
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, Category="Events")
 	void OnChoice(const TArray<UChoice*>& choices);
 
 	// Called before the thread is destroyed
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, Category="Events")
 	void OnShutdown();
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category="Events")
 	FThreadShutdownDelegate OnThreadShutdown;
 
 	// Picks a choice by index at the current branch
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Action")
 	void PickChoice(int index);
 
 	// Registers a callback for a named "tag function"
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Setup")
 	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Setup")
 	void RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function);
 
 protected:

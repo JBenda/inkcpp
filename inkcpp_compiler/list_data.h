@@ -19,7 +19,7 @@ namespace ink::compiler::internal
 		void new_list(const std::string& list_name);
 
 		// add flag to current list
-		void new_flag(const std::string& flag_name, int value);
+		void new_flag(const std::string& flag_name, size_t value);
 
 		lid_t get_lid(const std::string_view& list_name) {
 			auto itr = _lists.find(list_name);
@@ -37,9 +37,9 @@ namespace ink::compiler::internal
 		}
 	private:
 		std::map<std::string, int,std::less<>> _lists;
-		std::vector<int> _list_end;
+		std::vector<size_t> _list_end;
 		std::vector<std::string_view> _list_name;
-		int _current_list_start = 0;
+		size_t _current_list_start = 0;
 		std::vector<std::string> _flag_names;
 	};
 }

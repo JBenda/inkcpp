@@ -11,6 +11,8 @@ namespace ink::runtime::internal
 	public:
 		simple_restorable_stack(T* buffer, size_t size, const T& null)
 			: _buffer(buffer), _size(size), _null(null) { }
+		virtual ~simple_restorable_stack() = default;
+			
 
 		void push(const T& value);
 		T pop();

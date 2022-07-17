@@ -481,10 +481,10 @@ public:
 
 
   /**
-   * Integrity (self) check
+   * Integrity (self) test
    * \return True if the tree intergity is correct, false if error (should not happen normally)
    */   
-  bool check() const
+  bool test() const
   {
     // check root
     if (empty() && (root_ != INVALID_IDX)) {

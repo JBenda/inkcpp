@@ -14,6 +14,11 @@ namespace ink::runtime::internal {
 		|| ty == value_type::int32
 		|| ty == value_type::uint32
 		|| ty == value_type::float32, void>::type;
+	
+	template<value_type ty>
+	using is_signed_numeric_t = typename enable_if<
+		ty == value_type::int32
+		|| ty == value_type::float32, void>::type;
 
 	/// list of internal value types
 	/// produces a SFINAE error if type is not part of list
@@ -369,7 +374,7 @@ namespace ink::runtime::internal {
 	};
 
 	template<value_type ty>
-	class operation<Command::NEGATE, ty,  is_numeric_t<ty>> : public operation_base<void> {
+	class operation<Command::NEGATE, ty,  is_signed_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
 		void operator()(basic_eval_stack& stack, value* vals) {

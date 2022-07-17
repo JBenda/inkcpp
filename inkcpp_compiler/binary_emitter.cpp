@@ -171,8 +171,8 @@ namespace ink::compiler::internal
 
 	void binary_emitter::write_list(Command command, CommandFlag flag, const std::vector<list_flag>& entries) {
 		uint32_t id = _list_count++;
-		for(const list_flag& flag : entries) {
-			_lists.write(flag);
+		for(const list_flag& entry : entries) {
+			_lists.write(entry);
 		}
 		_lists.write(null_flag);
 		write(command, id, flag);

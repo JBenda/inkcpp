@@ -23,7 +23,7 @@
 				) \
 			)); \
 		} else {\
-			inkAssert(vals[1].type()==value_type::list_flag);\
+			inkAssert(vals[1].type()==value_type::list_flag, "list operation was called but second argument is not a list or list_flag");\
 			stack.push(value{}.set<value_type::RET1>( \
 					_list_table.FUN( \
 						vals[0].get<value_type::list_flag>(), \
@@ -32,7 +32,7 @@
 			)); \
 		} \
 	} else { \
-		inkAssert(vals[0].type() == value_type::list); \
+		inkAssert(vals[0].type() == value_type::list, "list operation was called but first argument is not a list or a list_flag!"); \
 		if(vals[1].type() == value_type::list) { \
 			stack.push(value{}.set<value_type::RET2>( \
 				_list_table.FUN( \
@@ -41,7 +41,7 @@
 				) \
 			)); \
 		} else {\
-			inkAssert(vals[1].type()==value_type::list_flag);\
+			inkAssert(vals[1].type()==value_type::list_flag, "list operation was called but second argument ist not a list or list_flag!");\
 			stack.push(value{}.set<value_type::RET3>( \
 					_list_table.FUN( \
 						vals[0].get<value_type::list>(), \
@@ -76,8 +76,8 @@ namespace ink::runtime::internal {
 		{
 			int i = vals[1].type() == value_type::int32
 				? vals[1].get<value_type::int32>()
-				: vals[1].get<value_type::uint32>();
-			inkAssert(vals[0].type() == value_type::list);
+				: static_cast<int>(vals[1].get<value_type::uint32>());
+			inkAssert(vals[0].type() == value_type::list, "try to use list add function but value is not of type list");
 			stack.push(value{}.set<value_type::list>(
 				_list_table.add(vals[0].get<value_type::list>(), i)
 			));
@@ -88,12 +88,13 @@ namespace ink::runtime::internal {
 	void operation<Command::ADD, value_type::list_flag, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::list_flag);
+		inkAssert(vals[0].type() == value_type::list_flag, "try to use add function with list_flag results but first argument is not a list_flag!");
 		inkAssert(vals[1].type() == value_type::int32
-				|| vals[1].type() == value_type::uint32);
+				|| vals[1].type() == value_type::uint32,
+				"try modify a list flag with a non intiger type!");
 		int i = vals[1].type() == value_type::int32
 			? vals[1].get<value_type::int32>()
-			: vals[1].get<value_type::uint32>();
+			: static_cast<int>(vals[1].get<value_type::uint32>());
 		stack.push(value{}.set<value_type::list_flag>(
 			_list_table.add(vals[0].get<value_type::list_flag>(), i)
 		));
@@ -108,7 +109,7 @@ namespace ink::runtime::internal {
 			int i = vals[1].type() == value_type::int32
 				? vals[1].get<value_type::int32>()
 				: vals[1].get<value_type::uint32>();
-			inkAssert(vals[0].type() == value_type::list);
+			inkAssert(vals[0].type() == value_type::list, "A in list resulting subtraction needs at leas one list as argument!");
 			stack.push(value{}.set<value_type::list>(
 				_list_table.sub(vals[0].get<value_type::list>(), i)
 			));
@@ -119,9 +120,10 @@ namespace ink::runtime::internal {
 	void operation<Command::SUBTRACT, value_type::list_flag, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::list_flag);
+		inkAssert(vals[0].type() == value_type::list_flag, "subtraction resulting in list_flag needs a list_flag as first arguments!");
 		inkAssert(vals[1].type() == value_type::int32
-				|| vals[1].type() == value_type::uint32);
+				|| vals[1].type() == value_type::uint32,
+				"Try to subtract non integer value from list_flag.");
 		int i = vals[1].type() == value_type::int32
 			? vals[1].get<value_type::int32>()
 			: vals[1].get<value_type::uint32>();
@@ -170,8 +172,8 @@ namespace ink::runtime::internal {
 	void operation<Command::LIST_INT, value_type::string, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::string);
-		inkAssert(vals[1].type() == value_type::int32);
+		inkAssert(vals[0].type() == value_type::string, "list_flag construction needs the list name as string as first argument!");
+		inkAssert(vals[1].type() == value_type::int32, "list_flag construction needs the flag numeric value as second argument!");
 		list_flag entry = _list_table.get_list_id(vals[0].get<value_type::string>());
 		entry.flag = vals[1].get<value_type::int32>() - 1;
 		stack.push(value{}.set<value_type::list_flag>(entry));
@@ -181,14 +183,14 @@ namespace ink::runtime::internal {
 		if(val.type() == value_type::int32) {
 			return val.get<value_type::int32>() - 1;
 		} else {
-			inkAssert(val.type() == value_type::list_flag);
+			inkAssert(val.type() == value_type::list_flag, "flag value must be a integer or a list_flag");
 			return val.get<value_type::list_flag>().flag;
 		}
 	}
 	void operation<Command::LIST_RANGE, value_type::list, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::list);
+		inkAssert(vals[0].type() == value_type::list, "Can't get range of non list type!");
 		stack.push(value{}.set<value_type::list>(_list_table.range(
 						vals[0].get<value_type::list>(),
 						get_limit(vals[1]),

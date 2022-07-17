@@ -51,7 +51,10 @@ namespace ink::runtime::internal
 	}
 #endif
 #ifdef INK_ENABLE_UNREAL
-	SUPPORT_TYPE_PARAMETER_ONLY(FString);
+	template<>
+	FString function_base::pop<FString>(basic_eval_stack* stack) {
+		return FString(pop<const char*>(stack));
+	}
 
 	template<>
 	FInkVar function_base::pop<FInkVar>(basic_eval_stack* stack)
@@ -63,12 +66,17 @@ namespace ink::runtime::internal
 		case value_type::divert:
 			inkFail("Trying to pass null or divert as ink parameter to external function");
 			break;
-		case value_type::integer:
-			return FInkVar(v.get<int>());
-		case value_type::decimal:
-			return FInkVar(v.get<float>());
+		case value_type::int32:
+			return FInkVar(v.get<value_type::int32>());
+		case value_type::uint32:  {
+			uint32_t n = v.get<value_type::uint32>();
+			inkAssert(n < (~(1<<31)), "Value to large to cast without overlfow to int!");
+			return FInkVar(static_cast<int>(n));
+		}
+		case value_type::float32:
+			return FInkVar(v.get<value_type::float32>());
 		case value_type::string:
-			return FInkVar(v.get<FString>());
+			return FInkVar(FString(v.get<value_type::string>().str));
 		}
 
 		return FInkVar();
@@ -86,10 +94,10 @@ namespace ink::runtime::internal
 			}
 			break;
 		case EInkVarType::Int:
-			stack->push(value.intVar);
+			stack->push(internal::value{}.set<value_type::int32>(value.intVar));
 			break;
 		case EInkVarType::Float:
-			stack->push(value.floatVar);
+			stack->push(internal::value{}.set<value_type::float32>(value.floatVar));
 			break;
 		case EInkVarType::String:
 			inkFail("NOT IMPLEMENTED"); // TODO: String support

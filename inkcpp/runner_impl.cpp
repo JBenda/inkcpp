@@ -246,13 +246,13 @@ namespace ink::runtime::internal
 		// Iterate over the container stack marking any _new_ entries as "visited"
 		if (record_visits)
 		{
-			const container_t* iter;
+			const container_t* con_iter;
 			size_t num_new = _container.size() - pos;
-			while (_container.iter(iter))
+			while (_container.iter(con_iter))
 			{
 				if (num_new <= 0)
 					break;
-				_globals->visit(*iter);
+				_globals->visit(*con_iter);
 				--num_new;
 			}
 		}
@@ -316,7 +316,7 @@ namespace ink::runtime::internal
 	}
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
-		: _story(data), _globals(global.cast<globals_impl>()), _container(~0),
+		: _story(data), _globals(global.cast<globals_impl>()),
 		_operations(
 				global.cast<globals_impl>()->strings(),
 				global.cast<globals_impl>()->lists(),
@@ -324,7 +324,7 @@ namespace ink::runtime::internal
 				*global.cast<globals_impl>(),
 				*data,
 				static_cast<const runner_interface&>(*this)),
-		_backup(nullptr), _done(nullptr), _choices()
+		_backup(nullptr), _done(nullptr), _choices(), _container(~0)
 	{
 		_ptr = _story->instructions();
 		bEvaluationMode = false;
@@ -430,12 +430,9 @@ namespace ink::runtime::internal
 	FString runner_impl::getline()
 	{
 		inkAssert(false, "Fix (see getline for std)");
-		// Advance interpreter one line
-		advance_line();
 
 		// Read line into std::string
 		FString result;
-		_output >> result;
 
 		// Return result
 		inkAssert(_output.is_empty(), "Output should be empty after getline!");
@@ -527,12 +524,12 @@ namespace ink::runtime::internal
 
 #ifdef INK_ENABLE_CSTD
 	char* runner_impl::getline_alloc()
-	{
-		// TODO
+	{                                         
+		/// TODO
+		inkAssert(false, "Not implemented yet!");
 		return nullptr;
-
-#endif
 	}
+#endif
 
 	bool runner_impl::move_to(hash_t path)
 	{
@@ -641,7 +638,9 @@ namespace ink::runtime::internal
 
 	void runner_impl::step()
 	{
+#ifndef INK_ENABLE_UNREAL
 		try
+#endif
 		{
 			inkAssert(_ptr != nullptr, "Can not step! Do not have a valid pointer");
 
@@ -830,7 +829,7 @@ namespace ink::runtime::internal
 				if(flag & CommandFlag::TUNNEL_TO_VARIABLE) {
 					hash_t var_name = read<hash_t>();
 					const value* val = get_var(var_name);
-					inkAssert(val != nullptr);
+					inkAssert(val != nullptr, "Variable containing tunnel target could not be found!");
 					target = val->get<value_type::divert>();
 				} else {
 					target = read<uint32_t>();
@@ -845,7 +844,7 @@ namespace ink::runtime::internal
 				if(flag & CommandFlag::FUNCTION_TO_VARIABLE) {
 					hash_t var_name = read<hash_t>();
 					const value* val = get_var(var_name);
-					inkAssert(val != nullptr);
+					inkAssert(val != nullptr, "Varibale containing function could not be found!");
 					target  = val->get<value_type::divert>();
 				} else {
 					target = read<uint32_t>();
@@ -1131,12 +1130,14 @@ namespace ink::runtime::internal
 				break;
 			}
 		}
+#ifndef INK_ENABLE_UNREAL
 		catch (...)
 		{
 			// Reset our whole state as it's probably corrupt
 			reset();
 			throw;
 		}
+#endif
 	}
 
 	void runner_impl::on_done(bool setDone)
@@ -1201,7 +1202,7 @@ namespace ink::runtime::internal
 		_eval.mark_strings(strings);
 
 		// Take into account choice text
-		for (int i = 0; i < _choices.size(); i++)
+		for (size_t i = 0; i < _choices.size(); i++)
 			strings.mark_used(_choices[i]._text);
 	}
 

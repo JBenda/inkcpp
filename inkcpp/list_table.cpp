@@ -52,7 +52,7 @@ namespace ink::runtime::internal
 
 	list_table::list list_table::create()
 	{
-		for(int i = 0; i < _entry_state.size(); ++i) {
+		for(size_t i = 0; i < _entry_state.size(); ++i) {
 			if (_entry_state[i] == state::empty) {
 				_entry_state[i] = state::used;
 				return list(i);
@@ -82,7 +82,7 @@ namespace ink::runtime::internal
 	}
 
 	void list_table::gc() {
-		for(int i = 0; i < _entry_state.size(); ++i) {
+		for(size_t i = 0; i < _entry_state.size(); ++i) {
 			if (_entry_state[i] == state::unused) {
 				_entry_state[i] = state::empty;
 				data_t* entry = getPtr(i);
@@ -299,10 +299,10 @@ namespace ink::runtime::internal
 	}
 
 
-	list_table::list list_table::add(list arg, int i) {
+	list_table::list list_table::add(list arg, int n) {
 		// TODO: handle i == 0 (for performance only)
-		if (i < 0) {
-			return sub(arg, -i);
+		if (n < 0) {
+			return sub(arg, -n);
 		}
 		list res = create();
 		data_t* l = getPtr(arg.lid);
@@ -314,7 +314,7 @@ namespace ink::runtime::internal
 				for(int j = listBegin(i); j < _list_end[i] - i;++j)
 				{
 					if(hasFlag(l, j)) {
-						setFlag(o,j+i);
+						setFlag(o,j+n);
 						has_flag = true;
 					}
 				}
@@ -339,10 +339,10 @@ namespace ink::runtime::internal
 		return arg;
 	}
 
-	list_table::list list_table::sub(list arg, int i) {
+	list_table::list list_table::sub(list arg, int n) {
 		// TODO: handle i == 0 (for perofrgmance only)
-		if(i < 0) {
-			return add(arg, -i);
+		if(n < 0) {
+			return add(arg, -n);
 		}
 		list res = create();
 		data_t* l = getPtr(arg.lid);
@@ -354,7 +354,7 @@ namespace ink::runtime::internal
 				for(int j = listBegin(i) + i; j < _list_end[i]; ++j)
 				{
 					if(hasFlag(l,j)) {
-						setFlag(o,j-i);
+						setFlag(o,j-n);
 						has_flag = true;
 					}
 				}
@@ -554,14 +554,14 @@ namespace ink::runtime::internal
 
 	list_flag list_table::lrnd(list lh, prng& rng) const {
 		const data_t* l = getPtr(lh.lid);
-		int i = count(lh);
-		rng.rand(i);		
+		int n = count(lh);
+		n = rng.rand(n);
 		int count = 0;
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(l, i)) {
 				for(int j = listBegin(i); j < _list_end[i]; ++j) {
 					if(hasFlag(l,j)) {
-						if(count++ == i) {
+						if(count++ == n) {
 							return list_flag{
 								static_cast<decltype(list_flag::list_id)>(i),
 								static_cast<decltype(list_flag::flag)>( j - listBegin(i) )

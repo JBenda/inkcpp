@@ -6,7 +6,7 @@
 /// define different value_types, and the mapping between type and data.
 
 #include "system.h"
-#include "../shared/private/command.h"
+#include "command.h"
 #include "list_table.h"
 #include "tuple.hpp"
 
@@ -87,7 +87,7 @@ namespace ink::runtime::internal {
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };
 
-		constexpr value() : _type{value_type::none}, uint32_value{0}{}
+		constexpr value() : uint32_value{0}, _type{value_type::none}{}
 
 		/// get value of the type (if possible)
 		template<value_type ty>
@@ -122,7 +122,7 @@ namespace ink::runtime::internal {
 		/// this new type
 		template<typename ... T>
 		value redefine(const value& oth, T& ... env) const {
-			inkAssert(type() == oth.type());
+			inkAssert(type() == oth.type(), "try to redefine value of other type");
 			return redefine<value_type::OP_BEGIN, T...>(oth, {&env...});
 		}
 

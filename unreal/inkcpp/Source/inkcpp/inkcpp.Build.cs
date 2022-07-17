@@ -21,7 +21,9 @@ public class inkcpp : ModuleRules
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-                Path.Combine(ModuleDirectory, "../shared/Private")
+                Path.Combine(ModuleDirectory, "../shared/Private"),
+				Path.Combine(ModuleDirectory, "Private/ink"),
+				Path.Combine(ModuleDirectory, "Public/ink")
             }
 			);
 			

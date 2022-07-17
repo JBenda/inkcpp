@@ -8,7 +8,7 @@
 #endif
 
 namespace ink::internal {
-	class header;
+	struct header;
 }
 namespace ink::runtime::internal
 {
@@ -215,7 +215,7 @@ namespace ink::runtime::internal
 					abs(config::maxListTypes)
 					+ abs(config::maxFlags),
 					sizeof(data_t)
-			) * abs(config::maxLists);
+			) * static_cast<int>(abs(config::maxLists));
 
 		int _entrySize; ///< entry size in data_t 
 		// entries (created lists)
