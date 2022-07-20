@@ -34,6 +34,29 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 					REQUIRE(line3 == "Line 3\n");
 					REQUIRE(line4 == "Line 4\n");
 				}
+			}
+			WHEN("consume lines with functions")
+			{
+				thread->move_to(ink::hash_string("Functions"));
+				std::string line1 = thread->getline();
+				std::string line2 = thread->getline();
+
+				THEN("function lines are correct") {
+					REQUIRE(line1 == "Function Line\n");
+					REQUIRE(line2 == "Function Result\n");
+				}
+			}
+			WHEN("consume lines with tunnels")
+			{
+				thread->move_to(ink::hash_string("Tunnels"));
+				std::string line1 = thread->getline();
+				std::string line2 = thread->getline();
+
+				THEN("tunnel lines are correct") {
+					REQUIRE(line1 == "Tunnel Line\n");
+					REQUIRE(line2 == "Tunnel Result\n");
+				}
+
 				THEN("thread cannot continue")
 				{
 					REQUIRE(!thread->can_continue());
