@@ -578,8 +578,7 @@ namespace ink::runtime::internal
 		if (hasAddedNewText)
 			return change_type::extended_past_newline;
 
-		// Nothing to report yet
-		return change_type::no_change;
+		inkFail("Invalid change detction. Never should be here!");
 	}
 
 	bool runner_impl::line_step()
@@ -606,7 +605,6 @@ namespace ink::runtime::internal
 					forget();
 					break;
 				case change_type::no_change:
-					forget();
 					break;
 				}
 			}
@@ -625,8 +623,8 @@ namespace ink::runtime::internal
 				{
 					// Save a snapshot of the current runtime state so we
 					//  can return here if we end up hitting a new line
-					if (!_saved)
-						save();
+					forget();
+					save();
 				}
 				// Otherwise, make sure we don't have any snapshots hanging around
 				// expect we are in choice handleing
