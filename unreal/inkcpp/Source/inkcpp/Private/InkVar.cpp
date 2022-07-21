@@ -1,6 +1,38 @@
 #include "InkVar.h"
+#include "ink/types.h"
 
 #include "Misc/AssertionMacros.h"
+
+FinFInkVar::FInkVar(ink::runtime::value val) : FInkVar() {
+	using v_types = ink::runtime::value::Type;
+	switch(val.type) {
+		case v_type::Bool:
+			type = EInkVarType::Int;
+			intVar = static_cast<int>(val.v_bool);
+			break;
+		case v_type::Uint32:
+			type = EInkVarType::Int;
+			/// @TODO: add warning if overflows
+			intVar = static_cast<int>(val.v_uint32);
+			break;
+		case v_type::Int32:
+			type = EInkVarType::Int;
+			intVar = val.v_int32;
+			break;
+		case v_type::String:
+			type = EInkVarType::String;
+			stringVar = FString(val.v_string);
+			break;
+		case v_type::Float:
+			type = EInkVarType::Float;
+			floatVar = val.v_float;
+			break;
+		default:
+			inkFail("unknown type!, failed to convert ink::value to InkVar");
+	}
+}
+	
+	value to_value() const;
 
 FString UInkVarLibrary::Conv_InkVarString(const FInkVar& InkVar)
 {

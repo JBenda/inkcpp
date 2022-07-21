@@ -19,6 +19,8 @@ enum class EInkVarType : uint8
 	None
 };
 
+namespace ink::runtime { struct value; }
+
 USTRUCT(BlueprintType)
 struct INKCPP_API FInkVar
 {
@@ -29,6 +31,9 @@ struct INKCPP_API FInkVar
 	FInkVar(float val) { type = EInkVarType::Float; floatVar = val; }
 	FInkVar(int val) { type = EInkVarType::Int; intVar = val; }
 	FInkVar(FString val) { type = EInkVarType::String; stringVar = val; }
+	FInkVar(ink::runtime::value val);
+	
+	ink::runtime::value to_value() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ink")
 	EInkVarType type;

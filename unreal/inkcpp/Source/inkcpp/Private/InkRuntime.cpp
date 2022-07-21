@@ -7,6 +7,7 @@
 #include "InkThread.h"
 #include "TagList.h"
 #include "InkAsset.h"
+#include "InkVar.h"
 
 // inkcpp includes
 #include "ink/story.h"
@@ -98,48 +99,21 @@ void AInkRuntime::Tick(float DeltaTime)
 	}
 }
 
-/*void AInkRuntime::ExternalFunctionRegistered(FString functionName)
+void AInkRuntime::HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params)
 {
-	// Add to registered function set
-	bool alreadyRegistered = false;
-	mRegisteredFunctions.Add(functionName, &alreadyRegistered);
-
-	// If we've never head of this function before, register it with the Story runtime
-	if (!alreadyRegistered) 
-	{
-		FExternalFunctionHandler handler;
-		handler.BindDynamic(this, &AInkRuntime::ExternalFunctionHandler);
-		mpRuntime->RegisterExternalFunction(functionName, handler);
-	}
-}*/
-
-UTagList* AInkRuntime::GetTagsAtPath(FString Path)
-{
-	// TODO
-	// Get tags at knot
-	//auto tags = mpRuntime->TagsForContentAtPath(Path);
-
-	// Convert to a tag list
-	UTagList* result = NewObject<UTagList>(this, UTagList::StaticClass());
-	//result->Initialize(tags);
-
-	return result;
+       // Look for method and execute with parameters
+       FGlobalTagFunctionMulticastDelegate* function = mGlobalTagFunctions.Find(FName(*Params[0]));
+       if (function != nullptr)
+       {
+			function->Broadcast(Caller, Params);
+       }
 }
 
-/*FInkVar AInkRuntime::ExternalFunctionHandler(FString functionName, TArray<FInkVar> arguments)
+void AInkRuntime::RegisterTagFunction(FName functionName, const FTagFunctionDelegate & function)
 {
-	checkf(mpCurrentThread != nullptr, TEXT("Got callback for external function '%s' but no thread is currently active!"), *functionName);
-
-	FInkVar result;
-	bool handled = mpCurrentThread->HandleExternalFunction(functionName, arguments, result);
-	if (!handled)
-	{
-		UE_LOG(InkRuntime, Warning, TEXT("Currently running thread has no implementation of external function %s"), *functionName);
-		return FInkVar();
-	}
-
-	return result;
-}*/
+	// Register tag function
+	mGlobalTagFunctions.FindOrAdd(functionName).Add(function);
+}
 
 UInkThread* AInkRuntime::Start(TSubclassOf<class UInkThread> type, FString path, bool startImmediately)
 {
@@ -185,24 +159,6 @@ UInkThread* AInkRuntime::StartExisting(UInkThread* thread, FString path, bool st
 	return thread;
 }
 
-void AInkRuntime::RegisterGlobalTagFunction(FName FunctionName, const FGlobalTagFunctionDelegate& Function)
-{
-	// Register tag function
-	mGlobalTagFunctions.FindOrAdd(FunctionName).Add(Function);
-}
-
-void AInkRuntime::HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params)
-{
-	// Look for method and execute with parameters
-	FGlobalTagFunctionMulticastDelegate* function = mGlobalTagFunctions.Find(FName(*Params[0]));
-	if (function != nullptr)
-	{
-#define GET_PARAM(n) Params.Num() > n ? Params[n] : FString()
-		function->Broadcast(Caller, GET_PARAM(1), GET_PARAM(2), GET_PARAM(3));
-#undef GET_PARAM
-	}
-}
-
 void AInkRuntime::PushExclusiveThread(UInkThread* Thread)
 {
 	// If we're already on the stack, ignore
@@ -217,4 +173,15 @@ void AInkRuntime::PopExclusiveThread(UInkThread* Thread)
 {
 	// Remove from the stack
 	mExclusiveStack.Remove(Thread);
+}
+
+void AInkRuntime::GetGlobalVariable(FName name, FInkVar& value) const {
+	ink::optional<ink::value> var = mpGlobals->get<ink::value>(TCHAR_TO_ANSI(*name));
+	inkAssert(var, "Reguested variable does not exists!");
+	if(var) { value = *var; }
+}
+
+void AInkRuntime::SetGlobalVariable(FName name, const FInkVar& value) {
+	bool success = mpGlobals->set<ink::value>(TCHAR_TO_ANSI(*name), value.to_value());
+	inkAssert(success, "Unable to set variable");
 }

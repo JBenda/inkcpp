@@ -10,7 +10,10 @@
 
 #include "InkRuntime.generated.h"
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FGlobalTagFunctionDelegate, const TArray<FString>&, Params);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGlobalTagFunctionMulticastDelegate, const TArray<FString>&, Params);
 class UInkThread;
+class FInkVar;
 namespace ink::runtime { class story; }
 
 UCLASS()
@@ -23,25 +26,28 @@ public:
 	AInkRuntime();
 	~AInkRuntime();
 
-	UFUNCTION(BlueprintCallable, Category="Start")
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	UInkThread* Start(TSubclassOf<UInkThread> type, FString path, bool runImmediately = true);
 
-	UFUNCTION(BlueprintCallable, Category="Start")
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	UInkThread* StartExisting(UInkThread* thread, FString path, bool runImmediately = true);
 
-	UFUNCTION(BlueprintCallable, Category="Tags")
-	void RegisterGlobalTagFunction(FName FunctionName, const FGlobalTagFunctionDelegate& Function);
-
-	// Called from UInkThread
-	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
-
 	// Marks a thread as "exclusive". As long as it is running, no other threads will update.
-	UFUNCTION(BlueprintCallable, Category="Exclusive Thread")
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void PushExclusiveThread(UInkThread* Thread);
 
 	// Removes a thread from the exclusive stack. See PushExclusiveThread.
-	UFUNCTION(BlueprintCallable, Category="Exclusive Thread")
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void PopExclusiveThread(UInkThread* Thread);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate & function);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void GetGlobalVariable(FName name, FInkVar& value) const;
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void SetGlobalVariable(FName name, const FInkVar& value);
 
 protected:
 	// Called when the game starts or when spawned
@@ -55,31 +61,13 @@ public:
 	UPROPERTY(EditAnywhere, Category="Put in correct category")
 	class UInkAsset* InkAsset;
 
-	// Called by threads when they want to register an external function
-	void ExternalFunctionRegistered(FString functionName);
-
-	/* Returns the tags at the specified knot */
-	UFUNCTION(BlueprintPure, Category="Tags")
-	UTagList* GetTagsAtPath(FString Path);
-
-private:
-	// UFUNCTION()
-	// FInkVar ExternalFunctionHandler(FString functionName, TArray<FInkVar> arguments);
-
 private:
 	ink::runtime::story* mpRuntime;
 	ink::runtime::globals mpGlobals;
 
 	UPROPERTY()
 	TArray<UInkThread*> mThreads;
-
-	/*UPROPERTY()
-	UInkThread* mpCurrentThread;*/
-
-	UPROPERTY()
-	TSet<FString> mRegisteredFunctions;
-
-	UPROPERTY()
+	
 	TMap<FName, FGlobalTagFunctionMulticastDelegate> mGlobalTagFunctions;
 
 	UPROPERTY()

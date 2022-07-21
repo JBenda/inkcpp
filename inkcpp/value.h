@@ -88,6 +88,9 @@ namespace ink::runtime::internal {
 		template<value_type> struct ret { using type = void; };
 
 		constexpr value() : uint32_value{0}, _type{value_type::none}{}
+		
+		value(const ink::runtime::value& val);
+		ink::runtime::value to_interface_value() const;
 
 		/// get value of the type (if possible)
 		template<value_type ty>

@@ -21,17 +21,8 @@ namespace ink::runtime::internal
 		virtual ~globals_impl() { }
 
 	protected:
-		optional<uint32_t> get_uint(hash_t name) const override;
-		bool set_uint(hash_t name, uint32_t value) override;
-
-	  	optional<int32_t> get_int(hash_t name) const override;
-		bool set_int(hash_t name, int32_t value) override;
-
-		optional<float> get_float(hash_t name) const override;
-		bool set_float(hash_t name, float value) override;
-
-		optional<const char*> get_str(hash_t name) const override;
-		bool set_str(hash_t name, const char* value) override;
+		optional<ink::runtime::value> get_var(hash_t name) const override;
+		bool set_var(hash_t name, const ink::runtime::value& val) override;
 
 	public:
 		// Records a visit to a container
