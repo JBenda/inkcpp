@@ -12,7 +12,9 @@
 #include "Internationalization/Regex.h"
 
 UInkThread::UInkThread() : mbHasRun(false), mnChoiceToChoose(-1), mnYieldCounter(0), mbKill(false) { }
-
+UInkThread::~UInkThread() {
+	delete mpTags;
+}
 void UInkThread::Yield()
 {
 	mnYieldCounter++;
@@ -36,7 +38,7 @@ void UInkThread::RegisterTagFunction(FName functionName, const FTagFunctionDeleg
 
 void UInkThread::RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function)
 {
-	mpRunner->bind(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function);
+	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function);
 }
 
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)
@@ -50,6 +52,7 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 	mpRuntime = runtime;
 	mbInitialized = true;
 	mpRunner = thread;
+	mpTags = NewObject<UTagList>();
 
 	OnStartup();
 }
@@ -125,8 +128,8 @@ bool UInkThread::ExecuteInternal()
 				for(size_t i = 0; i < mpRunner->num_tags(); ++i) {
 					tags.Add(FString(mpRunner->get_tag(i)));
 				}
-				mTags.Initialize(tags);
-				OnLineWritten(line, pTags);
+				mpTags->Initialize(tags);
+				OnLineWritten(line, mpTags);
 				
 				// Handle tags/tag methods post-line
 				for (auto it = tags.CreateConstIterator(); it; ++it)
@@ -185,7 +188,7 @@ void UInkThread::ExecuteTagMethod(const TArray<FString>& Params)
 	FTagFunctionMulticastDelegate* function = mTagFunctions.Find(FName(*Params[0]));
 	if (function != nullptr)
 	{
-		function->Broadcast(Params);
+		function->Broadcast(this, Params);
 	}
 
 	// Forward to runtime

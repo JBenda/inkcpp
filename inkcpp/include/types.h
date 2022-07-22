@@ -26,6 +26,7 @@ namespace ink::runtime
 		enum class Type {
 			Bool, Uint32, Int32, String, Float
 		} type;
+		value() : v_uint32{0}, type{Type::Int32} {}
 		value(bool v) : v_bool{v}, type{Type::Bool} {}
 		value(uint32_t v) : v_uint32{v}, type{Type::Uint32} {}
 		value(int32_t v) : v_int32{v}, type{Type::Int32} {}

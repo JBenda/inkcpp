@@ -3,27 +3,27 @@
 
 #include "Misc/AssertionMacros.h"
 
-FinFInkVar::FInkVar(ink::runtime::value val) : FInkVar() {
+FInkVar::FInkVar(ink::runtime::value val) : FInkVar() {
 	using v_types = ink::runtime::value::Type;
 	switch(val.type) {
-		case v_type::Bool:
+		case v_types::Bool:
 			type = EInkVarType::Int;
 			intVar = static_cast<int>(val.v_bool);
 			break;
-		case v_type::Uint32:
+		case v_types::Uint32:
 			type = EInkVarType::Int;
 			/// @TODO: add warning if overflows
 			intVar = static_cast<int>(val.v_uint32);
 			break;
-		case v_type::Int32:
+		case v_types::Int32:
 			type = EInkVarType::Int;
 			intVar = val.v_int32;
 			break;
-		case v_type::String:
+		case v_types::String:
 			type = EInkVarType::String;
 			stringVar = FString(val.v_string);
 			break;
-		case v_type::Float:
+		case v_types::Float:
 			type = EInkVarType::Float;
 			floatVar = val.v_float;
 			break;
@@ -32,7 +32,21 @@ FinFInkVar::FInkVar(ink::runtime::value val) : FInkVar() {
 	}
 }
 	
-	value to_value() const;
+ink::runtime::value FInkVar::to_value() const {
+	switch(type) {
+		case EInkVarType::Int:
+			return ink::runtime::value(intVar);
+		case EInkVarType::Float:
+			return ink::runtime::value(floatVar);
+		case EInkVarType::String:
+			return ink::runtime::value(TCHAR_TO_ANSI(*stringVar));
+		case EInkVarType::None:
+			inkFail("None type cant be passed");
+		default:
+			inkFail("Unsupported type");
+	}
+	
+}
 
 FString UInkVarLibrary::Conv_InkVarString(const FInkVar& InkVar)
 {

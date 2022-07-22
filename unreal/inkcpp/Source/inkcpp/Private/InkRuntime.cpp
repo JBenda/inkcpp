@@ -13,6 +13,8 @@
 #include "ink/story.h"
 #include "ink/globals.h"
 
+namespace ink { using value = runtime::value; }
+
 // Sets default values
 AInkRuntime::AInkRuntime() : mpRuntime(nullptr)
 {
@@ -175,13 +177,13 @@ void AInkRuntime::PopExclusiveThread(UInkThread* Thread)
 	mExclusiveStack.Remove(Thread);
 }
 
-void AInkRuntime::GetGlobalVariable(FName name, FInkVar& value) const {
+void AInkRuntime::GetGlobalVariable(const FString& name, FInkVar& value) const {
 	ink::optional<ink::value> var = mpGlobals->get<ink::value>(TCHAR_TO_ANSI(*name));
 	inkAssert(var, "Reguested variable does not exists!");
 	if(var) { value = *var; }
 }
 
-void AInkRuntime::SetGlobalVariable(FName name, const FInkVar& value) {
+void AInkRuntime::SetGlobalVariable(const FString& name, const FInkVar& value) {
 	bool success = mpGlobals->set<ink::value>(TCHAR_TO_ANSI(*name), value.to_value());
 	inkAssert(success, "Unable to set variable");
 }

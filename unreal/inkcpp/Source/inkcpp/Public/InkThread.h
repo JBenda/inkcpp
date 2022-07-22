@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 
 #include "InkVar.h"
+#include "InkDelegates.h"
+
 
 #include "ink/runner.h"
 #include "ink/types.h"
@@ -15,10 +17,6 @@
 class UTagList;
 class AInkRuntime;
 class UChoice;
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FTagFunctionDelegate, const TArray<FString>&, Params);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTagFunctionMulticastDelegate, const TArray<FString>&, Params);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FExternalFunctionDelegate, const TArray<FInkVar>&, Arguments, FInkVar&, Result);
 
 /**
  * Base class for all ink threads
@@ -30,6 +28,7 @@ class INKCPP_API UInkThread : public UObject
 
 public:
 	UInkThread();
+	~UInkThread();
 
 	// Yields the thread immediately. Will wait until Resume().
 	UFUNCTION(BlueprintCallable, Category="Ink")
@@ -56,7 +55,7 @@ public:
 
 	// Called when the thread has printed a new line
 	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
-	void OnLineWritten(const FString& line, const UTagList& tags);
+	void OnLineWritten(const FString& line, const UTagList* tags);
 
 	// Called when a tag has been processed on the current line
 	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
@@ -101,9 +100,11 @@ private:
 
 private:
 	ink::runtime::runner mpRunner;
-	UTagList mTags;
+	UTagList* mpTags;
 	TArray<UChoice*> mCurrentChoices; /// @TODO: make accassible?
 
+	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
+	
 	FString mStartPath;
 	bool mbHasRun;
 

@@ -4,16 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
 #include "InkDelegates.h"
+
 #include "ink/types.h"
 #include "ink/globals.h"
 
+
 #include "InkRuntime.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FGlobalTagFunctionDelegate, const TArray<FString>&, Params);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGlobalTagFunctionMulticastDelegate, const TArray<FString>&, Params);
 class UInkThread;
-class FInkVar;
+struct FInkVar;
 namespace ink::runtime { class story; }
 
 UCLASS()
@@ -43,11 +44,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate & function);
 	
-	UFUNCTION(BlueprintCallable, Category="Ink")
-	void GetGlobalVariable(FName name, FInkVar& value) const;
+	// for interanl use
+	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
 	
 	UFUNCTION(BlueprintCallable, Category="Ink")
-	void SetGlobalVariable(FName name, const FInkVar& value);
+	void GetGlobalVariable(const FString& name, FInkVar& value) const;
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void SetGlobalVariable(const FString& name, const FInkVar& value);
 
 protected:
 	// Called when the game starts or when spawned
