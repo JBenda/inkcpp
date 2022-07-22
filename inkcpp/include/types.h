@@ -29,7 +29,7 @@ namespace ink::runtime
 		value(bool v) : v_bool{v}, type{Type::Bool} {}
 		value(uint32_t v) : v_uint32{v}, type{Type::Uint32} {}
 		value(int32_t v) : v_int32{v}, type{Type::Int32} {}
-		value{const char* v} : v_string{v}, type{Type::String} {}
-		value{float v} : v_float{v}, type{Type::float} {}
+		value(const char* v) : v_string{v}, type{Type::String} {}
+		value(float v) : v_float{v}, type{Type::Float} {}
 	};
 }

@@ -9,6 +9,7 @@
 #include "command.h"
 #include "list_table.h"
 #include "tuple.hpp"
+#include "types.h"
 
 #ifdef INK_ENABLE_STL
 #include <iosfwd>
@@ -89,7 +90,8 @@ namespace ink::runtime::internal {
 
 		constexpr value() : uint32_value{0}, _type{value_type::none}{}
 		
-		value(const ink::runtime::value& val);
+		explicit value(const ink::runtime::value& val);
+		bool set( const ink::runtime::value& val );
 		ink::runtime::value to_interface_value() const;
 
 		/// get value of the type (if possible)

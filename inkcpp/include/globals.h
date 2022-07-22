@@ -1,6 +1,6 @@
 #pragma once
 
-#include "system.h"
+#include "types.h"
 
 namespace ink::runtime
 {
@@ -88,7 +88,7 @@ namespace ink::runtime
 	inline optional<int32_t> globals_interface::get<int32_t>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if (var && var->type == value::Type::Int32) {
-			return {v->v_int32};
+			return {var->v_int32};
 		}
 		return nullopt;
 	}
@@ -102,25 +102,25 @@ namespace ink::runtime
 	inline optional<float> globals_interface::get<float>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if ( var && var->type == value::Type::Float) {
-			return {v->v_float};
+			return {var->v_float};
 		}
 		return nullopt;
 	}
 	template<>
 	inline bool globals_interface::set<float>(const char* name, const float& val) {
-		return set_var(string_hash(name), value(val));
+		return set_var(hash_string(name), value(val));
 	}
 	
 	template<>
 	inline optional<const char*> globals_interface::get<const char*>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if ( var && var->type == value::Type::String ) {
-			return {v->v_string};
+			return {var->v_string};
 		}
 		return nullopt;
 	}
 	template<>
-	inline bool globals_interface::set<const char*>(const char* name, const char*& val) {
-		return set_var(string_hash(name), value(val));
+	inline bool globals_interface::set<const char*>(const char* name, const char* const& val) {
+		return set_var(hash_string(name), value(val));
 	}
 }

@@ -70,7 +70,7 @@ namespace ink::runtime::internal
 		return os;
 	}
 	
-	value(const ink::runtime::value& val) {
+	value::value(const ink::runtime::value& val) : value() {
 		using types = ink::runtime::value::Type; 
 		switch (val.type) {
 			case types::Bool:
@@ -90,7 +90,15 @@ namespace ink::runtime::internal
 				break;
 		}
 	}
-	ink::runtime::value to_interface_value() const {
+	bool value::set( const ink::runtime::value& val ) {
+		auto var = value( val );
+		if ( var.type() == type() ) {
+			*this = var;
+			return true;
+		}
+		return false;
+	}
+	ink::runtime::value value::to_interface_value() const {
 		using val = ink::runtime::value;
 		if(type() == value_type::boolean) { return val(get<value_type::boolean>()); }
 		else if(type() == value_type::uint32) { return val(get<value_type::uint32>()); }

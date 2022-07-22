@@ -113,34 +113,29 @@ namespace ink::runtime::internal
 	optional<ink::runtime::value> globals_impl::get_var(hash_t name) const {
 		auto* var = get_variable(name);
 		if (!var) { return nullopt; }
-		return {var.to_interface_value()};
+		return {var->to_interface_value()};
 	}
 	
 	bool globals_impl::set_var(hash_t name, const ink::runtime::value& val) {
 		auto* var = get_variable(name);
 		if (!var) { return false; }
-		var = val;
-		return true;
-	}
-	
-	bool globals_impl::set_str(hash_t name, const char* val) {
-		value* v = get_variable(name);
-		if (v->type() == value_type::string)
-		{
+		if ( val.type == ink::runtime::value::Type::String && var->type() == value_type::string) {
 			size_t size = 0;
 			char* ptr;
-			for(const char*i = val; *i; ++i) { ++size; }
-			char* new_string = strings().create(size + 1);
-			strings().mark_used(new_string);
+			for ( const char* i = val.v_string; *i; ++i ) { ++size; }
+			char* new_string = strings().create( size + 1 );
+			strings().mark_used( new_string );
 			ptr = new_string;
-			for(const char* i = val; *i; ++i) {
+			for ( const char* i = val.v_string; *i; ++i ) {
 				*ptr++ = *i;
 			}
 			*ptr = 0;
-			*v = value{}.set<value_type::string>(static_cast<const char*>(new_string), true);
+			*var = value{}.set<value_type::string>( static_cast<const char*>( new_string ), true );
 			return true;
+		} else {
+			return var->set( val );
 		}
-		return false;
+		inkFail("Unchecked case in set var!");
 	}
 
 	void globals_impl::initialize_globals(runner_impl* run)
