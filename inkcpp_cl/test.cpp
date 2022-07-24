@@ -21,7 +21,7 @@ void inklecate(const std::string& inkFilename, const std::string& jsonFilename)
 
 	// Create command
 	std::stringstream cmd;
-	cmd << inklecateCmd << " -o " << jsonFilename << " " << inkFilename;
+	cmd << inklecateCmd << " -o \"" << jsonFilename << "\" \"" << inkFilename << "\"";
 
 	// Run
 	int result = std::system(cmd.str().c_str());
