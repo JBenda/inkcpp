@@ -86,7 +86,6 @@ void AInkRuntime::Tick(float DeltaTime)
 	for (auto iter = mThreads.CreateIterator(); iter; iter++)
 	{
 		UInkThread* pNextThread = *iter;
-		UE_LOG(InkCpp, Display, TEXT("EXEC thread"));
 
 		// Ignore threads that aren't eligable for execution
 		if (!pNextThread->CanExecute())
@@ -136,12 +135,11 @@ UInkThread* AInkRuntime::Start(TSubclassOf<class UInkThread> type, FString path,
 
 UInkThread* AInkRuntime::StartExisting(UInkThread* thread, FString path, bool startImmediately /*= true*/)
 {
-	UE_LOG(InkCpp, Display, TEXT("Start start"));
 	if (mpRuntime == nullptr)
 	{
+		UE_LOG(InkCpp, Warning, TEXT("Failed to start existing"));
 		return nullptr;
 	}
-	UE_LOG(InkCpp, Display, TEXT("Do More start"));
 
 	// Initialize thread with new runner
 	ink::runtime::runner runner = mpRuntime->new_runner(mpGlobals);

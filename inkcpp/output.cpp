@@ -275,6 +275,7 @@ namespace ink
 								break;
 							case value_type::list_flag:
 								length += lists.stringLen(_data[i].get<value_type::list_flag>());
+								break;
 							default: length += value_length(_data[i]);
 						}
 					}

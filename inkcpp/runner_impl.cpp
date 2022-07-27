@@ -429,13 +429,25 @@ namespace ink::runtime::internal
 #ifdef INK_ENABLE_UNREAL
 	FString runner_impl::getline()
 	{
-		inkAssert(false, "Fix (see getline for std)");
+		FString result{};
+		bool fill = false;
+		do {
+			if ( fill ) {
+				result += " ";
+			}
+			// Advance interpreter one line
+			advance_line();
+			// Read lin ve into std::string
+			const char* str = _output.get_alloc(_globals->strings(), _globals->lists());
+			result.Append( str, c_str_len( str ) );
+			fill = _output.last_char() == ' ';
+		} while ( _ptr != nullptr && _output.last_char() != '\n' );
 
-		// Read line into std::string
-		FString result;
+		// TODO: fallback choice = no choice
+		if ( !has_choices() && _fallback_choice ) { choose( ~0 ); }
 
 		// Return result
-		inkAssert(_output.is_empty(), "Output should be empty after getline!");
+		inkAssert( _output.is_empty(), "Output should be empty after getline!" );
 		return result;
 	}
 #endif
@@ -526,7 +538,7 @@ namespace ink::runtime::internal
 	char* runner_impl::getline_alloc()
 	{                                         
 		/// TODO
-		inkAssert(false, "Not implemented yet!");
+		inkFail("Not implemented yet!");
 		return nullptr;
 	}
 #endif

@@ -12,9 +12,7 @@
 #include "Internationalization/Regex.h"
 
 UInkThread::UInkThread() : mbHasRun(false), mnChoiceToChoose(-1), mnYieldCounter(0), mbKill(false) { }
-UInkThread::~UInkThread() {
-	delete mpTags;
-}
+UInkThread::~UInkThread() {}
 void UInkThread::Yield()
 {
 	mnYieldCounter++;
@@ -59,7 +57,6 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 
 bool UInkThread::ExecuteInternal()
 {
-	UE_LOG(InkCpp, Display, TEXT("UInkThread::ExecuteInternal"));
 	// Kill thread
 	if (mbKill)
 		return true;
@@ -94,7 +91,6 @@ bool UInkThread::ExecuteInternal()
 		{
 			// Handle text
 			FString line = mpRunner->getline();
-			UE_LOG(InkCpp, Display, TEXT("line: %s"), *line);
 			// Special: Line begins with >> marker
 			if (line.StartsWith(TEXT(">>")))
 			{
@@ -130,7 +126,6 @@ bool UInkThread::ExecuteInternal()
 					tags.Add(FString(mpRunner->get_tag(i)));
 				}
 				mpTags->Initialize(tags);
-				UE_LOG(InkCpp, Display, TEXT("Call linewriten"));
 				OnLineWritten(line, mpTags);
 				
 				// Handle tags/tag methods post-line
@@ -199,7 +194,6 @@ void UInkThread::ExecuteTagMethod(const TArray<FString>& Params)
 
 bool UInkThread::Execute()
 {
-	UE_LOG(InkCpp, Display, TEXT("UInkThread::Execute"));
 	// Execute thread
 	bool finished = ExecuteInternal();
 
@@ -215,10 +209,18 @@ bool UInkThread::Execute()
 	return finished;
 }
 
-void UInkThread::PickChoice(int index)
+bool UInkThread::PickChoice(int index)
 {
+	if (index >= mCurrentChoices.Num()) {
+		UE_LOG(InkCpp, Warning,
+			TEXT("PickChoice: index(%i) out of range [0-%i)"),
+				index,
+				mCurrentChoices.Num());
+		return false;
+	}
 	mnChoiceToChoose = index;
 	mbInChoice = false;
+	return true;
 }
 
 bool UInkThread::CanExecute() const
