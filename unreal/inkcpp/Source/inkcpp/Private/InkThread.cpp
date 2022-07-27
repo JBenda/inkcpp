@@ -59,6 +59,7 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 
 bool UInkThread::ExecuteInternal()
 {
+	UE_LOG(InkCpp, Display, TEXT("UInkThread::ExecuteInternal"));
 	// Kill thread
 	if (mbKill)
 		return true;
@@ -93,7 +94,7 @@ bool UInkThread::ExecuteInternal()
 		{
 			// Handle text
 			FString line = mpRunner->getline();
-
+			UE_LOG(InkCpp, Display, TEXT("line: %s"), *line);
 			// Special: Line begins with >> marker
 			if (line.StartsWith(TEXT(">>")))
 			{
@@ -129,6 +130,7 @@ bool UInkThread::ExecuteInternal()
 					tags.Add(FString(mpRunner->get_tag(i)));
 				}
 				mpTags->Initialize(tags);
+				UE_LOG(InkCpp, Display, TEXT("Call linewriten"));
 				OnLineWritten(line, mpTags);
 				
 				// Handle tags/tag methods post-line
@@ -197,6 +199,7 @@ void UInkThread::ExecuteTagMethod(const TArray<FString>& Params)
 
 bool UInkThread::Execute()
 {
+	UE_LOG(InkCpp, Display, TEXT("UInkThread::Execute"));
 	// Execute thread
 	bool finished = ExecuteInternal();
 

@@ -30,8 +30,6 @@ AInkRuntime::~AInkRuntime()
 // Called when the game starts or when spawned
 void AInkRuntime::BeginPlay()
 {
-	Super::BeginPlay();
-
 	// Create the CPU for the story
 	if (InkAsset != nullptr)
 	{
@@ -46,6 +44,8 @@ void AInkRuntime::BeginPlay()
 	{
 		UE_LOG(InkCpp, Warning, TEXT("No story asset assigned."));
 	}
+	
+	Super::BeginPlay();
 }
 
 // Called every frame
@@ -86,6 +86,7 @@ void AInkRuntime::Tick(float DeltaTime)
 	for (auto iter = mThreads.CreateIterator(); iter; iter++)
 	{
 		UInkThread* pNextThread = *iter;
+		UE_LOG(InkCpp, Display, TEXT("EXEC thread"));
 
 		// Ignore threads that aren't eligable for execution
 		if (!pNextThread->CanExecute())
@@ -119,8 +120,10 @@ void AInkRuntime::RegisterTagFunction(FName functionName, const FTagFunctionDele
 
 UInkThread* AInkRuntime::Start(TSubclassOf<class UInkThread> type, FString path, bool startImmediately)
 {
+	UE_LOG(InkCpp, Display, TEXT("Start"));
 	if (mpRuntime == nullptr || type == nullptr)
 	{
+		UE_LOG(InkCpp, Warning, TEXT("failed to start"));
 		return nullptr;
 	}
 
@@ -133,10 +136,12 @@ UInkThread* AInkRuntime::Start(TSubclassOf<class UInkThread> type, FString path,
 
 UInkThread* AInkRuntime::StartExisting(UInkThread* thread, FString path, bool startImmediately /*= true*/)
 {
+	UE_LOG(InkCpp, Display, TEXT("Start start"));
 	if (mpRuntime == nullptr)
 	{
 		return nullptr;
 	}
+	UE_LOG(InkCpp, Display, TEXT("Do More start"));
 
 	// Initialize thread with new runner
 	ink::runtime::runner runner = mpRuntime->new_runner(mpGlobals);
