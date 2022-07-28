@@ -18,7 +18,7 @@ jobs:
           - os: macos-latest
             artifact: macos
             name: MacOSX
-            inklecate_url: https://github.com/inkle/ink/releases/download/0.9.0/inklecate_mac.zip
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.0.0/inklecate_mac.zip
             proof: false
           - os: windows-latest
             artifact: win64

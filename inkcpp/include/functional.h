@@ -128,17 +128,23 @@ namespace ink::runtime::internal
 		// calls the underlying delegate using arguments on the stack
 		virtual void call(basic_eval_stack* stack, size_t length, string_table&) override
 		{
+			constexpr bool RET_VOID = 
+				is_same<typename function_traits<decltype(&D::Execute)>::return_type,
+						void>::value;
 			// Create variable array
 			TArray<FInkVar> variables;
 			for (size_t i = 0; i < length; i++)
 			{
 				variables.Add(pop<FInkVar>(stack));
 			}
-
-			FInkVar result;
-			invocableDelegate.ExecuteIfBound(variables, result);
-
-			push(stack, result);
+            if constexpr (RET_VOID)
+			{
+				invocableDelegate.Execute(variables);
+				push(stack, 0);
+			} else {
+				FInkVar result = invocableDelegate.Execute(variables);
+				push(stack, result);
+			}
 		}
 	private:
 		D invocableDelegate;

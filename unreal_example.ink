@@ -1,6 +1,7 @@
 ->Start
-EXTERNAL SetBrightness(x)
+// EXTERNAL SetBrightness(x)
 === function SetBrightness(x) ===
+	oho
 
 VAR brightness = 50
 

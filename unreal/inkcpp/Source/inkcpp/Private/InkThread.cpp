@@ -39,6 +39,11 @@ void UInkThread::RegisterExternalFunction(const FString& functionName, const FEx
 	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function);
 }
 
+void UInkThread::RegisterExternalEvent(const FString& functionName, const FExternalFunctionVoidDelegate& function)
+{
+	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function);
+}
+
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)
 {
 	if (!ensureMsgf(!mbInitialized, TEXT("Thread already initialized!")))

@@ -2,19 +2,24 @@
 
 #include "EditorFramework/AssetImportData.h"
 #include "Misc/FileHelper.h"
+#include "Interfaces/IPluginManager.h"
 
 #include "InkAsset.h"
 #include "ink/compiler.h"
+#include "inklecate_cmd.cpp"
 
 #include <sstream>
 #include <cstdlib>
+
+DECLARE_LOG_CATEGORY_EXTERN(InkCpp, Log, All);
+DEFINE_LOG_CATEGORY(InkCpp);
 
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: UFactory(ObjectInitializer), FReimportHandler()
 {
 	// Add ink format
 	Formats.Add(FString(TEXT("json;")) + NSLOCTEXT("UInkAssetFactory", "FormatInkJSON", "Ink JSON File").ToString());
-	Formats.Add(FString(TEXT("ink;")) + NSLOCTEXT("UInkAssetFactory", "FormatInk", "Ink File").ToString())
+	Formats.Add(FString(TEXT("ink;")) + NSLOCTEXT("UInkAssetFactory", "FormatInk", "Ink File").ToString());
 
 	// Set class
 	SupportedClass = UInkAsset::StaticClass();
@@ -29,22 +34,29 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 {
 	std::stringstream output;
 	std::stringstream cmd;
-	static constexpr std::string ink_suffix{".ink"};
+	static const std::string inklecate_cmd{ INKLECATE_CMD };
+	static const std::string ink_suffix{".ink"};
 	try
 	{
 		std::string cFilename = TCHAR_TO_ANSI(*Filename);
 		if (cFilename.size() > ink_suffix.size()
 				&& std::equal(ink_suffix.rbegin(), ink_suffix.rend(), cFilename.rbegin()))
 		{
-			cmd << INKLECAT_CMD << " -o " << cFilename << ".json " << cFilename;
-			int result = std::system(cmd.str().c_str())
+			if(inklecate_cmd.size() == 0) {
+				UE_LOG(InkCpp, Warning, TEXT("Inklecate provided with the plugin, please import ink.json files"));
+				return nullptr;
+			}
+			cmd 
+				<< TCHAR_TO_ANSI(*IPluginManager::Get().FindPlugin(TEXT("InkCPP"))->GetContentDir())
+				<< inklecate_cmd << " -o " << cFilename << ".json " << cFilename;
+			int result = std::system(cmd.str().c_str());
 			if (result != 0) {
 				UE_LOG(InkCpp, Warning, TEXT("Inklecate failed with exit code %i"), result);
 				return nullptr;
 			}
 			cFilename += ".json";
 		}
-		ink::compiler::run(cFilename, output);
+		ink::compiler::run(cFilename.c_str(), output);
 
 		// Create ink asset
 		UInkAsset* asset = NewObject<UInkAsset>(InParent, InClass, InName, Flags);

@@ -79,6 +79,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	void RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void RegisterExternalEvent(const FString& functionName, const FExternalFunctionVoidDelegate& function);
+	
 
 protected:
 	virtual void OnStartup_Implementation() { }
