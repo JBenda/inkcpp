@@ -7,12 +7,14 @@
 #include "ink/compiler.h"
 
 #include <sstream>
+#include <cstdlib>
 
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: UFactory(ObjectInitializer), FReimportHandler()
 {
 	// Add ink format
 	Formats.Add(FString(TEXT("json;")) + NSLOCTEXT("UInkAssetFactory", "FormatInkJSON", "Ink JSON File").ToString());
+	Formats.Add(FString(TEXT("ink;")) + NSLOCTEXT("UInkAssetFactory", "FormatInk", "Ink File").ToString())
 
 	// Set class
 	SupportedClass = UInkAsset::StaticClass();
@@ -26,9 +28,23 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled)
 {
 	std::stringstream output;
+	std::stringstream cmd;
+	static constexpr std::string ink_suffix{".ink"};
 	try
 	{
-		ink::compiler::run(TCHAR_TO_ANSI(*Filename), output);
+		std::string cFilename = TCHAR_TO_ANSI(*Filename);
+		if (cFilename.size() > ink_suffix.size()
+				&& std::equal(ink_suffix.rbegin(), ink_suffix.rend(), cFilename.rbegin()))
+		{
+			cmd << INKLECAT_CMD << " -o " << cFilename << ".json " << cFilename;
+			int result = std::system(cmd.str().c_str())
+			if (result != 0) {
+				UE_LOG(InkCpp, Warning, TEXT("Inklecate failed with exit code %i"), result);
+				return nullptr;
+			}
+			cFilename += ".json";
+		}
+		ink::compiler::run(cFilename, output);
 
 		// Create ink asset
 		UInkAsset* asset = NewObject<UInkAsset>(InParent, InClass, InName, Flags);

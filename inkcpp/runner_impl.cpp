@@ -429,6 +429,7 @@ namespace ink::runtime::internal
 #ifdef INK_ENABLE_UNREAL
 	FString runner_impl::getline()
 	{
+		clear_tags();
 		FString result{};
 		bool fill = false;
 		do {
