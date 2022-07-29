@@ -427,7 +427,8 @@ namespace ink
 						for(const char* i=_data[iter].get<value_type::string>();
 								*i; ++i)
 						{
-							if (!isspace(*i)) {
+							// isspace only supports characters in [0, UCHAR_MAX]
+							if (!isspace(static_cast<unsigned char>(*i))) {
 								hasGlue = false;
 								break;
 							}
