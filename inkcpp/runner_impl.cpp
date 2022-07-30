@@ -364,8 +364,7 @@ namespace ink::runtime::internal
 			// Advance interpreter one line
 			advance_line();
 			// Read line into std::string
-			std::string part;
-			_output >> part;
+			result += _output.get();
 			fill = _output.last_char() == ' ';
 		} while(_ptr != nullptr && _output.last_char() != '\n');
 
