@@ -366,7 +366,6 @@ namespace ink::runtime::internal
 			// Read line into std::string
 			std::string part;
 			_output >> part;
-			result += part;
 			fill = _output.last_char() == ' ';
 		} while(_ptr != nullptr && _output.last_char() != '\n');
 

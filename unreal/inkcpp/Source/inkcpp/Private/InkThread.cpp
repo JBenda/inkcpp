@@ -101,7 +101,7 @@ bool UInkThread::ExecuteInternal()
 			{
 				// This is a special version of the tag function call
 				// Expected: >> MyTagFunction(Arg1, Arg2, Arg3)
-				FRegexPattern pattern = FRegexPattern(TEXT("^>>\\s*(\\w+)\\s*(\\((([\\w ]+)(,\\s*([\\w ]+))*)?\\))?$"));
+				FRegexPattern pattern = FRegexPattern(TEXT("^>>\\s*(\\w+)(\\((\\s*(\\w+)\\s*(,\\s*(\\w+)\\s*)*)?\\))?$"));
 				FRegexMatcher matcher = FRegexMatcher(pattern, line);
 				if (matcher.FindNext())
 				{

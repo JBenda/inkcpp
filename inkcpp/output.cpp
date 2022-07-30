@@ -327,7 +327,7 @@ namespace ink
 				_size = start;
 
 				// Return processed string
-				end = clean_string<false,false>(buffer, buffer+length);
+				end = clean_string<true, false>(buffer, buffer + c_str_len(buffer));
 				*end = 0;
 				_last_char = end[-1];
 				if constexpr (RemoveTail) {
