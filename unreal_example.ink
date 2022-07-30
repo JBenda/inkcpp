@@ -1,5 +1,5 @@
 ->Start
-// EXTERNAL SetBrightness(x)
+EXTERNAL SetBrightness(x)
 === function SetBrightness(x) ===
 	oho
 
@@ -10,11 +10,11 @@ LIST background = (a), b, c
 === Start ===
 Hello, your personal assistent here.
 Why we don't start with some customisation options:
-* Yes
+* [Yes]
 	-> Settings ->
 	How The story looks now? much better :)
 	->DONE
-* I Don't like you.
+* [I Don't like you.]
 	Then Bye
 	->DONE
 
@@ -31,23 +31,23 @@ And now some custom background :)
 
 = Color
 Which color do like?
-+ Magenta
++ [Magenta]
 	A wired choice ... # setColor_255_0_255
-+ Cyan
++ [Cyan]
 	A think this will be a intense experience. # setColor_0_255_255
-+ Yellow
++ [Yellow]
 	A delighting decision. # setColor_255_255_0
 - Do You Like your decision?
-+ Yes ->->
-+ No -> Color
++ [Yes] ->->
++ [No] -> Color
 
 = Brightness
 Do you like the Brightness level?
-+ A bit more please.
++ [A bit more please.]
 	~ brightness += 5
-+ A bit less.
++ [A bit less.]
 	~ brightness -= 5
-+ The settings {is fine| is now to my compliance!}
++ [The settings {is fine| is now to my compliance!}]
 	->->
 -   ~ SetBrightness(brightness)
 	->Brightness
@@ -55,10 +55,10 @@ Do you like the Brightness level?
 = Background
 >> SetBg({background})
 How do you like this image?
-+ {background < LIST_MAX(LIST_ALL(background))} Mhe the next please.
++ {background < LIST_MAX(LIST_ALL(background))} [Mhe the next please.]
 	~ background++
-+ {background > LIST_MIN(LIST_ALL(background))} Can you show me the previous please?
++ {background > LIST_MIN(LIST_ALL(background))} [Can you show me the previous please?]
 	~ background--
-+ This is great
++ [This is great]
 	->->
 - -> Background
