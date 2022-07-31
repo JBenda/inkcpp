@@ -182,7 +182,7 @@ void AInkRuntime::PopExclusiveThread(UInkThread* Thread)
 	mExclusiveStack.Remove(Thread);
 }
 
-FInkVar AInkRuntime::GetGlobalVariable(const FString& name) const {
+FInkVar AInkRuntime::GetGlobalVariable(const FString& name) {
 	ink::optional<ink::value> var = mpGlobals->get<ink::value>(TCHAR_TO_ANSI(*name));
 	(var, "Reguested variable does not exists!");
 	if(var) { return FInkVar(*var); }
