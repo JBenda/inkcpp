@@ -119,7 +119,8 @@ namespace ink::runtime::internal
 	bool globals_impl::set_var(hash_t name, const ink::runtime::value& val) {
 		auto* var = get_variable(name);
 		if (!var) { return false; }
-		if ( val.type == ink::runtime::value::Type::String && var->type() == value_type::string) {
+		if ( val.type == ink::runtime::value::Type::String) {
+			if (!(var->type() == value_type::none || var->type() == value_type::string)) { return false; }
 			size_t size = 0;
 			char* ptr;
 			for ( const char* i = val.v_string; *i; ++i ) { ++size; }
@@ -143,12 +144,12 @@ namespace ink::runtime::internal
 		// If no way to move there, then there are no globals.
 		if (!run->move_to(hash_string("global decl")))
 		{
-			_globals_initialized = true;
 			return;
 		}
 
 		// execute one line to startup the globals
 		run->getline_silent();
+		_globals_initialized = true;
 	}
 
 	void globals_impl::gc()

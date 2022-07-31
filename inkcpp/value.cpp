@@ -92,7 +92,7 @@ namespace ink::runtime::internal
 	}
 	bool value::set( const ink::runtime::value& val ) {
 		auto var = value( val );
-		if ( var.type() == type() ) {
+		if ( type() == value_type::none || var.type() == type() ) {
 			*this = var;
 			return true;
 		}

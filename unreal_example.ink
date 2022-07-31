@@ -1,14 +1,21 @@
 ->Start
 EXTERNAL SetBrightness(x)
 === function SetBrightness(x) ===
-	oho
+      ~ return
+
+EXTERNAL GetGreeting()
+=== function GetGreeting() ===
+	~ return "Hey, "
 
 VAR brightness = 50
+
+VAR date = "???"
 
 LIST background = (a), b, c
 
 === Start ===
-Hello, your personal assistent here.
+{GetGreeting()}, your personal assistent here.  # Story Start
+Today is the {date}
 Why we don't start with some customisation options:
 * [Yes]
 	-> Settings ->

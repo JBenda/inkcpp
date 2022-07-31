@@ -126,7 +126,7 @@ namespace ink::runtime::internal
 		function_array_delegate(const D& del) : invocableDelegate(del) { }
 
 		// calls the underlying delegate using arguments on the stack
-		virtual void call(basic_eval_stack* stack, size_t length, string_table&) override
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings) override
 		{
 			constexpr bool RET_VOID = 
 				is_same<typename function_traits<decltype(&D::Execute)>::return_type,
@@ -142,7 +142,19 @@ namespace ink::runtime::internal
 				invocableDelegate.Execute(variables);
 				push(stack, 0);
 			} else {
-				FInkVar result = invocableDelegate.Execute(variables);
+				
+				auto ret = invocableDelegate.Execute(variables);
+				ink::runtime::value result = ret.to_value();
+				if(result.type == ink::runtime::value::Type::String) {
+					const char* src = result.v_string;
+					size_t len = string_handler<const char*>::length(src);
+					char* buffer = allocate(strings, len + 1);
+					char* ptr = buffer;
+					while(*src != '\0')
+						*(ptr++) = *(src++);
+					*ptr = 0;
+					result.v_string = buffer;
+				}
 				push(stack, result);
 			}
 		}

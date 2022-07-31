@@ -48,7 +48,7 @@ public:
 	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
 	
 	UFUNCTION(BlueprintCallable, Category="Ink")
-	void GetGlobalVariable(const FString& name, FInkVar& value) const;
+	FInkVar GetGlobalVariable(const FString& name) const;
 	
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	void SetGlobalVariable(const FString& name, const FInkVar& value);

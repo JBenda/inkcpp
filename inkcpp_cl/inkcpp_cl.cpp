@@ -140,12 +140,10 @@ int main(int argc, const char** argv)
 
 		// Start runner
 		runner thread = myInk->new_runner();
-
 		while (true)
 		{
 			while (thread->can_continue())
 				std::cout << thread->getline();
-
 			if (thread->has_tags()){
 				std::cout << "# tags: ";
 				for (int i = 0; i < thread->num_tags(); ++i) {
