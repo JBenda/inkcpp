@@ -52,7 +52,8 @@ namespace ink::runtime::internal {
 		inline typename value::ret<to>::type numeric_cast(const value& v) {
 			if (to == v.type()) { return v.get<to>(); }
 			else {
-				throw ink_exception("invalid numeric_cast!");
+				inkFail("invalid numeric_cast!");
+				return 0;
 			}
 		}
 
@@ -66,7 +67,8 @@ namespace ink::runtime::internal {
 				case value_type::boolean:
 					return static_cast<uint32_t>(v.get<value_type::boolean>());
 				default:
-					throw ink_exception("invalid cast to uint!");
+					inkFail("invalid cast to uint!");
+					return 0;
 			}
 		}
 
@@ -78,7 +80,8 @@ namespace ink::runtime::internal {
 				case value_type::boolean:
 					return static_cast<int32_t>(v.get<value_type::boolean>());
 				default:
-					throw ink_exception("invalid cast to int!");
+					inkFail("invalid cast to int!");
+					return 0;
 			}
 		}
 
@@ -92,7 +95,8 @@ namespace ink::runtime::internal {
 				case value_type::int32:
 					return static_cast<float>(v.get<value_type::int32>());
 				default:
-					throw ink_exception("invalid numeric_cast!");
+					inkFail("invalid numeric_cast!");
+					return 0;
 			}
 		}
 	}

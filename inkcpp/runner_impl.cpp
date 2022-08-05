@@ -188,8 +188,8 @@ namespace ink::runtime::internal
 
 		// Iterate until we find the container marker just before our own
 		while (_story->iterate_containers(iter, container_id, offset, reverse)) {
-			if (!reverse && offset > _ptr
-					|| reverse && offset < _ptr) {
+			if (( !reverse && offset > _ptr )
+					|| ( reverse && offset < _ptr )) {
 
 				// Step back once in the iteration and break
 				inBound = true;
@@ -202,11 +202,11 @@ namespace ink::runtime::internal
 
 		bool first = true;
 		// Start moving forward (or backwards)
-		if(inBound && (offset == nullptr || !reverse&&offset<=dest || reverse&&offset>dest) )
+		if(inBound && (offset == nullptr || (!reverse&&offset<=dest) || (reverse&&offset>dest)) )
 			while (_story->iterate_containers(iter, container_id, offset, reverse))
 			{
 				// Break when we've past the destination
-				if (!reverse && offset > dest || reverse && offset <= dest) {
+				if ((!reverse && offset > dest) || (reverse && offset <= dest)) {
 					// jump back to start of same container
 					if(first && reverse && offset == dest
 							&& _container.top() == container_id)  {
@@ -587,6 +587,7 @@ namespace ink::runtime::internal
 			return change_type::extended_past_newline;
 
 		inkFail("Invalid change detction. Never should be here!");
+		return change_type::no_change;
 	}
 
 	bool runner_impl::line_step()
@@ -711,7 +712,7 @@ namespace ink::runtime::internal
 				if(bEvaluationMode) {
 					_eval.push(value{}.set<value_type::value_pointer>(val, static_cast<char>(flag) - 1));
 				} else {
-					throw ink_exception("never conciderd what should happend here! (value pointer print)");
+					inkFail("never conciderd what should happend here! (value pointer print)");
 				}
 			}
 			break;

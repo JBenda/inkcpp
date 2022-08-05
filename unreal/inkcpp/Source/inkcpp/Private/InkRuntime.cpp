@@ -184,7 +184,6 @@ void AInkRuntime::PopExclusiveThread(UInkThread* Thread)
 
 FInkVar AInkRuntime::GetGlobalVariable(const FString& name) {
 	ink::optional<ink::value> var = mpGlobals->get<ink::value>(TCHAR_TO_ANSI(*name));
-	(var, "Reguested variable does not exists!");
 	if(var) { return FInkVar(*var); }
 	else { UE_LOG(InkCpp, Warning, TEXT("Failed to find global variable with name: %s"), *name); }
 	return FInkVar{};

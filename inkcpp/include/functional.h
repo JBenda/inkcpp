@@ -3,6 +3,9 @@
 #include "traits.h"
 #include "system.h"
 
+#ifdef  INK_ENABLE_UNREAL
+#include "../InkVar.h"
+#endif
 namespace ink::runtime::internal
 {
 	class basic_eval_stack;

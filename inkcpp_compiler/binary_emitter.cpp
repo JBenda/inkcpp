@@ -26,7 +26,7 @@ namespace ink::compiler::internal
 		if (
 				context == nullptr ||
 				sep == nullptr ||
-				s == nullptr && *context == nullptr )
+				(s == nullptr && *context == nullptr) )
 		{
 			errno = EINVAL;
 			return nullptr;

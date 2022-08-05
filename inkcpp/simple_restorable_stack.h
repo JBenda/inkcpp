@@ -31,7 +31,7 @@ namespace ink::runtime::internal
 
 	protected:
 		virtual void overflow(T*& buffer, size_t& size) {
-			throw ink_exception("Stack overflow!");
+			inkFail("Stack overflow!");
 		}
 
 		void initialize_data(T* buffer, size_t size) {
@@ -62,7 +62,7 @@ namespace ink::runtime::internal
 		managed_restorable_stack(const T& null) :
 			simple_restorable_stack<T>(nullptr, 0, null), _stack{}
 		{ base::initialize_data(_stack.data(), N); }
-		virtual void overflow(T*& buffer, size_t& size) override final {
+		virtual void overflow(T*& buffer, size_t& size) override {
 			if constexpr (dynamic) {
 				if (buffer) {
 					_stack.extend();

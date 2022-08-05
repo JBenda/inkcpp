@@ -122,7 +122,7 @@ namespace ink
 	void ink_assert(bool condition, const char* msg = nullptr);
 	[[ noreturn ]] inline void ink_assert(const char* msg = nullptr) { ink_assert(false, msg); exit(EXIT_FAILURE);}
 #else
-	[[ noreturn ]] inline void ink_fail(const char*) { check(false); throw nullptr; }
+	inline void ink_fail(const char*) { checkNoEntry(); }
 #endif
 
 #ifdef INK_ENABLE_STL
@@ -176,7 +176,7 @@ namespace ink
 	public:
 		optional() {}
 		optional(nullopt_t) {}
-		optional(T&& val) : _has_value{true}, _value{std::forward<T&&>(val)}{}
+		optional(T&& val) : _has_value{true}, _value{val}{}
 		optional(const T& val) : _has_value{true}, _value{val}{}
 
 		const T& operator*() const { return _value; }
@@ -190,12 +190,12 @@ namespace ink
 		constexpr operator bool() const { return has_value(); }
 		template<typename U>
 		constexpr T value_or(U&& u) const {
-			return _has_value ? _value : static_cast<T>(std::forward<U>(u));
+			return _has_value ? _value : static_cast<T>(u);
 		}
 	private:
 		void test_value() const {
 			if ( ! _has_value) {
-				throw ink_exception("Can't access empty optional!");
+				ink_fail("Can't access empty optional!");
 			}
 		}
 

@@ -208,7 +208,7 @@ namespace ink::runtime::internal
 		} else if (vt == value_type::thread_start) {
 			start.set<value_type::thread_start>(jump);
 		} else {
-			throw ink_exception("unknown jump type");
+			inkFail("unknown jump type");
 		}
 		return threadIter.get();
 	}

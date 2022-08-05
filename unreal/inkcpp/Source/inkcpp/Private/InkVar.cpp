@@ -42,6 +42,7 @@ ink::runtime::value FInkVar::to_value() const {
 			return ink::runtime::value(value.GetSubtype<unsigned>());
 		default:
 			inkFail("Unsupported type");
+			return ink::runtime::value();
 	}
 	
 }

@@ -135,7 +135,8 @@ namespace ink::runtime::internal {
 		template<value_type ty, typename ... T>
 		value redefine(const value& oth, const tuple<T*...>& env) const {
 			if constexpr ( ty == value_type::OP_END) {
-				throw ink_exception("Can't redefine value with this type! (It is not an variable type!)");
+				inkFail("Can't redefine value with this type! (It is not an variable type!)");
+				return value{};
 			} else if (ty != type()) {
 				return redefine<ty + 1>(oth, env);
 			} else {

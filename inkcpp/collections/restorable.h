@@ -329,7 +329,7 @@ namespace ink::runtime::internal
 	protected:
 		// Called when we run out of space in buffer. 
 		virtual void overflow(ElementType*& buffer, size_t& size) {
-			throw ink_exception("Restorable run out of memory!");
+			inkFail("Restorable run out of memory!");
 		}
 
 	private:

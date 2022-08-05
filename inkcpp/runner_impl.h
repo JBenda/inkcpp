@@ -171,26 +171,23 @@ namespace ink::runtime::internal
 		bool bSavedEvaluationMode = false;
 
 		// Keeps track of what threads we're inside
-		class threads : public internal::simple_restorable_stack<thread_t> {
-			using base = internal::simple_restorable_stack<thread_t>;
-			static constexpr bool dynamic = config::limitThreadDepth < 0;
-			static constexpr size_t N = abs(config::limitThreadDepth);
+		template<bool dynamic, size_t N>
+		class threads : public internal::managed_restorable_stack<thread_t,  dynamic,  N> {
+			using base = internal::managed_restorable_stack<thread_t, dynamic, N>;
 		public:
 			template<bool ... D, bool con = dynamic,  enable_if_t<con, bool> = true >
 			threads()
-				: base(nullptr, 0, ~0),
+				: base(~0),
 				_threadDone(nullptr, reinterpret_cast<ip_t>(~0)) {
 					static_assert(sizeof...(D) == 0, "Don't use explicit template arguments!");
 			}
 			template<bool ... D, bool con = dynamic, enable_if_t<!con, bool> = true >
 			threads()
-				: _stack{},
-				base(_stack.data(), N, ~0),
+				: base(~0),
 				_threadDone(nullptr, reinterpret_cast<ip_t>(~0)) {
 					static_assert(sizeof...(D) == 0, "Don't use explicit template arguments");
 					_threadDone.clear(nullptr);
 				}
-
 			void clear() {
 				base::clear();
 				_threadDone.clear(nullptr);
@@ -227,9 +224,9 @@ namespace ink::runtime::internal
 			void resize(size_t size, long) {}
 
 
-			managed_array<thread_t, dynamic, N> _stack;
 			array_type _threadDone;
-		} _threads;
+		};
+		threads<config::limitContainerDepth < 0, abs(config::limitThreadDepth)> _threads;
 
 		// Choice list
 		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
@@ -251,16 +248,11 @@ namespace ink::runtime::internal
 		prng _rng{};
 	};
 
-	inline void runner_impl::threads::overflow(thread_t*& buffer, size_t& size) {
+	template<bool dynamic, size_t N>
+	void runner_impl::threads<dynamic, N>::overflow(thread_t*& buffer, size_t& size) {
+		base::overflow(buffer, size);
 		if constexpr (dynamic) {
-			if(buffer) {
-				_stack.extend();
-			}
-			buffer = _stack.data();
-			size = _stack.capacity();
 			resize(size, 0);
-		} else {
-			base::overflow(buffer, size);
 		}
 	}
 

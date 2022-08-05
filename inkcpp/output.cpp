@@ -316,7 +316,7 @@ namespace ink
 					case value_type::list_flag:
 						ptr = lists.toString(ptr, _data[i].get<value_type::list>());
 						break;
-					default: throw ink_exception("cant convert expression to string!");
+					default: inkFail("cant convert expression to string!");
 					}
 				}
 

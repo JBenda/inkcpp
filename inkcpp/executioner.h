@@ -79,7 +79,7 @@ namespace ink::runtime::internal {
 		typed_executer(const T& t) {}
 
 		void operator()(value_type, basic_eval_stack&, value*) {
-			throw ink_exception("Operation for value not supported!");
+			inkFail("Operation for value not supported!");
 		}
 	};
 
@@ -140,7 +140,7 @@ namespace ink::runtime::internal {
 		template<typename T>
 		executer_imp(const T& t) {}
 		void operator()(Command, basic_eval_stack&) {
-			throw ink_exception("requested command was not found!");
+			inkFail("requested command was not found!");
 		}
 	};
 

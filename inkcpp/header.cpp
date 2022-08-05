@@ -27,11 +27,11 @@ namespace ink::internal {
 			res.ink_bin_version_number =
 				swap_bytes(*reinterpret_cast<const vcpp_t*>(ptr));
 		} else {
-			throw ink_exception("Failed to parse endian encoding!");
+			inkFail("Failed to parse endian encoding!");
 		}
 
 		if (res.ink_bin_version_number != InkBinVersion) {
-			throw ink_exception("InkCpp-version mismatch: file was compiled with different InkCpp-version!");
+			inkFail("InkCpp-version mismatch: file was compiled with different InkCpp-version!");
 		}
 		return res;
 	}
