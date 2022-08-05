@@ -203,45 +203,45 @@ namespace ink::runtime::internal
 		bool first = true;
 		// Start moving forward (or backwards)
 		if(inBound && (offset == nullptr || !reverse&&offset<=dest || reverse&&offset>dest) )
-		while (_story->iterate_containers(iter, container_id, offset, reverse))
-		{
-			// Break when we've past the destination
-			if (!reverse && offset > dest || reverse && offset <= dest) {
-				// jump back to start of same container
-				if(first && reverse && offset == dest
-						&& _container.top() == container_id)  {
-					// check if it was start flag
-					auto con_id = container_id;
-					_story->iterate_containers(iter, container_id, offset, true);
-					if(offset == nullptr || con_id == container_id) 
-					{
-						_globals->visit(container_id);
+			while (_story->iterate_containers(iter, container_id, offset, reverse))
+			{
+				// Break when we've past the destination
+				if (!reverse && offset > dest || reverse && offset <= dest) {
+					// jump back to start of same container
+					if(first && reverse && offset == dest
+							&& _container.top() == container_id)  {
+						// check if it was start flag
+						auto con_id = container_id;
+						_story->iterate_containers(iter, container_id, offset, true);
+						if(offset == nullptr || con_id == container_id) 
+						{
+							_globals->visit(container_id);
+						}
 					}
+					break;
 				}
-				break;
+				first = false;
+
+				// Two cases:
+
+				// (1) Container iterator has the same value as the top of the stack.
+				//  This means that this is an end marker for the container we're in
+				if (!_container.empty() && _container.top() == container_id)
+				{
+					if (_container.size() == pos)
+						pos--;
+
+					// Get out of that container
+					_container.pop();
+				}
+
+				// (2) This must be the entrance marker for a new container. Enter it
+				else
+				{
+					// Push it
+					_container.push(container_id);
+				}
 			}
-			first = false;
-
-			// Two cases:
-
-			// (1) Container iterator has the same value as the top of the stack.
-			//  This means that this is an end marker for the container we're in
-			if (!_container.empty() && _container.top() == container_id)
-			{
-				if (_container.size() == pos)
-					pos--;
-
-				// Get out of that container
-				_container.pop();
-			}
-
-			// (2) This must be the entrance marker for a new container. Enter it
-			else
-			{
-				// Push it
-				_container.push(container_id);
-			}
-		}
 
 		// Iterate over the container stack marking any _new_ entries as "visited"
 		if (record_visits)
