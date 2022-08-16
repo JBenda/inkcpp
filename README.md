@@ -65,7 +65,7 @@ Many, but not all features of the Ink language are supported (see Glaring Omissi
 * Visit and read counts (`visits` and `CNT?` commands).
 * `seq` command and all sequence types (stopping, cycle, shuffle)
 * Global store that can be shared between runners
-* External function binding (no fallback support yet)
+* External function binding (define a function with same signature and name, which will be used if no function is bindeded)
 * Tunnels and internal functions
 * Ink threads (probably incredibly unstable though)
 
