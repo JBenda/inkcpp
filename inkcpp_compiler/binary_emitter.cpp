@@ -12,6 +12,8 @@
 #include <cstring>
 #endif
 
+#include <iostream>
+
 namespace ink::compiler::internal
 {
 	using std::vector;
@@ -106,8 +108,10 @@ namespace ink::compiler::internal
 			_current->children.push_back(container);
 			_current->indexed_children.insert({ index_in_parent, container });
 
-			if (!name.empty())
+			if (!name.empty()) {
+				std::cout << "add: " << name << "\n";
 				_current->named_children.insert({ name, container });
+			}
 		}
 
 		// Set this as the current pointer
@@ -128,9 +132,12 @@ namespace ink::compiler::internal
 
    	int binary_emitter::function_container_arguments(const std::string& name)
 	{
+		std::cout << "a\n";
 		if(_root == nullptr) { return -1; }
+		std::cout << "b\n";
 		auto fn = _root->named_children.find(name);
 		if (fn == _root->named_children.end()) { return -1; }
+		std::cout << "c\n";
 
 		size_t offset = fn->second->offset;
 		byte_t cmd = _containers.get(offset);
@@ -158,7 +165,9 @@ namespace ink::compiler::internal
 
 		// Note the position of this later so we can resolve the paths at the end
 		size_t param_position = _containers.pos() - sizeof(uint32_t);
-		_paths.push_back(std::make_tuple(param_position, path, _current, useCountIndex));
+		bool op = flag & CommandFlag::FALLBACK_FUNCTION;
+		if(op) std::cout << "op\n";
+		_paths.push_back(std::make_tuple(param_position, path, op, _current, useCountIndex));
 	}
 
 	void binary_emitter::write_variable(Command command, CommandFlag flag, const std::string& name)
@@ -290,8 +299,9 @@ namespace ink::compiler::internal
 			using std::get;
 			size_t position = get<0>(pair);
 			const std::string& path = get<1>(pair);
-			container_data* context = get<2>(pair);
-			bool useCountIndex = get<3>(pair);
+			bool optional = get<2>(pair);
+			container_data* context = get<3>(pair);
+			bool useCountIndex = get<4>(pair);
 
 			// Start at the root
 			container_data* container = _root;
@@ -341,7 +351,10 @@ namespace ink::compiler::internal
 				// Named child
 				else
 				{
-					container = container->named_children[token];
+					auto itr = container->named_children.find(token);
+					container = itr == container->named_children.end()
+						? nullptr
+						: itr->second;
 				}
 
 				firstParent = false;
@@ -366,7 +379,14 @@ namespace ink::compiler::internal
 				else
 				{
 					// Otherwise, write container address
-					_containers.set(position, container->offset);
+					if (container == nullptr) {
+						_containers.set(position, 0);
+						std::cout << "optional: ? " << optional << "\n";
+						std::cout << path << "\n";
+						inkAssert(optional, "Was not able to resolve a not optional path!");
+					} else {
+						_containers.set(position, container->offset);
+					}
 				}
 			}
 		}

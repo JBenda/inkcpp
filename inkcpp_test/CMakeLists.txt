@@ -1,15 +1,16 @@
 add_executable(inkcpp_test catch.hpp Main.cpp 
-    Array.cpp 
-    Pointer.cpp 
-    Stack.cpp
-    Callstack.cpp
-    Restorable.cpp
-	Value.cpp
-	Globals.cpp
-	Lists.cpp
-	Tags.cpp
-	NewLines.cpp
-    )
+  Array.cpp
+  Pointer.cpp
+  Stack.cpp
+  Callstack.cpp
+  Restorable.cpp
+  Value.cpp
+  Globals.cpp
+  Lists.cpp
+  Tags.cpp
+  NewLines.cpp
+  FallbackFunction.cpp
+)
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
 target_include_directories(inkcpp_test PRIVATE ../shared/private/)

@@ -6,6 +6,8 @@
 #include "header.h"
 #include "string_utils.h"
 
+#include <iostream>
+
 namespace ink::runtime
 {
 	const choice* runner_interface::get_choice(size_t index) const
@@ -646,13 +648,6 @@ namespace ink::runtime::internal
 			Command cmd = read<Command>();
 			CommandFlag flag = read<CommandFlag>();
 
-			if (!_eval.is_empty() && _eval.top().type() == value_type::ex_fn_not_found) {
-				inkAssert(cmd == Command::FUNCTION, "Failed to call external function and no "
-					"local function exists to call instead! Please bind external function or "
-					"add define a dummy function in your story!"
-				);
-			}
-
 			// If we're falling and we hit a non-fallthrough command, stop the fall.
 			if (_is_falling && !((cmd == Command::DIVERT && flag & CommandFlag::DIVERT_IS_FALLTHROUGH) || cmd == Command::END_CONTAINER_MARKER))
 			{
@@ -860,6 +855,7 @@ namespace ink::runtime::internal
 					inkAssert(!_eval.is_empty(), "fallback function but no function call before?");
 					if(_eval.top_value().type() == value_type::ex_fn_not_found) {
 						_eval.pop();
+						inkAssert(target != 0, "Exetrnal function was not binded, and no fallback function provided!");
 						start_frame<frame_type::function>(target);
 					}
 				}
@@ -937,6 +933,7 @@ namespace ink::runtime::internal
 				// If we failed, notify a potential fallback function
 				if (!success)
 				{
+					std::cout << "ex_fn_not_found" << static_cast<int>(value_type::ex_fn_not_found) << "\n";
 					_eval.push(values::ex_fn_not_found);
 				}
 			}
@@ -1135,6 +1132,7 @@ namespace ink::runtime::internal
 				inkAssert(false, "Unrecognized command!");
 				break;
 			}
+
 		}
 		catch (...)
 		{

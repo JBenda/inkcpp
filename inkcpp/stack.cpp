@@ -1,6 +1,8 @@
 #include "stack.h"
 #include "string_table.h"
 
+#include <iostream>
+
 namespace ink::runtime::internal
 {
 	basic_stack::basic_stack(entry* data, size_t size)
@@ -504,6 +506,7 @@ namespace ink::runtime::internal
 
 	void basic_eval_stack::push(const value& val)
 	{
+		std::cout << "push" << static_cast<int>(val.type()) << "\n";
 		base::push(val);
 	}
 

@@ -54,6 +54,11 @@ namespace ink::compiler::internal
 		binary_stream _lists;
 		binary_stream _containers;
 
-		std::vector<std::tuple<size_t, std::string, container_data*, bool>> _paths;
+		// positon to write address
+		// path as string
+		// if path may not exists (used for function fallbackes)
+		// container data
+		// use count index?
+		std::vector<std::tuple<size_t, std::string, bool, container_data*, bool>> _paths;
 	};
 }

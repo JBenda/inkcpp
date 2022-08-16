@@ -41,7 +41,7 @@ namespace ink::runtime::internal {
 		func_start,                 // start of function marker
 		func_end,                   // end of function marker
 		null,                       // void value, for function returns
-		ex_fn_not_found,			// value for failed external function calls
+		ex_fn_not_found,						// value for failed external function calls
 		tunnel_frame,               // return from tunnel
 		function_frame,             // return from function
 		thread_frame,               // return from thread
