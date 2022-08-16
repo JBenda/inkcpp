@@ -6,8 +6,6 @@
 #include "header.h"
 #include "string_utils.h"
 
-#include <iostream>
-
 namespace ink::runtime
 {
 	const choice* runner_interface::get_choice(size_t index) const
@@ -933,7 +931,6 @@ namespace ink::runtime::internal
 				// If we failed, notify a potential fallback function
 				if (!success)
 				{
-					std::cout << "ex_fn_not_found" << static_cast<int>(value_type::ex_fn_not_found) << "\n";
 					_eval.push(values::ex_fn_not_found);
 				}
 			}

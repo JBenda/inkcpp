@@ -12,8 +12,6 @@
 #include <cstring>
 #endif
 
-#include <iostream>
-
 namespace ink::compiler::internal
 {
 	using std::vector;
@@ -109,7 +107,6 @@ namespace ink::compiler::internal
 			_current->indexed_children.insert({ index_in_parent, container });
 
 			if (!name.empty()) {
-				std::cout << "add: " << name << "\n";
 				_current->named_children.insert({ name, container });
 			}
 		}
@@ -132,12 +129,9 @@ namespace ink::compiler::internal
 
    	int binary_emitter::function_container_arguments(const std::string& name)
 	{
-		std::cout << "a\n";
 		if(_root == nullptr) { return -1; }
-		std::cout << "b\n";
 		auto fn = _root->named_children.find(name);
 		if (fn == _root->named_children.end()) { return -1; }
-		std::cout << "c\n";
 
 		size_t offset = fn->second->offset;
 		byte_t cmd = _containers.get(offset);
@@ -166,7 +160,6 @@ namespace ink::compiler::internal
 		// Note the position of this later so we can resolve the paths at the end
 		size_t param_position = _containers.pos() - sizeof(uint32_t);
 		bool op = flag & CommandFlag::FALLBACK_FUNCTION;
-		if(op) std::cout << "op\n";
 		_paths.push_back(std::make_tuple(param_position, path, op, _current, useCountIndex));
 	}
 
@@ -381,9 +374,7 @@ namespace ink::compiler::internal
 					// Otherwise, write container address
 					if (container == nullptr) {
 						_containers.set(position, 0);
-						std::cout << "optional: ? " << optional << "\n";
-						std::cout << path << "\n";
-						inkAssert(optional, "Was not able to resolve a not optional path!");
+						inkAssert(optional, ("Was not able to resolve a not optional path! '" + path + "'").c_str());
 					} else {
 						_containers.set(position, container->offset);
 					}
