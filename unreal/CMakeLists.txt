@@ -1,4 +1,4 @@
-
+cmake_policy(SET CMP0135 NEW)
 include(FetchContent)
 set(CMAKE_TLS_VERIFY true)
 FetchContent_Declare(inklecate_mac
