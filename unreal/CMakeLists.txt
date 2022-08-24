@@ -1,4 +1,6 @@
-cmake_policy(SET CMP0135 NEW)
+if(${CMAKE_VERSION} VERSION_GREATER "3.24.0")
+	cmake_policy(SET CMP0135 NEW)
+endif()
 include(FetchContent)
 set(CMAKE_TLS_VERIFY true)
 FetchContent_Declare(inklecate_mac
