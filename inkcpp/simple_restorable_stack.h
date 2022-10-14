@@ -146,7 +146,6 @@ namespace ink::runtime::internal
 	inline void simple_restorable_stack<T>::clear()
 	{
 		// Reset to start
-		// TODO: Support save!
 		_save = _jump = InvalidIndex;
 		_pos = 0;
 	}
@@ -210,18 +209,18 @@ namespace ink::runtime::internal
 	{
 		inkAssert(_save != InvalidIndex, "Can not forget when the stack has never been saved!");
 
-		/*// If we have moven to a point earlier than the save point but we have a jump point
-		if (_pos < _save && _pos > _jump)
-		{*/
-			// If we're at the save point, move us instead
-			if (_pos == _save)
-				_pos = _jump;
-			// Everything between the jump point and the save point needs to be nullified
-			else for (size_t i = _jump; i < _save; i++)
-				_buffer[i] = _null;
-		/*}*/
+		inkAssert(_pos >= _save || _pos < _jump, "Pos is in backup areal! (should be impossible)");
+		// if we are below the backup areal, no changes are needed
+		// if we above the backup areal, we need to collpse it
+		if (_pos >= _save) {
+			size_t delta = _save - _jump;
+			for(size_t i = _save; i < _pos; ++i) {
+				_buffer[i - delta] = _buffer[i];
+			}
+			_pos -= delta;
+		}
 
 		// Just reset save position
-		_save = InvalidIndex;
+		_save = _jump = InvalidIndex;
 	}
 }
