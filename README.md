@@ -136,8 +136,6 @@ The big things we're missing right now are:
 
 * Fallback functions for externals.
 * Variable observers
-* Lists and whatever cool, crazy stuff Ink has been adding recently.
-* Robust tests using ink-proof.
 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.

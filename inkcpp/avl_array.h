@@ -41,6 +41,8 @@
 #ifndef _AVL_ARRAY_H_
 #define _AVL_ARRAY_H_
 
+#include "system.h"
+
 #include <cstdint>
 
 
@@ -73,19 +75,30 @@ class avl_array
   static const size_type INVALID_IDX = Size;
 
   // iterator class
-  typedef class tag_avl_array_iterator
+  template<bool Const>
+  class tag_avl_array_iterator
   {
-    avl_array*  instance_;    // array instance
+	template<bool Con, typename T1, typename T2>
+	using if_t = ink::runtime::internal::if_t<Con, T1, T2>;
+    if_t<Const, const avl_array*, avl_array*>
+		instance_;    		  // array instance
     size_type   idx_;         // actual node
 
     friend avl_array;         // avl_array may access index pointer
 
   public:
+
     // ctor
-    tag_avl_array_iterator(avl_array* instance = nullptr, size_type idx = 0U)
+    tag_avl_array_iterator(if_t<Const, const avl_array*,avl_array*> instance = nullptr, size_type idx = 0U)
       : instance_(instance)
       , idx_(idx)
     { }
+
+  	template<bool C = Const, typename = ink::runtime::internal::enable_if_t<C>>
+  	tag_avl_array_iterator(const tag_avl_array_iterator<false>& itr)
+  	  : instance_(itr.instance_)
+  	  , idx_(itr.idx_)
+  	{}
 
     inline tag_avl_array_iterator& operator=(const tag_avl_array_iterator& other)
     {
@@ -101,16 +114,21 @@ class avl_array
     { return !(*this == rhs); }
 
     // dereference - access value
-    inline T& operator*() const
+    inline if_t<Const, const T&, T&> operator*() const
     { return val(); }
 
     // access value
-    inline T& val() const
+    inline if_t<Const, const T&, T&> val() const
     { return instance_->val_[idx_]; }
 
     // access key
-    inline Key& key() const
+    inline const Key& key() const
     { return instance_->key_[idx_]; }
+
+	// returns unique number for each entry
+	// the numbers are unique as long no operation are executed
+	// on the avl
+  	inline size_t temp_identifier() const { return instance_->size() - idx_ - 1; }
 
     // preincrement
     tag_avl_array_iterator& operator++()
@@ -152,7 +170,7 @@ class avl_array
       ++(*this);
       return _copy;
     }
-  } avl_array_iterator;
+  };
 
 
 public:
@@ -163,7 +181,8 @@ public:
   typedef T&                  reference;
   typedef const T&            const_reference;
   typedef Key                 key_type;
-  typedef avl_array_iterator  iterator;
+  typedef tag_avl_array_iterator<false> iterator;
+  typedef tag_avl_array_iterator<true> const_iterator;
 
 
   // ctor
@@ -184,8 +203,18 @@ public:
     return iterator(this, i);
   }
 
+  inline const_iterator begin() const
+  {
+	return const_iterator(const_cast<avl_array&>(*this).begin());
+  }
+
   inline iterator end()
   { return iterator(this, INVALID_IDX); }
+
+  inline const_iterator end() const
+  {
+	return const_iterator(this, INVALID_IDX);
+  }
 
 
   // capacity
@@ -317,6 +346,11 @@ public:
     }
     // key not found, return end() iterator
     return end();
+  }
+
+  inline const_iterator find(const key_type& key) const
+  {
+	  return const_iterator(const_cast<avl_array&>(*this).find(key));
   }
 
 

@@ -2,6 +2,7 @@
 #include "output.h"
 #include "list_table.h"
 #include "string_utils.h"
+#include "string_table.h"
 
 namespace ink::runtime::internal
 {
@@ -90,6 +91,7 @@ namespace ink::runtime::internal
 				break;
 		}
 	}
+
 	bool value::set( const ink::runtime::value& val ) {
 		auto var = value( val );
 		if ( type() == value_type::none || var.type() == type() ) {
@@ -98,6 +100,7 @@ namespace ink::runtime::internal
 		}
 		return false;
 	}
+
 	ink::runtime::value value::to_interface_value() const {
 		using val = ink::runtime::value;
 		if(type() == value_type::boolean) { return val(get<value_type::boolean>()); }
@@ -107,5 +110,40 @@ namespace ink::runtime::internal
 		else if(type() == value_type::float32) { return val(get<value_type::float32>()); }
 		inkFail("No valid type to convert to interface value!");
 		return val();
+	}
+
+	size_t value::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		ptr = snap_write(ptr, _type, data);
+		if (_type == value_type::string) {
+			unsigned char buf[max_value_size];
+			string_type* res = reinterpret_cast<string_type*>(buf);
+			auto str = get<value_type::string>();
+			res->allocated = str.allocated;
+			if (str.allocated) {
+				res->str = reinterpret_cast<const char*>(static_cast<std::uintptr_t>(snapper.strings.get_id(str.str)));
+			} else {
+				res->str = reinterpret_cast<const char*>(static_cast<std::uintptr_t>(str.str - snapper.story_string_table));
+			}
+			ptr = snap_write(ptr, buf, data);
+		} else {
+			// TODO more space efficent?
+			ptr = snap_write(ptr, &bool_value, max_value_size, data);
+		}
+		return ptr - data;
+	}
+	const unsigned char* value::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		ptr = snap_read(ptr, _type);
+		ptr = snap_read(ptr, &bool_value, max_value_size);
+		if(_type == value_type::string) {
+			if(string_value.allocated) {
+				string_value.str = loader.string_table[(std::uintptr_t)(string_value.str)];
+			} else {
+				string_value.str = loader.story_string_table +(std::uintptr_t)(string_value.str);
+			}
+		}
+		return ptr;
 	}
 }

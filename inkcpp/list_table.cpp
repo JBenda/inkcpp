@@ -650,5 +650,20 @@ namespace ink::runtime::internal
 	}
 #endif
 
+	size_t list_table::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		ptr += _data.snap(data ? ptr : nullptr, snapper);
+		ptr += _entry_state.snap(data ? ptr : nullptr, snapper);
+		return ptr - data;
+	}
+
+	const unsigned char* list_table::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		ptr = _data.snap_load(ptr, loader);
+		ptr = _entry_state.snap_load(ptr, loader);
+		return ptr;
+	}
+
 }
 

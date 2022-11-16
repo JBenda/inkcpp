@@ -2,11 +2,12 @@
 
 #include "system.h"
 #include "array.h"
+#include "snapshot_impl.h"
 
 namespace ink::runtime::internal
 {
 	template<typename T>
-	class simple_restorable_stack
+	class simple_restorable_stack : public snapshot_interface
 	{
 	public:
 		simple_restorable_stack(T* buffer, size_t size, const T& null)
@@ -28,6 +29,9 @@ namespace ink::runtime::internal
 		void save();
 		void restore();
 		void forget();
+
+		virtual size_t snap(unsigned char* data, const snapper&) const override;
+		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 	protected:
 		virtual void overflow(T*& buffer, size_t& size) {
@@ -222,5 +226,44 @@ namespace ink::runtime::internal
 
 		// Just reset save position
 		_save = _jump = InvalidIndex;
+	}
+	template<typename T>
+	size_t simple_restorable_stack<T>::snap(unsigned char* data, const snapper&) const
+	{
+		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
+		unsigned char* ptr = data;
+		ptr = snap_write(ptr, _null, data);
+		ptr = snap_write(ptr, _pos, data);
+		ptr = snap_write(ptr, _save, data);
+		ptr = snap_write(ptr, _jump, data);
+		size_t max = _pos;
+		if (_save > max) { max = _save; }
+		if (_jump > max) { max = _jump; }
+		for(size_t i = 0; i < max; ++i)
+		{
+			ptr = snap_write(ptr, _buffer[i], data);
+		}
+		return ptr - data;
+	}
+
+	template<typename T>
+	const unsigned char* simple_restorable_stack<T>::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
+		T null;
+		ptr = snap_read(ptr, null);
+		inkAssert(null == _null, "different null value compared to snapshot!");
+		ptr = snap_read(ptr, _pos);
+		ptr = snap_read(ptr, _save);
+		ptr = snap_read(ptr, _jump);
+		size_t max = _pos;
+		if(_save > max) { max = _save; }
+		if(_jump > max) { max = _jump; }
+		while(_size < max) { overflow(_buffer, _size); }
+		for(size_t i = 0; i < max; ++i)
+		{
+			ptr = snap_read(ptr, _buffer[i]);
+		}
+		return ptr;
 	}
 }

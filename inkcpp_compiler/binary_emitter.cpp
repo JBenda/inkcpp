@@ -67,9 +67,9 @@ namespace ink::compiler::internal
 
 			// Clear lists
 			children.clear();
-			named_children.clear();
-			indexed_children.clear();
-			noop_offsets.clear();
+			//named_children.clear();
+			//indexed_children.clear();
+			//noop_offsets.clear();
 			parent = nullptr;
 		}
 	};

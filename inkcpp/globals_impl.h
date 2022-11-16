@@ -6,19 +6,26 @@
 #include "string_table.h"
 #include "list_table.h"
 #include "stack.h"
+#include "snapshot_impl.h"
 
 namespace ink::runtime::internal
 {
 	class story_impl;
 	class runner_impl;
+	class snapshot_impl;
 
 	// Implementation of the global store
-	class globals_impl : public globals_interface
+	class globals_impl : public globals_interface, public snapshot_interface
 	{
+		friend snapshot_impl;
 	public:
+		size_t snap(unsigned char* data, const snapper&) const override;
+		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 		// Initializes a new global store from the given story
 		globals_impl(const story_impl*);
 		virtual ~globals_impl() { }
+
+		snapshot* create_snapshot() const override;
 
 	protected:
 		optional<ink::runtime::value> get_var(hash_t name) const override;
@@ -57,6 +64,7 @@ namespace ink::runtime::internal
 
 		// gets the allocated string table
 		inline string_table& strings() { return _strings; }
+		inline const string_table& strings() const { return _strings; }
 
 		// gets list entries
 		list_table& lists() { return _lists; }
@@ -84,16 +92,7 @@ namespace ink::runtime::internal
 				return !(*this == vc);
 			}
 		};
-		class visit_counts{
-			visit_count* _data;
-			size_t _len;
-		public:
-			visit_counts(size_t len) 
-			: _data{new visit_count[len]}, _len{len} {}
-			size_t size() const { return _len; }
-			visit_count& operator[](size_t i) { return _data[i]; }
-			const visit_count& operator[](size_t i) const { return _data[i]; }
-		} _visit_counts;
+		managed_array<visit_count, true, 1> _visit_counts;
 
 		// Pointer back to owner story.
 		const story_impl* const _owner;

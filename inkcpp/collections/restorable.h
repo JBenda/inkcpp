@@ -1,7 +1,13 @@
+#pragma once
+
+#include "../snapshot_impl.h"
+
 #include <system.h>
+#include <traits.h>
 
 namespace ink::runtime::internal
 {
+	struct entry;
 	template<typename ElementType>
 	constexpr auto EmptyNullPredicate = [](const ElementType&) { return false; };
 
@@ -68,7 +74,7 @@ namespace ink::runtime::internal
 	 * from this class gain this functionality.
 	 */
 	template<typename ElementType>
-	class restorable
+	class restorable : public snapshot_interface
 	{
 	public:
 		restorable(ElementType* buffer, size_t size)
@@ -326,6 +332,10 @@ namespace ink::runtime::internal
 			return count;
 		}
 
+		// snapshot interface
+		virtual size_t snap(unsigned char* data, const snapper&) const override;
+		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 	protected:
 		// Called when we run out of space in buffer. 
 		virtual void overflow(ElementType*& buffer, size_t& size) {
@@ -374,4 +384,17 @@ namespace ink::runtime::internal
 		size_t _jump;
 		size_t _save;
 	};
+	template<>
+	size_t restorable<value>::snap(unsigned char* data, const snapper& snapper) const;
+	template<>
+	size_t restorable<entry>::snap(unsigned char* data, const snapper& snapper) const;
+	template<>
+	size_t restorable<int>::snap(unsigned char* data, const snapper&) const;
+
+	template<>
+	const unsigned char* restorable<value>::snap_load(const unsigned char* data, const loader&);
+	template<>
+	const unsigned char* restorable<entry>::snap_load(const unsigned char* data, const loader&);
+	template<>
+	const unsigned char* restorable<int>::snap_load(const unsigned char* data, const loader&);
 }

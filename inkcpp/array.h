@@ -1,11 +1,13 @@
 #pragma once
 
 #include "system.h"
+#include "traits.h"
+#include "snapshot_interface.h"
 
 namespace ink::runtime::internal
 {
 	template<typename T, bool dynamic, size_t initialCapacity>
-	class managed_array {
+		class managed_array : snapshot_interface {
 	public:
 		managed_array() : _capacity{initialCapacity}, _size{0}{
 			if constexpr (dynamic) {
@@ -48,11 +50,42 @@ namespace ink::runtime::internal
 		}
 		void clear() { _size = 0; }
 		void resize(size_t size) {
-			inkAssert(size <= _size, "Only allow to reduce size");
+			if constexpr (dynamic) {
+				if (size > _capacity) {
+					extend(size);
+				}
+			} else {
+				ink_assert(size <= _size, "Only allow to reduce size");
+			}
 			_size = size;
 		}
 
-		void extend();
+		void extend(size_t capacity = 0);
+
+		size_t snap(unsigned char* data, const snapper&) const override
+		{
+			inkAssert(!is_pointer<T>{}(), "here is a special case oversight");
+			unsigned char* ptr = data;
+			ptr = snap_write(ptr, _size, data);
+			for(const T& e : *this) {
+				ptr = snap_write(ptr, e, data);
+			}
+			return ptr - data;
+		}
+		const unsigned char* snap_load(const unsigned char* ptr, const loader&) override
+{
+			decltype(_size) size;
+			ptr = snap_read(ptr, size);
+			if constexpr (dynamic) {
+				resize(size);
+			} else {
+				inkAssert(size <= initialCapacity, "capacity of non dynamic array is to small vor snapshot!");
+			}
+			for (T& e : *this) {
+				ptr = snap_read(ptr, e);
+			}
+			return ptr;
+		}
 	private:
 
 		if_t<dynamic, char, T> _static_data[dynamic ? 1 : initialCapacity];
@@ -62,10 +95,12 @@ namespace ink::runtime::internal
 	};
 
 	template<typename T, bool dynamic, size_t initialCapacity>
-	void managed_array<T, dynamic, initialCapacity>::extend()
+	void managed_array<T, dynamic, initialCapacity>::extend(size_t capacity)
 	{
 		static_assert(dynamic, "Can only extend if array is dynamic!");
-		size_t new_capacity = 1.5f * _capacity;
+		size_t new_capacity = capacity > _capacity
+			? capacity
+			: 1.5f * _capacity;
 		if (new_capacity < 5) { new_capacity = 5; }
 		T* new_data = new T[new_capacity];
 
@@ -79,7 +114,7 @@ namespace ink::runtime::internal
 	}
 
 	template<typename T>
-	class basic_restorable_array
+	class basic_restorable_array : public snapshot_interface
 	{
 	public:
 		basic_restorable_array(T* array, size_t capacity, T nullValue)
@@ -116,6 +151,10 @@ namespace ink::runtime::internal
 		// Resets all values and clears any save points
 		void clear(const T& value);
 
+		// snapshot interface
+		virtual size_t snap(unsigned char* data, const snapper&) const override;
+		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 	protected:
 		inline T* buffer() { return _array; }
 		void set_new_buffer(T* buffer, size_t capacity) {
@@ -143,6 +182,36 @@ namespace ink::runtime::internal
 		// null
 		const T _null;
 	};
+
+	template<typename T>
+	inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		ptr = snap_write(ptr, _saved, data);
+		ptr = snap_write(ptr, _capacity, data);
+		ptr = snap_write(ptr, _null, data);
+		for(size_t i = 0; i < _capacity; ++i) {
+			ptr = snap_write(ptr, _array[i], data);
+			ptr = snap_write(ptr, _temp[i], data);
+		}
+		return ptr - data;
+	}
+
+	template<typename T>
+	inline const unsigned char* basic_restorable_array<T>::snap_load(const unsigned char* data, const loader& loader)
+	{
+		auto ptr = data;
+		ptr = snap_read(ptr, _saved);
+		ptr = snap_read(ptr, _capacity);
+		T null;
+		ptr = snap_read(ptr, null);
+		inkAssert(null == _null, "null value is different to snapshot!");
+		for(size_t i = 0; i < _capacity; ++i) {
+			ptr = snap_read(ptr, _array[i]);
+			ptr = snap_read(ptr, _temp[i]);
+		}
+		return ptr;
+	}
 
 	template<typename T>
 	inline void basic_restorable_array<T>::set(size_t index, const T& value)

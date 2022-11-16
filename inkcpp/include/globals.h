@@ -4,8 +4,7 @@
 
 namespace ink::runtime
 {
-	class globals_interface;
-	namespace internal { class globals_impl;}
+	class snapshot;
 
 	/**
 	* Represents a global store to be shared amongst ink runners.
@@ -41,6 +40,8 @@ namespace ink::runtime
 					"Requested Type is not supported");
 			return false;
 		}
+
+		virtual snapshot* create_snapshot() const = 0;
 
 		virtual ~globals_interface() = default;
 

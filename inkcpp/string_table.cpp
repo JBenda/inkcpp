@@ -94,4 +94,42 @@ namespace ink::runtime::internal
 			iter++;
 		}
 	}
+
+	size_t string_table::snap(unsigned char* data, const snapper&) const
+	{
+		unsigned char* ptr = data;
+		for (size_t i = 0; i < _table.size(); ++i) {
+			for(auto itr = _table.begin(); itr != _table.end(); ++itr) {
+				if (itr.temp_identifier() == i) {
+					ptr = snap_write(ptr, itr.key(), strlen(itr.key()) + 1, data);
+					break;
+				}
+			}
+		}
+		ptr = snap_write(ptr, "\0", 1, data);
+		return ptr - data;
+	}
+
+	const unsigned char* string_table::snap_load(const unsigned char* data, const loader& loader)
+	{
+		auto* ptr = data;
+		int i = 0;
+		while(*ptr) {
+			size_t len = 0;
+			for(;ptr[len];++len);
+			++len;
+			auto str = create(len);
+			loader.string_table.push() = str;
+			ptr = snap_read(ptr, str, len);
+			mark_used(str);
+		}
+		return ptr + 1;
+	}
+
+	size_t string_table::get_id(const char* string) const
+	{
+		auto iter = _table.find(string);
+		inkAssert(iter != _table.end(), "Try to fetch not contained string!");
+		return iter.temp_identifier();
+	}
 }

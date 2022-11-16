@@ -8,6 +8,7 @@
 #include "system.h"
 #include "command.h"
 #include "list_table.h"
+#include "snapshot_impl.h"
 #include "tuple.hpp"
 #include "types.h"
 
@@ -83,13 +84,18 @@ namespace ink::runtime::internal {
 	/**
 	 * @brief class to wrap stack value to common type.
 	 */
-	class value {
+	class value : public snapshot_interface {
 	public:
+		// snapshot interface
+		size_t snap(unsigned char* data, const snapper&) const override;
+		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };
 
-		constexpr value() : uint32_value{0}, _type{value_type::none}{}
-		
+		constexpr value() : snapshot_interface(), _type{ value_type::none }, bool_value{ 0 }{}
+		constexpr explicit value( value_type type ) : _type{ type }, bool_value{ 0 } {}
+
 		explicit value(const ink::runtime::value& val);
 		bool set( const ink::runtime::value& val );
 		ink::runtime::value to_interface_value() const;
@@ -166,6 +172,19 @@ namespace ink::runtime::internal {
 				char ci;
 			} pointer;
 		};
+		static constexpr size_t max_value_size = 
+			sizeof_largest_type<
+				decltype(bool_value),
+				decltype(int32_value),
+				decltype(string_value),
+				decltype(uint32_value),
+				decltype(float_value),
+				decltype(jump),
+				decltype(list_value),
+				decltype(list_flag_value),
+				decltype(frame_value),
+				decltype(pointer)
+		>();
 		value_type _type;
 	};
 
@@ -422,11 +441,11 @@ namespace ink::runtime::internal {
 
 	// static constexpr instantiations of flag values
 	namespace values {
-		static constexpr value marker = value{}.set<value_type::marker>();
-		static constexpr value glue = value{}.set<value_type::glue>();
-		static constexpr value newline = value{}.set<value_type::newline>();
-		static constexpr value func_start = value{}.set<value_type::func_start>();
-		static constexpr value func_end = value{}.set<value_type::func_end>();
-		static constexpr value null = value{}.set<value_type::null>();
+		static constexpr value marker = value( value_type::marker );
+		static constexpr value glue = value( value_type::glue );
+		static constexpr value newline = value( value_type::newline );
+		static constexpr value func_start = value( value_type::func_start );
+		static constexpr value func_end = value( value_type::func_end );
+		static constexpr value null = value( value_type::null );
 	}
 }

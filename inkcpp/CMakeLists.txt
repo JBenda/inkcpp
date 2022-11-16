@@ -11,6 +11,7 @@ list(APPEND SOURCES
     runner_impl.h runner_impl.cpp
     simple_restorable_stack.h stack.h stack.cpp
     story_impl.h story_impl.cpp
+	snapshot_impl.h snapshot_impl.cpp snapshot_interface.h
     story_ptr.cpp
     system.cpp
     value.h value.cpp
