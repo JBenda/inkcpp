@@ -64,7 +64,7 @@ namespace ink::runtime::internal
 
 		// parse binary list meta data
 		list_table(const char* data, const ink::internal::header&);
-		explicit list_table() : _valid{false} {}
+		explicit list_table() : _valid{ false }, _entrySize{0} {}
 		size_t stringLen(const list_flag& e) const;
 		const char* toString(const list_flag& e) const;
 
@@ -158,10 +158,10 @@ namespace ink::runtime::internal
 			return lid == 0 ? 0 : _list_end[lid-1];
 		}
 		const data_t* getPtr(int eid) const {
-			return _data.begin() + _entrySize * eid;
+			return _data.begin() + static_cast<std::ptrdiff_t>(_entrySize) * static_cast<std::ptrdiff_t>(eid);
 		}
 		data_t* getPtr(int eid)	 {
-			return _data.begin() + _entrySize * eid;
+			return _data.begin() + static_cast<std::ptrdiff_t>(_entrySize) * static_cast<std::ptrdiff_t>(eid);
 		}
 		int numFlags() const {
 			return _flag_names.size();

@@ -104,7 +104,7 @@ namespace ink
 		case '\n':
 			if (!includeNewline)
 				return false;
-		case '\t':
+		case '\t': [[fallthrough]];
 		case ' ':
 			return true;
 		default:

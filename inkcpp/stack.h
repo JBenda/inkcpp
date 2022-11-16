@@ -14,7 +14,7 @@ namespace ink
 			class string_table;
 			struct entry
 			{
-				hash_t name;
+				hash_t name = 0;
 				value data;
 			};
 

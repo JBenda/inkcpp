@@ -9,7 +9,7 @@ namespace ink::runtime::internal
 	template<typename T, bool dynamic, size_t initialCapacity>
 		class managed_array : snapshot_interface {
 	public:
-		managed_array() : _capacity{initialCapacity}, _size{0}{
+		managed_array() : _capacity{ initialCapacity }, _size{ 0 }, _static_data{0}{
 			if constexpr (dynamic) {
 				_dynamic_data = new T[initialCapacity];
 			}
