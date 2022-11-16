@@ -135,6 +135,14 @@ UInkThread* AInkRuntime::Start(TSubclassOf<class UInkThread> type, FString path,
 	return StartExisting(pThread, path, startImmediately);
 }
 
+FInkSnapshot Snapshot()
+{
+	ink::runtime::snapshot* inkSnapshot = mpGlobals->create_snapshot();
+	FInkSnapshot snapshot(inkSnapshot.get_data(), inkSnapshot.get_data_len());
+	delete inkSnapshot;
+	return snapshot;
+}
+
 UInkThread* AInkRuntime::StartExisting(UInkThread* thread, FString path, bool startImmediately /*= true*/)
 {
 	if (mpRuntime == nullptr)

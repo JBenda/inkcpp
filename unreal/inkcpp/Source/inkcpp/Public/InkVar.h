@@ -10,7 +10,7 @@
 
 #include "InkVar.generated.h"
 
-// A wrapper for passing around ink vars to and fro ink itself
+// A wrapper for passing around ink vars to and from ink itself
 // Not templated so it can be used in blueprints
 UENUM(BlueprintType)
 enum class EInkVarType : uint8

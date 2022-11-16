@@ -15,6 +15,7 @@
 
 class UInkThread;
 struct FInkVar;
+struct FInkSnapshot;
 namespace ink::runtime { class story; }
 
 UCLASS()
@@ -28,10 +29,22 @@ public:
 	~AInkRuntime();
 
 	UFUNCTION(BlueprintCallable, Category="Ink")
-	UInkThread* Start(TSubclassOf<UInkThread> type, FString path, bool runImmediately = true);
+	UInkThread* Start(TSubclassOf<UInkThread> type, FString path = "", bool runImmediately = true);
 
 	UFUNCTION(BlueprintCallable, Category="Ink")
-	UInkThread* StartExisting(UInkThread* thread, FString path, bool runImmediately = true);
+	UInkThread* StartExisting(UInkThread* thread, FString path = "", bool runImmediately = true);
+	
+	// only tested in choices moments
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	FInkSnapshot* Snapshot();
+	
+	AInkRuntime(FInkSnapshot* snapshot);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	UInkThread* LoadThread(TSubclassOf<UInkThread> type, int id = 0);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	UInkThread* LoadInThreadExisting(UInkThread* thread, int id = 0);
 
 	// Marks a thread as "exclusive". As long as it is running, no other threads will update.
 	UFUNCTION(BlueprintCallable, Category="Ink")

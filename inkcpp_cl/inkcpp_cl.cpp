@@ -148,7 +148,9 @@ int main(int argc, const char** argv)
 		// Start runner
 		runner thread;
 		if (snapshotFile.size()) {
-			thread = myInk->new_runner_from_snapshot(*snapshot::from_file(snapshotFile.c_str()));
+			auto snap_ptr = snapshot::from_file( snapshotFile.c_str() );
+			thread = myInk->new_runner_from_snapshot(*snap_ptr);
+			delete snap_ptr;
 		} else {
 			thread = myInk->new_runner();
 		}
@@ -181,6 +183,7 @@ int main(int argc, const char** argv)
 				if (c == -1) {
 					snapshot* snap = thread->create_snapshot();
 					snap->write_to_file(std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".snap").c_str());
+					delete snap;
 					break;
 				}
 				thread->choose(c - 1);
