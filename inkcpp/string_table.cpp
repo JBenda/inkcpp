@@ -98,15 +98,16 @@ namespace ink::runtime::internal
 	size_t string_table::snap(unsigned char* data, const snapper&) const
 	{
 		unsigned char* ptr = data;
+		bool should_write = data != nullptr;
 		for (size_t i = 0; i < _table.size(); ++i) {
 			for(auto itr = _table.begin(); itr != _table.end(); ++itr) {
 				if (itr.temp_identifier() == i) {
-					ptr = snap_write(ptr, itr.key(), strlen(itr.key()) + 1, data);
+					ptr = snap_write(ptr, itr.key(), strlen(itr.key()) + 1, should_write );
 					break;
 				}
 			}
 		}
-		ptr = snap_write(ptr, "\0", 1, data);
+		ptr = snap_write(ptr, "\0", 1, should_write );
 		return ptr - data;
 	}
 

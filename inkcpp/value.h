@@ -93,8 +93,8 @@ namespace ink::runtime::internal {
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };
 
-		constexpr value() : snapshot_interface(), _type{ value_type::none }, bool_value{ 0 }{}
-		constexpr explicit value( value_type type ) : _type{ type }, bool_value{ 0 } {}
+		constexpr value() : snapshot_interface(), bool_value{ 0 }, _type{ value_type::none } {}
+		constexpr explicit value( value_type type ) : bool_value{ 0 }, _type{ type } {}
 
 		explicit value(const ink::runtime::value& val);
 		bool set( const ink::runtime::value& val );

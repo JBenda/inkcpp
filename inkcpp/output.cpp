@@ -147,43 +147,8 @@ namespace ink::runtime::internal
 #ifdef INK_ENABLE_UNREAL
 	FString basic_stream::get()
 	{
-		size_t start = find_start();
-
-		// TODO: Slow! FString concatonation.
-		//  Is there really no equivilent of stringstream in Unreal? Some kind of String Builder?
-
-		// Move up from marker
-		bool hasGlue = false;
+		UE_LOG( InkCpp, Warning, TEXT("Basic stream::get is not implemented correctly and should not be used implemented correctly!" ) );
 		FString str;
-		for (size_t i = start; i < _size; i++)
-		{
-			if (should_skip(i, hasGlue))
-				continue;
-
-			switch (_data[i].type)
-			{
-			case value_type::int32:
-				str += FString::Printf(TEXT("%d"), _data[i].integer_value);
-				break;
-			case value_type::float32:
-				// TODO: Whitespace cleaning
-				str += FString::Printf(TEXT("%f"), _data[i].float_value);
-				break;
-			case value_type::string:
-				str += _data[i].string_val;
-				break;
-			case data_type::newline:
-				str += "\n";
-				break;
-			default:
-				break;
-			}
-		}
-
-		// Reset stream size to where we last held the marker
-		_size = start;
-
-		// Return processed string
 		return str;
 	}
 #endif
@@ -502,9 +467,9 @@ namespace ink::runtime::internal
 	size_t basic_stream::snap(unsigned char* data, const snapper& snapper) const
 	{
 		unsigned char* ptr = data;
-		ptr = snap_write(ptr, _last_char, data);
-		ptr = snap_write(ptr, _size, data);
-		ptr = snap_write(ptr, _save, data);
+		ptr = snap_write(ptr, _last_char, data != nullptr);
+		ptr = snap_write(ptr, _size, data != nullptr);
+		ptr = snap_write(ptr, _save, data != nullptr);
 		for(auto itr = _data; itr != _data + _size; ++itr)
 		{
 			ptr += itr->snap(data ? ptr : nullptr, snapper);

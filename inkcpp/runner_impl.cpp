@@ -542,39 +542,40 @@ namespace ink::runtime::internal
 	size_t runner_impl::snap(unsigned char* data, const snapper& snapper) const
 	{
 		unsigned char* ptr = data;
-		ptr = snap_write(ptr, _ptr, data);
-		ptr = snap_write(ptr, _backup, data);
-		ptr = snap_write(ptr, _done, data);
-		ptr = snap_write(ptr, _rng.get_state(), data);
-		ptr = snap_write(ptr, _evaluation_mode, data);
-		ptr = snap_write(ptr, _saved_evaluation_mode, data);
-		ptr = snap_write(ptr, _saved, data);
-		ptr = snap_write(ptr, _is_falling, data);
+		bool should_write = data != nullptr;
+		ptr = snap_write(ptr, _ptr, should_write);
+		ptr = snap_write(ptr, _backup, should_write);
+		ptr = snap_write(ptr, _done, should_write);
+		ptr = snap_write(ptr, _rng.get_state(), should_write);
+		ptr = snap_write(ptr, _evaluation_mode, should_write);
+		ptr = snap_write(ptr, _saved_evaluation_mode, should_write);
+		ptr = snap_write(ptr, _saved, should_write);
+		ptr = snap_write(ptr, _is_falling, should_write);
 		ptr += _output.snap(data ? ptr : nullptr, snapper);
 		ptr += _stack.snap(data ? ptr : nullptr, snapper);
 		ptr += _ref_stack.snap(data ? ptr : nullptr, snapper);
 		ptr += _eval.snap(data ? ptr : nullptr, snapper);
-		ptr = snap_write(ptr, _tags.size(), data);
+		ptr = snap_write(ptr, _tags.size(), should_write);
 		for (const auto& tag : _tags) {
 			std::uintptr_t offset = tag - snapper.story_string_table;
-			ptr = snap_write(ptr, offset, data);
+			ptr = snap_write(ptr, offset, should_write);
 		}
 		ptr += _container.snap(data ? ptr : nullptr, snapper);
 		ptr += _threads.snap(data ? ptr : nullptr, snapper);
-		ptr = snap_write(ptr, _backup_choice_len, data);
-		ptr = snap_write(ptr, _fallback_choice.has_value(), data);
-		auto snap_choice = [&snapper, write = static_cast<bool>(data)](unsigned char* data, const choice& c) -> size_t {
+		ptr = snap_write(ptr, _backup_choice_len, should_write);
+		ptr = snap_write(ptr, _fallback_choice.has_value(), should_write);
+		auto snap_choice = [&snapper, &should_write](unsigned char* data, const choice& c) -> size_t {
 			unsigned char* ptr = data;
-			ptr = snap_write(ptr, c._index, write);
-			ptr = snap_write(ptr, c._path, write);
-			ptr = snap_write(ptr, c._thread, write);
-			ptr = snap_write(ptr, snapper.strings.get_id(c._text), write);
+			ptr = snap_write(ptr, c._index, should_write );
+			ptr = snap_write(ptr, c._path, should_write );
+			ptr = snap_write(ptr, c._thread, should_write );
+			ptr = snap_write(ptr, snapper.strings.get_id(c._text), should_write );
 			return ptr - data;
 		};
 		if (_fallback_choice) {
 			ptr += snap_choice(ptr, _fallback_choice.value());
 		}
-		ptr = snap_write(ptr, _choices.size(), data);
+		ptr = snap_write(ptr, _choices.size(), should_write);
 		for (const choice& c : _choices) {
 			ptr += snap_choice(ptr, c);
 		}

@@ -28,9 +28,9 @@ namespace ink::runtime::internal {
 	{
 		unsigned char* ptr = data;
 		size_t max;
-		ptr = snap_base(ptr, data, _pos, _jump, _save, max);
+		ptr = snap_base(ptr, data != nullptr, _pos, _jump, _save, max);
 		for(size_t i = 0; i < max; ++i) {
-			ptr = snap_write(ptr, _buffer[i].name, data);
+			ptr = snap_write(ptr, _buffer[i].name, data != nullptr);
 			ptr += _buffer[i].data.snap(data ? ptr : nullptr, snapper);
 		}
 		return ptr - data;
@@ -40,7 +40,7 @@ namespace ink::runtime::internal {
 	{
 		unsigned char* ptr = data;
 		size_t max;
-		ptr = snap_base(ptr, data, _pos, _jump, _save, max);
+		ptr = snap_base(ptr, data != nullptr, _pos, _jump, _save, max);
 		for(size_t i = 0; i < max; ++i) {
 			ptr += _buffer[i].snap(data ? ptr : nullptr, snapper);
 		}
@@ -51,9 +51,9 @@ namespace ink::runtime::internal {
 	{
 		unsigned char* ptr = data;
 		size_t max;
-		ptr = snap_base(ptr, data, _pos, _jump, _save, max);
+		ptr = snap_base(ptr, data != nullptr, _pos, _jump, _save, max);
 		for(size_t i = 0; i < max; ++i) {
-			ptr = snap_write(ptr, _buffer[i], data);
+			ptr = snap_write(ptr, _buffer[i], data != nullptr);
 		}
 		return ptr - data;
 	}

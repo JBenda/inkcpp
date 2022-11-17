@@ -10,7 +10,7 @@ namespace ink::runtime::internal
 	class string_table : public snapshot_interface
 	{
 	public:
-		~string_table();
+		virtual ~string_table() final;
 
 		// Create a dynmaic string of a particular length
 		char* create(size_t length);

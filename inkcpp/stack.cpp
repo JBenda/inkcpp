@@ -591,8 +591,9 @@ namespace ink::runtime::internal
 	size_t basic_stack::snap(unsigned char* data, const snapper& snapper) const
 	{
 		unsigned char* ptr = data;
-		ptr = snap_write(ptr, _next_thread, data);
-		ptr = snap_write(ptr, _backup_next_thread, data);
+		bool should_write = data != nullptr;
+		ptr = snap_write(ptr, _next_thread, should_write );
+		ptr = snap_write(ptr, _backup_next_thread, should_write );
 		ptr += base::snap(data ? ptr : nullptr, snapper);
 		return ptr - data;
 	}

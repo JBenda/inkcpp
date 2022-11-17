@@ -115,7 +115,8 @@ namespace ink::runtime::internal
 	size_t value::snap(unsigned char* data, const snapper& snapper) const
 	{
 		unsigned char* ptr = data;
-		ptr = snap_write(ptr, _type, data);
+		bool should_write = data != nullptr;
+		ptr = snap_write(ptr, _type, should_write );
 		if (_type == value_type::string) {
 			unsigned char buf[max_value_size];
 			string_type* res = reinterpret_cast<string_type*>(buf);
@@ -126,10 +127,10 @@ namespace ink::runtime::internal
 			} else {
 				res->str = reinterpret_cast<const char*>(static_cast<std::uintptr_t>(str.str - snapper.story_string_table));
 			}
-			ptr = snap_write(ptr, buf, data);
+			ptr = snap_write(ptr, buf, should_write );
 		} else {
 			// TODO more space efficent?
-			ptr = snap_write(ptr, &bool_value, max_value_size, data);
+			ptr = snap_write(ptr, &bool_value, max_value_size, should_write );
 		}
 		return ptr - data;
 	}

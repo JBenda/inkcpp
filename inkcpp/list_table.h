@@ -64,7 +64,7 @@ namespace ink::runtime::internal
 
 		// parse binary list meta data
 		list_table(const char* data, const ink::internal::header&);
-		explicit list_table() : _valid{ false }, _entrySize{0} {}
+		explicit list_table() : _entrySize{0}, _valid{ false } {}
 		size_t stringLen(const list_flag& e) const;
 		const char* toString(const list_flag& e) const;
 

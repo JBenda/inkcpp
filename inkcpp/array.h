@@ -9,7 +9,7 @@ namespace ink::runtime::internal
 	template<typename T, bool dynamic, size_t initialCapacity>
 		class managed_array : snapshot_interface {
 	public:
-		managed_array() : _capacity{ initialCapacity }, _size{ 0 }, _static_data{0}{
+		managed_array() : _static_data{}, _capacity{ initialCapacity }, _size{ 0 }{
 			if constexpr (dynamic) {
 				_dynamic_data = new T[initialCapacity];
 			}
@@ -55,7 +55,7 @@ namespace ink::runtime::internal
 					extend(size);
 				}
 			} else {
-				ink_assert(size <= _size, "Only allow to reduce size");
+				inkAssert(size <= _size, "Only allow to reduce size");
 			}
 			_size = size;
 		}
@@ -66,9 +66,10 @@ namespace ink::runtime::internal
 		{
 			inkAssert(!is_pointer<T>{}(), "here is a special case oversight");
 			unsigned char* ptr = data;
-			ptr = snap_write(ptr, _size, data);
+			bool should_write = data != nullptr;
+			ptr = snap_write(ptr, _size, should_write );
 			for(const T& e : *this) {
-				ptr = snap_write(ptr, e, data);
+				ptr = snap_write(ptr, e, should_write );
 			}
 			return ptr - data;
 		}
@@ -187,12 +188,13 @@ namespace ink::runtime::internal
 	inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper& snapper) const
 	{
 		unsigned char* ptr = data;
-		ptr = snap_write(ptr, _saved, data);
-		ptr = snap_write(ptr, _capacity, data);
-		ptr = snap_write(ptr, _null, data);
+		bool should_write = data != nullptr;
+		ptr = snap_write(ptr, _saved, should_write );
+		ptr = snap_write(ptr, _capacity, should_write );
+		ptr = snap_write(ptr, _null, should_write );
 		for(size_t i = 0; i < _capacity; ++i) {
-			ptr = snap_write(ptr, _array[i], data);
-			ptr = snap_write(ptr, _temp[i], data);
+			ptr = snap_write(ptr, _array[i], should_write );
+			ptr = snap_write(ptr, _temp[i], should_write );
 		}
 		return ptr - data;
 	}
@@ -344,7 +346,7 @@ namespace ink::runtime::internal
 			this->set_new_buffer(_buffer, new_capacity);
 		}
 
-		~allocated_restorable_array()
+		virtual ~allocated_restorable_array() final
 		{
 			if(_buffer) {
 				delete[] _buffer;

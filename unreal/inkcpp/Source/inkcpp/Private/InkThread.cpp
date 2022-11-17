@@ -46,16 +46,15 @@ void UInkThread::RegisterExternalEvent(const FString& functionName, const FExter
 
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)
 {
-	if (!ensureMsgf(!mbInitialized, TEXT("Thread already initialized!")))
-	{
-		return;
-	}
-
 	mStartPath = path;
 	mpRuntime = runtime;
 	mbInitialized = true;
 	mpRunner = thread;
 	mpTags = NewObject<UTagList>();
+	mTagFunctions.Reset();
+	mCurrentChoices.Reset();
+	mbHasRun = false;
+	mbInChoice = false;
 
 	OnStartup();
 }

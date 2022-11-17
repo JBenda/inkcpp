@@ -54,8 +54,8 @@ namespace ink
 #ifdef INK_ENABLE_STL
 				// Extract into a string
 				std::string get();
-#else
-				// will conflict with stl definition
+#else defined INK_ENABLE_UNREAL
+				FString get();
 #endif
 
 				// Check if the stream is empty

@@ -232,16 +232,17 @@ namespace ink::runtime::internal
 	{
 		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
 		unsigned char* ptr = data;
-		ptr = snap_write(ptr, _null, data);
-		ptr = snap_write(ptr, _pos, data);
-		ptr = snap_write(ptr, _save, data);
-		ptr = snap_write(ptr, _jump, data);
+		bool should_write = data != nullptr;
+		ptr = snap_write(ptr, _null, should_write);
+		ptr = snap_write(ptr, _pos, should_write );
+		ptr = snap_write(ptr, _save, should_write );
+		ptr = snap_write(ptr, _jump, should_write );
 		size_t max = _pos;
 		if (_save > max) { max = _save; }
 		if (_jump > max) { max = _jump; }
 		for(size_t i = 0; i < max; ++i)
 		{
-			ptr = snap_write(ptr, _buffer[i], data);
+			ptr = snap_write(ptr, _buffer[i], should_write );
 		}
 		return ptr - data;
 	}

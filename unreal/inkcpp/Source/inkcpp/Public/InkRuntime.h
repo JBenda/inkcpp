@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Misc/Optional.h"
 
 #include "InkDelegates.h"
+#include "InkSnapshot.h"
 
 #include "ink/types.h"
 #include "ink/globals.h"
@@ -15,7 +17,7 @@
 
 class UInkThread;
 struct FInkVar;
-struct FInkSnapshot;
+
 namespace ink::runtime { class story; }
 
 UCLASS()
@@ -28,23 +30,29 @@ public:
 	AInkRuntime();
 	~AInkRuntime();
 
+	/**
+	* Create a new Thread. If a Snapshot is set/loaded create Threads like there was before
+	* if you want to create a fresh Thread despite an existing LoadedSnapshot enter the starting path
+	*/
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	UInkThread* Start(TSubclassOf<UInkThread> type, FString path = "", bool runImmediately = true);
 
+	/**
+	* Create a new Thread in existing memory, for more details \see AInkRuntime::Start()
+	*/
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	UInkThread* StartExisting(UInkThread* thread, FString path = "", bool runImmediately = true);
 	
 	// only tested in choices moments
 	UFUNCTION(BlueprintCallable, Category="Ink")
-	FInkSnapshot* Snapshot();
+	FInkSnapshot Snapshot();
 	
-	AInkRuntime(FInkSnapshot* snapshot);
-	
+	/**
+	* Loads a snapshot file, therfore deletes globals and invalidate all current Threads
+	* After this Start and StartExisting will load the corresponding Threads (on at a time)
+	*/
 	UFUNCTION(BlueprintCallable, Category="Ink")
-	UInkThread* LoadThread(TSubclassOf<UInkThread> type, int id = 0);
-	
-	UFUNCTION(BlueprintCallable, Category="Ink")
-	UInkThread* LoadInThreadExisting(UInkThread* thread, int id = 0);
+	void LoadSnapshot(const FInkSnapshot& snapshot);
 
 	// Marks a thread as "exclusive". As long as it is running, no other threads will update.
 	UFUNCTION(BlueprintCallable, Category="Ink")
@@ -75,7 +83,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Story asset used in this level
-	UPROPERTY(EditAnywhere, Category="Put in correct category")
+	UPROPERTY(EditAnywhere, Category="Ink")
 	class UInkAsset* InkAsset;
 
 private:
@@ -89,4 +97,9 @@ private:
 
 	UPROPERTY()
 	TArray<UInkThread*> mExclusiveStack;
+	
+	// UPROPERTY(EditDefaultsOnly, Category="Ink")
+	TOptional<FInkSnapshot> mSnapshot;
+	// snapshot generates data when re-constructing the globals to allow reconstructing the threads
+	ink::runtime::snapshot* mpSnapshot;
 };

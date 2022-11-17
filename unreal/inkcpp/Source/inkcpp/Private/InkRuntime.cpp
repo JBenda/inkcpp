@@ -12,6 +12,7 @@
 // inkcpp includes
 #include "ink/story.h"
 #include "ink/globals.h"
+#include "ink/snapshot.h"
 
 namespace ink { using value = runtime::value; }
 
@@ -24,7 +25,8 @@ AInkRuntime::AInkRuntime() : mpRuntime(nullptr)
 
 AInkRuntime::~AInkRuntime()
 {
-
+	if(mSnapshot) { delete mpSnapshot; }
+	mSnapshot.Reset();
 }
 
 // Called when the game starts or when spawned
@@ -38,7 +40,11 @@ void AInkRuntime::BeginPlay()
 		UE_LOG(InkCpp, Display, TEXT("Loaded Ink asset"));
 
 		// create globals
-		mpGlobals = mpRuntime->new_globals();
+		if (mSnapshot) {
+			LoadSnapshot(*mSnapshot);
+		} else {
+			mpGlobals = mpRuntime->new_globals();
+		}
 		// initialize globals
 		mpRuntime->new_runner(mpGlobals);
 	}
@@ -135,12 +141,18 @@ UInkThread* AInkRuntime::Start(TSubclassOf<class UInkThread> type, FString path,
 	return StartExisting(pThread, path, startImmediately);
 }
 
-FInkSnapshot Snapshot()
+FInkSnapshot AInkRuntime::Snapshot()
 {
 	ink::runtime::snapshot* inkSnapshot = mpGlobals->create_snapshot();
-	FInkSnapshot snapshot(inkSnapshot.get_data(), inkSnapshot.get_data_len());
+	FInkSnapshot snapshot(reinterpret_cast<const char*>(inkSnapshot->get_data()), inkSnapshot->get_data_len());
 	delete inkSnapshot;
 	return snapshot;
+}
+
+void AInkRuntime::LoadSnapshot(const FInkSnapshot& snapshot) {
+	mSnapshot = snapshot;
+	mpSnapshot = ink::runtime::snapshot::from_binary(reinterpret_cast<unsigned char*>(mSnapshot->data.GetData()), mSnapshot->data.Num(), false);
+	mpGlobals = mpRuntime->new_globals_from_snapshot(*mpSnapshot);
 }
 
 UInkThread* AInkRuntime::StartExisting(UInkThread* thread, FString path, bool startImmediately /*= true*/)
@@ -150,9 +162,22 @@ UInkThread* AInkRuntime::StartExisting(UInkThread* thread, FString path, bool st
 		UE_LOG(InkCpp, Warning, TEXT("Failed to start existing"));
 		return nullptr;
 	}
+	
+	// remove handle if it still exists
+	mThreads.Remove(thread);
+	mExclusiveStack.Remove(thread);
 
 	// Initialize thread with new runner
-	ink::runtime::runner runner = mpRuntime->new_runner(mpGlobals);
+	ink::runtime::runner runner;
+	if (mSnapshot && path.IsEmpty()) {		
+		if (mpSnapshot->num_runners() == mThreads.Num()) {
+			UE_LOG(InkCpp, Warning, TEXT("Already created all Threads from Snapshot!, will not create more. You can Still create new Threads with entering the starting Path."));
+			return nullptr;
+		}
+		runner = mpRuntime->new_runner_from_snapshot(*mpSnapshot, mpGlobals, mThreads.Num());
+	} else {
+		runner = mpRuntime->new_runner(mpGlobals);
+	}
 	thread->Initialize(path, this, runner);
 
 	// If we're not starting immediately, just queue

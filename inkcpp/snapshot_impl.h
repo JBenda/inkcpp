@@ -53,7 +53,7 @@ namespace ink::runtime::internal
 		} _header;
 
 		size_t get_offset(size_t idx) const {
-			inkAssert(idx <= _header.num_runners);
+			inkAssert(idx <= _header.num_runners, "Out of Bound access for runner in snapshot.");
 			return reinterpret_cast<const size_t*>(_file + sizeof(header))[idx];
 		}
 
