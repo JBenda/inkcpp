@@ -19,7 +19,7 @@ namespace ink::config {
 	static constexpr int limitEvalStackDepth = -20;
 	static constexpr int limitContainerDepth = -20;
 	/// number of simultaneous active tags
-	static constexpr int limitActiveTags = 10;
+	static constexpr int limitActiveTags = -10;
 	// temporary variables and callstack;
 	static constexpr int limitRuntimeStack = -20;
 	// references  and callstack

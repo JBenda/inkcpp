@@ -156,7 +156,10 @@ namespace ink::runtime
 		*/
 		virtual void choose(size_t index) = 0;
 
+		/** check if since last choice selection tags have been added */
 		virtual bool has_tags() const = 0;
+		/** return the number of tags accumulated since last choice
+			* order of tags wont change, and new are added at the end */
 		virtual size_t num_tags() const = 0;
 		virtual const char* get_tag(size_t index) const = 0;
 

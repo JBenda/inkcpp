@@ -17,7 +17,6 @@
 
 class UInkThread;
 struct FInkVar;
-
 namespace ink::runtime { class story; }
 
 UCLASS()
@@ -53,6 +52,7 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	void LoadSnapshot(const FInkSnapshot& snapshot);
+
 
 	// Marks a thread as "exclusive". As long as it is running, no other threads will update.
 	UFUNCTION(BlueprintCallable, Category="Ink")

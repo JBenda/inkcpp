@@ -43,6 +43,9 @@ namespace ink
 			 * @returns choice text as a string
 			 */
 			const char* text() const { return _text; }
+
+			choice() : choice(0) {}
+			choice(int) : _text{nullptr}, _index{~0}, _path{~0u}, _thread{~0u} {}
 		private:
 			friend class internal::runner_impl;
 
