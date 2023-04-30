@@ -318,6 +318,7 @@ namespace ink::runtime::internal
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
 		: _story(data), _globals(global.cast<globals_impl>()),
+		_rng(time(NULL)),
 		_operations(
 				global.cast<globals_impl>()->strings(),
 				global.cast<globals_impl>()->lists(),
@@ -1215,7 +1216,7 @@ namespace ink::runtime::internal
 				int sequenceLength = _eval.pop().get<value_type::int32>();
 				int index = _eval.pop().get<value_type::int32>();
 
-				_eval.push(value{}.set<value_type::int32>(_rng.rand(sequenceLength)));
+				_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength))));
 			} break;
 			case Command::SEED:
 			{

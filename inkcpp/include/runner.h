@@ -33,6 +33,12 @@ namespace ink::runtime
 		virtual ~runner_interface(){};
 
 #pragma region Interface Methods
+		/**
+		 * Sets seed for PRNG used in runner.
+		 * Else runner is started with the current time as seed.
+		 * @param seed seed to use for PRNG
+		 */
+		virtual void set_rng_seed(uint32_t seed) = 0;
 
 		/**
 		 * Moves the runner to the specified path
