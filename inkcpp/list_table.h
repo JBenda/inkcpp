@@ -13,6 +13,7 @@ namespace ink::internal {
 }
 namespace ink::runtime::internal
 {
+	class list_impl;
 	class prng;
 
 	// TODO: move to utils
@@ -74,9 +75,34 @@ namespace ink::runtime::internal
 		/** converts list to string representation
 		 * @param out char array with minimu size of stringLen(l)
 		 * @param l list to stringify
-		 * @return pointer to end of insierted string
+		 * @return pointer to end of inserted string
 		 */
 		char* toString(char* out, const list& l) const;
+
+		/** Finds flag id to flag name
+		 * currently used a simple O(n) serach, for the expected number of flags should this be no problem
+		 * @param flag_name null terminated string contaning the flag name
+		 * @return list_flag with corresponding name
+		 * @retval nullopt if no flag was found
+		 */
+		optional<list_flag> toFlag(const char* flag_name) const {
+			for(auto itr = _flag_names.begin(); itr != _flag_names.end(); ++itr) {
+				if (strcmp(*itr, flag_name) == 0) {
+					int fid = itr - _flag_names.begin();
+					int lid = 0;
+					int begin = 0;
+					for(auto itr = _list_end.begin(); itr != _list_end.end(); ++itr) {
+						if(*itr > fid) { 
+							lid = itr - _list_end.begin();
+							break;
+						}
+						begin = *itr;
+					}
+					return {list_flag{.list_id = static_cast<int16_t>(lid), .flag = static_cast<int16_t>(fid - begin)}};
+				}
+			}
+			return nullopt;
+		}
 
 		// snapshot interface implementation
 		size_t snap(unsigned char* data, const snapper&) const override;
@@ -235,6 +261,7 @@ namespace ink::runtime::internal
 		bool _valid;
 	public:
 		friend class name_flag_itr;
+		friend list_impl;
 		class named_flag_itr {
 			const list_table& _list;
 			const data_t* _data;

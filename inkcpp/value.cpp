@@ -1,4 +1,6 @@
 #include "value.h"
+
+#include "list_impl.h"
 #include "output.h"
 #include "list_table.h"
 #include "string_utils.h"
@@ -101,13 +103,18 @@ namespace ink::runtime::internal
 		return false;
 	}
 
-	ink::runtime::value value::to_interface_value() const {
+	ink::runtime::value value::to_interface_value(list_table& table) const {
 		using val = ink::runtime::value;
 		if(type() == value_type::boolean) { return val(get<value_type::boolean>()); }
 		else if(type() == value_type::uint32) { return val(get<value_type::uint32>()); }
 		else if(type() == value_type::int32) { return val(get<value_type::int32>()); }
 		else if(type() == value_type::string) { return val(get<value_type::string>().str); }
 		else if(type() == value_type::float32) { return val(get<value_type::float32>()); }
+		else if(type() == value_type::list_flag) { 
+			auto lid = table.create();
+			lid = table.add(lid, get<value_type::list_flag>());
+			return val(new list_impl(table, lid));
+		} else if(type() == value_type::list) { return val(new list_impl(table, get<value_type::list>())) }
 		inkFail("No valid type to convert to interface value!");
 		return val();
 	}

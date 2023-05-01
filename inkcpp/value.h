@@ -98,7 +98,7 @@ namespace ink::runtime::internal {
 
 		explicit value(const ink::runtime::value& val);
 		bool set( const ink::runtime::value& val );
-		ink::runtime::value to_interface_value() const;
+		ink::runtime::value to_interface_value(list_table&) const;
 
 		/// get value of the type (if possible)
 		template<value_type ty>
