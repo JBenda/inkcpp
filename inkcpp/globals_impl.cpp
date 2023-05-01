@@ -117,7 +117,7 @@ namespace ink::runtime::internal
 	optional<ink::runtime::value> globals_impl::get_var(hash_t name) const {
 		auto* var = get_variable(name);
 		if (!var) { return nullopt; }
-		return {var->to_interface_value()};
+		return {var->to_interface_value(_lists)};
 	}
 	
 	bool globals_impl::set_var(hash_t name, const ink::runtime::value& val) {

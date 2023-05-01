@@ -18,10 +18,6 @@ SCENARIO("tags", "[tags]")
 	thread->move_to(ink::hash_string("test_knot"));
 	while(thread->can_continue()) {
 		auto line = thread->getline();
-		std::cout << line << std::endl;
-		for ( ink::size_t i = 0; i < thread->num_tags(); ++i) {
-			std::cout << "\t" << thread->get_tag(i) << std::endl;
-		}
 	}
 	REQUIRE(thread->can_continue() == false);
 }

@@ -126,7 +126,7 @@ namespace ink::runtime
 	}
 
 	template<>
-	inline optional<list_interface> globals_interface::get<list_interface>(const char* name) const {
+	inline optional<list> globals_interface::get<list>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if (var && var->type == value::Type::List) {
 			return {var->v_list};
@@ -134,7 +134,7 @@ namespace ink::runtime
 		return nullopt;
 	}
 	template<>
-	inline bool globals_interface::set<list_interface>(const char* name, const list_interface& val) {
+	inline bool globals_interface::set<list>(const char* name, const list& val) {
 		return set_var(hash_string(name), value(val));
 	}
 }

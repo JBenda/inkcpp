@@ -35,8 +35,11 @@ namespace ink::runtime::internal {
     }
 
   private:
+    friend ink::runtime::internal::value;
+    list_table::list get_list() const { return list_table::list(_list); }
+    
     /// @todo wrong iteration order, first lists then flags
-    void next(const char*& flag_name, int& i) const {
+    void next(const char*& flag_name, int& i) const override final{
       if (i == -1) { return; }
 
       list_flag flag{.list_id = static_cast<int16_t>(i >> 16), .flag = static_cast<int16_t>(i & 0xFF)};
@@ -45,17 +48,18 @@ namespace ink::runtime::internal {
       }
       if (flag.flag >= _list_table->_list_end[flag.list_id]) {
         next_list:
-        while(!_list_table->hasList(_list_table->getPtr(_list), flag.list_id)) {
+        flag.flag = 0;
+        do {
           ++flag.list_id;
           if(flag.list_id >= _list_table->_list_end.size()) {
             i = -1;
             return;
           }
-        }
+        } while(!_list_table->hasList(_list_table->getPtr(_list), flag.list_id));
       }
       while(!_list_table->has(list_table::list{_list}, flag)) {
         ++flag.flag;
-        if(flag.flag >= _list_table->_list_end[flag.list_id]) {
+        if(flag.flag >= _list_table->_list_end[flag.list_id] - _list_table->listBegin(flag.list_id)) {
           goto next_list;
         }
       }
