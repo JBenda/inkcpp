@@ -33,6 +33,8 @@ namespace ink::runtime::internal
 		template<typename T>
 		static void push(basic_eval_stack* stack, const T& value);
 
+		static void push_void(basic_eval_stack* stack);
+
 		// string special push
 		static void push_string(basic_eval_stack* stack, const char* dynamic_string);
 
@@ -88,7 +90,7 @@ namespace ink::runtime::internal
 				
 				// Ink expects us to push something
 				// TODO -- Should be a special "void" value
-				push(stack, 0);
+				push_void(stack);
 			}
 			else if constexpr (is_string<typename traits::return_type>::value)
 			{

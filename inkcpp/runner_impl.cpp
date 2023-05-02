@@ -722,9 +722,6 @@ namespace ink::runtime::internal
 			// If we're on a newline
 			if (_output.ends_with(value_type::newline))
 			{
-				// TODO: REMOVE
-				// return true;
-
 				// Unless we are out of content, we are going to try
 				//  to continue a little further. This is to check for
 				//  glue (which means there is potentially more content
@@ -962,7 +959,16 @@ namespace ink::runtime::internal
 				} else {
 					target = read<uint32_t>();
 				}
-				start_frame<frame_type::function>(target);
+				if (!(flag & CommandFlag::FALLBACK_FUNCTION)) {
+					start_frame<frame_type::function>(target);
+				} else {
+					inkAssert(!_eval.is_empty(), "fallback function but no function call before?");
+					if(_eval.top_value().type() == value_type::ex_fn_not_found) {
+						_eval.pop();
+						inkAssert(target != 0, "Exetrnal function was not binded, and no fallback function provided!");
+						start_frame<frame_type::function>(target);
+					}
+				}
 			}
 			break;
 			case Command::TUNNEL_RETURN:
@@ -1034,18 +1040,11 @@ namespace ink::runtime::internal
 				// find and execute. will automatically push a valid if applicable
 				bool success = _functions.call(functionName, &_eval, numArguments, _globals->strings());
 
-				// If we failed, we need to at least pretend so our state doesn't get fucked
+				// If we failed, notify a potential fallback function
 				if (!success)
 				{
-					// pop arguments
-					for (int i = 0; i < numArguments; i++)
-						_eval.pop();
-
-					// push void
-					_eval.push(value());
+					_eval.push(values::ex_fn_not_found);
 				}
-
-				// TODO: Verify something was found?
 			}
 			break;
 
@@ -1242,6 +1241,7 @@ namespace ink::runtime::internal
 				inkAssert(false, "Unrecognized command!");
 				break;
 			}
+
 		}
 #ifndef INK_ENABLE_UNREAL
 		catch (...)
