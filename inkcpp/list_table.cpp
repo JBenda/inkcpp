@@ -3,6 +3,7 @@
 #include "header.h"
 #include "random.h"
 #include "string_utils.h"
+#include "list_impl.h"
 
 #ifdef INK_ENABLE_STL
 #include <ostream>
@@ -78,7 +79,9 @@ namespace ink::runtime::internal
 	}
 
 	void list_table::mark_used(list l) {
-		_entry_state[l.lid] = state::used;
+		if (_entry_state[l.lid] == state::unused) {
+			_entry_state[l.lid] = state::used;
+		}
 	}
 
 	void list_table::gc() {
@@ -91,6 +94,7 @@ namespace ink::runtime::internal
 				}
 			}
 		}
+		_list_handouts.clear();
 	}
 
 	int list_table::toFid(list_flag e) const {
@@ -618,6 +622,13 @@ namespace ink::runtime::internal
 			o[i] = r[i];
 		}
 		return res;
+	}
+
+	list_interface* list_table::handout_list(list l) {
+		static_assert(sizeof(list_interface) == sizeof(list_impl));
+		auto& res = _list_handouts.push();
+		new(&res)  list_impl(*this, l.lid);
+		return &res;
 	}
 
 #ifdef INK_ENABLE_STL

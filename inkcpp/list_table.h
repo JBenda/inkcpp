@@ -13,7 +13,6 @@ namespace ink::internal {
 }
 namespace ink::runtime::internal
 {
-	class list_impl;
 	class prng;
 
 	// TODO: move to utils
@@ -177,6 +176,7 @@ namespace ink::runtime::internal
 		}
 		list range(list l, int min, int max);
 
+		list_interface* handout_list(list);
 	private:
 		void copy_lists(const data_t* src, data_t* dst);
 		static constexpr int bits_per_data = sizeof(data_t) * 8;
@@ -257,11 +257,13 @@ namespace ink::runtime::internal
 		managed_array<int, config::maxListTypes> _list_end;
 		managed_array<const char*,config::maxFlags> _flag_names;
 		managed_array<const char*,config::maxListTypes> _list_names;
+		/// keep track over lists accessed with get_var, and clear then at gc time
+		managed_array<list_interface, config::limitEditableLists> _list_handouts;
 
 		bool _valid;
 	public:
 		friend class name_flag_itr;
-		friend list_impl;
+		friend class list_impl;
 		class named_flag_itr {
 			const list_table& _list;
 			const data_t* _data;
@@ -332,6 +334,7 @@ namespace ink::runtime::internal
 				named_flag_itr(*this, f)};
 			return res;
 		}
+
 #ifdef INK_ENABLE_STL
 		std::ostream& write(std::ostream&,list) const;
 #endif

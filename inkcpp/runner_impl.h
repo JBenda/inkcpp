@@ -35,7 +35,7 @@ namespace ink::runtime::internal
 		virtual ~runner_impl();
 
 		// used by the globals object to do garbage collection
-		void mark_strings(string_table&) const;
+		void mark_used(string_table&, list_table&) const;
 
 #pragma region runner Implementation
 		// sets seed for prng in runner

@@ -57,7 +57,7 @@ namespace ink
 				void clear();
 
 				// Garbage collection
-				void mark_strings(string_table&) const;
+				void mark_used(string_table&, list_table&) const;
 
 				// == Threading ==
 
@@ -163,8 +163,8 @@ namespace ink
 				// Clear stack
 				void clear();
 
-				// Garbage collection
-				void mark_strings(string_table&) const;
+				/** Mark used strings and lists for garbage collection */
+				void mark_used(string_table&, list_table&) const;
 
 				// == Save/Restore ==
 				void save();

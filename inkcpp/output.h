@@ -77,8 +77,8 @@ namespace ink
 				// Clears the whole stream
 				void clear();
 
-				// Marks strings that are in use
-				void mark_strings(string_table&) const;
+				// Marks strings and lists that are in use
+				void mark_used(string_table&, list_table&) const;
 
 				// = Save/Restore
 				void save();

@@ -92,7 +92,7 @@ namespace ink::runtime::internal
 				set<value_type::float32>(val.v_float);
 				break;
 			case types::List:
-				set<value_type::list>(static_cast<list_impl*>(val.v_list)->get_list());
+				set<value_type::list>(list_table::list{static_cast<list_impl*>(val.v_list)->get_lid()});
 		}
 	}
 
@@ -113,11 +113,11 @@ namespace ink::runtime::internal
 		else if(type() == value_type::string) { return val(get<value_type::string>().str); }
 		else if(type() == value_type::float32) { return val(get<value_type::float32>()); }
 		else if(type() == value_type::list_flag) { 
-			auto lid = table.create();
-			lid = table.add(lid, get<value_type::list_flag>());
-			return val(new list_impl(table, lid));
+			auto v = table.create();
+			v = table.add(v, get<value_type::list_flag>());
+			return val(table.handout_list(v));
 		} else if(type() == value_type::list) { 
-			return val(new list_impl(table, get<value_type::list>()));
+			return val(table.handout_list(get<value_type::list>()));
 		}
 		inkFail("No valid type to convert to interface value!");
 		return val();

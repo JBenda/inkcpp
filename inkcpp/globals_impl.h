@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "string_table.h"
 #include "list_table.h"
+#include "list_impl.h"
 #include "stack.h"
 #include "snapshot_impl.h"
 

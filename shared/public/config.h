@@ -18,6 +18,11 @@ namespace ink::config {
 	static constexpr int limitThreadDepth = -10;
 	static constexpr int limitEvalStackDepth = -20;
 	static constexpr int limitContainerDepth = -20;
+	/** number of lists which can be accessed with get_var
+	 *  before the story must continue 
+	 * @attention list vars are only valid until the story continous!
+	 */
+	static constexpr int limitEditableLists = -5;
 	/// number of simultaneous active tags
 	static constexpr int limitActiveTags = -10;
 	// temporary variables and callstack;

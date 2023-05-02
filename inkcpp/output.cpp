@@ -429,7 +429,7 @@ namespace ink::runtime::internal
 		_size = 0;
 	}
 
-	void basic_stream::mark_strings(string_table& strings) const
+	void basic_stream::mark_used(string_table& strings, list_table& lists) const
 	{
 		// Find all allocated strings and mark them as used
 		for (size_t i = 0; i < _size; i++)
@@ -439,6 +439,8 @@ namespace ink::runtime::internal
 				if (str.allocated) {
 					strings.mark_used(str.str);
 				}
+			} else if (_data[i].type() == value_type::list) {
+				lists.mark_used(_data[i].get<value_type::list>());
 			}
 		}
 	}

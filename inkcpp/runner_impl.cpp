@@ -1306,13 +1306,13 @@ namespace ink::runtime::internal
 		_container.clear();
 	}
 
-	void runner_impl::mark_strings(string_table& strings) const
+	void runner_impl::mark_used(string_table& strings, list_table& lists) const
 	{
 		// Find strings in output and stacks
-		_output.mark_strings(strings);
-		_stack.mark_strings(strings);
-		// ref_stack has no strings!
-		_eval.mark_strings(strings);
+		_output.mark_used(strings, lists);
+		_stack.mark_used(strings, lists);
+		// ref_stack has no strings and lists!
+		_eval.mark_used(strings, lists);
 
 		// Take into account choice text
 		for (size_t i = 0; i < _choices.size(); i++)

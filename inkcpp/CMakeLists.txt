@@ -18,6 +18,7 @@ list(APPEND SOURCES
 	tuple.hpp
     string_table.h string_table.cpp avl_array.h
 	list_table.h list_table.cpp
+  list_impl.h list_impl.cpp
 	operations.h operation_bases.h
 	list_operations.h list_operations.cpp
 	container_operations.h container_operations.cpp
