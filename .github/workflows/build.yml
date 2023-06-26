@@ -18,17 +18,17 @@ jobs:
           - os: macos-latest
             artifact: macos
             name: MacOSX
-            inklecate_url: https://github.com/inkle/ink/releases/download/v1.0.0/inklecate_mac.zip
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
             proof: false
           - os: windows-latest
             artifact: win64
             name: Windows x64
-            inklecate_url: https://github.com/inkle/ink/releases/download/v1.0.0/inklecate_windows.zip
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_windows.zip
             proof: false
           - os: "ubuntu-20.04"
             artifact: linux
             name: Linux x64
-            inklecate_url: https://github.com/inkle/ink/releases/download/v1.0.0/inklecate_linux.zip
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
             proof: true
 
     steps:
