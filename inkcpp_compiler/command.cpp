@@ -14,7 +14,7 @@ namespace ink
 			"\n",
 			"<>",
 			"void",
-			"#",
+			"inkcpp_TAG",
 			"inkcpp_DIVERT",
 			"inkcpp_DIVERT_TO_VARIABLE",
 			"inkcpp_TUNNEL",
@@ -40,6 +40,8 @@ namespace ink
 
 			"str",
 			"/str",
+			"#",
+			"/#",
 
 			"inkcpp_CHOICE",
 			"thread",

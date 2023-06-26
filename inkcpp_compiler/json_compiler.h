@@ -51,5 +51,6 @@ namespace ink::compiler::internal
 		container_t _next_container_index;
 
 		list_data _list_meta;
+		int _ink_version;
 	};
 }

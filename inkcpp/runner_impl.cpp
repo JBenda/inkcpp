@@ -6,6 +6,7 @@
 #include "header.h"
 #include "string_utils.h"
 #include "snapshot_impl.h"
+#include "value.h"
 
 namespace ink::runtime
 {
@@ -164,6 +165,7 @@ namespace ink::runtime::internal
 	void runner_impl::clear_tags()
 	{
 		_tags.clear();
+		_choice_tags_begin = -1;
 	}
 
 	void runner_impl::jump(ip_t dest, bool record_visits)
@@ -330,6 +332,7 @@ namespace ink::runtime::internal
 	{
 		_ptr = _story->instructions();
 		_evaluation_mode = false;
+		_choice_tags_begin = -1;
 
 		// register with globals
 		_globals->add_runner(this);
@@ -526,7 +529,7 @@ namespace ink::runtime::internal
 
 	size_t runner_impl::num_tags() const
 	{
-		return _tags.size();
+		return _choice_tags_begin < 0 ? _tags.size() : _choice_tags_begin;
 	}
 
 	const char* runner_impl::get_tag(size_t index) const
@@ -549,6 +552,7 @@ namespace ink::runtime::internal
 		ptr = snap_write(ptr, _done, should_write);
 		ptr = snap_write(ptr, _rng.get_state(), should_write);
 		ptr = snap_write(ptr, _evaluation_mode, should_write);
+		ptr = snap_write(ptr, _string_mode, should_write);
 		ptr = snap_write(ptr, _saved_evaluation_mode, should_write);
 		ptr = snap_write(ptr, _saved, should_write);
 		ptr = snap_write(ptr, _is_falling, should_write);
@@ -556,6 +560,7 @@ namespace ink::runtime::internal
 		ptr += _stack.snap(data ? ptr : nullptr, snapper);
 		ptr += _ref_stack.snap(data ? ptr : nullptr, snapper);
 		ptr += _eval.snap(data ? ptr : nullptr, snapper);
+		ptr = snap_write(ptr, _choice_tags_begin, should_write);
 		ptr = snap_write(ptr, _tags.size(), should_write);
 		for (const auto& tag : _tags) {
 			std::uintptr_t offset = tag - snapper.story_string_table;
@@ -600,6 +605,9 @@ namespace ink::runtime::internal
 		ptr = _stack.snap_load(ptr, loader);
 		ptr = _ref_stack.snap_load(ptr, loader);
 		ptr = _eval.snap_load(ptr, loader);
+		int choice_tags_begin;
+		ptr = snap_read(ptr, choice_tags_begin);
+		_choice_tags_begin = choice_tags_begin;
 		size_t num_tags;
 		ptr = snap_read(ptr, num_tags);
 		for(size_t i = 0; i < num_tags; ++i) {
@@ -1082,6 +1090,7 @@ namespace ink::runtime::internal
 			case Command::START_STR:
 			{
 				inkAssert(_evaluation_mode, "Can not enter string mode while not in evaluation mode!");
+				_string_mode = true;
 				_evaluation_mode = false;
 				_output << values::marker;
 			} break;
@@ -1089,6 +1098,7 @@ namespace ink::runtime::internal
 			{
 				// TODO: Assert we really had a marker on there?
 				inkAssert(!_evaluation_mode, "Must be in evaluation mode");
+				_string_mode = false;
 				_evaluation_mode = true;
 
 				// Load value from output stream
@@ -1096,6 +1106,20 @@ namespace ink::runtime::internal
 				_eval.push(value{}.set<value_type::string>(_output.get_alloc<false>(
 								_globals->strings(),
 								_globals->lists())));
+			} break;
+
+			case Command::START_TAG:
+			{
+				_output << values::marker;
+			} break;
+
+			case Command::END_TAG:
+			{
+				auto tag = _output.get_alloc<true>(_globals->strings(), _globals->lists());
+				if(_string_mode && _choice_tags_begin < 0) {
+					_choice_tags_begin = _tags.size();
+				}
+				_tags.push() = tag;
 			} break;
 
 			// == Choice commands
@@ -1141,12 +1165,19 @@ namespace ink::runtime::internal
 				}
 				for(;sc;--sc) { _output << stack[sc-1]; }
 
+				// fetch relevant tags
+				const char* const* tags = nullptr;
+				if (_choice_tags_begin >= 0 && _tags[_tags.size()-1] != nullptr) {
+					for(tags = _tags.end() - 1; *(tags-1) != nullptr && (tags - _tags.begin()) > _choice_tags_begin; --tags);
+					_tags.push() = nullptr;
+				}
+
 				// Create choice and record it
 				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
 					_fallback_choice
-						= choice{}.setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
+						= choice{}.setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread(), tags);
 				} else {
-					add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread());
+					add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread(), tags);
 				}
 				// save stack at last choice
 				if(_saved) { forget(); }
@@ -1314,6 +1345,10 @@ namespace ink::runtime::internal
 		// ref_stack has no strings and lists!
 		_eval.mark_used(strings, lists);
 
+		// Take into account tags
+		for (size_t i = 0; i < _tags.size(); ++i) {
+			strings.mark_used(_tags[i]);
+		}
 		// Take into account choice text
 		for (size_t i = 0; i < _choices.size(); i++)
 			strings.mark_used(_choices[i]._text);

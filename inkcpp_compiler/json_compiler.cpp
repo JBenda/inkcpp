@@ -1,6 +1,8 @@
 #include "json_compiler.h"
 
 #include "list_data.h"
+#include "system.h"
+#include "version.h"
 
 #include <string_view>
 #include <iostream>
@@ -19,7 +21,7 @@ namespace ink::compiler::internal
 	void json_compiler::compile(const nlohmann::json& input, emitter* output, compilation_results* results)
 	{
 		// Get the runtime version
-		int inkVersion = input["inkVersion"];
+		_ink_version = input["inkVersion"];
 		// TODO: Do something with version number
 
 		// Start the output
@@ -27,7 +29,7 @@ namespace ink::compiler::internal
 		_emitter = output;
 
 		// Initialize emitter
-		_emitter->start(inkVersion, results);
+		_emitter->start(_ink_version, results);
 
 		if(auto itr = input.find("listDefs"); itr != input.end()) {
 			compile_lists_definition(*itr);
@@ -396,6 +398,9 @@ namespace ink::compiler::internal
 
 		else if (get(command, "#", val))
 		{
+			if (_ink_version > 20) {
+				ink_exception("with inkVerison 21 the tag system chages, and the '#: <tag>' is deprecated now");
+			}
 			_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);
 		}
 

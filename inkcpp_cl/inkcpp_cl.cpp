@@ -175,7 +175,14 @@ int main(int argc, const char** argv)
 				int index = 1;
 				for (const ink::runtime::choice& c : *thread)
 				{
-					std::cout << index++ << ": " << c.text() << std::endl;
+					std::cout << index++ << ": " << c.text();
+					if(c.has_tags()) {
+						std::cout << "\n\t";
+						for(size_t i = 0; i < c.num_tags(); ++i) {
+							std::cout << "# " << c.get_tag(i) << " ";
+						}
+					}
+					std::cout << std::endl;
 				}
 
 				int c = 0;

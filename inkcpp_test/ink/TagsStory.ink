@@ -6,7 +6,7 @@
 
 Hello # output_tag_h
 * a
-* b->knot2 # choice_tag_b
+* [b # choice_tag_b # choice_tag_b_2]->knot2
 - World! # output_tag_w
 * c # choice_tag_c
 * d # choice_tag_d
@@ -17,5 +17,6 @@ Hello # output_tag_h
 
 Knot2 # output_tag_k
 * e
-* f # choice_tag_f
-- out->END # close_tag
+* f #shared_tag # shared_tag_2 [ with detail #choice_tag #choice_tag_2] and content # content_tag # content_tag_2 
+* g # choice_tag_g
+- out # close_tag->END

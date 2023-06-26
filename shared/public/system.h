@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <optional>
 #include <cctype>
+#include <cstdint>
 #endif
 
 namespace ink

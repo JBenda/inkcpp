@@ -49,6 +49,8 @@ namespace ink
 		// == String stack
 		START_STR,
 		END_STR,
+		START_TAG,
+		END_TAG,
 
 		// == Choice commands
 		CHOICE,

@@ -45,13 +45,30 @@ namespace ink
 			const char* text() const { return _text; }
 
 			choice() : choice(0) {}
-			choice(int) : _text{nullptr}, _index{~0}, _path{~0u}, _thread{~0u} {}
+			choice(int) : _tags{nullptr}, _text{nullptr}, _index{~0}, _path{~0u}, _thread{~0u} {}
+
+			bool has_tags() const { return _tags != nullptr; }
+			size_t num_tags() const
+			{
+				size_t i = 0;
+				if (has_tags()) while ( _tags[i] != nullptr )
+				{
+					++i;
+				};
+				return i;
+			}
+			const char* get_tag(size_t index) const {
+				return _tags[index];
+			}
+
 		private:
 			friend class internal::runner_impl;
 
 			uint32_t path() const { return _path; }
-			choice& setup(internal::basic_stream&, internal::string_table& strings, internal::list_table& lists, int index, uint32_t path, thread_t thread);
+			choice&  setup( internal::basic_stream&, internal::string_table& strings, internal::list_table& lists, int index, uint32_t path, thread_t thread, const char* const* tags );
+
 		private:
+			const char* const* _tags;
 			const char* _text;
 			int _index;
 			uint32_t _path;
