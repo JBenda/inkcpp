@@ -320,7 +320,6 @@ namespace ink::runtime::internal
 
 	runner_impl::runner_impl(const story_impl* data, globals global)
 		: _story(data), _globals(global.cast<globals_impl>()),
-		_rng(time(NULL)),
 		_operations(
 				global.cast<globals_impl>()->strings(),
 				global.cast<globals_impl>()->lists(),
@@ -328,7 +327,7 @@ namespace ink::runtime::internal
 				*global.cast<globals_impl>(),
 				*data,
 				static_cast<const runner_interface&>(*this)),
-		_backup(nullptr), _done(nullptr), _choices(), _container(~0)
+		_backup(nullptr), _done(nullptr), _choices(), _container(~0), _rng(time(NULL))
 	{
 		_ptr = _story->instructions();
 		_evaluation_mode = false;
@@ -1046,7 +1045,7 @@ namespace ink::runtime::internal
 				int numArguments = (int)flag;
 
 				// find and execute. will automatically push a valid if applicable
-				bool success = _functions.call(functionName, &_eval, numArguments, _globals->strings());
+				bool success = _functions.call(functionName, &_eval, numArguments, _globals->strings(), _globals->lists());
 
 				// If we failed, notify a potential fallback function
 				if (!success)

@@ -40,6 +40,8 @@ ink::runtime::value FInkVar::to_value() const {
 			return ink::runtime::value(value.GetSubtype<bool>());
 		case EInkVarType::UInt:
 			return ink::runtime::value(value.GetSubtype<unsigned>());
+		case EInkVarType::List:
+			return ink::runtime::value(value.GetSubtype<FInkList>().GetData());
 		default:
 			inkFail("Unsupported type");
 			return ink::runtime::value();
@@ -84,9 +86,16 @@ FText UInkVarLibrary::Conv_InkVarText(const FInkVar& InkVar)
 
 bool UInkVarLibrary::Conv_InkVarBool(const FInkVar& InkVar)
 {
-	if (ensureMsgf(InkVar.type() == EInkVarType::Bool, TEXT("InkVar is not an Int Type!")))
+	if (ensureMsgf(InkVar.type() == EInkVarType::Bool, TEXT("InkVar is not an Bool Type!")))
 		return InkVar.value.GetSubtype<bool>();
 	return false;
+}
+
+FInkList UInkVarLibrary::Conv_InkVarInkList(const FInkVar& InkVar)
+{
+	if (ensureMsgf(InkVar.type() == EInkVarType::List, TEXT("InkVar is not an List Type!")))
+		return InkVar.value.GetSubtype<FInkList>();
+	return nullptr;
 }
 
 

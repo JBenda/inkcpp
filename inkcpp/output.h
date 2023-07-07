@@ -54,7 +54,7 @@ namespace ink
 #ifdef INK_ENABLE_STL
 				// Extract into a string
 				std::string get();
-#else defined INK_ENABLE_UNREAL
+#elif defined(INK_ENABLE_UNREAL)
 				FString get();
 #endif
 

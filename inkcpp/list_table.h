@@ -85,17 +85,17 @@ namespace ink::runtime::internal
 		 * @retval nullopt if no flag was found
 		 */
 		optional<list_flag> toFlag(const char* flag_name) const {
-			for(auto itr = _flag_names.begin(); itr != _flag_names.end(); ++itr) {
-				if (strcmp(*itr, flag_name) == 0) {
-					int fid = itr - _flag_names.begin();
+			for(auto flag_itr = _flag_names.begin(); flag_itr != _flag_names.end(); ++flag_itr) {
+				if (strcmp(*flag_itr, flag_name) == 0) {
+					int fid = flag_itr - _flag_names.begin();
 					int lid = 0;
 					int begin = 0;
-					for(auto itr = _list_end.begin(); itr != _list_end.end(); ++itr) {
-						if(*itr > fid) { 
-							lid = itr - _list_end.begin();
+					for(auto list_itr = _list_end.begin(); list_itr != _list_end.end(); ++list_itr) {
+						if(*list_itr > fid) { 
+							lid = list_itr - _list_end.begin();
 							break;
 						}
-						begin = *itr;
+						begin = *list_itr;
 					}
 					return {list_flag{.list_id = static_cast<int16_t>(lid), .flag = static_cast<int16_t>(fid - begin)}};
 				}

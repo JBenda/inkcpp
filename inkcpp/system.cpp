@@ -25,13 +25,6 @@ namespace ink
 		for (size_t i = 0; i < length; i++)
 			*(buf++) = 0;
 	}
-
-	void ink_assert(bool condition, const char* msg /*= nullptr*/)
-	{
-		if (!condition)
-			throw ink_exception(msg);
-	}
-
 }
 
 #endif

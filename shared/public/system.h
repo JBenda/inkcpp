@@ -15,6 +15,7 @@
 #include <optional>
 #include <cctype>
 #include <cstdint>
+#include <cstdarg>
 #endif
 
 namespace ink
@@ -118,13 +119,6 @@ namespace ink
 	void zero_memory(void* buffer, size_t length);
 #endif
 
-	// assert	
-#ifndef INK_ENABLE_UNREAL
-	void ink_assert(bool condition, const char* msg = nullptr);
-	[[ noreturn ]] inline void ink_assert(const char* msg = nullptr) { ink_assert(false, msg); exit(EXIT_FAILURE);}
-#else
-	inline void ink_fail(const char*) { checkNoEntry(); }
-#endif
 
 #ifdef INK_ENABLE_STL
 	using ink_exception = std::runtime_error;
@@ -139,6 +133,36 @@ namespace ink
 	private:
 		const char* _msg;
 	};
+#endif
+
+	// assert	
+#ifndef INK_ENABLE_UNREAL
+	template<typename... Args>
+	void ink_assert( bool condition, const char* msg = nullptr, Args... args )
+	{
+		if ( !condition )
+		{
+			if constexpr ( sizeof...( args ) > 0 )
+			{
+				char* message = static_cast<char*>(
+				  malloc( sprintf( nullptr, msg, args... ) + 1 ) );
+				sprintf( message, msg, args... );
+				throw ink_exception( message );
+			}
+			else
+			{
+				throw ink_exception( msg );
+			}
+		}
+	}
+	template<typename... Args>
+	[[noreturn]] inline void ink_assert( const char* msg = nullptr, Args... args )
+	{
+		ink_assert( false, msg, args... );
+		exit( EXIT_FAILURE );
+	}
+#else
+	inline void ink_fail(const char*) { checkNoEntry(); }
 #endif
 
 	namespace runtime::internal
@@ -210,7 +234,7 @@ namespace ink
 
 #ifdef INK_ENABLE_UNREAL
 #define inkZeroMemory(buff, len) FMemory::Memset(buff, 0, len)
-#define inkAssert(condition, text) checkf(condition, TEXT(text))
+#define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
 #define inkFail(text) ink::ink_fail(text)
 #else
 #define inkZeroMemory ink::zero_memory

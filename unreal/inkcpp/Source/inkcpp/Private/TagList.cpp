@@ -25,7 +25,7 @@ bool UTagList::Has(const FString& tag) const
 
 bool UTagList::HasEnum(const FString& enumName, uint8& value) const
 {
-	UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, *enumName, true);
+	UEnum* Enum = FindObjectSafe<UEnum>(nullptr, *enumName, true);
 	if (!Enum)
 	{
 		value = 0;

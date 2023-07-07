@@ -57,8 +57,8 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 			path_bin /= path(inklecate_cmd, path::format::generic_format).make_preferred();
 			path story_path(cFilename, path::format::generic_format);
 			story_path.make_preferred();
-			char filename[1024];
-			if(tmpnam_s(filename, 1024)) {
+			const char* filename = std::tmpnam(nullptr);
+			if(filename == nullptr) {
 				UE_LOG(InkCpp, Error, TEXT("Failed to create temporary file"));
 				return nullptr;
 			}

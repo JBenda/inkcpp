@@ -2,6 +2,10 @@
 
 #include "system.h"
 
+#ifdef INK_ENABLE_STL
+#include <ostream>
+#endif
+
 namespace ink::runtime {
 	namespace internal {
 		class list_table;
@@ -12,6 +16,7 @@ namespace ink::runtime {
 
 		class iterator {
 			const char* _flag_name;
+			const char* _list_name;
 			const list_interface& _list;
 			int _i;
 			friend list_interface;
@@ -19,8 +24,22 @@ namespace ink::runtime {
 			iterator(const char* flag_name, const list_interface& list, size_t i)
 				: _flag_name(flag_name), _list(list), _i(i) {}
 		public:
-			const char* operator*() const { return _flag_name; };
-			iterator& operator++() { _list.next(_flag_name, _i); return *this; }
+			struct Flag {
+				const char* flag_name;
+				const char* list_name;
+#ifdef INK_ENABLE_STL
+				friend std::ostream& operator<<(std::ostream& os, const Flag& flag) {
+					os << flag.list_name << "(" << flag.flag_name << ")";
+					return os;
+				}
+#endif
+			};
+			Flag      operator*() const { return Flag{ .flag_name = _flag_name, .list_name = _list_name }; };
+			iterator& operator++()
+			{
+				_list.next( _flag_name, _list_name, _i );
+				return *this;
+			}
 			bool operator!=(const iterator& itr) const { return itr._i != _i; }
 			bool operator==(const iterator& itr) const {
 				return itr._i == _i;
@@ -29,33 +48,33 @@ namespace ink::runtime {
 
 		/** checks if a flag is contained in the list */
 		virtual bool contains(const char* flag) const {
-			ink_assert(false, "Not implemented function from interfaces is called!"); return false;
+			inkAssert(false, "Not implemented function from interfaces is called!"); return false;
 		};
 
 		/** add a flag to list */
 		virtual void add(const char* flag) {
-			ink_assert(false, "Not implemented function from interface is called!");
+			inkAssert(false, "Not implemented function from interface is called!");
 		};
 
 		/** removes a flag from list */
 		virtual void remove(const char* flag) {
-			ink_assert(false, "Not implemented function from interface is called!");
+			inkAssert(false, "Not implemented function from interface is called!");
 		};
 
 		/** begin iterator for contained flags in list */
 		virtual iterator begin() const {
-			ink_assert(false, "Not implemented function from interface is called!");
+			inkAssert(false, "Not implemented function from interface is called!");
 			return new_iterator(nullptr, -1);
 		};
 		/** end iterator for contained flags in list */
 		virtual iterator end() const {
-			ink_assert(false, "Not implemented function from interface is called!");
+			inkAssert(false, "Not implemented function from interface is called!");
 			return new_iterator(nullptr, -1); };
 
 	private:
 		friend iterator;
-		virtual void next(const char*& flag_name, int& i) const {
-			ink_assert(false, "Not implemented funciton from interface is called!");
+		virtual void next(const char*& flag_name, const char*& list_name, int& i) const {
+			inkAssert(false, "Not implemented funciton from interface is called!");
 		};
 	protected:
 		iterator new_iterator(const char* flag_name, int i) const {

@@ -11,7 +11,7 @@
 namespace ink::runtime::internal
 {
 	template<>
-	int32_t function_base::pop<int32_t>(basic_eval_stack* stack)
+	int32_t function_base::pop<int32_t>(basic_eval_stack* stack, list_table& lists)
 	{
 		value val = stack->pop();
 		inkAssert(val.type() == value_type::int32, "Type missmatch!");
@@ -19,7 +19,7 @@ namespace ink::runtime::internal
 	}
 
 	template<>
-	const char* function_base::pop<const char*>(basic_eval_stack* stack)
+	const char* function_base::pop<const char*>(basic_eval_stack* stack, list_table& lists)
 	{
 		value val = stack->pop();
 		inkAssert(val.type() == value_type::string, "Type missmatch!");
@@ -52,15 +52,15 @@ namespace ink::runtime::internal
 
 #ifdef INK_ENABLE_STL
 	template<>
-	std::string function_base::pop<std::string>(basic_eval_stack* stack) {
-		return std::string(pop<const char*>(stack));
+	std::string function_base::pop<std::string>(basic_eval_stack* stack, list_table& lists) {
+		return std::string(pop<const char*>(stack, lists));
 	}
 #endif
 #ifdef INK_ENABLE_UNREAL
 	template<>
-	FInkVar function_base::pop<FInkVar>(basic_eval_stack* stack)
+	FInkVar function_base::pop<FInkVar>(basic_eval_stack* stack, list_table& lists)
 	{
-		return FInkVar(stack->pop().to_interface_value());
+		return FInkVar(stack->pop().to_interface_value(lists));
 	}
 
 	template<>

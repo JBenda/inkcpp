@@ -7,10 +7,10 @@
 namespace ink::runtime::internal
 {
 	// hash tree sorted by string pointers
-	class string_table : public snapshot_interface
+	class string_table final : public snapshot_interface
 	{
 	public:
-		virtual ~string_table() final;
+		virtual ~string_table();
 
 		// Create a dynmaic string of a particular length
 		char* create(size_t length);

@@ -309,7 +309,7 @@ namespace ink::runtime::internal
 	};
 
 	template<typename T>
-	class allocated_restorable_array : public basic_restorable_array<T>
+	class allocated_restorable_array final : public basic_restorable_array<T>
 	{
 		using base = basic_restorable_array<T>;
 	public:
@@ -346,7 +346,7 @@ namespace ink::runtime::internal
 			this->set_new_buffer(_buffer, new_capacity);
 		}
 
-		virtual ~allocated_restorable_array() final
+		virtual ~allocated_restorable_array() 
 		{
 			if(_buffer) {
 				delete[] _buffer;

@@ -13,6 +13,11 @@ int UChoice::GetIndex() const
 	return data->index();
 }
 
+const UTagList* UChoice::GetTags() const
+{
+	return tags;
+}
+
 void UChoice::Initialize(const ink::runtime::choice* c)
 {
 	data = c;

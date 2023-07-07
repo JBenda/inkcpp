@@ -10,6 +10,7 @@ namespace ink::runtime::internal
 {
 	class basic_eval_stack;
 	class string_table;
+	class list_table;
 
 	// base function container with virtual callback methods
 	class function_base
@@ -19,15 +20,15 @@ namespace ink::runtime::internal
 
 		// calls the underlying function object taking parameters from a stack
 #ifdef INK_ENABLE_UNREAL
-		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings) = 0;
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) = 0;
 #else
-		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings) = 0;
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) = 0;
 #endif
 
 	protected:
 		// used to hide basic_eval_stack and value definitions
 		template<typename T>
-		static T pop(basic_eval_stack* stack);
+		static T pop(basic_eval_stack* stack, list_table& lists);
 
 		// used to hide basic_eval_stack and value definitions
 		template<typename T>
@@ -50,9 +51,9 @@ namespace ink::runtime::internal
 		function(F functor) : functor(functor) { }
 
 		// calls the underlying function using arguments on the stack
-		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings) override
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) override
 		{
-			call(stack, length, strings, GenSeq<traits::arity>());
+			call(stack, length, strings, lists, GenSeq<traits::arity>());
 		}
 
 	private:
@@ -68,15 +69,15 @@ namespace ink::runtime::internal
 
 		// pops an argument from the stack using the function-type
 		template<int index>
-		arg_type<index> pop_arg(basic_eval_stack* stack)
+		arg_type<index> pop_arg(basic_eval_stack* stack, list_table& lists)
 		{
 			// todo - type assert?
 
-			return pop<arg_type<index>>(stack);
+			return pop<arg_type<index>>(stack, lists);
 		}
 
 		template<size_t... Is>
-		void call(basic_eval_stack* stack, size_t length, string_table& strings, seq<Is...>)
+		void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists, seq<Is...>)
 		{
 			// Make sure the argument counts match
 			inkAssert(sizeof...(Is) == length, "Attempting to call functor with too few/many arguments");
@@ -86,7 +87,7 @@ namespace ink::runtime::internal
 			if constexpr (is_same<void, typename traits::return_type>::value)
 			{
 				// Just evaluevaluatelate
-				functor(pop_arg<Is>(stack)...);
+				functor(pop_arg<Is>(stack, lists)...);
 				
 				// Ink expects us to push something
 				// TODO -- Should be a special "void" value
@@ -97,20 +98,14 @@ namespace ink::runtime::internal
 				// SPECIAL: The result of the functor is a string type
 				//  in order to store it in the inkcpp interpreter we 
 				//  need to store it in our allocated string table
-				auto string_result = functor(pop_arg<Is>(stack)...);
+				auto string_result = functor(pop_arg<Is>(stack, lists)...);
 
 				// Get string length
 				size_t len = string_handler<typename traits::return_type>::length(string_result);
 
 				// Get source and allocate buffer
-				const char* src = string_handler<typename traits::return_type>::src(string_result);
 				char* buffer = allocate(strings, len + 1);
-
-				// Copy
-				char* ptr = buffer;
-				while (*src != '\0')
-					*(ptr++) = *(src++);
-				*ptr = 0;
+				string_handler<typename traits::return_type>::src_copy(string_result, buffer);
 
 				// push string result
 				push_string(stack, buffer);
@@ -118,7 +113,7 @@ namespace ink::runtime::internal
 			else
 			{
 				// Evaluate and push the result onto the stack
-				push(stack, functor(pop_arg<Is>(stack)...));
+				push(stack, functor(pop_arg<Is>(stack, lists)...));
 			}
 		}
 	};
@@ -131,7 +126,7 @@ namespace ink::runtime::internal
 		function_array_delegate(const D& del) : invocableDelegate(del) { }
 
 		// calls the underlying delegate using arguments on the stack
-		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings) override
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) override
 		{
 			constexpr bool RET_VOID = 
 				is_same<typename function_traits<decltype(&D::Execute)>::return_type,
@@ -140,7 +135,7 @@ namespace ink::runtime::internal
 			TArray<FInkVar> variables;
 			for (size_t i = 0; i < length; i++)
 			{
-				variables.Add(pop<FInkVar>(stack));
+				variables.Add(pop<FInkVar>(stack, lists));
 			}
             if constexpr (RET_VOID)
 			{

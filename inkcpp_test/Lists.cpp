@@ -79,11 +79,12 @@ SCENARIO("run a story with lists", "[lists]")
 			THEN("should iterate all contained flags")
 			{
 				l1 = *globals->get<list>("list");
-				for(const char* flag : *l1) {
+				for(auto flag : *l1) {
 					INFO(flag);
-					REQUIRE((strcmp(flag, "bird") == 0
-						||strcmp(flag, "dog") == 0
-						|| strcmp(flag, "yellow") == 0
+					REQUIRE((strcmp(flag.list_name, "colors")==0 || strcmp(flag.list_name, "animals") == 0));
+					REQUIRE((strcmp(flag.flag_name, "bird") == 0
+						|| strcmp(flag.flag_name, "dog") == 0
+						|| strcmp(flag.flag_name, "yellow") == 0
 					));
 				}
 			}
