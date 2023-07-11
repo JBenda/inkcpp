@@ -145,7 +145,7 @@ namespace ink
 			if constexpr ( sizeof...( args ) > 0 )
 			{
 				char* message = static_cast<char*>(
-				  malloc( sprintf( nullptr, msg, args... ) + 1 ) );
+				  malloc( snprintf( nullptr, 0, msg, args... ) + 1 ) );
 				sprintf( message, msg, args... );
 				throw ink_exception( message );
 			}
@@ -162,7 +162,14 @@ namespace ink
 		exit( EXIT_FAILURE );
 	}
 #else
-	inline void ink_fail(const char*) { checkNoEntry(); }
+	template<typename... Args>
+	inline void ink_fail(const char* msg, Args... args) { 
+		if (sizeof...(args) > 0) {
+			checkf(false, UTF8_TO_TCHAR(msg), args...)
+		} else {
+			checkf(false, UTF8_TO_TCHAR(msg));
+		}
+	}
 #endif
 
 	namespace runtime::internal
@@ -235,9 +242,9 @@ namespace ink
 #ifdef INK_ENABLE_UNREAL
 #define inkZeroMemory(buff, len) FMemory::Memset(buff, 0, len)
 #define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
-#define inkFail(text) ink::ink_fail(text)
+#define inkFail ink::ink_fail
 #else
 #define inkZeroMemory ink::zero_memory
 #define inkAssert ink::ink_assert
-#define inkFail(text) ink::ink_assert(text)
+#define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
 #endif

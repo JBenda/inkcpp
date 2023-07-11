@@ -3,6 +3,8 @@
 /// Define base constructs to specify by operation headers.
 
 #include "command.h"
+#include "stack.h"
+#include "value.h"
 
 namespace ink::runtime::internal {
 
