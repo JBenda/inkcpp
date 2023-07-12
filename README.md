@@ -134,7 +134,6 @@ I am currently working toward a 1.0 release. You can track my progress here: htt
 
 The big things we're missing right now are:
 
-* Fallback functions for externals.
 * Variable observers
 
 ## Dependencies
