@@ -138,9 +138,11 @@ namespace ink::runtime::internal
 		// Return processed string
 		// remove mulitple accourencies of ' '
 		std::string result = str.str();
-		auto end = clean_string<true, false>(result.begin(), result.end());
-		_last_char = *(end-1);
-		result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
+		if ( !result.empty() ) {
+			auto end = clean_string<true, false>( result.begin(), result.end() );
+			_last_char = *( end - 1 );
+			result.resize( end - result.begin() - ( _last_char == ' ' ? 1 : 0 ) );
+		}
 		return result;
 	}
 #endif
