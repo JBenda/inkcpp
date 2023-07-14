@@ -32,7 +32,7 @@ namespace ink::runtime::internal {
       flag.flag = 0;
       do {
         ++flag.list_id;
-        if(flag.list_id >= _list_table->_list_end.size()) {
+        if(static_cast<size_t>(flag.list_id) >= _list_table->_list_end.size()) {
           i = -1;
           return;
         }

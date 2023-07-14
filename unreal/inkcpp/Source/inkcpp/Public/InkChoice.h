@@ -2,7 +2,7 @@
 
 #include "UObject/Object.h"
 
-#include "Choice.generated.h"
+#include "InkChoice.generated.h"
 
 namespace ink::runtime { class choice; }
 class UTagList;

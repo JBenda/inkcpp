@@ -5,7 +5,7 @@
 #include "inkcpp.h"
 #include "InkRuntime.h"
 #include "TagList.h"
-#include "Choice.h"
+#include "InkChoice.h"
 #include "ink/runner.h"
 
 // Unreal includes
