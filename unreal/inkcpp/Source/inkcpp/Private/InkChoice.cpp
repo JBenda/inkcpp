@@ -2,22 +2,22 @@
 
 #include "ink/choice.h"
 
-FString UChoice::GetText() const
+FString UInkChoice::GetText() const
 {
 	return data->text();
 }
 
-int UChoice::GetIndex() const
+int UInkChoice::GetIndex() const
 {
 	return data->index();
 }
 
-const UTagList* UChoice::GetTags() const
+const UTagList* UInkChoice::GetTags() const
 {
 	return tags;
 }
 
-void UChoice::Initialize(const ink::runtime::choice* c)
+void UInkChoice::Initialize(const ink::runtime::choice* c)
 {
 	data = c;
 }

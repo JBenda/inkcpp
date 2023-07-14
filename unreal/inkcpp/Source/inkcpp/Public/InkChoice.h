@@ -8,7 +8,7 @@ namespace ink::runtime { class choice; }
 class UTagList;
 
 UCLASS(BlueprintType)
-class UChoice : public UObject
+class UInkChoice : public UObject
 {
 	GENERATED_BODY()
 public:

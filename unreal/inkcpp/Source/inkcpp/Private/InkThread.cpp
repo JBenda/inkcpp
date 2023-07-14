@@ -154,7 +154,7 @@ bool UInkThread::ExecuteInternal()
 			// Forward to handler
 			for (ink::size_t i = 0; i < mpRunner->num_choices(); i++)
 			{
-				UChoice* choice = NewObject<UChoice>(this);
+				UInkChoice* choice = NewObject<UInkChoice>(this);
 				choice->Initialize(mpRunner->get_choice(i));
 				mCurrentChoices.Add(choice);
 			}

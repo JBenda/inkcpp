@@ -16,7 +16,7 @@
 
 class UTagList;
 class AInkRuntime;
-class UChoice;
+class UInkChoice;
 
 /**
  * Base class for all ink threads
@@ -63,7 +63,7 @@ public:
 
 	// Called when the thread has requested a branch
 	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
-	void OnChoice(const TArray<UChoice*>& choices);
+	void OnChoice(const TArray<UInkChoice*>& choices);
 
 	// Called before the thread is destroyed
 	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
@@ -88,7 +88,7 @@ protected:
 	virtual void OnStartup_Implementation() { }
 	virtual void OnLineWritten_Implementation(const FString& line, UTagList* tags) { }
 	virtual void OnTag_Implementation(const FString& line) { }
-	virtual void OnChoice_Implementation(const TArray<UChoice*>& choices) { }
+	virtual void OnChoice_Implementation(const TArray<UInkChoice*>& choices) { }
 	virtual void OnShutdown_Implementation() { }
 	
 private:
@@ -105,7 +105,7 @@ private:
 private:
 	ink::runtime::runner mpRunner;
 	UTagList* mpTags;
-	TArray<UChoice*> mCurrentChoices; /// @TODO: make accassible?
+	TArray<UInkChoice*> mCurrentChoices; /// @TODO: make accassible?
 
 	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
 	
