@@ -50,6 +50,15 @@ namespace ink::runtime::internal
 	template<typename T>
 	struct is_pointer<T*> : true_type {};
 
+	template<class T> struct remove_cv { typedef T type; };
+	template<class T> struct remove_cv<const T> { typedef T type; };
+	template<class T> struct remove_cv<volatile T> { typedef T type; };
+	template<class T> struct remove_cv<const volatile T> { typedef T type; };
+	template<class T>
+	struct remove_cvref
+	{ typedef std::remove_cv_t<std::remove_reference_t<T>> type; };
+
+
 	// == string testing (from me) ==
 
 	template<typename T>

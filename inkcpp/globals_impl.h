@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include "system.h"
 #include "array.h"
 #include "globals.h"
@@ -8,6 +9,7 @@
 #include "list_impl.h"
 #include "stack.h"
 #include "snapshot_impl.h"
+#include "functional.h"
 
 namespace ink::runtime::internal
 {
@@ -16,7 +18,7 @@ namespace ink::runtime::internal
 	class snapshot_impl;
 
 	// Implementation of the global store
-	class globals_impl : public globals_interface, public snapshot_interface
+	class globals_impl final : public globals_interface, public snapshot_interface
 	{
 		friend snapshot_impl;
 	public:
@@ -31,6 +33,7 @@ namespace ink::runtime::internal
 	protected:
 		optional<ink::runtime::value> get_var(hash_t name) const override;
 		bool set_var(hash_t name, const ink::runtime::value& val) override;
+		void internal_observe(hash_t name, internal::callback_base* callback) override;
 
 	public:
 		// Records a visit to a container
@@ -115,6 +118,11 @@ namespace ink::runtime::internal
 		//  Implemented as a stack (slow lookup) because it has save/restore functionality.
 		//  If I could create an avl tree with save/restore, that'd be great but seems super complex.
 		internal::stack<abs(config::limitGlobalVariables), config::limitGlobalVariables < 0> _variables;
+		struct Callback {
+			hash_t name;
+			callback_base* operation;
+		};
+		managed_array<Callback, config::limitGlobalVariableObservers < 0, abs(config::limitGlobalVariableObservers)> _callbacks;
 		bool _globals_initialized;
 	};
 }

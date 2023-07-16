@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "functional.h"
 
 namespace ink::runtime
 {
@@ -41,6 +42,22 @@ namespace ink::runtime
 			return false;
 		}
 
+		/**
+		 * @brief Observers global variable.
+		 * 
+		 * Calls callback with `value` or with casted value if it is one of 
+		 * values variants. The callback will also be called with the current value
+		 * when the observe is bind.
+		 * @param callback functor with:
+		 * * 0 arguments
+		 * * 1 argument: `new_value`
+		 * * 2 arguments: `new_value`, `ink::optional<old_value>`: first time call will not contain a old_value
+		 */
+		template<typename F>
+		void observe(const char* name, F callback) {
+			internal_observe(hash_string(name), new internal::callback(callback));
+		}
+
 		virtual snapshot* create_snapshot() const = 0;
 
 		virtual ~globals_interface() = default;
@@ -48,6 +65,7 @@ namespace ink::runtime
 	protected:
 		virtual optional<value> get_var(hash_t name) const = 0;
 		virtual bool set_var(hash_t name, const value& val) = 0;
+		virtual void internal_observe(hash_t name, internal::callback_base* callback) = 0;
 	};
 	
 	template<>

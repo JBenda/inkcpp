@@ -2,6 +2,7 @@
 
 #include "list.h"
 #include "story_ptr.h"
+#include "system.h"
 
 namespace ink
 {
@@ -47,5 +48,35 @@ namespace ink::runtime
 				case Type::List: v_list = v.v_list; break;
 			}
 		}
+
+		template<Type Ty>
+		const auto& get() const {
+			static_assert(Ty != Ty, "No value getter for the selected type");
+		}
 	};
+
+	template<>
+	inline const auto& value::get<value::Type::Bool>() const {
+		return v_bool;
+	}
+	template<>
+	inline const auto& value::get<value::Type::Uint32>() const {
+		return v_uint32;
+	}
+	template<>
+	inline const auto& value::get<value::Type::Int32>() const {
+		return v_int32;
+	}
+	template<>
+	inline const auto& value::get<value::Type::String>() const {
+		return v_string;
+	}
+	template<>
+	inline const auto& value::get<value::Type::Float>() const {
+		return v_float;
+	}
+	template<>
+	inline const auto& value::get<value::Type::List>() const {
+		return v_list;
+	}
 }

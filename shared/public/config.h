@@ -15,6 +15,7 @@ namespace ink::config {
 	/// if required you can set them to -x then, the system will use dynamic
 	/// allocation for this type, with an initial size of x.
 	static constexpr int limitGlobalVariables = -50;
+	static constexpr int limitGlobalVariableObservers = -10;
 	static constexpr int limitThreadDepth = -10;
 	static constexpr int limitEvalStackDepth = -20;
 	static constexpr int limitContainerDepth = -20;

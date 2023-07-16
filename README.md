@@ -59,7 +59,6 @@ All features of ink 1.1 are supported, and checked with [ink-proof](https://gith
 
 Big features missing compared to the `C#` implementation are:
 * stable Ink Thread support
-* Variable Observers
 
 ## Configuring and Building (CMake)
 

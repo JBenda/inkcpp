@@ -45,6 +45,7 @@ namespace ink::runtime::internal
 				if (_size == _capacity) { extend(); }
 			} else {
 				inkAssert(_size <= _capacity, "Stack Overflow!");
+				/// FIXME silent fail!!
 			}
 			return data()[_size++];
 		}

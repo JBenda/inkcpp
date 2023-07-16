@@ -1,16 +1,103 @@
 #pragma once
 
+#include "list.h"
 #include "traits.h"
 #include "system.h"
+#include "types.h"
 
 #ifdef  INK_ENABLE_UNREAL
 #include "../InkVar.h"
 #endif
+
 namespace ink::runtime::internal
 {
 	class basic_eval_stack;
 	class string_table;
 	class list_table;
+
+	class callback_base {
+	public:
+		virtual void call(ink::runtime::value, ink::optional<ink::runtime::value>) = 0;
+	};
+
+	template<typename F>
+	class callback final : public callback_base
+	{
+		using traits = function_traits<F>;
+		static_assert(traits::arity < 3);
+
+		template<ink::runtime::value::Type Ty>
+		void call_functor(ink::runtime::value new_val, ink::optional<ink::runtime::value> old_val) {
+			if constexpr(traits::arity == 2) {
+				if (old_val.has_value()) {
+					functor(new_val.get<Ty>(), typename traits::template argument<1>::type{old_val.value().get<Ty>()});
+				} else {
+					functor(new_val.get<Ty>(), ink::nullopt);
+				}
+			} else {
+				functor(new_val.get<Ty>());
+			}
+		}
+
+	public:
+		callback( const callback& )            = delete;
+		callback( callback&& )                 = delete;
+		callback& operator=( const callback& ) = delete;
+		callback& operator=( callback&& )      = delete;
+		callback( F functor )
+		 : functor( functor ) {}
+
+		virtual void call(ink::runtime::value new_val, 
+			ink::optional<ink::runtime::value> old_val) {
+			using value = ink::runtime::value;
+			auto check = [&new_val, &old_val](value::Type type){
+				inkAssert(new_val.type == type,
+				"Missmatch type for variable observer: expected %i, got %i",
+				static_cast<int>(type),
+				static_cast<int>(new_val.type));
+				if constexpr (traits::arity == 2) {
+					// inkAssert(!old_val.has_value() || old_val.value().type == type,
+					// 	"Missmatch type for variable observers old value: expected optional<%i> got optional<%i>",
+					// static_cast<int>(type),
+					// static_cast<int>(old_val.value().type));
+				}
+			};
+			if constexpr (traits::arity > 0) {
+				using arg_t = typename remove_cvref<typename traits::template argument<0>::type>::type;
+				if constexpr (is_same<arg_t, value>::value) {
+					if constexpr (traits::arity == 2) {
+						functor(new_val, old_val);
+					} else {
+						functor(new_val);
+					}
+				} else if constexpr (is_same<arg_t, bool>::value) {
+					check(value::Type::Bool);
+					call_functor<value::Type::Bool>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, uint32_t>::value) {
+					check(value::Type::Uint32);
+					call_functor<value::Type::Uint32>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, int32_t>::value) {
+					check(value::Type::Int32);
+					call_functor<value::Type::Int32>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, const char*>::value) {
+					check(value::Type::String);
+					call_functor<value::Type::String>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, float>::value) {
+					check(value::Type::Float);
+					call_functor<value::Type::Float>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, list_interface*>::value){
+					check(value::Type::List);
+					call_functor<value::Type::List>(new_val, old_val);
+				} else {
+					static_assert(always_false<arg_t>::value, "Unsupported value for variable observer callback!");
+				}
+			} else {
+				functor();
+			}
+		}
+	private:
+		F functor;
+	};
 
 	// base function container with virtual callback methods
 	class function_base

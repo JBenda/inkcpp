@@ -2,6 +2,8 @@
 #include "story_impl.h"
 #include "runner_impl.h"
 #include "snapshot_impl.h"
+#include "system.h"
+#include "types.h"
 
 #include <cstring>
 
@@ -102,7 +104,23 @@ namespace ink::runtime::internal
 
 	void globals_impl::set_variable(hash_t name, const value& val)
 	{
+		ink::optional<value> old_var = ink::nullopt;
+		value* p_old_var = get_variable(name);
+		if (p_old_var != nullptr) {
+			old_var = *p_old_var;
+		}
+
 		_variables.set(name, val);
+
+		for(auto& callback : _callbacks) {
+			if (callback.name == name) {
+				if (old_var.has_value()) {
+					callback.operation->call(val.to_interface_value(lists()), {old_var->to_interface_value(lists())});
+				} else {
+					callback.operation->call(val.to_interface_value(lists()), ink::nullopt);
+				}
+			}
+		}
 	}
 
 	const value* globals_impl::get_variable(hash_t name) const
@@ -123,6 +141,9 @@ namespace ink::runtime::internal
 	bool globals_impl::set_var(hash_t name, const ink::runtime::value& val) {
 		auto* var = get_variable(name);
 		if (!var) { return false; }
+		ink::runtime::value old_val = var->to_interface_value(lists());
+
+		bool ret = false;
 		if ( val.type == ink::runtime::value::Type::String) {
 			if (!(var->type() == value_type::none || var->type() == value_type::string)) { return false; }
 			size_t size = 0;
@@ -136,11 +157,27 @@ namespace ink::runtime::internal
 			}
 			*ptr = 0;
 			*var = value{}.set<value_type::string>( static_cast<const char*>( new_string ), true );
-			return true;
+			ret = true;
 		} else {
-			return var->set( val );
+			ret = var->set(val);
 		}
-		inkFail("Unchecked case in set var!");
+
+		for (auto& callback : _callbacks) {
+			if (callback.name == name) {
+				callback.operation->call(val, {old_val});
+			}
+		}
+		
+		return ret;
+	}
+
+	void globals_impl::internal_observe(hash_t name, callback_base* callback) {
+		_callbacks.push() = Callback { .name = name, .operation = callback };
+		if (_globals_initialized) {
+			value* p_var = _variables.get(name);
+			inkAssert(p_var != nullptr, "Global variable to observe does not exists after initiliazation. This variable will therofe not get any value.");
+			callback->call(p_var->to_interface_value(lists()), ink::nullopt);
+		}
 	}
 
 	void globals_impl::initialize_globals(runner_impl* run)
