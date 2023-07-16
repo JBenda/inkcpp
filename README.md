@@ -70,6 +70,8 @@ To configure the project...
 
 CMake will then generate the necessary build files for your environment. By default, it generates Visual Studio projects and solutions on Windows and Makefiles on Mac and Linux. You can change this using CMake's command line options (see `cmake --help`). It supports pretty much anything.
 
+The documentation can be build iff Doxygen is installed with `cmake --build . --target doc`. The documentation can then be found in at `html/index.html`.
+
 To build, either run the generated buildfiles OR you can use `cmake --build . --config <Release|Debug>` from the build folder to automatically execute the relevant toolchain.
 
 For a more in depth installation description please checkout the (wiki)[https://github.com/brwarner/inkcpp/wiki/building].
