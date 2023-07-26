@@ -74,6 +74,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	void SetGlobalVariable(const FString& name, const FInkVar& value);
 
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void ObserverVariable(const FString& variableName, const FVariableCallbackDelegate& callback);
+
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void ObserverVariableEvent(const FString& variableName, const FVariableCallbackDelegateNewValue& callback);
+
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void ObserverVariableChange(const FString& variableName, const FVariableCallbackDelegateNewOldValue& callback);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

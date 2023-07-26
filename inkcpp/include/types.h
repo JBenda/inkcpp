@@ -4,11 +4,6 @@
 #include "story_ptr.h"
 #include "system.h"
 
-namespace ink
-{
-
-}
-
 namespace ink::runtime
 {
 	class globals_interface;

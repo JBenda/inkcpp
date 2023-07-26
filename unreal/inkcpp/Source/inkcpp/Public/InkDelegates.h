@@ -13,6 +13,9 @@ DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FInkVar, FExternalFunctionDelegate, con
 DECLARE_DYNAMIC_DELEGATE_OneParam(FExternalFunctionVoidDelegate, const TArray<FInkVar>&, Arguments);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FGlobalTagFunctionDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGlobalTagFunctionMulticastDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
+DECLARE_DYNAMIC_DELEGATE(FVariableCallbackDelegate);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FVariableCallbackDelegateNewValue, const FInkVar&, value);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FVariableCallbackDelegateNewOldValue, const FInkVar&, value, const FInkVar&, old_value);
 
 UCLASS()
 class UFuckYou : public UObject

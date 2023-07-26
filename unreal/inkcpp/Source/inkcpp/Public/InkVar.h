@@ -54,7 +54,7 @@ struct INKCPP_API FInkVar
 
 	// allow changing via Editor, but not in controle flow, it is just a wrapper type to create a new one
 	// UPROPERTY(EditAnywhere, Category = "Ink")
-	TUnion<float, int, unsigned, bool, FString, FInkList> value;
+	TUnion<float, int, unsigned, bool, FString, UInkList> value;
 	
 	TArray<UTF8CHAR> utf8{};
 	
@@ -110,7 +110,7 @@ public:
 	static bool Conv_InkVarBool(const FInkVar& InkVar);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "InkList (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	static FInkList Conv_InkVarInkList(const FInkVar& InkVar);
+	static const UInkList* Conv_InkVarInkList(const FInkVar& InkVar);
 	
 	// UFUNCTION(BlueprintPure, meta = (DisplayName = "UInt (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
 	// static unsigned Conv_InkVarUInt(const FInkVar& InkVar);

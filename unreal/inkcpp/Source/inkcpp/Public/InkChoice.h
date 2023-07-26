@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TagList.h"
+
 #include "UObject/Object.h"
 
 #include "InkChoice.generated.h"
@@ -27,5 +29,5 @@ protected:
 
 private:
 	const ink::runtime::choice* data;
-	const UTagList* tags;
+	UTagList tags;
 };

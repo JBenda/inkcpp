@@ -238,3 +238,22 @@ void AInkRuntime::SetGlobalVariable(const FString& name, const FInkVar& value) {
 		}
 	}
 }
+void AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegate& callback) {
+	mpGlobals->observe(ink::hash_string(TCHAR_TO_ANSI(*name)), [callback](){callback.Execute());
+}
+
+void AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegateNewValue& callback) {
+	mpGlobals->observe(ink::hash_string(TCHAR_TO_ANSI(*name)), [callback](x){callback.Execute(FInkVar(x)));
+}
+
+void AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegateNewOldValue& callback) {
+	mpGlobals->observe(ink::hash_string(TCHAR_TO_ANSI(*name)), 
+		[callback](x,y){
+			if (y.has_value()) {
+				callback.Execute(FInkVar(x), FInkVar(y));
+			} else {
+				callback.Execute(FInkVar(x), FInkVar()); 
+			}
+		}
+	);
+}

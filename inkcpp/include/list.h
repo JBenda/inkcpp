@@ -19,6 +19,7 @@ namespace ink::runtime {
 			const char* _list_name;
 			const list_interface& _list;
 			int _i;
+			bool _one_list_iterator; //< iterates only though values of one list
 			friend list_interface;
 		protected:
 			iterator(const char* flag_name, const list_interface& list, size_t i)
