@@ -50,7 +50,7 @@ namespace ink::runtime::internal
 		virtual void call(ink::runtime::value new_val, 
 			ink::optional<ink::runtime::value> old_val) {
 			using value = ink::runtime::value;
-			auto check = [&new_val, &old_val](value::Type type){
+			auto check_type = [&new_val, &old_val](value::Type type){
 				inkAssert(new_val.type == type,
 				"Missmatch type for variable observer: expected %i, got %i",
 				static_cast<int>(type),
@@ -71,22 +71,22 @@ namespace ink::runtime::internal
 						functor(new_val);
 					}
 				} else if constexpr (is_same<arg_t, bool>::value) {
-					check(value::Type::Bool);
+					check_type(value::Type::Bool);
 					call_functor<value::Type::Bool>(new_val, old_val);
 				} else if constexpr (is_same<arg_t, uint32_t>::value) {
-					check(value::Type::Uint32);
+					check_type(value::Type::Uint32);
 					call_functor<value::Type::Uint32>(new_val, old_val);
 				} else if constexpr (is_same<arg_t, int32_t>::value) {
-					check(value::Type::Int32);
+					check_type(value::Type::Int32);
 					call_functor<value::Type::Int32>(new_val, old_val);
 				} else if constexpr (is_same<arg_t, const char*>::value) {
-					check(value::Type::String);
+					check_type(value::Type::String);
 					call_functor<value::Type::String>(new_val, old_val);
 				} else if constexpr (is_same<arg_t, float>::value) {
-					check(value::Type::Float);
+					check_type(value::Type::Float);
 					call_functor<value::Type::Float>(new_val, old_val);
 				} else if constexpr (is_same<arg_t, list_interface*>::value){
-					check(value::Type::List);
+					check_type(value::Type::List);
 					call_functor<value::Type::List>(new_val, old_val);
 				} else {
 					static_assert(always_false<arg_t>::value, "Unsupported value for variable observer callback!");

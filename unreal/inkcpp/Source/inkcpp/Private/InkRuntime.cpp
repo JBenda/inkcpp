@@ -13,6 +13,8 @@
 #include "ink/story.h"
 #include "ink/globals.h"
 #include "ink/snapshot.h"
+#include "system.h"
+#include "types.h"
 
 namespace ink { using value = runtime::value; }
 
@@ -239,16 +241,16 @@ void AInkRuntime::SetGlobalVariable(const FString& name, const FInkVar& value) {
 	}
 }
 void AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegate& callback) {
-	mpGlobals->observe(ink::hash_string(TCHAR_TO_ANSI(*name)), [callback](){callback.Execute());
+	mpGlobals->observe(TCHAR_TO_ANSI(*name), [callback](){callback.Execute();});
 }
 
-void AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegateNewValue& callback) {
-	mpGlobals->observe(ink::hash_string(TCHAR_TO_ANSI(*name)), [callback](x){callback.Execute(FInkVar(x)));
+void AInkRuntime::ObserverVariableEvent(const FString& name, const FVariableCallbackDelegateNewValue& callback) {
+	mpGlobals->observe(TCHAR_TO_ANSI(*name), [callback](ink::runtime::value x){callback.Execute(FInkVar(x));});
 }
 
-void AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegateNewOldValue& callback) {
-	mpGlobals->observe(ink::hash_string(TCHAR_TO_ANSI(*name)), 
-		[callback](x,y){
+void AInkRuntime::ObserverVariableChange(const FString& name, const FVariableCallbackDelegateNewOldValue& callback) {
+	mpGlobals->observe(TCHAR_TO_ANSI(*name), 
+		[callback](ink::runtime::value x, ink::optional<ink::runtime::value> y){
 			if (y.has_value()) {
 				callback.Execute(FInkVar(x), FInkVar(y));
 			} else {

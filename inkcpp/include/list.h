@@ -22,8 +22,8 @@ namespace ink::runtime {
 			bool _one_list_iterator; //< iterates only though values of one list
 			friend list_interface;
 		protected:
-			iterator(const char* flag_name, const list_interface& list, size_t i)
-				: _flag_name(flag_name), _list(list), _i(i) {}
+			iterator(const char* flag_name, const list_interface& list, size_t i, bool one_list_only = false)
+				: _flag_name(flag_name), _list(list), _i(i), _one_list_iterator(one_list_only) {}
 		public:
 			struct Flag {
 				const char* flag_name;
@@ -67,6 +67,12 @@ namespace ink::runtime {
 			inkAssert(false, "Not implemented function from interface is called!");
 			return new_iterator(nullptr, -1);
 		};
+
+		/** returns a iterator over elements of the given list */
+		virtual iterator begin(const char* list_name) const {
+			inkAssert(false, "Not implemented function from interface is called!");
+			return new_iterator(nullptr, -1);
+		}
 		/** end iterator for contained flags in list */
 		virtual iterator end() const {
 			inkAssert(false, "Not implemented function from interface is called!");
@@ -78,8 +84,8 @@ namespace ink::runtime {
 			inkAssert(false, "Not implemented funciton from interface is called!");
 		};
 	protected:
-		iterator new_iterator(const char* flag_name, int i) const {
-			return iterator(flag_name, *this, i);
+		iterator new_iterator(const char* flag_name, int i, bool one_list_only = false) const {
+			return iterator(flag_name, *this, i, one_list_only);
 		}
 		list_interface(internal::list_table& table, int list) : _list_table {&table}, _list{list} {}
     internal::list_table* _list_table;

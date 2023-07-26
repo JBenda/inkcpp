@@ -5,20 +5,25 @@
 namespace ink::runtime::internal {
   class list_table;
   class value;
-  class list_impl : public list_interface {
+  class list_impl final : public list_interface {
   public:
     list_impl(list_table& table, int lid) : list_interface(table, lid) {}
     int get_lid() const { return _list; }
     
-    bool contains(const char* flag_name) const override final;
-    void add(const char* flag_name) override final; 
-    void remove(const char* flag_name) override final;
+    bool contains(const char* flag_name) const override;
+    void add(const char* flag_name) override; 
+    void remove(const char* flag_name) override;
 
-    list_interface::iterator begin() const override final {
+    list_interface::iterator begin() const override {
       return ++new_iterator(nullptr, 0);
     }
 
-    list_interface::iterator end() const override final {
+    list_interface::iterator begin(const char* list_name) const {
+      size_t list_id = _list_table->get_list_id(list_name).list_id;
+      return ++new_iterator(nullptr, list_id<<16);
+    }
+
+    list_interface::iterator end() const override {
       return new_iterator(nullptr, -1);
     }
 
@@ -26,7 +31,7 @@ namespace ink::runtime::internal {
     friend ink::runtime::internal::value;
     
     /// @todo wrong iteration order, first lists then flags
-    void next(const char*& flag_name, const char*& list_name, int& i) const override final;
+    void next(const char*& flag_name, const char*& list_name, int& i) const override;
     
   };
 }

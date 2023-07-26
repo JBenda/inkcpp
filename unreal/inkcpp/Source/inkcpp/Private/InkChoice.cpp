@@ -14,7 +14,7 @@ int UInkChoice::GetIndex() const
 
 const UTagList* UInkChoice::GetTags() const
 {
-	return tags;
+	return &tags;
 }
 
 void UInkChoice::Initialize(const ink::runtime::choice* c)

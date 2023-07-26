@@ -17,11 +17,10 @@ struct FListFlag {
 };
 
 /**
- * Allowes reading and modifing ink lists.
- * @attention The 
+ * Allowes reading ink lists.
  */
-UCLASS()
-struct INKCPP_API UInkList : public UOBject
+UCLASS(Blueprintable, BlueprintType)
+class INKCPP_API UInkList : public UObject
 {
 	GENERATED_BODY()
 
