@@ -88,6 +88,7 @@ int main(int argc, const char** argv)
 
 	// If input filename is an .ink file
 	int val = inputFilename.find(".ink");
+	bool json_file_is_tmp_file = false;
 	if (val == inputFilename.length() - 4)
 	{
 		// Create temporary filename
@@ -105,6 +106,7 @@ int main(int argc, const char** argv)
 		}
 
 		// New input is the json file
+		json_file_is_tmp_file = true;
 		inputFilename = jsonFile;
 	}
 
@@ -115,6 +117,7 @@ int main(int argc, const char** argv)
 		std::ofstream fout(outputFilename, std::ios::binary | std::ios::out);
 		ink::compiler::run(inputFilename.c_str(), fout, &results);
 		fout.close();
+		if(json_file_is_tmp_file) { remove(inputFilename.c_str()); }
 
 		// Report errors
 		for (auto& warn : results.warnings)
@@ -130,6 +133,7 @@ int main(int argc, const char** argv)
 	}
 	catch (std::exception& e)
 	{
+		if(json_file_is_tmp_file) { remove(inputFilename.c_str()); }
 		std::cerr << "Unhandled InkBin compiler exception: " << e.what() << std::endl;
 		return 1;
 	}

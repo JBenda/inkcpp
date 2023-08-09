@@ -1,4 +1,5 @@
 #include "list_impl.h"
+#include "list.h"
 #include "list_table.h"
 
 namespace ink::runtime::internal {
@@ -48,5 +49,10 @@ namespace ink::runtime::internal {
     list_name = _list_table->_list_names[flag.list_id];
 
     i = (flag.list_id << 16) | flag.flag;
+  }
+
+  list_interface::iterator list_impl::begin(const char* list_name) const {
+          size_t list_id = _list_table->get_list_id(list_name).list_id;
+      return ++new_iterator(nullptr, list_id<<16);
   }
 }

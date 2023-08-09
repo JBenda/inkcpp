@@ -18,11 +18,7 @@ namespace ink::runtime::internal {
       return ++new_iterator(nullptr, 0);
     }
 
-    list_interface::iterator begin(const char* list_name) const {
-      size_t list_id = _list_table->get_list_id(list_name).list_id;
-      return ++new_iterator(nullptr, list_id<<16);
-    }
-
+    list_interface::iterator begin(const char* list_name) const override;
     list_interface::iterator end() const override {
       return new_iterator(nullptr, -1);
     }
