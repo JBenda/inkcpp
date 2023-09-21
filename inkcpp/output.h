@@ -2,6 +2,7 @@
 
 #include "value.h"
 #include "platform.h"
+#include "snapshot_impl.h"
 
 namespace ink
 {
@@ -11,7 +12,7 @@ namespace ink
 		{
 			class string_table;
 			class list_table;
-			class basic_stream
+			class basic_stream : public snapshot_interface
 			{
 			protected:
 				basic_stream(value*, size_t);
@@ -53,12 +54,8 @@ namespace ink
 #ifdef INK_ENABLE_STL
 				// Extract into a string
 				std::string get();
-#else
-				// will conflict with stl definition
-#	ifdef INK_ENABLE_UNREAL
-				// Extract into a string
+#elif defined(INK_ENABLE_UNREAL)
 				FString get();
-#	endif
 #endif
 
 				// Check if the stream is empty
@@ -80,8 +77,8 @@ namespace ink
 				// Clears the whole stream
 				void clear();
 
-				// Marks strings that are in use
-				void mark_strings(string_table&) const;
+				// Marks strings and lists that are in use
+				void mark_used(string_table&, list_table&) const;
 
 				// = Save/Restore
 				void save();
@@ -99,12 +96,16 @@ namespace ink
 
 				bool saved() const { return _save != ~0; }
 
+				// snapshot interface
+				size_t snap(unsigned char* data, const snapper&) const override;
+				const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 			private:
 				size_t find_start() const;
 				bool should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
 
-				template<typename OUT>
-				void copy_string(const char* str, size_t& dataIter, OUT& output);
+				template<typename T>
+				void copy_string(const char* str, size_t& dataIter, T& output);
 				
 			private:
 				char _last_char;
@@ -126,9 +127,7 @@ namespace ink
 			std::ostream& operator <<(std::ostream&, basic_stream&);
 			basic_stream& operator >>(basic_stream&, std::string&);
 #endif
-#ifdef INK_ENABLE_UNREAL
-			basic_stream& operator >>(basic_stream&, FString&);
-#endif
+
 
 			template<size_t N>
 			class stream : public basic_stream

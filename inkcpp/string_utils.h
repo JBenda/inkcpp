@@ -74,7 +74,8 @@ namespace ink::runtime::internal {
 			case value_type::newline:
 				return toStr(buffer, size, "\n");
 			default:
-				throw ink_exception("only support toStr for numeric types");
+				inkFail("only support toStr for numeric types");
+			return -1;
 		}
 	}
 
@@ -108,7 +109,8 @@ namespace ink::runtime::internal {
 			case value_type::newline:
 				return 1;
 			default:
-				throw ink_exception("Can't determine length of this value type");
+				inkFail("Can't determine length of this value type");
+				return -1;
 		}
 	}
 
@@ -126,7 +128,7 @@ namespace ink::runtime::internal {
 	inline constexpr ITR clean_string(ITR begin, ITR end) {
 		auto dst = begin;
 		for(auto src = begin; src != end; ++src){
-			if (src == begin) {
+			if (dst == begin) {
 				if (LEADING_SPACES && (src[0] == ' ' || src[0] == '\n')) { continue; }
 			}
 			else if(src[-1] == '\n' && (src[0] == ' ' || src[0] == '\n')) { continue;}

@@ -124,6 +124,23 @@ namespace ink
 				memcpy(ptr, data, len);
 			}
 
+			byte_t binary_stream::get(size_t offset) const
+			{
+				// Find slab for offset
+				unsigned int slab_index = offset / DATA_SIZE;
+				size_t pos = offset % DATA_SIZE;
+
+				// Get slab and ptr
+				byte_t* slab = nullptr;
+				if (slab_index < _slabs.size())
+					slab = _slabs[slab_index];
+				else if (slab_index == _slabs.size())
+					slab = _currentSlab;
+
+				inkAssert(slab != nullptr, "try to access invalid slab in binary stream");
+				return slab[pos];
+			}
+
 			void binary_stream::reset()
 			{
 				// Delete all slabs

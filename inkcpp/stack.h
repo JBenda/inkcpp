@@ -3,6 +3,7 @@
 #include "value.h"
 #include "collections/restorable.h"
 #include "array.h"
+#include "snapshot_impl.h"
 
 namespace ink
 {
@@ -13,7 +14,7 @@ namespace ink
 			class string_table;
 			struct entry
 			{
-				hash_t name;
+				hash_t name = 0;
 				value data;
 			};
 
@@ -24,7 +25,7 @@ namespace ink
 				thread
 			};
 
-			class basic_stack : protected restorable<entry>
+			class basic_stack : protected restorable<entry> 
 			{
 			protected:
 				basic_stack(entry* data, size_t size);
@@ -56,7 +57,7 @@ namespace ink
 				void clear();
 
 				// Garbage collection
-				void mark_strings(string_table&) const;
+				void mark_used(string_table&, list_table&) const;
 
 				// == Threading ==
 
@@ -79,6 +80,10 @@ namespace ink
 				// push all values to other _stack
 				void push_values(basic_stack& _stack);
 
+				// snapshot interface
+				size_t snap(unsigned char* data, const snapper&) const override;
+				const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 			private:
 				entry& add(hash_t name, const value& val);
 				const entry* pop();
@@ -91,6 +96,10 @@ namespace ink
 
 				static const hash_t NulledHashId = ~0;
 			};
+			
+			template<> void basic_stack::push_frame<frame_type::function>(offset_t return_to, bool eval);
+			template<> void basic_stack::push_frame<frame_type::tunnel>(offset_t return_to, bool eval);
+			template<> void basic_stack::push_frame<frame_type::thread>(offset_t return_to, bool eval);
 
 			/**
 			 * @brief stack for call history and temporary variables
@@ -135,6 +144,7 @@ namespace ink
 				using base = restorable<value>;
 
 			public:
+
 				// Push value onto the stack
 				void push(const value&);
 
@@ -153,13 +163,19 @@ namespace ink
 				// Clear stack
 				void clear();
 
-				// Garbage collection
-				void mark_strings(string_table&) const;
+				/** Mark used strings and lists for garbage collection */
+				void mark_used(string_table&, list_table&) const;
 
 				// == Save/Restore ==
 				void save();
 				void restore();
 				void forget();
+
+				// snapshot interface
+				size_t snap(unsigned char* data, const snapper& snapper) const override
+				{ return base::snap(data, snapper); }
+				const unsigned char* snap_load(const unsigned char* data, const loader& loader) override
+				{ return base::snap_load(data, loader); }
 			};
 
 			template<size_t N, bool dynamic = false>

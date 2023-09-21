@@ -2,17 +2,27 @@
 
 #include "EditorFramework/AssetImportData.h"
 #include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Interfaces/IPluginManager.h"
 
 #include "InkAsset.h"
 #include "ink/compiler.h"
+#include "inklecate_cmd.cpp"
 
 #include <sstream>
+#include <cstdlib>
+#include <filesystem>
+#include <cstdio>
+
+DECLARE_LOG_CATEGORY_EXTERN(InkCpp, Log, All);
+DEFINE_LOG_CATEGORY(InkCpp);
 
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: UFactory(ObjectInitializer), FReimportHandler()
 {
 	// Add ink format
 	Formats.Add(FString(TEXT("json;")) + NSLOCTEXT("UInkAssetFactory", "FormatInkJSON", "Ink JSON File").ToString());
+	Formats.Add(FString(TEXT("ink;")) + NSLOCTEXT("UInkAssetFactory", "FormatInk", "Ink File").ToString());
 
 	// Set class
 	SupportedClass = UInkAsset::StaticClass();
@@ -26,9 +36,52 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled)
 {
 	std::stringstream output;
+	std::stringstream cmd{};
+	static const std::string inklecate_cmd{ INKLECATE_CMD };
+	static const std::string ink_suffix{".ink"};
 	try
 	{
-		ink::compiler::run(TCHAR_TO_ANSI(*Filename), output);
+		std::string cFilename = TCHAR_TO_ANSI(*Filename);
+		bool use_temp_file = false;
+		if (cFilename.size() > ink_suffix.size()
+				&& std::equal(ink_suffix.rbegin(), ink_suffix.rend(), cFilename.rbegin()))
+		{
+			use_temp_file = true;
+			if(inklecate_cmd.size() == 0) {
+				UE_LOG(InkCpp, Warning, TEXT("Inklecate provided with the plugin, please import ink.json files"));
+				return nullptr;
+			}
+			using path = std::filesystem::path;
+			path path_bin(TCHAR_TO_ANSI(*IPluginManager::Get().FindPlugin(TEXT("InkCPP"))->GetBaseDir()), path::format::generic_format);
+			path_bin.make_preferred();
+			path_bin /= path(inklecate_cmd, path::format::generic_format).make_preferred();
+			path story_path(cFilename, path::format::generic_format);
+			story_path.make_preferred();
+			const char* filename = std::tmpnam(nullptr);
+			if(filename == nullptr) {
+				UE_LOG(InkCpp, Error, TEXT("Failed to create temporary file"));
+				return nullptr;
+			}
+			cFilename = filename;
+			path json_path(cFilename, path::format::generic_format);
+			json_path.make_preferred();
+			cmd 
+				// if std::system start with a quote, the pair of qoute is removed, which leads to errors with pathes with spaces
+				// but if the quote is not the first symbol it works fine (a"b" is glued to ab from bash)
+				<< path_bin.string()[0] << "\"" << (path_bin.string().c_str() + 1) << "\""
+				<< " -o \"" << json_path.string() << "\" "
+				<< '"' << story_path.string() << "\" 2>&1";
+			auto cmd_str = cmd.str();
+			int result = std::system(cmd_str.c_str());
+			if (result != 0) {
+				UE_LOG(InkCpp, Warning, TEXT("Inklecate failed with exit code %i, executed was: '%s'"), result, *FString(cmd_str.c_str()));
+				return nullptr;
+			}
+		}
+		ink::compiler::run(cFilename.c_str(), output);
+		if(use_temp_file) {
+			std::filesystem::remove(cFilename);
+		}
 
 		// Create ink asset
 		UInkAsset* asset = NewObject<UInkAsset>(InParent, InClass, InName, Flags);

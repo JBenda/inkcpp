@@ -11,7 +11,7 @@
 namespace ink::runtime::internal
 {
 	template<>
-	int32_t function_base::pop<int32_t>(basic_eval_stack* stack)
+	int32_t function_base::pop<int32_t>(basic_eval_stack* stack, list_table& lists)
 	{
 		value val = stack->pop();
 		inkAssert(val.type() == value_type::int32, "Type missmatch!");
@@ -19,7 +19,7 @@ namespace ink::runtime::internal
 	}
 
 	template<>
-	const char* function_base::pop<const char*>(basic_eval_stack* stack)
+	const char* function_base::pop<const char*>(basic_eval_stack* stack, list_table& lists)
 	{
 		value val = stack->pop();
 		inkAssert(val.type() == value_type::string, "Type missmatch!");
@@ -31,6 +31,12 @@ namespace ink::runtime::internal
 	{
 		stack->push(value{}.set<value_type::int32>(v));
 	}
+
+	void function_base::push_void(basic_eval_stack* stack)
+	{
+		stack->push(values::null);
+	}
+
 
 	void function_base::push_string(basic_eval_stack* stack, const char* dynamic_string)
 	{
@@ -46,54 +52,25 @@ namespace ink::runtime::internal
 
 #ifdef INK_ENABLE_STL
 	template<>
-	std::string function_base::pop<std::string>(basic_eval_stack* stack) {
-		return std::string(pop<const char*>(stack));
+	std::string function_base::pop<std::string>(basic_eval_stack* stack, list_table& lists) {
+		return std::string(pop<const char*>(stack, lists));
 	}
 #endif
 #ifdef INK_ENABLE_UNREAL
-	SUPPORT_TYPE_PARAMETER_ONLY(FString);
-
 	template<>
-	FInkVar function_base::pop<FInkVar>(basic_eval_stack* stack)
+	FInkVar function_base::pop<FInkVar>(basic_eval_stack* stack, list_table& lists)
 	{
-		value v = stack->pop();
-		switch (v.type())
-		{
-		case value_type::null:
-		case value_type::divert:
-			inkFail("Trying to pass null or divert as ink parameter to external function");
-			break;
-		case value_type::integer:
-			return FInkVar(v.get<int>());
-		case value_type::decimal:
-			return FInkVar(v.get<float>());
-		case value_type::string:
-			return FInkVar(v.get<FString>());
-		}
-
-		return FInkVar();
+		return FInkVar(stack->pop().to_interface_value(lists));
 	}
 
 	template<>
-	void function_base::push<FInkVar>(basic_eval_stack* stack, const FInkVar& value)
+	void function_base::push<ink::runtime::value>(basic_eval_stack* stack, const ink::runtime::value& value)
 	{
-		switch (value.type)
-		{
-		case EInkVarType::None:
-			{
-				internal::value v;
-				stack->push(v);
-			}
-			break;
-		case EInkVarType::Int:
-			stack->push(value.intVar);
-			break;
-		case EInkVarType::Float:
-			stack->push(value.floatVar);
-			break;
-		case EInkVarType::String:
-			inkFail("NOT IMPLEMENTED"); // TODO: String support
-			return;
+		internal::value val{};
+		if(val.set(value)) {
+			stack->push(val);
+		} else {
+			inkFail("unable to set variable?");
 		}
 	}
 #endif

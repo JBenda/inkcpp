@@ -6,9 +6,11 @@
 /// define different value_types, and the mapping between type and data.
 
 #include "system.h"
-#include "../shared/private/command.h"
+#include "command.h"
 #include "list_table.h"
+#include "snapshot_impl.h"
 #include "tuple.hpp"
+#include "types.h"
 
 #ifdef INK_ENABLE_STL
 #include <iosfwd>
@@ -41,6 +43,7 @@ namespace ink::runtime::internal {
 		func_start,                 // start of function marker
 		func_end,                   // end of function marker
 		null,                       // void value, for function returns
+		ex_fn_not_found,            // value for failed external function calls
 		tunnel_frame,               // return from tunnel
 		function_frame,             // return from function
 		thread_frame,               // return from thread
@@ -82,12 +85,21 @@ namespace ink::runtime::internal {
 	/**
 	 * @brief class to wrap stack value to common type.
 	 */
-	class value {
+	class value : public snapshot_interface {
 	public:
+		// snapshot interface
+		size_t snap(unsigned char* data, const snapper&) const override;
+		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };
 
-		constexpr value() : _type{value_type::none}, uint32_value{0}{}
+		constexpr value() : snapshot_interface(), bool_value{ 0 }, _type{ value_type::none } {}
+		constexpr explicit value( value_type type ) : bool_value{ 0 }, _type{ type } {}
+
+		explicit value(const ink::runtime::value& val);
+		bool set( const ink::runtime::value& val );
+		ink::runtime::value to_interface_value(list_table&) const;
 
 		/// get value of the type (if possible)
 		template<value_type ty>
@@ -122,7 +134,7 @@ namespace ink::runtime::internal {
 		/// this new type
 		template<typename ... T>
 		value redefine(const value& oth, T& ... env) const {
-			inkAssert(type() == oth.type());
+			inkAssert(type() == oth.type(), "try to redefine value of other type");
 			return redefine<value_type::OP_BEGIN, T...>(oth, {&env...});
 		}
 
@@ -130,7 +142,8 @@ namespace ink::runtime::internal {
 		template<value_type ty, typename ... T>
 		value redefine(const value& oth, const tuple<T*...>& env) const {
 			if constexpr ( ty == value_type::OP_END) {
-				throw ink_exception("Can't redefine value with this type! (It is not an variable type!)");
+				inkFail("Can't redefine value with this type! (It is not an variable type!)");
+				return value{};
 			} else if (ty != type()) {
 				return redefine<ty + 1>(oth, env);
 			} else {
@@ -160,6 +173,19 @@ namespace ink::runtime::internal {
 				char ci;
 			} pointer;
 		};
+		static constexpr size_t max_value_size = 
+			sizeof_largest_type<
+				decltype(bool_value),
+				decltype(int32_value),
+				decltype(string_value),
+				decltype(uint32_value),
+				decltype(float_value),
+				decltype(jump),
+				decltype(list_value),
+				decltype(list_flag_value),
+				decltype(frame_value),
+				decltype(pointer)
+		>();
 		value_type _type;
 	};
 
@@ -351,6 +377,11 @@ namespace ink::runtime::internal {
 		return *this;
 	}
 	template<>
+	inline constexpr value& value::set<value_type::ex_fn_not_found>() {
+		_type = value_type::ex_fn_not_found;
+		return *this;
+	}
+	template<>
 	inline constexpr value& value::set<value_type::newline>() {
 		_type = value_type::newline;
 		return *this;
@@ -416,11 +447,12 @@ namespace ink::runtime::internal {
 
 	// static constexpr instantiations of flag values
 	namespace values {
-		static constexpr value marker = value{}.set<value_type::marker>();
-		static constexpr value glue = value{}.set<value_type::glue>();
-		static constexpr value newline = value{}.set<value_type::newline>();
-		static constexpr value func_start = value{}.set<value_type::func_start>();
-		static constexpr value func_end = value{}.set<value_type::func_end>();
-		static constexpr value null = value{}.set<value_type::null>();
+		static constexpr value marker = value( value_type::marker );
+		static constexpr value glue = value( value_type::glue );
+		static constexpr value newline = value( value_type::newline );
+		static constexpr value func_start = value( value_type::func_start );
+		static constexpr value func_end = value( value_type::func_end );
+		static constexpr value null = value( value_type::null );
+		static constexpr value ex_fn_not_found = value(value_type::ex_fn_not_found);
 	}
 }

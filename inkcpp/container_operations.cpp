@@ -13,9 +13,10 @@ namespace ink::runtime::internal {
 			basic_eval_stack& stack, value* vals)
 	{
 		container_t id;
-		inkAssert(_story.get_container_id(
-				_story.instructions() + vals[0].get<value_type::divert>(),
-				id), "failed to find container to read visit count!");
+		bool success = _story.get_container_id(
+			_story.instructions() + vals[0].get<value_type::divert>(),
+			id);
+		inkAssert(success, "failed to find container to read visit count!");
 		stack.push(value{}.set<value_type::int32>(
 				static_cast<int32_t>(_visit_counts.visits( id )
 			)));
@@ -25,9 +26,10 @@ namespace ink::runtime::internal {
 		basic_eval_stack& stack, value* vals)
 	{
 		container_t id;
-		inkAssert(_story.get_container_id(
-				_story.instructions() + vals[0].get<value_type::divert>(),
-				id), "failed to find container to read turn count!");
+		bool success = _story.get_container_id(
+			_story.instructions() + vals[0].get<value_type::divert>(),
+			id);
+		inkAssert(success, "failed to find container to read turn count!");
 		stack.push(value{}.set<value_type::int32>(
 						static_cast<int32_t>(_visit_counts.turns(id)
 					)));

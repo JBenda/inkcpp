@@ -1,0 +1,3 @@
+#ifndef INKLECATE_CMD
+#define INKLECATE_CMD "@INKLECATE_CMD@"
+#endif

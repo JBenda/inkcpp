@@ -3,6 +3,7 @@
 #include "config.h"
 #include "system.h"
 #include "functional.h"
+#include "types.h"
 
 #ifdef INK_ENABLE_UNREAL
 #include "Containers/UnrealString.h"
@@ -32,6 +33,12 @@ namespace ink::runtime
 		virtual ~runner_interface(){};
 
 #pragma region Interface Methods
+		/**
+		 * Sets seed for PRNG used in runner.
+		 * Else runner is started with the current time as seed.
+		 * @param seed seed to use for PRNG
+		 */
+		virtual void set_rng_seed(uint32_t seed) = 0;
 
 		/**
 		 * Moves the runner to the specified path
@@ -56,6 +63,7 @@ namespace ink::runtime
 		*/
 		virtual bool can_continue() const = 0;
 
+#ifdef INK_ENABLE_CSTD
 		/**
 		 * Continue execution until the next newline, then allocate a c-style
 		 * string with the output. This allocated string is now the callers 
@@ -64,6 +72,13 @@ namespace ink::runtime
 		 * @return allocated c-style string with the output of a single line of execution
 		*/
 		virtual char* getline_alloc() = 0;
+#endif
+
+		/**
+		 * @brief creates a snapshot containing the runner, globals and all other runners connected to the globals.
+		 * @sa story::new_runner_from_snapshot, story::new_globals_from_snapshot
+		 */
+		virtual snapshot* create_snapshot() const = 0;
 
 #ifdef INK_ENABLE_STL
 		/**
@@ -147,7 +162,10 @@ namespace ink::runtime
 		*/
 		virtual void choose(size_t index) = 0;
 
+		/** check if since last choice selection tags have been added */
 		virtual bool has_tags() const = 0;
+		/** return the number of tags accumulated since last choice
+			* order of tags wont change, and new are added at the end */
 		virtual size_t num_tags() const = 0;
 		virtual const char* get_tag(size_t index) const = 0;
 

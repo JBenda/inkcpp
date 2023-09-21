@@ -13,6 +13,11 @@
 	"CanContainContent": false,
 	"IsBetaVersion": false,
 	"Installed": false,
+	"SupportedTargetPlatforms": [
+		"Win64",
+		"Mac",
+		"Linux"
+	],
 	"Modules": [
     {
       "Name": "inkcpp",

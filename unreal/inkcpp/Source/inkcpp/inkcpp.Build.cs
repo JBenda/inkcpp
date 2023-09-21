@@ -7,10 +7,10 @@ public class inkcpp : ModuleRules
 {
 	public inkcpp(ReadOnlyTargetRules Target) : base(Target)
 	{
-        // Enable C++17 support
+        // Enable C++20 support
 		PCHUsage = ModuleRules.PCHUsageMode.NoSharedPCHs;
         PrivatePCHHeaderFile = "Public/inkcpp.h";
-        CppStandard = CppStandardVersion.Cpp17;
+        CppStandard = CppStandardVersion.Cpp20;
 
         PublicIncludePaths.AddRange(
 			new string[] {
@@ -21,7 +21,9 @@ public class inkcpp : ModuleRules
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-                Path.Combine(ModuleDirectory, "../shared/Private")
+                Path.Combine(ModuleDirectory, "../shared/Private"),
+				Path.Combine(ModuleDirectory, "Private/ink"),
+				Path.Combine(ModuleDirectory, "Public/ink")
             }
 			);
 			

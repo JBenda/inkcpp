@@ -1,11 +1,11 @@
 #pragma once
 
-#include "system.h"
+#include "types.h"
+#include "functional.h"
 
 namespace ink::runtime
 {
-	class globals_interface;
-	namespace internal { class globals_impl;}
+	class snapshot;
 
 	/**
 	* Represents a global store to be shared amongst ink runners.
@@ -42,52 +42,117 @@ namespace ink::runtime
 			return false;
 		}
 
+		/**
+		 * @brief Observers global variable.
+		 * 
+		 * Calls callback with `value` or with casted value if it is one of 
+		 * values variants. The callback will also be called with the current value
+		 * when the observe is bind.
+		 * @param callback functor with:
+		 * * 0 arguments
+		 * * 1 argument: `new_value`
+		 * * 2 arguments: `new_value`, `ink::optional<old_value>`: first time call will not contain a old_value
+		 */
+		template<typename F>
+		void observe(const char* name, F callback) {
+			internal_observe(hash_string(name), new internal::callback(callback));
+		}
+
+		virtual snapshot* create_snapshot() const = 0;
+
 		virtual ~globals_interface() = default;
 
 	protected:
-		virtual optional<uint32_t> get_uint(hash_t name) const = 0;
-		virtual bool set_uint(hash_t name, uint32_t val) = 0;
-		virtual optional<int32_t> get_int(hash_t name) const = 0;
-		virtual bool set_int(hash_t name, int32_t val) = 0;
-		virtual optional<float> get_float(hash_t name) const = 0;
-		virtual bool set_float(hash_t name, float val) = 0;
-		virtual optional<const char *>  get_str(hash_t name) const = 0;
-		virtual bool set_str(hash_t name, const char* val) = 0;
+		virtual optional<value> get_var(hash_t name) const = 0;
+		virtual bool set_var(hash_t name, const value& val) = 0;
+		virtual void internal_observe(hash_t name, internal::callback_base* callback) = 0;
 	};
+	
+	template<>
+	inline optional<value> globals_interface::get<value>(const char* name) const {
+		return get_var(hash_string(name));
+	}
+	template<>
+	inline bool globals_interface::set<value>(const char* name, const value& val) {
+		return set_var(hash_string(name), val);
+	}
+	
+	template<>
+	inline optional<bool> globals_interface::get<bool>(const char* name) const {
+		auto var = get_var(hash_string(name));
+		if ( var && var->type == value::Type::Bool) {
+			return {var->v_bool};
+		}
+		return nullopt;
+	}
+	template<>
+	inline bool globals_interface::set<bool>(const char* name, const bool& val) {
+		return set_var(hash_string(name), value(val));
+	}
 
 	template<>
 	inline optional<uint32_t>  globals_interface::get<uint32_t>(const char* name) const {
-		return get_uint(hash_string(name));
+		auto var = get_var(hash_string(name));
+		if (var && var->type == value::Type::Uint32) {
+			return {var->v_uint32};
+		}
+		return nullopt;
 	}
 	template<>
 	inline bool globals_interface::set<uint32_t>(const char* name, const uint32_t& val) {
-		return set_uint(hash_string(name), val);
+		return set_var(hash_string(name), value(val));
 	}
 
 	template<>
 	inline optional<int32_t> globals_interface::get<int32_t>(const char* name) const {
-		return get_int(hash_string(name));
+		auto var = get_var(hash_string(name));
+		if (var && var->type == value::Type::Int32) {
+			return {var->v_int32};
+		}
+		return nullopt;
 	}
 	template<>
 	inline bool globals_interface::set<int32_t>(const char* name, const int32_t& val) {
-		return set_int(hash_string(name), val);
+		return set_var(hash_string(name), value(val));
 	}
-
+	
+	
 	template<>
 	inline optional<float> globals_interface::get<float>(const char* name) const {
-		return get_float(hash_string(name));
+		auto var = get_var(hash_string(name));
+		if ( var && var->type == value::Type::Float) {
+			return {var->v_float};
+		}
+		return nullopt;
 	}
 	template<>
 	inline bool globals_interface::set<float>(const char* name, const float& val) {
-		return set_float(hash_string(name), val);
+		return set_var(hash_string(name), value(val));
+	}
+	
+	template<>
+	inline optional<const char*> globals_interface::get<const char*>(const char* name) const {
+		auto var = get_var(hash_string(name));
+		if ( var && var->type == value::Type::String ) {
+			return {var->v_string};
+		}
+		return nullopt;
+	}
+	template<>
+	inline bool globals_interface::set<const char*>(const char* name, const char* const& val) {
+		return set_var(hash_string(name), value(val));
 	}
 
 	template<>
-	inline optional<const char*>globals_interface::get<const char*>(const char* name) const {
-		return get_str(hash_string(name));
+	inline optional<list> globals_interface::get<list>(const char* name) const {
+		auto var = get_var(hash_string(name));
+		if (var && var->type == value::Type::List) {
+			return {var->v_list};
+		}
+		return nullopt;
 	}
 	template<>
-	inline bool globals_interface::set<const char*>(const char* name, const char * const & val) {
-		return set_str(hash_string(name), val);
+	inline bool globals_interface::set<list>(const char* name, const list& val) {
+		return set_var(hash_string(name), value(val));
 	}
 }

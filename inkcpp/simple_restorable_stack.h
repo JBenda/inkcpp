@@ -2,15 +2,18 @@
 
 #include "system.h"
 #include "array.h"
+#include "snapshot_impl.h"
 
 namespace ink::runtime::internal
 {
 	template<typename T>
-	class simple_restorable_stack
+	class simple_restorable_stack : public snapshot_interface
 	{
 	public:
 		simple_restorable_stack(T* buffer, size_t size, const T& null)
 			: _buffer(buffer), _size(size), _null(null) { }
+		virtual ~simple_restorable_stack() = default;
+			
 
 		void push(const T& value);
 		T pop();
@@ -27,9 +30,12 @@ namespace ink::runtime::internal
 		void restore();
 		void forget();
 
+		virtual size_t snap(unsigned char* data, const snapper&) const override;
+		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+
 	protected:
 		virtual void overflow(T*& buffer, size_t& size) {
-			throw ink_exception("Stack overflow!");
+			inkFail("Stack overflow!");
 		}
 
 		void initialize_data(T* buffer, size_t size) {
@@ -60,7 +66,7 @@ namespace ink::runtime::internal
 		managed_restorable_stack(const T& null) :
 			simple_restorable_stack<T>(nullptr, 0, null), _stack{}
 		{ base::initialize_data(_stack.data(), N); }
-		virtual void overflow(T*& buffer, size_t& size) override final {
+		virtual void overflow(T*& buffer, size_t& size) override {
 			if constexpr (dynamic) {
 				if (buffer) {
 					_stack.extend();
@@ -144,7 +150,6 @@ namespace ink::runtime::internal
 	inline void simple_restorable_stack<T>::clear()
 	{
 		// Reset to start
-		// TODO: Support save!
 		_save = _jump = InvalidIndex;
 		_pos = 0;
 	}
@@ -208,18 +213,58 @@ namespace ink::runtime::internal
 	{
 		inkAssert(_save != InvalidIndex, "Can not forget when the stack has never been saved!");
 
-		/*// If we have moven to a point earlier than the save point but we have a jump point
-		if (_pos < _save && _pos > _jump)
-		{*/
-			// If we're at the save point, move us instead
-			if (_pos == _save)
-				_pos = _jump;
-			// Everything between the jump point and the save point needs to be nullified
-			else for (size_t i = _jump; i < _save; i++)
-				_buffer[i] = _null;
-		/*}*/
+		inkAssert(_pos >= _save || _pos < _jump, "Pos is in backup areal! (should be impossible)");
+		// if we are below the backup areal, no changes are needed
+		// if we above the backup areal, we need to collpse it
+		if (_pos >= _save) {
+			size_t delta = _save - _jump;
+			for(size_t i = _save; i < _pos; ++i) {
+				_buffer[i - delta] = _buffer[i];
+			}
+			_pos -= delta;
+		}
 
 		// Just reset save position
-		_save = InvalidIndex;
+		_save = _jump = InvalidIndex;
+	}
+	template<typename T>
+	size_t simple_restorable_stack<T>::snap(unsigned char* data, const snapper&) const
+	{
+		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
+		unsigned char* ptr = data;
+		bool should_write = data != nullptr;
+		ptr = snap_write(ptr, _null, should_write);
+		ptr = snap_write(ptr, _pos, should_write );
+		ptr = snap_write(ptr, _save, should_write );
+		ptr = snap_write(ptr, _jump, should_write );
+		size_t max = _pos;
+		if (_save > max) { max = _save; }
+		if (_jump > max) { max = _jump; }
+		for(size_t i = 0; i < max; ++i)
+		{
+			ptr = snap_write(ptr, _buffer[i], should_write );
+		}
+		return ptr - data;
+	}
+
+	template<typename T>
+	const unsigned char* simple_restorable_stack<T>::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
+		T null;
+		ptr = snap_read(ptr, null);
+		inkAssert(null == _null, "different null value compared to snapshot!");
+		ptr = snap_read(ptr, _pos);
+		ptr = snap_read(ptr, _save);
+		ptr = snap_read(ptr, _jump);
+		size_t max = _pos;
+		if(_save > max) { max = _save; }
+		if(_jump > max) { max = _jump; }
+		while(_size < max) { overflow(_buffer, _size); }
+		for(size_t i = 0; i < max; ++i)
+		{
+			ptr = snap_read(ptr, _buffer[i]);
+		}
+		return ptr;
 	}
 }

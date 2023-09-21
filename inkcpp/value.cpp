@@ -1,7 +1,10 @@
 #include "value.h"
+
+#include "list_impl.h"
 #include "output.h"
 #include "list_table.h"
 #include "string_utils.h"
+#include "string_table.h"
 
 namespace ink::runtime::internal
 {
@@ -68,5 +71,91 @@ namespace ink::runtime::internal
 	basic_stream& operator<<(basic_stream& os, const value& val) {
 		os.append(val);
 		return os;
+	}
+	
+	value::value(const ink::runtime::value& val) : value() {
+		using types = ink::runtime::value::Type; 
+		switch (val.type) {
+			case types::Bool:
+				set<value_type::boolean>(val.v_bool);
+				break;
+			case types::Uint32:
+				set<value_type::uint32>(val.v_uint32);
+				break;
+			case types::Int32:
+				set<value_type::int32>(val.v_int32);
+				break;
+			case types::String:
+				set<value_type::string>(val.v_string);
+				break;
+			case types::Float:
+				set<value_type::float32>(val.v_float);
+				break;
+			case types::List:
+				set<value_type::list>(list_table::list{static_cast<list_impl*>(val.v_list)->get_lid()});
+		}
+	}
+
+	bool value::set( const ink::runtime::value& val ) {
+		auto var = value( val );
+		if ( type() == value_type::none || var.type() == type() ) {
+			*this = var;
+			return true;
+		}
+		return false;
+	}
+
+	ink::runtime::value value::to_interface_value(list_table& table) const {
+		using val = ink::runtime::value;
+		if(type() == value_type::boolean) { return val(get<value_type::boolean>()); }
+		else if(type() == value_type::uint32) { return val(get<value_type::uint32>()); }
+		else if(type() == value_type::int32) { return val(get<value_type::int32>()); }
+		else if(type() == value_type::string) { return val(get<value_type::string>().str); }
+		else if(type() == value_type::float32) { return val(get<value_type::float32>()); }
+		else if(type() == value_type::list_flag) { 
+			auto v = table.create();
+			v = table.add(v, get<value_type::list_flag>());
+			return val(table.handout_list(v));
+		} else if(type() == value_type::list) { 
+			return val(table.handout_list(get<value_type::list>()));
+		}
+		inkFail("No valid type to convert to interface value!");
+		return val();
+	}
+
+	size_t value::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		bool should_write = data != nullptr;
+		ptr = snap_write(ptr, _type, should_write );
+		if (_type == value_type::string) {
+			unsigned char buf[max_value_size];
+			string_type* res = reinterpret_cast<string_type*>(buf);
+			auto str = get<value_type::string>();
+			res->allocated = str.allocated;
+			if (str.allocated) {
+				res->str = reinterpret_cast<const char*>(static_cast<std::uintptr_t>(snapper.strings.get_id(str.str)));
+			} else {
+				res->str = reinterpret_cast<const char*>(static_cast<std::uintptr_t>(str.str - snapper.story_string_table));
+			}
+			ptr = snap_write(ptr, buf, should_write );
+		} else {
+			// TODO more space efficent?
+			ptr = snap_write(ptr, &bool_value, max_value_size, should_write );
+		}
+		return ptr - data;
+	}
+	const unsigned char* value::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		ptr = snap_read(ptr, _type);
+		ptr = snap_read(ptr, &bool_value, max_value_size);
+		if(_type == value_type::string) {
+			if(string_value.allocated) {
+				string_value.str = loader.string_table[(std::uintptr_t)(string_value.str)];
+			} else {
+				string_value.str = loader.story_string_table +(std::uintptr_t)(string_value.str);
+			}
+		}
+		return ptr;
 	}
 }

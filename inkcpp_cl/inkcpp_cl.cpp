@@ -10,6 +10,7 @@
 #include <compiler.h>
 #include <choice.h>
 #include <globals.h>
+#include <snapshot.h>
 
 #include "test.h"
 
@@ -19,7 +20,7 @@ void usage()
 	cout
 		<< "Usage: inkcpp_cl <options> <json file>\n"
 		<< "\t-o <filename>:\tOutput file name\n"
-		<< "\t-p:\tPlay mode\n"
+		<< "\t-p [<snapshot_file>]:\tPlay mode\n\toptional snapshot file to load\n\tto create a snapshot file enter '-1' as choice\n"
 		<< endl;
 }
 
@@ -35,6 +36,7 @@ int main(int argc, const char** argv)
 	// Parse options
 	std::string outputFilename;
 	bool playMode = false, testMode = false, testDirectory = false;
+	std::string snapshotFile;
 	for (int i = 1; i < argc - 1; i++)
 	{
 		std::string option = argv[i];
@@ -43,8 +45,13 @@ int main(int argc, const char** argv)
 			outputFilename = argv[i + 1];
 			i += 1;
 		}
-		else if (option == "-p")
+		else if (option == "-p") {
 			playMode = true;
+			if (i + 1 < argc - 1 && argv[i+1][0] != '-') {
+				++i;
+				snapshotFile = argv[i];
+			}
+		}
 		else if (option == "-t")
 			testMode = true;
 		else if (option == "-td")
@@ -81,6 +88,7 @@ int main(int argc, const char** argv)
 
 	// If input filename is an .ink file
 	int val = inputFilename.find(".ink");
+	bool json_file_is_tmp_file = false;
 	if (val == inputFilename.length() - 4)
 	{
 		// Create temporary filename
@@ -98,6 +106,7 @@ int main(int argc, const char** argv)
 		}
 
 		// New input is the json file
+		json_file_is_tmp_file = true;
 		inputFilename = jsonFile;
 	}
 
@@ -108,6 +117,7 @@ int main(int argc, const char** argv)
 		std::ofstream fout(outputFilename, std::ios::binary | std::ios::out);
 		ink::compiler::run(inputFilename.c_str(), fout, &results);
 		fout.close();
+		if(json_file_is_tmp_file) { remove(inputFilename.c_str()); }
 
 		// Report errors
 		for (auto& warn : results.warnings)
@@ -123,6 +133,7 @@ int main(int argc, const char** argv)
 	}
 	catch (std::exception& e)
 	{
+		if(json_file_is_tmp_file) { remove(inputFilename.c_str()); }
 		std::cerr << "Unhandled InkBin compiler exception: " << e.what() << std::endl;
 		return 1;
 	}
@@ -139,13 +150,19 @@ int main(int argc, const char** argv)
 		story* myInk = story::from_file(outputFilename.c_str());
 
 		// Start runner
-		runner thread = myInk->new_runner();
+		runner thread;
+		if (snapshotFile.size()) {
+			auto snap_ptr = snapshot::from_file( snapshotFile.c_str() );
+			thread = myInk->new_runner_from_snapshot(*snap_ptr);
+			delete snap_ptr;
+		} else {
+			thread = myInk->new_runner();
+		}
 
 		while (true)
 		{
 			while (thread->can_continue())
 				std::cout << thread->getline();
-
 			if (thread->has_tags()){
 				std::cout << "# tags: ";
 				for (int i = 0; i < thread->num_tags(); ++i) {
@@ -162,14 +179,26 @@ int main(int argc, const char** argv)
 				int index = 1;
 				for (const ink::runtime::choice& c : *thread)
 				{
-					std::cout << index++ << ": " << c.text() << std::endl;
+					std::cout << index++ << ": " << c.text();
+					if(c.has_tags()) {
+						std::cout << "\n\t";
+						for(size_t i = 0; i < c.num_tags(); ++i) {
+							std::cout << "# " << c.get_tag(i) << " ";
+						}
+					}
+					std::cout << std::endl;
 				}
 
 				int c = 0;
 				std::cin >> c;
+				if (c == -1) {
+					snapshot* snap = thread->create_snapshot();
+					snap->write_to_file(std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".snap").c_str());
+					delete snap;
+					break;
+				}
 				thread->choose(c - 1);
 				std::cout << "?> ";
-				continue;
 				continue;
 			}
 

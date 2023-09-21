@@ -5,7 +5,7 @@ enable_testing()
 
 # Project setup
 project(inkcpp VERSION 0.1)
-SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
@@ -18,7 +18,6 @@ add_subdirectory(inkcpp_test)
 add_subdirectory(unreal)
 
 
-get_target_property(TEE inkcpp PUBLIC_HEADER)
 install(TARGETS inkcpp inkcpp_compiler inkcpp_shared
 	EXPORT inkcppTarget
 	ARCHIVE DESTINATION "lib/ink"
@@ -57,3 +56,11 @@ set(CPACK_GENERATOR "ZIP")
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 include(CPack)
+
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+	set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
+	doxygen_add_docs(doc ${PROJECT_SOURCE_DIR} COMMENT "Generate docs")
+else(DOXYGEN_FOUND)
+	message("Doxygen needed to generate documntation!")
+endif(DOXYGEN_FOUND)

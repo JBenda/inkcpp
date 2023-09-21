@@ -49,25 +49,16 @@ thread->choose(0);
 ```
 
 ## Current Status
-Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must me in the same folder or in the PATH.
+
+Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must be in the same folder or in the PATH.
+`inklecate` can be downloaded from the official [release page](https://github.com/inkle/ink/releases) and will be downloaded from CMake at  configure time (located at `build/unreal/inkcpp/Resources/inklecate`).
 
 Without the `-p` flag, it'll just compile the JSON/Ink file into InkCPP's binary format (see the Wiki on GitHub).
 
-Many, but not all features of the Ink language are supported (see Glaring Omissions below), but be warned, this runtime is still highly unstable. I am currently working on getting it to pass all the unit tests on [ink-proof](https://github.com/chromy/ink-proof).
+All features of ink 1.1 are supported, and checked with [ink-proof](https://github.com/chromy/ink-proof).
 
-* Temporary and global variables
-* Int, String, or Divert values
-* Eval stack (`ev`, `/ev`), String stack (`str`, `/str`)
-* Choices (support for both `*` and `+` and conditional choices)
-* Diverts (variable and fixed, conditional and normal)
-* All mathematical operators (`+`, `<=`, etc.). String equality not supported.
-* Glue
-* Visit and read counts (`visits` and `CNT?` commands).
-* `seq` command and all sequence types (stopping, cycle, shuffle)
-* Global store that can be shared between runners
-* External function binding (no fallback support yet)
-* Tunnels and internal functions
-* Ink threads (probably incredibly unstable though)
+Big features missing compared to the `C#` implementation are:
+* stable Ink Thread support
 
 ## Configuring and Building (CMake)
 
@@ -78,6 +69,8 @@ To configure the project...
 3. From the build folder, run `cmake ..`
 
 CMake will then generate the necessary build files for your environment. By default, it generates Visual Studio projects and solutions on Windows and Makefiles on Mac and Linux. You can change this using CMake's command line options (see `cmake --help`). It supports pretty much anything.
+
+The documentation can be build iff Doxygen is installed with `cmake --build . --target doc`. The documentation can then be found in at `html/index.html`.
 
 To build, either run the generated buildfiles OR you can use `cmake --build . --config <Release|Debug>` from the build folder to automatically execute the relevant toolchain.
 
@@ -129,15 +122,6 @@ Code for the Unreal plugin is located in the `unreal` directory. In order to ins
 ## Next Steps
 
 I am currently working toward a 1.0 release. You can track my progress here: https://github.com/brwarner/inkcpp/projects/1
-
-### Glaring Omissions
-
-The big things we're missing right now are:
-
-* Fallback functions for externals.
-* Variable observers
-* Lists and whatever cool, crazy stuff Ink has been adding recently.
-* Robust tests using ink-proof.
 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.

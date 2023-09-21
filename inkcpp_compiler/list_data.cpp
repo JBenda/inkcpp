@@ -13,7 +13,7 @@ namespace ink::compiler::internal
 		_list_end.push_back(current_back);
 	}
 
-	void list_data::new_flag(const std::string& flag_name, int value)
+	void list_data::new_flag(const std::string& flag_name, size_t value)
 	{
 		while(_flag_names.size() < _current_list_start + value) {
 			_flag_names.push_back("");
@@ -23,6 +23,7 @@ namespace ink::compiler::internal
 		}
 		_flag_names[_current_list_start + value - 1] = flag_name;
 	}
+
 	std::vector<list_data::named_list_flag> list_data::get_flags() const {
 		std::vector<named_list_flag> result{};
 		size_t begin = 0;

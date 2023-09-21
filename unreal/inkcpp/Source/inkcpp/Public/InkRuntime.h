@@ -4,13 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Misc/Optional.h"
+
 #include "InkDelegates.h"
+#include "InkSnapshot.h"
+
 #include "ink/types.h"
 #include "ink/globals.h"
+
 
 #include "InkRuntime.generated.h"
 
 class UInkThread;
+struct FInkVar;
 namespace ink::runtime { class story; }
 
 UCLASS()
@@ -23,25 +29,59 @@ public:
 	AInkRuntime();
 	~AInkRuntime();
 
-	UFUNCTION(BlueprintCallable)
-	UInkThread* Start(TSubclassOf<UInkThread> type, FString path, bool runImmediately = true);
+	/**
+	* Create a new Thread. If a Snapshot is set/loaded create Threads like there was before
+	* if you want to create a fresh Thread despite an existing LoadedSnapshot enter the starting path
+	*/
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	UInkThread* Start(TSubclassOf<UInkThread> type, FString path = "", bool runImmediately = true);
 
-	UFUNCTION(BlueprintCallable)
-	UInkThread* StartExisting(UInkThread* thread, FString path, bool runImmediately = true);
+	/**
+	* Create a new Thread in existing memory, for more details \see AInkRuntime::Start()
+	*/
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	UInkThread* StartExisting(UInkThread* thread, FString path = "", bool runImmediately = true);
+	
+	// only tested in choices moments
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	FInkSnapshot Snapshot();
+	
+	/**
+	* Loads a snapshot file, therfore deletes globals and invalidate all current Threads
+	* After this Start and StartExisting will load the corresponding Threads (on at a time)
+	*/
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void LoadSnapshot(const FInkSnapshot& snapshot);
 
-	UFUNCTION(BlueprintCallable)
-	void RegisterGlobalTagFunction(FName FunctionName, const FGlobalTagFunctionDelegate& Function);
-
-	// Called from UInkThread
-	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
 
 	// Marks a thread as "exclusive". As long as it is running, no other threads will update.
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void PushExclusiveThread(UInkThread* Thread);
 
 	// Removes a thread from the exclusive stack. See PushExclusiveThread.
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void PopExclusiveThread(UInkThread* Thread);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate & function);
+	
+	// for interanl use
+	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	FInkVar GetGlobalVariable(const FString& name);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void SetGlobalVariable(const FString& name, const FInkVar& value);
+
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void ObserverVariable(const FString& variableName, const FVariableCallbackDelegate& callback);
+
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void ObserverVariableEvent(const FString& variableName, const FVariableCallbackDelegateNewValue& callback);
+
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void ObserverVariableChange(const FString& variableName, const FVariableCallbackDelegateNewOldValue& callback);
 
 protected:
 	// Called when the game starts or when spawned
@@ -52,19 +92,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Story asset used in this level
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Ink")
 	class UInkAsset* InkAsset;
-
-	// Called by threads when they want to register an external function
-	void ExternalFunctionRegistered(FString functionName);
-
-	/* Returns the tags at the specified knot */
-	UFUNCTION(BlueprintPure)
-	UTagList* GetTagsAtPath(FString Path);
-
-private:
-	// UFUNCTION()
-	// FInkVar ExternalFunctionHandler(FString functionName, TArray<FInkVar> arguments);
 
 private:
 	ink::runtime::story* mpRuntime;
@@ -72,16 +101,14 @@ private:
 
 	UPROPERTY()
 	TArray<UInkThread*> mThreads;
-
-	/*UPROPERTY()
-	UInkThread* mpCurrentThread;*/
-
-	UPROPERTY()
-	TSet<FString> mRegisteredFunctions;
-
-	UPROPERTY()
+	
 	TMap<FName, FGlobalTagFunctionMulticastDelegate> mGlobalTagFunctions;
 
 	UPROPERTY()
 	TArray<UInkThread*> mExclusiveStack;
+	
+	// UPROPERTY(EditDefaultsOnly, Category="Ink")
+	TOptional<FInkSnapshot> mSnapshot;
+	// snapshot generates data when re-constructing the globals to allow reconstructing the threads
+	ink::runtime::snapshot* mpSnapshot;
 };

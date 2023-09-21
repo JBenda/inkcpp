@@ -1,6 +1,8 @@
 #include "json_compiler.h"
 
 #include "list_data.h"
+#include "system.h"
+#include "version.h"
 
 #include <string_view>
 #include <iostream>
@@ -19,15 +21,14 @@ namespace ink::compiler::internal
 	void json_compiler::compile(const nlohmann::json& input, emitter* output, compilation_results* results)
 	{
 		// Get the runtime version
-		int inkVersion = input["inkVersion"];
-		// TODO: Do something with version number
+		_ink_version = input["inkVersion"];
 
 		// Start the output
 		set_results(results);
 		_emitter = output;
 
 		// Initialize emitter
-		_emitter->start(inkVersion, results);
+		_emitter->start(_ink_version, results);
 
 		if(auto itr = input.find("listDefs"); itr != input.end()) {
 			compile_lists_definition(*itr);
@@ -90,14 +91,14 @@ namespace ink::compiler::internal
 						container_t myIndex = _next_container_index++;
 
 						// Make appropriate flags
-						CommandFlag flags = CommandFlag::NO_FLAGS;
+						CommandFlag cmd_flags = CommandFlag::NO_FLAGS;
 						if (visits)
-							flags |= CommandFlag::CONTAINER_MARKER_TRACK_VISITS;
+							cmd_flags |= CommandFlag::CONTAINER_MARKER_TRACK_VISITS;
 						if (turns)
-							flags |= CommandFlag::CONTAINER_MARKER_TRACK_TURNS;
+							cmd_flags |= CommandFlag::CONTAINER_MARKER_TRACK_TURNS;
 
 						// Write command out at this position
-						_emitter->write(Command::START_CONTAINER_MARKER, myIndex, flags);
+						_emitter->write(Command::START_CONTAINER_MARKER, myIndex, cmd_flags);
 
 						data.indexToReturn = myIndex;
 
@@ -196,8 +197,8 @@ namespace ink::compiler::internal
 			std::vector<size_t> divert_positions;
 
 			// Write empty divert to be patched later
-			uint32_t position = _emitter->fallthrough_divert();
-			divert_positions.push_back(position);
+			uint32_t divert_position = _emitter->fallthrough_divert();
+			divert_positions.push_back(divert_position);
 
 			// (2) Write deffered containers
 			for (auto& t : meta.deferred)
@@ -364,7 +365,8 @@ namespace ink::compiler::internal
 			// Encode argument count into command flag and write out the hash of the function name
 			_emitter->write(Command::CALL_EXTERNAL, hash_string(val.c_str()),
 					static_cast<CommandFlag>(numArgs));
-		}
+			_emitter->write_path(Command::FUNCTION, CommandFlag::FALLBACK_FUNCTION, val);
+	}
 
 		// list initialisation
 		else if (has(command, "list"))
@@ -395,6 +397,9 @@ namespace ink::compiler::internal
 
 		else if (get(command, "#", val))
 		{
+			if (_ink_version > 20) {
+				ink_exception("with inkVerison 21 the tag system chages, and the '#: <tag>' is deprecated now");
+			}
 			_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);
 		}
 

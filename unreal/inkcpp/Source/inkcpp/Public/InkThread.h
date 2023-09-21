@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 
 #include "InkVar.h"
+#include "InkDelegates.h"
+
 
 #include "ink/runner.h"
 #include "ink/types.h"
@@ -14,14 +16,7 @@
 
 class UTagList;
 class AInkRuntime;
-class UChoice;
-
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FTagFunctionDelegate, FString, FirstParameter, FString, SecondParameter, FString, ThirdParameter);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FTagFunctionMulticastDelegate, FString, FirstParameter, FString, SecondParameter, FString, ThirdParameter);
-
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FExternalFunctionDelegate, const TArray<FInkVar>&, Arguments, FInkVar&, Result);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FThreadShutdownDelegate);
+class UInkChoice;
 
 /**
  * Base class for all ink threads
@@ -33,65 +28,67 @@ class INKCPP_API UInkThread : public UObject
 
 public:
 	UInkThread();
+	~UInkThread();
 
 	// Yields the thread immediately. Will wait until Resume().
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void Yield();
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category="Ink")
 	bool IsYielding();
 
 	// Causes the thread to resume if yielded.
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void Resume();
 
 	// Kills the thread, regardless of state
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void Stop();
 
 	// Returns the runtime which owns this thread.
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category="Ink")
 	AInkRuntime* GetRuntime() const { return mpRuntime; }
 
 	// Called before the thread begins executing
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
 	void OnStartup();
 
 	// Called when the thread has printed a new line
-	UFUNCTION(BlueprintNativeEvent)
-	void OnLineWritten(const FString& line, UTagList* tags);
+	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
+	void OnLineWritten(const FString& line, const UTagList* tags);
 
 	// Called when a tag has been processed on the current line
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
 	void OnTag(const FString& line);
 
 	// Called when the thread has requested a branch
-	UFUNCTION(BlueprintNativeEvent)
-	void OnChoice(const TArray<UChoice*>& choices);
+	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
+	void OnChoice(const TArray<UInkChoice*>& choices);
 
 	// Called before the thread is destroyed
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintImplementableEvent , Category="Ink")
 	void OnShutdown();
 
-	UPROPERTY(BlueprintAssignable)
-	FThreadShutdownDelegate OnThreadShutdown;
-
 	// Picks a choice by index at the current branch
-	UFUNCTION(BlueprintCallable)
-	void PickChoice(int index);
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	bool PickChoice(int index);
 
 	// Registers a callback for a named "tag function"
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Ink")
 	void RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function);
+	
+	UFUNCTION(BlueprintCallable, Category="Ink")
+	void RegisterExternalEvent(const FString& functionName, const FExternalFunctionVoidDelegate& function);
+	
 
 protected:
 	virtual void OnStartup_Implementation() { }
 	virtual void OnLineWritten_Implementation(const FString& line, UTagList* tags) { }
 	virtual void OnTag_Implementation(const FString& line) { }
-	virtual void OnChoice_Implementation(const TArray<UChoice*>& choices) { }
+	virtual void OnChoice_Implementation(const TArray<UInkChoice*>& choices) { }
 	virtual void OnShutdown_Implementation() { }
 	
 private:
@@ -103,13 +100,15 @@ private:
 
 	bool ExecuteInternal();
 
-	//bool HandleExternalFunction(const FString& functionName, TArray<FInkVar> arguments, FInkVar& result);
-
 	void ExecuteTagMethod(const TArray<FString>& Params);
 
 private:
 	ink::runtime::runner mpRunner;
+	UTagList* mpTags;
+	TArray<UInkChoice*> mCurrentChoices; /// @TODO: make accassible?
 
+	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
+	
 	FString mStartPath;
 	bool mbHasRun;
 
@@ -121,10 +120,4 @@ private:
 
 	UPROPERTY()
 	AInkRuntime* mpRuntime;
-
-	UPROPERTY()
-	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
-
-	/*UPROPERTY()
-	TMap<FString, FExternalFunctionDelegate> mExternalFunctions;*/
 };

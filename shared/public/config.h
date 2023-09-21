@@ -15,11 +15,17 @@ namespace ink::config {
 	/// if required you can set them to -x then, the system will use dynamic
 	/// allocation for this type, with an initial size of x.
 	static constexpr int limitGlobalVariables = -50;
+	static constexpr int limitGlobalVariableObservers = -10;
 	static constexpr int limitThreadDepth = -10;
 	static constexpr int limitEvalStackDepth = -20;
 	static constexpr int limitContainerDepth = -20;
+	/** number of lists which can be accessed with get_var
+	 *  before the story must continue 
+	 * @attention list vars are only valid until the story continous!
+	 */
+	static constexpr int limitEditableLists = -5;
 	/// number of simultaneous active tags
-	static constexpr int limitActiveTags = 10;
+	static constexpr int limitActiveTags = -10;
 	// temporary variables and callstack;
 	static constexpr int limitRuntimeStack = -20;
 	// references  and callstack

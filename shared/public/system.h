@@ -7,12 +7,15 @@
 #include "Misc/CString.h"
 #include "HAL/UnrealMemory.h"
 #include "Hash/CityHash.h"
+
 #endif
 #ifdef INK_ENABLE_STL
 #include <exception>
 #include <stdexcept>
 #include <optional>
 #include <cctype>
+#include <cstdint>
+#include <cstdarg>
 #endif
 
 namespace ink
@@ -103,7 +106,7 @@ namespace ink
 		case '\n':
 			if (!includeNewline)
 				return false;
-		case '\t':
+		case '\t': [[fallthrough]];
 		case ' ':
 			return true;
 		default:
@@ -116,13 +119,6 @@ namespace ink
 	void zero_memory(void* buffer, size_t length);
 #endif
 
-	// assert	
-#ifndef INK_ENABLE_UNREAL
-	void ink_assert(bool condition, const char* msg = nullptr);
-	[[ noreturn ]] inline void ink_assert(const char* msg = nullptr) { ink_assert(false, msg); exit(EXIT_FAILURE);}
-#else
-	[[ noreturn ]] inline void ink_fail(const char*) { check(false); throw nullptr; }
-#endif
 
 #ifdef INK_ENABLE_STL
 	using ink_exception = std::runtime_error;
@@ -137,6 +133,43 @@ namespace ink
 	private:
 		const char* _msg;
 	};
+#endif
+
+	// assert	
+#ifndef INK_ENABLE_UNREAL
+	template<typename... Args>
+	void ink_assert( bool condition, const char* msg = nullptr, Args... args )
+	{
+		if ( !condition )
+		{
+			if constexpr ( sizeof...( args ) > 0 )
+			{
+				char* message = static_cast<char*>(
+				  malloc( snprintf( nullptr, 0, msg, args... ) + 1 ) );
+				sprintf( message, msg, args... );
+				throw ink_exception( message );
+			}
+			else
+			{
+				throw ink_exception( msg );
+			}
+		}
+	}
+	template<typename... Args>
+	[[noreturn]] inline void ink_assert( const char* msg = nullptr, Args... args )
+	{
+		ink_assert( false, msg, args... );
+		exit( EXIT_FAILURE );
+	}
+#else
+	template<typename... Args>
+	inline void ink_fail(const char* msg, Args... args) { 
+		if (sizeof...(args) > 0) {
+			checkf(false, UTF8_TO_TCHAR(msg), args...)
+		} else {
+			checkf(false, UTF8_TO_TCHAR(msg));
+		}
+	}
 #endif
 
 	namespace runtime::internal
@@ -175,8 +208,8 @@ namespace ink
 	public:
 		optional() {}
 		optional(nullopt_t) {}
-		optional(T&& val) _has_value{true}, _value{std::forward(val)}{}
-		optional(const T& val) _has_value{true}, _value{val}{}
+		optional(T&& val) : _has_value{true}, _value{val}{}
+		optional(const T& val) : _has_value{true}, _value{val}{}
 
 		const T& operator*() const { return _value; }
 		T& operator*() { return _value; }
@@ -184,17 +217,17 @@ namespace ink
 		T* operator->() { return &_value; }
 
 		constexpr bool has_value() const { return _has_value; }
-		constexpr T& value() { check(); return _value; }
-		constexpr const T& value() const { check(); return _value; }
+		constexpr T& value() { test_value(); return _value; }
+		constexpr const T& value() const { test_value(); return _value; }
 		constexpr operator bool() const { return has_value(); }
 		template<typename U>
 		constexpr T value_or(U&& u) const {
-			return _has_value ? _value : static_cast<T>(std::forward(u));
+			return _has_value ? _value : static_cast<T>(u);
 		}
 	private:
-		void check() const {
+		void test_value() const {
 			if ( ! _has_value) {
-				throw ink_exception("Can't access empty optional!");
+				ink_fail("Can't access empty optional!");
 			}
 		}
 
@@ -208,10 +241,10 @@ namespace ink
 
 #ifdef INK_ENABLE_UNREAL
 #define inkZeroMemory(buff, len) FMemory::Memset(buff, 0, len)
-#define inkAssert(condition, text) checkf(condition, TEXT(text))
-#define inkFail(text) ink::ink_fail(text)
+#define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
+#define inkFail ink::ink_fail
 #else
 #define inkZeroMemory ink::zero_memory
 #define inkAssert ink::ink_assert
-#define inkFail(text) ink::ink_assert(text)
+#define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
 #endif

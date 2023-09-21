@@ -48,6 +48,9 @@ namespace ink
 				// reset to 0
 				void reset();
 
+				// read a byte from stream
+				byte_t get(size_t offset) const;
+
 			private:
 				// Size of a data slab. Whenever
 				//  a slab runs out of data,

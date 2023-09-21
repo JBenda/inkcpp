@@ -1,12 +1,103 @@
 #pragma once
 
+#include "list.h"
 #include "traits.h"
 #include "system.h"
+#include "types.h"
+
+#ifdef  INK_ENABLE_UNREAL
+#include "../InkVar.h"
+#endif
 
 namespace ink::runtime::internal
 {
 	class basic_eval_stack;
 	class string_table;
+	class list_table;
+
+	class callback_base {
+	public:
+		virtual void call(ink::runtime::value, ink::optional<ink::runtime::value>) = 0;
+	};
+
+	template<typename F>
+	class callback final : public callback_base
+	{
+		using traits = function_traits<F>;
+		static_assert(traits::arity < 3);
+
+		template<ink::runtime::value::Type Ty>
+		void call_functor(ink::runtime::value new_val, ink::optional<ink::runtime::value> old_val) {
+			if constexpr(traits::arity == 2) {
+				if (old_val.has_value()) {
+					functor(new_val.get<Ty>(), typename traits::template argument<1>::type{old_val.value().get<Ty>()});
+				} else {
+					functor(new_val.get<Ty>(), ink::nullopt);
+				}
+			} else {
+				functor(new_val.get<Ty>());
+			}
+		}
+
+	public:
+		callback( const callback& )            = delete;
+		callback( callback&& )                 = delete;
+		callback& operator=( const callback& ) = delete;
+		callback& operator=( callback&& )      = delete;
+		callback( F functor )
+		 : functor( functor ) {}
+
+		virtual void call(ink::runtime::value new_val, 
+			ink::optional<ink::runtime::value> old_val) {
+			using value = ink::runtime::value;
+			auto check_type = [&new_val, &old_val](value::Type type){
+				inkAssert(new_val.type == type,
+				"Missmatch type for variable observer: expected %i, got %i",
+				static_cast<int>(type),
+				static_cast<int>(new_val.type));
+				if constexpr (traits::arity == 2) {
+					// inkAssert(!old_val.has_value() || old_val.value().type == type,
+					// 	"Missmatch type for variable observers old value: expected optional<%i> got optional<%i>",
+					// static_cast<int>(type),
+					// static_cast<int>(old_val.value().type));
+				}
+			};
+			if constexpr (traits::arity > 0) {
+				using arg_t = typename remove_cvref<typename traits::template argument<0>::type>::type;
+				if constexpr (is_same<arg_t, value>::value) {
+					if constexpr (traits::arity == 2) {
+						functor(new_val, old_val);
+					} else {
+						functor(new_val);
+					}
+				} else if constexpr (is_same<arg_t, bool>::value) {
+					check_type(value::Type::Bool);
+					call_functor<value::Type::Bool>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, uint32_t>::value) {
+					check_type(value::Type::Uint32);
+					call_functor<value::Type::Uint32>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, int32_t>::value) {
+					check_type(value::Type::Int32);
+					call_functor<value::Type::Int32>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, const char*>::value) {
+					check_type(value::Type::String);
+					call_functor<value::Type::String>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, float>::value) {
+					check_type(value::Type::Float);
+					call_functor<value::Type::Float>(new_val, old_val);
+				} else if constexpr (is_same<arg_t, list_interface*>::value){
+					check_type(value::Type::List);
+					call_functor<value::Type::List>(new_val, old_val);
+				} else {
+					static_assert(always_false<arg_t>::value, "Unsupported value for variable observer callback!");
+				}
+			} else {
+				functor();
+			}
+		}
+	private:
+		F functor;
+	};
 
 	// base function container with virtual callback methods
 	class function_base
@@ -15,16 +106,22 @@ namespace ink::runtime::internal
 		virtual ~function_base() { }
 
 		// calls the underlying function object taking parameters from a stack
-		virtual void call(basic_eval_stack* stack, ink::size_t length, string_table& strings) = 0;
+#ifdef INK_ENABLE_UNREAL
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) = 0;
+#else
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) = 0;
+#endif
 
 	protected:
 		// used to hide basic_eval_stack and value definitions
 		template<typename T>
-		static T pop(basic_eval_stack* stack);
+		static T pop(basic_eval_stack* stack, list_table& lists);
 
 		// used to hide basic_eval_stack and value definitions
 		template<typename T>
 		static void push(basic_eval_stack* stack, const T& value);
+
+		static void push_void(basic_eval_stack* stack);
 
 		// string special push
 		static void push_string(basic_eval_stack* stack, const char* dynamic_string);
@@ -41,9 +138,9 @@ namespace ink::runtime::internal
 		function(F functor) : functor(functor) { }
 
 		// calls the underlying function using arguments on the stack
-		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings) override
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) override
 		{
-			call(stack, length, strings, GenSeq<traits::arity>());
+			call(stack, length, strings, lists, GenSeq<traits::arity>());
 		}
 
 	private:
@@ -59,15 +156,15 @@ namespace ink::runtime::internal
 
 		// pops an argument from the stack using the function-type
 		template<int index>
-		arg_type<index> pop_arg(basic_eval_stack* stack)
+		arg_type<index> pop_arg(basic_eval_stack* stack, list_table& lists)
 		{
 			// todo - type assert?
 
-			return pop<arg_type<index>>(stack);
+			return pop<arg_type<index>>(stack, lists);
 		}
 
 		template<size_t... Is>
-		void call(basic_eval_stack* stack, size_t length, string_table& strings, seq<Is...>)
+		void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists, seq<Is...>)
 		{
 			// Make sure the argument counts match
 			inkAssert(sizeof...(Is) == length, "Attempting to call functor with too few/many arguments");
@@ -77,31 +174,25 @@ namespace ink::runtime::internal
 			if constexpr (is_same<void, typename traits::return_type>::value)
 			{
 				// Just evaluevaluatelate
-				functor(pop_arg<Is>(stack)...);
+				functor(pop_arg<Is>(stack, lists)...);
 				
 				// Ink expects us to push something
 				// TODO -- Should be a special "void" value
-				push(stack, 0);
+				push_void(stack);
 			}
 			else if constexpr (is_string<typename traits::return_type>::value)
 			{
 				// SPECIAL: The result of the functor is a string type
 				//  in order to store it in the inkcpp interpreter we 
 				//  need to store it in our allocated string table
-				auto string_result = functor(pop_arg<Is>(stack)...);
+				auto string_result = functor(pop_arg<Is>(stack, lists)...);
 
 				// Get string length
 				size_t len = string_handler<typename traits::return_type>::length(string_result);
 
 				// Get source and allocate buffer
-				const char* src = string_handler<typename traits::return_type>::src(string_result);
 				char* buffer = allocate(strings, len + 1);
-
-				// Copy
-				char* ptr = buffer;
-				while (*src != '\0')
-					*(ptr++) = *(src++);
-				*ptr = 0;
+				string_handler<typename traits::return_type>::src_copy(string_result, buffer);
 
 				// push string result
 				push_string(stack, buffer);
@@ -109,7 +200,7 @@ namespace ink::runtime::internal
 			else
 			{
 				// Evaluate and push the result onto the stack
-				push(stack, functor(pop_arg<Is>(stack)...));
+				push(stack, functor(pop_arg<Is>(stack, lists)...));
 			}
 		}
 	};
@@ -122,19 +213,37 @@ namespace ink::runtime::internal
 		function_array_delegate(const D& del) : invocableDelegate(del) { }
 
 		// calls the underlying delegate using arguments on the stack
-		virtual void call(basic_eval_stack* stack, size_t length) override
+		virtual void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) override
 		{
+			constexpr bool RET_VOID = 
+				is_same<typename function_traits<decltype(&D::Execute)>::return_type,
+						void>::value;
 			// Create variable array
 			TArray<FInkVar> variables;
 			for (size_t i = 0; i < length; i++)
 			{
-				variables.Add(pop<FInkVar>(stack));
+				variables.Add(pop<FInkVar>(stack, lists));
 			}
-
-			FInkVar result;
-			invocableDelegate.ExecuteIfBound(variables, result);
-
-			push(stack, result);
+            if constexpr (RET_VOID)
+			{
+				invocableDelegate.Execute(variables);
+				push(stack, 0);
+			} else {
+				
+				auto ret = invocableDelegate.Execute(variables);
+				ink::runtime::value result = ret.to_value();
+				if(result.type == ink::runtime::value::Type::String) {
+					const char* src = result.v_string;
+					size_t len = string_handler<const char*>::length(src);
+					char* buffer = allocate(strings, len + 1);
+					char* ptr = buffer;
+					while(*src != '\0')
+						*(ptr++) = *(src++);
+					*ptr = 0;
+					result.v_string = buffer;
+				}
+				push(stack, result);
+			}
 		}
 	private:
 		D invocableDelegate;

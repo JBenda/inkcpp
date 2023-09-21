@@ -76,7 +76,7 @@ namespace ink::runtime::internal
 	};
 	class reverse_find_from_frame_predicat_operator {
 	public:
-		reverse_find_from_frame_predicat_operator(int ci, hash_t name) : _name{name}, _ci{ci} {
+		reverse_find_from_frame_predicat_operator(int ci, hash_t name) : _ci{ci}, _name{name} {
 			inkAssert(ci == -1 || ci == 0, "only support ci == -1, for now!");
 		}
 		bool operator()(entry& e) {
@@ -208,7 +208,7 @@ namespace ink::runtime::internal
 		} else if (vt == value_type::thread_start) {
 			start.set<value_type::thread_start>(jump);
 		} else {
-			throw ink_exception("unknown jump type");
+			inkFail("unknown jump type");
 		}
 		return threadIter.get();
 	}
@@ -368,13 +368,15 @@ namespace ink::runtime::internal
 		base::clear();
 	}
 
-	void basic_stack::mark_strings(string_table& strings) const
+	void basic_stack::mark_used(string_table& strings, list_table& lists) const
 	{
 		// Mark all strings
 		base::for_each_all(
-			[&strings](const entry& elem) {
+			[&strings, &lists](const entry& elem) {
 				if (elem.data.type() == value_type::string) {
 					strings.mark_used(elem.data.get<value_type::string>());
+				} else if (elem.data.type() == value_type::list) {
+					lists.mark_used(elem.data.get<value_type::list>());
 				}
 		});
 	}
@@ -532,15 +534,17 @@ namespace ink::runtime::internal
 		base::clear();
 	}
 
-	void basic_eval_stack::mark_strings(string_table& strings) const
+	void basic_eval_stack::mark_used(string_table& strings, list_table& lists) const
 	{
 		// Iterate everything (including what we have saved) and mark strings
-		base::for_each_all([&strings](const value& elem) {
+		base::for_each_all([&strings,&lists](const value& elem) {
 				if (elem.type() == value_type::string) {
 					string_type str = elem.get<value_type::string>();
 					if (str.allocated) {
 						strings.mark_used(str.str);
 					}
+				} else if (elem.type() == value_type::list) {
+					lists.mark_used(elem.get<value_type::list>());
 				}
 			});
 	}
@@ -586,5 +590,23 @@ namespace ink::runtime::internal
 		{
 			stack.set(itr.get()->name, itr.get()->data);
 		}
+	}
+
+	size_t basic_stack::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		bool should_write = data != nullptr;
+		ptr = snap_write(ptr, _next_thread, should_write );
+		ptr = snap_write(ptr, _backup_next_thread, should_write );
+		ptr += base::snap(data ? ptr : nullptr, snapper);
+		return ptr - data;
+	}
+
+	const unsigned char* basic_stack::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		ptr = snap_read(ptr, _next_thread);
+		ptr = snap_read(ptr, _backup_next_thread);
+		ptr = base::snap_load(ptr, loader);
+		return ptr;
 	}
 }

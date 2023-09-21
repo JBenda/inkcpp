@@ -7,10 +7,10 @@ public class inkcpp_editor : ModuleRules
 {
 	public inkcpp_editor(ReadOnlyTargetRules Target) : base(Target)
 	{
-        // Enable C++17 support
+        // Enable C++20 support
         PCHUsage = ModuleRules.PCHUsageMode.NoSharedPCHs;
         PrivatePCHHeaderFile = "Public/inkcpp_editor.h";
-        CppStandard = CppStandardVersion.Cpp17;
+        CppStandard = CppStandardVersion.Cpp20;
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
@@ -31,6 +31,7 @@ public class inkcpp_editor : ModuleRules
 			new string[]
 			{
 				"Core",
+				"Projects"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

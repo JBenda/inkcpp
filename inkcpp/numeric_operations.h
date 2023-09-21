@@ -1,4 +1,5 @@
 #pragma once
+#include "value.h"
 
 /// Define operation for numeric types.
 /// use generalized types numeric and integral to keep redundancy minimal.
@@ -13,6 +14,11 @@ namespace ink::runtime::internal {
 		ty == value_type::boolean
 		|| ty == value_type::int32
 		|| ty == value_type::uint32
+		|| ty == value_type::float32, void>::type;
+	
+	template<value_type ty>
+	using is_signed_numeric_t = typename enable_if<
+		ty == value_type::int32
 		|| ty == value_type::float32, void>::type;
 
 	/// list of internal value types
@@ -47,7 +53,8 @@ namespace ink::runtime::internal {
 		inline typename value::ret<to>::type numeric_cast(const value& v) {
 			if (to == v.type()) { return v.get<to>(); }
 			else {
-				throw ink_exception("invalid numeric_cast!");
+				inkFail("invalid numeric_cast! from %i to %i", v.type(), to);
+				return 0;
 			}
 		}
 
@@ -61,7 +68,8 @@ namespace ink::runtime::internal {
 				case value_type::boolean:
 					return static_cast<uint32_t>(v.get<value_type::boolean>());
 				default:
-					throw ink_exception("invalid cast to uint!");
+					inkFail("invalid cast to uint!");
+					return 0;
 			}
 		}
 
@@ -73,7 +81,8 @@ namespace ink::runtime::internal {
 				case value_type::boolean:
 					return static_cast<int32_t>(v.get<value_type::boolean>());
 				default:
-					throw ink_exception("invalid cast to int!");
+					inkFail("invalid cast to int!");
+					return 0;
 			}
 		}
 
@@ -87,7 +96,26 @@ namespace ink::runtime::internal {
 				case value_type::int32:
 					return static_cast<float>(v.get<value_type::int32>());
 				default:
-					throw ink_exception("invalid numeric_cast!");
+					inkFail("invalid numeric_cast!");
+					return 0;
+			}
+		}
+
+		/// specialisation for boolean
+		template<>
+		inline bool numeric_cast<value_type::boolean>(const value& v) {
+			switch(v.type()) {
+				case value_type::boolean:
+					return v.get<value_type::boolean>();
+				case value_type::int32:
+					return v.get<value_type::int32>() != 0;
+				case value_type::uint32:
+					return v.get<value_type::uint32>() != 0;
+				case value_type::float32:
+					return v.get<value_type::float32>() != 0;
+				default:
+					inkFail("invalid numeric_cast to boolean from: %i", v.type());
+					return false;
 			}
 		}
 	}
@@ -227,7 +255,9 @@ namespace ink::runtime::internal {
 	public:
 		using operation_base::operation_base;
 		void operator()(basic_eval_stack& stack, value* vals) {
-			stack.push(value{}.set<ty>( vals[0].get<ty>() % vals[1].get<ty>() ));
+			stack.push(value{}.set<ty>( 
+				casting::numeric_cast<ty>(vals[0])
+				% casting::numeric_cast<ty>(vals[1])));
 		}
 	};
 
@@ -320,7 +350,9 @@ namespace ink::runtime::internal {
 	public:
 		using operation_base::operation_base;
 		void operator()(basic_eval_stack& stack, value* vals) {
-			stack.push(value{}.set<value_type::boolean>( vals[0].get<ty>() && vals[1].get<ty>() ));
+			stack.push(value{}.set<value_type::boolean>( 
+				casting::numeric_cast<value_type::boolean>(vals[0])
+				&& casting::numeric_cast<value_type::boolean>(vals[1])));
 		}
 	};
 
@@ -328,8 +360,11 @@ namespace ink::runtime::internal {
 	class operation<Command::OR, ty, is_integral_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
-		void operator()(basic_eval_stack& stack, value* vals) {
-			stack.push(value{}.set<value_type::boolean>( vals[0].get<ty>() || vals[1].get<ty>() ));
+		void operator()( basic_eval_stack& stack, value* vals )
+		{
+			stack.push(value{}.set<value_type::boolean>( 
+				casting::numeric_cast<value_type::boolean>(vals[0])
+				|| casting::numeric_cast<value_type::boolean>(vals[1])));
 		}
 	};
 
@@ -369,7 +404,7 @@ namespace ink::runtime::internal {
 	};
 
 	template<value_type ty>
-	class operation<Command::NEGATE, ty,  is_numeric_t<ty>> : public operation_base<void> {
+	class operation<Command::NEGATE, ty,  is_signed_numeric_t<ty>> : public operation_base<void> {
 	public:
 		using operation_base::operation_base;
 		void operator()(basic_eval_stack& stack, value* vals) {
@@ -393,7 +428,7 @@ namespace ink::runtime::internal {
 		void operator()(basic_eval_stack& stack, value* vals) {
 			int min = casting::numeric_cast<value_type::int32>(vals[0]);
 			int max = casting::numeric_cast<value_type::int32>(vals[0]);
-			stack.push(value{}.set<value_type::int32>(_prng.rand(max - min + 1) + min));
+			stack.push(value{}.set<value_type::int32>(static_cast<int32_t>(_prng.rand(max - min + 1) + min)));
 		}
 	};
 }

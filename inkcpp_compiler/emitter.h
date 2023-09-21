@@ -28,6 +28,12 @@ namespace ink::compiler::internal
 		// ends a container
 		virtual uint32_t end_container() = 0;
 
+		// checks if _root contains a container named name to check
+		// if name is in valid internal function name
+		// @return number of arguments functions takes (arity)
+		// @retval -1 if the function was not found
+		virtual int function_container_arguments(const std::string& name) = 0;
+
 		// Writes a command with an optional payload
 		virtual void write_raw(Command command, CommandFlag flag = CommandFlag::NO_FLAGS, const char* payload = nullptr, ink::size_t payload_size = 0) = 0;
 

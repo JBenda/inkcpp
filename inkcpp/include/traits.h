@@ -9,6 +9,13 @@
 
 namespace ink::runtime::internal
 {
+	template<typename ... Ts>
+	constexpr size_t sizeof_largest_type() 
+	{
+		size_t ret = 0;
+		return ( (ret = sizeof(Ts) > ret ? sizeof(Ts) : ret), ... );
+	}
+
 	template<unsigned int N, typename Arg, typename... Args>
 	struct get_ith_type : get_ith_type<N - 1, Args...> {};
 
@@ -36,6 +43,21 @@ namespace ink::runtime::internal
 
 	template<class T>
 	struct is_same<T, T> : true_type {};
+
+	template<typename T>
+	struct is_pointer : false_type {};
+
+	template<typename T>
+	struct is_pointer<T*> : true_type {};
+
+	template<class T> struct remove_cv { typedef T type; };
+	template<class T> struct remove_cv<const T> { typedef T type; };
+	template<class T> struct remove_cv<volatile T> { typedef T type; };
+	template<class T> struct remove_cv<const volatile T> { typedef T type; };
+	template<class T>
+	struct remove_cvref
+	{ typedef std::remove_cv_t<std::remove_reference_t<T>> type; };
+
 
 	// == string testing (from me) ==
 
@@ -66,8 +88,13 @@ namespace ink::runtime::internal
 #define MARK_AS_STRING(TYPE, LEN, SRC) template<> struct is_string<TYPE> : constant<bool, true> { }; \
 	template<> struct string_handler<TYPE> { \
 		static size_t length(const TYPE& x) { return LEN; } \
-		static const char* src(const TYPE& x) { return SRC; } \
-	};
+		static void src_copy(const TYPE& x, char* output) { \
+			[&output](const char* src){\
+			while(*src != '\0')  *(output++) = *(src++); \
+			*output = 0; \
+			}(SRC);\
+		} \
+	}
 
 	inline size_t c_str_len(const char* c) {
 		const char* i = c;

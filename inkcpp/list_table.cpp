@@ -3,6 +3,7 @@
 #include "header.h"
 #include "random.h"
 #include "string_utils.h"
+#include "list_impl.h"
 
 #ifdef INK_ENABLE_STL
 #include <ostream>
@@ -52,7 +53,7 @@ namespace ink::runtime::internal
 
 	list_table::list list_table::create()
 	{
-		for(int i = 0; i < _entry_state.size(); ++i) {
+		for(size_t i = 0; i < _entry_state.size(); ++i) {
 			if (_entry_state[i] == state::empty) {
 				_entry_state[i] = state::used;
 				return list(i);
@@ -78,11 +79,13 @@ namespace ink::runtime::internal
 	}
 
 	void list_table::mark_used(list l) {
-		_entry_state[l.lid] = state::used;
+		if (_entry_state[l.lid] == state::unused) {
+			_entry_state[l.lid] = state::used;
+		}
 	}
 
 	void list_table::gc() {
-		for(int i = 0; i < _entry_state.size(); ++i) {
+		for(size_t i = 0; i < _entry_state.size(); ++i) {
 			if (_entry_state[i] == state::unused) {
 				_entry_state[i] = state::empty;
 				data_t* entry = getPtr(i);
@@ -91,6 +94,7 @@ namespace ink::runtime::internal
 				}
 			}
 		}
+		_list_handouts.clear();
 	}
 
 	int list_table::toFid(list_flag e) const {
@@ -299,10 +303,10 @@ namespace ink::runtime::internal
 	}
 
 
-	list_table::list list_table::add(list arg, int i) {
+	list_table::list list_table::add(list arg, int n) {
 		// TODO: handle i == 0 (for performance only)
-		if (i < 0) {
-			return sub(arg, -i);
+		if (n < 0) {
+			return sub(arg, -n);
 		}
 		list res = create();
 		data_t* l = getPtr(arg.lid);
@@ -314,7 +318,7 @@ namespace ink::runtime::internal
 				for(int j = listBegin(i); j < _list_end[i] - i;++j)
 				{
 					if(hasFlag(l, j)) {
-						setFlag(o,j+i);
+						setFlag(o,j+n);
 						has_flag = true;
 					}
 				}
@@ -339,10 +343,10 @@ namespace ink::runtime::internal
 		return arg;
 	}
 
-	list_table::list list_table::sub(list arg, int i) {
+	list_table::list list_table::sub(list arg, int n) {
 		// TODO: handle i == 0 (for perofrgmance only)
-		if(i < 0) {
-			return add(arg, -i);
+		if(n < 0) {
+			return add(arg, -n);
 		}
 		list res = create();
 		data_t* l = getPtr(arg.lid);
@@ -354,7 +358,7 @@ namespace ink::runtime::internal
 				for(int j = listBegin(i) + i; j < _list_end[i]; ++j)
 				{
 					if(hasFlag(l,j)) {
-						setFlag(o,j-i);
+						setFlag(o,j-n);
 						has_flag = true;
 					}
 				}
@@ -399,7 +403,7 @@ namespace ink::runtime::internal
 		const data_t* data = getPtr(l.lid);
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(data, i)) {
-				for(int j = listBegin(i); j < _list_end[j]; ++j) {
+				for(int j = listBegin(i); j < _list_end[i]; ++j) {
 					if(hasFlag(data, j)) {
 						int value = j - listBegin(i);
 						if(res.flag < 0 || value < res.flag) {
@@ -554,14 +558,14 @@ namespace ink::runtime::internal
 
 	list_flag list_table::lrnd(list lh, prng& rng) const {
 		const data_t* l = getPtr(lh.lid);
-		int i = count(lh);
-		rng.rand(i);		
+		int n = count(lh);
+		n = rng.rand(n);
 		int count = 0;
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(l, i)) {
 				for(int j = listBegin(i); j < _list_end[i]; ++j) {
 					if(hasFlag(l,j)) {
-						if(count++ == i) {
+						if(count++ == n) {
 							return list_flag{
 								static_cast<decltype(list_flag::list_id)>(i),
 								static_cast<decltype(list_flag::flag)>( j - listBegin(i) )
@@ -620,6 +624,13 @@ namespace ink::runtime::internal
 		return res;
 	}
 
+	list_interface* list_table::handout_list(list l) {
+		static_assert(sizeof(list_interface) == sizeof(list_impl));
+		auto& res = _list_handouts.push();
+		new(&res)  list_impl(*this, l.lid);
+		return &res;
+	}
+
 #ifdef INK_ENABLE_STL
 	std::ostream& list_table::write(std::ostream& os, list l) const {
 		bool first = true;
@@ -649,6 +660,21 @@ namespace ink::runtime::internal
 		return os;
 	}
 #endif
+
+	size_t list_table::snap(unsigned char* data, const snapper& snapper) const
+	{
+		unsigned char* ptr = data;
+		ptr += _data.snap(data ? ptr : nullptr, snapper);
+		ptr += _entry_state.snap(data ? ptr : nullptr, snapper);
+		return ptr - data;
+	}
+
+	const unsigned char* list_table::snap_load(const unsigned char* ptr, const loader& loader)
+	{
+		ptr = _data.snap_load(ptr, loader);
+		ptr = _entry_state.snap_load(ptr, loader);
+		return ptr;
+	}
 
 }
 

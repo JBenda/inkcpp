@@ -3,10 +3,19 @@
 #include "CoreMinimal.h"
 #include "Delegates/Delegate.h"
 
+#include "InkVar.h"
+
 #include "InkDelegates.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_FourParams(FGlobalTagFunctionDelegate, UInkThread*, Caller, const FString&, FirstParameter, const FString&, SecondParameter, const FString&, ThirdParameter);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FGlobalTagFunctionMulticastDelegate, UInkThread*, Caller, const FString&, FirstParameter, const FString&, SecondParameter, const FString&, ThirdParameter);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FTagFunctionDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTagFunctionMulticastDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
+DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FInkVar, FExternalFunctionDelegate, const TArray<FInkVar>&, Arguments);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FExternalFunctionVoidDelegate, const TArray<FInkVar>&, Arguments);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FGlobalTagFunctionDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGlobalTagFunctionMulticastDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
+DECLARE_DYNAMIC_DELEGATE(FVariableCallbackDelegate);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FVariableCallbackDelegateNewValue, const FInkVar&, value);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FVariableCallbackDelegateNewOldValue, const FInkVar&, value, const FInkVar&, old_value);
 
 UCLASS()
 class UFuckYou : public UObject

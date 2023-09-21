@@ -19,7 +19,7 @@ namespace ink::runtime::internal {
 	void operation<Command::FLOOR, value_type::float32, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::float32);
+		inkAssert(vals[0].type() == value_type::float32, "Expected floating point number to floor.");
 		stack.push(value{}.set<value_type::float32>(
 					floor(vals->get<value_type::float32>())));
 	}
@@ -27,7 +27,7 @@ namespace ink::runtime::internal {
 	void operation<Command::CEILING, value_type::float32, void>::operator()(
 			basic_eval_stack& stack, value* vals)
 	{
-		inkAssert(vals[0].type() == value_type::float32);
+		inkAssert(vals[0].type() == value_type::float32, "Expected floating point number to ceil.");
 		stack.push(value{}.set<value_type::float32>(
 					ceil(vals->get<value_type::float32>())));
 	}

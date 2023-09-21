@@ -2,7 +2,9 @@
 
 /// Define base constructs to specify by operation headers.
 
-#include "../shared/private/command.h"
+#include "command.h"
+#include "stack.h"
+#include "value.h"
 
 namespace ink::runtime::internal {
 
@@ -54,7 +56,7 @@ namespace ink::runtime::internal {
 		 * @param vs array of values, first one = first argument etc
 		 */
 		void operator()(basic_eval_stack& stack, value* vs) {
-			throw ink_exception("operation not implemented!");
+			inkFail("operation not implemented!");
 		}
 	};
 }
