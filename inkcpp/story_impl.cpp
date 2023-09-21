@@ -268,6 +268,7 @@ namespace ink::runtime::internal
 			_list_meta = nullptr;
 			_lists = nullptr;
 		}
+		inkAssert(_header.ink_bin_version_number == ink::InkBinVersion, "invalid InkBinVerison! currently: %i you used %i", ink::InkBinVersion, _header.ink_bin_version_number);
 		inkAssert(_header.endien == header::endian_types::same,
 				"different endien support not yet implemented");
 

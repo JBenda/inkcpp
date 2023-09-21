@@ -22,7 +22,6 @@ namespace ink::compiler::internal
 	{
 		// Get the runtime version
 		_ink_version = input["inkVersion"];
-		// TODO: Do something with version number
 
 		// Start the output
 		set_results(results);
