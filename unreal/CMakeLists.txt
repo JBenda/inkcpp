@@ -22,7 +22,7 @@ set(INKLECATE_CMD "")
 if(WIN32)
 	FetchContent_MakeAvailable(inklecate_windows)
 	if(NOT inklecate_windows_SOURCE_DIR)
-	message(WARNING "failed to downloawd inklecate for windows, "
+	message(WARNING "failed to download inklecate for windows, "
 		"the unreal plugin will be unable use a .ink file as asset directly")
 	else()
 	set(INKLECATE_CMD "Resources/inklecate/windows/inklecate.exe")
@@ -30,7 +30,7 @@ if(WIN32)
 elseif(APPLE)
 	FetchContent_MakeAvailable(inklecate_mac)
 	if(NOT inklecate_mac_SOURCE_DIRE)
-		message(WARNING "failed to downloawd inklecate for MacOS, "
+		message(WARNING "failed to download inklecate for MacOS, "
 			"the unreal plugin will be unable use a .ink file as asset directly")
 	else()
 	set(INKLECATE_CMD "Resources/inklecate/mac/inklecate")
@@ -38,7 +38,7 @@ elseif(APPLE)
 elseif(UNIX)
 	FetchContent_MakeAvailable(inklecate_linux)
 	if(NOT inklecate_linux_SOURCE_DIR)
-		message(WARNING "failed to downloawd inklecate for linux, "
+		message(WARNING "failed to download inklecate for linux, "
 			"the unreal plugin will be unable use a .ink file as asset directly")
 	else()
 	set(INKLECATE_CMD "Resources/inklecate/linux/inklecate")

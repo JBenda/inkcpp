@@ -523,7 +523,7 @@ namespace ink::runtime::internal
 
 	bool runner_impl::has_tags() const
 	{
-		return _tags.size() > 0;
+		return num_tags() > 0;
 	}
 
 	size_t runner_impl::num_tags() const
@@ -1212,7 +1212,7 @@ namespace ink::runtime::internal
 					if (!_threads.empty())
 					{
 						on_done(false);
-						return;
+						break;
 					}
 					else if (_stack.has_frame(&type) && type == frame_type::function) // implicit return is only for functions
 					{
@@ -1222,12 +1222,9 @@ namespace ink::runtime::internal
 						// HACK
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
 						execute_return();
+					} else if (_container.empty() && _ptr == _story->end()){
+						on_done(true);
 					}
-					/*else TODO I had to remove this to make a test work.... is this important? Have I broken something?
-					{
-						on_done(false); // do we need to not set _done here? It wasn't set in the original code #implieddone
-						return;
-					}*/
 				}
 			} break;
 			case Command::VISIT:

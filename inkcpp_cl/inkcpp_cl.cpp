@@ -21,6 +21,7 @@ void usage()
 		<< "Usage: inkcpp_cl <options> <json file>\n"
 		<< "\t-o <filename>:\tOutput file name\n"
 		<< "\t-p [<snapshot_file>]:\tPlay mode\n\toptional snapshot file to load\n\tto create a snapshot file enter '-1' as choice\n"
+		<< "\t--ommit-choice-tags:\tdo not print tags after choices, primarly used to be compatible with inkclecat output"
 		<< endl;
 }
 
@@ -35,7 +36,10 @@ int main(int argc, const char** argv)
 
 	// Parse options
 	std::string outputFilename;
-	bool playMode = false, testMode = false, testDirectory = false;
+	bool playMode = false, 
+			 testMode = false, 
+			 testDirectory = false,
+			 ommit_choice_tags = false;
 	std::string snapshotFile;
 	for (int i = 1; i < argc - 1; i++)
 	{
@@ -51,6 +55,10 @@ int main(int argc, const char** argv)
 				++i;
 				snapshotFile = argv[i];
 			}
+		}
+		else if (option == "--ommit-choice-tags")
+		{
+			ommit_choice_tags = true;
 		}
 		else if (option == "-t")
 			testMode = true;
@@ -180,7 +188,7 @@ int main(int argc, const char** argv)
 				for (const ink::runtime::choice& c : *thread)
 				{
 					std::cout << index++ << ": " << c.text();
-					if(c.has_tags()) {
+					if(!ommit_choice_tags && c.has_tags()) {
 						std::cout << "\n\t";
 						for(size_t i = 0; i < c.num_tags(); ++i) {
 							std::cout << "# " << c.get_tag(i) << " ";
