@@ -5,9 +5,98 @@
 #include "list_table.h"
 #include "string_utils.h"
 #include "string_table.h"
+#include "system.h"
 
 namespace ink::runtime::internal
 {
+	
+	template<value_type = value_type::OP_BEGIN>
+	bool truthy_impl(const value& v);
+
+	template<>
+	bool truthy_impl<value_type::OP_END>(const value& v) {
+		inkAssert("Type was not found in operational types or it has no conversion to boolean");
+	}
+	
+	template<>
+	bool truthy_impl<value_type::string>(const value& v) {
+		if(v.type() == value_type::string) {
+			// if string is not empty
+			return *v.get<value_type::string>().str != 0;
+		} else {
+			return truthy_impl<value_type::string+1>(v);
+		}
+	}
+	
+	template<>
+	bool truthy_impl<value_type::list_flag>(const value& v) {
+		if(v.type() == value_type::list_flag) {
+			auto flag = v.get<value_type::list_flag>();
+			return flag != null_flag && flag != empty_flag;
+		} else {
+			return truthy_impl<value_type::list_flag+1>(v);
+		}
+	}
+	
+	template<>
+	bool truthy_impl<value_type::list>(const value& v) {
+		if(v.type() == value_type::list) {
+			inkAssert("Curently not supported");
+		} else {
+			return truthy_impl<value_type::list +1>(v);
+		}
+	}
+	
+	template<>
+	bool truthy_impl<value_type::float32>(const value& v) {
+		if (v.type() == value_type::float32) {
+			return v.get<value_type::float32>() != 0.0f;
+		} else {
+			return truthy_impl<value_type::float32+1>(v);
+		}
+	}
+	template<>
+	bool truthy_impl<value_type::int32>(const value& v) {
+		if(v.type() == value_type::int32) {
+			return v.get<value_type::int32>() != 0;
+		} else {
+			return truthy_impl<value_type::int32+1>(v);
+		}
+	}
+	
+	template<>
+	bool truthy_impl<value_type::uint32>(const value& v) {
+		if (v.type() == value_type::uint32) {
+			return v.get<value_type::uint32>() != 0;
+		} else {
+			return truthy_impl<value_type::uint32+1>(v);
+		}
+	}
+	
+	template<>
+	bool truthy_impl<value_type::boolean>(const value& v) {
+		if(v.type() == value_type::boolean) {
+			return v.get<value_type::boolean>();
+		} else {
+			return truthy_impl<value_type::boolean + 1>(v);
+		}
+	}
+
+	template<>
+	bool truthy_impl<value_type::divert>(const value& v) {
+		if (v.type() == value_type::divert) {
+			inkAssert("Divert can not be evaluated to boolean");
+		} else {
+			return truthy_impl<value_type::divert + 1>(v);
+		}
+	}
+
+	bool value::truthy() const {
+		return truthy_impl(*this);
+	}
+	
+
+	
 #ifdef INK_ENABLE_STL
 	template<value_type ty = value_type::PRINT_BEGIN>
 	void append(std::ostream& os, const value& val, const list_table* lists) {

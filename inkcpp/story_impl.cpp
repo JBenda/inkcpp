@@ -165,6 +165,7 @@ namespace ink::runtime::internal
 				return static_cast<CommandFlag>(offset[1]);
 			}
 		}
+		inkAssert("Container not found -> can't fetch flag");
 	}
 
 	ip_t story_impl::find_offset_for(hash_t path) const
