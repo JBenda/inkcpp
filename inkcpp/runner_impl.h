@@ -142,7 +142,7 @@ namespace ink::runtime::internal
 		void clear_tags();
 
 		// Special code for jumping from the current IP to another
-		void jump(ip_t, bool record_visits = true);
+		void jump(ip_t, bool record_visits);
 
 		void run_binary_operator(unsigned char cmd);
 		void run_unary_operator(unsigned char cmd);

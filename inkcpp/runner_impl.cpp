@@ -224,6 +224,7 @@ namespace ink::runtime::internal
 			}
 			std::cout << std::endl;
 		}
+		if(record_visits) {
 		while(stack_iter != stack.rend()&&
 			(!is_in(std::get<container_t>(*stack_iter)) || std::get<CommandFlag>(*stack_iter) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
 		{
@@ -234,7 +235,7 @@ namespace ink::runtime::internal
 			curr = offset;
 			_globals->visit(std::get<container_t>(*stack_iter), enteringStart);
 			++stack_iter;
-		}
+		}}
 
 		stack_iter = stack.rbegin();
 		if(!stack.empty() && !is_in(std::get<container_t>(*stack_iter))) {
@@ -381,7 +382,7 @@ namespace ink::runtime::internal
 
 		// Do the jump
 		inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
-		jump(_story->instructions() + target);
+		jump(_story->instructions() + target, true);
 	}
 
 	frame_type runner_impl::execute_return()
@@ -610,7 +611,7 @@ namespace ink::runtime::internal
 		_threads.clear();
 
 		// Jump to destination and clear choice list
-		jump(_story->instructions() + c.path(), false);
+		jump(_story->instructions() + c.path(), true);
 		clear_choices();
 		clear_tags();
 	}
@@ -764,7 +765,7 @@ namespace ink::runtime::internal
 		// Clear state and move to destination
 		reset();
 		_ptr = _story->instructions();
-		jump(destination);
+		jump(destination, false);
 
 		return true;
 	}
@@ -1009,7 +1010,7 @@ namespace ink::runtime::internal
 
 				// Do the jump
 				inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
-				jump(_story->instructions() + target);
+				jump(_story->instructions() + target, true);
 			}
 			break;
 			case Command::DIVERT_TO_VARIABLE:
@@ -1025,7 +1026,7 @@ namespace ink::runtime::internal
 				inkAssert(val, "Jump destiniation needs to be defined!");
 
 				// Move to location
-				jump(_story->instructions() + val->get<value_type::divert>());
+				jump(_story->instructions() + val->get<value_type::divert>(), true);
 				inkAssert(_ptr < _story->end(), "Diverted past end of story data!");
 			}
 			break;
