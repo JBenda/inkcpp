@@ -42,6 +42,7 @@ namespace ink
 		DUPLICATE,
 		PUSH_VARIABLE_VALUE,
 		VISIT,
+		TURN, /// How many choices where made since start of the story
 		READ_COUNT,
 		SEQUENCE,
 		SEED,
@@ -57,6 +58,7 @@ namespace ink
 
 		// == Threading
 		THREAD,
+
 		// == thinary operations
 		LIST_RANGE,
 		OP_BEGIN = LIST_RANGE,

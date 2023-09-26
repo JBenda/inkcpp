@@ -174,7 +174,7 @@ namespace ink::runtime::internal
 
 	void runner_impl::jump(ip_t dest, bool record_visits)
 	{
-		std::cout << "jump to: " << (dest - _story->instructions()) << std::endl;
+		// std::cout << "jump to: " << (dest - _story->instructions()) << std::endl;
 		if (dest == _ptr) { return; }
 		std::vector<std::tuple<CommandFlag, container_t, ip_t>> stack;
 
@@ -194,7 +194,7 @@ namespace ink::runtime::internal
 		
 		_ptr = dest;
 
-		if (offset == dest) {
+		if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
 			_ptr += 6;
 			stack.push_back({static_cast<CommandFlag>(offset[1]), id, offset});
 		}
@@ -211,18 +211,18 @@ namespace ink::runtime::internal
 		ip_t curr = dest;
 		{
 			const container_t* iter;
-			std::cout << "old: ";
+			// std::cout << "old: ";
 			while(_container.iter(iter)) {
-				std::cout << (*iter ) << ", ";
+				// std::cout << (*iter ) << ", ";
 			}
-			std::cout << std::endl;
+			// std::cout << std::endl;
 		}
 		{
-			std::cout << "new: ";
+			// std::cout << "new: ";
 			for(auto iter = stack.rbegin(); iter != stack.rend(); ++iter) {
-				std::cout << std::get<container_t>(*iter) << ", ";
+				// std::cout << std::get<container_t>(*iter) << ", ";
 			}
-			std::cout << std::endl;
+			// std::cout << std::endl;
 		}
 		if(record_visits) {
 		while(stack_iter != stack.rend()&&
@@ -231,7 +231,7 @@ namespace ink::runtime::internal
 			auto offset = std::get<ip_t>(*stack_iter);
 			bool enteringStart = allEnteredAtStart && ((curr - offset) <= 6);
 			if(!enteringStart) { allEnteredAtStart = false; }
-			std::cout << "visit: " << std::get<container_t>(*stack_iter) << "\td: " << (curr - offset) << std::endl;
+			// std::cout << "visit: " << std::get<container_t>(*stack_iter) << "\td: " << (curr - offset) << std::endl;
 			curr = offset;
 			_globals->visit(std::get<container_t>(*stack_iter), enteringStart);
 			++stack_iter;
@@ -264,11 +264,11 @@ namespace ink::runtime::internal
 		}
 		{
 			const container_t* iter;
-			std::cout << "cur: ";
+			// std::cout << "cur: ";
 			while(_container.iter(iter)) {
-				std::cout << (*iter ) << ", ";
+				// std::cout << (*iter ) << ", ";
 			}
-			std::cout << std::endl;
+			// std::cout << std::endl;
 		}
 		
 		
@@ -1236,7 +1236,7 @@ namespace ink::runtime::internal
 					container_t destination = -1;
 					if (_story->get_container_id(_story->instructions() + path, destination))
 					{
-						std::cout << "Once only: " << _globals->visits(destination) << std::endl;
+						// std::cout << "Once only: " << _globals->visits(destination) << std::endl;
 						// Ignore the choice if we've visited the destination before
 						if (_globals->visits(destination) > 0)
 							break;
@@ -1252,7 +1252,7 @@ namespace ink::runtime::internal
 					// Only show if the top of the eval stack is 'truthy'
 					auto top = _eval.pop();
 					bool cond = top.truthy();
-					std::cout << (int)top.type() << " Condiditon: " << cond << std::endl;
+					// std::cout << (int)top.type() << " Condiditon: " << cond << std::endl;
 					if(!cond)
 						break;
 				}
@@ -1292,7 +1292,7 @@ namespace ink::runtime::internal
 			{
 				// Keep track of current container
 				auto index = read<uint32_t>();
-				std::cout << "START: " << index << std::endl;
+				// std::cout << "START: " << index << std::endl;
 				_container.push(index);
 
 				// Increment visit count
@@ -1341,6 +1341,10 @@ namespace ink::runtime::internal
 				//  is 0-indexed for some reason. idk why but this is what ink expects
 				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(_container.top()) - 1));
 			} break;
+			case Command::TURN:
+			{
+				_eval.push(value{}.set<value_type::int32>((int)_globals->turns()));
+			} break;
 			case Command::SEQUENCE:
 			{
 				// TODO: The C# ink runtime does a bunch of fancy logic
@@ -1366,7 +1370,7 @@ namespace ink::runtime::internal
 				container_t container = read<container_t>();
 
 				// Push the read count for the requested container index
-				std::cout << "read count from: " << container << " =  " <<_globals->visits(container) << std::endl;
+				// std::cout << "read count from: " << container << " =  " <<_globals->visits(container) << std::endl;
 				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(container)));
 			} break;
 			case Command::TAG:

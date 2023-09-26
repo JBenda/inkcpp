@@ -56,6 +56,7 @@ namespace ink::compiler::internal
 
 		// Offset in the binary stream
 		uint32_t offset = 0;
+		uint32_t end_offset = 0;
 
 		// Index used in CNT? operations
 		container_t counter_index = ~0;
@@ -123,6 +124,7 @@ namespace ink::compiler::internal
 	uint32_t binary_emitter::end_container()
 	{
 		// Move up the chain
+		_current->end_offset = _containers.pos();
 		_current = _current->parent;
 
 		// Return offset
@@ -288,16 +290,16 @@ namespace ink::compiler::internal
 
 	void binary_emitter::process_paths()
 	{
-		std::function<void(const container_data*, int)> draw;
-		draw = [&draw](const container_data* node, int depth){
-			for(int i = 0; i < depth; ++i) { std::cout << "\t"; }
-			std::cout << (node->counter_index < 1000 ? node->counter_index : -1) << ": " << node->offset;
-			std::cout << std::endl;
-			for(auto& child : node->children) {
-				draw(child, depth + 1);
-			}
-		};
-		draw(_root, 0);
+		// std::function<void(const container_data*, int)> draw;
+		// draw = [&draw](const container_data* node, int depth){
+		// 	for(int i = 0; i < depth; ++i) { std::cout << "\t"; }
+		// 	std::cout << (node->counter_index < 1000 ? node->counter_index : -1) << ": " << node->offset << " - " << node->end_offset;
+		// 	std::cout << std::endl;
+		// 	for(auto& child : node->children) {
+		// 		draw(child, depth + 1);
+		// 	}
+		// };
+		// draw(_root, 0);
 		for (auto pair : _paths)
 		{
 			// We need to replace the uint32_t at this location with the byte position of the requested container

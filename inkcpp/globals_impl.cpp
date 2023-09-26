@@ -11,6 +11,7 @@ namespace ink::runtime::internal
 {
 	globals_impl::globals_impl(const story_impl* story)
 		: _num_containers(story->num_containers())
+		, _turn_cnt{0}
 		, _visit_counts()
 		, _owner(story)
 		, _runners_start(nullptr)
@@ -52,8 +53,13 @@ namespace ink::runtime::internal
 		return _visit_counts[container_id].visits;
 	}
 
+	uint32_t globals_impl::turns() const {
+		return _turn_cnt;
+	}
+
 	void globals_impl::turn()
 	{
+		++_turn_cnt;
 		for(size_t i = 0; i < _visit_counts.size(); ++i)
 		{
 			if(_visit_counts[i].turns != -1) {
