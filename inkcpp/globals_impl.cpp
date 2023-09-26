@@ -39,10 +39,12 @@ namespace ink::runtime::internal
 		}
 	}
 
-	void globals_impl::visit(uint32_t container_id)
+	void globals_impl::visit(uint32_t container_id, bool entering_at_start)
 	{
-		_visit_counts[container_id].visits += 1;
-		_visit_counts[container_id].turns  = 0;
+		if((!(_owner->container_flag(container_id) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) || entering_at_start) {
+			_visit_counts[container_id].visits += 1;
+			_visit_counts[container_id].turns  = 0;
+		}
 	}
 
 	uint32_t globals_impl::visits(uint32_t container_id) const

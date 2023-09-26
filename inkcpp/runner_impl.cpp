@@ -9,6 +9,9 @@
 #include "system.h"
 #include "value.h"
 
+#include <vector>
+#include <iostream>
+
 namespace ink::runtime
 {
 	const choice* runner_interface::get_choice(size_t index) const
@@ -171,39 +174,101 @@ namespace ink::runtime::internal
 
 	void runner_impl::jump(ip_t dest, bool record_visits)
 	{
-		if (dest == _ptr) { return; }const uint32_t* iter = nullptr;
-		container_t container_id;
+		std::cout << "jump to: " << (dest - _story->instructions()) << std::endl;
+		if (dest == _ptr) { return; }
+		std::vector<std::tuple<CommandFlag, container_t, ip_t>> stack;
+
 		ip_t offset;
-		bool reversed = _ptr > dest;
+		const uint32_t* iter = nullptr;
+		container_t id;
 
-		while(_story->iterate_containers(iter, container_id, offset, reversed)) {
-			if ((offset == _ptr) || (reversed && offset < _ptr) || (!reversed && offset > _ptr)) { break; }
-		}
-		if (!reversed && offset == _ptr) { // If we going reversed, we will stay in front of the command, else execute it 
-			if (!_container.empty() && _container.top() == container_id) {
-				_container.pop();
+		while(_story->iterate_containers(iter, id, offset)) {
+			if(offset >= dest) { break; }
+			if (stack.empty() || std::get<container_t>(stack.back()) != id) {
+				inkAssert(static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER, "Expected start Container");
+				stack.push_back({static_cast<CommandFlag>(offset[1]), id, offset});
 			} else {
-				_container.push(container_id);
-			}
-		} if (offset != _ptr) { _story->iterate_containers(iter, container_id, offset, !reversed); }
-		while(_story->iterate_containers(iter, container_id, offset, reversed)) {
-			if((offset == dest) || (reversed && offset < dest) || (!reversed && offset > dest)) { break; }
-			if(!_container.empty() && _container.top() == container_id) {
-				_container.pop();
-			} else {
-				_container.push(container_id);
+				stack.pop_back();
 			}
 		}
-		if (reversed && offset == dest) { // if we going reversed the command must be reversed, because we will it execute soon
-			if(!_container.empty() && _container.top() == container_id) {
-				_container.pop();
-			} else {
-				_container.push(container_id);
-			}
-		}
-
-		_ptr = dest;
 		
+		_ptr = dest;
+
+		if (offset == dest) {
+			_ptr += 6;
+			stack.push_back({static_cast<CommandFlag>(offset[1]), id, offset});
+		}
+
+		bool allEnteredAtStart = true;
+		auto stack_iter= stack.rbegin();
+		auto is_in = [this](container_t id)-> bool{
+			const container_t* iter;
+			while(this->_container.iter(iter)) {
+				if(*iter == id) { return true; }
+			}
+			return false;
+		};
+		ip_t curr = dest;
+		{
+			const container_t* iter;
+			std::cout << "old: ";
+			while(_container.iter(iter)) {
+				std::cout << (*iter ) << ", ";
+			}
+			std::cout << std::endl;
+		}
+		{
+			std::cout << "new: ";
+			for(auto iter = stack.rbegin(); iter != stack.rend(); ++iter) {
+				std::cout << std::get<container_t>(*iter) << ", ";
+			}
+			std::cout << std::endl;
+		}
+		while(stack_iter != stack.rend()&&
+			(!is_in(std::get<container_t>(*stack_iter)) || std::get<CommandFlag>(*stack_iter) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
+		{
+			auto offset = std::get<ip_t>(*stack_iter);
+			bool enteringStart = allEnteredAtStart && ((curr - offset) <= 6);
+			if(!enteringStart) { allEnteredAtStart = false; }
+			std::cout << "visit: " << std::get<container_t>(*stack_iter) << "\td: " << (curr - offset) << std::endl;
+			curr = offset;
+			_globals->visit(std::get<container_t>(*stack_iter), enteringStart);
+			++stack_iter;
+		}
+
+		stack_iter = stack.rbegin();
+		if(!stack.empty() && !is_in(std::get<container_t>(*stack_iter))) {
+			while(stack_iter != stack.rend() && !is_in(std::get<container_t>(*stack_iter))) {
+				++stack_iter;
+			}
+			if(stack_iter != stack.rend()) {
+				while(!_container.empty() && _container.top() != std::get<container_t>(*stack_iter)) {
+					_container.pop();
+				}
+			} else {
+				while(!_container.empty()) {
+					_container.pop();
+				}
+			}
+			--stack_iter;
+			while(stack_iter != stack.rbegin()) {
+				_container.push(std::get<container_t>(*stack_iter));
+				--stack_iter;
+			}
+			_container.push(std::get<container_t>(*stack_iter));
+		} else if(stack.empty()) {
+			while(!_container.empty()) {
+				_container.pop();
+			}
+		}
+		{
+			const container_t* iter;
+			std::cout << "cur: ";
+			while(_container.iter(iter)) {
+				std::cout << (*iter ) << ", ";
+			}
+			std::cout << std::endl;
+		}
 		
 		
 		
@@ -546,7 +611,6 @@ namespace ink::runtime::internal
 
 		// Jump to destination and clear choice list
 		jump(_story->instructions() + c.path(), false);
-		if(!_container.empty()){ _globals->visit(_container.top()); }
 		clear_choices();
 		clear_tags();
 	}
@@ -1223,12 +1287,13 @@ namespace ink::runtime::internal
 			{
 				// Keep track of current container
 				auto index = read<uint32_t>();
+				std::cout << "START: " << index << std::endl;
 				_container.push(index);
 
 				// Increment visit count
 				if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS)
 				{
-					_globals->visit(_container.top());
+					_globals->visit(_container.top(), true);
 				}
 
 				// TODO Turn counts

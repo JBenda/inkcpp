@@ -37,7 +37,7 @@ namespace ink::runtime::internal
 
 	public:
 		// Records a visit to a container
-		void visit(uint32_t container_id);
+		void visit(uint32_t container_id, bool entering_at_start);
 
 		// Checks the number of visits to a container
 		uint32_t visits(uint32_t container_id) const;

@@ -4,6 +4,8 @@
 #include "version.h"
 #include "list_data.h"
 
+#include <functional>
+#include <iostream>
 #include <vector>
 #include <map>
 #include <fstream>
@@ -286,6 +288,16 @@ namespace ink::compiler::internal
 
 	void binary_emitter::process_paths()
 	{
+		std::function<void(const container_data*, int)> draw;
+		draw = [&draw](const container_data* node, int depth){
+			for(int i = 0; i < depth; ++i) { std::cout << "\t"; }
+			std::cout << (node->counter_index < 1000 ? node->counter_index : -1) << ": " << node->offset;
+			std::cout << std::endl;
+			for(auto& child : node->children) {
+				draw(child, depth + 1);
+			}
+		};
+		draw(_root, 0);
 		for (auto pair : _paths)
 		{
 			// We need to replace the uint32_t at this location with the byte position of the requested container
