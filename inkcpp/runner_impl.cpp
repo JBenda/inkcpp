@@ -225,8 +225,19 @@ namespace ink::runtime::internal
 			// std::cout << std::endl;
 		}
 		if(record_visits) {
+			const container_t* iter;
+			size_t comm_end = 0;
+			while(_container.rev_iter(iter) && stack_iter != stack.rend()) {
+				if (std::get<container_t>(*stack_iter) != *iter) {
+					break;
+				}
+				++comm_end;
+				++stack_iter;
+			}
+		stack_iter = stack.rbegin();
+		size_t level = stack.size();
 		while(stack_iter != stack.rend()&&
-			(!is_in(std::get<container_t>(*stack_iter)) || std::get<CommandFlag>(*stack_iter) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
+			(level > comm_end || std::get<CommandFlag>(*stack_iter) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
 		{
 			auto offset = std::get<ip_t>(*stack_iter);
 			bool enteringStart = allEnteredAtStart && ((curr - offset) <= 6);

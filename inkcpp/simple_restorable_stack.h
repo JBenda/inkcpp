@@ -24,6 +24,7 @@ namespace ink::runtime::internal
 		void clear();
 
 		bool iter(const T*& iterator) const;
+		bool rev_iter(const T*& iterator) const;
 
 		// == Save/Restore ==
 		void save();
@@ -164,7 +165,11 @@ namespace ink::runtime::internal
 		// Begin at the top of the stack
 		if (iterator == nullptr || iterator < _buffer || iterator > _buffer + _pos)
 		{
-			iterator = _buffer + _pos - 1;
+			if (_pos == _save) {
+				iterator = _buffer + _jump -1;
+			} else {
+				iterator = _buffer + _pos - 1;
+			}
 			return true;
 		}
 
@@ -175,7 +180,7 @@ namespace ink::runtime::internal
 		// Run backwards
 		iterator--;
 
-		// Skip nulls
+		// Skip nulls FIXME: not used?
 		while (*iterator == _null)
 			iterator--;
 
@@ -186,6 +191,37 @@ namespace ink::runtime::internal
 			return false;
 		}
 
+		return true;
+	}
+
+	template<typename T>
+	inline bool simple_restorable_stack<T>::rev_iter(const T*& iterator) const
+	{
+		if (_pos == 0)
+			return false;
+		if (iterator == nullptr || iterator < _buffer || iterator > _buffer + _pos) {
+			if (_jump == 0) {
+				iterator = _buffer + _save;
+			} else {
+				iterator = _buffer;
+			}
+			return true;
+		}
+
+		if (iterator == _buffer + _jump) {
+			iterator = _buffer + _save;
+		}
+
+		++iterator;
+
+		while(*iterator ==_null) {
+			++iterator;
+		}
+
+		if(iterator == _buffer + _pos) {
+			iterator = nullptr;
+			return false;
+		}
 		return true;
 	}
 
