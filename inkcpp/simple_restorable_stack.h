@@ -168,6 +168,10 @@ namespace ink::runtime::internal
 		if (iterator == nullptr || iterator < _buffer || iterator > _buffer + _pos)
 		{
 			if (_pos == _save) {
+				if(_jump == 0) {
+					iterator = nullptr;
+					return false;
+				}
 				iterator = _buffer + _jump -1;
 			} else {
 				iterator = _buffer + _pos - 1;
@@ -182,9 +186,6 @@ namespace ink::runtime::internal
 		// Run backwards
 		iterator--;
 
-		// Skip nulls FIXME: not used?
-		while (*iterator == _null)
-			iterator--;
 
 		// End
 		if (iterator < _buffer)
@@ -203,21 +204,19 @@ namespace ink::runtime::internal
 			return false;
 		if (iterator == nullptr || iterator < _buffer || iterator > _buffer + _pos) {
 			if (_jump == 0) {
+				if (_save == _pos) {
+					iterator = nullptr;
+					return false;
+				}
 				iterator = _buffer + _save;
 			} else {
 				iterator = _buffer;
 			}
 			return true;
 		}
-
+		++iterator;
 		if (iterator == _buffer + _jump) {
 			iterator = _buffer + _save;
-		}
-
-		++iterator;
-
-		while(*iterator ==_null) {
-			++iterator;
 		}
 
 		if(iterator == _buffer + _pos) {

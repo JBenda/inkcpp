@@ -9,6 +9,7 @@
 #include "system.h"
 #include "value.h"
 
+#include <cstddef>
 #include <vector>
 #include <iostream>
 
@@ -174,68 +175,98 @@ namespace ink::runtime::internal
 
 	void runner_impl::jump(ip_t dest, bool record_visits)
 	{
-		// std::cout << "jump to: " << (dest - _story->instructions()) << std::endl;
-		if (dest == _ptr) { return; }
-		std::vector<std::tuple<CommandFlag, container_t, ip_t>> stack;
-
-		ip_t offset;
-		const uint32_t* iter = nullptr;
-		container_t id;
-
-		// find current stack
-		while(_story->iterate_containers(iter, id, offset)) {
-			if(offset >= dest) {break;}
-		}
-		bool reversed = _ptr > dest;
-		size_t comm_end = _container.size();
-		while(_story->iterate_containers(iter, id, offset, reversed)) {
-			if((!reversed && offset >= dest) || (reversed && offset <= dest)) { break; }
-			if (_container.empty() || _container.top().id != id) {
-				_container.push({.id=id,.offset=offset});
-			} else {
-				_container.pop();
-				if(_container.size() < comm_end) {
-					comm_end = _container.size();
-				}
-			}
-		}
-		
-		_ptr = dest;
-
-		if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
-			_ptr += 6;
-			_container.push({.id=id, .offset=offset});
-		}
-
-		bool allEnteredAtStart = true;
-		ip_t curr = dest;
-				
-		if(record_visits) {
-			const ContainerData* iter = nullptr;
-			size_t level = stack.size();
-			while(_container.iter(iter) &&
-				(level > comm_end || _story->container_flag(iter->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
-			{
-				auto offset = iter->offset;
-				bool enteringStart = allEnteredAtStart && ((curr - offset) <= 6); // FIXME: == 0
-				if(!enteringStart) { allEnteredAtStart = false; }
-				// std::cout << "visit: " << std::get<container_t>(*stack_iter) << "\td: " << (curr - offset) << std::endl;
-				curr = offset;
-				_globals->visit(iter->id, enteringStart);
-			}
-		}
-
-				
-		
 		// Optimization: if we are _is_falling, then we can
 		//  _should be_ able to safely assume that there is nothing to do here. A falling
 		//  divert should only be taking us from a container to that same container's end point
 		//  without entering any other containers
-		/*if (_is_falling)
+		// OR IF if target is same position do nothing
+		// could happend if jumping to and of an unnamed container
+		if (_is_falling || dest ==_ptr)
 		{
 			_ptr = dest;
 			return;
-		}*/
+		}
+
+		const uint32_t* iter = nullptr;
+		container_t id;
+		ip_t offset;
+		size_t comm_end;
+		bool reversed = _ptr > dest;
+
+		if (reversed) {
+			comm_end = 0;
+			iter = nullptr;
+			const ContainerData* old_iter = nullptr;
+			const uint32_t* last_comm_iter = nullptr;
+			_container.rev_iter(old_iter);
+
+			// find commen part of old and new stack
+			while(_story->iterate_containers(iter, id, offset)) {
+				if(old_iter == nullptr || offset >= dest) { break; }
+				if(old_iter !=nullptr && id == old_iter->id) {
+					last_comm_iter = iter;
+					_container.rev_iter(old_iter);
+					++comm_end;
+				}
+			}
+
+			// clear old part from stack
+			while(_container.size() > comm_end) { _container.pop(); }
+			iter = last_comm_iter;
+
+		} else {
+			iter = nullptr;
+			comm_end = _container.size();
+			// go to current possition in container list
+			while(_story->iterate_containers(iter, id, offset)) {
+				if(offset >= _ptr) {break;}
+			}
+			_story->iterate_containers(iter, id, offset, true);
+		}
+
+		// move to destination and update container stack on the go
+		while(_story->iterate_containers(iter, id, offset)) {
+			if (offset >= dest) { break; }
+			if(_container.empty() || _container.top().id != id) {
+				_container.push({.id = id, .offset = offset});
+			} else {
+				_container.pop();
+				if (_container.size() < comm_end) {
+					comm_end = _container.size();
+				}
+			}
+		}
+		_ptr = dest;
+
+		// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
+		// it will get visited in the next step
+		if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
+			_ptr += 6;
+			_container.push({.id=id, .offset=offset});
+			if (reversed && comm_end == _container.size() - 1) { ++comm_end; }
+		}
+
+		// iff all container (until now) are entered at first position
+		bool allEnteredAtStart = true;
+		ip_t child_position = dest;
+		if(record_visits) {
+			const ContainerData* iter = nullptr;
+			size_t level = _container.size();
+			while(_container.iter(iter) &&
+				(level > comm_end || _story->container_flag(iter->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
+			{
+				auto offset = iter->offset;
+				inkAssert(child_position >= offset, "Container stack order is broken");
+				// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed subcontainers first child
+				// check if child_positino is the first child of current container
+				allEnteredAtStart = allEnteredAtStart && ((child_position - offset) <= 6);
+				child_position = offset;
+				_globals->visit(iter->id, allEnteredAtStart);
+			}
+		}
+
+				
+		
 	}
 	template<frame_type type>
 	void runner_impl::start_frame(uint32_t target) {
@@ -1201,7 +1232,7 @@ namespace ink::runtime::internal
 						// HACK
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
 						execute_return();
-					} else if (_container.empty() && _ptr == _story->end()){
+					} else if (_container.empty() && _ptr == _story->end()){ // FIXME
 						on_done(false);
 					}
 				}

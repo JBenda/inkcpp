@@ -133,8 +133,6 @@ namespace ink::compiler::internal
 		// Write command out at this position
 		if(meta.cmd_flags != CommandFlag::NO_FLAGS) {
 			_emitter->write(Command::START_CONTAINER_MARKER, meta.indexToReturn, meta.cmd_flags);
-		} else {
-			_emitter->write_raw(Command::VOID);
 		}
 		if(meta.recordInContainerMap) {
 			_emitter->add_start_to_container_map(position, meta.indexToReturn);
