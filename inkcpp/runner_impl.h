@@ -257,7 +257,14 @@ namespace ink::runtime::internal
 		functions _functions;
 
 		// Container set
-		internal::managed_restorable_stack<container_t, config::limitContainerDepth < 0,abs(config::limitContainerDepth)> _container;
+		struct ContainerData {
+			container_t id = ~0u;
+			ip_t offset = 0;
+			bool operator==(const ContainerData& oth) const {
+				return oth.id == id && oth.offset == offset;
+			}
+		};
+		internal::managed_restorable_stack<ContainerData, config::limitContainerDepth < 0,abs(config::limitContainerDepth)> _container;
 		bool _is_falling = false;
 
 		bool _saved = false;

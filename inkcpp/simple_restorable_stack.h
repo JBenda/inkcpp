@@ -6,6 +6,8 @@
 
 namespace ink::runtime::internal
 {
+	/// only use this type for simple objects with simple copy operator and no heap references
+	/// because they will may be serialized, stored and loaded in a different instance
 	template<typename T>
 	class simple_restorable_stack : public snapshot_interface
 	{
@@ -266,7 +268,6 @@ namespace ink::runtime::internal
 	template<typename T>
 	size_t simple_restorable_stack<T>::snap(unsigned char* data, const snapper&) const
 	{
-		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
 		unsigned char* ptr = data;
 		bool should_write = data != nullptr;
 		ptr = snap_write(ptr, _null, should_write);
@@ -286,7 +287,6 @@ namespace ink::runtime::internal
 	template<typename T>
 	const unsigned char* simple_restorable_stack<T>::snap_load(const unsigned char* ptr, const loader& loader)
 	{
-		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
 		T null;
 		ptr = snap_read(ptr, null);
 		inkAssert(null == _null, "different null value compared to snapshot!");

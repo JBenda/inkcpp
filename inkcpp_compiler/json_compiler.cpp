@@ -231,7 +231,7 @@ namespace ink::compiler::internal
 
 		// Write end container marker, End pointer should point to End command (form symetry with START command)
 		if (meta.indexToReturn != ~0)
-			_emitter->write(Command::END_CONTAINER_MARKER, meta.indexToReturn);
+			_emitter->write(Command::END_CONTAINER_MARKER, meta.indexToReturn, meta.cmd_flags);
 
 		// Record end position in map
 		if (meta.recordInContainerMap)

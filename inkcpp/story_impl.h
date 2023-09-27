@@ -36,6 +36,8 @@ namespace ink::runtime::internal
 
 		bool iterate_containers(const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false) const;
 		bool get_container_id(ip_t offset, container_t& container_id) const;
+		/// Get container flag from container offset (either start or end)
+		CommandFlag container_flag(ip_t offset) const;
 		CommandFlag container_flag(container_t id) const;
 
 		ip_t find_offset_for(hash_t path) const;

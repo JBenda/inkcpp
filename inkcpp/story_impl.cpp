@@ -155,6 +155,11 @@ namespace ink::runtime::internal
 	}
 
 	
+	CommandFlag story_impl::container_flag(ip_t offset) const {
+		inkAssert(static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER ||
+			static_cast<Command>(offset[0]) == Command::END_CONTAINER_MARKER);
+		return static_cast<CommandFlag>(offset[1]);
+	}
 	CommandFlag story_impl::container_flag(container_t id) const {
 		const uint32_t* iter = nullptr;
 		ip_t offset;
