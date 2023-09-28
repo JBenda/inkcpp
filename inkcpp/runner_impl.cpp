@@ -9,10 +9,6 @@
 #include "system.h"
 #include "value.h"
 
-#include <cstddef>
-#include <vector>
-#include <iostream>
-
 namespace ink::runtime
 {
 	const choice* runner_interface::get_choice(size_t index) const
@@ -1138,7 +1134,6 @@ namespace ink::runtime::internal
 					container_t destination = -1;
 					if (_story->get_container_id(_story->instructions() + path, destination))
 					{
-						// std::cout << "Once only: " << _globals->visits(destination) << std::endl;
 						// Ignore the choice if we've visited the destination before
 						if (_globals->visits(destination) > 0)
 							break;
@@ -1152,10 +1147,7 @@ namespace ink::runtime::internal
 				// Choice is conditional
 				if (flag & CommandFlag::CHOICE_HAS_CONDITION) {
 					// Only show if the top of the eval stack is 'truthy'
-					auto top = _eval.pop();
-					bool cond = top.truthy();
-					// std::cout << (int)top.type() << " Condiditon: " << cond << std::endl;
-					if(!cond)
+					if(!_eval.pop().truthy())
 						break;
 				}
 
@@ -1194,8 +1186,7 @@ namespace ink::runtime::internal
 			{
 				// Keep track of current container
 				auto index = read<uint32_t>();
-				// std::cout << "START: " << index << std::endl;
-				// offset points to command
+				// offset points to command, command has size 6
 				_container.push({.id=index, .offset=_ptr - 6});
 
 				// Increment visit count
@@ -1272,7 +1263,6 @@ namespace ink::runtime::internal
 				container_t container = read<container_t>();
 
 				// Push the read count for the requested container index
-				// std::cout << "read count from: " << container << " =  " <<_globals->visits(container) << std::endl;
 				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(container)));
 			} break;
 			case Command::TAG:

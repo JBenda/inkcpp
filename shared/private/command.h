@@ -58,7 +58,6 @@ namespace ink
 
 		// == Threading
 		THREAD,
-
 		// == thinary operations
 		LIST_RANGE,
 		OP_BEGIN = LIST_RANGE,

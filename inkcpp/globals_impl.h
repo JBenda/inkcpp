@@ -37,6 +37,7 @@ namespace ink::runtime::internal
 
 	public:
 		// Records a visit to a container
+		/// @param start_cmd iff the visit was initiatet through a MARKER_START_CONTAINER
 		void visit(uint32_t container_id, bool entering_at_start);
 
 		// Checks the number of visits to a container

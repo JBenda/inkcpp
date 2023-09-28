@@ -6,7 +6,6 @@
 #include "version.h"
 
 #include <string_view>
-#include <iostream>
 
 namespace ink::compiler::internal
 {

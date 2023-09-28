@@ -5,7 +5,6 @@
 #include "system.h"
 #include "types.h"
 
-#include <cstring>
 
 namespace ink::runtime::internal
 {
