@@ -107,7 +107,7 @@ namespace ink::runtime::internal {
 		get() const { static_assert(ty != ty, "No getter for this type defined!"); }
 
 		/// check if value evaluates to true
-		bool truthy() const;
+		bool truthy(const list_table& lists) const;
 		/// set value of type (if possible)
 		template<value_type ty, typename ...Args>
 		constexpr value& set(Args ...args) {

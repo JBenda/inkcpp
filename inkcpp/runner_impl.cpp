@@ -873,7 +873,7 @@ namespace ink::runtime::internal
 				uint32_t target = read<uint32_t>();
 
 				// Check for condition
-				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().truthy())
+				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().truthy(_globals->lists()))
 					break;
 
 				// SPECIAL: Fallthrough divert. We're starting to fall out of containers
@@ -917,7 +917,7 @@ namespace ink::runtime::internal
 				hash_t variable = read<hash_t>();
 
 				// Check for condition
-				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().truthy())
+				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().truthy(_globals->lists()))
 					break;
 
 				const value* val = get_var(variable);
@@ -1147,7 +1147,7 @@ namespace ink::runtime::internal
 				// Choice is conditional
 				if (flag & CommandFlag::CHOICE_HAS_CONDITION) {
 					// Only show if the top of the eval stack is 'truthy'
-					if(!_eval.pop().truthy())
+					if(!_eval.pop().truthy(_globals->lists()))
 						break;
 				}
 
@@ -1223,8 +1223,8 @@ namespace ink::runtime::internal
 						// HACK
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
 						execute_return();
-					} else if (_container.empty() && _ptr == _story->end()){ // FIXME
-						on_done(false);
+					} else if (_ptr == _story->end()){ // check needed, because it colud exist an unnamed toplevel container (empty named container stack != empty container stack)
+						on_done(true);
 					}
 				}
 			} break;
