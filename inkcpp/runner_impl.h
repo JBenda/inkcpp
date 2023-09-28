@@ -142,7 +142,7 @@ namespace ink::runtime::internal
 		void clear_tags();
 
 		// Special code for jumping from the current IP to another
-		void jump(ip_t, bool record_visits = true);
+		void jump(ip_t, bool record_visits);
 
 		void run_binary_operator(unsigned char cmd);
 		void run_unary_operator(unsigned char cmd);
@@ -257,7 +257,15 @@ namespace ink::runtime::internal
 		functions _functions;
 
 		// Container set
-		internal::managed_restorable_stack<container_t, config::limitContainerDepth < 0,abs(config::limitContainerDepth)> _container;
+		struct ContainerData {
+			container_t id = ~0u;
+			ip_t offset = 0;
+			bool operator==(const ContainerData& oth) const {
+				return oth.id == id && oth.offset == offset;
+			}
+			bool operator!=(const ContainerData& oth) const { return !(*this == oth); }
+		};
+		internal::managed_restorable_stack<ContainerData, config::limitContainerDepth < 0,abs(config::limitContainerDepth)> _container;
 		bool _is_falling = false;
 
 		bool _saved = false;

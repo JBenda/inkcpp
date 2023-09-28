@@ -37,10 +37,13 @@ namespace ink::runtime::internal
 
 	public:
 		// Records a visit to a container
-		void visit(uint32_t container_id);
+		/// @param start_cmd iff the visit was initiatet through a MARKER_START_CONTAINER
+		void visit(uint32_t container_id, bool entering_at_start);
 
 		// Checks the number of visits to a container
 		uint32_t visits(uint32_t container_id) const;
+		// Number of current turn (number of passed choices)
+		uint32_t turns() const;
 
 		// Returnn number of turns since container was last visited
 		// \retval -1 if container was never visited before
@@ -85,6 +88,7 @@ namespace ink::runtime::internal
 		// Store the number of containers. This is the length of most of our lists
 		const uint32_t _num_containers;
 
+		uint32_t _turn_cnt = 0;
 		// Visit count array
 		struct visit_count {
 			uint32_t visits = 0;

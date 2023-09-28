@@ -42,6 +42,7 @@ namespace ink
 		DUPLICATE,
 		PUSH_VARIABLE_VALUE,
 		VISIT,
+		TURN, /// How many choices where made since start of the story
 		READ_COUNT,
 		SEQUENCE,
 		SEED,
@@ -135,6 +136,7 @@ namespace ink
 		// == Container marker
 		CONTAINER_MARKER_TRACK_VISITS = 1 << 0,
 		CONTAINER_MARKER_TRACK_TURNS = 1 << 1,
+		CONTAINER_MARKER_ONLY_FIRST = 1 << 2,
 
 		// == Variable assignment
 		ASSIGNMENT_IS_REDEFINE = 1 << 0,

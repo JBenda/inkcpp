@@ -1,11 +1,11 @@
 #include "json_compiler.h"
 
+#include "command.h"
 #include "list_data.h"
 #include "system.h"
 #include "version.h"
 
 #include <string_view>
-#include <iostream>
 
 namespace ink::compiler::internal
 {
@@ -52,6 +52,7 @@ namespace ink::compiler::internal
 		container_t indexToReturn = ~0;
 		bool recordInContainerMap = false;
 		vector<defer_entry> deferred;
+		CommandFlag cmd_flags = CommandFlag::NO_FLAGS;
 	};
 
 	void json_compiler::handle_container_metadata(
@@ -91,14 +92,14 @@ namespace ink::compiler::internal
 						container_t myIndex = _next_container_index++;
 
 						// Make appropriate flags
-						CommandFlag cmd_flags = CommandFlag::NO_FLAGS;
+						data.cmd_flags = CommandFlag::NO_FLAGS;
 						if (visits)
-							cmd_flags |= CommandFlag::CONTAINER_MARKER_TRACK_VISITS;
+							data.cmd_flags |= CommandFlag::CONTAINER_MARKER_TRACK_VISITS;
 						if (turns)
-							cmd_flags |= CommandFlag::CONTAINER_MARKER_TRACK_TURNS;
+							data.cmd_flags |= CommandFlag::CONTAINER_MARKER_TRACK_TURNS;
+						if (onlyFirst)
+							data.cmd_flags |= CommandFlag::CONTAINER_MARKER_ONLY_FIRST;
 
-						// Write command out at this position
-						_emitter->write(Command::START_CONTAINER_MARKER, myIndex, cmd_flags);
 
 						data.indexToReturn = myIndex;
 
@@ -128,6 +129,10 @@ namespace ink::compiler::internal
 
 		// tell the emitter we're beginning a new container
 		uint32_t position = _emitter->start_container(index_in_parent, name_override.empty() ? meta.name : name_override);
+		// Write command out at this position
+		if(meta.cmd_flags != CommandFlag::NO_FLAGS) {
+			_emitter->write(Command::START_CONTAINER_MARKER, meta.indexToReturn, meta.cmd_flags);
+		}
 		if(meta.recordInContainerMap) {
 			_emitter->add_start_to_container_map(position, meta.indexToReturn);
 		}
@@ -218,12 +223,12 @@ namespace ink::compiler::internal
 				_emitter->patch_fallthroughs(offset);
 		}
 
-		// Write end container marker
-		if (meta.indexToReturn != ~0)
-			_emitter->write(Command::END_CONTAINER_MARKER, meta.indexToReturn);
-
 		// End container
 		uint32_t end_position = _emitter->end_container();
+
+		// Write end container marker, End pointer should point to End command (form symetry with START command)
+		if (meta.indexToReturn != ~0)
+			_emitter->write(Command::END_CONTAINER_MARKER, meta.indexToReturn, meta.cmd_flags);
 
 		// Record end position in map
 		if (meta.recordInContainerMap)

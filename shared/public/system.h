@@ -140,6 +140,10 @@ namespace ink
 	template<typename... Args>
 	void ink_assert( bool condition, const char* msg = nullptr, Args... args )
 	{
+		static const char* EMPTY = "";
+		if (msg == nullptr) {
+			msg = EMPTY;
+		}
 		if ( !condition )
 		{
 			if constexpr ( sizeof...( args ) > 0 )

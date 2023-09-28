@@ -6,6 +6,8 @@
 
 namespace ink::runtime::internal
 {
+	/// only use this type for simple objects with simple copy operator and no heap references
+	/// because they will may be serialized, stored and loaded in a different instance
 	template<typename T>
 	class simple_restorable_stack : public snapshot_interface
 	{
@@ -24,6 +26,7 @@ namespace ink::runtime::internal
 		void clear();
 
 		bool iter(const T*& iterator) const;
+		bool rev_iter(const T*& iterator) const;
 
 		// == Save/Restore ==
 		void save();
@@ -164,7 +167,15 @@ namespace ink::runtime::internal
 		// Begin at the top of the stack
 		if (iterator == nullptr || iterator < _buffer || iterator > _buffer + _pos)
 		{
-			iterator = _buffer + _pos - 1;
+			if (_pos == _save) {
+				if(_jump == 0) {
+					iterator = nullptr;
+					return false;
+				}
+				iterator = _buffer + _jump -1;
+			} else {
+				iterator = _buffer + _pos - 1;
+			}
 			return true;
 		}
 
@@ -175,9 +186,6 @@ namespace ink::runtime::internal
 		// Run backwards
 		iterator--;
 
-		// Skip nulls
-		while (*iterator == _null)
-			iterator--;
 
 		// End
 		if (iterator < _buffer)
@@ -186,6 +194,35 @@ namespace ink::runtime::internal
 			return false;
 		}
 
+		return true;
+	}
+
+	template<typename T>
+	inline bool simple_restorable_stack<T>::rev_iter(const T*& iterator) const
+	{
+		if (_pos == 0)
+			return false;
+		if (iterator == nullptr || iterator < _buffer || iterator > _buffer + _pos) {
+			if (_jump == 0) {
+				if (_save == _pos) {
+					iterator = nullptr;
+					return false;
+				}
+				iterator = _buffer + _save;
+			} else {
+				iterator = _buffer;
+			}
+			return true;
+		}
+		++iterator;
+		if (iterator == _buffer + _jump) {
+			iterator = _buffer + _save;
+		}
+
+		if(iterator == _buffer + _pos) {
+			iterator = nullptr;
+			return false;
+		}
 		return true;
 	}
 
@@ -230,7 +267,6 @@ namespace ink::runtime::internal
 	template<typename T>
 	size_t simple_restorable_stack<T>::snap(unsigned char* data, const snapper&) const
 	{
-		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
 		unsigned char* ptr = data;
 		bool should_write = data != nullptr;
 		ptr = snap_write(ptr, _null, should_write);
@@ -250,7 +286,6 @@ namespace ink::runtime::internal
 	template<typename T>
 	const unsigned char* simple_restorable_stack<T>::snap_load(const unsigned char* ptr, const loader& loader)
 	{
-		static_assert(is_same<T, container_t>{}() || is_same<T, thread_t>{}() || is_same<T, int>{}());
 		T null;
 		ptr = snap_read(ptr, null);
 		inkAssert(null == _null, "different null value compared to snapshot!");

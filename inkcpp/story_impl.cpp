@@ -154,6 +154,25 @@ namespace ink::runtime::internal
 		return false;
 	}
 
+	
+	CommandFlag story_impl::container_flag(ip_t offset) const {
+		inkAssert(static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER ||
+			static_cast<Command>(offset[0]) == Command::END_CONTAINER_MARKER);
+		return static_cast<CommandFlag>(offset[1]);
+	}
+	CommandFlag story_impl::container_flag(container_t id) const {
+		const uint32_t* iter = nullptr;
+		ip_t offset;
+		container_t c_id;
+		while(iterate_containers(iter, c_id, offset)) {
+			if (c_id == id) {
+				inkAssert(static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER);
+				return static_cast<CommandFlag>(offset[1]);
+			}
+		}
+		inkAssert("Container not found -> can't fetch flag");
+	}
+
 	ip_t story_impl::find_offset_for(hash_t path) const
 	{
 		hash_t* iter = _container_hash_start;

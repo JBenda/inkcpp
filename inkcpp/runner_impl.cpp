@@ -6,6 +6,7 @@
 #include "header.h"
 #include "string_utils.h"
 #include "snapshot_impl.h"
+#include "system.h"
 #include "value.h"
 
 namespace ink::runtime
@@ -174,94 +175,94 @@ namespace ink::runtime::internal
 		//  _should be_ able to safely assume that there is nothing to do here. A falling
 		//  divert should only be taking us from a container to that same container's end point
 		//  without entering any other containers
-		/*if (_is_falling)
+		// OR IF if target is same position do nothing
+		// could happend if jumping to and of an unnamed container
+		if (_is_falling || dest ==_ptr)
 		{
 			_ptr = dest;
 			return;
-		}*/
+		}
 
-		// Check which direction we are jumping
-		bool reverse = dest < _ptr;
-
-		// iteration
 		const uint32_t* iter = nullptr;
-		container_t container_id;
+		container_t id;
 		ip_t offset;
-		bool inBound = false;
+		size_t comm_end;
+		bool reversed = _ptr > dest;
 
-		// Iterate until we find the container marker just before our own
-		while (_story->iterate_containers(iter, container_id, offset, reverse)) {
-			if (( !reverse && offset > _ptr )
-					|| ( reverse && offset < _ptr )) {
+		if (reversed) {
+			comm_end = 0;
+			iter = nullptr;
+			const ContainerData* old_iter = nullptr;
+			const uint32_t* last_comm_iter = nullptr;
+			_container.rev_iter(old_iter);
 
-				// Step back once in the iteration and break
-				inBound = true;
-				_story->iterate_containers(iter, container_id, offset, !reverse);
-				break;
+			// find commen part of old and new stack
+			while(_story->iterate_containers(iter, id, offset)) {
+				if(old_iter == nullptr || offset >= dest) { break; }
+				if(old_iter !=nullptr && id == old_iter->id) {
+					last_comm_iter = iter;
+					_container.rev_iter(old_iter);
+					++comm_end;
+				}
 			}
+
+			// clear old part from stack
+			while(_container.size() > comm_end) { _container.pop(); }
+			iter = last_comm_iter;
+
+		} else {
+			iter = nullptr;
+			comm_end = _container.size();
+			// go to current possition in container list
+			while(_story->iterate_containers(iter, id, offset)) {
+				if(offset >= _ptr) {break;}
+			}
+			_story->iterate_containers(iter, id, offset, true);
 		}
 
-		size_t pos = _container.size();
-
-		bool first = true;
-		// Start moving forward (or backwards)
-		if(inBound && (offset == nullptr || (!reverse&&offset<=dest) || (reverse&&offset>dest)) )
-			while (_story->iterate_containers(iter, container_id, offset, reverse))
-			{
-				// Break when we've past the destination
-				if ((!reverse && offset > dest) || (reverse && offset <= dest)) {
-					// jump back to start of same container
-					if(first && reverse && offset == dest
-							&& _container.top() == container_id)  {
-						// check if it was start flag
-						auto con_id = container_id;
-						_story->iterate_containers(iter, container_id, offset, true);
-						if(offset == nullptr || con_id == container_id) 
-						{
-							_globals->visit(container_id);
-						}
-					}
-					break;
+		// move to destination and update container stack on the go
+		while(_story->iterate_containers(iter, id, offset)) {
+			if (offset >= dest) { break; }
+			if(_container.empty() || _container.top().id != id) {
+				_container.push({.id = id, .offset = offset});
+			} else {
+				_container.pop();
+				if (_container.size() < comm_end) {
+					comm_end = _container.size();
 				}
-				first = false;
-
-				// Two cases:
-
-				// (1) Container iterator has the same value as the top of the stack.
-				//  This means that this is an end marker for the container we're in
-				if (!_container.empty() && _container.top() == container_id)
-				{
-					if (_container.size() == pos)
-						pos--;
-
-					// Get out of that container
-					_container.pop();
-				}
-
-				// (2) This must be the entrance marker for a new container. Enter it
-				else
-				{
-					// Push it
-					_container.push(container_id);
-				}
-			}
-
-		// Iterate over the container stack marking any _new_ entries as "visited"
-		if (record_visits)
-		{
-			const container_t* con_iter;
-			size_t num_new = _container.size() - pos;
-			while (_container.iter(con_iter))
-			{
-				if (num_new <= 0)
-					break;
-				_globals->visit(*con_iter);
-				--num_new;
 			}
 		}
-
-		// Jump
 		_ptr = dest;
+
+		// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
+		// it will get visited in the next step
+		if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
+			_ptr += 6;
+			_container.push({.id=id, .offset=offset});
+			if (reversed && comm_end == _container.size() - 1) { ++comm_end; }
+		}
+
+		// iff all container (until now) are entered at first position
+		bool allEnteredAtStart = true;
+		ip_t child_position = dest;
+		if(record_visits) {
+			const ContainerData* iter = nullptr;
+			size_t level = _container.size();
+			while(_container.iter(iter) &&
+				(level > comm_end || _story->container_flag(iter->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
+			{
+				auto offset = iter->offset;
+				inkAssert(child_position >= offset, "Container stack order is broken");
+				// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed subcontainers first child
+				// check if child_positino is the first child of current container
+				allEnteredAtStart = allEnteredAtStart && ((child_position - offset) <= 6);
+				child_position = offset;
+				_globals->visit(iter->id, allEnteredAtStart);
+			}
+		}
+
+				
+		
 	}
 	template<frame_type type>
 	void runner_impl::start_frame(uint32_t target) {
@@ -279,7 +280,7 @@ namespace ink::runtime::internal
 
 		// Do the jump
 		inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
-		jump(_story->instructions() + target);
+		jump(_story->instructions() + target, true);
 	}
 
 	frame_type runner_impl::execute_return()
@@ -327,7 +328,7 @@ namespace ink::runtime::internal
 				*global.cast<globals_impl>(),
 				*data,
 				static_cast<const runner_interface&>(*this)),
-		_backup(nullptr), _done(nullptr), _choices(), _container(~0), _rng(time(NULL))
+		_backup(nullptr), _done(nullptr), _choices(), _container(ContainerData{}), _rng(time(NULL))
 	{
 		_ptr = _story->instructions();
 		_evaluation_mode = false;
@@ -508,8 +509,7 @@ namespace ink::runtime::internal
 		_threads.clear();
 
 		// Jump to destination and clear choice list
-		jump(_story->instructions() + c.path(), false);
-		if(!_container.empty()){ _globals->visit(_container.top()); }
+		jump(_story->instructions() + c.path(), true);
 		clear_choices();
 		clear_tags();
 	}
@@ -663,7 +663,7 @@ namespace ink::runtime::internal
 		// Clear state and move to destination
 		reset();
 		_ptr = _story->instructions();
-		jump(destination);
+		jump(destination, false);
 
 		return true;
 	}
@@ -873,7 +873,7 @@ namespace ink::runtime::internal
 				uint32_t target = read<uint32_t>();
 
 				// Check for condition
-				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().get<value_type::boolean>())
+				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().truthy(_globals->lists()))
 					break;
 
 				// SPECIAL: Fallthrough divert. We're starting to fall out of containers
@@ -908,7 +908,7 @@ namespace ink::runtime::internal
 
 				// Do the jump
 				inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
-				jump(_story->instructions() + target);
+				jump(_story->instructions() + target, true);
 			}
 			break;
 			case Command::DIVERT_TO_VARIABLE:
@@ -917,14 +917,14 @@ namespace ink::runtime::internal
 				hash_t variable = read<hash_t>();
 
 				// Check for condition
-				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().get<value_type::boolean>())
+				if (flag & CommandFlag::DIVERT_HAS_CONDITION && !_eval.pop().truthy(_globals->lists()))
 					break;
 
 				const value* val = get_var(variable);
 				inkAssert(val, "Jump destiniation needs to be defined!");
 
 				// Move to location
-				jump(_story->instructions() + val->get<value_type::divert>());
+				jump(_story->instructions() + val->get<value_type::divert>(), true);
 				inkAssert(_ptr < _story->end(), "Diverted past end of story data!");
 			}
 			break;
@@ -1147,7 +1147,7 @@ namespace ink::runtime::internal
 				// Choice is conditional
 				if (flag & CommandFlag::CHOICE_HAS_CONDITION) {
 					// Only show if the top of the eval stack is 'truthy'
-					if (!_eval.pop().get<value_type::boolean>())
+					if(!_eval.pop().truthy(_globals->lists()))
 						break;
 				}
 
@@ -1185,20 +1185,21 @@ namespace ink::runtime::internal
 			case Command::START_CONTAINER_MARKER:
 			{
 				// Keep track of current container
-				_container.push(read<uint32_t>());
+				auto index = read<uint32_t>();
+				// offset points to command, command has size 6
+				_container.push({.id=index, .offset=_ptr - 6});
 
 				// Increment visit count
-				if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS)
+				if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS || flag & CommandFlag::CONTAINER_MARKER_TRACK_TURNS)
 				{
-					_globals->visit(_container.top());
+					_globals->visit(_container.top().id, true);
 				}
 
-				// TODO Turn counts
 			} break;
 			case Command::END_CONTAINER_MARKER:
 			{
 				container_t index = read<container_t>();
-				inkAssert(_container.top() == index, "Leaving container we are not in!");
+				inkAssert(_container.top().id == index, "Leaving container we are not in!");
 
 				// Move up out of the current container
 				_container.pop();
@@ -1222,7 +1223,7 @@ namespace ink::runtime::internal
 						// HACK
 						_ptr += sizeof(Command) + sizeof(CommandFlag);
 						execute_return();
-					} else if (_container.empty() && _ptr == _story->end()){
+					} else if (_ptr == _story->end()){ // check needed, because it colud exist an unnamed toplevel container (empty named container stack != empty container stack)
 						on_done(true);
 					}
 				}
@@ -1231,7 +1232,11 @@ namespace ink::runtime::internal
 			{
 				// Push the visit count for the current container to the top
 				//  is 0-indexed for some reason. idk why but this is what ink expects
-				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(_container.top()) - 1));
+				_eval.push(value{}.set<value_type::int32>((int)_globals->visits(_container.top().id) - 1));
+			} break;
+			case Command::TURN:
+			{
+				_eval.push(value{}.set<value_type::int32>((int)_globals->turns()));
 			} break;
 			case Command::SEQUENCE:
 			{

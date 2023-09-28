@@ -54,6 +54,7 @@ namespace ink::compiler::internal
 
 		// Offset in the binary stream
 		uint32_t offset = 0;
+		uint32_t end_offset = 0;
 
 		// Index used in CNT? operations
 		container_t counter_index = ~0;
@@ -121,6 +122,7 @@ namespace ink::compiler::internal
 	uint32_t binary_emitter::end_container()
 	{
 		// Move up the chain
+		_current->end_offset = _containers.pos();
 		_current = _current->parent;
 
 		// Return offset

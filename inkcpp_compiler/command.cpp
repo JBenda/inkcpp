@@ -34,6 +34,7 @@ namespace ink
 			"du",
 			"inkcpp_PUSH_VARIABLE_VALUE",
 			"visit",
+			"turn",
 			"inkcpp_READ_COUNT",
 			"seq",
 			"srnd",
