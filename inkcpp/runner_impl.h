@@ -263,6 +263,7 @@ namespace ink::runtime::internal
 			bool operator==(const ContainerData& oth) const {
 				return oth.id == id && oth.offset == offset;
 			}
+			bool operator!=(const ContainerData& oth) const { return !(*this == oth); }
 		};
 		internal::managed_restorable_stack<ContainerData, config::limitContainerDepth < 0,abs(config::limitContainerDepth)> _container;
 		bool _is_falling = false;
