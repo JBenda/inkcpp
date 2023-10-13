@@ -15,7 +15,8 @@ namespace ink::runtime::internal
 
 	template<>
 	bool truthy_impl<value_type::OP_END>(const value& v, const list_table& lists) {
-		inkAssert("Type was not found in operational types or it has no conversion to boolean");
+		inkFail("Type was not found in operational types or it has no conversion to boolean");
+		return false;
 	}
 	
 	template<>
@@ -87,7 +88,8 @@ namespace ink::runtime::internal
 	template<>
 	bool truthy_impl<value_type::divert>(const value& v, const list_table& lists) {
 		if (v.type() == value_type::divert) {
-			inkAssert("Divert can not be evaluated to boolean");
+			inkFail("Divert can not be evaluated to boolean");
+			return false;
 		} else {
 			return truthy_impl<value_type::divert + 1>(v, lists);
 		}

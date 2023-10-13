@@ -156,8 +156,8 @@ namespace ink::runtime::internal
 
 	
 	CommandFlag story_impl::container_flag(ip_t offset) const {
-		inkAssert(static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER ||
-			static_cast<Command>(offset[0]) == Command::END_CONTAINER_MARKER);
+		inkAssert((static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER ||
+			static_cast<Command>(offset[0]) == Command::END_CONTAINER_MARKER), "Tried to fetch container flag from non container command!");
 		return static_cast<CommandFlag>(offset[1]);
 	}
 	CommandFlag story_impl::container_flag(container_t id) const {
@@ -166,11 +166,12 @@ namespace ink::runtime::internal
 		container_t c_id;
 		while(iterate_containers(iter, c_id, offset)) {
 			if (c_id == id) {
-				inkAssert(static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER);
+				inkAssert(static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER, "Container list pointer is invalid!");
 				return static_cast<CommandFlag>(offset[1]);
 			}
 		}
-		inkAssert("Container not found -> can't fetch flag");
+		inkFail("Container not found -> can't fetch flag");
+		return CommandFlag::NO_FLAGS;
 	}
 
 	ip_t story_impl::find_offset_for(hash_t path) const

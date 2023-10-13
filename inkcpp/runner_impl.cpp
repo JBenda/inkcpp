@@ -246,18 +246,18 @@ namespace ink::runtime::internal
 		bool allEnteredAtStart = true;
 		ip_t child_position = dest;
 		if(record_visits) {
-			const ContainerData* iter = nullptr;
+			const ContainerData* iData = nullptr;
 			size_t level = _container.size();
-			while(_container.iter(iter) &&
-				(level > comm_end || _story->container_flag(iter->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
+			while(_container.iter(iData) &&
+				(level > comm_end || _story->container_flag(iData->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST )) 
 			{
-				auto offset = iter->offset;
-				inkAssert(child_position >= offset, "Container stack order is broken");
+				auto parrent_offset = iData->offset;
+				inkAssert(child_position >= parrent_offset, "Container stack order is broken");
 				// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed subcontainers first child
 				// check if child_positino is the first child of current container
-				allEnteredAtStart = allEnteredAtStart && ((child_position - offset) <= 6);
-				child_position = offset;
-				_globals->visit(iter->id, allEnteredAtStart);
+				allEnteredAtStart = allEnteredAtStart && ((child_position - parrent_offset) <= 6);
+				child_position = parrent_offset;
+				_globals->visit(iData->id, allEnteredAtStart);
 			}
 		}
 
