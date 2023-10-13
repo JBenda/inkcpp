@@ -18,7 +18,7 @@ DECLARE_LOG_CATEGORY_EXTERN(InkCpp, Log, All);
 DEFINE_LOG_CATEGORY(InkCpp);
 
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
-	: UFactory(ObjectInitializer), FReimportHandler()
+	: UFactory(ObjectInitializer), FReimportHandler(), object_ptr(*this)
 {
 	// Add ink format
 	Formats.Add(FString(TEXT("json;")) + NSLOCTEXT("UInkAssetFactory", "FormatInkJSON", "Ink JSON File").ToString());
@@ -31,6 +31,7 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 
 	// Fuck data tables TODO - some criteria?
 	ImportPriority = 99999;
+	
 }
 
 UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled)
@@ -141,9 +142,9 @@ int32 UInkAssetFactory::GetPriority() const
 	return ImportPriority;
 }
 
-const UObject* UInkAssetFactory::GetFactoryObject() const
+TObjectPtr<UObject>* UInkAssetFactory::GetFactoryObject() const
 {
-	return this;
+	return const_cast<TObjectPtr<UObject>*>(&object_ptr);
 }
 
 EReimportResult::Type UInkAssetFactory::Reimport(UObject* Obj)
