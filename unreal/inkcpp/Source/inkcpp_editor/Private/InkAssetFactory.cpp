@@ -18,7 +18,7 @@ DECLARE_LOG_CATEGORY_EXTERN(InkCpp, Log, All);
 DEFINE_LOG_CATEGORY(InkCpp);
 
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
-	: UFactory(ObjectInitializer), FReimportHandler(), object_ptr(*this)
+	: UFactory(ObjectInitializer), FReimportHandler(), object_ptr(this)
 {
 	// Add ink format
 	Formats.Add(FString(TEXT("json;")) + NSLOCTEXT("UInkAssetFactory", "FormatInkJSON", "Ink JSON File").ToString());
