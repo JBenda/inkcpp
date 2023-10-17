@@ -7,6 +7,10 @@ FString UInkChoice::GetText() const
 	return data->text();
 }
 
+UInkChoice::UInkChoice() {
+	tags = NewObject<UTagList>();
+}
+
 int UInkChoice::GetIndex() const
 {
 	return data->index();
@@ -14,7 +18,7 @@ int UInkChoice::GetIndex() const
 
 const UTagList* UInkChoice::GetTags() const
 {
-	return &tags;
+	return tags;
 }
 
 void UInkChoice::Initialize(const ink::runtime::choice* c)
@@ -25,6 +29,6 @@ void UInkChoice::Initialize(const ink::runtime::choice* c)
 		for(unsigned i = 0; i < c->num_tags(); ++i) {
 			fstring_tags.Add(FString(c->get_tag(i)));
 		}
-		tags.Initialize(fstring_tags);
+		tags->Initialize(fstring_tags);
 	}
 }
