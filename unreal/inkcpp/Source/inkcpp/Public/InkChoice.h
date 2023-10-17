@@ -14,6 +14,8 @@ class UInkChoice : public UObject
 {
 	GENERATED_BODY()
 public:
+	UInkChoice();
+
 	UFUNCTION(BlueprintPure, Category="Ink")
 	FString GetText() const;
 
@@ -29,5 +31,5 @@ protected:
 
 private:
 	const ink::runtime::choice* data;
-	UTagList tags;
+	TObjectPtr<UTagList> tags;
 };
