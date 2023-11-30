@@ -160,7 +160,7 @@ namespace ink::runtime::internal {
 			return base::size() != _last_size;
 		}
 
-		size_t snap( unsigned char* data, const base::snapper& snapper ) const
+		size_t snap( unsigned char* data, const snapshot_interface::snapper& snapper ) const
 		{
 			unsigned char* ptr          = data;
 			bool           should_write = data != nullptr;
@@ -169,7 +169,7 @@ namespace ink::runtime::internal {
 			return ptr - data;
 		}
 
-		const unsigned char* snap_load(const unsigned char* ptr, const base::loader& loader) {
+		const unsigned char* snap_load(const unsigned char* ptr, const snapshot_interface::loader& loader) {
 			ptr = base::snap_load(ptr, loader);
 			ptr = base::snap_read(ptr, _last_size);
 			return ptr;
