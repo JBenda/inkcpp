@@ -94,9 +94,9 @@ namespace ink::runtime::internal {
 			unsigned char* ptr          = data;
 			bool           should_write = data != nullptr;
 			ptr                         = snap_write( ptr, _size, should_write );
-			for ( const T& e : *this )
+			for (const T& e : *this)
 			{
-				if constexpr (is_base_of<snapshot_interface, typename remove_cvref<decltype(e)>::type>::value) {
+				if constexpr (is_base_of<snapshot_interface, T>::value) {
 					ptr += e.snap(data == nullptr ? nullptr : ptr, snapper);
 				} else {
 					ptr = snap_write( ptr, e, should_write );
@@ -119,7 +119,7 @@ namespace ink::runtime::internal {
 			}
 			for ( T& e : *this )
 			{
-				if constexpr (is_base_of<snapshot_interface, typename remove_cvref<decltype(e)>::type>::value) {
+				if constexpr (is_base_of<snapshot_interface, T>::value) {
 					ptr = e.snap_load(ptr, loader);
 				} else {
 					ptr = snap_read( ptr, e );

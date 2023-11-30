@@ -117,8 +117,14 @@ namespace ink::runtime::internal
 		ptr = snap_write(ptr, _index, should_write);
 		ptr = snap_write(ptr, _path, should_write);
 		ptr = snap_write(ptr, _thread, should_write);
-		std::uintptr_t offset = _tags != nullptr ? _tags - snapper.current_runner_tags : 0;
-		ptr = snap_write(ptr, offset, should_write);
+		// handle difference between no tag and first tag
+		if (_tags == nullptr) {
+			ptr = snap_write(ptr, false, should_write);
+		} else {
+			ptr = snap_write(ptr, true, should_write);
+			std::uintptr_t offset = _tags != nullptr ? _tags - snapper.current_runner_tags : 0;
+			ptr = snap_write(ptr, offset, should_write);
+		}
 		ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);
 		return ptr - data;
 	}
@@ -128,9 +134,15 @@ namespace ink::runtime::internal
 		ptr = snap_read(ptr, _index);
 		ptr = snap_read(ptr, _path);
 		ptr = snap_read(ptr, _thread);
-		std::uintptr_t offset;
-		ptr = snap_read(ptr, offset);
-		_tags = offset == 0 ? nullptr : loader.current_runner_tags + offset;
+		bool has_tags;
+		ptr = snap_read(ptr, has_tags);
+		if (has_tags) {
+			std::uintptr_t offset;
+			ptr = snap_read(ptr, offset);
+			_tags = loader.current_runner_tags + offset;
+		} else {
+			_tags = nullptr;
+		}
 		size_t string_id;
 		ptr = snap_read(ptr, string_id);
 		_text = loader.string_table[string_id];
