@@ -38,6 +38,18 @@ namespace ink::runtime::internal
 	struct false_type : constant<bool, false> {};
 	struct true_type : constant<bool, true>{};
 
+	template<typename B>
+	true_type test_ptr_conv(const volatile B*);
+	template<typename>
+	false_type test_ptr_conv(const volatile void*);
+	template<typename B, typename D>
+	auto test_is_base_of(int) -> decltype(test_ptr_conv<B>(static_cast<D*>(nullptr)));
+	// template<typename, typename> /// FIXME: needed?
+	// auto test_is_base_of(...) -> true_type;
+
+	template<class Base, class Derived>
+	struct is_base_of : constant<bool, decltype(test_is_base_of<Base, Derived>(0))::value> {};
+
 	template<class T, class U>
 	struct is_same : false_type {};
 

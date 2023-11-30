@@ -38,12 +38,14 @@ namespace ink::runtime::internal
 		struct snapper {
 			const string_table& strings;
 			const char* story_string_table;
+			const char*const* current_runner_tags;
 		};
 		struct loader {
-			managed_array<const char*, true, 5>& string_table;
+			managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 			const char* story_string_table;
+			const char*const* current_runner_tags;
 		};
-		virtual size_t snap(unsigned char* data, const snapper&) const = 0;
-		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) = 0;
+		size_t snap(unsigned char* data, snapper&) const { inkFail("Snap function not implemented"); return 0; };
+		const unsigned char* snap_load(const unsigned char* data, loader&) { inkFail("Snap function not implemented"); return nullptr;};
 	};
 }

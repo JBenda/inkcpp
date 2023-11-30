@@ -64,6 +64,10 @@ namespace ink
 				// Check if the stream has a marker
 				bool has_marker() const;
 
+				// how many entries are behind last marker
+				/// \ratval -1 if no marker is set
+				int entries_since_marker() const;
+
 				// Checks if the stream ends with a specific type
 				bool ends_with(value_type) const;
 
@@ -97,8 +101,8 @@ namespace ink
 				bool saved() const { return _save != ~0; }
 
 				// snapshot interface
-				size_t snap(unsigned char* data, const snapper&) const override;
-				const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+				size_t snap(unsigned char* data, const snapper&) const;
+				const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 			private:
 				size_t find_start() const;

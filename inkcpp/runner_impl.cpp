@@ -542,13 +542,17 @@ namespace ink::runtime::internal
 		return _globals->create_snapshot();
 	}
 
-	size_t runner_impl::snap(unsigned char* data, const snapper& snapper) const
+	size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	{
 		unsigned char* ptr = data;
 		bool should_write = data != nullptr;
-		ptr = snap_write(ptr, _ptr, should_write);
-		ptr = snap_write(ptr, _backup, should_write);
-		ptr = snap_write(ptr, _done, should_write);
+		snapper.current_runner_tags = _tags[0].ptr();
+		std::uintptr_t offset = _ptr != nullptr ? _ptr - _story->instructions() : 0;
+		ptr = snap_write(ptr, offset, should_write);
+		offset = _backup - _story->instructions();
+		ptr = snap_write(ptr, offset, should_write);
+		offset = _done - _story->instructions();
+		ptr = snap_write(ptr, offset, should_write);
 		ptr = snap_write(ptr, _rng.get_state(), should_write);
 		ptr = snap_write(ptr, _evaluation_mode, should_write);
 		ptr = snap_write(ptr, _string_mode, should_write);
@@ -560,43 +564,32 @@ namespace ink::runtime::internal
 		ptr += _ref_stack.snap(data ? ptr : nullptr, snapper);
 		ptr += _eval.snap(data ? ptr : nullptr, snapper);
 		ptr = snap_write(ptr, _choice_tags_begin, should_write);
-		ptr = snap_write(ptr, _tags.size(), should_write);
-		for (const auto& tag : _tags) {
-			std::uintptr_t offset = tag - snapper.story_string_table;
-			ptr = snap_write(ptr, offset, should_write);
-		}
+		ptr += _tags.snap(data ? ptr : nullptr, snapper);
 		ptr += _container.snap(data ? ptr : nullptr, snapper);
 		ptr += _threads.snap(data ? ptr : nullptr, snapper);
-		ptr = snap_write(ptr, _backup_choice_len, should_write);
 		ptr = snap_write(ptr, _fallback_choice.has_value(), should_write);
-		auto snap_choice = [&snapper, &should_write](unsigned char* data, const choice& c) -> size_t {
-			unsigned char* ptr = data;
-			ptr = snap_write(ptr, c._index, should_write );
-			ptr = snap_write(ptr, c._path, should_write );
-			ptr = snap_write(ptr, c._thread, should_write );
-			ptr = snap_write(ptr, snapper.strings.get_id(c._text), should_write );
-			return ptr - data;
-		};
 		if (_fallback_choice) {
-			ptr += snap_choice(ptr, _fallback_choice.value());
+			ptr += _fallback_choice.value().snap(data ? ptr : nullptr, snapper);
 		}
-		ptr = snap_write(ptr, _choices.size(), should_write);
-		for (const choice& c : _choices) {
-			ptr += snap_choice(ptr, c);
-		}
+		ptr += _choices.snap(data ? ptr : nullptr, snapper);
 		return ptr - data;
 	}
 
-	const unsigned char* runner_impl::snap_load(const unsigned char* data, const loader& loader)
+	const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& loader)
 	{
 		auto ptr = data;
-		ptr = snap_read(ptr, _ptr);
-		ptr = snap_read(ptr, _backup);
-		ptr = snap_read(ptr, _done);
+		std::uintptr_t offset;
+		ptr = snap_read(ptr, offset);
+		_ptr = offset == 0 ? nullptr : _story->instructions() + offset;
+		ptr = snap_read(ptr, offset);
+		_backup = _story->instructions() + offset;
+		ptr = snap_read(ptr, offset);
+		_done = _story->instructions() + offset;
 		int32_t seed;
 		ptr = snap_read(ptr, seed);
 		_rng.srand(seed);
 		ptr = snap_read(ptr, _evaluation_mode);
+		ptr = snap_read(ptr, _string_mode);
 		ptr = snap_read(ptr, _saved_evaluation_mode);
 		ptr = snap_read(ptr, _saved);
 		ptr = snap_read(ptr, _is_falling);
@@ -607,37 +600,18 @@ namespace ink::runtime::internal
 		int choice_tags_begin;
 		ptr = snap_read(ptr, choice_tags_begin);
 		_choice_tags_begin = choice_tags_begin;
-		size_t num_tags;
-		ptr = snap_read(ptr, num_tags);
-		for(size_t i = 0; i < num_tags; ++i) {
-			std::uintptr_t offset;
-			ptr = snap_read(ptr, offset);
-			_tags.push() = offset + loader.story_string_table;
-		}
+		ptr = _tags.snap_load(ptr, loader);
+		loader.current_runner_tags = _tags[0].ptr();
 		ptr = _container.snap_load(ptr, loader);
 		ptr = _threads.snap_load(ptr, loader);
-		ptr = snap_read(ptr, _backup_choice_len);
-		auto read_choice = [&ptr,&loader]() -> choice{
-			choice c;
-			ptr = snap_read(ptr, c._index);
-			ptr = snap_read(ptr, c._path);
-			ptr = snap_read(ptr, c._thread);
-			size_t string_id;
-			ptr = snap_read(ptr, string_id);
-			c._text = loader.string_table[string_id];
-			return c;
-		};
 		bool has_fallback_choice;
 		ptr = snap_read(ptr, has_fallback_choice);
-		_fallback_choice = has_fallback_choice
-			? optional<choice>{read_choice()}
-			: nullopt;
-		size_t num_choices;
-		ptr = snap_read(ptr, num_choices);
-		for (size_t i = 0; i < num_choices; ++i) {
-			_choices.push() = read_choice();
+		_fallback_choice = nullopt;
+		if (has_fallback_choice) {
+			_fallback_choice.emplace();
+			ptr = _fallback_choice.value().snap_load(ptr, loader);
 		}
-
+		ptr = _choices.snap_load(ptr, loader);
 		return ptr;
 	}
 
@@ -678,7 +652,7 @@ namespace ink::runtime::internal
 		// Check if the old newline is still present (hasn't been glu'd) and
 		//  if there is new text (non-whitespace) in the stream since saving
 		bool stillHasNewline = _output.saved_ends_with(value_type::newline);
-		bool hasAddedNewText = _output.text_past_save();
+		bool hasAddedNewText = _output.text_past_save() || _tags.has_changed();
 
 		// Newline is still there and there's no new text
 		if (stillHasNewline && !hasAddedNewText)
@@ -1165,7 +1139,7 @@ namespace ink::runtime::internal
 				for(;sc;--sc) { _output << stack[sc-1]; }
 
 				// fetch relevant tags
-				const char* const* tags = nullptr;
+				const snap_tag* tags = nullptr;
 				if (_choice_tags_begin >= 0 && _tags[_tags.size()-1] != nullptr) {
 					for(tags = _tags.end() - 1; *(tags-1) != nullptr && (tags - _tags.begin()) > _choice_tags_begin; --tags);
 					_tags.push() = nullptr;
@@ -1174,9 +1148,9 @@ namespace ink::runtime::internal
 				// Create choice and record it
 				if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
 					_fallback_choice
-						= choice{}.setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread(), tags);
+						= choice{}.setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread(), tags->ptr());
 				} else {
-					add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread(), tags);
+					add_choice().setup(_output, _globals->strings(), _globals->lists(), _choices.size(), path, current_thread(), tags->ptr());
 				}
 				// save stack at last choice
 				if(_saved) { forget(); }
@@ -1368,7 +1342,8 @@ namespace ink::runtime::internal
 		_globals->save();
 		_eval.save();
 		_threads.save();
-		_backup_choice_len = _choices.size();
+		_choices.save();
+		_tags.save();
 		_saved_evaluation_mode = _evaluation_mode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1387,7 +1362,8 @@ namespace ink::runtime::internal
 		_globals->restore();
 		_eval.restore();
 		_threads.restore();
-		_choices.resize(_backup_choice_len);
+		_choices.restore();
+		_tags.restore();
 		_evaluation_mode = _saved_evaluation_mode;
 
 		// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1409,6 +1385,8 @@ namespace ink::runtime::internal
 		_globals->forget();
 		_eval.forget();
 		_threads.forget();
+		_choices.forgett();
+		_tags.forgett();
 
 		// Nothing to do for eval stack. It should just stay as it is
 

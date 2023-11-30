@@ -81,8 +81,8 @@ namespace ink
 				void push_values(basic_stack& _stack);
 
 				// snapshot interface
-				size_t snap(unsigned char* data, const snapper&) const override;
-				const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+				size_t snap(unsigned char* data, const snapper&) const;
+				const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 			private:
 				entry& add(hash_t name, const value& val);
@@ -172,9 +172,9 @@ namespace ink
 				void forget();
 
 				// snapshot interface
-				size_t snap(unsigned char* data, const snapper& snapper) const override
+				size_t snap(unsigned char* data, const snapper& snapper) const
 				{ return base::snap(data, snapper); }
-				const unsigned char* snap_load(const unsigned char* data, const loader& loader) override
+				const unsigned char* snap_load(const unsigned char* data, const loader& loader)
 				{ return base::snap_load(data, loader); }
 			};
 

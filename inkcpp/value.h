@@ -88,8 +88,8 @@ namespace ink::runtime::internal {
 	class value : public snapshot_interface {
 	public:
 		// snapshot interface
-		size_t snap(unsigned char* data, const snapper&) const override;
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		size_t snap(unsigned char* data, const snapper&) const;
+		const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 		/// help struct to determine cpp type which represent the value_type
 		template<value_type> struct ret { using type = void; };

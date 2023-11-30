@@ -38,11 +38,11 @@ And now some custom background :)
 
 = Color
 Which color do like?
-+ [Magenta]
++ [Magenta # c:mag]
 	A wired choice ... # setColor_255_0_255
-+ [Cyan]
++ [Cyan # c:cya]
 	A think this will be a intense experience. # setColor_0_255_255
-+ [Yellow]
++ [Yellow # c:yel]
 	A delighting decision. # setColor_255_255_0
 - Do You Like your decision?
 + [Yes] ->->
