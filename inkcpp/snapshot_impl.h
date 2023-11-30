@@ -3,10 +3,34 @@
 #include "snapshot.h"
 #include "snapshot_interface.h"
 #include "array.h"
+#include "choice.h"
 
 
 namespace ink::runtime::internal
 {
+	class snap_choice : public snapshot_interface, public choice {
+	public:
+		using choice::choice;
+		snap_choice(const choice& c) : choice{c} {}
+		snap_choice(choice&& c) : choice{c} {}
+		size_t snap(unsigned char* data, const snapper&) const;
+		const unsigned char* snap_load(const unsigned char* data, const loader&);
+	};
+	static_assert(sizeof(snap_choice) == sizeof(choice));
+
+	class snap_tag : public snapshot_interface {
+	public:
+		snap_tag() : _str{nullptr} {}
+		snap_tag(const char* str) : _str{str} {}
+		operator const char*() const { return _str; }
+		snap_tag& operator=( const char* str) { _str = str; return *this; }
+		size_t snap(unsigned char*, const snapper&) const;
+		const unsigned char* snap_load(const unsigned char* data, const loader&);
+		const char* const* ptr() const { return &_str; }
+	private:
+		const char* _str;
+	};
+	static_assert(sizeof(snap_tag) == sizeof(const char*));
 
 	class snapshot_impl : public snapshot
 	{

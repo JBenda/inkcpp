@@ -104,8 +104,8 @@ namespace ink::runtime::internal
 		}
 
 		// snapshot interface implementation
-		size_t snap(unsigned char* data, const snapper&) const override;
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		size_t snap(unsigned char* data, const snapper&) const;
+		const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 		/** special traitment when a list get assignet again
 		 * when a list get assigned and would have no origin, it gets the origin of the base with origin

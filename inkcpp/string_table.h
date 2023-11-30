@@ -24,8 +24,8 @@ namespace ink::runtime::internal
 
 
 		// snapshot interface implementation
-		size_t snap(unsigned char* data, const snapper&) const override;
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		size_t snap(unsigned char* data, const snapper&) const;
+		const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 		// get position of string when iterate through data
 		// used to enable storing a string table references

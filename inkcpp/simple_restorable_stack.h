@@ -33,8 +33,8 @@ namespace ink::runtime::internal
 		void restore();
 		void forget();
 
-		virtual size_t snap(unsigned char* data, const snapper&) const override;
-		virtual const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		virtual size_t snap(unsigned char* data, const snapper&) const;
+		virtual const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 	protected:
 		virtual void overflow(T*& buffer, size_t& size) {

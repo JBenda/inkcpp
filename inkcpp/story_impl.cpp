@@ -4,6 +4,7 @@
 #include "globals_impl.h"
 #include "snapshot.h"
 #include "snapshot_impl.h"
+#include "snapshot_interface.h"
 #include "version.h"
 
 #ifdef INK_ENABLE_STL
@@ -222,11 +223,11 @@ namespace ink::runtime::internal
 		if (store == nullptr)
 			store = new_globals_from_snapshot(snapshot);
 		auto* run = new runner_impl(this, store);
-		auto end = run->snap_load(snapshot.get_runner_snap(idx),
-				snapshot_interface::loader{
+		auto loader = snapshot_interface::loader{
 					snapshot.strings(),
 					_string_table, 
-				});
+		};
+		auto end = run->snap_load(snapshot.get_runner_snap(idx), loader);
 		inkAssert(
 			(idx + 1 < snapshot.num_runners() && end == snapshot.get_runner_snap(idx + 1))
 				|| end == snapshot.get_data() + snapshot.get_data_len(), "not all data were used for runner reconstruction"

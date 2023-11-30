@@ -56,4 +56,3 @@ configure_file(
 # Copy files into destination directory
 install(DIRECTORY "inkcpp/" DESTINATION "inkcpp" COMPONENT unreal EXCLUDE_FROM_ALL
 	PATTERN "*.in" EXCLUDE)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/" DESTINATION "inkcpp" COMPONENT unreal EXCLUDE_FROM_ALL)

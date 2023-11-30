@@ -333,8 +333,8 @@ namespace ink::runtime::internal
 		}
 
 		// snapshot interface
-		virtual size_t snap(unsigned char* data, const snapper&) const override;
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		virtual size_t snap(unsigned char* data, const snapper&) const;
+		const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 	protected:
 		// Called when we run out of space in buffer. 

@@ -62,8 +62,8 @@ namespace ink::runtime::internal
 
 		snapshot* create_snapshot() const override;	
 
-		size_t snap(unsigned char* data, const snapper&) const override;
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
+		size_t snap(unsigned char* data, snapper&) const;
+		const unsigned char* snap_load(const unsigned char* data, loader&);
 
 
 #ifdef INK_ENABLE_CSTD
@@ -245,12 +245,11 @@ namespace ink::runtime::internal
 		threads <config::limitContainerDepth < 0, abs( config::limitThreadDepth )> _threads;
 
 		// Choice list
-		managed_array<choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
-		optional<choice> _fallback_choice;
-		size_t _backup_choice_len = 0;
+		managed_restorable_array<snap_choice, config::maxChoices < 0, abs(config::maxChoices)> _choices;
+		optional<snap_choice> _fallback_choice;
 
 		// Tag list
-		managed_array<const char*, config::limitActiveTags < 0, abs(config::limitActiveTags)> _tags;
+		managed_restorable_array<snap_tag, config::limitActiveTags < 0, abs(config::limitActiveTags)> _tags;
 		int _choice_tags_begin;
 
 		// TODO: Move to story? Both?
