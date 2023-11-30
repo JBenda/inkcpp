@@ -137,16 +137,28 @@ namespace ink::runtime::internal
 		return ptr;
 	}
 	size_t snap_tag::snap(unsigned char* data, const snapper& snapper) const{
-		std::uintptr_t offset = _str - snapper.story_string_table;
 		unsigned char* ptr = data;
-		ptr = snap_write(ptr, offset, data != nullptr);
+		bool should_write = data != nullptr;
+		if (_str == nullptr) {
+			ptr = snap_write(ptr, false, should_write);
+		} else {
+			size_t id = snapper.strings.get_id(_str);
+			ptr = snap_write(ptr, true, should_write);
+			ptr = snap_write(ptr, id, should_write);
+		}
 		return ptr - data;
 	}
 	const unsigned char* snap_tag::snap_load(const unsigned char* data, const loader& loader){
-		std::uintptr_t offset;
 		const unsigned char* ptr = data;
-		ptr = snap_read(ptr, offset);
-		_str = loader.story_string_table + offset;
+		bool has_content;
+		ptr = snap_read(ptr, has_content);
+		if (!has_content) {
+			_str = nullptr;
+		} else {
+			size_t id;
+			ptr = snap_read(ptr, id);
+			_str = loader.string_table[id];
+		}
 		return ptr;
 	}
 }

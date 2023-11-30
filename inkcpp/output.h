@@ -64,6 +64,10 @@ namespace ink
 				// Check if the stream has a marker
 				bool has_marker() const;
 
+				// how many entries are behind last marker
+				/// \ratval -1 if no marker is set
+				int entries_since_marker() const;
+
 				// Checks if the stream ends with a specific type
 				bool ends_with(value_type) const;
 

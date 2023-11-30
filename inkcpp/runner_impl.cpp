@@ -8,7 +8,6 @@
 #include "snapshot_impl.h"
 #include "system.h"
 #include "value.h"
-#include <iostream>
 
 namespace ink::runtime
 {
@@ -549,7 +548,6 @@ namespace ink::runtime::internal
 		bool should_write = data != nullptr;
 		snapper.current_runner_tags = _tags[0].ptr();
 		std::uintptr_t offset = _ptr != nullptr ? _ptr - _story->instructions() : 0;
-		std::cout << "offset: " << offset << " <-> " << (unsigned long)_ptr << "ptr\n";
 		ptr = snap_write(ptr, offset, should_write);
 		offset = _backup - _story->instructions();
 		ptr = snap_write(ptr, offset, should_write);

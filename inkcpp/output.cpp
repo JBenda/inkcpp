@@ -203,16 +203,20 @@ namespace ink::runtime::internal
 		_size = start;
 	}
 
-	bool basic_stream::has_marker() const
+	bool basic_stream::has_marker() const {
+		return entries_since_marker() >= 0;
+	}
+
+	int basic_stream::entries_since_marker() const
 	{
 		// TODO: Cache?
 		for (size_t i = 0; i < _size; i++)
 		{
 			if (_data[i].type() == value_type::marker)
-				return true;
+				return i;
 		}
 
-		return false;
+		return -1;
 	}
 
 	bool basic_stream::ends_with(value_type type) const
