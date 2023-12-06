@@ -39,7 +39,7 @@ jobs:
         submodules: true
 
     # Download inklecate
-    - uses: suisei-cn/actions-download-file@v1
+    - uses: suisei-cn/actions-download-file@v1.4.0
       name: Download Inklecate 
       id: download_inklecate 
       with:
@@ -62,7 +62,7 @@ jobs:
 
     # Setup CMake
     - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v1.9
+      uses: jwlawson/actions-setup-cmake@v1.14.2
       with:
         cmake-version: '3.21.x'
 
