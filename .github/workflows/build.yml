@@ -111,7 +111,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.artifact }}-lib
-        path: build/cmp_lib/
+        path: build/comp_lib/
 
     - name: Install UE
       working-directory: ${{github.workspace}}/build
@@ -135,7 +135,7 @@ jobs:
         cp ../inkcpp_runtime_driver drivers/
         chmod +x drivers/inkcpp_runtime_driver
         mkdir deps/inkcpp
-        cp ../../build/bin/* deps/inkcpp/
+        cp ../../build/comp_cl/* deps/inkcpp/
         chmod +x deps/inkcpp/inkcpp_cl
     
     # Run it
