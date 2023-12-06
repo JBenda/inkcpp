@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - name: Install deps
+        run: |
+          npm i @actions/core
+          npm i @actions/github
       - name: Download artifacts
         uses: marcofaggian/action-download-multiple-artifacts@v4.0.1
         with:
