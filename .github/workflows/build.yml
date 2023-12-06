@@ -34,7 +34,7 @@ jobs:
     steps:
 
     # Checkout project
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -89,17 +89,41 @@ jobs:
       run: ctest . -C $BUILD_TYPE -V
 
     # Copy all build artifacts to the bin directory
-    - name: Install
+    - name: Install CL
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: cmake --install . --config $BUILD_TYPE --prefix bin --component cl
+      run: cmake --install . --config $BUILD_TYPE --prefix comp_cl --component cl
 
     # Upload bin directory as artifact
     - name: Upload Binary Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.artifact }}
-        path: build/bin/
+        name: ${{ matrix.artifact }}-cl
+        path: build/comp_cl/
+
+    - name: Install LIB
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --install . --config $BUILD_TYPE --prefix comp_lib --component lib
+
+    # Upload bin directory as artifact
+    - name: Upload Binary Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact }}-lib
+        path: build/cmp_lib/
+
+    - name: Install UE
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --install . --config $BUILD_TYPE --prefix comp_unreal --component unreal
+
+    # Upload bin directory as artifact
+    - name: Upload Binary Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact }}-unreal
+        path: build/comp_unreal/
 
     # Make sure Inkproof has everything it needs to run our executable
     - name: Setup Ink Proof
@@ -187,7 +211,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Download Ink Proof page for Linux
       - uses: actions/download-artifact@v2
