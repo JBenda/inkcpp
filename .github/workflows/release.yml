@@ -17,10 +17,13 @@ jobs:
       - name: Download artifacts
         uses: marcofaggian/action-download-multiple-artifacts@v3.0.8
         with:
-          names: linux-cl.zip linux-lib.zip linux-unreal.zip macos-cl.zip macos-lib.zip macos-unreal.zip win64-cl.zip win64-lib.zip win64-unreal.zip
-          paths: . . . . . . . . .
+          names: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal
+          paths: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal
           workflow: build.yml
           branch: master
+      - name: Zip
+        run: |
+          for f in linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal; do zip -r $f $f; done
       - name: List
         run: tree
       - name: Create release
