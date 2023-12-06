@@ -32,4 +32,4 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
               --generate-notes \
-              "$tag" "linux-cl" "linux-lib" "linux-unreal" "macos-cl" "macos-lib" "macos-unreal" "win64-cl" "win64-lib" "win-unreal"
+              "$tag" "linux-cl" "linux-lib" "linux-unreal" "macos-cl" "macos-lib" "macos-unreal" "win64-cl" "win64-lib" "win64-unreal"
