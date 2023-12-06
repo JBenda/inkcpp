@@ -9,24 +9,19 @@ permissions:
   contents: write
 
 jobs:
-  download:
-    name: Download
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        type: [cl, lib, unreal]
-        os: [macos, win64, linux]
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: ${{ matrix.os }}-${{ matrix.type }}
-    
   release:
     name: Release pushed tag
     runs-on: ubuntu-22.04
-    needs: download
     steps:
       - uses: actions/checkout@v3
+      - name: Download artifacts
+        uses: marcofaggian/action-download-multiple-artifacts@v1
+        with:
+          names: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win-unreal
+          paths: . . . . . . . . .
+          workflow: build.yml
+          workflow_conclusion: success
+          branch: master
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
