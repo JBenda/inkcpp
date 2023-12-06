@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: ${{ matrix.os }}-${{ matrix-type }}
+          name: ${{ matrix.os }}-${{ matrix.type }}
     
   release:
     name: Release pushed tag
