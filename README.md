@@ -16,7 +16,7 @@ Ink Proofing Test Results: https://brwarner.github.io/inkcpp
 ## Current Status
 
 Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must be in the same folder or in the PATH.
-`inklecate` can be downloaded from the official [release page](https://github.com/inkle/ink/releases) and will be downloaded from CMake at  configure time (located at `build/unreal/inkcpp/Resources/inklecate`).
+`inklecate` can be downloaded from the [official release page](https://github.com/inkle/ink/releases) and will be downloaded from CMake at  configure time (located at `build/unreal/inkcpp/Resources/inklecate`).
 
 Without the `-p` flag, it'll just compile the JSON/Ink file into InkCPP's binary format (see the Wiki on GitHub).
 
