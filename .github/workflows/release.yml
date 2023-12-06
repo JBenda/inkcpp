@@ -18,9 +18,11 @@ jobs:
         uses: marcofaggian/action-download-multiple-artifacts@v3.0.8
         with:
           names: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win-unreal
-          paths: . . . . . . . . .
+          paths: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win-64-lib win-unreal
           workflow: build.yml
           branch: master
+      - name: List
+        run: tree
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
