@@ -14,11 +14,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Install deps
-        run: |
-          npm i -g @actions/core @actions/github
       - name: Download artifacts
-        uses: marcofaggian/action-download-multiple-artifacts@v4.0.1
+        uses: marcofaggian/action-download-multiple-artifacts@v3.0.8
         with:
           names: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win-unreal
           paths: . . . . . . . . .
