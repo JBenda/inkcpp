@@ -12,7 +12,64 @@ Ink Proofing Test Results: https://brwarner.github.io/inkcpp
 * Support for multiple "runners" (not ink threads) running in parallel on a single story that can optionally share a global variable/state store (but with their own callstack, temporaries, etc.)
 * Multi-thread safe
 
-## Example
+
+## Current Status
+
+Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must be in the same folder or in the PATH.
+`inklecate` can be downloaded from the official [release page](https://github.com/inkle/ink/releases) and will be downloaded from CMake at  configure time (located at `build/unreal/inkcpp/Resources/inklecate`).
+
+Without the `-p` flag, it'll just compile the JSON/Ink file into InkCPP's binary format (see the Wiki on GitHub).
+
+All features of ink 1.1 are supported, and checked with [ink-proof](https://github.com/chromy/ink-proof).
+
+KeyFeatures: snapshots, observers, binding ink functions, support ink [function fallback](https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md#fallbacks-for-external-functions)
+
+## Unreal Plugin
+
+The current version of the UE plugin can be downloaded from the [release page](https://github.com/brwarner/inkcpp/releases/latest) with te corresponding name of the OS (e.g. win64-unreal).
+Place the content of this file at your plugin folder of your UE project and at the next start up it will be intigrated.
+
+A example project can be found [here](https://cloud.julian-benda.de/index.php/s/cRMBGBWbHPCcdwb). 
+
+Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run `cmake --install . --component unreal --prefix Path/To/Unreal/Plugins/` which will add an `inkcpp` folder there with the `.uplugin`, the code for the UClasses, and all the inkcpp source files required. `config.h` will automatically detect it is being built in an Unreal plugin environment and disable STL and enable Unreal extensions (FString support, Unreal asserts, CityHash, etc.).
+
+If you compile the UE Plugin by your self feel free to visit the [wiki page](https://github.com/brwarner/inkcpp/wiki/Unreal) for a more debug oriented build process.
+
+## Use standalone
+
+1. Grep the current version from the [release page](https://github.com/brwarner/inkcpp/releases/latest) depending on your OS (e.g. macos-cl).
+2. unpack it to a location found by your path
+3. run your story: `inkcpp-cl -p story.json`
+4. if you want to compile `.ink` flies directly make sure `inklecate` is in your path. If you not have it you can grep it from the [official page](https://github.com/inkle/ink/releases/latest)
+
+Nice features for testing:
++ predefined choice selection `echo 1 2 1  | inkpp-cl -p story.(ink|json|bin)`
++ create snapshots to shorten testing:
+	+ create snapshot by entering `-1` as choice `echo 1 2 -1 | inkcpp-cl -p story.ink`
+ 	+ load snapshot as an additional argument `echo 1 | inkcpp-cl -p story.snap story.ink`
+
+## Including in C++ Code
+
+Instructions:
+
+1. Download the for your OS macthing lib archive from the [release page](https://github.com/brwarner/inkcpp/releases/latest) (e.g. linux-lib).
+2. The following must be linked into your build solution for your C++ to compile correctly:
+	- `include/ink`: contains important shared headers.
+		+ For a Visual Studio project, link this directory as an Include Directory in VC++ Directories.
+	- `lib/inkcpp.lib` and `lib/inkcpp_compiler.lib`: contains the library code for the InkCPP runner and compiler, respectively.
+		+ For a Visual Studio project, link these files as Additional Dependencies in Linker->Input.
+		+ You don't need to link the compiler if you're not using it within your program.
+5. Reference the headers in your code like so:
+```cpp
+
+#include <ink/story.h>
+#include <ink/runner.h>
+#include <ink/choice.h>
+```
+6. if you use cmake checkout the (wiki)[https://github.com/brwarner/inkcpp/wiki/building#cmake-example] for including the library via cmake
+
+
+### Example
 
 ```cpp
 #include <ink/story.h>
@@ -48,17 +105,6 @@ thread->choose(0);
 
 ```
 
-## Current Status
-
-Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must be in the same folder or in the PATH.
-`inklecate` can be downloaded from the official [release page](https://github.com/inkle/ink/releases) and will be downloaded from CMake at  configure time (located at `build/unreal/inkcpp/Resources/inklecate`).
-
-Without the `-p` flag, it'll just compile the JSON/Ink file into InkCPP's binary format (see the Wiki on GitHub).
-
-All features of ink 1.1 are supported, and checked with [ink-proof](https://github.com/chromy/ink-proof).
-
-Big features missing compared to the `C#` implementation are:
-* stable Ink Thread support
 
 ## Configuring and Building (CMake)
 
@@ -74,34 +120,12 @@ The documentation can be build iff Doxygen is installed with `cmake --build . --
 
 To build, either run the generated buildfiles OR you can use `cmake --build . --config <Release|Debug>` from the build folder to automatically execute the relevant toolchain.
 
+To install the different components use `cmake --install . --component <lib|cl|unreal>`
++ `lib` C++ library to link against
++ `cl` command line application
++ `unreal` UE-plugin
+
 For a more in depth installation description please checkout the (wiki)[https://github.com/brwarner/inkcpp/wiki/building].
-
-## Including in C++ Code
-
-Required software: (CMake)[https://cmake.org/]
-
-Instructions:
-
-1. Clone the repository
-2. Configure and build the project with CMake, as described above
-3. From your newly-created `build` directory, run `cmake --install . --prefix Path/To/Desired/Library/Directory --component <lib/cl/unreal>`.
-4. Generated in your chosen directory, you will find a collection of folders. The following must be linked into your build solution for your C++ to compile correctly:
-	- `include/ink`: contains important shared headers.
-		+ For a Visual Studio project, link this directory as an Include Directory in VC++ Directories.
-	- `lib/inkcpp.lib` and `lib/inkcpp_compiler.lib`: contains the library code for the InkCPP runner and compiler, respectively.
-		+ For a Visual Studio project, link these files as Additional Dependencies in Linker->Input.
-		+ You don't need to link the compiler if you're not using it within your program.
-	- if you used the `cl` component you will find the `inkcpp_cl` executable in this location
-	- for `unreal` you will find a `Source` directory containing the Unreal needed libs and headers. **Note:** not working for the current unreal version, we are working to fix this.
-5. Reference the headers in your code like so:
-
-```cpp
-
-#include <ink/story.h>
-#include <ink/runner.h>
-#include <ink/choice.h>
-```
-6. if you use cmake checkout the (wiki)[https://github.com/brwarner/inkcpp/wiki/building#cmake-example] for including the library via cmake
 
 
 ### Troubleshooting
@@ -115,9 +139,6 @@ Run `ctest` from the build folder to execute unit tests configured with CMake. U
 
 Right now this only executes the internal unit tests which test the functions of particular classes. Soon it'll run more complex tests on .ink files using ink-proof.
 
-## Unreal Plugin
-
-Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run `cmake --install . --component unreal --prefix Path/To/Unreal/Plugins/` which will add an `inkcpp` folder there with the `.uplugin`, the code for the UClasses, and all the inkcpp source files required. `config.h` will automatically detect it is being built in an Unreal plugin environment and disable STL and enable Unreal extensions (FString support, Unreal asserts, CityHash, etc.).
 
 ## Next Steps
 
