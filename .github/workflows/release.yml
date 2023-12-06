@@ -20,7 +20,6 @@ jobs:
           names: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win-unreal
           paths: . . . . . . . . .
           workflow: build.yml
-          workflow_conclusion: success
           branch: master
       - name: Create release
         env:
