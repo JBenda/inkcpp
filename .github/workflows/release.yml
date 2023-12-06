@@ -17,8 +17,8 @@ jobs:
       - name: Download artifacts
         uses: marcofaggian/action-download-multiple-artifacts@v3.0.8
         with:
-          names: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal
-          paths: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal
+          names: linux-cl.zip linux-lib.zip linux-unreal.zip macos-cl.zip macos-lib.zip macos-unreal.zip win64-cl.zip win64-lib.zip win64-unreal.zip
+          paths: . . . . . . . . .
           workflow: build.yml
           branch: master
       - name: List
@@ -32,4 +32,4 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
               --generate-notes \
-              "$tag" "linux-cl" "linux-lib" "linux-unreal" "macos-cl" "macos-lib" "macos-unreal" "win64-cl" "win64-lib" "win64-unreal"
+              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-unreal.zip" "macos-cl.zip" "macos-lib.zip" "macos-unreal.zip" "win64-cl.zip" "win64-lib.zip" "win64-unreal.zip"
