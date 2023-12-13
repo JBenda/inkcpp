@@ -20,6 +20,12 @@ namespace ink::runtime::internal {
 			}
 		}
 
+		~managed_array() {
+			if constexpr (dynamic) {
+				delete[] _dynamic_data;
+			}
+		}
+
 		const T& operator[]( size_t i ) const { return data()[i]; }
 		T&       operator[]( size_t i ) { return data()[i]; }
 		const T* data() const
