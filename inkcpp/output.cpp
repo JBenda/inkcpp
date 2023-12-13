@@ -140,8 +140,12 @@ namespace ink::runtime::internal
 		std::string result = str.str();
 		if ( !result.empty() ) {
 			auto end = clean_string<true, false>( result.begin(), result.end() );
-			_last_char = *( end - 1 );
-			result.resize( end - result.begin() - ( _last_char == ' ' ? 1 : 0 ) );
+			if (result.begin() == end) {
+				result.resize(0);
+			} else {
+				_last_char = *( end - 1 );
+				result.resize( end - result.begin() - ( _last_char == ' ' ? 1 : 0 ) );
+			}
 		}
 		return result;
 	}

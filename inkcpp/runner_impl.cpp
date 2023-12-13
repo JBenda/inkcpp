@@ -185,7 +185,7 @@ namespace ink::runtime::internal
 
 		const uint32_t* iter = nullptr;
 		container_t id;
-		ip_t offset;
+		ip_t offset = nullptr;
 		size_t comm_end;
 		bool reversed = _ptr > dest;
 
