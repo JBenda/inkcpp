@@ -172,11 +172,14 @@ jobs:
 
   reporting:
     name: "Pull Request Report"
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'brwarner/inkcpp' }}
+    # if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'brwarner/inkcpp' }}
     runs-on: ubuntu-latest
     needs: compilation
     steps:
       # Download Ink Proof Results
+      - name: Debug
+        run: |
+          echo ${{github.event_name}} ${{github.event.pull_request.head.repo.full_name}} ${{github.event.pull_request.head.ref}} ${{github.event.pull_request.base.full_name}} ${{github.event.pull_request.base.ref}}
       - uses: actions/download-artifact@v2
         with:
           name: results
