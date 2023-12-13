@@ -155,7 +155,7 @@ int main(int argc, const char** argv)
 		using namespace ink::runtime;
 
 		// Load story
-		story* myInk = story::from_file(outputFilename.c_str());
+		std::unique_ptr<story> myInk{story::from_file(outputFilename.c_str())};
 
 		// Start runner
 		runner thread;
@@ -213,12 +213,11 @@ int main(int argc, const char** argv)
 			// out of content
 			break;
 		}
-
-		return 0;
 	}
 	catch (const std::exception& e)
 	{
 		std::cerr << "Unhandled ink runtime exception: " << e.what() << std::endl;
 		return 1;
 	}
+	return 0;
 }
