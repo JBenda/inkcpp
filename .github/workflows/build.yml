@@ -144,7 +144,7 @@ jobs:
       shell: bash
       working-directory: proofing/ink-proof
       run: |
-        python3 proof.py --examples 'I...' inkcpp inklecate_v0.9.0 > run.out
+        python3 proof.py --examples 'I...' inklecate_v1.1.1 inkcpp_runtime > run.out
         echo -e "| ${{ matrix.name }} | $(cat run.out) |" > ${{ matrix.artifact }}.txt
 
     # Creates a "disabled" artifact if ink proofing is disabled
