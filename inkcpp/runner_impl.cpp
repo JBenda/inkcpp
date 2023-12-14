@@ -177,7 +177,7 @@ namespace ink::runtime::internal
 		//  without entering any other containers
 		// OR IF if target is same position do nothing
 		// could happend if jumping to and of an unnamed container
-		if (_is_falling || dest ==_ptr)
+		if (dest ==_ptr)
 		{
 			_ptr = dest;
 			return;
@@ -1173,10 +1173,11 @@ namespace ink::runtime::internal
 			case Command::END_CONTAINER_MARKER:
 			{
 				container_t index = read<container_t>();
-				inkAssert(_container.top().id == index, "Leaving container we are not in!");
 
-				// Move up out of the current container
-				_container.pop();
+					inkAssert(_container.top().id == index, "Leaving container we are not in!");
+
+					// Move up out of the current container
+					_container.pop();
 
 				// SPECIAL: If we've popped all containers, then there's an implied 'done' command or return
 				if (_container.empty())
