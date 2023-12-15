@@ -77,7 +77,7 @@ SpaceAfterTemplateKeyword: false
 SpaceAfterLogicalNot: true
 SpaceAfterCStyleCast: true
 SortUsingDeclarations: Lexicographic
-SortIncludes: CaseInsensitive
+SortIncludes: Never
 ShortNamespaceLines: 0
 SeparateDefinitionBlocks: Always
 RequiresExpressionIndentation: OuterScope

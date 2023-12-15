@@ -66,4 +66,4 @@ namespace ink::runtime::internal
 		_instance_block = _story_block = nullptr;
 		return is_destroyed;
 	}
-}
+        } // namespace ink::runtime::internal

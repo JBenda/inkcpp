@@ -177,16 +177,15 @@ namespace ink::runtime::internal
 		//  without entering any other containers
 		// OR IF if target is same position do nothing
 		// could happend if jumping to and of an unnamed container
-		if (dest ==_ptr)
-		{
-			_ptr = dest;
+                if (dest == _ptr) {
+                        _ptr = dest;
 			return;
-		}
+                }
 
-		const uint32_t* iter = nullptr;
+                const uint32_t* iter = nullptr;
 		container_t id;
-		ip_t offset = nullptr;
-		size_t comm_end;
+                ip_t            offset = nullptr;
+                size_t comm_end;
 		bool reversed = _ptr > dest;
 
 		if (reversed) {
@@ -1172,14 +1171,16 @@ namespace ink::runtime::internal
 			} break;
 			case Command::END_CONTAINER_MARKER:
 			{
-				container_t index = read<container_t>();
+	                        container_t index = read<container_t>();
 
-					inkAssert(_container.top().id == index, "Leaving container we are not in!");
+	                        inkAssert(
+	                            _container.top().id == index, "Leaving container we are not in!"
+	                        );
 
-					// Move up out of the current container
-					_container.pop();
+	                        // Move up out of the current container
+	                        _container.pop();
 
-				// SPECIAL: If we've popped all containers, then there's an implied 'done' command or return
+	                        // SPECIAL: If we've popped all containers, then there's an implied 'done' command or return
 				if (_container.empty())
 				{
 					_is_falling = false;
