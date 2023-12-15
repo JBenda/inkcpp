@@ -2,30 +2,11 @@
 AccessModifierOffset: -2
 AlignAfterOpenBracket: BlockIndent
 AlignArrayOfStructures: Right
-AlignConsecutiveAssignments:
-  Enabled: true
-  AcrossComments: true
-  AcrossEmptyLines: true
-  AlignCompound: true
-  PadOperators: true
-AlignConsecutiveBitFields:
-  Enabled: true
-  AcrossEmptyLines: true
-  AcrossComments: true
-  AlignCompound: true
-  PadOperators: true
-AlignConsecutiveDeclarations:
-  Enabled: true
-  AcrossEmptyLines: true
-  AcrossComments: true
-  AlignCompound: true
-  PadOperators: true
-AlignConsecutiveMacros:
-  Enabled: true
-  AcrossEmptyLines: true
-  AcrossComments: true
-  AlignCompound: true
-  PadOperators: true
+# readd padOperation if bumped from clang 14
+AlignConsecutiveAssignments: AcrossComments
+AlignConsecutiveBitFields: AcrossComments
+AlignConsecutiveDeclarations: AcrossComments
+AlignConsecutiveMacros: AcrossComments
 AlignEscapedNewlines: Left
 AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
@@ -78,7 +59,7 @@ SortIncludes: Never
 ShortNamespaceLines: 0
 SeparateDefinitionBlocks: Always
 # RequiresExpressionIndentation: OuterScope
-BreakBeforeConceptDeclarations: Always
+# BreakBeforeConceptDeclarations: Always
 # BreakBeforeInlineASMColon: Always
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
@@ -96,10 +77,10 @@ IndentCaseLabels: true
 IndentExternBlock: Indent
 IndentGotoLabels: false
 IndentPPDirectives: AfterHash
-IndentRequiresClause: true
+# IndentRequiresClause: true
 IndentWidth: 2
 IndentWrappedFunctionNames: true
-InsertBraces: true
+# InsertBraces: true
 # InsertNewlineAtEOF: true
 KeepEmptyLinesAtTheStartOfBlocks: true
 LambdaBodyIndentation: Signature
@@ -112,6 +93,6 @@ ReferenceAlignment: Left
 ReflowComments: true
 RemoveBracesLLVM: false
 # RemoveSemicolon: false
-RequiresClausePosition: OwnLine
+# RequiresClausePosition: OwnLine
 UseCRLF: false
 DeriveLineEnding: false
