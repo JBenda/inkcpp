@@ -44,7 +44,7 @@ AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: true
 BinPackParameters: true
 BreakBeforeBraces: Linux
-BreakAfterAttributes: Always
+# BreakAfterAttributes: Always
 BreakBeforeBinaryOperators: All
 UseTab: ForIndentation
 Standard: Latest
@@ -73,13 +73,13 @@ PointerAlignment: Left
 SpaceAfterTemplateKeyword: false
 SpaceAfterLogicalNot: true
 SpaceAfterCStyleCast: true
-SortUsingDeclarations: Lexicographic
+SortUsingDeclarations: false
 SortIncludes: Never
 ShortNamespaceLines: 0
 SeparateDefinitionBlocks: Always
-RequiresExpressionIndentation: OuterScope
+# RequiresExpressionIndentation: OuterScope
 BreakBeforeConceptDeclarations: Always
-BreakBeforeInlineASMColon: Always
+# BreakBeforeInlineASMColon: Always
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
@@ -100,16 +100,18 @@ IndentRequiresClause: true
 IndentWidth: 2
 IndentWrappedFunctionNames: true
 InsertBraces: true
-InsertNewlineAtEOF: true
+# InsertNewlineAtEOF: true
 KeepEmptyLinesAtTheStartOfBlocks: true
 LambdaBodyIndentation: Signature
 Language: Cpp
-LineEnding: LF
+# LineEnding: LF
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: Inner
 QualifierAlignment: Left
 ReferenceAlignment: Left
 ReflowComments: true
 RemoveBracesLLVM: false
-RemoveSemicolon: false
+# RemoveSemicolon: false
 RequiresClausePosition: OwnLine
+UseCRLF: false
+DeriveLineEnding: false
