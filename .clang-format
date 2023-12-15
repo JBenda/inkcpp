@@ -79,6 +79,7 @@ IndentGotoLabels: false
 IndentPPDirectives: AfterHash
 # IndentRequiresClause: true
 IndentWidth: 2
+TabWidth: 2
 IndentWrappedFunctionNames: true
 # InsertBraces: true
 # InsertNewlineAtEOF: true
