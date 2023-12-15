@@ -175,18 +175,13 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'master' }}
     steps:
-      - name: Install Clang16
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 16 all
       - uses: actions/checkout@v3
       - name: Fetch master branch
         run: |
           git fetch origin master --depth 1
       - name: Check clang-format
         run: |
-          diff=$(git-clang-format --style file -q --diff origin/master)
+          diff=$(git-clang-format-15 --style file -q --diff origin/master)
           echo $diff
           if [ "$diff" != "" ]; then
             exit 1
