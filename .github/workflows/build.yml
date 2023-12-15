@@ -170,6 +170,22 @@ jobs:
         name: ${{ matrix.artifact }}-www
         path: proofing/ink-proof/out
 
+  clang-format:
+    name: "Check Formatting"
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'master' }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fetch master branch
+        run: |
+          git fetch origin master --depth 1
+      - name: Check clang-format
+        run: |
+          diff=$(git clang-format-15 --style file --diff master)
+          if [ "$diff" != "" ]; then
+            exit 1
+          fi
+
   reporting:
     name: "Pull Request Report"
     # if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'brwarner/inkcpp' }}
@@ -180,9 +196,6 @@ jobs:
       pull-requests: write
     steps:
       # Download Ink Proof Results
-      - name: Debug
-        run: |
-          echo ${{github.event_name}} ${{github.event.pull_request.head.repo.full_name}} ${{github.event.pull_request.head.ref}} ${{github.event.pull_request.base.full_name}} ${{github.event.pull_request.base.ref}}
       - uses: actions/download-artifact@v2
         with:
           name: results
