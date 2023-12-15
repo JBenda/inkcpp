@@ -147,8 +147,8 @@ namespace ink::runtime::internal
                                 result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
                         }
                 }
-		return result;
-	}
+                return result;
+        }
 #endif
 #ifdef INK_ENABLE_UNREAL
 	FString basic_stream::get()
