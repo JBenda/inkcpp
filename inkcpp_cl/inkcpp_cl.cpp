@@ -41,8 +41,8 @@ int main(int argc, const char** argv)
   for (int i = 1; i < argc - 1; i++) {
     std::string option = argv[i];
     if (option == "-o") {
-      outputFilename  = argv[i + 1];
-      i              += 1;
+      outputFilename = argv[i + 1];
+      i += 1;
     } else if (option == "-p") {
       playMode = true;
       if (i + 1 < argc - 1 && argv[i + 1][0] != '-') {
@@ -143,7 +143,7 @@ int main(int argc, const char** argv)
     std::unique_ptr<story> myInk{story::from_file(outputFilename.c_str())};
 
     // Start runner
-    runner                 thread;
+    runner thread;
     if (snapshotFile.size()) {
       auto snap_ptr = snapshot::from_file(snapshotFile.c_str());
       thread        = myInk->new_runner_from_snapshot(*snap_ptr);

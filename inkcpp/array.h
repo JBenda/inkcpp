@@ -29,7 +29,7 @@ public:
 
   const T& operator[](size_t i) const { return data()[i]; }
 
-  T&       operator[](size_t i) { return data()[i]; }
+  T& operator[](size_t i) { return data()[i]; }
 
   const T* data() const
   {
@@ -49,23 +49,23 @@ public:
     }
   }
 
-  const T*     begin() const { return data(); }
+  const T* begin() const { return data(); }
 
-  T*           begin() { return data(); }
+  T* begin() { return data(); }
 
-  const T*     end() const { return data() + _size; }
+  const T* end() const { return data() + _size; }
 
-  T*           end() { return data() + _size; }
+  T* end() { return data() + _size; }
 
-  const T&     back() const { return end()[-1]; }
+  const T& back() const { return end()[-1]; }
 
-  T&           back() { return end()[-1]; }
+  T& back() { return end()[-1]; }
 
   const size_t size() const { return _size; }
 
   const size_t capacity() const { return _capacity; }
 
-  T&           push()
+  T& push()
   {
     if constexpr (dynamic) {
       if (_size == _capacity) {
@@ -92,7 +92,7 @@ public:
     _size = size;
   }
 
-  void   extend(size_t capacity = 0);
+  void extend(size_t capacity = 0);
 
   size_t snap(unsigned char* data, const snapper& snapper) const
   {
@@ -148,20 +148,20 @@ public:
   {
   }
 
-  void   restore() { base::resize(_last_size); }
+  void restore() { base::resize(_last_size); }
 
-  void   save() { _last_size = this->size(); }
+  void save() { _last_size = this->size(); }
 
-  void   forgett() { _last_size = 0; }
+  void forgett() { _last_size = 0; }
 
-  bool   has_changed() const { return base::size() != _last_size; }
+  bool has_changed() const { return base::size() != _last_size; }
 
   size_t snap(unsigned char* data, const snapshot_interface::snapper& snapper) const
   {
-    unsigned char* ptr           = data;
-    bool           should_write  = data != nullptr;
-    ptr                         += base::snap(ptr, snapper);
-    ptr                          = base::snap_write(ptr, _last_size, should_write);
+    unsigned char* ptr          = data;
+    bool           should_write = data != nullptr;
+    ptr += base::snap(ptr, snapper);
+    ptr = base::snap_write(ptr, _last_size, should_write);
     return ptr - data;
   }
 
@@ -217,28 +217,28 @@ public:
   }
 
   // == Non-Copyable ==
-  basic_restorable_array(const basic_restorable_array<T>&)                 = delete;
-  basic_restorable_array<T>&   operator=(const basic_restorable_array<T>&) = delete;
+  basic_restorable_array(const basic_restorable_array<T>&)               = delete;
+  basic_restorable_array<T>& operator=(const basic_restorable_array<T>&) = delete;
 
   // set value by index
-  void                         set(size_t index, const T& value);
+  void set(size_t index, const T& value);
 
   // get value by index
-  const T&                     get(size_t index) const;
+  const T& get(size_t index) const;
 
   // size of the array
-  inline size_t                capacity() const { return _capacity; }
+  inline size_t capacity() const { return _capacity; }
 
   // only const indexing is supported due to save/restore system
-  inline const T&              operator[](size_t index) const { return get(index); }
+  inline const T& operator[](size_t index) const { return get(index); }
 
   // == Save/Restore ==
-  void                         save();
-  void                         restore();
-  void                         forget();
+  void save();
+  void restore();
+  void forget();
 
   // Resets all values and clears any save points
-  void                         clear(const T& value);
+  void clear(const T& value);
 
   // snapshot interface
   virtual size_t               snap(unsigned char* data, const snapper&) const;
@@ -247,7 +247,7 @@ public:
 protected:
   inline T* buffer() { return _array; }
 
-  void      set_new_buffer(T* buffer, size_t capacity)
+  void set_new_buffer(T* buffer, size_t capacity)
   {
     _array    = buffer;
     _temp     = buffer + capacity / 2;
@@ -263,17 +263,17 @@ private:
   void clear_temp();
 
 private:
-  bool    _saved;
+  bool _saved;
 
   // real values live here
-  T*      _array;
+  T* _array;
 
   // we store values here when we're in save mode
   //  they're copied on a call to forget()
-  T*      _temp;
+  T* _temp;
 
   // size of both _array and _temp
-  size_t  _capacity;
+  size_t _capacity;
 
   // null
   const T _null;

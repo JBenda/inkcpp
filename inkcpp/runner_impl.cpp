@@ -408,7 +408,7 @@ std::string runner_impl::getline()
     advance_line();
     // Read line into std::string
     result += _output.get();
-    fill    = _output.last_char() == ' ';
+    fill = _output.last_char() == ' ';
   } while (_ptr != nullptr && _output.last_char() != '\n');
 
   // TODO: fallback choice = no choice
@@ -531,13 +531,13 @@ void runner_impl::choose(size_t index)
   restore(); // restore to stack state when choice was maked
   _globals->turn();
   // Get the choice
-  const auto& c            = has_choices() ? _choices[index] : _fallback_choice.value();
+  const auto& c = has_choices() ? _choices[index] : _fallback_choice.value();
 
   // Get its thread
-  thread_t    choiceThread = c._thread;
+  thread_t choiceThread = c._thread;
 
   // Figure out where our previous pointer was for that thread
-  ip_t        prev         = nullptr;
+  ip_t prev = nullptr;
   if (choiceThread == ~0) {
     prev = _done;
   } else {
@@ -592,30 +592,30 @@ snapshot* runner_impl::create_snapshot() const
 
 size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
-  unsigned char* ptr           = data;
-  bool           should_write  = data != nullptr;
-  snapper.current_runner_tags  = _tags[0].ptr();
-  std::uintptr_t offset        = _ptr != nullptr ? _ptr - _story->instructions() : 0;
-  ptr                          = snap_write(ptr, offset, should_write);
-  offset                       = _backup - _story->instructions();
-  ptr                          = snap_write(ptr, offset, should_write);
-  offset                       = _done - _story->instructions();
-  ptr                          = snap_write(ptr, offset, should_write);
-  ptr                          = snap_write(ptr, _rng.get_state(), should_write);
-  ptr                          = snap_write(ptr, _evaluation_mode, should_write);
-  ptr                          = snap_write(ptr, _string_mode, should_write);
-  ptr                          = snap_write(ptr, _saved_evaluation_mode, should_write);
-  ptr                          = snap_write(ptr, _saved, should_write);
-  ptr                          = snap_write(ptr, _is_falling, should_write);
-  ptr                         += _output.snap(data ? ptr : nullptr, snapper);
-  ptr                         += _stack.snap(data ? ptr : nullptr, snapper);
-  ptr                         += _ref_stack.snap(data ? ptr : nullptr, snapper);
-  ptr                         += _eval.snap(data ? ptr : nullptr, snapper);
-  ptr                          = snap_write(ptr, _choice_tags_begin, should_write);
-  ptr                         += _tags.snap(data ? ptr : nullptr, snapper);
-  ptr                         += _container.snap(data ? ptr : nullptr, snapper);
-  ptr                         += _threads.snap(data ? ptr : nullptr, snapper);
-  ptr                          = snap_write(ptr, _fallback_choice.has_value(), should_write);
+  unsigned char* ptr          = data;
+  bool           should_write = data != nullptr;
+  snapper.current_runner_tags = _tags[0].ptr();
+  std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
+  ptr                         = snap_write(ptr, offset, should_write);
+  offset                      = _backup - _story->instructions();
+  ptr                         = snap_write(ptr, offset, should_write);
+  offset                      = _done - _story->instructions();
+  ptr                         = snap_write(ptr, offset, should_write);
+  ptr                         = snap_write(ptr, _rng.get_state(), should_write);
+  ptr                         = snap_write(ptr, _evaluation_mode, should_write);
+  ptr                         = snap_write(ptr, _string_mode, should_write);
+  ptr                         = snap_write(ptr, _saved_evaluation_mode, should_write);
+  ptr                         = snap_write(ptr, _saved, should_write);
+  ptr                         = snap_write(ptr, _is_falling, should_write);
+  ptr += _output.snap(data ? ptr : nullptr, snapper);
+  ptr += _stack.snap(data ? ptr : nullptr, snapper);
+  ptr += _ref_stack.snap(data ? ptr : nullptr, snapper);
+  ptr += _eval.snap(data ? ptr : nullptr, snapper);
+  ptr = snap_write(ptr, _choice_tags_begin, should_write);
+  ptr += _tags.snap(data ? ptr : nullptr, snapper);
+  ptr += _container.snap(data ? ptr : nullptr, snapper);
+  ptr += _threads.snap(data ? ptr : nullptr, snapper);
+  ptr = snap_write(ptr, _fallback_choice.has_value(), should_write);
   if (_fallback_choice) {
     ptr += _fallback_choice.value().snap(data ? ptr : nullptr, snapper);
   }
@@ -1011,7 +1011,7 @@ void runner_impl::step()
 	  bool   is_redef     = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
 
 	  // Get the top value and put it into the variable
-	  value  v            = _eval.pop();
+	  value v = _eval.pop();
 	  set_var<Scope::LOCAL>(variableName, v, is_redef);
 	} break;
 
@@ -1019,11 +1019,11 @@ void runner_impl::step()
 	  hash_t variableName = read<hash_t>();
 
 	  // Check if it's a redefinition (not yet used, seems important for pointers later?)
-	  bool   is_redef     = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
+	  bool is_redef = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
 
 	  // If not, we're setting a global (temporary variables are explicitely defined as such,
 	  //  where globals are defined using SET_VARIABLE).
-	  value  val          = _eval.pop();
+	  value val = _eval.pop();
 	  if (is_redef) {
 	    set_var(variableName, val, is_redef);
 	  } else {
@@ -1037,12 +1037,12 @@ void runner_impl::step()
 	  hash_t functionName = read<hash_t>();
 
 	  // Interpret flag as argument count
-	  int    numArguments = ( int ) flag;
+	  int numArguments = ( int ) flag;
 
 	  // find and execute. will automatically push a valid if applicable
-	  bool   success      = _functions.call(
-              functionName, &_eval, numArguments, _globals->strings(), _globals->lists()
-          );
+	  bool success = _functions.call(
+	      functionName, &_eval, numArguments, _globals->strings(), _globals->lists()
+	  );
 
 	  // If we failed, notify a potential fallback function
 	  if (! success) {
@@ -1388,7 +1388,7 @@ void runner_impl::restore()
   // Not doing this anymore. There can be lingering stack entries from function returns
   // inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
 
-  _saved           = false;
+  _saved = false;
 }
 
 void runner_impl::forget()
