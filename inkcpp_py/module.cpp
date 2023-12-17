@@ -203,8 +203,10 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        [](const runner& self) { return py::make_iterator(self.begin(), self.end()); },
 	        py::keep_alive<0, 1>()
 	    )
-	    .def("choose", &runner::choose, "Select a choice to continue");
-
+	    .def("choose", &runner::choose, "Select a choice to continue")
+	    .def(
+	        "bind_void", []() {}, "Bind function which void result"
+	    );
 	py::class_<choice>(m, "Choice")
 	    .def("text", &choice::text, "Get choice printable content")
 	    .def("has_tags", &choice::has_tags, "if choices is tagged?")

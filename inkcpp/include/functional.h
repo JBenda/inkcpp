@@ -197,6 +197,18 @@ namespace ink::runtime::internal
 				// push string result
 				push_string(stack, buffer);
 			}
+			else if constexpr (is_same<value, remove_cvref<typename traits::return_type>>::value) {
+				auto val = functor(pop_args<Is>(stack, lists)...);
+				if (val.type() == ink::runtime::value::Type::String) {
+					auto src = val.template get<ink::runtime::value::Type::String>();
+					size_t len = string_handler<decltype(src)>::length(src);
+					char* buffer = allocate(strings, len + 1);
+					string_handler<decltype(src)>::src_copy(src, buffer);
+					push_string(stack, buffer);
+				} else {
+					push(val);
+				}
+			}
 			else
 			{
 				// Evaluate and push the result onto the stack
