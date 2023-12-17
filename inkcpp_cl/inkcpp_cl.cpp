@@ -155,16 +155,16 @@ int main(int argc, const char** argv)
 		while (true) {
 			while (thread->can_continue()) {
 				std::cout << thread->getline();
-			}
-			if (thread->has_tags()) {
-				std::cout << "# tags: ";
-				for (int i = 0; i < thread->num_tags(); ++i) {
-					if (i != 0) {
-						std::cout << ", ";
+				if (thread->has_tags()) {
+					std::cout << "# tags: ";
+					for (int i = 0; i < thread->num_tags(); ++i) {
+						if (i != 0) {
+							std::cout << ", ";
+						}
+						std::cout << thread->get_tag(i);
 					}
-					std::cout << thread->get_tag(i);
+					std::cout << std::endl;
 				}
-				std::cout << std::endl;
 			}
 			if (thread->has_choices()) {
 				// Extra end line

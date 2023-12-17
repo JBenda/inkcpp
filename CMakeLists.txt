@@ -9,6 +9,7 @@ SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
+add_compile_options(-fPIC)
 # Add subdirectories
 add_subdirectory(shared)
 add_subdirectory(inkcpp)
