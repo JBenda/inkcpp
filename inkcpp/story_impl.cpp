@@ -7,10 +7,6 @@
 #include "snapshot_interface.h"
 #include "version.h"
 
-#ifdef INK_ENABLE_STL
-#include <iostream>
-#endif
-
 namespace ink::runtime
 {
 #ifdef INK_ENABLE_STL

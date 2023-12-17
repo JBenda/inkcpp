@@ -39,7 +39,7 @@ jobs:
         submodules: true
 
     # Download inklecate
-    - uses: suisei-cn/actions-download-file@v1
+    - uses: suisei-cn/actions-download-file@v1.4.0
       name: Download Inklecate 
       id: download_inklecate 
       with:
@@ -62,7 +62,7 @@ jobs:
 
     # Setup CMake
     - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v1.9
+      uses: jwlawson/actions-setup-cmake@v1.14.2
       with:
         cmake-version: '3.21.x'
 
@@ -144,7 +144,7 @@ jobs:
       shell: bash
       working-directory: proofing/ink-proof
       run: |
-        python3 proof.py --examples 'I...' inkcpp inklecate_v0.9.0 > run.out
+        python3 proof.py --examples 'I...' inklecate_v1.1.1 inkcpp_runtime > run.out
         echo -e "| ${{ matrix.name }} | $(cat run.out) |" > ${{ matrix.artifact }}.txt
 
     # Creates a "disabled" artifact if ink proofing is disabled
@@ -170,11 +170,33 @@ jobs:
         name: ${{ matrix.artifact }}-www
         path: proofing/ink-proof/out
 
+  clang-format:
+    name: "Check Formatting"
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'master' }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fetch master branch
+        run: |
+          git fetch origin master --depth 1
+      - name: Check clang-format
+        run: |
+          diff=$(git clang-format-14 --style file -q --diff origin/master)
+          echo $diff
+          if [ "$diff" != "" ]; then
+            echo run git clang-format --style file master
+            echo or upstream/master depending on your setup
+            clang
+          fi
+
   reporting:
     name: "Pull Request Report"
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    # if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'brwarner/inkcpp' }}
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'master' }}
     runs-on: ubuntu-latest
-    needs: compilation
+    needs: [compilation, clang-format]
+    permissions:
+      pull-requests: write
     steps:
       # Download Ink Proof Results
       - uses: actions/download-artifact@v2
@@ -200,7 +222,7 @@ jobs:
           done
       
       # Post Comment
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@v2.8.0
         with:
           recreate: true
           path: comment.txt
