@@ -193,6 +193,17 @@
         }
       };
 
+      const BadgeCode = {
+        view(vnode) {
+          const name = vnode.attrs.name;
+          const href = vnode.attrs.href;
+          const origin = location.origin;
+          const resultsLink = `${origin}/${m.route.prefix}${href}`;
+          const imgLink = `${origin}/${name}`;
+          return m('code', `<a href="${resultsLink}"><img src="${imgLink}"/></a>`);
+        }
+      };
+
       const FocusExample = {
         view(vnode) {
           const example = Data.exampleByName[vnode.attrs.exampleName];
@@ -227,7 +238,7 @@
           const isLoading = Files.isLoading(vnode.attrs.path);
           return text === "" ? m('p', m("i.gray", isLoading ? "Loading" : "Empty file")) : m("pre.f6", {
             style: "white-space: pre-wrap; tab-size: 4;",
-          }, text ? text.split("\n").map(l => [l, m('span', {title: "newline", style: "user-select: none; color: #eaeaea;"}, "↵"), "\n"]) : "");
+          }, text ? text.split("\n").flatMap(l => [m('span', {title: "newline", class: "moon-gray", style: "user-select: none"}, "↵"), "\n", l]).slice(2) : "");
         },
       };
 
@@ -245,8 +256,8 @@
             return m("pre.f6", {
               style: "white-space: pre-wrap; tab-size: 4;",
             }, diff.map(p => {
-                const c = p.added ? 'green' : p.removed ? 'red' : '';
-                return m('span', {class: c}, p.value);
+                const c = p.added ? 'bg-washed-green dark-green' : p.removed ? 'bg-washed-red dark-red' : '';
+                return p.value.split("\n").flatMap(l => [m('span', {title: "newline", class: c || "moon-gray", style: "user-select: none"}, "↵"), "\n", m('span', {class: c}, l)]).slice(2);
             }));
           }
         },
@@ -396,6 +407,10 @@
             Data.programs.filter(p => !p.name.startsWith("bytecode")).map(p => {
               return [
                 m('.', m(BadgeView, {
+                  href: href(`/program/${p.name}`),
+                  name: `${p.name}.svg`,
+                })),
+                m('.pa3', m(BadgeCode, {
                   href: href(`/program/${p.name}`),
                   name: `${p.name}.svg`,
                 })),
@@ -771,7 +786,7 @@
 
                 Data.compilers.map(c => {
                   const rs = Data.resultsByRuntimeCompiler[r.name][c.name];
-                  const total = rs.length;
+                  const total = rs.filter(r => r.status !== "INCOMPATIBLE_VERSION").length;
                   const successes = rs.filter(r => r.status === "SUCCESS").length;
                   const programName = m.route.param("programName");
                   const compilerName = m.route.param("compilerName");

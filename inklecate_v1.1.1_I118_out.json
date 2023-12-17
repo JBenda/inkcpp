@@ -1,0 +1,1 @@
+{"inkVersion":21,"root":[["ev",{"VAR?":"negativeLiteral"},0,"+","out","/ev","\n","ev",{"VAR?":"negativeLiteral2"},0,"+","out","/ev","\n","ev",{"VAR?":"negativeLiteral3"},0,"+","out","/ev","\n",["done",{"#n":"g-0"}],null],"done",{"global decl":["ev",-1,{"VAR=":"negativeLiteral"},false,{"VAR=":"negativeLiteral2"},true,{"VAR=":"negativeLiteral3"},"/ev","end",null]}],"listDefs":{}}
