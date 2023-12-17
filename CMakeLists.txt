@@ -16,6 +16,7 @@ add_subdirectory(inkcpp_compiler)
 add_subdirectory(inkcpp_cl)
 add_subdirectory(inkcpp_test)
 add_subdirectory(unreal)
+add_subdirectory(inkcpp_py)
 
 
 install(TARGETS inkcpp inkcpp_compiler inkcpp_shared

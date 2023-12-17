@@ -1,3 +1,7 @@
 [submodule "proofing/ink-proof"]
 	path = proofing/ink-proof
 	url = https://github.com/chromy/ink-proof.git
+[submodule "inkcpp_py/pybind11"]
+	path = inkcpp_py/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = stable
