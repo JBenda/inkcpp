@@ -6,6 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
 namespace py = pybind11;
 
@@ -17,6 +18,7 @@ namespace py = pybind11;
 #include <snapshot.h>
 
 #include <sstream>
+#include <functional>
 
 using runner      = ink::runtime::runner_interface;
 using runner_ptr  = ink::runtime::runner;
@@ -71,6 +73,27 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    .def("new_runner", &story::new_runner, "creates a new runner for the current story");
 
 	py::class_<globals, globals_ptr>(m, "Globals")
+	    .def(
+	        "observe_ping",
+	        [](globals& self, const char* name, std::function<void()> f) { self.observe(name, f); },
+	        "Get a ping each time the observed variable changes"
+	    )
+	    .def(
+	        "observe_value",
+	        [](globals& self, const char* name, std::function<void(const value&)> f) {
+		        self.observe(name, f);
+	        },
+	        "Get a call with new value each time the variable changes"
+	    )
+	    .def(
+	        "observe_delta",
+	        [](globals& self, const char* name,
+	           std::function<void(const value&, ink::optional<const value>)> f) {
+		        self.observe(name, f);
+	        },
+	        "Get a call with the new and old value (this could be None) each time the variable "
+	        "changes"
+	    )
 	    .def(
 	        "__getattr__",
 	        [](const globals& self, const std::string& key) {
