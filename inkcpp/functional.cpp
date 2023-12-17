@@ -11,6 +11,12 @@
 namespace ink::runtime::internal
 {
 	template<>
+	ink::runtime::value function_base::pop<ink::runtime::value>(basic_eval_stack* stack, list_table& lists)
+	{
+		value val = stack->pop();
+		return val.to_interface_value(lists);
+	}
+	template<>
 	int32_t function_base::pop<int32_t>(basic_eval_stack* stack, list_table& lists)
 	{
 		value val = stack->pop();
@@ -62,7 +68,7 @@ namespace ink::runtime::internal
 	{
 		return FInkVar(stack->pop().to_interface_value(lists));
 	}
-
+#endif
 	template<>
 	void function_base::push<ink::runtime::value>(basic_eval_stack* stack, const ink::runtime::value& value)
 	{
@@ -73,5 +79,4 @@ namespace ink::runtime::internal
 			inkFail("unable to set variable?");
 		}
 	}
-#endif
 }

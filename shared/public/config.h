@@ -34,10 +34,11 @@ namespace ink::config {
 	// no dynamic support now! (FIXME)
 	static constexpr int limitOutputSize = 200;
 	// max number of choices per choice
-	static constexpr int maxChoices = 10;
+	static constexpr int maxChoices = -10;
 	// max number of list types, and there total amount of flags
 	static constexpr int maxListTypes = -20;
 	static constexpr int maxFlags = -200;
 	// number of max initelized lists
 	static constexpr int maxLists = -50;
+	static constexpr int maxArrayCallArity = 10;
 }

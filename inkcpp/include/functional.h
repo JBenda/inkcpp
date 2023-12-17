@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include "list.h"
 #include "traits.h"
 #include "system.h"
@@ -167,52 +168,69 @@ namespace ink::runtime::internal
 		void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists, seq<Is...>)
 		{
 			// Make sure the argument counts match
-			inkAssert(sizeof...(Is) == length, "Attempting to call functor with too few/many arguments");
-			static_assert(sizeof...(Is) == traits::arity);
+			constexpr bool array_call = is_same<
+					const ink::runtime::value*,
+					typename traits::template argument<1>::type>::value;
 
+			inkAssert(array_call || sizeof...(Is) == length, "Attempting to call functor with too few/many arguments");
+			static_assert(sizeof...(Is) == traits::arity);
+			if_t<array_call, value[config::maxArrayCallArity], char> vals; 
+			if constexpr (array_call) {
+				inkAssert(length <= config::maxArrayCallArity, "AIttampt to call array call with more arguments then supportet, please change in config");
+				for (size_t i = 0; i < length; ++i) {
+					vals[i] = pop<ink::runtime::value>(stack, lists);
+				}
+			}
 			// void functions
 			if constexpr (is_same<void, typename traits::return_type>::value)
 			{
 				// Just evaluevaluatelate
-				functor(pop_arg<Is>(stack, lists)...);
+				if constexpr (array_call) {
+					functor(length, vals);
+				} else {
+					functor(pop_arg<Is>(stack, lists)...);
+				}
 				
 				// Ink expects us to push something
-				// TODO -- Should be a special "void" value
 				push_void(stack);
-			}
-			else if constexpr (is_string<typename traits::return_type>::value)
-			{
-				// SPECIAL: The result of the functor is a string type
-				//  in order to store it in the inkcpp interpreter we 
-				//  need to store it in our allocated string table
-				auto string_result = functor(pop_arg<Is>(stack, lists)...);
-
-				// Get string length
-				size_t len = string_handler<typename traits::return_type>::length(string_result);
-
-				// Get source and allocate buffer
-				char* buffer = allocate(strings, len + 1);
-				string_handler<typename traits::return_type>::src_copy(string_result, buffer);
-
-				// push string result
-				push_string(stack, buffer);
-			}
-			else if constexpr (is_same<value, remove_cvref<typename traits::return_type>>::value) {
-				auto val = functor(pop_args<Is>(stack, lists)...);
-				if (val.type() == ink::runtime::value::Type::String) {
-					auto src = val.template get<ink::runtime::value::Type::String>();
-					size_t len = string_handler<decltype(src)>::length(src);
-					char* buffer = allocate(strings, len + 1);
-					string_handler<decltype(src)>::src_copy(src, buffer);
-					push_string(stack, buffer);
+			} else {
+				typename traits::return_type res;
+				if constexpr (array_call) {
+					res = functor(length, vals);
 				} else {
-					push(val);
+					res = functor(pop_arg<Is>(stack, lists)...);
 				}
-			}
-			else
-			{
-				// Evaluate and push the result onto the stack
-				push(stack, functor(pop_arg<Is>(stack, lists)...));
+				if constexpr (is_string<typename traits::return_type>::value)
+				{
+					// SPECIAL: The result of the functor is a string type
+					//  in order to store it in the inkcpp interpreter we 
+					//  need to store it in our allocated string table
+					// Get string length
+					size_t len = string_handler<typename traits::return_type>::length(res);
+
+					// Get source and allocate buffer
+					char* buffer = allocate(strings, len + 1);
+					string_handler<typename traits::return_type>::src_copy(res, buffer);
+
+					// push string result
+					push_string(stack, buffer);
+				}
+				else if constexpr (is_same<value, remove_cvref<typename traits::return_type>>::value) {
+					if (res.type() == ink::runtime::value::Type::String) {
+						auto src = res.template get<ink::runtime::value::Type::String>();
+						size_t len = string_handler<decltype(src)>::length(src);
+						char* buffer = allocate(strings, len + 1);
+						string_handler<decltype(src)>::src_copy(src, buffer);
+						push_string(stack, buffer);
+					} else {
+						push(stack, res);
+					}
+				}
+				else
+				{
+					// Evaluate and push the result onto the stack
+					push(stack, res);
+				}
 			}
 		}
 	};

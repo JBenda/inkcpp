@@ -179,6 +179,10 @@ namespace ink::runtime
 		 * Given a name and a callable object, register this function
 		 *  to be called back from the ink runtime.
 		 *
+		 * beside an exact signature match, the function can also have one of the following signatures:
+		 * + void(size_t argl, const ink::runtime::value* argv)
+		 * + ink::runtime::value(size_t argl, const ink::runtime::value* argv)
+		 * this provides a generic way to bind functions with abitrary length
 		 * @param name name hash
 		 * @param function callable
 		*/
