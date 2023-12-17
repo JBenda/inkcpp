@@ -2,9 +2,21 @@
 
 import inkcpp_py
 import sys
+import os
+
+story_ink = 'unreal_example.ink'
+story_json = 'unreal_example.ink.json'
+story_bin = 'unreal_example.bin'
+
+
+# convert .ink / .json file to .bin file
+if not os.path.exists(story_json):
+    os.system('inklecate {}'.format(story_ink))
+if not os.path.exists(story_bin):
+    inkcpp_py.compile_json(story_json, story_bin)
 
 # load story and maybe snapshot
-story = inkcpp_py.Story.from_file('unreal_example.bin')
+story = inkcpp_py.Story.from_file(story_bin)
 if len(sys.argv) > 1:
     snap = inkcpp_py.Snapshot.from_file(sys.argv[1])
     globals = story.new_globals_from_snapshot(snap)

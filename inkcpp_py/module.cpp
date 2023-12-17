@@ -1,3 +1,4 @@
+#include "compilation_results.h"
 #include "story_ptr.h"
 #include "types.h"
 #include <pybind11/attr.h>
@@ -268,4 +269,16 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    .def("num_runners", &snapshot::num_runners, "Number of different runners stored in snapshot")
 	    .def("write_to_file", &snapshot::write_to_file, "Store snapshot in file")
 	    .def("from_file", &snapshot::from_file, "Load snapshot from file");
+	m.def("compile_json", [](const char* input_file_name, const char* output_filen_ame){
+		ink::compiler::compilation_results results;
+		ink::compiler::run(input_file_name, output_filen_ame, &results);
+		if(!results.errors.empty()) {
+			std::string str;
+			for (auto& error : results.errors) {
+				str += error;
+				str += '\n';
+			}
+			throw py::value_error(str);
+		}
+	}, "Converts a story.json file to a story.bin file used by inkcpp");
 }
