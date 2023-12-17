@@ -4,6 +4,7 @@
 #include <pybind11/cast.h>
 #include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
@@ -27,17 +28,37 @@ using value       = ink::runtime::value;
 using list        = ink::runtime::list_interface;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, ink::runtime::story_ptr<T>);
-struct StringValueWrap : public value{
-	StringValueWrap(const std::string& s) : str{s}{
-		value::type = value::Type::String;
+
+struct StringValueWrap : public value {
+	StringValueWrap(const std::string& s)
+	    : str{s}
+	{
+		value::type     = value::Type::String;
 		value::v_string = str.c_str();
 	}
-	~StringValueWrap() {
-		std::cout << "death" << std::endl;
-		
-	}
+
+	~StringValueWrap() { std::cout << "death" << std::endl; }
+
 	std::string str;
 };
+
+std::string list_to_str(const list& list)
+{
+	std::stringstream out;
+	out << "[";
+	bool first = true;
+	for (const auto& flag : list) {
+		if (first) {
+			first = false;
+		} else {
+			out << ", ";
+		}
+		out << flag;
+	}
+	out << "]";
+	return out.str();
+}
+
 PYBIND11_MODULE(inkcpp_py, m)
 {
 	m.doc()
@@ -63,7 +84,10 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    )
 	    .def("__setattr__", [](globals& self, const std::string& key, const value& val) {
 		    if (! self.set<value>(key.c_str(), val)) {
-			    throw py::key_error(std::string("No global variable with name '") + key + "' found you are trying to override a non string variable with a string");
+			    throw py::key_error(
+			        std::string("No global variable with name '") + key
+			        + "' found you are trying to override a non string variable with a string"
+			    );
 		    }
 	    });
 
@@ -71,7 +95,12 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    m, "List",
 	    "Allows reading and editing inkcpp lists. !Only valid until next choose ore getline a runner "
 	    "referncing the corresponding global"
-	);
+	)
+	    .def("add", &list::add, "Add flag to list")
+	    .def("remove", &list::remove, "Remove flag from list")
+	    .def("contains", &list::contains, "Check if list contains the given flag")
+	    .def("__str__", &list_to_str);
+
 
 	py::class_<value> py_value(m, "Value", "A Value of a Ink Variable");
 	py_value.def_readonly("type", &value::type, "Type contained in value");
@@ -79,38 +108,36 @@ PYBIND11_MODULE(inkcpp_py, m)
 	py_value.def(py::init<bool>());
 	py_value.def(py::init<uint32_t>());
 	py_value.def(py::init<int32_t>());
-	// py_value.def(py::init<const char*>());
 	py_value.def(py::init<float>());
-	py_value.def(py::init([](const std::string& str){
-		return new StringValueWrap(str);
-	}));
+	py_value.def(py::init<list*>());
+	py_value.def(py::init([](const std::string& str) { return new StringValueWrap(str); }));
+	py_value.def(
+	    "as_list",
+	    [](const value& self) {
+		    if (self.type != value::Type::List) {
+			    throw py::attribute_error("Try to access list of non list value");
+		    }
+		    return self.v_list;
+	    },
+	    py::return_value_policy::reference
+	);
 	py_value.def("__str__", [](const value& self) {
 		switch (self.type) {
 			case value::Type::Bool: return std::string(self.v_bool ? "true" : "false");
 			case value::Type::Uint32: return std::to_string(self.v_uint32);
 			case value::Type::Int32: return std::to_string(self.v_int32);
-			case value::Type::String: std::cout << "aho?? " << self.v_string << std::endl; return std::string(self.v_string);
+			case value::Type::String:
+				std::cout << "aho?? " << self.v_string << std::endl;
+				return std::string(self.v_string);
 			case value::Type::Float: return std::to_string(self.v_float);
 			case value::Type::List: {
-				std::stringstream out;
-				out << "[";
-				bool first = true;
-				for (const auto& flag : *self.v_list) {
-					if (first) {
-						first = false;
-					} else {
-						out << ", ";
-					}
-					out << flag;
-				}
-				out << "]";
-				return out.str();
+				return list_to_str(*self.v_list);
 			}
 		}
 		throw py::attribute_error("value is in an invalid state");
 	});
 
-	py::enum_<value::Type>(m,  "Type")
+	py::enum_<value::Type>(m, "Type")
 	    .value("Bool", value::Type::Bool)
 	    .value("Uint32", value::Type::Uint32)
 	    .value("Int32", value::Type::Int32)
