@@ -28,6 +28,7 @@ using story       = ink::runtime::story;
 using choice      = ink::runtime::choice;
 using value       = ink::runtime::value;
 using list        = ink::runtime::list_interface;
+using snapshot    = ink::runtime::snapshot;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, ink::runtime::story_ptr<T>);
 
@@ -70,9 +71,25 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    .def("from_file", &story::from_file, "Creates a new story from a .bin file")
 	    .def("new_globals", &story::new_globals, "creates new globals store for the current story")
 	    .def("new_runner", [](story& self) { return self.new_runner(); })
-	    .def("new_runner", &story::new_runner, "creates a new runner for the current story");
+	    .def("new_runner", &story::new_runner, "creates a new runner for the current story")
+	    .def("new_globals_from_snapshot", &story::new_globals_from_snapshot)
+	    .def("new_runner_from_snapshot", &story::new_runner_from_snapshot)
+	    .def(
+	        "new_runner_from_snapshot", [](story& self, const snapshot& snap, globals_ptr store
+	                                    ) { return self.new_runner_from_snapshot(snap, store); }
+	    )
+	    .def(
+	        "new_runner_from_snapshot",
+	        [](story& self, const snapshot& snap, globals_ptr store, unsigned idx) {
+		        return self.new_runner_from_snapshot(snap, store, idx);
+	        }
+	    );
 
 	py::class_<globals, globals_ptr>(m, "Globals")
+	    .def(
+	        "create_snapshot", &globals::create_snapshot,
+	        "Creates a snapshot from the current state for later usage"
+	    )
 	    .def(
 	        "observe_ping",
 	        [](globals& self, const char* name, std::function<void()> f) { self.observe(name, f); },
@@ -168,6 +185,10 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    .export_values();
 
 	py::class_<runner, runner_ptr>(m, "Runner")
+	    .def(
+	        "create_snapshot", &runner::create_snapshot,
+	        "Creates a snapshot from the current state for later usage"
+	    )
 	    .def("can_continue", &runner::can_continue, "check if there is content left in story")
 	    .def("getline", static_cast<std::string (runner::*)()>(&runner::getline))
 	    .def("has_tags", &runner::has_tags, "Where there tags since last getline")
@@ -241,4 +262,10 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        },
 	        "Get all current assinged tags"
 	    );
+	py::class_<snapshot>(
+	    m, "Snapshot", "Globals and all assoziatet runner stored for later restoration"
+	)
+	    .def("num_runners", &snapshot::num_runners, "Number of different runners stored in snapshot")
+	    .def("write_to_file", &snapshot::write_to_file, "Store snapshot in file")
+	    .def("from_file", &snapshot::from_file, "Load snapshot from file");
 }
