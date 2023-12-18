@@ -4,12 +4,12 @@ cmake_minimum_required(VERSION 3.16)
 enable_testing()
 
 # Project setup
-project(inkcpp VERSION 0.1)
+project(inkcpp VERSION 0.1.1)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
-add_compile_options(-fPIC)
+
 # Add subdirectories
 add_subdirectory(shared)
 add_subdirectory(inkcpp)
@@ -17,7 +17,11 @@ add_subdirectory(inkcpp_compiler)
 add_subdirectory(inkcpp_cl)
 add_subdirectory(inkcpp_test)
 add_subdirectory(unreal)
-add_subdirectory(inkcpp_py)
+
+set(INKCPP_PY OFF CACHE BOOL "Build python bindings")
+if (INKCPP_PY)
+	add_subdirectory(inkcpp_py)
+endif(INKCPP_PY)
 
 
 install(TARGETS inkcpp inkcpp_compiler inkcpp_shared

@@ -22,11 +22,13 @@ Without the `-p` flag, it'll just compile the JSON/Ink file into InkCPP's binary
 
 All features of ink 1.1 are supported, and checked with [ink-proof](https://github.com/chromy/ink-proof).
 
+In addition a UE Plugin inclusive BluePrints are provided and python bindings based on [pybind11](https://github.com/pybind/pybind11).
+
 KeyFeatures: snapshots, observers, binding ink functions, support ink [function fallback](https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md#fallbacks-for-external-functions)
 
 ## Unreal Plugin
 
-The current version of the UE plugin can be downloaded from the [release page](https://github.com/brwarner/inkcpp/releases/latest) with te corresponding name of the OS (e.g. win64-unreal).
+The current version of the UE plugin can be downloaded from the [release page](https://github.com/JBenda/inkcpp/releases/latest) with te corresponding name of the OS (e.g. win64-unreal).
 Place the content of this file at your plugin folder of your UE project and at the next start up it will be intigrated.
 
 A example project can be found [here](https://cloud.julian-benda.de/index.php/s/cRMBGBWbHPCcdwb). 
@@ -125,7 +127,7 @@ To install the different components use `cmake --install . --component <lib|cl|u
 + `cl` command line application
 + `unreal` UE-plugin
 
-For a more in depth installation description please checkout the (wiki)[https://github.com/brwarner/inkcpp/wiki/building].
+For a more in depth installation description please checkout the [wiki](https://github.com/brwarner/inkcpp/wiki/building).
 
 
 ### Troubleshooting
@@ -140,9 +142,14 @@ Run `ctest` from the build folder to execute unit tests configured with CMake. U
 Right now this only executes the internal unit tests which test the functions of particular classes. Soon it'll run more complex tests on .ink files using ink-proof.
 
 
-## Next Steps
+## Python Bindings
 
-I am currently working toward a 1.0 release. You can track my progress here: https://github.com/brwarner/inkcpp/projects/1
+The easy way to start is installing it with pip: `pip install inkcpp_py`.
+An example can be found at [./inkcpp_py/example.py].
+
+The python bindnigs are defined in `inkcpp_py` subfolder.
+
+A downloadable version of the `inkcpp_py` lib can be found at the [release page](https://github.com/JBenda/inkcpp/releases/latest) with the name `<os>_py` eg `linux_py`.
 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
