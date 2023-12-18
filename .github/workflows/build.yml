@@ -217,7 +217,7 @@ jobs:
           git fetch origin master --depth 1
       - name: Check clang-format
         run: |
-          diff=$(git clang-format-14 --style file -q --diff origin/master)
+          diff=$(git clang-format-14 --extensions c,cpp,h,hpp --style file -q --diff origin/master)
           echo $diff
           if [ "$diff" != "" ]; then
             echo run git clang-format --extensions c,cpp,h,hpp --style file master
