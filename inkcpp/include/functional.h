@@ -164,18 +164,19 @@ namespace ink::runtime::internal
 			return pop<arg_type<index>>(stack, lists);
 		}
 
+		static constexpr bool is_array_call() {
+			if constexpr (traits::arity == 2) {
+				return is_same<const ink::runtime::value*, typename traits::template argument<1>::type>::value;
+			}
+			return false;
+		}
 		template<size_t... Is>
 		void call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists, seq<Is...>)
 		{
-			// Make sure the argument counts match
-			constexpr bool array_call = is_same<
-					const ink::runtime::value*,
-					typename traits::template argument<1>::type>::value;
-
-			inkAssert(array_call || sizeof...(Is) == length, "Attempting to call functor with too few/many arguments");
+			inkAssert(is_array_call() || sizeof...(Is) == length, "Attempting to call functor with too few/many arguments");
 			static_assert(sizeof...(Is) == traits::arity);
-			if_t<array_call, value[config::maxArrayCallArity], char> vals; 
-			if constexpr (array_call) {
+			if_t<is_array_call(), value[config::maxArrayCallArity], char> vals; 
+			if constexpr (is_array_call()) {
 				inkAssert(length <= config::maxArrayCallArity, "AIttampt to call array call with more arguments then supportet, please change in config");
 				for (size_t i = 0; i < length; ++i) {
 					vals[i] = pop<ink::runtime::value>(stack, lists);
@@ -185,7 +186,7 @@ namespace ink::runtime::internal
 			if constexpr (is_same<void, typename traits::return_type>::value)
 			{
 				// Just evaluevaluatelate
-				if constexpr (array_call) {
+				if constexpr (is_array_call()) {
 					functor(length, vals);
 				} else {
 					functor(pop_arg<Is>(stack, lists)...);
@@ -195,7 +196,7 @@ namespace ink::runtime::internal
 				push_void(stack);
 			} else {
 				typename traits::return_type res;
-				if constexpr (array_call) {
+				if constexpr (is_array_call()) {
 					res = functor(length, vals);
 				} else {
 					res = functor(pop_arg<Is>(stack, lists)...);

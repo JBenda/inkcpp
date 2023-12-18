@@ -17,13 +17,13 @@ jobs:
       - name: Download artifacts
         uses: marcofaggian/action-download-multiple-artifacts@v3.0.8
         with:
-          names: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal
-          paths: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal
+          names: linux-cl linux-lib linux-unreal linux-py macos-cl macos-lib macos-unreal macos-py win64-cl win64-lib win64-unreal win64-py
+          paths: linux-cl linux-lib linux-unreal linux-py macos-cl macos-lib macos-unreal macos-py win64-cl win64-lib win64-unreal win64-py
           workflow: build.yml
           branch: master
       - name: Zip
         run: |
-          for f in linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal; do zip -r $f $f; done
+          for f in linux-cl linux-lib linux-unreal linux-py macos-cl macos-lib macos-unreal macos-py win64-cl win64-lib win64-unreal win64-py; do zip -r $f $f; done
       - name: List
         run: tree
       - name: Create release
@@ -35,4 +35,4 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
               --generate-notes \
-              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-unreal.zip" "macos-cl.zip" "macos-lib.zip" "macos-unreal.zip" "win64-cl.zip" "win64-lib.zip" "win64-unreal.zip"
+              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-unreal.zip" "linux-py.zip" "macos-cl.zip" "macos-lib.zip" "macos-unreal.zip" "macos-py.zip" "win64-cl.zip" "win64-lib.zip" "win64-unreal.zip" "win64-py.zip"

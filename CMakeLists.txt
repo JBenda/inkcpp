@@ -11,6 +11,12 @@ SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
 
 # Add subdirectories
+set(INKCPP_PY OFF CACHE BOOL "Build python bindings")
+if (INKCPP_PY)
+	add_compile_options(-fPIC)
+	add_subdirectory(inkcpp_py)
+endif(INKCPP_PY)
+
 add_subdirectory(shared)
 add_subdirectory(inkcpp)
 add_subdirectory(inkcpp_compiler)
@@ -18,10 +24,6 @@ add_subdirectory(inkcpp_cl)
 add_subdirectory(inkcpp_test)
 add_subdirectory(unreal)
 
-set(INKCPP_PY OFF CACHE BOOL "Build python bindings")
-if (INKCPP_PY)
-	add_subdirectory(inkcpp_py)
-endif(INKCPP_PY)
 
 
 install(TARGETS inkcpp inkcpp_compiler inkcpp_shared

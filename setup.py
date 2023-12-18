@@ -19,7 +19,7 @@ PLAT_TO_CMAKE = {
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "") -> None:
         super().__init__(name, sources=[])
-        self.sourcedir = os.fpath(Path(sourcedir).resolve())
+        self.sourcedir = os.fspath(Path(sourcedir).resolve())
     
 class CMakeBuild(build_ext):
  def build_extension(self, ext: CMakeExtension) -> None:
@@ -126,7 +126,7 @@ setup(
     description="Python bindings for InkCPP a Inkle runtime written in C++",
     long_description="For all issues and ideas please visit the repository at https://github.com/JBenda/inkcpp",
     zip_safe=False,
-    ext_modules=[CmakeExtension("inkcpp_py")],
-    cmdclass={"build_ext:" CMakeBuild},
+    ext_modules=[CMakeExtension("inkcpp_py")],
+    cmdclass={"build_ext": CMakeBuild},
     python_requirnes=">=3.7",
 )

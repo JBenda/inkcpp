@@ -146,6 +146,12 @@ Right now this only executes the internal unit tests which test the functions of
 
 The easy way to start is installing it with pip: `pip install inkcpp_py`.
 An example can be found at [./inkcpp_py/example.py].
+To build it from source use:
+
+```sh
+git clone --recurse-submodules https://github.com/JBenda/inkcpp.git
+pip install inkcpp
+```
 
 The python bindnigs are defined in `inkcpp_py` subfolder.
 

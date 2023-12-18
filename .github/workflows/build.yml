@@ -74,7 +74,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DINKCPP_PY=ON
 
     # Build using CMake and OS toolkit
     - name: Build
@@ -124,6 +124,17 @@ jobs:
       with:
         name: ${{ matrix.artifact }}-unreal
         path: build/comp_unreal/
+
+    - name: Install PythonLib
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --install . --config $BUILD_TYPE --prefix comp_py --component unreal
+
+    - name: Upload Binary Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact }}-py
+        path: build/comp_py/
 
     # Make sure Inkproof has everything it needs to run our executable
     - name: Setup Ink Proof
