@@ -10,9 +10,9 @@ story_bin = 'unreal_example.bin'
 
 
 # convert .ink / .json file to .bin file
-if not os.path.exists(story_json):
-    os.system('inklecate {}'.format(story_ink))
 if not os.path.exists(story_bin):
+    if not os.path.exists(story_json):
+        os.system('inklecate {}'.format(story_ink))
     inkcpp_py.compile_json(story_json, story_bin)
 
 # load story and maybe snapshot
