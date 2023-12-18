@@ -5,6 +5,7 @@
 # Ink files
 inkcpp_cl/*.ink
 *.json
+!inkcpp_py/sources.json
 
 # Visual Studio code
 *.code-workspace
