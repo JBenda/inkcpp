@@ -226,14 +226,20 @@ public:
 	 *
 	 * @see can_continue
 	 */
-	inline operator bool() const { return can_continue(); }
+	inline operator bool() const
+	{
+		return can_continue();
+	}
 
 	/**
 	 * Checks if we're currently facing any choices
 	 *
 	 * @return are there any choices available
 	 */
-	inline bool has_choices() const { return begin() != end(); }
+	inline bool has_choices() const
+	{
+		return begin() != end();
+	}
 
 	/**
 	 * Returns the number of choices currently available
@@ -260,8 +266,12 @@ public:
 	 * @param index index of the choice to access
 	 * @return choice object with info on the choice
 	 */
-	inline const choice* operator[](size_t index) { return get_choice(index); }
+	inline const choice* operator[](size_t index)
+	{
+		return get_choice(index);
+	}
 
 #pragma endregion
 };
 } // namespace ink::runtime
+
