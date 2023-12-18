@@ -12,7 +12,7 @@ jobs:
   release:
     name: Release pushed tag
     runs-on: ubuntu-22.04
-    enviroment:
+    environment:
       name: pypi
       url: https://pypi.org/p/inkcpp-py
     permissions:
