@@ -1,12 +1,9 @@
 [project]
-name = "inkcpp_py"
-version = "0.1.1"
-dynamic = ["version"]
+name = "inkcpp-py"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
 keywords = ["ink", "inkpp", "inklecate"]
-requires-python ">=3.7"
-desrciption="Python bindings for InkCPP a Inkle runtime written in C++"
+dynamic = ["version", "description", "authors", "requires-python"]
 
 [project.urls]
 Repository = "https://github.com/JBenda/inkcpp.git"
@@ -44,12 +41,12 @@ ignore_missing_imports = true
 # ]
 # testpaths = ["tests"]
 
-[tool.cibuildwheel]
+# [tool.cibuildwheel]
 # test-command = "pytest {project}/tests"
 # test-extras = ["test"]
 # test-skip = ["*universal2:arm64"]
 # Setuptools bug causes collision between pypy and cpython artifacts
-before-build = "rm -rf {project}/build"
+# before-build = "rm -rf {project}/build"
 
 [tool.ruff]
 target-version = "py37"

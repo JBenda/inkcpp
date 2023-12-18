@@ -181,6 +181,31 @@ jobs:
         name: ${{ matrix.artifact }}-www
         path: proofing/ink-proof/out
 
+
+  build-python:
+    name: Build Python package
+    needs: compilation
+    runs-on: ubuntu-latest
+    steps:        
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.x"
+    - name: install build
+      run: >-
+        python3 -m
+        pip install
+        build
+        --user
+    - name: Build python release
+      run: python3 -m build
+    - name: Upload Python files
+      uses: actions/upload-artifact@v3
+      with:
+        name: python-package-distribution
+        path: dist/
+
   clang-format:
     name: "Check Formatting"
     runs-on: ubuntu-latest

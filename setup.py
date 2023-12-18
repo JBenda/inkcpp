@@ -4,9 +4,15 @@ import os
 import re
 import sys
 import subprocess
+import glob
+import json
 from pathlib import Path
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
+
+
+# find shared/** inkcpp/** inkcpp_compiler/** inkcpp_py/** -not -path '*/.*' | sed -e 's/[^ ]*/"\0"/g' -e '/""/d' -e 's/ /,\n/g'
+# + "CMakeLists.txt"
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -18,7 +24,9 @@ PLAT_TO_CMAKE = {
 
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "") -> None:
-        super().__init__(name, sources=[])
+        src_files = json.load(open('inkcpp_py/sources.json'))
+        src_files += ["CMakeLists.txt", "Config.cmake.in"]
+        super().__init__(name, sources=src_files)
         self.sourcedir = os.fspath(Path(sourcedir).resolve())
     
 class CMakeBuild(build_ext):
@@ -45,6 +53,7 @@ class CMakeBuild(build_ext):
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
             f"-DINKCPP_PY=ON",
+            f"-DWHEEL_BUILD=ON",
         ]
         build_args = [
             f"--target=inkcpp_py",
@@ -111,6 +120,8 @@ class CMakeBuild(build_ext):
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
 
+        print([f for f in os.listdir(ext.sourcedir)])
+        print("'{}'".format(ext.sourcedir), cmake_args)
         subprocess.run(
             ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
         )
@@ -119,14 +130,15 @@ class CMakeBuild(build_ext):
         )            
 
 setup(
-    name="inkcpp_py",
+    name="inkcpp-py",
     version="0.1.1",
     author="Julian Benda",
-    auther_email="julian.benda@ovgu.de",
+    author_email="julian.benda@ovgu.de",
     description="Python bindings for InkCPP a Inkle runtime written in C++",
     long_description="For all issues and ideas please visit the repository at https://github.com/JBenda/inkcpp",
     zip_safe=False,
     ext_modules=[CMakeExtension("inkcpp_py")],
     cmdclass={"build_ext": CMakeBuild},
-    python_requirnes=">=3.7",
+    python_requires=">=3.7",
+    py_modules=[],
 )
