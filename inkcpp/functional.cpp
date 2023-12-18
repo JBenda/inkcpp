@@ -40,20 +40,14 @@ void function_base::push<int32_t>(basic_eval_stack* stack, const int32_t& v)
 	stack->push(value{}.set<value_type::int32>(v));
 }
 
-void function_base::push_void(basic_eval_stack* stack)
-{
-	stack->push(values::null);
-}
+void function_base::push_void(basic_eval_stack* stack) { stack->push(values::null); }
 
 void function_base::push_string(basic_eval_stack* stack, const char* dynamic_string)
 {
 	stack->push(value{}.set<value_type::string>(dynamic_string, true));
 }
 
-char* function_base::allocate(string_table& strings, size_t len)
-{
-	return strings.create(len);
-}
+char* function_base::allocate(string_table& strings, size_t len) { return strings.create(len); }
 
 // Generate template implementations for all significant types
 
