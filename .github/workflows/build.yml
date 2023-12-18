@@ -220,7 +220,7 @@ jobs:
           diff=$(git clang-format-14 --style file -q --diff origin/master)
           echo $diff
           if [ "$diff" != "" ]; then
-            echo run git clang-format --style file master
+            echo run git clang-format --extensions c,cpp,h,hpp --style file master
             echo or upstream/master depending on your setup
             clang
           fi

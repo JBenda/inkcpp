@@ -12,7 +12,7 @@ namespace ink::runtime::internal
 {
 template<>
 ink::runtime::value
-function_base::pop<ink::runtime::value>(basic_eval_stack* stack, list_table& lists)
+    function_base::pop<ink::runtime::value>(basic_eval_stack* stack, list_table& lists)
 {
 	value val = stack->pop();
 	return val.to_interface_value(lists);
