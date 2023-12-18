@@ -392,7 +392,9 @@ runner_impl::runner_impl(const story_impl* data, globals global)
 runner_impl::~runner_impl()
 {
 	// unregister with globals
-	_globals->remove_runner(this);
+	if (_globals.is_valid()) {
+		_globals->remove_runner(this);
+	}
 }
 
 #ifdef INK_ENABLE_STL

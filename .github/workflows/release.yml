@@ -12,20 +12,27 @@ jobs:
   release:
     name: Release pushed tag
     runs-on: ubuntu-22.04
+    enviroment:
+      name: pypi
+      url: https://pypi.org/p/inkcpp-py
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - name: Download artifacts
         uses: marcofaggian/action-download-multiple-artifacts@v3.0.8
         with:
-          names: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal
-          paths: linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal
+          names: linux-cl linux-lib linux-unreal  macos-cl macos-lib macos-unreal  win64-cl win64-lib win64-unreal python-package-distribution
+          paths: linux-cl linux-lib linux-unreal  macos-cl macos-lib macos-unreal  win64-cl win64-lib win64-unreal dist/
           workflow: build.yml
           branch: master
       - name: Zip
         run: |
-          for f in linux-cl linux-lib linux-unreal macos-cl macos-lib macos-unreal win64-cl win64-lib win64-unreal; do zip -r $f $f; done
+          for f in linux-cl linux-lib linux-unreal  macos-cl macos-lib macos-unreal  win64-cl win64-lib win64-unreal win6; do zip -r $f $f; done
       - name: List
         run: tree
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -35,4 +42,5 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
               --generate-notes \
-              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-unreal.zip" "macos-cl.zip" "macos-lib.zip" "macos-unreal.zip" "win64-cl.zip" "win64-lib.zip" "win64-unreal.zip"
+              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-unreal.zip" "macos-cl.zip" "macos-lib.zip" "macos-unreal.zip" "win64-cl.zip" "win64-lib.zip" "win64-unreal.zip" 
+

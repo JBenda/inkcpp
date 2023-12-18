@@ -4,18 +4,29 @@ cmake_minimum_required(VERSION 3.16)
 enable_testing()
 
 # Project setup
-project(inkcpp VERSION 0.1)
+project(inkcpp VERSION 0.1.1)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
+
 # Add subdirectories
+set(INKCPP_PY OFF CACHE BOOL "Build python bindings")
+set(WHEEL_BUILD OFF CACHE BOOL "Set for build wheel python lib (do not forgett INKCPP_PY")
+
+if (INKCPP_PY)
+	add_compile_options(-fPIC)
+	add_subdirectory(inkcpp_py)
+endif(INKCPP_PY)
 add_subdirectory(shared)
 add_subdirectory(inkcpp)
 add_subdirectory(inkcpp_compiler)
+if (NOT WHEEL_BUILD)
 add_subdirectory(inkcpp_cl)
 add_subdirectory(inkcpp_test)
 add_subdirectory(unreal)
+endif(NOT WHEEL_BUILD)
+
 
 
 install(TARGETS inkcpp inkcpp_compiler inkcpp_shared
