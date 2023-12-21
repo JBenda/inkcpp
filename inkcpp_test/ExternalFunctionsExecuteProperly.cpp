@@ -13,16 +13,16 @@ SCENARIO("a story with an external function evaluates the function at the right 
 	GIVEN("a story with an external function")
 	{
 		inklecate("ink/ExternalFunctionsExecuteProperly.ink", "ExternalFunctionsExecuteProperly.tmp");
-		ink::compiler::run("ExternalFunctionsExecuteProperly.tmp", "ExternalFunctionsExecuteProperly.bin");
+		ink::compiler::run(
+		    "ExternalFunctionsExecuteProperly.tmp", "ExternalFunctionsExecuteProperly.bin"
+		);
 		auto   ink    = story::from_file("ExternalFunctionsExecuteProperly.bin");
 		runner thread = ink->new_runner();
 
 		int line_count = 0;
 
 
-		thread->bind("GET_LINE_COUNT", [&line_count]() {
-			return line_count;
-		});
+		thread->bind("GET_LINE_COUNT", [&line_count]() { return line_count; });
 
 		WHEN("run thread")
 		{

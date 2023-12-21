@@ -17,10 +17,7 @@ const choice* runner_interface::get_choice(size_t index) const
 	return begin() + index;
 }
 
-size_t runner_interface::num_choices() const
-{
-	return end() - begin();
-}
+size_t runner_interface::num_choices() const { return end() - begin(); }
 } // namespace ink::runtime
 
 namespace ink::runtime::internal
@@ -520,10 +517,7 @@ void runner_impl::advance_line()
 	_globals->gc();
 }
 
-bool runner_impl::can_continue() const
-{
-	return _ptr != nullptr;
-}
+bool runner_impl::can_continue() const { return _ptr != nullptr; }
 
 void runner_impl::choose(size_t index)
 {
@@ -571,10 +565,7 @@ void runner_impl::getline_silent()
 	_output.clear();
 }
 
-bool runner_impl::has_tags() const
-{
-	return num_tags() > 0;
-}
+bool runner_impl::has_tags() const { return num_tags() > 0; }
 
 size_t runner_impl::num_tags() const
 {
@@ -587,10 +578,7 @@ const char* runner_impl::get_tag(size_t index) const
 	return _tags[index];
 }
 
-snapshot* runner_impl::create_snapshot() const
-{
-	return _globals->create_snapshot();
-}
+snapshot* runner_impl::create_snapshot() const { return _globals->create_snapshot(); }
 
 size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
@@ -759,7 +747,7 @@ bool runner_impl::line_step()
 				// Save a snapshot of the current runtime state so we
 				//  can return here if we end up hitting a new line
 				// forget();
-				if (!_saved) {
+				if (! _saved) {
 					save();
 				}
 			}
