@@ -35,10 +35,10 @@ namespace ink::runtime::internal {
 		list_flag,					// a single list flag
 		string,                     // Pointer to string
 		OP_END,                     // END of types where we can operate on
-		value_pointer,				// a pointer to an value
 		newline = OP_END,           // newline symbol
 		PRINT_END,                  // END of printable values
 		marker = PRINT_END,         // special marker (used in output stream)
+		value_pointer,				// a pointer to an value
 		glue,                       // glue symbol
 		func_start,                 // start of function marker
 		func_end,                   // end of function marker

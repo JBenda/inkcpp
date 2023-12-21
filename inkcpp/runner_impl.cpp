@@ -515,6 +515,9 @@ void runner_impl::advance_line()
 	// can be in save state becaues of choice
 	// Garbage collection TODO: How often do we want to do this?
 	_globals->gc();
+	if (_output.saved()) {
+		_output.restore();
+	}
 }
 
 bool runner_impl::can_continue() const { return _ptr != nullptr; }
