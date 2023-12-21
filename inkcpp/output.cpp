@@ -339,8 +339,8 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 	_size = start;
 
 	// Return processed string
-	end        = clean_string<true, false>(buffer, buffer + c_str_len(buffer));
-	*end       = 0;
+	end  = clean_string<true, false>(buffer, buffer + c_str_len(buffer));
+	*end = 0;
 	if (end != buffer) {
 		_last_char = end[-1];
 		if constexpr (RemoveTail) {
@@ -369,7 +369,7 @@ size_t basic_stream::find_start() const
 	if (_save != ~0 && start < _save) {
 		// TODO: check if we don't reset save correct
 		// at some point we can modifiy the output even behind save (probally discard?) and push a new
-		// element -> invalid save point 
+		// element -> invalid save point
 		inkAssert(false, "Trying to access output stream prior to save point!");
 	}
 

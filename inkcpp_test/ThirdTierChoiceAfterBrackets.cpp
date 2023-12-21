@@ -36,7 +36,7 @@ SCENARIO(
 				REQUIRE(thread->has_choices());
 				thread->choose(0);
 				thread->getall();
-				REQUIRE(!thread->has_choices());
+				REQUIRE(! thread->has_choices());
 			}
 		}
 	}
