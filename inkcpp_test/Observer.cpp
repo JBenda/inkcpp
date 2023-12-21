@@ -21,10 +21,7 @@ SCENARIO( "Observer", "[variables]" )
 		WHEN( "Run without observers" )
 		{
 			std::string out = thread->getall();
-			REQUIRE( out == R"V(hello line 1 1
-hello line 2 5
-test line 3 5
-)V" );
+			REQUIRE( out == "hello line 1 1 hello line 2 5 test line 3 5\n");
 		}
 		WHEN( "Run with observers read only, with specific type" )
 		{
@@ -56,10 +53,7 @@ test line 3 5
 			globals->observe( "var2", var2 );
 			std::string out = thread->getall();
 
-			REQUIRE( out == R"V(hello line 1 1
-hello line 2 5
-test line 3 5
-)V" );
+			REQUIRE( out == "hello line 1 1 hello line 2 5 test line 3 5\n" );
 			REQUIRE( var1_cnt == 2 );
 			REQUIRE( var2_cnt == 2 );
 		}
@@ -95,10 +89,7 @@ test line 3 5
 			globals->observe( "var2", var2 );
 			std::string out = thread->getall();
 
-			REQUIRE( out == R"V(hello line 1 1
-hello line 2 5
-test line 3 5
-)V" );
+			REQUIRE( out == "hello line 1 1 hello line 2 5 test line 3 5\n" );
 			REQUIRE( var1_cnt == 2 );
 			REQUIRE( var2_cnt == 2 );
 		}
@@ -119,10 +110,7 @@ test line 3 5
 			globals->observe( "var1", var1 );
 			std::string out = thread->getall();
 
-			REQUIRE( out == R"V(hello line 1 1
-hello line 2 5
-test line 3 5
-)V" );
+			REQUIRE( out == "hello line 1 1 hello line 2 5 test line 3 5\n" );
 			REQUIRE( var1_cnt == 4 );
 		}
 		WHEN( "Run with missmatching type" )
@@ -140,10 +128,7 @@ test line 3 5
 			globals->observe("var1", var1);
 			std::string out = thread->getall();
 
-			REQUIRE( out == R"V(hello line 1 1
-hello line 2 5
-test line 3 5
-)V" );
+			REQUIRE( out == "hello line 1 1 hello line 2 5 test line 3 5\n" );
 			REQUIRE(var1_cnt==2);
 		}
 		WHEN("call with new and old value")
@@ -180,10 +165,7 @@ test line 3 5
 			globals->observe("var2", var2);
 			std::string out = thread->getall();
 
-			REQUIRE( out == R"V(hello line 1 1
-hello line 2 5
-test line 3 5
-)V" );		
+			REQUIRE( out == "hello line 1 1 hello line 2 5 test line 3 5\n" );		
 			REQUIRE(var1_cnt == 2);
 			REQUIRE(var2_cnt == 2);
 		}
@@ -205,10 +187,7 @@ test line 3 5
 			std::string out = thread->getall();
 
 			REQUIRE(8 == globals->get<int32_t>("var1").value());
-			REQUIRE( out == R"V(hello line 1 1
-hello line 2 8
-test line 3 8
-)V" );
+			REQUIRE( out == "hello line 1 1 hello line 2 8 test line 3 8\n" );
 			REQUIRE(var1_cnt == 3);
 		}
 		WHEN("Changing Sam value at bind time")
@@ -229,10 +208,7 @@ test line 3 8
 			std::string out = thread->getall();
 
 			REQUIRE(5 == globals->get<int32_t>("var1").value());
-			REQUIRE( out == R"V(hello line 1 8
-hello line 2 5
-test line 3 5
-)V" );
+			REQUIRE( out == "hello line 1 8 hello line 2 5 test line 3 5\n" );
 			REQUIRE(var1_cnt == 3);
 			
 		}
@@ -257,10 +233,7 @@ test line 3 5
 			std::string out = thread->getall();
 
 			REQUIRE(5 == globals->get<int32_t>("var1").value());
-			REQUIRE( out == R"V(hello line 1 10
-hello line 2 5
-test line 3 5
-)V" );
+			REQUIRE( out == "hello line 1 10 hello line 2 5 test line 3 5\n" );
 			REQUIRE(var1_cnt == 4);
 			
 		}
@@ -282,10 +255,7 @@ test line 3 5
 			globals->observe("var2", var2);
 			std::string out = thread->getall();
 
-			REQUIRE( out == R"V(hello line 1 1
-didum line 2 5
-test line 3 5
-)V" );
+			REQUIRE( out == "hello line 1 1 didum line 2 5 test line 3 5\n" );
 			REQUIRE(var1_cnt == 2);
 			REQUIRE(var2_cnt == 3);
 		}

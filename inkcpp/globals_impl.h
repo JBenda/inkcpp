@@ -101,6 +101,7 @@ namespace ink::runtime::internal
 			}
 		};
 		managed_array<visit_count, true, 1> _visit_counts;
+		managed_array<visit_count, true, 1> _visit_counts_backup;
 
 		// Pointer back to owner story.
 		const story_impl* const _owner;

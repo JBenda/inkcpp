@@ -34,7 +34,7 @@ SCENARIO("run a story with external function and fallback function", "[external 
       REQUIRE_NOTHROW(out = thread->getall());
       THEN("Both function should be called the correct amount of times")
       {
-        REQUIRE(out == "Hohooh ! A small demonstraion of my power:\n4 * 4 = 16, stunning i would say\n");
+        REQUIRE(out == "Hohooh ! A small demonstration of my power:\nMath 4 * 4 = 16, stunning i would say\n");
         REQUIRE(cnt_sqrt == 2);
         REQUIRE(cnt_greeting == 1);
       }
@@ -50,7 +50,7 @@ SCENARIO("run a story with external function and fallback function", "[external 
       REQUIRE_NOTHROW(out = thread->getall());;
       THEN("Sqrt should be falled twice, and uses default greeting")
       {
-        REQUIRE(out == "Hello ! A small demonstraion of my power:\n4 * 4 = 16, stunning i would say\n");
+        REQUIRE(out == "Hello ! A small demonstration of my power:\nMath 4 * 4 = 16, stunning i would say\n");
         REQUIRE(cnt_sqrt == 2);
       }
     }

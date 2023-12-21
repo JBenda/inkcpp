@@ -758,8 +758,10 @@ bool runner_impl::line_step()
 			if (_ptr != nullptr) {
 				// Save a snapshot of the current runtime state so we
 				//  can return here if we end up hitting a new line
-				forget();
-				save();
+				// forget();
+				if (!_saved) {
+					save();
+				}
 			}
 			// Otherwise, make sure we don't have any snapshots hanging around
 			// expect we are in choice handleing

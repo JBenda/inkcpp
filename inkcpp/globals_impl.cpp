@@ -12,12 +12,14 @@ namespace ink::runtime::internal
 		: _num_containers(story->num_containers())
 		, _turn_cnt{0}
 		, _visit_counts()
+		, _visit_counts_backup()
 		, _owner(story)
 		, _runners_start(nullptr)
 		, _lists(story->list_meta(), story->get_header())
 		, _globals_initialized(false)
 	{
 		_visit_counts.resize(_num_containers);
+		_visit_counts_backup.resize(_num_containers);
 		if (_lists) {
 			// initelize static lists
 			const list_flag* flags = story->lists();
@@ -224,11 +226,17 @@ namespace ink::runtime::internal
 
 	void globals_impl::save()
 	{
+		for (int i = 0; i < _num_containers; ++i) {
+			_visit_counts_backup[i] = _visit_counts[i];
+		}
 		_variables.save();
 	}
 
 	void globals_impl::restore()
 	{
+		for (int i = 0; i < _num_containers; ++i) {
+			_visit_counts[i] = _visit_counts_backup[i];
+		}
 		_variables.restore();
 	}
 
