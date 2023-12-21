@@ -183,9 +183,8 @@ private:
 		} else if (ty != type()) {
 			return redefine<ty + 1>(oth, env);
 		} else {
-			return internal::redefine<ty, typename ret<ty>::type, tuple<T*...>>(env)(
-			    get<ty>(), oth.get<ty>()
-			);
+			return internal::redefine<ty, typename ret<ty>::type, tuple<T*...>>(env
+			)(get<ty>(), oth.get<ty>());
 		}
 	}
 
