@@ -205,11 +205,14 @@ public:
 	 *
 	 * @param name name string
 	 * @param function callable
+	 * @param lookaheadSafe if false stop glue lookahead if encounter this function
+	 *                      this prevents double execution of external functions but can lead to
+	 *                      missing glues
 	 */
 	template<typename F>
-	inline void bind(const char* name, F function)
+	inline void bind(const char* name, F function, bool lookaheadSafe = false)
 	{
-		bind(ink::hash_string(name), function);
+		bind(ink::hash_string(name), function, lookaheadSafe);
 	}
 
 #ifdef INK_ENABLE_UNREAL

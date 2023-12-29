@@ -689,7 +689,7 @@ runner_impl::change_type runner_impl::detect_change() const
 	// Check if the old newline is still present (hasn't been glu'd) and
 	//  if there is new text (non-whitespace) in the stream since saving
 	bool stillHasNewline = _output.saved_ends_with(value_type::newline);
-	bool hasAddedNewText = _output.text_past_save();
+	bool hasAddedNewText = _output.text_past_save() || _tags.has_changed();
 
 	// Newline is still there and there's no new text
 	if (stillHasNewline && ! hasAddedNewText) {
@@ -849,7 +849,9 @@ void runner_impl::step()
 					if (_evaluation_mode) {
 						_eval.push(values::newline);
 					} else {
-						_output << values::newline;
+						if (! _output.ends_with(value_type::newline)) {
+							_output << values::newline;
+						}
 					}
 				} break;
 				case Command::GLUE: {
@@ -1036,6 +1038,7 @@ void runner_impl::step()
 					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
 					} else if (_output.saved() && _output.saved_ends_with(value_type::newline) && ! fn->lookaheadSafe()) {
+						// TODO: seperate token?
 						_output.append(values::newline);
 					} else {
 						fn->call(&_eval, numArguments, _globals->strings(), _globals->lists());

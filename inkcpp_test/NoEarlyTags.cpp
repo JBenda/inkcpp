@@ -22,11 +22,14 @@ SCENARIO("Story with tags and glues", "[glue, tags]")
       REQUIRE(out == "Hey there, nice to meet you!\n");
       REQUIRE(thread->num_tags() == 2);
     }
-    WHEN("glue")
+    WHEN("glue: tags will stop lookahead")
     {
       thread->getline();
       std::string out = thread->getline();
-      REQUIRE(out == "Hey, I'm Hey and this is YOU, nice to meet you too!I'm Do! Most people can't pronounce it, just think 'Kee-vah\".\n");
+      REQUIRE(out == "Hey, I'm Hey and this is YOU, nice to meet you too!\n");
+      REQUIRE(thread->num_tags() == 3);
+      out = thread->getline();
+      REQUIRE(out == "I'm Do! Most people can't pronounce it, just think 'Kee-vah\".\n");
       REQUIRE(thread->num_tags() == 5);
     }
   }

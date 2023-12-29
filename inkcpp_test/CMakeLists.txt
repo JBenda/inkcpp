@@ -17,6 +17,7 @@ add_executable(inkcpp_test catch.hpp Main.cpp
   ThirdTierChoiceAfterBrackets.cpp
   NoEarlyTags.cpp
   ExternalFunctionsExecuteProperly.cpp
+  LookaheadSafe.cpp
 )
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
