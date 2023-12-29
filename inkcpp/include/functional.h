@@ -114,11 +114,15 @@ private:
 class function_base
 {
 public:
-	function_base(bool lookaheadSafe) : _lookaheadSafe(lookaheadSafe) {}
+	function_base(bool lookaheadSafe)
+	    : _lookaheadSafe(lookaheadSafe)
+	{
+	}
+
 	virtual ~function_base() {}
 
 	// calls the underlying function object taking parameters from a stack
-		// TODO: remove ?
+	// TODO: remove ?
 #ifdef INK_ENABLE_UNREAL
 	virtual void
 	    call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists)

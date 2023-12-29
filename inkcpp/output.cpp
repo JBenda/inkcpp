@@ -211,10 +211,7 @@ void basic_stream::get(value* ptr, size_t length)
 	_size = start;
 }
 
-bool basic_stream::has_marker() const
-{
-	return entries_since_marker() >= 0;
-}
+bool basic_stream::has_marker() const { return entries_since_marker() >= 0; }
 
 int basic_stream::entries_since_marker() const
 {
@@ -420,8 +417,8 @@ bool basic_stream::text_past_save() const
 			if (! is_whitespace(d.get<value_type::string>(), false))
 				return true;
 		} else if (d.printable()) {
-				return true;
-			}
+			return true;
+		}
 	}
 
 	// No text
