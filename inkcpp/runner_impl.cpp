@@ -1032,13 +1032,13 @@ void runner_impl::step()
 					int numArguments = ( int ) flag;
 
 					// find and execute. will automatically push a valid if applicable
-					bool success = _functions.call(
-					    functionName, &_eval, numArguments, _globals->strings(), _globals->lists()
-					);
-
-					// If we failed, notify a potential fallback function
-					if (! success) {
+					auto* fn = _functions.find(functionName);
+					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
+					} else if (_output.saved() && _output.saved_ends_with(value_type::newline) && ! fn->lookaheadSafe()) {
+						_output.append(values::newline);
+					} else {
+						fn->call(&_eval, numArguments, _globals->strings(), _globals->lists());
 					}
 				} break;
 

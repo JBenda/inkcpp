@@ -114,9 +114,11 @@ private:
 class function_base
 {
 public:
+	function_base(bool lookaheadSafe) : _lookaheadSafe(lookaheadSafe) {}
 	virtual ~function_base() {}
 
 	// calls the underlying function object taking parameters from a stack
+		// TODO: remove ?
 #ifdef INK_ENABLE_UNREAL
 	virtual void
 	    call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists)
@@ -127,7 +129,10 @@ public:
 	    = 0;
 #endif
 
+	bool lookaheadSafe() const { return _lookaheadSafe; }
+
 protected:
+	bool _lookaheadSafe;
 	// used to hide basic_eval_stack and value definitions
 	template<typename T>
 	static T pop(basic_eval_stack* stack, list_table& lists);
@@ -150,8 +155,9 @@ template<typename F>
 class function : public function_base
 {
 public:
-	function(F functor)
-	    : functor(functor)
+	function(F functor, bool lookaheadSafe)
+	    : function_base(lookaheadSafe)
+	    , functor(functor)
 	{
 	}
 

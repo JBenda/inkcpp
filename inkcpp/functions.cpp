@@ -39,19 +39,12 @@ namespace ink::runtime::internal
 		}
 	}
 
-	bool functions::call(hash_t name, basic_eval_stack* stack, size_t num_arguments, string_table& strings, list_table& lists)
+	function_base* functions::find(hash_t name)
 	{
 		// find entry
 		entry* iter = _list;
 		while (iter != nullptr && iter->name != name)
 			iter = iter->next;
-
-		// failed to find
-		if (iter == nullptr)
-			return false;
-
-		// call
-		iter->value->call(stack, num_arguments, strings, lists);
-		return true;
+		return iter == nullptr ? nullptr : iter->value;
 	}
 }

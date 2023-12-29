@@ -419,7 +419,9 @@ bool basic_stream::text_past_save() const
 			// TODO: Cache what counts as whitespace?
 			if (! is_whitespace(d.get<value_type::string>(), false))
 				return true;
-		}
+		} else if (d.printable()) {
+				return true;
+			}
 	}
 
 	// No text

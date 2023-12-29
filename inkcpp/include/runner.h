@@ -187,11 +187,14 @@ public:
 	 * this provides a generic way to bind functions with abitrary length
 	 * @param name name hash
 	 * @param function callable
+	 * @param lookaheadSafe if false stop glue lookahead if encounter this function
+	 *                      this prevents double execution of external functions but can lead to
+	 *                      missing glues
 	 */
 	template<typename F>
-	inline void bind(hash_t name, F function)
+	inline void bind(hash_t name, F function, bool lookaheadSafe = false)
 	{
-		internal_bind(name, new internal::function(function));
+		internal_bind(name, new internal::function(function, lookaheadSafe));
 	}
 
 	/**
