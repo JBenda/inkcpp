@@ -37,7 +37,7 @@ def src_files(dir):
 
 def glob_src_files():
     files = []
-    dirs = ['./inkcpp', './inkcpp_compiler', './inkcpp_py']
+    dirs = ['./inkcpp', './inkcpp_compiler', './inkcpp_py', './shared']
     for dir in dirs:
         files += src_files(dir)
     return files
