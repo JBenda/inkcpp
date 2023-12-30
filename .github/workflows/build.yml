@@ -168,7 +168,7 @@ jobs:
 
     # Upload results artifact
     - name: Upload Results Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: results
         path: proofing/ink-proof/${{ matrix.artifact }}.txt
@@ -176,7 +176,7 @@ jobs:
     # Upload website artifact
     - name: Upload Ink-Proof Website Artifact
       if: ${{ matrix.proof }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.artifact }}-www
         path: proofing/ink-proof/out
@@ -199,13 +199,14 @@ jobs:
         python3 -m
         pip install
         build
+        pytest
         --user
     - name: Build python release
       run: python3 -m build
     - name: Test python release
       run: |
-        pip install dist/*.whl
-        python -m pytest
+        python3 -m pip install dist/*.whl --user
+        python3 -m pytest
     - name: Remove wheel
       run: |
         rm dist/*.whl
