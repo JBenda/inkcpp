@@ -226,22 +226,30 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    .def("choose", &runner::choose, "Select a choice to continue")
 	    .def(
 	        "bind_void",
-	        [](runner& self, const char* function_name, std::function<void(std::vector<value>)> f) {
-		        self.bind(function_name, [f](size_t len, const value* vals) {
-			        std::vector args(vals, vals + len);
-			        f(args);
-		        });
+	        [](runner& self, const char* function_name, std::function<void(std::vector<value>)> f,
+	           bool lookaheadSafe) {
+		        self.bind(
+		            function_name,
+		            [f](size_t len, const value* vals) {
+			            std::vector args(vals, vals + len);
+			            f(args);
+		            },
+		            lookaheadSafe
+		        );
 	        },
+	        py::arg("function_name"), py::arg("function"), py::arg_v("lookaheadSafe", false),
 	        "Bind function which void result"
 	    )
 	    .def(
 	        "bind",
-	        [](runner& self, const char* function_name, std::function<value(std::vector<value>)> f) {
+	        [](runner& self, const char* function_name, std::function<value(std::vector<value>)> f,
+	           bool lookaheadSafe) {
 		        self.bind(function_name, [f](size_t len, const value* vals) {
 			        std::vector args(vals, vals + len);
 			        return f(args);
 		        });
 	        },
+	        py::arg("function_name"), py::arg("function"), py::arg_v("lookaheadSafe", false),
 	        "Bind a function with return value"
 	    );
 	py::class_<choice>(m, "Choice")

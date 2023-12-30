@@ -275,8 +275,8 @@ template<typename D>
 class function_array_delegate : public function_base
 {
 public:
-	function_array_delegate(const D& del)
-	    : invocableDelegate(del)
+	function_array_delegate(const D& del, bool lookaheadSafe)
+	    : function_baes(lookaheadSafe), invocableDelegate(del)
 	{
 	}
 

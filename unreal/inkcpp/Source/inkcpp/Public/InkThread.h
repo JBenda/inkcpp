@@ -78,10 +78,10 @@ public:
 	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
 
 	UFUNCTION(BlueprintCallable, Category="Ink")
-	void RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function);
+	void RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function, bool lookaheadSafe = false);
 	
 	UFUNCTION(BlueprintCallable, Category="Ink")
-	void RegisterExternalEvent(const FString& functionName, const FExternalFunctionVoidDelegate& function);
+	void RegisterExternalEvent(const FString& functionName, const FExternalFunctionVoidDelegate& function, bool lookaheadSafe = false);
 	
 
 protected:

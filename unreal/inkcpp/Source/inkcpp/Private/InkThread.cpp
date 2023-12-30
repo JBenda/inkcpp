@@ -34,14 +34,14 @@ void UInkThread::RegisterTagFunction(FName functionName, const FTagFunctionDeleg
 	mTagFunctions.FindOrAdd(functionName).Add(function);
 }
 
-void UInkThread::RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function)
+void UInkThread::RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function, bool lookaheadSafe)
 {
-	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function);
+	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function, lookaheadSafe);
 }
 
-void UInkThread::RegisterExternalEvent(const FString& functionName, const FExternalFunctionVoidDelegate& function)
+void UInkThread::RegisterExternalEvent(const FString& functionName, const FExternalFunctionVoidDelegate& function, bool lookaheadSafe)
 {
-	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function);
+	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function, lookaheadSafe);
 }
 
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)

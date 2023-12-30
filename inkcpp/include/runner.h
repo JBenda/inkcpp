@@ -217,9 +217,9 @@ public:
 
 #ifdef INK_ENABLE_UNREAL
 	template<typename D>
-	void bind_delegate(hash_t name, D functionDelegate)
+	void bind_delegate(hash_t name, D functionDelegate, bool lookaheadSafe)
 	{
-		internal_bind(name, new internal::function_array_delegate(functionDelegate));
+		internal_bind(name, new internal::function_array_delegate(functionDelegate, lookaheadSafe));
 	}
 #endif
 
