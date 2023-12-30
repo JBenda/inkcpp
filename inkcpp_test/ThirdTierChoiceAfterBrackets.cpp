@@ -27,16 +27,16 @@ SCENARIO(
 			THEN("thread doesn't error")
 			{
 				thread->getall();
-				thread->has_choices();
+				REQUIRE(thread->has_choices());
 				thread->choose(0);
 				thread->getall();
-				thread->has_choices();
+				REQUIRE(thread->has_choices());
 				thread->choose(0);
 				thread->getall();
-				thread->has_choices();
+				REQUIRE(thread->has_choices());
 				thread->choose(0);
 				thread->getall();
-				thread->has_choices();
+				REQUIRE(! thread->has_choices());
 			}
 		}
 	}
