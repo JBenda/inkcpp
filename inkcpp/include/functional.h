@@ -276,7 +276,8 @@ class function_array_delegate : public function_base
 {
 public:
 	function_array_delegate(const D& del, bool lookaheadSafe)
-	    : function_baes(lookaheadSafe), invocableDelegate(del)
+	    : function_baes(lookaheadSafe)
+	    , invocableDelegate(del)
 	{
 	}
 
