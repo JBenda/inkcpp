@@ -1,5 +1,5 @@
 add_subdirectory(pybind11)
-pybind11_add_module(inkcpp_py module.cpp)
+pybind11_add_module(inkcpp_py src/module.cpp)
 target_compile_definitions(inkcpp_py PRIVATE VERSION_INFO=${VERSION})
 
 target_link_libraries(inkcpp_py PUBLIC inkcpp inkcpp_compiler inkcpp_shared)

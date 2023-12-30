@@ -168,7 +168,7 @@ jobs:
 
     # Upload results artifact
     - name: Upload Results Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: results
         path: proofing/ink-proof/${{ matrix.artifact }}.txt
@@ -176,7 +176,7 @@ jobs:
     # Upload website artifact
     - name: Upload Ink-Proof Website Artifact
       if: ${{ matrix.proof }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.artifact }}-www
         path: proofing/ink-proof/out
@@ -199,9 +199,28 @@ jobs:
         python3 -m
         pip install
         build
+        pytest
         --user
     - name: Build python release
       run: python3 -m build
+
+    - uses: suisei-cn/actions-download-file@v1.4.0
+      name: Download Inklecate 
+      id: download_inklecate 
+      with:
+        url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
+        target: "inklecate/"
+    - name: Deploy Inkelcate 
+      shell: bash
+      run: |
+        cd inklecate
+        unzip *.zip
+        echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
+
+    - name: Test python release
+      run: |
+        python3 -m pip install dist/*.whl --user
+        python3 -m pytest
     - name: Remove wheel
       run: |
         rm dist/*.whl

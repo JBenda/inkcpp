@@ -11,7 +11,7 @@ from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
 
-# find shared/** inkcpp/** inkcpp_compiler/** inkcpp_py/** -not -path '*/.*' | sed -e 's/[^ ]*/"\0"/g' -e '/""/d' -e 's/ /,\n/g'
+# echo "[\n$(find shared/** inkcpp/** inkcpp_compiler/** inkcpp_py/** -not -path '*/.*' | tr '\n' ' ' | sed -e 's/[^ ]\+/"\0"/g' -e 's/[[:blank:]]*$//' -e 's/ /,\n/g')\n]"
 # + "CMakeLists.txt"
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
@@ -22,9 +22,31 @@ PLAT_TO_CMAKE = {
     "win-arm64": "ARM64",
 }
 
+def src_files(dir):
+    dir = os.fsencode(dir)
+    files = []
+    for file in os.listdir(dir):
+        if file[0] == '.':
+            continue
+        file = os.path.join(dir, file)
+        if os.path.isdir(file):
+            files += src_files(file)
+        else:
+            files.append(file.decode("utf-8"))
+    return files
+
+def glob_src_files():
+    files = []
+    dirs = ['./inkcpp', './inkcpp_compiler', './inkcpp_py', './shared']
+    for dir in dirs:
+        files += src_files(dir)
+    return files
+        
+
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "") -> None:
-        src_files = json.load(open('inkcpp_py/sources.json'))
+        src_files = glob_src_files()
+        # src_files = json.load(open('inkcpp_py/sources.json'))
         src_files += ["CMakeLists.txt", "Config.cmake.in"]
         super().__init__(name, sources=src_files)
         self.sourcedir = os.fspath(Path(sourcedir).resolve())

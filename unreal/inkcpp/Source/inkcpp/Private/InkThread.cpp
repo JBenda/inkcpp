@@ -11,49 +11,52 @@
 // Unreal includes
 #include "Internationalization/Regex.h"
 
-UInkThread::UInkThread() : mbHasRun(false), mnChoiceToChoose(-1), mnYieldCounter(0), mbKill(false) { }
+UInkThread::UInkThread()
+    : mbHasRun(false)
+    , mnChoiceToChoose(-1)
+    , mnYieldCounter(0)
+    , mbKill(false)
+{
+}
+
 UInkThread::~UInkThread() {}
-void UInkThread::Yield()
-{
-	mnYieldCounter++;
-}
 
-bool UInkThread::IsYielding()
-{
-	return mnYieldCounter > 0;
-}
+void UInkThread::Yield() { mnYieldCounter++; }
 
-void UInkThread::Resume()
-{
-	mnYieldCounter--;
-}
+bool UInkThread::IsYielding() { return mnYieldCounter > 0; }
 
-void UInkThread::RegisterTagFunction(FName functionName, const FTagFunctionDelegate & function)
+void UInkThread::Resume() { mnYieldCounter--; }
+
+void UInkThread::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
 {
 	// Register tag function
 	mTagFunctions.FindOrAdd(functionName).Add(function);
 }
 
-void UInkThread::RegisterExternalFunction(const FString& functionName, const FExternalFunctionDelegate& function)
+void UInkThread::RegisterExternalFunction(
+    const FString& functionName, const FExternalFunctionDelegate& function, bool lookaheadSafe
+)
 {
-	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function);
+	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function, lookaheadSafe);
 }
 
-void UInkThread::RegisterExternalEvent(const FString& functionName, const FExternalFunctionVoidDelegate& function)
+void UInkThread::RegisterExternalEvent(
+    const FString& functionName, const FExternalFunctionVoidDelegate& function, bool lookaheadSafe
+)
 {
-	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function);
+	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function, lookaheadSafe);
 }
 
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)
 {
-	mStartPath = path;
-	mpRuntime = runtime;
+	mStartPath    = path;
+	mpRuntime     = runtime;
 	mbInitialized = true;
-	mpRunner = thread;
-	mpTags = NewObject<UTagList>();
+	mpRunner      = thread;
+	mpTags        = NewObject<UTagList>();
 	mTagFunctions.Reset();
 	mCurrentChoices.Reset();
-	mbHasRun = false;
+	mbHasRun   = false;
 	mbInChoice = false;
 
 	OnStartup();
@@ -66,9 +69,8 @@ bool UInkThread::ExecuteInternal()
 		return true;
 
 	// If this is the first time we're running, start us off at our starting path
-	if (!mbHasRun)
-	{
-		if (!ensureMsgf(mbInitialized, TEXT("Thread executing without call to ::Initialize")))
+	if (! mbHasRun) {
+		if (! ensureMsgf(mbInitialized, TEXT("Thread executing without call to ::Initialize")))
 			return true;
 		if (mStartPath.Len()) {
 			mpRunner->move_to(ink::hash_string(TCHAR_TO_ANSI(*mStartPath)));
@@ -77,13 +79,10 @@ bool UInkThread::ExecuteInternal()
 	}
 
 	// Execution loop
-	while (true)
-	{
+	while (true) {
 		// Handle pending choice
-		if (mnChoiceToChoose != -1)
-		{
-			if (ensure(mpRunner->num_choices() > 0))
-			{
+		if (mnChoiceToChoose != -1) {
+			if (ensure(mpRunner->num_choices() > 0)) {
 				mpRunner->choose(mnChoiceToChoose);
 			}
 			mnChoiceToChoose = -1;
@@ -91,19 +90,17 @@ bool UInkThread::ExecuteInternal()
 		}
 
 		// Execute until story yields or finishes
-		while (mnYieldCounter == 0 && mpRunner->can_continue())
-		{
+		while (mnYieldCounter == 0 && mpRunner->can_continue()) {
 			// Handle text
 			FString line = mpRunner->getline();
 			// Special: Line begins with >> marker
-			if (line.StartsWith(TEXT(">>")))
-			{
+			if (line.StartsWith(TEXT(">>"))) {
 				// This is a special version of the tag function call
 				// Expected: >> MyTagFunction(Arg1, Arg2, Arg3)
-				FRegexPattern pattern = FRegexPattern(TEXT("^>>\\s*(\\w+)(\\((\\s*(\\w+)\\s*(,\\s*(\\w+)\\s*)*)?\\))?$"));
+				FRegexPattern pattern
+				    = FRegexPattern(TEXT("^>>\\s*(\\w+)(\\((\\s*(\\w+)\\s*(,\\s*(\\w+)\\s*)*)?\\))?$"));
 				FRegexMatcher matcher = FRegexMatcher(pattern, line);
-				if (matcher.FindNext())
-				{
+				if (matcher.FindNext()) {
 					// Get name of function
 					FString functionName = matcher.GetCaptureGroup(1);
 
@@ -111,8 +108,7 @@ bool UInkThread::ExecuteInternal()
 					TArray<FString> Arguments;
 					Arguments.Add(functionName);
 					int groupIndex = 4;
-					while (matcher.GetCaptureGroupBeginning(groupIndex) != -1)
-					{
+					while (matcher.GetCaptureGroupBeginning(groupIndex) != -1) {
 						Arguments.Add(matcher.GetCaptureGroup(groupIndex).TrimStartAndEnd());
 						groupIndex += 2;
 					}
@@ -120,21 +116,18 @@ bool UInkThread::ExecuteInternal()
 					// Call tag method
 					ExecuteTagMethod(Arguments);
 				}
-			}
-			else
-			{
+			} else {
 				// Forward to handler
 				// Get tags
 				TArray<FString> tags;
-				for(size_t i = 0; i < mpRunner->num_tags(); ++i) {
+				for (size_t i = 0; i < mpRunner->num_tags(); ++i) {
 					tags.Add(FString(mpRunner->get_tag(i)));
 				}
 				mpTags->Initialize(tags);
 				OnLineWritten(line, mpTags);
-				
+
 				// Handle tags/tag methods post-line
-				for (auto it = tags.CreateConstIterator(); it; ++it)
-				{
+				for (auto it = tags.CreateConstIterator(); it; ++it) {
 					// Generic tag handler
 					OnTag(*it);
 
@@ -147,13 +140,11 @@ bool UInkThread::ExecuteInternal()
 		}
 
 		// Handle choice block
-		if (mnYieldCounter == 0 && mpRunner->num_choices() > 0)
-		{
+		if (mnYieldCounter == 0 && mpRunner->num_choices() > 0) {
 			mbInChoice = true;
 
 			// Forward to handler
-			for (ink::size_t i = 0; i < mpRunner->num_choices(); i++)
-			{
+			for (ink::size_t i = 0; i < mpRunner->num_choices(); i++) {
 				UInkChoice* choice = NewObject<UInkChoice>(this);
 				choice->Initialize(mpRunner->get_choice(i));
 				mCurrentChoices.Add(choice);
@@ -169,8 +160,7 @@ bool UInkThread::ExecuteInternal()
 	}
 
 	// Have we reached the end? If so, destroy the thread
-	if (!mpRunner->can_continue() && mnYieldCounter == 0 && mpRunner->num_choices() == 0)
-	{
+	if (! mpRunner->can_continue() && mnYieldCounter == 0 && mpRunner->num_choices() == 0) {
 		UE_LOG(InkCpp, Display, TEXT("Destroying thread"));
 
 		// TODO: Event for ending?
@@ -187,8 +177,7 @@ void UInkThread::ExecuteTagMethod(const TArray<FString>& Params)
 {
 	// Look for method and execute with parameters
 	FTagFunctionMulticastDelegate* function = mTagFunctions.Find(FName(*Params[0]));
-	if (function != nullptr)
-	{
+	if (function != nullptr) {
 		function->Broadcast(this, Params);
 	}
 
@@ -202,8 +191,7 @@ bool UInkThread::Execute()
 	bool finished = ExecuteInternal();
 
 	// If we've finished, run callback
-	if (finished)
-	{
+	if (finished) {
 		// Allow outsiders to subscribe
 		// TODO: OnThreadShutdown.Broadcast();
 		OnShutdown();
@@ -216,23 +204,17 @@ bool UInkThread::Execute()
 bool UInkThread::PickChoice(int index)
 {
 	if (index >= mCurrentChoices.Num()) {
-		UE_LOG(InkCpp, Warning,
-			TEXT("PickChoice: index(%i) out of range [0-%i)"),
-				index,
-				mCurrentChoices.Num());
+		UE_LOG(
+		    InkCpp, Warning, TEXT("PickChoice: index(%i) out of range [0-%i)"), index,
+		    mCurrentChoices.Num()
+		);
 		return false;
 	}
 	mnChoiceToChoose = index;
-	mbInChoice = false;
+	mbInChoice       = false;
 	return true;
 }
 
-bool UInkThread::CanExecute() const
-{
-	return mnYieldCounter == 0 && !mbInChoice;
-}
+bool UInkThread::CanExecute() const { return mnYieldCounter == 0 && ! mbInChoice; }
 
-void UInkThread::Stop()
-{
-	mbKill = true;
-}
+void UInkThread::Stop() { mbKill = true; }

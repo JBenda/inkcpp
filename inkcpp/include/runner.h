@@ -187,11 +187,14 @@ public:
 	 * this provides a generic way to bind functions with abitrary length
 	 * @param name name hash
 	 * @param function callable
+	 * @param lookaheadSafe if false stop glue lookahead if encounter this function
+	 *                      this prevents double execution of external functions but can lead to
+	 *                      missing glues
 	 */
 	template<typename F>
-	inline void bind(hash_t name, F function)
+	inline void bind(hash_t name, F function, bool lookaheadSafe = false)
 	{
-		internal_bind(name, new internal::function(function));
+		internal_bind(name, new internal::function(function, lookaheadSafe));
 	}
 
 	/**
@@ -202,18 +205,21 @@ public:
 	 *
 	 * @param name name string
 	 * @param function callable
+	 * @param lookaheadSafe if false stop glue lookahead if encounter this function
+	 *                      this prevents double execution of external functions but can lead to
+	 *                      missing glues
 	 */
 	template<typename F>
-	inline void bind(const char* name, F function)
+	inline void bind(const char* name, F function, bool lookaheadSafe = false)
 	{
-		bind(ink::hash_string(name), function);
+		bind(ink::hash_string(name), function, lookaheadSafe);
 	}
 
 #ifdef INK_ENABLE_UNREAL
 	template<typename D>
-	void bind_delegate(hash_t name, D functionDelegate)
+	void bind_delegate(hash_t name, D functionDelegate, bool lookaheadSafe)
 	{
-		internal_bind(name, new internal::function_array_delegate(functionDelegate));
+		internal_bind(name, new internal::function_array_delegate(functionDelegate, lookaheadSafe));
 	}
 #endif
 

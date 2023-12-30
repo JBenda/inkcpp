@@ -17,10 +17,7 @@ const choice* runner_interface::get_choice(size_t index) const
 	return begin() + index;
 }
 
-size_t runner_interface::num_choices() const
-{
-	return end() - begin();
-}
+size_t runner_interface::num_choices() const { return end() - begin(); }
 } // namespace ink::runtime
 
 namespace ink::runtime::internal
@@ -520,10 +517,7 @@ void runner_impl::advance_line()
 	_globals->gc();
 }
 
-bool runner_impl::can_continue() const
-{
-	return _ptr != nullptr;
-}
+bool runner_impl::can_continue() const { return _ptr != nullptr; }
 
 void runner_impl::choose(size_t index)
 {
@@ -571,10 +565,7 @@ void runner_impl::getline_silent()
 	_output.clear();
 }
 
-bool runner_impl::has_tags() const
-{
-	return num_tags() > 0;
-}
+bool runner_impl::has_tags() const { return num_tags() > 0; }
 
 size_t runner_impl::num_tags() const
 {
@@ -587,10 +578,7 @@ const char* runner_impl::get_tag(size_t index) const
 	return _tags[index];
 }
 
-snapshot* runner_impl::create_snapshot() const
-{
-	return _globals->create_snapshot();
-}
+snapshot* runner_impl::create_snapshot() const { return _globals->create_snapshot(); }
 
 size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
@@ -758,8 +746,10 @@ bool runner_impl::line_step()
 			if (_ptr != nullptr) {
 				// Save a snapshot of the current runtime state so we
 				//  can return here if we end up hitting a new line
-				forget();
-				save();
+				// forget();
+				if (! _saved) {
+					save();
+				}
 			}
 			// Otherwise, make sure we don't have any snapshots hanging around
 			// expect we are in choice handleing
@@ -859,7 +849,9 @@ void runner_impl::step()
 					if (_evaluation_mode) {
 						_eval.push(values::newline);
 					} else {
-						_output << values::newline;
+						if (! _output.ends_with(value_type::newline)) {
+							_output << values::newline;
+						}
 					}
 				} break;
 				case Command::GLUE: {
@@ -1042,13 +1034,14 @@ void runner_impl::step()
 					int numArguments = ( int ) flag;
 
 					// find and execute. will automatically push a valid if applicable
-					bool success = _functions.call(
-					    functionName, &_eval, numArguments, _globals->strings(), _globals->lists()
-					);
-
-					// If we failed, notify a potential fallback function
-					if (! success) {
+					auto* fn = _functions.find(functionName);
+					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
+					} else if (_output.saved() && _output.saved_ends_with(value_type::newline) && ! fn->lookaheadSafe()) {
+						// TODO: seperate token?
+						_output.append(values::newline);
+					} else {
+						fn->call(&_eval, numArguments, _globals->strings(), _globals->lists());
 					}
 				} break;
 

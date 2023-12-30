@@ -15,6 +15,9 @@ add_executable(inkcpp_test catch.hpp Main.cpp
   InkyJson.cpp
   SpaceAfterBracketChoice.cpp
   ThirdTierChoiceAfterBrackets.cpp
+  NoEarlyTags.cpp
+  ExternalFunctionsExecuteProperly.cpp
+  LookaheadSafe.cpp
 )
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
@@ -38,6 +41,6 @@ set (destination "${CMAKE_CURRENT_BINARY_DIR}/ink")
 add_custom_command(
     TARGET inkcpp_test POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
-    DEPENDS ${destination}
+    DEPENDS ${source}
     COMMENT "symbolic link resources folder from ${source} => ${destination}"
 )
