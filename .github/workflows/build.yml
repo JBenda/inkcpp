@@ -203,6 +203,20 @@ jobs:
         --user
     - name: Build python release
       run: python3 -m build
+
+    - uses: suisei-cn/actions-download-file@v1.4.0
+      name: Download Inklecate 
+      id: download_inklecate 
+      with:
+        url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
+        target: "inklecate/"
+    - name: Deploy Inkelcate 
+      shell: bash
+      run: |
+        cd inklecate
+        unzip *.zip
+        echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
+
     - name: Test python release
       run: |
         python3 -m pip install dist/*.whl --user

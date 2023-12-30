@@ -3,14 +3,21 @@ import pytest
 import os
 
 @pytest.fixture
+def inklecate_cmd():
+    res = os.getenv("INKLECATE")
+    if res is None or res == "":
+        return "inklecate"
+    return res
+
+@pytest.fixture
 def story_path(tmpdir):
     return list(map(lambda x: tmpdir / ("LookaheadSafe" + x), [".bin", ".tmp"])) + ["inkcpp_test/ink/LookaheadSafe.ink"]
 
 @pytest.fixture
-def assets(story_path):
+def assets(story_path, inklecate_cmd):
     if not os.path.exists(story_path[0]):
         if not os.path.exists(story_path[1]):
-            os.system('inklecate -o {} {}'.format(story_path[1], story_path[2]))
+            os.system('{} -o {} {}'.format(inklecate_cmd, story_path[1], story_path[2]))
     ink.compile_json(str(story_path[1]), str(story_path[0]))
     ink_story = ink.Story.from_file(str(story_path[0]))
     ink_globals = ink_story.new_globals();
