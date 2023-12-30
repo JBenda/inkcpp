@@ -202,6 +202,10 @@ jobs:
         --user
     - name: Build python release
       run: python3 -m build
+    - name: Test python release
+      run: |
+        pip install dist/*.whl
+        python -m pytest
     - name: Remove wheel
       run: |
         rm dist/*.whl

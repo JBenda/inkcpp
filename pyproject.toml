@@ -30,8 +30,7 @@ warn_unreachable = true
 module = ["ninja"]
 ignore_missing_imports = true
 
-
-# [tool.pytest.ini_options]
+[tool.pytest.ini_options]
 # minversion = "6.0"
 # addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 # xfail_strict = true
@@ -39,7 +38,10 @@ ignore_missing_imports = true
 #     "error",
 #     "ignore:(ast.Str|Attribute s|ast.NameConstant|ast.Num) is deprecated:DeprecationWarning:_pytest",
 # ]
-# testpaths = ["tests"]
+testpaths = ["inkcpp_py/tests"]
+addopts = [
+  "--import-mode=importlib",
+]
 
 # [tool.cibuildwheel]
 # test-command = "pytest {project}/tests"
