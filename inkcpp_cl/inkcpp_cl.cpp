@@ -183,6 +183,7 @@ int main(int argc, const char** argv)
 				}
 
 				int c = 0;
+				std::cout << "?> ";
 				std::cin >> c;
 				if (c == -1) {
 					snapshot* snap = thread->create_snapshot();
@@ -193,7 +194,6 @@ int main(int argc, const char** argv)
 					break;
 				}
 				thread->choose(c - 1);
-				std::cout << "?> ";
 				continue;
 			}
 
