@@ -4,22 +4,22 @@
 
 namespace ink::runtime
 {
-	/**
-	 * A loaded ink story.
-	 *
-	 * Created by loading a binary ink story into memory. Once loaded,
-	 * the story class can create "runners" which execute story code.
-	 * A story can have any number of runners, which can optionally
-	 * share globals (variables, visit counts, etc). through the
-	 * globals object. By default, each runner gets its own newly
-	 * created globals store.
-	 * @see runner_interface
-	 * @see globals_interface
-	*/
-	class story
-	{
-	public:
-		virtual ~story(){};
+/**
+ * A loaded ink story.
+ *
+ * Created by loading a binary ink story into memory. Once loaded,
+ * the story class can create "runners" which execute story code.
+ * A story can have any number of runners, which can optionally
+ * share globals (variables, visit counts, etc). through the
+ * globals object. By default, each runner gets its own newly
+ * created globals store.
+ * @see runner_interface
+ * @see globals_interface
+ */
+class story
+{
+public:
+	virtual ~story(){};
 #pragma region Interface Methods
 		/**
 		 * Creates a new global store
@@ -83,7 +83,7 @@ namespace ink::runtime
 		*/
 		static story* from_binary(unsigned char* data, size_t length, bool freeOnDestroy = true);
 #pragma endregion
-	};
+};
 }
 
 /** @namespace ink

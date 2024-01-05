@@ -177,5 +177,6 @@ inline bool globals_interface::set<list>(const char* name, const list& val)
 {
 	return set_var(hash_string(name), value(val));
 }
+
 ///@}
 } // namespace ink::runtime

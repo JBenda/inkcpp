@@ -62,6 +62,7 @@ public:
 	
 private:
 	friend struct FInkVar;
+
 	ink::runtime::list GetData() const { return list_data; }
 
 	ink::runtime::list list_data;
