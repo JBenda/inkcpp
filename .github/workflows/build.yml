@@ -172,7 +172,7 @@ jobs:
 
   build-doc:
     name: Build Doxygen documentation
-    needs: compilation build-python
+    needs: [compilation, build-python]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
