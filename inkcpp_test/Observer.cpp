@@ -57,15 +57,15 @@ SCENARIO("Observer", "[variables]")
 			auto var1     = [&var1_cnt](value v) {
         REQUIRE(v.type == value::Type::Int32);
         if (var1_cnt++ == 0) {
-          REQUIRE(v.v_int32 == 1);
+          REQUIRE(v.get<value::Type::Int32>() == 1);
         } else {
-          REQUIRE(v.v_int32 == 5);
+          REQUIRE(v.get<value::Type::Int32>() == 5);
         }
 			};
 			int  var2_cnt = 0;
 			auto var2     = [&var2_cnt](value v) {
         REQUIRE(v.type == value::Type::String);
-        std::string str(v.v_string);
+        std::string str(v.get<value::Type::String>());
         if (var2_cnt++ == 0) {
           REQUIRE(str == "hello");
         } else {
@@ -133,7 +133,7 @@ SCENARIO("Observer", "[variables]")
 			int  var2_cnt = 0;
 			auto var2     = [&var2_cnt](value v, ink::optional<value> o_v) {
         REQUIRE(v.type == value::Type::String);
-        std::string str(v.v_string);
+        std::string str(v.get<value::Type::String>());
         if (var2_cnt++ == 0) {
           REQUIRE(str == "hello");
           REQUIRE_FALSE(o_v.has_value());
@@ -141,7 +141,7 @@ SCENARIO("Observer", "[variables]")
           REQUIRE(str == "test");
           REQUIRE(o_v.has_value());
           REQUIRE(o_v.value().type == value::Type::String);
-          std::string str2(o_v.value().v_string);
+          std::string str2(o_v.value().get<value::Type::String>());
           REQUIRE(str2 == "hello");
         }
 			};

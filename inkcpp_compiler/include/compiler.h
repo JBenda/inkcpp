@@ -9,26 +9,27 @@
 
 namespace ink
 {
+	/** collection of functions to compile a story.json to story.bin */
 	namespace compiler
 	{
-		// file -> file
+		/** file -> file */
 		void run(const char* filenameIn, const char* filenameOut, compilation_results* results = nullptr);
 
-		// file -> stream
+		/** file -> stream */
 		void run(const char* filenameIn, std::ostream& out, compilation_results* results = nullptr);
 
 #ifdef INK_EXPOSE_JSON
-		// JSON -> file
+		/** JSON -> file */
 		void run(const nlohmann::json&, const char* filenameOut, compilation_results* results = nullptr);
 
-		// JSON -> stream
+		/** JSON -> stream */
 		void run(const nlohmann::json&, std::ostream& out, compilation_results* results = nullptr);
 #endif
 
-		// stream -> stream
+		/** stream -> stream */
 		void run(std::istream& in, std::ostream& out, compilation_results* results = nullptr);
 
-		// stream -> file
+		/* stream -> file **/
 		void run(std::istream& in, const char* filenameOut, compilation_results* results = nullptr);
 	}
 }

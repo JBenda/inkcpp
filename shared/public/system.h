@@ -56,7 +56,7 @@ namespace ink
 	// Used to uniquely identify threads
 	typedef uint32_t thread_t;
 
-	// Used to unique identify a list flag
+	/** Used to unique identify a list flag  */
 	struct list_flag {
 		int16_t list_id; int16_t flag;
 		bool operator==(const list_flag& o) const {

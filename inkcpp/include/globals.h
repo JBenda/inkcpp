@@ -81,7 +81,7 @@ namespace ink::runtime
 	inline optional<bool> globals_interface::get<bool>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if ( var && var->type == value::Type::Bool) {
-			return {var->v_bool};
+			return {var->get<value::Type::Bool>()};
 		}
 		return nullopt;
 	}
@@ -94,7 +94,7 @@ namespace ink::runtime
 	inline optional<uint32_t>  globals_interface::get<uint32_t>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if (var && var->type == value::Type::Uint32) {
-			return {var->v_uint32};
+			return {var->get<value::Type::Uint32>()};
 		}
 		return nullopt;
 	}
@@ -107,7 +107,7 @@ namespace ink::runtime
 	inline optional<int32_t> globals_interface::get<int32_t>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if (var && var->type == value::Type::Int32) {
-			return {var->v_int32};
+			return {var->get<value::Type::Int32>()};
 		}
 		return nullopt;
 	}
@@ -121,7 +121,7 @@ namespace ink::runtime
 	inline optional<float> globals_interface::get<float>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if ( var && var->type == value::Type::Float) {
-			return {var->v_float};
+			return {var->get<value::Type::Float>()};
 		}
 		return nullopt;
 	}
@@ -134,7 +134,7 @@ namespace ink::runtime
 	inline optional<const char*> globals_interface::get<const char*>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if ( var && var->type == value::Type::String ) {
-			return {var->v_string};
+			return {var->get<value::Type::String>()};
 		}
 		return nullopt;
 	}
@@ -147,7 +147,7 @@ namespace ink::runtime
 	inline optional<list> globals_interface::get<list>(const char* name) const {
 		auto var = get_var(hash_string(name));
 		if (var && var->type == value::Type::List) {
-			return {var->v_list};
+			return {var->get<value::Type::List>()};
 		}
 		return nullopt;
 	}

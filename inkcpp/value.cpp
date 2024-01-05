@@ -170,22 +170,22 @@ namespace ink::runtime::internal
 		using types = ink::runtime::value::Type; 
 		switch (val.type) {
 			case types::Bool:
-				set<value_type::boolean>(val.v_bool);
+				set<value_type::boolean>(val.get<types::Bool>());
 				break;
 			case types::Uint32:
-				set<value_type::uint32>(val.v_uint32);
+				set<value_type::uint32>(val.get<types::Uint32>());
 				break;
 			case types::Int32:
-				set<value_type::int32>(val.v_int32);
+				set<value_type::int32>(val.get<types::Int32>());
 				break;
 			case types::String:
-				set<value_type::string>(val.v_string);
+				set<value_type::string>(val.get<types::String>());
 				break;
 			case types::Float:
-				set<value_type::float32>(val.v_float);
+				set<value_type::float32>(val.get<types::Float>());
 				break;
 			case types::List:
-				set<value_type::list>(list_table::list{static_cast<list_impl*>(val.v_list)->get_lid()});
+				set<value_type::list>(list_table::list{static_cast<list_impl*>(val.get<types::List>())->get_lid()});
 		}
 	}
 
