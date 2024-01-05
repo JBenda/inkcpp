@@ -78,26 +78,19 @@ if (DOXYGEN_FOUND)
         REQUIRED
         COMPONENTS Interpreter
 		)
-		execute_process(
-			COMMAND ${Python3_EXECUTABLE} -m pydoc
-			RESULT_VARIABLE PYDOC_MISSING
-			OUTPUT_QUIET)
-		set(PY_HTML "${PROJECT_SOURCE_DIR}/Documentation/inkcpp_py.html")
-		if (${PYDOC_MISSING} EQUAL 0)
-			add_custom_target(inkcpp_py_doc
-				python -m pydoc -w inkcpp_py
-				COMMAND mv "./inkcpp_py.html" ${PY_HTML}
-				DEPENDS inkcpp_py
-				WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/inkcpp_py"
-				COMMENT "Generates simple python documentation") 
-		else()
-			message(WARNING "The pydoc module is not installed. Therfore no documentation for the python bindings can be created! '${PYDOC_MISSING}'")
+		add_custom_target(inkcpp_py_doc
+			python -m pydoc -w inkcpp_py
+			COMMAND mv "./inkcpp_py.html" ${PY_HTML}
+			DEPENDS inkcpp_py
+			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/inkcpp_py"
+			COMMENT "Generates simple python documentation") 
+	else()
+			message(WARNING "The python target is disabled, therfore no python documentation will be build. Set INKCPP_PY=ON to change this")
 			add_custom_target(inkcpp_py_doc
 				echo "<html><head></head><body><h2>Python Documenattion was not build!</h2></body></html>" > ${PY_HTML} 
 				COMMENT "Python Documentation dummy")
-		endif()
-		add_dependencies(doc inkcpp_py_doc)
 	endif(INKCPP_PY)
+	add_dependencies(doc inkcpp_py_doc)
 else(DOXYGEN_FOUND)
 	message("Doxygen needed to generate documntation!")
 endif(DOXYGEN_FOUND)
