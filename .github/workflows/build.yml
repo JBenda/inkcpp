@@ -74,7 +74,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DINKCPP_PY=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DINKCPP_PY=OFF
 
     # Build using CMake and OS toolkit
     - name: Build
@@ -125,17 +125,6 @@ jobs:
         name: ${{ matrix.artifact }}-unreal
         path: build/comp_unreal/
 
-    # - name: Install PythonLib
-    #   working-directory: ${{github.workspace}}/build
-    #   shell: bash
-    #   run: cmake --install . --config $BUILD_TYPE --prefix comp_py --component py
-
-    # - name: Upload Binary Artifact
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: ${{ matrix.artifact }}-py
-    #     path: build/comp_py/
-
     # Make sure Inkproof has everything it needs to run our executable
     - name: Setup Ink Proof
       if: ${{ matrix.proof }}
@@ -181,6 +170,45 @@ jobs:
         name: ${{ matrix.artifact }}-www
         path: proofing/ink-proof/out
 
+  build-doc:
+    name: Build Doxygen documentation
+    needs: compilation build-python
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Set upt Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.x"
+    - name: install python deps
+      run: >-
+        python3 -m
+        pip install
+        pydoc
+        --user
+    - name: Install Doxygen
+      run: sudo apt-get install doxygen graphviz -y
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.14.2
+      with:
+        cmake-version: '3.21.x'
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DINKCPP_PY=ON
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --build . --target doc
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: doxygen
+        path: Documentation/
 
   build-python:
     name: Build Python package
@@ -293,12 +321,17 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Download Ink Proof page for Linux
       - uses: actions/download-artifact@v2
         with:
           name: linux-www
+          path: www/proof
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: doxygen
           path: www
 
       # Deploy to Github Pages

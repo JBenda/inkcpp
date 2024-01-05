@@ -3,7 +3,9 @@
 
 Inkle Ink C++ Runtime with JSON -> Binary Compiler.
 
-Ink Proofing Test Results: https://jbenda.github.io/inkcpp
+Ink Proofing Test Results: https://jbenda.github.io/inkcpp/proof
+
+Doxygen Documentation: https://jbenda.github.io/inkcpp/html
 
 ## Project Goals
 * Fast, simple, clean syntax
@@ -145,7 +147,7 @@ Right now this only executes the internal unit tests which test the functions of
 ## Python Bindings
 
 The easy way to start is installing it with pip: `pip install inkcpp_py`.
-An example can be found at [./inkcpp_py/example.py].
+An example can be found at [example.py](./inkcpp_py/example.py).
 To build it from source use:
 
 ```sh
