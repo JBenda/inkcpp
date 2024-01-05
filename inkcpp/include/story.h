@@ -85,3 +85,71 @@ namespace ink::runtime
 #pragma endregion
 	};
 }
+
+/** @mainpage InkCPP Documentation
+ * @tableofcontents
+ *
+ * @section cmake CMAKE usage
+ *
+ * The current erlease is available at the [release page](https://github.com/JBenda/inkcpp/releases/latest), as `<os>-lib.zip` (e.g. `linux-lib.zip`). <br/>
+ * to link the libraries you can use `find_package(inkcpp CONFIG)` which provides two targets:
+ * + inkcpp: the runtime enviroment
+ * + inkcpp_comopiler: functionality to compile a story.json to story.bin
+ *
+ * To run your own `.ink` files you need a way to compile it to inks runtime format `.ink.json`. One way is to use `inklecate <story>.ink`.<br/>
+ * Which is available at the [official release page](https://github.com/inkle/ink/releases/latest).<br/>
+ *
+ * Exampl with library extracted at /YOUR/PROJECT/linux-lib
+ * And the [Example project](../cmake_example.zip) is extracted to /YOUR/PROJECT
+ * @code {sh}
+ * cd /YOUR/PROJECT
+ * ls # expected output: CMakeLists.txt main.cpp test.ink test.ink.json linux-lib
+ * mkdir build
+ * cd build
+ * inkcpp_DIR=../linux-lib cmake ..
+ * cmake --build .
+ * cp ../test.ink.json .
+ * ./main
+ * @endcode
+ *
+ * @subsection src_main main.cpp
+ * @include cmake_example/main.cpp
+ * 
+ * @subsection src_cmake CMakeLists.txt
+ * @include cmake_example/CMakeLists.txt
+ *
+ * @subsection src_story_json test.ink
+ * @include cmake_example/test.ink
+ * [test.ink.json](../cmake_example/test.ink.json)
+ *
+ * @section ue Unreal Installation
+ *
+ * The current release is available at the [release page](https://github.com/JBenda/inkcpp/releases/latest), as `<os>-unreal.zip` (e.g. `win64-unreal.zip`).<br/>
+ * Unpack this folder in `/PATH/TO/UNREAL_PROJECT/Plugins/` and it will be intigrated at the next startup.<br/>
+ * A MarketPlace appearance is work in progress :)
+ *
+ * If you want to use the newest version clone the project and install the unreal component.
+ * @code {sh}
+ * git clone https://github.com/JBenda/inkcpp
+ * cd inkcpp
+ * mkdir build
+ * mkdir plugin
+ * cd build
+ * cmake ..
+ * cmake --install . --component unreal --prefix ../plugin
+ * cd ../plugin
+ * # Should contain a folder named 'inkcpp'
+ * cp -r inkcpp /PATH/TO/UNREAL_PROJECT/Plugins
+ * @endcode
+ *
+ * @section py Python example
+ * 
+ * You can install the current release from [pypi](https://pypi.com/projects/inkcpp-py) with <br/>
+ * `pip install inkcpp-py`.<br/>
+ * Or build it yourself with <br/>
+ * `pip install .`
+ * 
+ * Here can you find an [example](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_py/example.py) inclusive [story](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_py/unreal_example.ink).
+ *
+ * [Python module documentation](./inkcpp_py.html) 
+ */
