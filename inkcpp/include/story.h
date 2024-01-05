@@ -86,6 +86,17 @@ namespace ink::runtime
 	};
 }
 
+/** @namespace ink
+ * Namespace contaning all modules and classes from InkCPP
+ *
+ * (Unreal Blueprint Classes Excluded, but there will not be there in a normal build)
+ */
+
+/** @namespace ink::runtime
+ * Contaning all modules and classes used for the inkles ink runtime.
+ * A minimal example can be found at @ref src_main
+ */
+
 /** @mainpage InkCPP Documentation
  * @tableofcontents
  * Inkle Ink C++ Runtime with INK.JSON -> Binary Compiler.<br/>
@@ -136,6 +147,9 @@ namespace ink::runtime
  * page](https://github.com/JBenda/inkcpp/releases/latest), as `<os>-unreal.zip` (e.g.
  * `win64-unreal.zip`).<br/> Unpack this folder in `/PATH/TO/UNREAL_PROJECT/Plugins/` and it will be
  * intigrated at the next startup.<br/> A MarketPlace appearance is work in progress :)
+ *
+ * The overview to the UE Blueprint class can be found at @ref unreal "here".
+ * A more detailed explination with images in WIP.
  *
  * If you want to use the newest version clone the project and install the unreal component.
  * @code {sh}
