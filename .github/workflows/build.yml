@@ -311,7 +311,7 @@ jobs:
   
   pages:
     name: "Upload Ink-Proof to Github Pages"
-    needs: compilation
+    needs: [ compilation, build-doc ]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
