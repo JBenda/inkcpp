@@ -64,7 +64,7 @@ jobs:
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v1.14.2
       with:
-        cmake-version: '3.21.x'
+        cmake-version: '3.22.x'
 
     # Create a build directory to store all the CMake generated files
     - name: Create Build Environment
@@ -187,7 +187,7 @@ jobs:
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v1.14.2
       with:
-        cmake-version: '3.21.x'
+        cmake-version: '3.22.x'
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
     - name: Configure CMake

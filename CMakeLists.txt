@@ -71,7 +71,12 @@ include(CPack)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
 	set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
-	doxygen_add_docs(doc WORKING_DIR ${PROJECT_SOURCE_DIR} CONFIG_FILE "${PROJECT_SOURCE_DIR}/Doxyfile" COMMENT "Generate docs")
+	# enable if update to cmake version 3.28
+	# doxygen_add_docs(doc WORKING_DIR ${PROJECT_SOURCE_DIR} CONFIG_FILE "${PROJECT_SOURCE_DIR}/Doxyfile" COMMENT "Generate docs")
+	add_custom_target(doc
+		${DOXYGEN_EXECUTABLE} "${PROJECT_SOURCE_DIR}/Doxyfile"
+		WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+		COMMENT "Generate doxygen documentation")
 	set(PY_HTML "${PROJECT_SOURCE_DIR}/Documentation/inkcpp_py.html")
 	if (INKCPP_PY)
 		find_package(
