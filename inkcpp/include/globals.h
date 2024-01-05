@@ -67,6 +67,9 @@ protected:
 	virtual void            internal_observe(hash_t name, internal::callback_base* callback) = 0;
 };
 
+/** @name Instanciations */
+///@{
+/** getter and setter instanciations for supported types */
 template<>
 inline optional<value> globals_interface::get<value>(const char* name) const
 {
@@ -174,4 +177,5 @@ inline bool globals_interface::set<list>(const char* name, const list& val)
 {
 	return set_var(hash_string(name), value(val));
 }
+///@}
 } // namespace ink::runtime

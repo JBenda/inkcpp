@@ -85,13 +85,11 @@ if (DOXYGEN_FOUND)
 			DEPENDS inkcpp_py
 			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/inkcpp_py"
 			COMMENT "Generates simple python documentation") 
+		add_dependencies(doc inkcpp_py_doc)
 	else()
 			message(WARNING "The python target is disabled, therfore no python documentation will be build. Set INKCPP_PY to change this")
-			add_custom_target(inkcpp_py_doc
-				echo "<html><head></head><body><h2>Python Documenattion was not build!</h2></body></html>" > ${PY_HTML} 
-				COMMENT "Python Documentation dummy")
+			file(WRITE ${PY_HTML} "<html><head></head><body><h2>Python Documenattion was not build!</h2></body></html>")
 	endif(INKCPP_PY)
-	add_dependencies(doc inkcpp_py_doc)
 else(DOXYGEN_FOUND)
 	message("Doxygen needed to generate documntation!")
 endif(DOXYGEN_FOUND)

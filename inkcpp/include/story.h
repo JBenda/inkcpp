@@ -14,7 +14,7 @@ namespace ink::runtime
 	 * globals object. By default, each runner gets its own newly
 	 * created globals store.
 	 * @see runner_interface
-	 * @see globals
+	 * @see globals_interface
 	*/
 	class story
 	{
@@ -88,6 +88,11 @@ namespace ink::runtime
 
 /** @mainpage InkCPP Documentation
  * @tableofcontents
+ * Inkle Ink C++ Runtime with INK.JSON -> Binary Compiler.<br/>
+ * supports ussage in:
+ * + C++ (with CMAKE)
+ * + UE
+ * + Python [inkcpp_py](https://pypi.org/project/inkcpp-py/)
  *
  * @section cmake CMAKE usage
  *
@@ -123,7 +128,7 @@ namespace ink::runtime
  *
  * @subsection src_story_json test.ink
  * @include cmake_example/test.ink
- * [test.ink.json](../cmake_example/test.ink.json)
+ * compiled: [test.ink.json](../cmake_example/test.ink.json)
  *
  * @section ue Unreal Installation
  *
@@ -148,9 +153,9 @@ namespace ink::runtime
  *
  * @section py Python example
  *
- * You can install the current release from [pypi](https://pypi.com/projects/inkcpp-py) with <br/>
+ * You can install the current release from [pypi](https://pypi.org/project/inkcpp-py/) with <br/>
  * `pip install inkcpp-py`.<br/>
- * Or build it yourself with <br/>
+ * Or build it yourself from main with: <br/>
  * `pip install .`
  *
  * Here can you find an
