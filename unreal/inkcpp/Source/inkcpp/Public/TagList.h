@@ -7,6 +7,7 @@
 
 /**
  * Helpful tag list
+ * @ingroup unreal
  */
 UCLASS()
 class INKCPP_API UTagList : public UObject

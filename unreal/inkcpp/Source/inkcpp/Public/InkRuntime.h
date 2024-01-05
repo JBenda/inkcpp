@@ -19,6 +19,9 @@ class UInkThread;
 struct FInkVar;
 namespace ink::runtime { class story; }
 
+/** Instanciated story with global variable storage and access, used to instanciate new threads.
+ * @ingroup unreal
+ */
 UCLASS()
 class INKCPP_API AInkRuntime : public AActor
 {

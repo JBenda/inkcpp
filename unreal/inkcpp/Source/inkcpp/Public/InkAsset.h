@@ -4,6 +4,9 @@
 
 #include "InkAsset.generated.h"
 
+/** Assets contanining a InkCPP .bin
+ * @ingroup unreal
+ */
 UCLASS(hidecategories=Object)
 class INKCPP_API UInkAsset : public UObject
 {

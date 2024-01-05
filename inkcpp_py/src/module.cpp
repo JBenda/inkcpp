@@ -35,10 +35,9 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, ink::runtime::story_ptr<T>);
 
 struct StringValueWrap : public value {
 	StringValueWrap(const std::string& s)
-	    : str{s}
+	    : value(s.c_str())
+	    , str{s}
 	{
-		value::type     = value::Type::String;
-		value::v_string = str.c_str();
 	}
 
 	~StringValueWrap() { std::cout << "death" << std::endl; }
@@ -158,19 +157,19 @@ PYBIND11_MODULE(inkcpp_py, m)
 		    if (self.type != value::Type::List) {
 			    throw py::attribute_error("Try to access list of non list value");
 		    }
-		    return self.v_list;
+		    return self.get<value::Type::List>();
 	    },
 	    py::return_value_policy::reference
 	);
 	py_value.def("__str__", [](const value& self) {
 		switch (self.type) {
-			case value::Type::Bool: return std::string(self.v_bool ? "true" : "false");
-			case value::Type::Uint32: return std::to_string(self.v_uint32);
-			case value::Type::Int32: return std::to_string(self.v_int32);
-			case value::Type::String: return std::string(self.v_string);
-			case value::Type::Float: return std::to_string(self.v_float);
+			case value::Type::Bool: return std::string(self.get<value::Type::Bool>() ? "true" : "false");
+			case value::Type::Uint32: return std::to_string(self.get<value::Type::Uint32>());
+			case value::Type::Int32: return std::to_string(self.get<value::Type::Int32>());
+			case value::Type::String: return std::string(self.get<value::Type::String>());
+			case value::Type::Float: return std::to_string(self.get<value::Type::Float>());
 			case value::Type::List: {
-				return list_to_str(*self.v_list);
+				return list_to_str(*self.get<value::Type::List>());
 			}
 		}
 		throw py::attribute_error("value is in an invalid state");

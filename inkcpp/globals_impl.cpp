@@ -154,13 +154,13 @@ bool globals_impl::set_var(hash_t name, const ink::runtime::value& val)
 		}
 		size_t size = 0;
 		char*  ptr;
-		for (const char* i = val.v_string; *i; ++i) {
+		for (const char* i = val.get<runtime::value::Type::String>(); *i; ++i) {
 			++size;
 		}
 		char* new_string = strings().create(size + 1);
 		strings().mark_used(new_string);
 		ptr = new_string;
-		for (const char* i = val.v_string; *i; ++i) {
+		for (const char* i = val.get<runtime::value::Type::String>(); *i; ++i) {
 			*ptr++ = *i;
 		}
 		*ptr = 0;

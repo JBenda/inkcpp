@@ -2,6 +2,9 @@
 
 #include "InkSnapshot.generated.h"
 
+/** A serelizable snapshot of a runtime state
+ * @ingroup unreal
+ */
 USTRUCT(BlueprintType)
 struct INKCPP_API FInkSnapshot
 {

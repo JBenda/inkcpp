@@ -18,11 +18,10 @@ class UTagList;
 class AInkRuntime;
 class UInkChoice;
 
-/**
- * Base class for all ink threads
+/** Base class for all ink threads
+ * @ingroup unreal
  */
 UCLASS(Blueprintable)
-
 class INKCPP_API UInkThread : public UObject
 {
 	GENERATED_BODY()

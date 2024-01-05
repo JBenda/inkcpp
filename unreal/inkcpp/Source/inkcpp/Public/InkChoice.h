@@ -9,6 +9,9 @@
 namespace ink::runtime { class choice; }
 class UTagList;
 
+/** Representing a Ink Choice in the story flow
+ * @ingroup unreal
+ */
 UCLASS(BlueprintType)
 class UInkChoice : public UObject
 {

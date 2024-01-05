@@ -12,8 +12,9 @@
 
 #include "InkVar.generated.h"
 
-// A wrapper for passing around ink vars to and from ink itself
-// Not templated so it can be used in blueprints
+/** Label for types possible contained in a @ref FInkVar
+ * @ingroup unreal
+ */
 UENUM(BlueprintType)
 enum class EInkVarType : uint8
 {
@@ -28,6 +29,10 @@ enum class EInkVarType : uint8
 
 namespace ink::runtime { struct value; }
 
+/** A wrapper for passing around ink vars to and from ink itself
+ * Not templated so it can be used in blueprints
+ * @ingroup unreal
+ */
 USTRUCT(BlueprintType)
 struct INKCPP_API FInkVar
 {
@@ -80,6 +85,9 @@ private:
 	}
 };
 
+/** Conversion Methods for @ref FInkVar
+ * @ingroup unreal
+ */
 UCLASS()
 class INKCPP_API UInkVarLibrary : public UBlueprintFunctionLibrary
 {
