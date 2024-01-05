@@ -72,6 +72,7 @@ find_package(Doxygen)
 if (DOXYGEN_FOUND)
 	set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
 	doxygen_add_docs(doc WORKING_DIR ${PROJECT_SOURCE_DIR} CONFIG_FILE "${PROJECT_SOURCE_DIR}/Doxyfile" COMMENT "Generate docs")
+	set(PY_HTML "${PROJECT_SOURCE_DIR}/Documentation/inkcpp_py.html")
 	if (INKCPP_PY)
 		find_package(
         Python3
@@ -85,7 +86,7 @@ if (DOXYGEN_FOUND)
 			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/inkcpp_py"
 			COMMENT "Generates simple python documentation") 
 	else()
-			message(WARNING "The python target is disabled, therfore no python documentation will be build. Set INKCPP_PY=ON to change this")
+			message(WARNING "The python target is disabled, therfore no python documentation will be build. Set INKCPP_PY to change this")
 			add_custom_target(inkcpp_py_doc
 				echo "<html><head></head><body><h2>Python Documenattion was not build!</h2></body></html>" > ${PY_HTML} 
 				COMMENT "Python Documentation dummy")
