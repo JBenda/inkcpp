@@ -35,8 +35,10 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, ink::runtime::story_ptr<T>);
 
 struct StringValueWrap : public value {
 	StringValueWrap(const std::string& s)
-	    : value(s.c_str()), str{s}
-	{ }
+	    : value(s.c_str())
+	    , str{s}
+	{
+	}
 
 	~StringValueWrap() { std::cout << "death" << std::endl; }
 
