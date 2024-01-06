@@ -131,16 +131,31 @@ PYBIND11_MODULE(inkcpp_py, m)
 		    }
 	    });
 
-	py::class_<list, std::unique_ptr<list, py::nodelete>>(
+	py::class_<list, std::unique_ptr<list, py::nodelete>> py_list(
 	    m, "List",
 	    "Allows reading and editing inkcpp lists. !Only valid until next choose ore getline a runner "
 	    "referncing the corresponding global"
-	)
-	    .def("add", &list::add, "Add flag to list")
+	);
+	py_list.def("add", &list::add, "Add flag to list")
 	    .def("remove", &list::remove, "Remove flag from list")
 	    .def("contains", &list::contains, "Check if list contains the given flag")
+	    .def(
+	        "flags_from",
+	        [](const list& self, const char* list_name) {
+		        return py::make_iterator(self.begin(list_name), self.end());
+	        },
+	        "Rerutrns all flags contained in list from a list", py::keep_alive<0, 1>()
+	    )
+	    .def(
+	        "__iter__", [](const list& self) { return py::make_iterator(self.begin(), self.end()); },
+	        py::keep_alive<0, 1>()
+	    )
 	    .def("__str__", &list_to_str);
-
+	py::class_<list::iterator::Flag>(
+	    py_list, "Flag", "A list flag containing the name of the flag and the corresponding list"
+	)
+	    .def_readonly("flag", &list::iterator::Flag::flag_name, "The flag")
+	    .def_readonly("list", &list::iterator::Flag::list_name, "Name of the corresponding list");
 
 	py::class_<value> py_value(m, "Value", "A Value of a Ink Variable");
 	py_value.def_readonly("type", &value::type, "Type contained in value");
@@ -175,7 +190,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 		throw py::attribute_error("value is in an invalid state");
 	});
 
-	py::enum_<value::Type>(m, "Type")
+	py::enum_<value::Type>(py_value, "Type")
 	    .value("Bool", value::Type::Bool)
 	    .value("Uint32", value::Type::Uint32)
 	    .value("Int32", value::Type::Int32)
@@ -190,8 +205,15 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        "Creates a snapshot from the current state for later usage"
 	    )
 	    .def("can_continue", &runner::can_continue, "check if there is content left in story")
-	    .def("getline", static_cast<std::string (runner::*)()>(&runner::getline))
-	    .def("has_tags", &runner::has_tags, "Where there tags since last getline")
+	    .def(
+	        "getline", static_cast<std::string (runner::*)()>(&runner::getline),
+	        "Get content of one output line"
+	    )
+	    .def(
+	        "getall", static_cast<std::string (runner::*)()>(&runner::getall),
+	        "execute getline and append until can_continue is false"
+	    )
+	    .def("has_tags", &runner::has_tags, "Where there tags since last getline?")
 	    .def("num_tags", &runner::num_tags, "Number of tags currently stored")
 	    .def(
 	        "get_tag", &runner::get_tag, "Get Tag currently stored at position i",
