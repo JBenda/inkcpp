@@ -13,8 +13,8 @@ namespace ink::runtime
  * share globals (variables, visit counts, etc). through the
  * globals object. By default, each runner gets its own newly
  * created globals store.
- * @see runner_interface
- * @see globals_interface
+ * @see ink::runtime::runner_interface
+ * @see ink::runtime::globals_interface
  */
 class story
 {
