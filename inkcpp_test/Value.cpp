@@ -40,7 +40,7 @@ SCENARIO("compare concatenated values")
 	list_table lst_table{};
 	prng rng;
 	eval_stack stack;
-	story_impl story(INK_TEST_RESOURCE_DIR "ListStory.bin");
+	story_impl    story(INK_TEST_RESOURCE_DIR "ListStory.bin");
 	globals globs_ptr = story.new_globals();
 	runner run = story.new_runner(globs_ptr);
 	globals_impl& globs = *globs_ptr.cast<globals_impl>();

@@ -12,7 +12,7 @@ SCENARIO( "run story with hidden choice" )
 {
 	GIVEN( "a story with choice visibale by second visit" )
 	{
-		auto    ink     = story::from_file( INK_TEST_RESOURCE_DIR "LabelConditionStory.bin" );
+		auto    ink     = story::from_file(INK_TEST_RESOURCE_DIR "LabelConditionStory.bin");
 		globals globals = ink->new_globals();
 		runner  thread  = ink->new_runner( globals );
 

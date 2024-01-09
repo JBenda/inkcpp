@@ -14,7 +14,7 @@ SCENARIO("run a story with lists", "[lists]")
 {
 	GIVEN("a story with multi lists")
 	{
-		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "ListStory.bin");
+		auto    ink     = story::from_file(INK_TEST_RESOURCE_DIR "ListStory.bin");
 		globals globals = ink->new_globals();
 		runner thread = ink->new_runner(globals);
 

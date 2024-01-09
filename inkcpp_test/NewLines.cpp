@@ -11,14 +11,11 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 {
 	GIVEN("a story with line breaks")
 	{
-		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
 		runner thread = ink->new_runner();
 		WHEN("start thread")
 		{
-			THEN("thread can continue")
-			{
-				REQUIRE(thread->can_continue());
-			}
+			THEN("thread can continue") { REQUIRE(thread->can_continue()); }
 			WHEN("consume lines")
 			{
 				std::string line1 = thread->getline();
@@ -39,7 +36,8 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 				std::string line1 = thread->getline();
 				std::string line2 = thread->getline();
 
-				THEN("function lines are correct") {
+				THEN("function lines are correct")
+				{
 					REQUIRE(line1 == "Function Line\n");
 					REQUIRE(line2 == "Function Result\n");
 				}
@@ -50,15 +48,13 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 				std::string line1 = thread->getline();
 				std::string line2 = thread->getline();
 
-				THEN("tunnel lines are correct") {
+				THEN("tunnel lines are correct")
+				{
 					REQUIRE(line1 == "Tunnel Line\n");
 					REQUIRE(line2 == "Tunnel Result\n");
 				}
 
-				THEN("thread cannot continue")
-				{
-					REQUIRE(!thread->can_continue());
-				}
+				THEN("thread cannot continue") { REQUIRE(! thread->can_continue()); }
 			}
 		}
 	}

@@ -39,13 +39,13 @@ int main(int argc, const char* argv[])
 	HInkStory*  story  = ink_story_from_file(INK_TEST_RESOURCE_DIR "FallBack.bin");
 	HInkRunner* runner = ink_story_new_runner(story, NULL);
 	ink_runner_bind(runner, "greeting", greeting);
-	ink_runner_bind(runner,"sqrt",  my_sqrt);
+	ink_runner_bind(runner, "sqrt", my_sqrt);
 
 	const char* res = ink_runner_get_line(runner);
-	assert(strcmp(res, "Hohooh ! A small demonstration of my power:\n")== 0);
+	assert(strcmp(res, "Hohooh ! A small demonstration of my power:\n") == 0);
 	assert(ink_runner_can_continue(runner));
 
-	assert(strcmp(ink_runner_get_line(runner), "Math 4 * 4 = 16, stunning i would say\n")== 0);
+	assert(strcmp(ink_runner_get_line(runner), "Math 4 * 4 = 16, stunning i would say\n") == 0);
 	assert(ink_runner_can_continue(runner) == 0);
 
 	assert(cnt_my_sqrt == 2);

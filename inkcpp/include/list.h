@@ -11,7 +11,7 @@ struct InkListIter;
 struct HInkList;
 void ink_list_flags(const HInkList*, InkListIter*);
 void ink_list_flags_from(const HInkList*, const char*, InkListIter*);
-int ink_list_iter_next(InkListIter*);
+int  ink_list_iter_next(InkListIter*);
 #endif
 
 namespace ink::runtime {
@@ -29,11 +29,12 @@ namespace ink::runtime {
 			int _i;
 			bool _one_list_iterator; //< iterates only though values of one list
 			friend list_interface;
-			#ifdef INK_BUILD_CLIB
-			friend void ::ink_list_flags(const HInkList*, InkListIter*);
-			friend void ::ink_list_flags_from(const HInkList*, const char*, InkListIter*);
-			friend int ::ink_list_iter_next(InkListIter* self);
-			#endif
+#ifdef INK_BUILD_CLIB
+		  friend void ::ink_list_flags(const HInkList*, InkListIter*);
+		  friend void ::ink_list_flags_from(const HInkList*, const char*, InkListIter*);
+		  friend int ::ink_list_iter_next(InkListIter* self);
+#endif
+
 		protected:
 			iterator(const char* flag_name, const list_interface& list, size_t i, bool one_list_only = false)
 				: _flag_name(flag_name), _list(list), _i(i), _one_list_iterator(one_list_only) {}

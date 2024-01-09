@@ -10,7 +10,7 @@ using namespace ink::runtime;
 
 SCENARIO("tags", "[tags]")
 {
-	auto ink = story::from_file(INK_TEST_RESOURCE_DIR "AHF.bin");
+	auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "AHF.bin");
 	runner thread = ink->new_runner();
 	thread->move_to(ink::hash_string("test_knot"));
 	while(thread->can_continue()) {
@@ -23,7 +23,7 @@ SCENARIO("run story with tags", "[tags]")
 {
 	GIVEN("a story with tags")
 	{
-		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
 		runner thread = ink->new_runner();
 		WHEN("start thread")
 		{

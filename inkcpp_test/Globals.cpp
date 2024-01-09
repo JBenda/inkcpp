@@ -11,7 +11,7 @@ SCENARIO("run story with global variable", "[global variables]")
 {
 	GIVEN ("a story with global variables")
 	{
-		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "GlobalStory.bin");
+		auto    ink       = story::from_file(INK_TEST_RESOURCE_DIR "GlobalStory.bin");
 		globals globStore = ink->new_globals();
 		runner thread = ink->new_runner(globStore);
 
