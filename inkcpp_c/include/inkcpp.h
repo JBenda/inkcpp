@@ -5,6 +5,16 @@
 
 #ifdef __cplusplus
 extern "C" {
+#else
+typedef struct HInkSnapshot HInkSnapshot;
+typedef struct HInkChoice   HInkChoice;
+typedef struct HInkList     HInkList;
+typedef struct HInkListIter HInkListIter;
+typedef struct InkFlag      InkFlag;
+typedef struct InkValue     InkValue;
+typedef struct HInkRunner   HInkRunner;
+typedef struct HInkGlobals  HInkGlobals;
+typedef struct HInkSTory    HInkStory;
 #endif
 
 	/** @defgroup clib Clib Interface
@@ -39,7 +49,7 @@ extern "C" {
 
 	void          ink_list_add(HInkList* self, const char* flag_name);
 	void          ink_list_remove(HInkList* self, const char* flag_name);
-	bool          ink_list_contains(const HInkList* self, const char* flag_name);
+	int           ink_list_contains(const HInkList* self, const char* flag_name);
 	HInkListIter* ink_list_flags(const HInkList* self);
 	HInkListIter* ink_list_flags_from(const HInkList* self, const char* list_name);
 	InkFlag       ink_list_iter_next(HInkListIter* self);
@@ -51,22 +61,23 @@ extern "C" {
 	 */
 	struct InkValue {
 		union {
-			int         bool_v; ///< contains value if #type == @ref InkValue::Type::Bool "Bool"
-			uint32_t    uint32_v; ///< contains value if #type == @ref InkValue::Type::Uint32 "Uint32"
-			int32_t     int32_v; ///< contains value if #type == @ref InkValue::Type::Int32 "Int32"
-			const char* string_v; ///< contains value if #type == @ref InkValue::Type::String "String"
-			HInkList*   list_v; ///< contains value if #type == @ref InkValue::Type::List "List"
+			int         bool_v;   ///< contains value if #type == @ref InkValue::Type::ValueTypeBool "ValueTypeBool"
+			uint32_t    uint32_v; ///< contains value if #type == @ref InkValue::Type::ValueTypeUint32 "ValueTypeUint32"
+			int32_t     int32_v;  ///< contains value if #type == @ref InkValue::Type::ValueTypeInt32 "ValueTypeInt32"
+			const char* string_v; ///< contains value if #type == @ref InkValue::Type::ValueTypeString "ValueTypeString"
+			float float_v; ///< contains value if #type == @ref InkValue::Type::ValueTypeFloat "ValueTypeFloat"
+			HInkList*   list_v;   ///< contains value if #type == @ref InkValue::Type::ValueTypeList "ValueTypeList"
 		};
 
 		/// indicates which type is contained in the value
 		enum Type {
-			Bool, ///< a boolean
-			Uint32, ///< a unsigned integer
-			Int32, ///< a signed integer
-			String, ///< a string
-			Float, ///< a floating point number
-			List ///< a ink list
-		} type; ///< indicates type contained in value
+			ValueTypeBool,   ///< a boolean
+			ValueTypeUint32, ///< a unsigned integer
+			ValueTypeInt32,  ///< a signed integer
+			ValueTypeString, ///< a string
+			ValueTypeFloat,  ///< a floating point number
+			ValueTypeList    ///< a ink list
+		} type;   ///< indicates type contained in value
 	};
 
 	const char* ink_value_to_string(const InkValue* self);
@@ -76,19 +87,19 @@ extern "C" {
 	 * @param argc number of arguments
 	 * @param argv array containing the arguments
 	 */
-	typedef void (*InkExternalFunctionVoid)(int argc, const InkValue* argv);
 	/** @memberof HInkRunner
 	 * Callback for a Ink external function wihich returns a value
 	 * @param argc number of arguments
 	 * @param argv array contaning the arguments
 	 * @return value to be furthe process by the ink runtime
 	 */
-	typedef InkValue (*InkExternalFunction)(int argc, const InkValue* argv);
 
 	/** @class HInkRunner
 	 * @ingroup clib
 	 */
 	struct HInkRunner;
+	typedef void (*InkExternalFunctionVoid)(int argc, const InkValue argv[]);
+	typedef InkValue (*InkExternalFunction)(int argc, const InkValue argv[]);
 	HInkSnapshot*     ink_runner_create_snapshot(const HInkRunner* self);
 	int               ink_runner_can_continue(const HInkRunner* self);
 	const char*       ink_runner_get_line(HInkRunner* self);
@@ -101,7 +112,6 @@ extern "C" {
 	void              ink_runner_bind_void(HInkRunner* self, InkExternalFunctionVoid callback);
 	void              ink_runner_bind(HInkRunner* self, InkExternalFunction callback);
 
-	typedef void (*InkObserver)(InkValue new_value, const InkValue* old_value);
 
 	/** @class HInkGlobals
 	 *  @ingroup clib
@@ -110,6 +120,7 @@ extern "C" {
 	 *  @copydetails ink::runtime::globals_interface
 	 */
 	struct HInkGlobals;
+	typedef void (*InkObserver)(InkValue new_value, const InkValue* old_value);
 	/**  @memberof HInkGlobals */
 	HInkSnapshot* ink_globals_create_snapshot(const HInkGlobals* self);
 	/** @memberof HInkGlobals */
@@ -117,7 +128,7 @@ extern "C" {
 	/**  @memberof HInkGlobals */
 	InkValue      ink_globals_get(const HInkGlobals* self, const char* variable_name);
 	/**  @memberof HInkGlobals */
-	bool          ink_globals_set(HInkGlobals* self, const char* variable_name, InkValue value);
+	int           ink_globals_set(HInkGlobals* self, const char* variable_name, InkValue value);
 
 	/** @class HInkStory
 	 *  @ingroup clib

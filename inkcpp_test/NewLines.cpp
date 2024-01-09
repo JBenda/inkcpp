@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <story.h>
 #include <globals.h>
@@ -12,9 +11,7 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 {
 	GIVEN("a story with line breaks")
 	{
-		inklecate("ink/LinesStory.ink", "LinesStory.tmp");
-		ink::compiler::run("LinesStory.tmp", "LinesStory.bin");
-		auto ink = story::from_file("LinesStory.bin");
+		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
 		runner thread = ink->new_runner();
 		WHEN("start thread")
 		{

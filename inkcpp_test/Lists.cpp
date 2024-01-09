@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <story.h>
 #include <runner.h>
@@ -15,9 +14,7 @@ SCENARIO("run a story with lists", "[lists]")
 {
 	GIVEN("a story with multi lists")
 	{
-		inklecate("ink/ListStory.ink", "ListStory.tmp");
-		ink::compiler::run("ListStory.tmp", "ListStory.bin");
-		auto ink = story::from_file("ListStory.bin");
+		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "ListStory.bin");
 		globals globals = ink->new_globals();
 		runner thread = ink->new_runner(globals);
 

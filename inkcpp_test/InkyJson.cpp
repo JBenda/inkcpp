@@ -1,5 +1,4 @@
 #include "catch.hpp"
-// #include "../inkcpp_cl/test.cpp"
 
 #include <story.h>
 #include <globals.h>
@@ -17,7 +16,7 @@ SCENARIO("run inklecate 1.1.1 story")
   auto compiler = GENERATE("inklecate", "inky");
   GIVEN(compiler)
   {
-    auto input_file = std::string("ink/simple-1.1.1-") + compiler + ".json";
+    auto input_file = std::string(INK_TEST_RESOURCE_DIR "simple-1.1.1-") + compiler + ".json";
     ink::compiler::run(input_file.c_str(), "simple.bin");
     auto ink = story::from_file("simple.bin");
     runner thread = ink->new_runner();

@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <story.h>
 #include <globals.h>
@@ -15,11 +14,7 @@ SCENARIO(
 {
 	GIVEN("a story with brackets and nested choices")
 	{
-		inklecate("ink/ThirdTierChoiceAfterBracketsStory.ink", "ThirdTierChoiceAfterBracketsStory.tmp");
-		ink::compiler::run(
-		    "ThirdTierChoiceAfterBracketsStory.tmp", "ThirdTierChoiceAfterBracketsStory.bin"
-		);
-		auto   ink    = story::from_file("ThirdTierChoiceAfterBracketsStory.bin");
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "ThirdTierChoiceAfterBracketsStory.bin");
 		runner thread = ink->new_runner();
 
 		WHEN("start thread")

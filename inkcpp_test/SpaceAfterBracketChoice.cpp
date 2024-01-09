@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <story.h>
 #include <globals.h>
@@ -12,9 +11,7 @@ SCENARIO("a story with bracketed choices and spaces can choose correctly", "[cho
 {
 	GIVEN("a story with line breaks")
 	{
-		inklecate("ink/ChoiceBracketStory.ink", "ChoiceBracketStory.tmp");
-		ink::compiler::run("ChoiceBracketStory.tmp", "ChoiceBracketStory.bin");
-		auto   ink    = story::from_file("ChoiceBracketStory.bin");
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "ChoiceBracketStory.bin");
 		runner thread = ink->new_runner();
 		thread->getall();
 		WHEN("start thread")

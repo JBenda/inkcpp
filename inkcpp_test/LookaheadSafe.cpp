@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <story.h>
 #include <globals.h>
@@ -12,9 +11,7 @@ SCENARIO("A story with external functions and glue", "[external]")
 {
 	GIVEN("The story")
 	{
-		inklecate("ink/LookaheadSafe.ink", "LookaheadSafe.tmp");
-		ink::compiler::run("LookaheadSafe.tmp", "LookaheadSafe.bin");
-		auto ink = story::from_file("LookaheadSafe.bin");
+		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "LookaheadSafe.bin");
 
 		int  cnt = 0;
 		auto foo = [&cnt]() {

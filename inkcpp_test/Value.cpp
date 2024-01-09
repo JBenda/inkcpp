@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <compiler.h>
 #include <story.h>
@@ -26,7 +25,6 @@ using eval_stack = ink::runtime::internal::eval_stack<28, false>;
 using ink::Command;
 
 using ink::runtime::internal::story_impl;
-using ink::runtime::internal::runner_impl;
 using ink::runtime::internal::globals_impl;
 using ink::runtime::globals;
 using ink::runtime::runner;
@@ -42,9 +40,7 @@ SCENARIO("compare concatenated values")
 	list_table lst_table{};
 	prng rng;
 	eval_stack stack;
-	inklecate("ink/ListStory.ink", "ListStory_value.tmp");
-	ink::compiler::run("ListStory_value.tmp", "ListStory_value.bin");
-	story_impl story("ListStory_value.bin");
+	story_impl story(INK_TEST_RESOURCE_DIR "ListStory.bin");
 	globals globs_ptr = story.new_globals();
 	runner run = story.new_runner(globs_ptr);
 	globals_impl& globs = *globs_ptr.cast<globals_impl>();

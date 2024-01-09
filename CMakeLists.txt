@@ -26,9 +26,9 @@ if (INKCPP_C)
 	add_subdirectory(inkcpp_c)
 endif(INKCPP_C)
 if (NOT WHEEL_BUILD)
-add_subdirectory(inkcpp_cl)
-add_subdirectory(inkcpp_test)
-add_subdirectory(unreal)
+	add_subdirectory(inkcpp_cl)
+	add_subdirectory(inkcpp_test)
+	add_subdirectory(unreal)
 endif(NOT WHEEL_BUILD)
 
 

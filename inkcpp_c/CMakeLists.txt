@@ -17,10 +17,14 @@ install(TARGETS inkcpp_c
 # configure in two steps to get the current installation prefix
 set(PREFIX "@PREFIX@")
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/inkcpp_package.pc.in
-  ${CMAKE_BINARY_DIR}/inkcpp_package.pc.in 
+  ${CMAKE_CURRENT_SOURCE_DIR}/inkcpp_c.pc.in
+  ${CMAKE_BINARY_DIR}/inkcpp_c.pc.in 
   @ONLY)
 install(CODE [[ 
   get_filename_component(PREFIX ${CMAKE_INSTALL_PREFIX} ABSOLUTE) 
-  configure_file(inkcpp_package.pc.in ${PREFIX}/lib/pkgconfig/inkcpp_package.pc @ONLY) 
+  configure_file(inkcpp_c.pc.in ${PREFIX}/lib/pkgconfig/inkcpp_c.pc @ONLY) 
   ]] COMPONENT clib EXCLUDE_FROM_ALL)
+
+install(EXPORT inkcpp_cTarget
+  FILE inkcpp_cTargets.cmake DESTINATION "lib/cmake/inkcpp"
+  COMPONENT clib EXCLUDE_FROM_ALL)
