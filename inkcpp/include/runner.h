@@ -66,12 +66,12 @@ public:
 #ifdef INK_ENABLE_CSTD
 	/**
 	 * Continue execution until the next newline, then allocate a c-style
-	 * string with the output. This allocated string is now the callers
-	 * responsibility and it should be deleted.
+	 * string with the output. This allocated string is managed by the runtime
+	 * and will be deleted at the next @ref choose() or @ref getline
 	 *
 	 * @return allocated c-style string with the output of a single line of execution
 	 */
-	virtual char* getline_alloc() = 0;
+	virtual const char* getline_alloc() = 0;
 #endif
 
 	/**

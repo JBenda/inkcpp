@@ -20,12 +20,29 @@ basic_stream::basic_stream(value* buffer, size_t len)
 
 void basic_stream::append(const value& in)
 {
+	// newline after glue -> no newline
+	// newline after glue
 	// SPECIAL: Incoming newline
 	if (in.type() == value_type::newline && _size > 1) {
 		// If the end of the stream is a function start marker, we actually
 		//  want to ignore this. Function start trimming.
 		if (_data[_size - 1].type() == value_type::func_start)
 			return;
+		size_t i = _size - 1;
+		while (true) {
+			value& d = _data[i];
+			// ignore additional newlines after newline or glue
+			if (d.type() == value_type::newline || d.type() == value_type::glue) {
+				return;
+			} else if (d.type() == value_type::string && is_whitespace(d.get<value_type::string>())) {
+			} else {
+				break;
+			}
+			if (i == 0) {
+				break;
+			}
+			--i;
+		}
 	}
 
 	// Ignore leading newlines
@@ -420,6 +437,8 @@ bool basic_stream::text_past_save() const
 			if (! is_whitespace(d.get<value_type::string>(), false))
 				return true;
 		} else if (d.printable()) {
+			return true;
+		} else if (d.type() == value_type::null) {
 			return true;
 		}
 	}

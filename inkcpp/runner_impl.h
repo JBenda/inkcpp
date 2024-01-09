@@ -68,7 +68,7 @@ namespace ink::runtime::internal
 
 #ifdef INK_ENABLE_CSTD
 		// c-style getline
-		virtual char* getline_alloc() override;
+		virtual const char* getline_alloc() override;
 #endif
 
 		// move to path

@@ -70,7 +70,7 @@ target_sources(inkcpp_test PRIVATE ${INK_OUT_FILES})
 if(TARGET inkcpp_c)
   file(GLOB TEST_FILES "${PROJECT_SOURCE_DIR}/inkcpp_c/tests/*.c")
   foreach(TEST_FILE IN LISTS TEST_FILES)
-    get_filename_component(TEST_NAME ${TEST_FILE} NAME)
+    get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_FILE} ${INK_OUT_FILES})
     target_link_libraries(${TEST_NAME} PRIVATE inkcpp_c)
     target_compile_definitions(${TEST_NAME} PRIVATE 

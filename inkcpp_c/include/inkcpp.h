@@ -9,7 +9,7 @@ extern "C" {
 typedef struct HInkSnapshot HInkSnapshot;
 typedef struct HInkChoice   HInkChoice;
 typedef struct HInkList     HInkList;
-typedef struct HInkListIter HInkListIter;
+typedef struct InkListIter  InkListIter;
 typedef struct InkFlag      InkFlag;
 typedef struct InkValue     InkValue;
 typedef struct HInkRunner   HInkRunner;
@@ -40,19 +40,15 @@ typedef struct HInkSTory    HInkStory;
 	const char* ink_choice_get_tag(const HInkChoice* self, int tag_id);
 
 	struct HInkList;
-	struct HInkListIter;
+	struct InkListIter { const void* _data; int _i; int _single_list; const char* flag_name; const char* list_name;};
 
-	struct InkFlag {
-		const char* flag_name;
-		const char* list_name;
-	};
 
 	void          ink_list_add(HInkList* self, const char* flag_name);
 	void          ink_list_remove(HInkList* self, const char* flag_name);
 	int           ink_list_contains(const HInkList* self, const char* flag_name);
-	HInkListIter* ink_list_flags(const HInkList* self);
-	HInkListIter* ink_list_flags_from(const HInkList* self, const char* list_name);
-	InkFlag       ink_list_iter_next(HInkListIter* self);
+	void ink_list_flags(const HInkList* self, InkListIter* iter);
+	void ink_list_flags_from(const HInkList* self, const char* list_name, InkListIter* iter);
+	int       ink_list_iter_next(InkListIter* self);
 
 	/** Repserentation of a ink variable.
 	 * @ingroup clib
@@ -80,7 +76,7 @@ typedef struct HInkSTory    HInkStory;
 		} type;   ///< indicates type contained in value
 	};
 
-	const char* ink_value_to_string(const InkValue* self);
+	// const char* ink_value_to_string(const InkValue* self);
 
 	/** @memberof HInkRunner
 	 * Callback for a Ink external function which returns void
@@ -100,17 +96,17 @@ typedef struct HInkSTory    HInkStory;
 	struct HInkRunner;
 	typedef void (*InkExternalFunctionVoid)(int argc, const InkValue argv[]);
 	typedef InkValue (*InkExternalFunction)(int argc, const InkValue argv[]);
+	void ink_runner_delete(HInkRunner* self);
 	HInkSnapshot*     ink_runner_create_snapshot(const HInkRunner* self);
 	int               ink_runner_can_continue(const HInkRunner* self);
 	const char*       ink_runner_get_line(HInkRunner* self);
-	const char*       ink_runner_get_all(HInkRunner* self);
 	int               ink_runner_num_tags(const HInkRunner* self);
 	const char*       ink_runner_tag(const HInkRunner* self, int tag_id);
 	int               ink_runner_num_choices(const HInkRunner* self);
 	const HInkChoice* ink_runner_get_choice(const HInkRunner* self, int choice_id);
 	void              ink_runner_choose(HInkRunner* self, int choice_id);
-	void              ink_runner_bind_void(HInkRunner* self, InkExternalFunctionVoid callback);
-	void              ink_runner_bind(HInkRunner* self, InkExternalFunction callback);
+	void              ink_runner_bind_void(HInkRunner* self, const char* function_name, InkExternalFunctionVoid callback);
+	void              ink_runner_bind(HInkRunner* self, const char* function_name, InkExternalFunction callback);
 
 
 	/** @class HInkGlobals
@@ -142,6 +138,7 @@ typedef struct HInkSTory    HInkStory;
 	 *  @copydoc ink::runtime::story::from_file
 	 */
 	HInkStory*   ink_story_from_file(const char* filename);
+	void ink_story_delete(HInkStory* self);
 	/** @memberof HInkStory
 	 *  @copydoc ink::runtime::story::new_globals
 	 */

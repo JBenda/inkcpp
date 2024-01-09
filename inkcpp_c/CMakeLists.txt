@@ -5,6 +5,7 @@ target_include_directories(inkcpp_c PUBLIC
 )
 set_target_properties(inkcpp_c PROPERTIES PUBLIC_HEADER "include/inkcpp.h")
 target_link_libraries(inkcpp_c PRIVATE inkcpp_shared inkcpp inkcpp_compiler)
+target_compile_definitions(inkcpp_c PRIVATE INK_BUILD_CLIB)
 
 install(TARGETS inkcpp_c
   EXPORT inkcpp_cTarget
