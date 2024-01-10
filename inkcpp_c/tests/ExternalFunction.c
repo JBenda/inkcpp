@@ -38,8 +38,8 @@ int main(int argc, const char* argv[])
 {
 	HInkStory*  story  = ink_story_from_file(INK_TEST_RESOURCE_DIR "FallBack.bin");
 	HInkRunner* runner = ink_story_new_runner(story, NULL);
-	ink_runner_bind(runner, "greeting", greeting);
-	ink_runner_bind(runner, "sqrt", my_sqrt);
+	ink_runner_bind(runner, "greeting", greeting, 0);
+	ink_runner_bind(runner, "sqrt", my_sqrt, 0);
 
 	const char* res = ink_runner_get_line(runner);
 	assert(strcmp(res, "Hohooh ! A small demonstration of my power:\n") == 0);

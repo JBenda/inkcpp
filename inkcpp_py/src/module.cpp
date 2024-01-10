@@ -253,7 +253,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 		        );
 	        },
 	        py::arg("function_name"), py::arg("function"), py::arg_v("lookaheadSafe", false),
-	        "Bind function which void result"
+	        "Bind function with void result"
 	    )
 	    .def(
 	        "bind",

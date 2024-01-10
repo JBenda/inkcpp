@@ -23,44 +23,103 @@ typedef struct HInkSTory    HInkStory;
 
 	/** @class HInkSnapshot
 	 * @ingroup clib
-	 * @brief Handler for a ink snapshot
-	 * @copydoc ink::runtime::snapshot
+	 * @brief Handler for a @ref ink::runtime::snapshot "ink snapshot"
+	 * @copydetails ink::runtime::snapshot
 	 */
 	struct HInkSnapshot;
 	/** @memberof HInkSnapshot
-	 *  @copydoc ink::runtime::snapshot::from_file
+	 *  @copydoc ink::runtime::snapshot::from_file()
 	 */
 	HInkSnapshot* ink_snapshot_from_file(const char* filename);
+	/** @memberof HInkSnapshot
+	 *  @copydoc  ink::runtime::snapshot::num_runner()
+	 */
 	int           ink_snapshot_num_runners(const HInkSnapshot* self);
+	/** @memberof HInkSnapshot
+	 *  @copydoc  ink::runtime::snapshot::write_to_file()
+	 */
 	void          ink_snapshot_write_to_file(const HInkSnapshot* self, const char* filename);
 
+	/** @class HInkChoice
+	 * @ingroup clib
+	 * @brief Handler for a @ref ink::runtime::choice "ink choice"
+	 * @copydetails ink::runtime::choice
+	 */
 	struct HInkChoice;
+	/** @memberof HInkChoice
+	 *  @copydoc ink::runtime::choice::text
+	 */
 	const char* ink_choice_text(const HInkChoice* self);
+	/** @memberof HInkChoice
+	 *  @copydoc ink::runtime::choice::num_tags
+	 */
 	int         ink_choice_num_tags(const HInkChoice* self);
-	const char* ink_choice_get_tag(const HInkChoice* self, int tag_id);
+	/** @memberof HInkChoice
+	 *  @copydoc ink::runtime::choice::get_tag
+	 */
+	const char* ink_choice_get_tag(const HInkChoice* self, int index);
 
+	/** @class HInkList
+	 * @ingroup clib
+	 * @brief Handler for a @ref ink::runtime::list_interface "ink list"
+	 */
 	struct HInkList;
 
+	/**
+	 * Iterater used to iterate flags of a ::HInkList
+	 * @see ink_list_flags() ink_list_flags_from()
+	 * @ingroup clib
+	 * @code
+	 * const HInkList* list = ...;
+	 * InkListIter iter;
+	 * if (ink_list_flags(list, &iter)) {
+	 *  do {
+	 *    iter->flag_name;
+	 *    iter->list_name;
+	 *    // ...
+	 *  } while(ink_list_iter_next(&iter));
+	 * }
+	 * @endcode
+	 */
 	struct InkListIter {
-		const void* _data;
-		int         _i;
-		int         _single_list;
-		const char* flag_name;
-		const char* list_name;
+		const void* _data;        ///< @private
+		int         _i;           ///< @private
+		int         _single_list; ///< @private
+		const char* flag_name;    ///< Name of the current flag
+		const char* list_name;    ///< name of the list the flag corresponds to
 	};
 
 	void ink_list_add(HInkList* self, const char* flag_name);
 	void ink_list_remove(HInkList* self, const char* flag_name);
 	int  ink_list_contains(const HInkList* self, const char* flag_name);
-	int ink_list_flags(const HInkList* self, InkListIter* iter);
-	int ink_list_flags_from(const HInkList* self, const char* list_name, InkListIter* iter);
+	/**
+	 * @memberof HInkList
+	 * Creates an Iterator over all flags contained in a list.
+	 * @see @ref InkListIter for a usage example
+	 * @retval 0 if the list contains no flags and the iterator would be invalid
+	 */
+	int  ink_list_flags(const HInkList* self, InkListIter* iter);
+	/**
+	 * @memberof HInkList
+	 * Creates an Iterator over all flags contained in a list assziated with a defined list.
+	 * @see @ref InkListIter for a usage example
+	 * @param list_name name of defined list which elements should be filterd
+	 * @retval 0 if the list contains no flags and the iterator would be invalid
+	 */
+	int  ink_list_flags_from(const HInkList* self, const char* list_name, InkListIter* iter);
+	/**
+	 * @memberof InkListIter
+	 * @retval 0 if the there is no next element
+	 * @retval 1 if a new flag can be found in iter.flag_name
+	 */
 	int  ink_list_iter_next(InkListIter* self);
 
 	/** Repserentation of a ink variable.
 	 * @ingroup clib
 	 * The concret type contained is noted in @ref InkValue::type "type", please use this information
 	 * to access the corresponding field of the union
-	 * @attention a InkValue of type @ref InkValue::Type::ValueTypeNone "ValueTypeNone" dose not contain any value! It is use e.g. at @ref ink_globals_get()
+	 * @attention a InkValue of type @ref InkValue::Type::ValueTypeNone "ValueTypeNone" dose not
+	 * contain any value! It is use e.g. at @ref ink_globals_get()
 	 */
 	struct InkValue {
 		union {
@@ -79,7 +138,7 @@ typedef struct HInkSTory    HInkStory;
 
 		/// indicates which type is contained in the value
 		enum Type {
-			ValueTypeNone, ///< the Value does not contain any value
+			ValueTypeNone,   ///< the Value does not contain any value
 			ValueTypeBool,   ///< a boolean
 			ValueTypeUint32, ///< a unsigned integer
 			ValueTypeInt32,  ///< a signed integer
@@ -96,32 +155,80 @@ typedef struct HInkSTory    HInkStory;
 	 * @param argc number of arguments
 	 * @param argv array containing the arguments
 	 */
+	typedef InkValue (*InkExternalFunction)(int argc, const InkValue argv[]);
 	/** @memberof HInkRunner
 	 * Callback for a Ink external function wihich returns a value
 	 * @param argc number of arguments
 	 * @param argv array contaning the arguments
 	 * @return value to be furthe process by the ink runtime
 	 */
+	typedef void (*InkExternalFunctionVoid)(int argc, const InkValue argv[]);
 
 	/** @class HInkRunner
 	 * @ingroup clib
+	 * A handle for an @ref ink::runtime::runner_interface "ink runner"
+	 * @copydetails ink::runtime::runner_interface
 	 */
 	struct HInkRunner;
-	typedef void (*InkExternalFunctionVoid)(int argc, const InkValue argv[]);
-	typedef InkValue (*InkExternalFunction)(int argc, const InkValue argv[]);
+	/** @memberof HInkRunner
+	 * Deconstructs the Runner and all frees assoziated resources
+	 */
 	void              ink_runner_delete(HInkRunner* self);
+	/** @memberof HInkRunner
+	 * Creates a snapshot, for later reloading.
+	 * @attention All runners assoziated with the same globals will create the same snapshot
+	 * @ref ::HInkSnapshot
+	 */
 	HInkSnapshot*     ink_runner_create_snapshot(const HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::can_continue()
+	 */
 	int               ink_runner_can_continue(const HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::getline_alloc()
+	 */
 	const char*       ink_runner_get_line(HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::num_tags()
+	 */
 	int               ink_runner_num_tags(const HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::get_tag()
+	 */
 	const char*       ink_runner_tag(const HInkRunner* self, int tag_id);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtiem::runner_interface::num_choices()
+	 */
 	int               ink_runner_num_choices(const HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::get_choice()
+	 */
 	const HInkChoice* ink_runner_get_choice(const HInkRunner* self, int choice_id);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::choose()
+	 */
 	void              ink_runner_choose(HInkRunner* self, int choice_id);
+	/** @memberof HInkRunner
+	 * Binds a external function which is called form the runtime, with no return value.
+	 * @see ink_runner_bind()
+	 * @param lookaheadSafe if false stop glue lookahead if encounter this function
+	 *                      this prevents double execution of external functions but can lead to
+	 *                      missing glues
+	 */
 	void              ink_runner_bind_void(
-	                 HInkRunner* self, const char* function_name, InkExternalFunctionVoid callback
+	                 HInkRunner* self, const char* function_name, InkExternalFunctionVoid callback,
+	                 int lookaheadSafe
 	             );
-	void ink_runner_bind(HInkRunner* self, const char* function_name, InkExternalFunction callback);
+	/** @memberof HInkRunner
+	 * Binds a external function which is called from the runtime, with a return vallue.
+	 * @see ink_runner_bind_void()
+	 * @param lookaheadSafe if false stop glue lookahead if encounter this function
+	 *                      this prevents double execution of external functions but can lead to
+	 *                      missing glues
+	 */
+	void ink_runner_bind(
+	    HInkRunner* self, const char* function_name, InkExternalFunction callback, int lookaheadSafe
+	);
 
 
 	/** @class HInkGlobals
@@ -131,16 +238,40 @@ typedef struct HInkSTory    HInkStory;
 	 *  @copydetails ink::runtime::globals_interface
 	 */
 	struct HInkGlobals;
+	/** @memberof HInkGlobals
+	 * @param new_value contains the value newly assigned
+	 * @param old_value contains the previous value or a @ref InkValue::Type::ValueTypeNone "ValueTypeNone" if the variable was previously unset.
+	 */
 	typedef void (*InkObserver)(InkValue new_value, InkValue old_value);
-	void ink_globals_delete(HInkGlobals* self);
-	/**  @memberof HInkGlobals */
+	/** @memberof HInkGlobals
+	 * Deconstructs the globals store and frees all assoziated memories.
+	 * @attention invalidates all assoziated @ref HInkRunner
+	 */
+	void          ink_globals_delete(HInkGlobals* self);
+	/**  @memberof HInkGlobals 
+	 * Creates a snapshot for later reloading.
+	 * @attention All runners assoziated with the same globals will create the same snapshot.
+	 * @ref ::HInkSnapshot
+	 */
 	HInkSnapshot* ink_globals_create_snapshot(const HInkGlobals* self);
-	/** @memberof HInkGlobals */
-	void          ink_globals_observe(HInkGlobals* self, const char* variable_name, InkObserver observer);
-	/**  @memberof HInkGlobals */
-	InkValue      ink_globals_get(const HInkGlobals* self, const char* variable_name);
-	/**  @memberof HInkGlobals */
-	int           ink_globals_set(HInkGlobals* self, const char* variable_name, InkValue value);
+	/** @memberof HInkGlobals 
+	 * assignes a observer to the variable with the corresponding name.
+	 * The observer is called each time the value of the variable gets assigned.
+	 * To monitor value changes compare the old with new value (see @ref InkObserver)
+	 */
+	void     ink_globals_observe(HInkGlobals* self, const char* variable_name, InkObserver observer);
+	/**  @memberof HInkGlobals 
+	 * Gets the value of a global variable
+	 * @param variable_name name of variable (same as in ink script)
+	 * @retval @ref InkValue::Type::ValueTypeNone "ValueTypeNone" iff the variable does not exist
+	 */
+	InkValue ink_globals_get(const HInkGlobals* self, const char* variable_name);
+	/**  @memberof HInkGlobals 
+	 * Sets the value of a globals variable.
+	 * @param variable_name name of variable (same as in ink script)
+	 * @return false if the variable was not set, because the variable with this name does no exists or the value did not match.
+	 */
+	int      ink_globals_set(HInkGlobals* self, const char* variable_name, InkValue value);
 
 	/** @class HInkStory
 	 *  @ingroup clib
@@ -154,17 +285,39 @@ typedef struct HInkSTory    HInkStory;
 	 *  @copydoc ink::runtime::story::from_file
 	 */
 	HInkStory*   ink_story_from_file(const char* filename);
+	/** @memberof HInkStory
+	 * deletes a story and all assoziated resources
+	 * @attention this will invalidate all ::HInkRunner and ::HInkGlobals handles assoziated with this
+	 * story
+	 */
 	void         ink_story_delete(HInkStory* self);
 	/** @memberof HInkStory
 	 *  @copydoc ink::runtime::story::new_globals
 	 */
 	HInkGlobals* ink_story_new_globals(HInkStory* self);
+	/** @memberof HInkStory
+	 *  @copydoc ink::runtime::story::new_runner
+	 */
 	HInkRunner*  ink_story_new_runner(HInkStory* self, HInkGlobals* globals);
+	/** @memberof HInkStory
+	 *  @copydoc ink::runtime::story::new_globals_from_snapshot
+	 */
 	HInkGlobals* ink_story_new_globals_from_snapshot(HInkStory* self, const HInkSnapshot* snapshot);
+	/** @memberof HInkStory
+	 *  @copydoc ink::runtime::story::new_runner_from_snapshot
+	 */
 	HInkRunner*  ink_story_new_runner_from_snapshot(
 	     HInkStory* self, const HInkSnapshot* snapshot, HInkGlobals* globals, int runner_id
 	 );
 
+	/**
+	 * @ingroup clib
+	 * Compiles a .ink.json file to an inkCPP .bin file.
+	 * @param input_filename path to file contaning input data (.ink.json)
+	 * @param output_filename path to file output data will be written (.bin)
+	 * @param error if not NULL will contain a error message if an error occures (else will be set to
+	 * NULL)
+	 */
 	void
 	    ink_compile_json(const char* input_filename, const char* output_filename, const char** error);
 

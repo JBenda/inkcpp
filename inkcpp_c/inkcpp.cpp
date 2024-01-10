@@ -200,7 +200,8 @@ extern "C" {
 	}
 
 	void ink_runner_bind_void(
-	    HInkRunner* self, const char* function_name, InkExternalFunctionVoid callback
+	    HInkRunner* self, const char* function_name, InkExternalFunctionVoid callback,
+	    int lookaheadSafe
 	)
 	{
 		static_assert(sizeof(ink::runtime::value) >= sizeof(InkValue));
@@ -213,11 +214,14 @@ extern "C" {
 				    c_vals[i] = inkvar_to_c(const_cast<value&>(vals[i]));
 			    }
 			    callback(c_len, c_vals);
-		    }
+		    },
+		    lookaheadSafe
 		);
 	}
 
-	void ink_runner_bind(HInkRunner* self, const char* function_name, InkExternalFunction callback)
+	void ink_runner_bind(
+	    HInkRunner* self, const char* function_name, InkExternalFunction callback, int lookaheadSafe
+	)
 	{
 		static_assert(sizeof(ink::runtime::value) >= sizeof(InkValue));
 		return reinterpret_cast<runner*>(self)->get()->bind(
@@ -230,7 +234,8 @@ extern "C" {
 			    }
 			    InkValue res = callback(c_len, c_vals);
 			    return inkvar_from_c(res);
-		    }
+		    },
+		    lookaheadSafe
 		);
 	}
 
@@ -322,10 +327,11 @@ extern "C" {
 		);
 	}
 
-	void ink_compile_json(const char* input_filename, const char* output_filename, const char** error) {
+	void ink_compile_json(const char* input_filename, const char* output_filename, const char** error)
+	{
 		ink::compiler::compilation_results result;
 		ink::compiler::run(input_filename, output_filename, &result);
-		if (error != nullptr && !result.errors.empty() || !result.warnings.empty()) {
+		if (error != nullptr && ! result.errors.empty() || ! result.warnings.empty()) {
 			std::stringstream ss;
 			for (auto& warn : result.warnings) {
 				ss << "WARNING: " << warn << '\n';
