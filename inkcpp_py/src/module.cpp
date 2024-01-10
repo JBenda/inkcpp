@@ -35,12 +35,13 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, ink::runtime::story_ptr<T>);
 
 struct StringValueWrap : public value {
 	StringValueWrap(const std::string& s)
-	    : value(s.c_str())
+	    : value()
 	    , str{s}
 	{
+		static_cast<value&>(*this) = value(str.c_str());
 	}
 
-	~StringValueWrap() { std::cout << "death" << std::endl; }
+	~StringValueWrap() {}
 
 	std::string str;
 };
@@ -80,8 +81,8 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    )
 	    .def(
 	        "new_runner_from_snapshot",
-	        [](story& self, const snapshot& snap, globals_ptr store, unsigned idx) {
-		        return self.new_runner_from_snapshot(snap, store, idx);
+	        [](story& self, const snapshot& snap) {
+		        return self.new_runner_from_snapshot(snap);
 	        }
 	    );
 
@@ -91,19 +92,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        "Creates a snapshot from the current state for later usage"
 	    )
 	    .def(
-	        "observe_ping",
-	        [](globals& self, const char* name, std::function<void()> f) { self.observe(name, f); },
-	        "Get a ping each time the observed variable changes"
-	    )
-	    .def(
-	        "observe_value",
-	        [](globals& self, const char* name, std::function<void(const value&)> f) {
-		        self.observe(name, f);
-	        },
-	        "Get a call with new value each time the variable changes"
-	    )
-	    .def(
-	        "observe_delta",
+	        "observe",
 	        [](globals& self, const char* name,
 	           std::function<void(const value&, ink::optional<const value>)> f) {
 		        self.observe(name, f);
@@ -126,7 +115,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 		    if (! self.set<value>(key.c_str(), val)) {
 			    throw py::key_error(
 			        std::string("No global variable with name '") + key
-			        + "' found you are trying to override a non string variable with a string"
+			        + "' found or you are trying to override a non string variable with a string"
 			    );
 		    }
 	    });
@@ -154,14 +143,19 @@ PYBIND11_MODULE(inkcpp_py, m)
 	py::class_<list::iterator::Flag>(
 	    py_list, "Flag", "A list flag containing the name of the flag and the corresponding list"
 	)
-	    .def_readonly("flag", &list::iterator::Flag::flag_name, "The flag")
-	    .def_readonly("list", &list::iterator::Flag::list_name, "Name of the corresponding list");
+	    .def_readonly("name", &list::iterator::Flag::flag_name, "The flag")
+	    .def_readonly("list_name", &list::iterator::Flag::list_name, "Name of the corresponding list");
 
 	py::class_<value> py_value(m, "Value", "A Value of a Ink Variable");
 	py_value.def_readonly("type", &value::type, "Type contained in value");
 	py_value.def(py::init<>());
 	py_value.def(py::init<bool>());
-	py_value.def(py::init<uint32_t>());
+	py_value.def("__init__", [](value& self, uint32_t v, value::Type type){
+		if (type != value::Type::Uint32) {
+			throw py::key_error("only use this signture if you want to explicit pass a uint");
+		}
+		self = value(v);
+	});
 	py_value.def(py::init<int32_t>());
 	py_value.def(py::init<float>());
 	py_value.def(py::init<list*>());

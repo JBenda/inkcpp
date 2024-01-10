@@ -37,16 +37,10 @@ print(bg)
 globals.background = inkcpp_py.Value(bg)
 
 # observer examples
-def ob_ping():
-    print("chang^-^")
-def ob_value(x):
-    print("now: ", x)
 def ob_delta(x, y):
     print("from:",y,"to:",x)
 
-globals.observe_ping("brightness", ob_ping)
-globals.observe_value("brightness", ob_value)
-globals.observe_delta("brightness", ob_delta)
+globals.observe("brightness", ob_delta)
 
 
 # external function with no input, but return value

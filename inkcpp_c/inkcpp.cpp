@@ -3,12 +3,15 @@
 #include "system.h"
 #include "types.h"
 
+#include <cstring>
+#include <sstream>
 #include <stdatomic.h>
 #include <story.h>
 #include <snapshot.h>
 #include <globals.h>
 #include <runner.h>
 #include <choice.h>
+#include <compiler.h>
 
 using namespace ink::runtime;
 
@@ -317,5 +320,20 @@ extern "C" {
 		        *reinterpret_cast<const snapshot*>(snap)
 		    ))
 		);
+	}
+
+	void ink_compile_json(const char* input_filename, const char* output_filename, const char** error) {
+		ink::compiler::compilation_results result;
+		ink::compiler::run(input_filename, output_filename, &result);
+		if (error != nullptr && !result.errors.empty() || !result.warnings.empty()) {
+			std::stringstream ss;
+			for (auto& warn : result.warnings) {
+				ss << "WARNING: " << warn << '\n';
+			}
+			for (auto& err : result.errors) {
+				ss << "ERROR: " << err << '\n';
+			}
+			*error = strdup(ss.str().c_str());
+		}
 	}
 }
