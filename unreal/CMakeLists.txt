@@ -18,34 +18,28 @@ URL https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
 URL_HASH SHA256=26f4e188e02536d6e99e73e71d9b13e2c2144187f1368a87e82fd5066176cff8
 SOURCE_DIR "inkcpp/Resources/inklecate/linux"
 )
-set(INKLECATE_CMD "")
-if(WIN32)
-	FetchContent_MakeAvailable(inklecate_windows)
-	if(NOT inklecate_windows_SOURCE_DIR)
-	message(WARNING "failed to download inklecate for windows, "
-		"the unreal plugin will be unable use a .ink file as asset directly")
-	else()
-	set(INKLECATE_CMD "Resources/inklecate/windows/inklecate.exe")
-	endif()
-elseif(APPLE)
-	FetchContent_MakeAvailable(inklecate_mac)
-	if(NOT inklecate_mac_SOURCE_DIRE)
-		message(WARNING "failed to download inklecate for MacOS, "
-			"the unreal plugin will be unable use a .ink file as asset directly")
-	else()
-	set(INKLECATE_CMD "Resources/inklecate/mac/inklecate")
-	endif()
-elseif(UNIX)
-	FetchContent_MakeAvailable(inklecate_linux)
-	if(NOT inklecate_linux_SOURCE_DIR)
-		message(WARNING "failed to download inklecate for linux, "
-			"the unreal plugin will be unable use a .ink file as asset directly")
-	else()
-	set(INKLECATE_CMD "Resources/inklecate/linux/inklecate")
-	endif()
+FetchContent_MakeAvailable(inklecate_windows)
+if(NOT inklecate_windows_SOURCE_DIR)
+message(WARNING "failed to download inklecate for windows, "
+	"the unreal plugin will be unable use a .ink file as asset directly")
 else()
-message(WARNING "unable to determine OS -> unreal component cant compile ink files directly"
-	" to fix this may define WIN32/APPLE or UNIX manually and run again")
+set(INKLECATE_CMD_WIN "Resources/inklecate/windows/inklecate.exe")
+endif()
+
+FetchContent_MakeAvailable(inklecate_mac)
+if(NOT inklecate_mac_SOURCE_DIRE)
+	message(WARNING "failed to download inklecate for MacOS, "
+		"the unreal plugin will be unable use a .ink file as asset directly")
+else()
+set(INKLECATE_CMD_MAC "Resources/inklecate/mac/inklecate")
+endif()
+
+FetchContent_MakeAvailable(inklecate_linux)
+if(NOT inklecate_linux_SOURCE_DIR)
+	message(WARNING "failed to download inklecate for linux, "
+		"the unreal plugin will be unable use a .ink file as asset directly")
+else()
+set(INKLECATE_CMD_LINUX "Resources/inklecate/linux/inklecate")
 endif()
 
 configure_file(

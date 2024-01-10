@@ -1,3 +1,17 @@
-#ifndef INKLECATE_CMD
-#define INKLECATE_CMD "@INKLECATE_CMD@"
-#endif
+#pragma once
+
+#include "Kismet/GameplayStatics.h"
+
+inline FString inklecate_cmd() {
+	FString platform = UGameplayStatics::GetPlatformName();
+	if (platform == TEST("Windows")) {
+		return FString(TEXT("@INKLECATE_CMD_WIN@"));
+	} else if (platform == TEST("Mac")) {
+		return FString(TEXT("@INKLECATE_CMD_MAC@"));
+	} else if (platform == TEST("Linux")) {
+		retrun FString(TEXT("@INKLECATE_CMD_LINUX@"));
+	} else {
+		UE_LOG(InkCpp, Warning, TEXT("Platform: '") + platform + TEXT("' is not know. For compiling a .ink file a system wide 'inklecate' executable wil be tried to use."));
+		return FString(TEXT("inklecate"));
+	}
+}

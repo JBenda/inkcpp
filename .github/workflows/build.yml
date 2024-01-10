@@ -20,16 +20,19 @@ jobs:
             name: MacOSX
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
             proof: false
+            unreal: false
           - os: windows-latest
             artifact: win64
             name: Windows x64
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_windows.zip
             proof: false
+            unreal: false
           - os: "ubuntu-20.04"
             artifact: linux
             name: Linux x64
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
             proof: true
+            unreal: true
 
     steps:
 
@@ -114,15 +117,17 @@ jobs:
         path: build/comp_lib/
 
     - name: Install UE
+      if: ${{ matrix.unreal }}
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: cmake --install . --config $BUILD_TYPE --prefix comp_unreal --component unreal
 
     # Upload bin directory as artifact
     - name: Upload Binary Artifact
+      if: ${{ matrix.unreal }}
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.artifact }}-unreal
+        name: unreal
         path: build/comp_unreal/
 
     # Make sure Inkproof has everything it needs to run our executable
