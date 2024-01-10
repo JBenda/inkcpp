@@ -8,8 +8,8 @@ namespace ink::runtime::internal {
 		ptr = snapshot_interface::snap_write(ptr, jump, write);
 		ptr = snapshot_interface::snap_write(ptr, save, write);
 		max = pos;
-		if (jump > max) { max = jump; }
-		if (save > max) { max = save; }
+		if (jump != ~0 && jump > max) { max = jump; }
+		if (save != ~0 && save > max) { max = save; }
 		return ptr;
 	}
 	const unsigned char* snap_load_base(const unsigned char* ptr, size_t& pos, size_t& jump, size_t& save, size_t& max)
@@ -18,8 +18,8 @@ namespace ink::runtime::internal {
 		ptr = snapshot_interface::snap_read(ptr, jump);
 		ptr = snapshot_interface::snap_read(ptr, save);
 		max = pos;
-		if (jump > max) { max = jump; }
-		if (save > max) { max = save; }
+		if (jump != ~0 && jump > max) { max = jump; }
+		if (save != ~0 && save > max) { max = save; }
 		return ptr;
 	}
 

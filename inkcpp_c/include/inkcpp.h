@@ -161,7 +161,7 @@ typedef struct HInkSTory    HInkStory;
 	HInkGlobals* ink_story_new_globals(HInkStory* self);
 	HInkRunner*  ink_story_new_runner(HInkStory* self, HInkGlobals* globals);
 	HInkGlobals* ink_story_new_globals_from_snapshot(HInkStory* self, const HInkSnapshot* snapshot);
-	HInkRunner*  ink_story_runner_from_snapshot(
+	HInkRunner*  ink_story_new_runner_from_snapshot(
 	     HInkStory* self, const HInkSnapshot* snapshot, HInkGlobals* globals, int runner_id
 	 );
 

@@ -279,37 +279,6 @@ private:
 	const T _null;
 };
 
-template<typename T>
-inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper& snapper) const
-{
-	unsigned char* ptr          = data;
-	bool           should_write = data != nullptr;
-	ptr                         = snap_write(ptr, _saved, should_write);
-	ptr                         = snap_write(ptr, _capacity, should_write);
-	ptr                         = snap_write(ptr, _null, should_write);
-	for (size_t i = 0; i < _capacity; ++i) {
-		ptr = snap_write(ptr, _array[i], should_write);
-		ptr = snap_write(ptr, _temp[i], should_write);
-	}
-	return ptr - data;
-}
-
-template<typename T>
-inline const unsigned char*
-    basic_restorable_array<T>::snap_load(const unsigned char* data, const loader& loader)
-{
-	auto ptr = data;
-	ptr      = snap_read(ptr, _saved);
-	ptr      = snap_read(ptr, _capacity);
-	T null;
-	ptr = snap_read(ptr, null);
-	inkAssert(null == _null, "null value is different to snapshot!");
-	for (size_t i = 0; i < _capacity; ++i) {
-		ptr = snap_read(ptr, _array[i]);
-		ptr = snap_read(ptr, _temp[i]);
-	}
-	return ptr;
-}
 
 template<typename T>
 inline void basic_restorable_array<T>::set(size_t index, const T& value)
@@ -440,7 +409,7 @@ public:
 			}
 			delete[] _buffer;
 		}
-		for (size_t i = base::capacity(); i < new_capacity; ++i) {
+		for (size_t i = base::capacity(); i < new_capacity / 2; ++i) {
 			new_buffer[i]                    = _initialValue;
 			new_buffer[i + base::capacity()] = _nullValue;
 		}
@@ -462,4 +431,40 @@ private:
 	T  _nullValue;
 	T* _buffer;
 };
+template<typename T>
+inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper& snapper) const
+{
+	unsigned char* ptr          = data;
+	bool           should_write = data != nullptr;
+	ptr                         = snap_write(ptr, _saved, should_write);
+	ptr                         = snap_write(ptr, _capacity, should_write);
+	ptr                         = snap_write(ptr, _null, should_write);
+	for (size_t i = 0; i < _capacity; ++i) {
+		ptr = snap_write(ptr, _array[i], should_write);
+		ptr = snap_write(ptr, _temp[i], should_write);
+	}
+	return ptr - data;
+}
+
+template<typename T>
+inline const unsigned char*
+    basic_restorable_array<T>::snap_load(const unsigned char* data, const loader& loader)
+{
+	auto ptr = data;
+	ptr      = snap_read(ptr, _saved);
+	decltype(_capacity) capacity;
+	ptr      = snap_read(ptr, capacity);
+	if (buffer() == nullptr) {
+		static_cast<allocated_restorable_array<T>&>(*this).resize(capacity);
+	}
+	inkAssert(_capacity >= capacity, "New config does not allow for necessary size used by this snapshot!");
+	T null;
+	ptr = snap_read(ptr, null);
+	inkAssert(null == _null, "null value is different to snapshot!");
+	for (size_t i = 0; i < _capacity; ++i) {
+		ptr = snap_read(ptr, _array[i]);
+		ptr = snap_read(ptr, _temp[i]);
+	}
+	return ptr;
+}
 } // namespace ink::runtime::internal

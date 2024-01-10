@@ -27,6 +27,7 @@ namespace ink::runtime::internal
 	char* string_table::create(size_t length)
 	{
 		// allocate the string
+		///  @todo use continuous memory
 		char* data = new char[length];
 		if (data == nullptr)
 			return nullptr;
@@ -102,7 +103,12 @@ namespace ink::runtime::internal
 		for (size_t i = 0; i < _table.size(); ++i) {
 			for(auto itr = _table.begin(); itr != _table.end(); ++itr) {
 				if (itr.temp_identifier() == i) {
-					ptr = snap_write(ptr, itr.key(), strlen(itr.key()) + 1, should_write );
+					size_t length = strlen(itr.key()) + 1;
+					if (length == 1) {
+						ptr = snap_write(ptr, EMPTY_STRING, 2, should_write);
+					} else {
+						ptr = snap_write(ptr, itr.key(), length, should_write );
+					}
 					break;
 				}
 			}
@@ -122,6 +128,9 @@ namespace ink::runtime::internal
 			auto str = create(len);
 			loader.string_table.push() = str;
 			ptr = snap_read(ptr, str, len);
+			if (len == 2 && str[0] == EMPTY_STRING[0]) {
+				str[0] = 0;
+			}
 			mark_used(str);
 		}
 		return ptr + 1;

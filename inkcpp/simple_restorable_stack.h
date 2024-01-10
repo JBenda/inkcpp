@@ -274,8 +274,8 @@ namespace ink::runtime::internal
 		ptr = snap_write(ptr, _save, should_write );
 		ptr = snap_write(ptr, _jump, should_write );
 		size_t max = _pos;
-		if (_save > max) { max = _save; }
-		if (_jump > max) { max = _jump; }
+		if (_save != InvalidIndex && _save > max) { max = _save; }
+		if (_jump != InvalidIndex && _jump > max) { max = _jump; }
 		for(size_t i = 0; i < max; ++i)
 		{
 			ptr = snap_write(ptr, _buffer[i], should_write );
@@ -293,8 +293,8 @@ namespace ink::runtime::internal
 		ptr = snap_read(ptr, _save);
 		ptr = snap_read(ptr, _jump);
 		size_t max = _pos;
-		if(_save > max) { max = _save; }
-		if(_jump > max) { max = _jump; }
+		if(_save != InvalidIndex && _save > max) { max = _save; }
+		if(_jump != InvalidIndex && _jump > max) { max = _jump; }
 		while(_size < max) { overflow(_buffer, _size); }
 		for(size_t i = 0; i < max; ++i)
 		{

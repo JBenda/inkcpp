@@ -254,7 +254,9 @@ size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
 	    _globals_initialized,
 	    "Only support snapshot of globals with runner! or you don't need a snapshot for this state"
 	);
+	ptr = snap_write(ptr, _turn_cnt, data != nullptr);
 	ptr += _visit_counts.snap(data ? ptr : nullptr, snapper);
+	ptr += _visit_counts_backup.snap(data ? ptr : nullptr, snapper);
 	ptr += _strings.snap(data ? ptr : nullptr, snapper);
 	ptr += _lists.snap(data ? ptr : nullptr, snapper);
 	ptr += _variables.snap(data ? ptr : nullptr, snapper);
@@ -264,7 +266,10 @@ size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
 const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loader& loader)
 {
 	_globals_initialized = true;
+	ptr = snap_read(ptr, _turn_cnt);
 	ptr                  = _visit_counts.snap_load(ptr, loader);
+	ptr = _visit_counts_backup.snap_load(ptr, loader);
+	inkAssert(_visit_counts.size() == _visit_counts_backup.size(), "Data inconsitency");
 	inkAssert(
 	    _num_containers == _visit_counts.size(),
 	    "errer when loading visit counts, story file dont match snapshot!"
