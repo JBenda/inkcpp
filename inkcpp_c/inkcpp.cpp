@@ -1,6 +1,7 @@
 #include "inkcpp.h"
 #include "list.h"
 #include "system.h"
+#include "types.h"
 
 #include <stdatomic.h>
 #include <story.h>
@@ -57,7 +58,8 @@ value inkvar_from_c(InkValue& val)
 		case InkValue::ValueTypeInt32: return value(val.int32_v);
 		case InkValue::ValueTypeString: return value(val.string_v);
 		case InkValue::ValueTypeFloat: return value(val.float_v);
-		case InkValue::ValueTypeList: return value(val.list_v);
+		case InkValue::ValueTypeList: return value(reinterpret_cast<list_interface*>(val.list_v));
+		case InkValue::ValueTypeNone: break;
 	}
 	inkFail("Undefined value type can not be translated");
 	return value{};
@@ -109,7 +111,7 @@ extern "C" {
 		return reinterpret_cast<const list_interface*>(self)->contains(flag_name);
 	}
 
-	void ink_list_flags(const HInkList* self, InkListIter* iter)
+	int ink_list_flags(const HInkList* self, InkListIter* iter)
 	{
 		list_interface::iterator itr = reinterpret_cast<const list_interface*>(self)->begin();
 		*iter                        = InkListIter{
@@ -119,9 +121,10 @@ extern "C" {
 		                           .flag_name    = itr._flag_name,
 		                           .list_name    = itr._list_name,
     };
+		return itr != reinterpret_cast<const list_interface*>(self)->end();
 	}
 
-	void ink_list_flags_from(const HInkList* self, const char* list_name, InkListIter* iter)
+	int ink_list_flags_from(const HInkList* self, const char* list_name, InkListIter* iter)
 	{
 		list_interface::iterator itr = reinterpret_cast<const list_interface*>(self)->begin(list_name);
 		*iter                        = InkListIter{
@@ -131,6 +134,7 @@ extern "C" {
 		                           .flag_name    = itr._flag_name,
 		                           .list_name    = itr._list_name,
     };
+		return itr != reinterpret_cast<const list_interface*>(self)->end();
 	}
 
 	int ink_list_iter_next(InkListIter* self)
@@ -140,6 +144,9 @@ extern "C" {
 		    self->_single_list
 		);
 		++itr;
+		self->flag_name = itr._flag_name;
+		self->list_name = itr._list_name;
+		self->_i        = itr._i;
 		return itr != itr._list.end();
 	}
 
@@ -224,6 +231,47 @@ extern "C" {
 		);
 	}
 
+	void ink_globals_delete(HInkGlobals* self) { delete reinterpret_cast<globals*>(self); }
+
+	HInkSnapshot* ink_globals_create_snapshot(const HInkGlobals* self)
+	{
+		return reinterpret_cast<HInkSnapshot*>(
+		    reinterpret_cast<const globals*>(self)->get()->create_snapshot()
+		);
+	}
+
+	void ink_globals_observe(HInkGlobals* self, const char* variable_name, InkObserver observer)
+	{
+		reinterpret_cast<globals*>(self)->get()->observe(
+		    variable_name,
+		    [observer](value new_value, ink::optional<value> old_value) {
+			    observer(
+			        inkvar_to_c(new_value), old_value.has_value()
+			                                    ? inkvar_to_c(old_value.value())
+			                                    : InkValue{.type = InkValue::Type::ValueTypeNone}
+			    );
+		    }
+		);
+	}
+
+	InkValue ink_globals_get(const HInkGlobals* self, const char* variable_name)
+	{
+		ink::optional<value> o_val
+		    = reinterpret_cast<const globals*>(self)->get()->get<value>(variable_name);
+		if (! o_val.has_value()) {
+			return InkValue{
+			    .type = InkValue::ValueTypeNone,
+			};
+		} else {
+			return inkvar_to_c(o_val.value());
+		}
+	}
+
+	int ink_globals_set(HInkGlobals* self, const char* variable_name, InkValue val)
+	{
+		return reinterpret_cast<globals*>(self)->get()->set(variable_name, inkvar_from_c(val));
+	}
+
 	HInkStory* ink_story_from_file(const char* filename)
 	{
 		return reinterpret_cast<HInkStory*>(story::from_file(filename));
@@ -239,5 +287,35 @@ extern "C" {
 		        : reinterpret_cast<story*>(self)->new_runner()
 		);
 		return reinterpret_cast<HInkRunner*>(res);
+	}
+
+	HInkRunner* ink_story_new_runner_from_snapshot(
+	    HInkStory* self, const HInkSnapshot* snapshot, HInkGlobals* global_store, int runner_id
+	)
+	{
+		const ink::runtime::snapshot& snap = *reinterpret_cast<const ink::runtime::snapshot*>(snapshot);
+		runner*                       res  = new runner(
+        global_store
+            ? reinterpret_cast<story*>(self)->new_runner_from_snapshot(
+                snap, *reinterpret_cast<globals*>(global_store), runner_id
+            )
+            : reinterpret_cast<story*>(self)->new_runner_from_snapshot(snap, nullptr, runner_id)
+		);
+		return reinterpret_cast<HInkRunner*>(res);
+	}
+
+	HInkGlobals* ink_story_new_globals(HInkStory* self)
+	{
+		return reinterpret_cast<HInkGlobals*>(new globals(reinterpret_cast<story*>(self)->new_globals())
+		);
+	}
+
+	HInkGlobals* ink_story_new_globals_from_snapshot(HInkStory* self, const HInkSnapshot* snap)
+	{
+		return reinterpret_cast<HInkGlobals*>(
+		    new globals(reinterpret_cast<story*>(self)->new_globals_from_snapshot(
+		        *reinterpret_cast<const snapshot*>(snap)
+		    ))
+		);
 	}
 }

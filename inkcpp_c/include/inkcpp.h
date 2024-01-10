@@ -52,14 +52,15 @@ typedef struct HInkSTory    HInkStory;
 	void ink_list_add(HInkList* self, const char* flag_name);
 	void ink_list_remove(HInkList* self, const char* flag_name);
 	int  ink_list_contains(const HInkList* self, const char* flag_name);
-	void ink_list_flags(const HInkList* self, InkListIter* iter);
-	void ink_list_flags_from(const HInkList* self, const char* list_name, InkListIter* iter);
+	int ink_list_flags(const HInkList* self, InkListIter* iter);
+	int ink_list_flags_from(const HInkList* self, const char* list_name, InkListIter* iter);
 	int  ink_list_iter_next(InkListIter* self);
 
 	/** Repserentation of a ink variable.
 	 * @ingroup clib
 	 * The concret type contained is noted in @ref InkValue::type "type", please use this information
 	 * to access the corresponding field of the union
+	 * @attention a InkValue of type @ref InkValue::Type::ValueTypeNone "ValueTypeNone" dose not contain any value! It is use e.g. at @ref ink_globals_get()
 	 */
 	struct InkValue {
 		union {
@@ -78,6 +79,7 @@ typedef struct HInkSTory    HInkStory;
 
 		/// indicates which type is contained in the value
 		enum Type {
+			ValueTypeNone, ///< the Value does not contain any value
 			ValueTypeBool,   ///< a boolean
 			ValueTypeUint32, ///< a unsigned integer
 			ValueTypeInt32,  ///< a signed integer
@@ -129,11 +131,12 @@ typedef struct HInkSTory    HInkStory;
 	 *  @copydetails ink::runtime::globals_interface
 	 */
 	struct HInkGlobals;
-	typedef void (*InkObserver)(InkValue new_value, const InkValue* old_value);
+	typedef void (*InkObserver)(InkValue new_value, InkValue old_value);
+	void ink_globals_delete(HInkGlobals* self);
 	/**  @memberof HInkGlobals */
 	HInkSnapshot* ink_globals_create_snapshot(const HInkGlobals* self);
 	/** @memberof HInkGlobals */
-	void          ink_globals_observe(HInkGlobals* self, InkObserver* observer);
+	void          ink_globals_observe(HInkGlobals* self, const char* variable_name, InkObserver observer);
 	/**  @memberof HInkGlobals */
 	InkValue      ink_globals_get(const HInkGlobals* self, const char* variable_name);
 	/**  @memberof HInkGlobals */
@@ -159,7 +162,7 @@ typedef struct HInkSTory    HInkStory;
 	HInkRunner*  ink_story_new_runner(HInkStory* self, HInkGlobals* globals);
 	HInkGlobals* ink_story_new_globals_from_snapshot(HInkStory* self, const HInkSnapshot* snapshot);
 	HInkRunner*  ink_story_runner_from_snapshot(
-	     HInkStory* self, const HInkSnapshot* snapshot, HInkGlobals* globals
+	     HInkStory* self, const HInkSnapshot* snapshot, HInkGlobals* globals, int runner_id
 	 );
 
 	void

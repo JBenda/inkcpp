@@ -9,8 +9,8 @@
 #ifdef INK_BUILD_CLIB
 struct InkListIter;
 struct HInkList;
-void ink_list_flags(const HInkList*, InkListIter*);
-void ink_list_flags_from(const HInkList*, const char*, InkListIter*);
+int ink_list_flags(const HInkList*, InkListIter*);
+int ink_list_flags_from(const HInkList*, const char*, InkListIter*);
 int  ink_list_iter_next(InkListIter*);
 #endif
 
@@ -27,11 +27,11 @@ namespace ink::runtime {
 			const char* _list_name;
 			const list_interface& _list;
 			int _i;
-			bool _one_list_iterator; //< iterates only though values of one list
+			bool _one_list_iterator; ///< iterates only though values of one list
 			friend list_interface;
 #ifdef INK_BUILD_CLIB
-		  friend void ::ink_list_flags(const HInkList*, InkListIter*);
-		  friend void ::ink_list_flags_from(const HInkList*, const char*, InkListIter*);
+		  friend int ::ink_list_flags(const HInkList*, InkListIter*);
+		  friend int ::ink_list_flags_from(const HInkList*, const char*, InkListIter*);
 		  friend int ::ink_list_iter_next(InkListIter* self);
 #endif
 
