@@ -4,8 +4,7 @@
 #include "types.h"
 
 #include <cstring>
-#include <sstream>
-#include <stdatomic.h>
+
 #include <story.h>
 #include <snapshot.h>
 #include <globals.h>
@@ -332,14 +331,14 @@ extern "C" {
 		ink::compiler::compilation_results result;
 		ink::compiler::run(input_filename, output_filename, &result);
 		if (error != nullptr && ! result.errors.empty() || ! result.warnings.empty()) {
-			std::stringstream ss;
+			std::string str{};
 			for (auto& warn : result.warnings) {
-				ss << "WARNING: " << warn << '\n';
+				str += "WARNING: " + warn + '\n';
 			}
 			for (auto& err : result.errors) {
-				ss << "ERROR: " << err << '\n';
+				str +=  "ERROR: " + err + '\n';
 			}
-			*error = strdup(ss.str().c_str());
+			*error = strdup(str.c_str());
 		}
 	}
 }
