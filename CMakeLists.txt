@@ -15,19 +15,15 @@ set(INKCPP_PY OFF CACHE BOOL "Build python bindings")
 set(WHEEL_BUILD OFF CACHE BOOL "Set for build wheel python lib (do not forgett INKCPP_PY")
 set(INKCPP_C OFF CACHE BOOL "Build c library")
 
-set(TARGETS "")
 if (INKCPP_PY)
 	add_compile_options(-fPIC)
 	add_subdirectory(inkcpp_py)
 endif(INKCPP_PY)
 add_subdirectory(shared)
 add_subdirectory(inkcpp)
-list(APPEND inkcpp)
 add_subdirectory(inkcpp_compiler)
-list(APPEND inkcpp_compiler)
 if (INKCPP_C)
 	add_subdirectory(inkcpp_c)
-	list(APPEND inkcpp_c)
 endif(INKCPP_C)
 if (NOT WHEEL_BUILD)
 	add_subdirectory(inkcpp_cl)
@@ -36,8 +32,7 @@ if (NOT WHEEL_BUILD)
 endif(NOT WHEEL_BUILD)
 
 
-
-install(TARGETS ${TARGETS}
+install(TARGETS inkcpp inkcpp_shared inkcpp_compiler
 	EXPORT inkcppTarget
 	ARCHIVE DESTINATION "lib/ink"
 	COMPONENT lib EXCLUDE_FROM_ALL

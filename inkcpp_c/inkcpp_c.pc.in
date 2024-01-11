@@ -1,6 +1,6 @@
 prefix=@PREFIX@
 exec_prefix=${prefix}
-libdir=${prefix}/lib
+libdir=${prefix}/lib/ink
 includedir=${prefix}/include
 
 Name: inkcpp

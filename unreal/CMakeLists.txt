@@ -27,7 +27,7 @@ set(INKLECATE_CMD_WIN "Resources/inklecate/windows/inklecate.exe")
 endif()
 
 FetchContent_MakeAvailable(inklecate_mac)
-if(NOT inklecate_mac_SOURCE_DIRE)
+if(NOT inklecate_mac_SOURCE_DIR)
 	message(WARNING "failed to download inklecate for MacOS, "
 		"the unreal plugin will be unable use a .ink file as asset directly")
 else()

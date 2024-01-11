@@ -9,8 +9,13 @@ list(APPEND SOURCES
     command.cpp
     )
 add_definitions(-DINK_COMPILER -DINK_EXPOSE_JSON)
-add_library(inkcpp_compiler ${SOURCES})
+add_library(inkcpp_compiler_o OBJECT ${SOURCES})
+add_library(inkcpp_compiler $<TARGET_OBJECTS:inkcpp_compiler_o>)
 
+target_include_directories(inkcpp_compiler_o PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+)
 target_include_directories(inkcpp_compiler PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:include>
@@ -19,8 +24,10 @@ FILE(GLOB PUBLIC_HEADERS "include/*")
 set_target_properties(inkcpp_compiler PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 target_link_libraries(inkcpp_compiler PRIVATE inkcpp_shared)
+target_link_libraries(inkcpp_compiler_o PRIVATE inkcpp_shared)
 
 # Make sure this project and all dependencies use the C++17 standard
+target_compile_features(inkcpp_compiler PUBLIC cxx_std_17)
 target_compile_features(inkcpp_compiler PUBLIC cxx_std_17)
 
 # Unreal installation
