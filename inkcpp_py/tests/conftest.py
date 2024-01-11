@@ -16,7 +16,7 @@ def extract_paths(tmpdir):
         name = os.path.splitext(os.path.basename(ink_source))[0]
         return (
         name,
-            list(map(lambda x: tmpdir.decode("utf-8") + ("/" + name + x), [".bin", ".tmp"])) + ["./inkcpp_test/ink/" + ink_source]
+            list(map(lambda x: tmpdir + ("/" + name + x), [".bin", ".tmp"])) + ["./inkcpp_test/ink/" + ink_source]
         )
     return res
 
