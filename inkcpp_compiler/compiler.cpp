@@ -87,4 +87,4 @@ namespace ink::compiler
 		// Close file
 		fout.close();
 	}
-}
+  } // namespace ink::compiler

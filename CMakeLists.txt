@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.16)
 enable_testing()
 
 # Project setup
-project(inkcpp VERSION 0.1.1)
+project(inkcpp VERSION 0.1.2)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
@@ -13,6 +13,7 @@ SET(CMAKE_INSTALL_INCLUDE_DIR include)
 # Add subdirectories
 set(INKCPP_PY OFF CACHE BOOL "Build python bindings")
 set(WHEEL_BUILD OFF CACHE BOOL "Set for build wheel python lib (do not forgett INKCPP_PY")
+set(INKCPP_C OFF CACHE BOOL "Build c library")
 
 if (INKCPP_PY)
 	add_compile_options(-fPIC)
@@ -21,15 +22,17 @@ endif(INKCPP_PY)
 add_subdirectory(shared)
 add_subdirectory(inkcpp)
 add_subdirectory(inkcpp_compiler)
+if (INKCPP_C)
+	add_subdirectory(inkcpp_c)
+endif(INKCPP_C)
 if (NOT WHEEL_BUILD)
-add_subdirectory(inkcpp_cl)
-add_subdirectory(inkcpp_test)
-add_subdirectory(unreal)
+	add_subdirectory(inkcpp_cl)
+	add_subdirectory(inkcpp_test)
+	add_subdirectory(unreal)
 endif(NOT WHEEL_BUILD)
 
 
-
-install(TARGETS inkcpp inkcpp_compiler inkcpp_shared
+install(TARGETS inkcpp inkcpp_shared inkcpp_compiler
 	EXPORT inkcppTarget
 	ARCHIVE DESTINATION "lib/ink"
 	COMPONENT lib EXCLUDE_FROM_ALL

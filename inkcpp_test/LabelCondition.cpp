@@ -1,4 +1,3 @@
-#include "../inkcpp_cl/test.h"
 #include "catch.hpp"
 
 #include <choice.h>
@@ -13,9 +12,7 @@ SCENARIO( "run story with hidden choice" )
 {
 	GIVEN( "a story with choice visibale by second visit" )
 	{
-		inklecate( "ink/LabelConditionStory.ink", "LabelConditionStory.tmp" );
-		ink::compiler::run( "LabelConditionStory.tmp", "LabelCondition.bin" );
-		auto    ink     = story::from_file( "LabelCondition.bin" );
+		auto    ink     = story::from_file(INK_TEST_RESOURCE_DIR "LabelConditionStory.bin");
 		globals globals = ink->new_globals();
 		runner  thread  = ink->new_runner( globals );
 

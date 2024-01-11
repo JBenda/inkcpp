@@ -13,8 +13,8 @@ namespace ink::runtime
  * share globals (variables, visit counts, etc). through the
  * globals object. By default, each runner gets its own newly
  * created globals store.
- * @see runner_interface
- * @see globals_interface
+ * @see ink::runtime::runner_interface
+ * @see ink::runtime::globals_interface
  */
 class story
 {
@@ -118,6 +118,9 @@ public:
  * way is to use `inklecate <story>.ink`.<br/> Which is available at the [official release
  * page](https://github.com/inkle/ink/releases/latest).<br/>
  *
+ * If you want to use the inkcpp with C link against the target inkcpp_c and `#include
+ * <ink/c/inkcpp.h>` The C-API documentation and example can be found @ref clib "here".
+ *
  * Exampl with library extracted at /YOUR/PROJECT/linux-lib
  * And the [Example project](../cmake_example.zip) is extracted to /YOUR/PROJECT
  * @code {sh}
@@ -128,7 +131,7 @@ public:
  * inkcpp_DIR=../linux-lib cmake ..
  * cmake --build .
  * cp ../test.ink.json .
- * ./main
+ * ./main_cpp
  * @endcode
  *
  * @subsection src_main main.cpp
@@ -144,8 +147,8 @@ public:
  * @section ue Unreal Installation
  *
  * The current release is available at the [release
- * page](https://github.com/JBenda/inkcpp/releases/latest), as `<os>-unreal.zip` (e.g.
- * `win64-unreal.zip`).<br/> Unpack this folder in `/PATH/TO/UNREAL_PROJECT/Plugins/` and it will be
+ * page](https://github.com/JBenda/inkcpp/releases/latest), as `unreal.zip`.<br/>
+ * Unpack this folder in `/PATH/TO/UNREAL_PROJECT/Plugins/` and it will be
  * intigrated at the next startup.<br/> A MarketPlace appearance is work in progress :)
  *
  * The overview to the UE Blueprint class can be found at @ref unreal "here".

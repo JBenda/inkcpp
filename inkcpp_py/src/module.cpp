@@ -35,12 +35,13 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, ink::runtime::story_ptr<T>);
 
 struct StringValueWrap : public value {
 	StringValueWrap(const std::string& s)
-	    : value(s.c_str())
+	    : value()
 	    , str{s}
 	{
+		static_cast<value&>(*this) = value(str.c_str());
 	}
 
-	~StringValueWrap() { std::cout << "death" << std::endl; }
+	~StringValueWrap() {}
 
 	std::string str;
 };
@@ -78,12 +79,9 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        "new_runner_from_snapshot", [](story& self, const snapshot& snap, globals_ptr store
 	                                    ) { return self.new_runner_from_snapshot(snap, store); }
 	    )
-	    .def(
-	        "new_runner_from_snapshot",
-	        [](story& self, const snapshot& snap, globals_ptr store, unsigned idx) {
-		        return self.new_runner_from_snapshot(snap, store, idx);
-	        }
-	    );
+	    .def("new_runner_from_snapshot", [](story& self, const snapshot& snap) {
+		    return self.new_runner_from_snapshot(snap);
+	    });
 
 	py::class_<globals, globals_ptr>(m, "Globals")
 	    .def(
@@ -91,19 +89,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        "Creates a snapshot from the current state for later usage"
 	    )
 	    .def(
-	        "observe_ping",
-	        [](globals& self, const char* name, std::function<void()> f) { self.observe(name, f); },
-	        "Get a ping each time the observed variable changes"
-	    )
-	    .def(
-	        "observe_value",
-	        [](globals& self, const char* name, std::function<void(const value&)> f) {
-		        self.observe(name, f);
-	        },
-	        "Get a call with new value each time the variable changes"
-	    )
-	    .def(
-	        "observe_delta",
+	        "observe",
 	        [](globals& self, const char* name,
 	           std::function<void(const value&, ink::optional<const value>)> f) {
 		        self.observe(name, f);
@@ -126,27 +112,49 @@ PYBIND11_MODULE(inkcpp_py, m)
 		    if (! self.set<value>(key.c_str(), val)) {
 			    throw py::key_error(
 			        std::string("No global variable with name '") + key
-			        + "' found you are trying to override a non string variable with a string"
+			        + "' found or you are trying to override a non string variable with a string"
 			    );
 		    }
 	    });
 
-	py::class_<list, std::unique_ptr<list, py::nodelete>>(
+	py::class_<list, std::unique_ptr<list, py::nodelete>> py_list(
 	    m, "List",
 	    "Allows reading and editing inkcpp lists. !Only valid until next choose ore getline a runner "
 	    "referncing the corresponding global"
-	)
-	    .def("add", &list::add, "Add flag to list")
+	);
+	py_list.def("add", &list::add, "Add flag to list")
 	    .def("remove", &list::remove, "Remove flag from list")
 	    .def("contains", &list::contains, "Check if list contains the given flag")
+	    .def(
+	        "flags_from",
+	        [](const list& self, const char* list_name) {
+		        return py::make_iterator(self.begin(list_name), self.end());
+	        },
+	        "Rerutrns all flags contained in list from a list", py::keep_alive<0, 1>()
+	    )
+	    .def(
+	        "__iter__", [](const list& self) { return py::make_iterator(self.begin(), self.end()); },
+	        py::keep_alive<0, 1>()
+	    )
 	    .def("__str__", &list_to_str);
-
+	py::class_<list::iterator::Flag>(
+	    py_list, "Flag", "A list flag containing the name of the flag and the corresponding list"
+	)
+	    .def_readonly("name", &list::iterator::Flag::flag_name, "The flag")
+	    .def_readonly(
+	        "list_name", &list::iterator::Flag::list_name, "Name of the corresponding list"
+	    );
 
 	py::class_<value> py_value(m, "Value", "A Value of a Ink Variable");
 	py_value.def_readonly("type", &value::type, "Type contained in value");
 	py_value.def(py::init<>());
 	py_value.def(py::init<bool>());
-	py_value.def(py::init<uint32_t>());
+	py_value.def("__init__", [](value& self, uint32_t v, value::Type type) {
+		if (type != value::Type::Uint32) {
+			throw py::key_error("only use this signture if you want to explicit pass a uint");
+		}
+		self = value(v);
+	});
 	py_value.def(py::init<int32_t>());
 	py_value.def(py::init<float>());
 	py_value.def(py::init<list*>());
@@ -175,7 +183,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 		throw py::attribute_error("value is in an invalid state");
 	});
 
-	py::enum_<value::Type>(m, "Type")
+	py::enum_<value::Type>(py_value, "Type")
 	    .value("Bool", value::Type::Bool)
 	    .value("Uint32", value::Type::Uint32)
 	    .value("Int32", value::Type::Int32)
@@ -190,8 +198,15 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        "Creates a snapshot from the current state for later usage"
 	    )
 	    .def("can_continue", &runner::can_continue, "check if there is content left in story")
-	    .def("getline", static_cast<std::string (runner::*)()>(&runner::getline))
-	    .def("has_tags", &runner::has_tags, "Where there tags since last getline")
+	    .def(
+	        "getline", static_cast<std::string (runner::*)()>(&runner::getline),
+	        "Get content of one output line"
+	    )
+	    .def(
+	        "getall", static_cast<std::string (runner::*)()>(&runner::getall),
+	        "execute getline and append until can_continue is false"
+	    )
+	    .def("has_tags", &runner::has_tags, "Where there tags since last getline?")
 	    .def("num_tags", &runner::num_tags, "Number of tags currently stored")
 	    .def(
 	        "get_tag", &runner::get_tag, "Get Tag currently stored at position i",
@@ -237,7 +252,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 		        );
 	        },
 	        py::arg("function_name"), py::arg("function"), py::arg_v("lookaheadSafe", false),
-	        "Bind function which void result"
+	        "Bind function with void result"
 	    )
 	    .def(
 	        "bind",

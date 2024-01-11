@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <story.h>
 #include <globals.h>
@@ -13,9 +12,7 @@ SCENARIO("a story with a white space infront of an conditional Divert", "[Output
 	// based on https://github.com/JBenda/inkcpp/issues/71
 	GIVEN("A story")
 	{
-		inklecate("ink/EmptyStringForDivert.ink", "EmptyStringForDivert.tmp");
-		ink::compiler::run("EmptyStringForDivert.tmp", "EmptyStringForDivert.bin");
-		auto   ink    = story::from_file("EmptyStringForDivert.bin");
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "EmptyStringForDivert.bin");
 		runner thread = ink->new_runner();
 
 		WHEN("run")

@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <story.h>
 #include <runner.h>
@@ -14,8 +13,7 @@ SCENARIO("a story supports UTF-8", "[utf-8]")
 {
 	GIVEN("a story with UTF8 characters")
 	{
-		inklecate("ink/UTF8Story.ink", "UTF8Story.tmp");
-		ink::compiler::run("UTF8Story.tmp", "UTF8Story.bin");
+		ink::compiler::run(INK_TEST_RESOURCE_DIR "UTF8Story.ink.json", "UTF8Story.bin");
 		auto ink = story::from_file("UTF8Story.bin");
 		runner thread = ink->new_runner();
 

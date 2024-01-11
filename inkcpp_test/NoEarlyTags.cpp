@@ -1,4 +1,3 @@
-#include "../inkcpp_cl/test.h"
 #include "catch.hpp"
 
 #include <compiler.h>
@@ -12,9 +11,7 @@ SCENARIO("Story with tags and glues", "[glue, tags]")
 {
 	GIVEN("lines intersected with tags and glue")
 	{
-		inklecate("ink/NoEarlyTags.ink", "NoEarlyTags.tmp");
-		ink::compiler::run("NoEarlyTags.tmp", "NoEarlyTags.bin");
-		auto ink    = story::from_file("NoEarlyTags.bin");
+		auto ink    = story::from_file(INK_TEST_RESOURCE_DIR "NoEarlyTags.bin");
 		auto thread = ink->new_runner();
 		WHEN("no glue")
 		{

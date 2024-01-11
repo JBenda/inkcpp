@@ -397,24 +397,11 @@ runner_impl::~runner_impl()
 #ifdef INK_ENABLE_STL
 std::string runner_impl::getline()
 {
-	std::string result{""};
-	bool        fill = false;
-	do {
-		if (fill) {
-			result += " ";
-		}
-		// Advance interpreter one line
-		advance_line();
-		// Read line into std::string
-		result += _output.get();
-		fill = _output.last_char() == ' ';
-	} while (_ptr != nullptr && _output.last_char() != '\n');
-
-	// TODO: fallback choice = no choice
+	advance_line();
+	std::string result = _output.get();
 	if (! has_choices() && _fallback_choice) {
 		choose(~0);
 	}
-
 	// Return result
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	return result;
@@ -422,19 +409,10 @@ std::string runner_impl::getline()
 
 void runner_impl::getline(std::ostream& out)
 {
-	bool fill = false;
-	do {
-		if (fill) {
-			out << " ";
-		}
-		// Advance interpreter one line
-		advance_line();
-		// Write into out
-		out << _output;
-		fill = _output.last_char() == ' ';
-	} while (_ptr != nullptr && _output.last_char() != '\n');
-
-	// TODO: fallback choice = no choice
+	// Advance interpreter one line
+	advance_line();
+	// Write into out
+	out << _output;
 	if (! has_choices() && _fallback_choice) {
 		choose(~0);
 	}
@@ -463,11 +441,9 @@ void runner_impl::getall(std::ostream& out)
 	// Advance interpreter until we're stopped
 	while (can_continue()) {
 		advance_line();
+		// Send output into stream
+		out << _output;
 	}
-
-	// Send output into stream
-	out << _output;
-
 	// Return result
 	inkAssert(_output.is_empty(), "Output should be empty after getall!");
 }
@@ -477,25 +453,12 @@ void runner_impl::getall(std::ostream& out)
 FString runner_impl::getline()
 {
 	clear_tags();
-	FString result{};
-	bool    fill = false;
-	do {
-		if (fill) {
-			result += " ";
-		}
-		// Advance interpreter one line
-		advance_line();
-		// Read lin ve into std::string
-		const char* str = _output.get_alloc(_globals->strings(), _globals->lists());
-		result.Append(str, c_str_len(str));
-		fill = _output.last_char() == ' ';
-	} while (_ptr != nullptr && _output.last_char() != '\n');
+	advance_line() FString result{};
+	result.Append(_output.get_alloc(_globals->strings(), globals->lists()));
 
-	// TODO: fallback choice = no choice
 	if (! has_choices() && _fallback_choice) {
 		choose(~0);
 	}
-
 	// Return result
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	return result;
@@ -657,11 +620,15 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 }
 
 #ifdef INK_ENABLE_CSTD
-char* runner_impl::getline_alloc()
+const char* runner_impl::getline_alloc()
 {
-	/// TODO
-	inkFail("Not implemented yet!");
-	return nullptr;
+	advance_line();
+	const char* res = _output.get_alloc(_globals->strings(), _globals->lists());
+	if (! has_choices() && _fallback_choice) {
+		choose(~0);
+	}
+	inkAssert(_output.is_empty(), "Output should be empty after getline!");
+	return res;
 }
 #endif
 
@@ -703,8 +670,6 @@ runner_impl::change_type runner_impl::detect_change() const
 	if (! stillHasNewline) {
 		return change_type::newline_removed;
 	}
-
-	// TODO New Tags -> extended
 
 	// If there's new text content, we went too far
 	if (hasAddedNewText) {
@@ -1042,7 +1007,7 @@ void runner_impl::step()
 						_eval.push(values::ex_fn_not_found);
 					} else if (_output.saved() && _output.saved_ends_with(value_type::newline) && ! fn->lookaheadSafe()) {
 						// TODO: seperate token?
-						_output.append(values::newline);
+						_output.append(values::null);
 					} else {
 						fn->call(&_eval, numArguments, _globals->strings(), _globals->lists());
 					}

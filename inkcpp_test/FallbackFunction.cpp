@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.h"
 
 #include <system.h>
 #include <story.h>
@@ -15,9 +14,7 @@ SCENARIO("run a story with external function and fallback function", "[external 
 {
 	GIVEN("story with two external functions, one with fallback")
 	{
-		inklecate("ink/FallBack.ink", "FallBack.tmp");
-		ink::compiler::run("FallBack.tmp", "FallBack.bin");
-		auto   ink    = story::from_file("FallBack.bin");
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "FallBack.bin");
 		runner thread = ink->new_runner();
 
 		WHEN("bind both external functions")

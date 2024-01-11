@@ -1,4 +1,3 @@
-#include "../inkcpp_cl/test.h"
 #include "catch.hpp"
 
 #include <choice.h>
@@ -13,9 +12,7 @@ SCENARIO("Observer", "[variables]")
 {
 	GIVEN("a story which changes variables")
 	{
-		inklecate("ink/ObserverStory.ink", "ObserverStory.tmp");
-		ink::compiler::run("ObserverStory.tmp", "ObserverStory.bin");
-		auto   ink     = story::from_file("ObserverStory.bin");
+		auto   ink     = story::from_file(INK_TEST_RESOURCE_DIR "ObserverStory.bin");
 		auto   globals = ink->new_globals();
 		runner thread  = ink->new_runner(globals);
 		WHEN("Run without observers")

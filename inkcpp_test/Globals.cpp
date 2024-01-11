@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "../inkcpp_cl/test.cpp"
 
 #include <story.h>
 #include <globals.h>
@@ -12,9 +11,7 @@ SCENARIO("run story with global variable", "[global variables]")
 {
 	GIVEN ("a story with global variables")
 	{
-		inklecate("ink/GlobalStory.ink", "GlobalsStory.tmp");
-		ink::compiler::run("GlobalsStory.tmp", "GlobalsStory.bin");
-		auto ink = story::from_file("GlobalsStory.bin");
+		auto    ink       = story::from_file(INK_TEST_RESOURCE_DIR "GlobalStory.bin");
 		globals globStore = ink->new_globals();
 		runner thread = ink->new_runner(globStore);
 

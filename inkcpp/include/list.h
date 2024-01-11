@@ -6,6 +6,14 @@
 #include <ostream>
 #endif
 
+#ifdef INK_BUILD_CLIB
+struct InkListIter;
+struct HInkList;
+int ink_list_flags(const HInkList*, InkListIter*);
+int ink_list_flags_from(const HInkList*, const char*, InkListIter*);
+int ink_list_iter_next(InkListIter*);
+#endif
+
 namespace ink::runtime {
 	namespace internal {
 		class list_table;
@@ -19,8 +27,14 @@ namespace ink::runtime {
 			const char* _list_name;
 			const list_interface& _list;
 			int _i;
-			bool _one_list_iterator; //< iterates only though values of one list
-			friend list_interface;
+		  bool                  _one_list_iterator; ///< iterates only though values of one list
+		  friend list_interface;
+#ifdef INK_BUILD_CLIB
+		  friend int ::ink_list_flags(const HInkList*, InkListIter*);
+		  friend int ::ink_list_flags_from(const HInkList*, const char*, InkListIter*);
+		  friend int ::ink_list_iter_next(InkListIter* self);
+#endif
+
 		protected:
 			iterator(const char* flag_name, const list_interface& list, size_t i, bool one_list_only = false)
 				: _flag_name(flag_name), _list(list), _i(i), _one_list_iterator(one_list_only) {}

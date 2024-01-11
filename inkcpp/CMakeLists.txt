@@ -36,16 +36,23 @@ list(APPEND COLLECTION_SOURCES
     collections/restorable.h 
     collections/restorable.cpp
 )
+FILE(GLOB PUBLIC_HEADERS "include/*")
+
 source_group(Collections REGULAR_EXPRESSION collections/.*)
-add_library(inkcpp ${SOURCES} ${COLLECTION_SOURCES})
+add_library(inkcpp_o OBJECT ${SOURCES} ${COLLECTION_SOURCES})
+target_include_directories(inkcpp_o PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+)
+add_library(inkcpp $<TARGET_OBJECTS:inkcpp_o>)
 target_include_directories(inkcpp PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:include>
 )
-FILE(GLOB PUBLIC_HEADERS "include/*")
 set_target_properties(inkcpp PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 # Make sure the include directory is included 
+target_link_libraries(inkcpp_o PRIVATE inkcpp_shared)
 target_link_libraries(inkcpp PRIVATE inkcpp_shared)
 # Make sure this project and all dependencies use the C++17 standard
 target_compile_features(inkcpp PUBLIC cxx_std_17)

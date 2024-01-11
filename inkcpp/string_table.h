@@ -36,5 +36,6 @@ namespace ink::runtime::internal
 
 	private:
 		avl_array<const char*, bool, ink::size_t, 100> _table;
-	};
+	  static constexpr const char*                   EMPTY_STRING = "\x03";
+  };
 }
