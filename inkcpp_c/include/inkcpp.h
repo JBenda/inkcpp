@@ -36,15 +36,18 @@ typedef struct HInkSTory    HInkStory;
 	 * For setup an example for option `2.` without cmake create a directory with the files below:
 	 * + `main.c`: found below
 	 * + `test.ink.json`: found at @ref src_story_json
+	 * 
 	 * And extract `<os>-clib.zip` from the [release
-	 * page](https://github.com/JBenda/inkcpp/releases/latest) to `/MY/INKCPP/EXAMPLE_INSTALL/PATH`
-	 * <br/>. To run the example do the following:
+	 * page](https://github.com/JBenda/inkcpp/releases/latest) to `/MY/INKCPP/EXAMPLE_INSTALL/PATH`.
+	 * <br/> To run the example do the following:
+	 * 
 	 * + change the `prefix=...` in `/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig/inkcpp.pc`
 	 *   to `prefix=/MY/INKCPP_EXAMPLE_INSTALL_PATH/`
 	 * + `export PKG_CONFIG_PATH=/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig`
 	 * + `gcc -c main.c $(pkg-config --cflags inkcpp)`
 	 * + `g++ -o main main.o $(pkg-config --libs inkcpp)`
 	 * + `./main`
+	 * 
 	 * As a sideproduct a file named `test.bin` should be created coaining the binary format used by
 	 * inkCPP.
 	 *

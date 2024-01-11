@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <assert.h>
 
-// #include <ink/c/inkcpp.h> // use this if went the cmake C++/C route
+#include <ink/c/inkcpp.h> // if <os>-lib.zip was used for the installation
 
-#include <ink/inkcpp.h> // use this if you use the minimal C route
+// #include <ink/inkcpp.h> // if <os>-clib.zip was used for the installation
 
 InkValue ink_add(int argc, const InkValue argv[])
 {

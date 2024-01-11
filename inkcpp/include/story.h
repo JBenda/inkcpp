@@ -131,7 +131,7 @@ public:
  * inkcpp_DIR=../linux-lib cmake ..
  * cmake --build .
  * cp ../test.ink.json .
- * ./main
+ * ./main_cpp
  * @endcode
  *
  * @subsection src_main main.cpp
