@@ -77,7 +77,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DINKCPP_PY=OFF
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DINKCPP_PY=OFF -DINKCPP_C=ON
 
     # Build using CMake and OS toolkit
     - name: Build
