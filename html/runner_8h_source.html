@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -45,6 +49,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('runner_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -59,11 +80,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_ccb04c775b4f6ff049b37d5384032e3d.html">inkcpp</a></li><li class="navelem"><a class="el" href="dir_4a8f5a854ffbcd9a72d16c328545681b.html">include</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">runner.h</div>  </div>
@@ -97,7 +113,7 @@ $(function() {
 <div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1runner__interface.html#a71ff23afa51246d6b4aff771db2bbe34">   64</a></span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classink_1_1runtime_1_1runner__interface.html#a71ff23afa51246d6b4aff771db2bbe34">can_continue</a>() <span class="keyword">const</span> = 0;</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#ifdef INK_ENABLE_CSTD</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">char</span>* getline_alloc() = 0;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* getline_alloc() = 0;</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
 <div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1runner__interface.html#af3fcb3bf7c0ff0722b7efc378ff9b334">   82</a></span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classink_1_1runtime_1_1snapshot.html">snapshot</a>* <a class="code" href="classink_1_1runtime_1_1runner__interface.html#af3fcb3bf7c0ff0722b7efc378ff9b334">create_snapshot</a>() <span class="keyword">const</span> = 0;</div>
@@ -187,12 +203,16 @@ $(function() {
 <div class="ttc" id="aclassink_1_1runtime_1_1runner__interface_html_ac845b66007a113707704e4f1e88b98ed"><div class="ttname"><a href="classink_1_1runtime_1_1runner__interface.html#ac845b66007a113707704e4f1e88b98ed">ink::runtime::runner_interface::has_choices</a></div><div class="ttdeci">bool has_choices() const</div><div class="ttdoc">Checks if we're currently facing any choices.</div><div class="ttdef"><b>Definition:</b> runner.h:242</div></div>
 <div class="ttc" id="aclassink_1_1runtime_1_1runner__interface_html_ae86dc739d94d0969b8d4759ac3205272"><div class="ttname"><a href="classink_1_1runtime_1_1runner__interface.html#ae86dc739d94d0969b8d4759ac3205272">ink::runtime::runner_interface::num_choices</a></div><div class="ttdeci">size_t num_choices() const</div><div class="ttdoc">Returns the number of choices currently available.</div></div>
 <div class="ttc" id="aclassink_1_1runtime_1_1runner__interface_html_af3fcb3bf7c0ff0722b7efc378ff9b334"><div class="ttname"><a href="classink_1_1runtime_1_1runner__interface.html#af3fcb3bf7c0ff0722b7efc378ff9b334">ink::runtime::runner_interface::create_snapshot</a></div><div class="ttdeci">virtual snapshot * create_snapshot() const =0</div><div class="ttdoc">creates a snapshot containing the runner, globals and all other runners connected to the globals.</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1snapshot_html"><div class="ttname"><a href="classink_1_1runtime_1_1snapshot.html">ink::runtime::snapshot</a></div><div class="ttdef"><b>Definition:</b> snapshot.h:7</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1snapshot_html"><div class="ttname"><a href="classink_1_1runtime_1_1snapshot.html">ink::runtime::snapshot</a></div><div class="ttdoc">Container for an InkCPP runtime snapshot.</div><div class="ttdef"><b>Definition:</b> snapshot.h:20</div></div>
 <div class="ttc" id="anamespaceink_1_1runtime_html"><div class="ttname"><a href="namespaceink_1_1runtime.html">ink::runtime</a></div><div class="ttdoc">Contaning all modules and classes used for the inkles ink runtime.</div><div class="ttdef"><b>Definition:</b> choice.h:7</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_ccb04c775b4f6ff049b37d5384032e3d.html">inkcpp</a></li><li class="navelem"><a class="el" href="dir_4a8f5a854ffbcd9a72d16c328545681b.html">include</a></li><li class="navelem"><b>runner.h</b></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

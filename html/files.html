@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -46,6 +50,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('files.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -79,36 +99,42 @@ $(function() {
 <tr id="row_0_0_7_"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="story__ptr_8h_source.html"><span class="icondoc"></span></a><b>story_ptr.h</b></td><td class="desc"></td></tr>
 <tr id="row_0_0_8_" class="even"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="traits_8h_source.html"><span class="icondoc"></span></a><b>traits.h</b></td><td class="desc"></td></tr>
 <tr id="row_0_0_9_"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="types_8h_source.html"><span class="icondoc"></span></a><b>types.h</b></td><td class="desc"></td></tr>
-<tr id="row_1_" class="even"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_1_" class="arrow" onclick="toggleFolder('1_')">&#9660;</span><span id="img_1_" class="iconfopen" onclick="toggleFolder('1_')">&#160;</span><a class="el" href="dir_b4c0e768d7d26ab9ad81c92e3b75b2ce.html" target="_self">inkcpp_compiler</a></td><td class="desc"></td></tr>
-<tr id="row_1_0_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span id="arr_1_0_" class="arrow" onclick="toggleFolder('1_0_')">&#9660;</span><span id="img_1_0_" class="iconfopen" onclick="toggleFolder('1_0_')">&#160;</span><a class="el" href="dir_438150829b2a8b213a09eff11424f599.html" target="_self">include</a></td><td class="desc"></td></tr>
-<tr id="row_1_0_0_" class="even"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="compilation__results_8h_source.html"><span class="icondoc"></span></a><b>compilation_results.h</b></td><td class="desc"></td></tr>
-<tr id="row_1_0_1_"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="compiler_8h_source.html"><span class="icondoc"></span></a><b>compiler.h</b></td><td class="desc"></td></tr>
-<tr id="row_2_" class="even"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_2_" class="arrow" onclick="toggleFolder('2_')">&#9660;</span><span id="img_2_" class="iconfopen" onclick="toggleFolder('2_')">&#160;</span><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html" target="_self">shared</a></td><td class="desc"></td></tr>
-<tr id="row_2_0_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span id="arr_2_0_" class="arrow" onclick="toggleFolder('2_0_')">&#9660;</span><span id="img_2_0_" class="iconfopen" onclick="toggleFolder('2_0_')">&#160;</span><a class="el" href="dir_263d281bba5f5d08f55c63dd3091866a.html" target="_self">public</a></td><td class="desc"></td></tr>
-<tr id="row_2_0_0_" class="even"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="config_8h_source.html"><span class="icondoc"></span></a><b>config.h</b></td><td class="desc"></td></tr>
-<tr id="row_2_0_1_"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="system_8h_source.html"><span class="icondoc"></span></a><b>system.h</b></td><td class="desc"></td></tr>
-<tr id="row_2_0_2_" class="even"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="version_8h_source.html"><span class="icondoc"></span></a><b>version.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_3_" class="arrow" onclick="toggleFolder('3_')">&#9660;</span><span id="img_3_" class="iconfopen" onclick="toggleFolder('3_')">&#160;</span><a class="el" href="dir_351fa2bb36c6a96acab23d5bdbf280e1.html" target="_self">unreal</a></td><td class="desc"></td></tr>
-<tr id="row_3_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span id="arr_3_0_" class="arrow" onclick="toggleFolder('3_0_')">&#9660;</span><span id="img_3_0_" class="iconfopen" onclick="toggleFolder('3_0_')">&#160;</span><a class="el" href="dir_43ac4c8d0f79606841b109a347e8d901.html" target="_self">inkcpp</a></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span id="arr_3_0_0_" class="arrow" onclick="toggleFolder('3_0_0_')">&#9660;</span><span id="img_3_0_0_" class="iconfopen" onclick="toggleFolder('3_0_0_')">&#160;</span><a class="el" href="dir_55fda786a7da43d96f9aae5a46eaea07.html" target="_self">Source</a></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_" class="even"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><span id="arr_3_0_0_0_" class="arrow" onclick="toggleFolder('3_0_0_0_')">&#9660;</span><span id="img_3_0_0_0_" class="iconfopen" onclick="toggleFolder('3_0_0_0_')">&#160;</span><a class="el" href="dir_3f9f1502653adddcffa15f22ce819958.html" target="_self">inkcpp</a></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_"><td class="entry"><span style="width:64px;display:inline-block;">&#160;</span><span id="arr_3_0_0_0_0_" class="arrow" onclick="toggleFolder('3_0_0_0_0_')">&#9658;</span><span id="img_3_0_0_0_0_" class="iconfclosed" onclick="toggleFolder('3_0_0_0_0_')">&#160;</span><a class="el" href="dir_08fe10b2934b9f940fec6baa43a7a42d.html" target="_self">Public</a></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_0_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_asset_8h_source.html"><span class="icondoc"></span></a><b>InkAsset.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_1_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_choice_8h_source.html"><span class="icondoc"></span></a><b>InkChoice.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_2_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="inkcpp_8h_source.html"><span class="icondoc"></span></a><b>inkcpp.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_3_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_delegates_8h_source.html"><span class="icondoc"></span></a><b>InkDelegates.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_4_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_list_8h_source.html"><span class="icondoc"></span></a><b>InkList.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_5_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_runtime_8h_source.html"><span class="icondoc"></span></a><b>InkRuntime.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_6_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_snapshot_8h_source.html"><span class="icondoc"></span></a><b>InkSnapshot.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_7_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_thread_8h_source.html"><span class="icondoc"></span></a><b>InkThread.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_8_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_var_8h_source.html"><span class="icondoc"></span></a><b>InkVar.h</b></td><td class="desc"></td></tr>
-<tr id="row_3_0_0_0_0_9_" class="even" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_tag_list_8h_source.html"><span class="icondoc"></span></a><b>TagList.h</b></td><td class="desc"></td></tr>
+<tr id="row_1_" class="even"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_1_" class="arrow" onclick="toggleFolder('1_')">&#9660;</span><span id="img_1_" class="iconfopen" onclick="toggleFolder('1_')">&#160;</span><a class="el" href="dir_774ecc1061ec1642f0ce7fcd1c27d50d.html" target="_self">inkcpp_c</a></td><td class="desc"></td></tr>
+<tr id="row_1_0_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span id="arr_1_0_" class="arrow" onclick="toggleFolder('1_0_')">&#9660;</span><span id="img_1_0_" class="iconfopen" onclick="toggleFolder('1_0_')">&#160;</span><a class="el" href="dir_c9f14f437db65a0a62b27f82686317dd.html" target="_self">include</a></td><td class="desc"></td></tr>
+<tr id="row_1_0_0_" class="even"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="inkcpp__c_2include_2inkcpp_8h_source.html"><span class="icondoc"></span></a><b>inkcpp.h</b></td><td class="desc"></td></tr>
+<tr id="row_2_"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_2_" class="arrow" onclick="toggleFolder('2_')">&#9660;</span><span id="img_2_" class="iconfopen" onclick="toggleFolder('2_')">&#160;</span><a class="el" href="dir_b4c0e768d7d26ab9ad81c92e3b75b2ce.html" target="_self">inkcpp_compiler</a></td><td class="desc"></td></tr>
+<tr id="row_2_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span id="arr_2_0_" class="arrow" onclick="toggleFolder('2_0_')">&#9660;</span><span id="img_2_0_" class="iconfopen" onclick="toggleFolder('2_0_')">&#160;</span><a class="el" href="dir_438150829b2a8b213a09eff11424f599.html" target="_self">include</a></td><td class="desc"></td></tr>
+<tr id="row_2_0_0_"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="compilation__results_8h_source.html"><span class="icondoc"></span></a><b>compilation_results.h</b></td><td class="desc"></td></tr>
+<tr id="row_2_0_1_" class="even"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="compiler_8h_source.html"><span class="icondoc"></span></a><b>compiler.h</b></td><td class="desc"></td></tr>
+<tr id="row_3_"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_3_" class="arrow" onclick="toggleFolder('3_')">&#9660;</span><span id="img_3_" class="iconfopen" onclick="toggleFolder('3_')">&#160;</span><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html" target="_self">shared</a></td><td class="desc"></td></tr>
+<tr id="row_3_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span id="arr_3_0_" class="arrow" onclick="toggleFolder('3_0_')">&#9660;</span><span id="img_3_0_" class="iconfopen" onclick="toggleFolder('3_0_')">&#160;</span><a class="el" href="dir_263d281bba5f5d08f55c63dd3091866a.html" target="_self">public</a></td><td class="desc"></td></tr>
+<tr id="row_3_0_0_"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="config_8h_source.html"><span class="icondoc"></span></a><b>config.h</b></td><td class="desc"></td></tr>
+<tr id="row_3_0_1_" class="even"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="system_8h_source.html"><span class="icondoc"></span></a><b>system.h</b></td><td class="desc"></td></tr>
+<tr id="row_3_0_2_"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><a href="version_8h_source.html"><span class="icondoc"></span></a><b>version.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_" class="even"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_4_" class="arrow" onclick="toggleFolder('4_')">&#9660;</span><span id="img_4_" class="iconfopen" onclick="toggleFolder('4_')">&#160;</span><a class="el" href="dir_351fa2bb36c6a96acab23d5bdbf280e1.html" target="_self">unreal</a></td><td class="desc"></td></tr>
+<tr id="row_4_0_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span id="arr_4_0_" class="arrow" onclick="toggleFolder('4_0_')">&#9660;</span><span id="img_4_0_" class="iconfopen" onclick="toggleFolder('4_0_')">&#160;</span><a class="el" href="dir_43ac4c8d0f79606841b109a347e8d901.html" target="_self">inkcpp</a></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_" class="even"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span id="arr_4_0_0_" class="arrow" onclick="toggleFolder('4_0_0_')">&#9660;</span><span id="img_4_0_0_" class="iconfopen" onclick="toggleFolder('4_0_0_')">&#160;</span><a class="el" href="dir_55fda786a7da43d96f9aae5a46eaea07.html" target="_self">Source</a></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><span id="arr_4_0_0_0_" class="arrow" onclick="toggleFolder('4_0_0_0_')">&#9660;</span><span id="img_4_0_0_0_" class="iconfopen" onclick="toggleFolder('4_0_0_0_')">&#160;</span><a class="el" href="dir_3f9f1502653adddcffa15f22ce819958.html" target="_self">inkcpp</a></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_" class="even"><td class="entry"><span style="width:64px;display:inline-block;">&#160;</span><span id="arr_4_0_0_0_0_" class="arrow" onclick="toggleFolder('4_0_0_0_0_')">&#9658;</span><span id="img_4_0_0_0_0_" class="iconfclosed" onclick="toggleFolder('4_0_0_0_0_')">&#160;</span><a class="el" href="dir_08fe10b2934b9f940fec6baa43a7a42d.html" target="_self">Public</a></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_0_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_asset_8h_source.html"><span class="icondoc"></span></a><b>InkAsset.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_1_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_choice_8h_source.html"><span class="icondoc"></span></a><b>InkChoice.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_2_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="unreal_2inkcpp_2_source_2inkcpp_2_public_2inkcpp_8h_source.html"><span class="icondoc"></span></a><b>inkcpp.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_3_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_delegates_8h_source.html"><span class="icondoc"></span></a><b>InkDelegates.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_4_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_list_8h_source.html"><span class="icondoc"></span></a><b>InkList.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_5_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_runtime_8h_source.html"><span class="icondoc"></span></a><b>InkRuntime.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_6_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_snapshot_8h_source.html"><span class="icondoc"></span></a><b>InkSnapshot.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_7_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_thread_8h_source.html"><span class="icondoc"></span></a><b>InkThread.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_8_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_ink_var_8h_source.html"><span class="icondoc"></span></a><b>InkVar.h</b></td><td class="desc"></td></tr>
+<tr id="row_4_0_0_0_0_9_" style="display:none;"><td class="entry"><span style="width:96px;display:inline-block;">&#160;</span><a href="_tag_list_8h_source.html"><span class="icondoc"></span></a><b>TagList.h</b></td><td class="desc"></td></tr>
 </table>
 </div><!-- directory -->
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

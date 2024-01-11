@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['type_258',['type',['../structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403',1,'ink::runtime::value']]]
+  ['bool_5fv_358',['bool_v',['../struct_ink_value.html#a8040a0a3d1392d6c68268a66fc5a5d9c',1,'InkValue']]]
 ];

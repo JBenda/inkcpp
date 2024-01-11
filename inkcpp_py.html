@@ -22,10 +22,10 @@
 <dl>
 <dt class="heading-text"><a href="inkcpp_py.html#Choice">Choice</a>
 </dt><dt class="heading-text"><a href="inkcpp_py.html#Globals">Globals</a>
+</dt><dt class="heading-text"><a href="inkcpp_py.html#List">List</a>
 </dt><dt class="heading-text"><a href="inkcpp_py.html#Runner">Runner</a>
 </dt><dt class="heading-text"><a href="inkcpp_py.html#Snapshot">Snapshot</a>
 </dt><dt class="heading-text"><a href="inkcpp_py.html#Story">Story</a>
-</dt><dt class="heading-text"><a href="inkcpp_py.html#Type">Type</a>
 </dt><dt class="heading-text"><a href="inkcpp_py.html#Value">Value</a>
 </dt></dl>
 </dd>
@@ -57,7 +57,7 @@ if&nbsp;choices&nbsp;is&nbsp;tagged?</span></dd></dl>
 &nbsp;<br>
 Number&nbsp;of&nbsp;tags&nbsp;assigned&nbsp;to&nbsp;choice</span></dd></dl>
 
-<dl><dt><a name="Choice-tags"><strong>tags</strong></a>(...)</dt><dd><span class="code"><a href="#Choice-tags">tags</a>(self:&nbsp;inkcpp_py.<a href="#Choice">Choice</a>)&nbsp;-&gt;&nbsp;List[str]<br>
+<dl><dt><a name="Choice-tags"><strong>tags</strong></a>(...)</dt><dd><span class="code"><a href="#Choice-tags">tags</a>(self:&nbsp;inkcpp_py.<a href="#Choice">Choice</a>)&nbsp;-&gt;&nbsp;<a href="#List">List</a>[str]<br>
 &nbsp;<br>
 Get&nbsp;all&nbsp;current&nbsp;assinged&nbsp;tags</span></dd></dl>
 
@@ -94,21 +94,58 @@ Access&nbsp;global&nbsp;varible&nbsp;if&nbsp;exists,&nbsp;if&nbsp;not&nbsp;throw
 &nbsp;<br>
 Creates&nbsp;a&nbsp;snapshot&nbsp;from&nbsp;the&nbsp;current&nbsp;state&nbsp;for&nbsp;later&nbsp;usage</span></dd></dl>
 
-<dl><dt><a name="Globals-observe_delta"><strong>observe_delta</strong></a>(...)</dt><dd><span class="code"><a href="#Globals-observe_delta">observe_delta</a>(self:&nbsp;inkcpp_py.<a href="#Globals">Globals</a>,&nbsp;arg0:&nbsp;str,&nbsp;arg1:&nbsp;Callable[[ink::runtime::value,&nbsp;Optional[ink::runtime::value]],&nbsp;None])&nbsp;-&gt;&nbsp;None<br>
+<dl><dt><a name="Globals-observe"><strong>observe</strong></a>(...)</dt><dd><span class="code"><a href="#Globals-observe">observe</a>(self:&nbsp;inkcpp_py.<a href="#Globals">Globals</a>,&nbsp;arg0:&nbsp;str,&nbsp;arg1:&nbsp;Callable[[ink::runtime::value,&nbsp;Optional[ink::runtime::value]],&nbsp;None])&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 Get&nbsp;a&nbsp;call&nbsp;with&nbsp;the&nbsp;new&nbsp;and&nbsp;old&nbsp;value&nbsp;(this&nbsp;could&nbsp;be&nbsp;None)&nbsp;each&nbsp;time&nbsp;the&nbsp;variable&nbsp;changes</span></dd></dl>
-
-<dl><dt><a name="Globals-observe_ping"><strong>observe_ping</strong></a>(...)</dt><dd><span class="code"><a href="#Globals-observe_ping">observe_ping</a>(self:&nbsp;inkcpp_py.<a href="#Globals">Globals</a>,&nbsp;arg0:&nbsp;str,&nbsp;arg1:&nbsp;Callable[[],&nbsp;None])&nbsp;-&gt;&nbsp;None<br>
-&nbsp;<br>
-Get&nbsp;a&nbsp;ping&nbsp;each&nbsp;time&nbsp;the&nbsp;observed&nbsp;variable&nbsp;changes</span></dd></dl>
-
-<dl><dt><a name="Globals-observe_value"><strong>observe_value</strong></a>(...)</dt><dd><span class="code"><a href="#Globals-observe_value">observe_value</a>(self:&nbsp;inkcpp_py.<a href="#Globals">Globals</a>,&nbsp;arg0:&nbsp;str,&nbsp;arg1:&nbsp;Callable[[ink::runtime::value],&nbsp;None])&nbsp;-&gt;&nbsp;None<br>
-&nbsp;<br>
-Get&nbsp;a&nbsp;call&nbsp;with&nbsp;new&nbsp;value&nbsp;each&nbsp;time&nbsp;the&nbsp;variable&nbsp;changes</span></dd></dl>
 
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <dl><dt><a name="Globals-__new__"><strong>__new__</strong></a>(*args, **kwargs)<span class="grey"><span class="heading-text"> from pybind11_builtins.pybind11_type</span></span></dt><dd><span class="code">Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="List">class <strong>List</strong></a>(pybind11_builtins.pybind11_object)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code">Allows&nbsp;reading&nbsp;and&nbsp;editing&nbsp;inkcpp&nbsp;lists.&nbsp;!Only&nbsp;valid&nbsp;until&nbsp;next&nbsp;choose&nbsp;ore&nbsp;getline&nbsp;a&nbsp;runner&nbsp;referncing&nbsp;the&nbsp;corresponding&nbsp;global<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="inkcpp_py.html#List">List</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="List-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="List-__iter__"><strong>__iter__</strong></a>(...)</dt><dd><span class="code"><a href="#List-__iter__">__iter__</a>(self:&nbsp;inkcpp_py.<a href="#List">List</a>)&nbsp;-&gt;&nbsp;Iterator</span></dd></dl>
+
+<dl><dt><a name="List-__str__"><strong>__str__</strong></a>(...)</dt><dd><span class="code"><a href="#List-__str__">__str__</a>(self:&nbsp;inkcpp_py.<a href="#List">List</a>)&nbsp;-&gt;&nbsp;str</span></dd></dl>
+
+<dl><dt><a name="List-add"><strong>add</strong></a>(...)</dt><dd><span class="code"><a href="#List-add">add</a>(self:&nbsp;inkcpp_py.<a href="#List">List</a>,&nbsp;arg0:&nbsp;str)&nbsp;-&gt;&nbsp;None<br>
+&nbsp;<br>
+Add&nbsp;flag&nbsp;to&nbsp;list</span></dd></dl>
+
+<dl><dt><a name="List-contains"><strong>contains</strong></a>(...)</dt><dd><span class="code"><a href="#List-contains">contains</a>(self:&nbsp;inkcpp_py.<a href="#List">List</a>,&nbsp;arg0:&nbsp;str)&nbsp;-&gt;&nbsp;bool<br>
+&nbsp;<br>
+Check&nbsp;if&nbsp;list&nbsp;contains&nbsp;the&nbsp;given&nbsp;flag</span></dd></dl>
+
+<dl><dt><a name="List-flags_from"><strong>flags_from</strong></a>(...)</dt><dd><span class="code"><a href="#List-flags_from">flags_from</a>(self:&nbsp;inkcpp_py.<a href="#List">List</a>,&nbsp;arg0:&nbsp;str)&nbsp;-&gt;&nbsp;Iterator<br>
+&nbsp;<br>
+Rerutrns&nbsp;all&nbsp;flags&nbsp;contained&nbsp;in&nbsp;list&nbsp;from&nbsp;a&nbsp;list</span></dd></dl>
+
+<dl><dt><a name="List-remove"><strong>remove</strong></a>(...)</dt><dd><span class="code"><a href="#List-remove">remove</a>(self:&nbsp;inkcpp_py.<a href="#List">List</a>,&nbsp;arg0:&nbsp;str)&nbsp;-&gt;&nbsp;None<br>
+&nbsp;<br>
+Remove&nbsp;flag&nbsp;from&nbsp;list</span></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>Flag</strong> = &lt;class 'inkcpp_py.List.Flag'&gt;<dd><span class="code">A&nbsp;list&nbsp;flag&nbsp;containing&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;flag&nbsp;and&nbsp;the&nbsp;corresponding&nbsp;list</span></dl>
+
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="List-__new__"><strong>__new__</strong></a>(*args, **kwargs)<span class="grey"><span class="heading-text"> from pybind11_builtins.pybind11_type</span></span></dt><dd><span class="code">Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
 
 </td></tr></table> <p>
 <table class="section">
@@ -127,13 +164,13 @@ Methods defined here:<br>
 
 <dl><dt><a name="Runner-__iter__"><strong>__iter__</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-__iter__">__iter__</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;Iterator</span></dd></dl>
 
-<dl><dt><a name="Runner-bind"><strong>bind</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-bind">bind</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>,&nbsp;function_name:&nbsp;str,&nbsp;function:&nbsp;Callable[[List[inkcpp_py.<a href="#Value">Value</a>]],&nbsp;inkcpp_py.<a href="#Value">Value</a>],&nbsp;lookaheadSafe:&nbsp;bool&nbsp;=&nbsp;False)&nbsp;-&gt;&nbsp;None<br>
+<dl><dt><a name="Runner-bind"><strong>bind</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-bind">bind</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>,&nbsp;function_name:&nbsp;str,&nbsp;function:&nbsp;Callable[[<a href="#List">List</a>[inkcpp_py.<a href="#Value">Value</a>]],&nbsp;inkcpp_py.<a href="#Value">Value</a>],&nbsp;lookaheadSafe:&nbsp;bool&nbsp;=&nbsp;False)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 Bind&nbsp;a&nbsp;function&nbsp;with&nbsp;return&nbsp;value</span></dd></dl>
 
-<dl><dt><a name="Runner-bind_void"><strong>bind_void</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-bind_void">bind_void</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>,&nbsp;function_name:&nbsp;str,&nbsp;function:&nbsp;Callable[[List[inkcpp_py.<a href="#Value">Value</a>]],&nbsp;None],&nbsp;lookaheadSafe:&nbsp;bool&nbsp;=&nbsp;False)&nbsp;-&gt;&nbsp;None<br>
+<dl><dt><a name="Runner-bind_void"><strong>bind_void</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-bind_void">bind_void</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>,&nbsp;function_name:&nbsp;str,&nbsp;function:&nbsp;Callable[[<a href="#List">List</a>[inkcpp_py.<a href="#Value">Value</a>]],&nbsp;None],&nbsp;lookaheadSafe:&nbsp;bool&nbsp;=&nbsp;False)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
-Bind&nbsp;function&nbsp;which&nbsp;void&nbsp;result</span></dd></dl>
+Bind&nbsp;function&nbsp;with&nbsp;void&nbsp;result</span></dd></dl>
 
 <dl><dt><a name="Runner-can_continue"><strong>can_continue</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-can_continue">can_continue</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;bool<br>
 &nbsp;<br>
@@ -155,7 +192,13 @@ Get&nbsp;current&nbsp;choice&nbsp;at&nbsp;index</span></dd></dl>
 &nbsp;<br>
 Get&nbsp;Tag&nbsp;currently&nbsp;stored&nbsp;at&nbsp;position&nbsp;i</span></dd></dl>
 
-<dl><dt><a name="Runner-getline"><strong>getline</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-getline">getline</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;str</span></dd></dl>
+<dl><dt><a name="Runner-getall"><strong>getall</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-getall">getall</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;str<br>
+&nbsp;<br>
+execute&nbsp;getline&nbsp;and&nbsp;append&nbsp;until&nbsp;can_continue&nbsp;is&nbsp;false</span></dd></dl>
+
+<dl><dt><a name="Runner-getline"><strong>getline</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-getline">getline</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;str<br>
+&nbsp;<br>
+Get&nbsp;content&nbsp;of&nbsp;one&nbsp;output&nbsp;line</span></dd></dl>
 
 <dl><dt><a name="Runner-has_choices"><strong>has_choices</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-has_choices">has_choices</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;bool<br>
 &nbsp;<br>
@@ -163,7 +206,7 @@ Check&nbsp;if&nbsp;there&nbsp;is&nbsp;at&nbsp;least&nbsp;one&nbsp;open&nbsp;choi
 
 <dl><dt><a name="Runner-has_tags"><strong>has_tags</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-has_tags">has_tags</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;bool<br>
 &nbsp;<br>
-Where&nbsp;there&nbsp;tags&nbsp;since&nbsp;last&nbsp;getline</span></dd></dl>
+Where&nbsp;there&nbsp;tags&nbsp;since&nbsp;last&nbsp;getline?</span></dd></dl>
 
 <dl><dt><a name="Runner-num_choices"><strong>num_choices</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-num_choices">num_choices</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;int<br>
 &nbsp;<br>
@@ -173,7 +216,7 @@ Number&nbsp;of&nbsp;current&nbsp;open&nbsp;choices</span></dd></dl>
 &nbsp;<br>
 Number&nbsp;of&nbsp;tags&nbsp;currently&nbsp;stored</span></dd></dl>
 
-<dl><dt><a name="Runner-tags"><strong>tags</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-tags">tags</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;List[str]<br>
+<dl><dt><a name="Runner-tags"><strong>tags</strong></a>(...)</dt><dd><span class="code"><a href="#Runner-tags">tags</a>(self:&nbsp;inkcpp_py.<a href="#Runner">Runner</a>)&nbsp;-&gt;&nbsp;<a href="#List">List</a>[str]<br>
 &nbsp;<br>
 Get&nbsp;all&nbsp;current&nbsp;assigned&nbsp;tags</span></dd></dl>
 
@@ -255,71 +298,11 @@ Overloaded&nbsp;function.<br>
 &nbsp;<br>
 2.&nbsp;<a href="#Story-new_runner_from_snapshot">new_runner_from_snapshot</a>(self:&nbsp;inkcpp_py.<a href="#Story">Story</a>,&nbsp;arg0:&nbsp;ink::runtime::snapshot,&nbsp;arg1:&nbsp;ink::runtime::globals_interface)&nbsp;-&gt;&nbsp;ink::runtime::runner_interface<br>
 &nbsp;<br>
-3.&nbsp;<a href="#Story-new_runner_from_snapshot">new_runner_from_snapshot</a>(self:&nbsp;inkcpp_py.<a href="#Story">Story</a>,&nbsp;arg0:&nbsp;ink::runtime::snapshot,&nbsp;arg1:&nbsp;ink::runtime::globals_interface,&nbsp;arg2:&nbsp;int)&nbsp;-&gt;&nbsp;ink::runtime::runner_interface</span></dd></dl>
+3.&nbsp;<a href="#Story-new_runner_from_snapshot">new_runner_from_snapshot</a>(self:&nbsp;inkcpp_py.<a href="#Story">Story</a>,&nbsp;arg0:&nbsp;ink::runtime::snapshot)&nbsp;-&gt;&nbsp;ink::runtime::runner_interface</span></dd></dl>
 
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <dl><dt><a name="Story-__new__"><strong>__new__</strong></a>(*args, **kwargs)<span class="grey"><span class="heading-text"> from pybind11_builtins.pybind11_type</span></span></dt><dd><span class="code">Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
-
-</td></tr></table> <p>
-<table class="section">
-<tr class="decor title-decor heading-text">
-<td class="section-title" colspan=3>&nbsp;<br><a name="Type">class <strong>Type</strong></a>(pybind11_builtins.pybind11_object)</td></tr>
-    
-<tr><td class="decor title-decor"><span class="code">&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
-<dd><a href="inkcpp_py.html#Type">Type</a></dd>
-<dd>pybind11_builtins.pybind11_object</dd>
-<dd><a href="builtins.html#object">builtins.object</a></dd>
-</dl>
-<hr>
-Methods defined here:<br>
-<dl><dt><a name="Type-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__eq__">__eq__</a>(self:&nbsp;object,&nbsp;other:&nbsp;object)&nbsp;-&gt;&nbsp;bool</span></dd></dl>
-
-<dl><dt><a name="Type-__getstate__"><strong>__getstate__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__getstate__">__getstate__</a>(self:&nbsp;object)&nbsp;-&gt;&nbsp;int</span></dd></dl>
-
-<dl><dt><a name="Type-__hash__"><strong>__hash__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__hash__">__hash__</a>(self:&nbsp;object)&nbsp;-&gt;&nbsp;int</span></dd></dl>
-
-<dl><dt><a name="Type-__index__"><strong>__index__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__index__">__index__</a>(self:&nbsp;inkcpp_py.<a href="#Type">Type</a>)&nbsp;-&gt;&nbsp;int</span></dd></dl>
-
-<dl><dt><a name="Type-__init__"><strong>__init__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Type">Type</a>,&nbsp;value:&nbsp;int)&nbsp;-&gt;&nbsp;None</span></dd></dl>
-
-<dl><dt><a name="Type-__int__"><strong>__int__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__int__">__int__</a>(self:&nbsp;inkcpp_py.<a href="#Type">Type</a>)&nbsp;-&gt;&nbsp;int</span></dd></dl>
-
-<dl><dt><a name="Type-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__ne__">__ne__</a>(self:&nbsp;object,&nbsp;other:&nbsp;object)&nbsp;-&gt;&nbsp;bool</span></dd></dl>
-
-<dl><dt><a name="Type-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__repr__">__repr__</a>(self:&nbsp;object)&nbsp;-&gt;&nbsp;str</span></dd></dl>
-
-<dl><dt><a name="Type-__setstate__"><strong>__setstate__</strong></a>(...)</dt><dd><span class="code"><a href="#Type-__setstate__">__setstate__</a>(self:&nbsp;inkcpp_py.<a href="#Type">Type</a>,&nbsp;state:&nbsp;int)&nbsp;-&gt;&nbsp;None</span></dd></dl>
-
-<dl><dt><a name="Type-__str__"><strong>__str__</strong></a> = name(...)</dt><dd><span class="code"><a href="#Type-name">name</a>(self:&nbsp;handle)&nbsp;-&gt;&nbsp;str</span></dd></dl>
-
-<hr>
-Readonly properties defined here:<br>
-<dl><dt><strong>__members__</strong></dt>
-</dl>
-<dl><dt><strong>name</strong></dt>
-<dd><span class="code">name(self:&nbsp;handle)&nbsp;-&gt;&nbsp;str</span></dd>
-</dl>
-<dl><dt><strong>value</strong></dt>
-</dl>
-<hr>
-Data and other attributes defined here:<br>
-<dl><dt><strong>Bool</strong> = &lt;Type.Bool: 0&gt;</dl>
-
-<dl><dt><strong>Float</strong> = &lt;Type.Float: 4&gt;</dl>
-
-<dl><dt><strong>Int32</strong> = &lt;Type.Int32: 2&gt;</dl>
-
-<dl><dt><strong>List</strong> = &lt;Type.List: 5&gt;</dl>
-
-<dl><dt><strong>String</strong> = &lt;Type.String: 3&gt;</dl>
-
-<dl><dt><strong>Uint32</strong> = &lt;Type.Uint32: 1&gt;</dl>
-
-<hr>
-Static methods inherited from pybind11_builtins.pybind11_object:<br>
-<dl><dt><a name="Type-__new__"><strong>__new__</strong></a>(*args, **kwargs)<span class="grey"><span class="heading-text"> from pybind11_builtins.pybind11_type</span></span></dt><dd><span class="code">Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
 
 </td></tr></table> <p>
 <table class="section">
@@ -343,25 +326,41 @@ Overloaded&nbsp;function.<br>
 &nbsp;<br>
 2.&nbsp;<a href="#Value-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>,&nbsp;arg0:&nbsp;bool)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
-3.&nbsp;<a href="#Value-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>,&nbsp;arg0:&nbsp;int)&nbsp;-&gt;&nbsp;None<br>
+3.&nbsp;<a href="#Value-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>,&nbsp;arg0:&nbsp;int,&nbsp;arg1:&nbsp;ink::runtime::value::Type)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 4.&nbsp;<a href="#Value-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>,&nbsp;arg0:&nbsp;int)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 5.&nbsp;<a href="#Value-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>,&nbsp;arg0:&nbsp;float)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
-6.&nbsp;<a href="#Value-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>,&nbsp;arg0:&nbsp;inkcpp_py.List)&nbsp;-&gt;&nbsp;None<br>
+6.&nbsp;<a href="#Value-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>,&nbsp;arg0:&nbsp;inkcpp_py.<a href="#List">List</a>)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 7.&nbsp;<a href="#Value-__init__">__init__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>,&nbsp;arg0:&nbsp;str)&nbsp;-&gt;&nbsp;None</span></dd></dl>
 
 <dl><dt><a name="Value-__str__"><strong>__str__</strong></a>(...)</dt><dd><span class="code"><a href="#Value-__str__">__str__</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>)&nbsp;-&gt;&nbsp;str</span></dd></dl>
 
-<dl><dt><a name="Value-as_list"><strong>as_list</strong></a>(...)</dt><dd><span class="code"><a href="#Value-as_list">as_list</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>)&nbsp;-&gt;&nbsp;inkcpp_py.List</span></dd></dl>
+<dl><dt><a name="Value-as_list"><strong>as_list</strong></a>(...)</dt><dd><span class="code"><a href="#Value-as_list">as_list</a>(self:&nbsp;inkcpp_py.<a href="#Value">Value</a>)&nbsp;-&gt;&nbsp;inkcpp_py.<a href="#List">List</a></span></dd></dl>
 
 <hr>
 Readonly properties defined here:<br>
 <dl><dt><strong>type</strong></dt>
 <dd><span class="code">Type&nbsp;contained&nbsp;in&nbsp;value</span></dd>
 </dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>Bool</strong> = &lt;Type.Bool: 0&gt;</dl>
+
+<dl><dt><strong>Float</strong> = &lt;Type.Float: 4&gt;</dl>
+
+<dl><dt><strong>Int32</strong> = &lt;Type.Int32: 2&gt;</dl>
+
+<dl><dt><strong>List</strong> = &lt;Type.List: 5&gt;</dl>
+
+<dl><dt><strong>String</strong> = &lt;Type.String: 3&gt;</dl>
+
+<dl><dt><strong>Type</strong> = &lt;class 'inkcpp_py.Value.Type'&gt;</dl>
+
+<dl><dt><strong>Uint32</strong> = &lt;Type.Uint32: 1&gt;</dl>
+
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <dl><dt><a name="Value-__new__"><strong>__new__</strong></a>(*args, **kwargs)<span class="grey"><span class="heading-text"> from pybind11_builtins.pybind11_type</span></span></dt><dd><span class="code">Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
@@ -375,16 +374,5 @@ Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <td class="singlecolumn"><dl><dt><a name="-compile_json"><strong>compile_json</strong></a>(...)<span class="grey"><span class="heading-text"> method of builtins.PyCapsule instance</span></span></dt><dd><span class="code"><a href="#-compile_json">compile_json</a>(arg0:&nbsp;str,&nbsp;arg1:&nbsp;str)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 Converts&nbsp;a&nbsp;story.json&nbsp;file&nbsp;to&nbsp;a&nbsp;story.bin&nbsp;file&nbsp;used&nbsp;by&nbsp;inkcpp</span></dd></dl>
-</td></tr></table><p>
-<table class="section">
-<tr class="decor data-decor heading-text">
-<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
-    
-<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><strong>Bool</strong> = &lt;Type.Bool: 0&gt;<br>
-<strong>Float</strong> = &lt;Type.Float: 4&gt;<br>
-<strong>Int32</strong> = &lt;Type.Int32: 2&gt;<br>
-<strong>List</strong> = &lt;Type.List: 5&gt;<br>
-<strong>String</strong> = &lt;Type.String: 3&gt;<br>
-<strong>Uint32</strong> = &lt;Type.Uint32: 1&gt;</td></tr></table>
+</td></tr></table>
 </body></html>

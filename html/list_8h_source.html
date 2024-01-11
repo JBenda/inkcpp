@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -45,6 +49,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('list_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -59,11 +80,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_ccb04c775b4f6ff049b37d5384032e3d.html">inkcpp</a></li><li class="navelem"><a class="el" href="dir_4a8f5a854ffbcd9a72d16c328545681b.html">include</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">list.h</div>  </div>
@@ -77,100 +93,123 @@ $(function() {
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;ostream&gt;</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceink_1_1runtime.html">ink::runtime</a> {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;    <span class="keyword">namespace </span>internal {</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;        <span class="keyword">class </span>list_table;</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;    }</div>
-<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html">   13</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a> {</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;        <a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>() : _list_table{<span class="keyword">nullptr</span>}, _list{-1} {}</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#ifdef INK_BUILD_CLIB</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">struct </span><a class="code" href="struct_ink_list_iter.html">InkListIter</a>;</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">struct </span><a class="code" href="class_h_ink_list.html">HInkList</a>;</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keywordtype">int</span> <a class="code" href="class_h_ink_list.html#af611fa62301b8fd925f0194d786888d4">ink_list_flags</a>(<span class="keyword">const</span> <a class="code" href="class_h_ink_list.html">HInkList</a>*, <a class="code" href="struct_ink_list_iter.html">InkListIter</a>*);</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keywordtype">int</span> <a class="code" href="class_h_ink_list.html#a49bc3d22f6f3d32d030d4709d5b78539">ink_list_flags_from</a>(<span class="keyword">const</span> <a class="code" href="class_h_ink_list.html">HInkList</a>*, <span class="keyword">const</span> <span class="keywordtype">char</span>*, <a class="code" href="struct_ink_list_iter.html">InkListIter</a>*);</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keywordtype">int</span> <a class="code" href="struct_ink_list_iter.html#a4c8715fc22f42cc1fba8d2a8cd798db0">ink_list_iter_next</a>(<a class="code" href="struct_ink_list_iter.html">InkListIter</a>*);</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; </div>
-<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">   17</a></span>&#160;        <span class="keyword">class </span><a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a> {</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;            <span class="keyword">const</span> <span class="keywordtype">char</span>* _flag_name;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;            <span class="keyword">const</span> <span class="keywordtype">char</span>* _list_name;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;            <span class="keyword">const</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>&amp; _list;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;            <span class="keywordtype">int</span> _i;</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;            <span class="keywordtype">bool</span> _one_list_iterator; <span class="comment">//&lt; iterates only though values of one list</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;            <span class="keyword">friend</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        <span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;            <a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag_name, <span class="keyword">const</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>&amp; <a class="code" href="classink_1_1runtime_1_1list__interface.html">list</a>, <span class="keywordtype">size_t</span> i, <span class="keywordtype">bool</span> one_list_only = <span class="keyword">false</span>)</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;                : _flag_name(flag_name), _list(<a class="code" href="classink_1_1runtime_1_1list__interface.html">list</a>), _i(i), _one_list_iterator(one_list_only) {}</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">   28</a></span>&#160;            <span class="keyword">struct </span><a class="code" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">Flag</a> {</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">char</span>* flag_name;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">char</span>* list_name;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#ifdef INK_ENABLE_STL</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;                <span class="keyword">friend</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, <span class="keyword">const</span> <a class="code" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">Flag</a>&amp; flag) {</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;                    os &lt;&lt; flag.list_name &lt;&lt; <span class="stringliteral">&quot;(&quot;</span> &lt;&lt; flag.flag_name &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;                    <span class="keywordflow">return</span> os;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;                }</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceink_1_1runtime.html">ink::runtime</a> {</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keyword">namespace </span>internal {</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        <span class="keyword">class </span>list_table;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    }</div>
+<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html">   21</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a> {</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;        <a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>() : _list_table{<span class="keyword">nullptr</span>}, _list{-1} {}</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">   25</a></span>&#160;        <span class="keyword">class </span><a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a> {</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;            <span class="keyword">const</span> <span class="keywordtype">char</span>* _flag_name;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;            <span class="keyword">const</span> <span class="keywordtype">char</span>* _list_name;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;            <span class="keyword">const</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>&amp; _list;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;            <span class="keywordtype">int</span> _i;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;          <span class="keywordtype">bool</span>                  _one_list_iterator; </div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;          <span class="keyword">friend</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#ifdef INK_BUILD_CLIB</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;          <span class="keyword">friend</span> int ::ink_list_flags(<span class="keyword">const</span> <a class="code" href="class_h_ink_list.html">HInkList</a>*, <a class="code" href="struct_ink_list_iter.html">InkListIter</a>*);</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;          <span class="keyword">friend</span> int ::ink_list_flags_from(<span class="keyword">const</span> <a class="code" href="class_h_ink_list.html">HInkList</a>*, <span class="keyword">const</span> <span class="keywordtype">char</span>*, <a class="code" href="struct_ink_list_iter.html">InkListIter</a>*);</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;          <span class="keyword">friend</span> int ::ink_list_iter_next(<a class="code" href="struct_ink_list_iter.html">InkListIter</a>* <span class="keyword">self</span>);</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;            };</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;            <a class="code" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">Flag</a>      operator*()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">Flag</a>{ .flag_name = _flag_name, .list_name = _list_name }; };</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;            iterator&amp; operator++()</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;            {</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                _list.next( _flag_name, _list_name, _i );</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;            }</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            <span class="keywordtype">bool</span> operator!=(<span class="keyword">const</span> iterator&amp; itr)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> itr._i != _i; }</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> iterator&amp; itr)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                <span class="keywordflow">return</span> itr._i == _i;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            }</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        };</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#a1d4f533d150509c7bc51a8b45d874399">   51</a></span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html#a1d4f533d150509c7bc51a8b45d874399">contains</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interfaces is called!&quot;</span>); <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        };</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#a8460ec39a3a3cca2b1159660a2c0cca7">   56</a></span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html#a8460ec39a3a3cca2b1159660a2c0cca7">add</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag) {</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        };</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b">   61</a></span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b">remove</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag) {</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        };</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#a5776279b360c2ae66c9ba4debc8fa6f3">   66</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a> <a class="code" href="classink_1_1runtime_1_1list__interface.html#a5776279b360c2ae66c9ba4debc8fa6f3">begin</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;            <span class="keywordflow">return</span> new_iterator(<span class="keyword">nullptr</span>, -1);</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        };</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00072"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#aa859743f6009c14b7dc044bc3a93687c">   72</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a> <a class="code" href="classink_1_1runtime_1_1list__interface.html#aa859743f6009c14b7dc044bc3a93687c">begin</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* list_name)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;            <span class="keywordflow">return</span> new_iterator(<span class="keyword">nullptr</span>, -1);</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        }</div>
-<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#aca807e9fac077e076e3ac241bb35732f">   77</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a> <a class="code" href="classink_1_1runtime_1_1list__interface.html#aca807e9fac077e076e3ac241bb35732f">end</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;            <span class="keywordflow">return</span> new_iterator(<span class="keyword">nullptr</span>, -1); };</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keyword">friend</span> iterator;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> next(<span class="keyword">const</span> <span class="keywordtype">char</span>*&amp; flag_name, <span class="keyword">const</span> <span class="keywordtype">char</span>*&amp; list_name, <span class="keywordtype">int</span>&amp; i)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented funciton from interface is called!&quot;</span>);</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        };</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        iterator new_iterator(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag_name, <span class="keywordtype">int</span> i, <span class="keywordtype">bool</span> one_list_only = <span class="keyword">false</span>)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;            <span class="keywordflow">return</span> iterator(flag_name, *<span class="keyword">this</span>, i, one_list_only);</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;            <a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag_name, <span class="keyword">const</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>&amp; <a class="code" href="classink_1_1runtime_1_1list__interface.html">list</a>, <span class="keywordtype">size_t</span> i, <span class="keywordtype">bool</span> one_list_only = <span class="keyword">false</span>)</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;                : _flag_name(flag_name), _list(<a class="code" href="classink_1_1runtime_1_1list__interface.html">list</a>), _i(i), _one_list_iterator(one_list_only) {}</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">   42</a></span>&#160;            <span class="keyword">struct </span><a class="code" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">Flag</a> {</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">char</span>* flag_name;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">char</span>* list_name;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor">#ifdef INK_ENABLE_STL</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                <span class="keyword">friend</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, <span class="keyword">const</span> <a class="code" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">Flag</a>&amp; flag) {</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                    os &lt;&lt; flag.list_name &lt;&lt; <span class="stringliteral">&quot;(&quot;</span> &lt;&lt; flag.flag_name &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                    <span class="keywordflow">return</span> os;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                }</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            };</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            <a class="code" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">Flag</a>      operator*()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">Flag</a>{ .flag_name = _flag_name, .list_name = _list_name }; };</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            iterator&amp; operator++()</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            {</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                _list.next( _flag_name, _list_name, _i );</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            }</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;            <span class="keywordtype">bool</span> operator!=(<span class="keyword">const</span> iterator&amp; itr)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> itr._i != _i; }</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> iterator&amp; itr)<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                <span class="keywordflow">return</span> itr._i == _i;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            }</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        };</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#a1d4f533d150509c7bc51a8b45d874399">   65</a></span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html#a1d4f533d150509c7bc51a8b45d874399">contains</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag)<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interfaces is called!&quot;</span>); <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        };</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#a8460ec39a3a3cca2b1159660a2c0cca7">   70</a></span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html#a8460ec39a3a3cca2b1159660a2c0cca7">add</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag) {</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        };</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b">   75</a></span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b">remove</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag) {</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        };</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
+<div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#a5776279b360c2ae66c9ba4debc8fa6f3">   80</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a> <a class="code" href="classink_1_1runtime_1_1list__interface.html#a5776279b360c2ae66c9ba4debc8fa6f3">begin</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;            <span class="keywordflow">return</span> new_iterator(<span class="keyword">nullptr</span>, -1);</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        };</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#aa859743f6009c14b7dc044bc3a93687c">   86</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a> <a class="code" href="classink_1_1runtime_1_1list__interface.html#aa859743f6009c14b7dc044bc3a93687c">begin</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* list_name)<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;            <span class="keywordflow">return</span> new_iterator(<span class="keyword">nullptr</span>, -1);</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        }</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        list_interface(internal::list_table&amp; table, <span class="keywordtype">int</span> list) : _list_table {&amp;table}, _list{list} {}</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    internal::list_table* _list_table;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keywordtype">int</span> _list;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    };</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;}</div>
-<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_1_1iterator_html"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface_1_1iterator.html">ink::runtime::list_interface::iterator</a></div><div class="ttdef"><b>Definition:</b> list.h:17</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html">ink::runtime::list_interface</a></div><div class="ttdef"><b>Definition:</b> list.h:13</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_a1d4f533d150509c7bc51a8b45d874399"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#a1d4f533d150509c7bc51a8b45d874399">ink::runtime::list_interface::contains</a></div><div class="ttdeci">virtual bool contains(const char *flag) const</div><div class="ttdoc">checks if a flag is contained in the list</div><div class="ttdef"><b>Definition:</b> list.h:51</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_a5776279b360c2ae66c9ba4debc8fa6f3"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#a5776279b360c2ae66c9ba4debc8fa6f3">ink::runtime::list_interface::begin</a></div><div class="ttdeci">virtual iterator begin() const</div><div class="ttdoc">begin iterator for contained flags in list</div><div class="ttdef"><b>Definition:</b> list.h:66</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_a838b17e7e36be5e10a2fb6b6e5e7762b"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b">ink::runtime::list_interface::remove</a></div><div class="ttdeci">virtual void remove(const char *flag)</div><div class="ttdoc">removes a flag from list</div><div class="ttdef"><b>Definition:</b> list.h:61</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_a8460ec39a3a3cca2b1159660a2c0cca7"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#a8460ec39a3a3cca2b1159660a2c0cca7">ink::runtime::list_interface::add</a></div><div class="ttdeci">virtual void add(const char *flag)</div><div class="ttdoc">add a flag to list</div><div class="ttdef"><b>Definition:</b> list.h:56</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_aa859743f6009c14b7dc044bc3a93687c"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#aa859743f6009c14b7dc044bc3a93687c">ink::runtime::list_interface::begin</a></div><div class="ttdeci">virtual iterator begin(const char *list_name) const</div><div class="ttdoc">returns a iterator over elements of the given list</div><div class="ttdef"><b>Definition:</b> list.h:72</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_aca807e9fac077e076e3ac241bb35732f"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#aca807e9fac077e076e3ac241bb35732f">ink::runtime::list_interface::end</a></div><div class="ttdeci">virtual iterator end() const</div><div class="ttdoc">end iterator for contained flags in list</div><div class="ttdef"><b>Definition:</b> list.h:77</div></div>
+<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1list__interface.html#aca807e9fac077e076e3ac241bb35732f">   91</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classink_1_1runtime_1_1list__interface_1_1iterator.html">iterator</a> <a class="code" href="classink_1_1runtime_1_1list__interface.html#aca807e9fac077e076e3ac241bb35732f">end</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented function from interface is called!&quot;</span>);</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            <span class="keywordflow">return</span> new_iterator(<span class="keyword">nullptr</span>, -1); };</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        <span class="keyword">friend</span> iterator;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> next(<span class="keyword">const</span> <span class="keywordtype">char</span>*&amp; flag_name, <span class="keyword">const</span> <span class="keywordtype">char</span>*&amp; list_name, <span class="keywordtype">int</span>&amp; i)<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            inkAssert(<span class="keyword">false</span>, <span class="stringliteral">&quot;Not implemented funciton from interface is called!&quot;</span>);</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        };</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        iterator new_iterator(<span class="keyword">const</span> <span class="keywordtype">char</span>* flag_name, <span class="keywordtype">int</span> i, <span class="keywordtype">bool</span> one_list_only = <span class="keyword">false</span>)<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;            <span class="keywordflow">return</span> iterator(flag_name, *<span class="keyword">this</span>, i, one_list_only);</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        }</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        list_interface(internal::list_table&amp; table, <span class="keywordtype">int</span> list) : _list_table {&amp;table}, _list{list} {}</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    internal::list_table* _list_table;</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="keywordtype">int</span> _list;</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    };</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;}</div>
+<div class="ttc" id="aclass_h_ink_list_html"><div class="ttname"><a href="class_h_ink_list.html">HInkList</a></div><div class="ttdoc">Handler for a ink list.</div></div>
+<div class="ttc" id="aclass_h_ink_list_html_a49bc3d22f6f3d32d030d4709d5b78539"><div class="ttname"><a href="class_h_ink_list.html#a49bc3d22f6f3d32d030d4709d5b78539">HInkList::ink_list_flags_from</a></div><div class="ttdeci">int ink_list_flags_from(const HInkList *self, const char *list_name, InkListIter *iter)</div><div class="ttdoc">Creates an Iterator over all flags contained in a list assziated with a defined list.</div></div>
+<div class="ttc" id="aclass_h_ink_list_html_af611fa62301b8fd925f0194d786888d4"><div class="ttname"><a href="class_h_ink_list.html#af611fa62301b8fd925f0194d786888d4">HInkList::ink_list_flags</a></div><div class="ttdeci">int ink_list_flags(const HInkList *self, InkListIter *iter)</div><div class="ttdoc">Creates an Iterator over all flags contained in a list.</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_1_1iterator_html"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface_1_1iterator.html">ink::runtime::list_interface::iterator</a></div><div class="ttdef"><b>Definition:</b> list.h:25</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html">ink::runtime::list_interface</a></div><div class="ttdef"><b>Definition:</b> list.h:21</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_a1d4f533d150509c7bc51a8b45d874399"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#a1d4f533d150509c7bc51a8b45d874399">ink::runtime::list_interface::contains</a></div><div class="ttdeci">virtual bool contains(const char *flag) const</div><div class="ttdoc">checks if a flag is contained in the list</div><div class="ttdef"><b>Definition:</b> list.h:65</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_a5776279b360c2ae66c9ba4debc8fa6f3"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#a5776279b360c2ae66c9ba4debc8fa6f3">ink::runtime::list_interface::begin</a></div><div class="ttdeci">virtual iterator begin() const</div><div class="ttdoc">begin iterator for contained flags in list</div><div class="ttdef"><b>Definition:</b> list.h:80</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_a838b17e7e36be5e10a2fb6b6e5e7762b"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b">ink::runtime::list_interface::remove</a></div><div class="ttdeci">virtual void remove(const char *flag)</div><div class="ttdoc">removes a flag from list</div><div class="ttdef"><b>Definition:</b> list.h:75</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_a8460ec39a3a3cca2b1159660a2c0cca7"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#a8460ec39a3a3cca2b1159660a2c0cca7">ink::runtime::list_interface::add</a></div><div class="ttdeci">virtual void add(const char *flag)</div><div class="ttdoc">add a flag to list</div><div class="ttdef"><b>Definition:</b> list.h:70</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_aa859743f6009c14b7dc044bc3a93687c"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#aa859743f6009c14b7dc044bc3a93687c">ink::runtime::list_interface::begin</a></div><div class="ttdeci">virtual iterator begin(const char *list_name) const</div><div class="ttdoc">returns a iterator over elements of the given list</div><div class="ttdef"><b>Definition:</b> list.h:86</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html_aca807e9fac077e076e3ac241bb35732f"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html#aca807e9fac077e076e3ac241bb35732f">ink::runtime::list_interface::end</a></div><div class="ttdeci">virtual iterator end() const</div><div class="ttdoc">end iterator for contained flags in list</div><div class="ttdef"><b>Definition:</b> list.h:91</div></div>
 <div class="ttc" id="anamespaceink_1_1runtime_html"><div class="ttname"><a href="namespaceink_1_1runtime.html">ink::runtime</a></div><div class="ttdoc">Contaning all modules and classes used for the inkles ink runtime.</div><div class="ttdef"><b>Definition:</b> choice.h:7</div></div>
-<div class="ttc" id="astructink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag_html"><div class="ttname"><a href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">ink::runtime::list_interface::iterator::Flag</a></div><div class="ttdef"><b>Definition:</b> list.h:28</div></div>
+<div class="ttc" id="astruct_ink_list_iter_html"><div class="ttname"><a href="struct_ink_list_iter.html">InkListIter</a></div><div class="ttdoc">Iterater used to iterate flags of a HInkList.</div><div class="ttdef"><b>Definition:</b> inkcpp.h:118</div></div>
+<div class="ttc" id="astruct_ink_list_iter_html_a4c8715fc22f42cc1fba8d2a8cd798db0"><div class="ttname"><a href="struct_ink_list_iter.html#a4c8715fc22f42cc1fba8d2a8cd798db0">InkListIter::ink_list_iter_next</a></div><div class="ttdeci">int ink_list_iter_next(InkListIter *self)</div></div>
+<div class="ttc" id="astructink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag_html"><div class="ttname"><a href="structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html">ink::runtime::list_interface::iterator::Flag</a></div><div class="ttdef"><b>Definition:</b> list.h:42</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_ccb04c775b4f6ff049b37d5384032e3d.html">inkcpp</a></li><li class="navelem"><a class="el" href="dir_4a8f5a854ffbcd9a72d16c328545681b.html">include</a></li><li class="navelem"><b>list.h</b></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

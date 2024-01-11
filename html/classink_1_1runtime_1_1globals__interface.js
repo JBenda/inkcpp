@@ -1,0 +1,25 @@
+var classink_1_1runtime_1_1globals__interface =
+[
+    [ "~globals_interface", "classink_1_1runtime_1_1globals__interface.html#a52920a03b9e7c8a93e05f4083353b5af", null ],
+    [ "create_snapshot", "classink_1_1runtime_1_1globals__interface.html#a36416ba6e0ad999ce810431f535d4977", null ],
+    [ "get", "classink_1_1runtime_1_1globals__interface.html#accd8bfb984db88c4a736561f72cfdae3", null ],
+    [ "get", "classink_1_1runtime_1_1globals__interface.html#a91d893d1da28e366ad5c65c402f25d71", null ],
+    [ "get", "classink_1_1runtime_1_1globals__interface.html#ac50f9096d7bbd97b26a6935725523667", null ],
+    [ "get", "classink_1_1runtime_1_1globals__interface.html#a1ee7f6520b11a652ed3a8e5dc629e7a6", null ],
+    [ "get", "classink_1_1runtime_1_1globals__interface.html#ae91bb548e646d549b80bc4bc7fac886b", null ],
+    [ "get", "classink_1_1runtime_1_1globals__interface.html#a2958bfc3d5454dd4b79ec6cdb5287dd7", null ],
+    [ "get", "classink_1_1runtime_1_1globals__interface.html#adb8b9d9ce3ae3a8e5d0d4d400f7a0e34", null ],
+    [ "get", "classink_1_1runtime_1_1globals__interface.html#a292fb064d8b8561af6b6db6d9ebcc8e6", null ],
+    [ "get_var", "classink_1_1runtime_1_1globals__interface.html#aa65fc67fb687942fcae9902335c0a6e0", null ],
+    [ "internal_observe", "classink_1_1runtime_1_1globals__interface.html#ae407b4566b7a863f8081f7f3b577bcbf", null ],
+    [ "observe", "classink_1_1runtime_1_1globals__interface.html#a0f1d8fe7859b28ee28986a14de19be61", null ],
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#a782a5adf49ca393204417cb028f4b11c", null ],
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#add52fabe248c933a8dcb95e2898d4a6d", null ],
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#a4e063af2ceb561a22fa78b0632710d37", null ],
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#a2aaf58a6b6f930ac8e958084e05c4065", null ],
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#ac5b0f6c0869e24e21757f5fe8b1df2ce", null ],
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#a840bafebcf05f3ae0f4ff5f15a3a41ff", null ],
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#aaeb06800da97d4f1dd5f0a0d9ab63e75", null ],
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#a0277b08550382cdedf1aa3e43aef0291", null ],
+    [ "set_var", "classink_1_1runtime_1_1globals__interface.html#a7c22e9e4acf7342bb029653704c94739", null ]
+];

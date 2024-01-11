@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -46,6 +50,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('functions.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -77,6 +97,9 @@ $(function() {
 </li>
 <li>bind()
 : <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a104b364f7813bb85b2970a4f718d4e24">ink::runtime::runner_interface</a>
+</li>
+<li>bool_v
+: <a class="el" href="struct_ink_value.html#a8040a0a3d1392d6c68268a66fc5a5d9c">InkValue</a>
 </li>
 </ul>
 
@@ -121,6 +144,12 @@ $(function() {
 
 
 <h3><a id="index_f"></a>- f -</h3><ul>
+<li>flag_name
+: <a class="el" href="struct_ink_list_iter.html#a7b6be43246df4f0efbf71d45f658b2b8">InkListIter</a>
+</li>
+<li>float_v
+: <a class="el" href="struct_ink_value.html#a862b316ca280f07d54b63162c6a97b95">InkValue</a>
+</li>
 <li>from_binary()
 : <a class="el" href="classink_1_1runtime_1_1story.html#a22bb40af1b9d2f168641f25ff780d641">ink::runtime::story</a>
 </li>
@@ -164,10 +193,121 @@ $(function() {
 <li>Initialize()
 : <a class="el" href="class_u_tag_list.html#a852e349a5487681deb2935b192db30ec">UTagList</a>
 </li>
+<li>ink_choice_get_tag()
+: <a class="el" href="class_h_ink_choice.html#a2c7901240045c9baddc4fd28c5274cd4">HInkChoice</a>
+</li>
+<li>ink_choice_num_tags()
+: <a class="el" href="class_h_ink_choice.html#a1bcde6aaa233fc49f0d690a709150aa5">HInkChoice</a>
+</li>
+<li>ink_choice_text()
+: <a class="el" href="class_h_ink_choice.html#a8310d2ed521bc132765b5cafbf9ec53b">HInkChoice</a>
+</li>
+<li>ink_globals_create_snapshot()
+: <a class="el" href="class_h_ink_globals.html#ac97d8118eed1b8b765c3c02e7cdb634c">HInkGlobals</a>
+</li>
+<li>ink_globals_delete()
+: <a class="el" href="class_h_ink_globals.html#ab4932626a60cfb463ebf1c989394e79d">HInkGlobals</a>
+</li>
+<li>ink_globals_get()
+: <a class="el" href="class_h_ink_globals.html#ad30f131136a2c9d71a9ca48e9d896eec">HInkGlobals</a>
+</li>
+<li>ink_globals_observe()
+: <a class="el" href="class_h_ink_globals.html#aa53d97ad5f0769559dde3684c5568e7d">HInkGlobals</a>
+</li>
+<li>ink_globals_set()
+: <a class="el" href="class_h_ink_globals.html#a0810efe07e443e96be14215294e45bdd">HInkGlobals</a>
+</li>
+<li>ink_list_flags()
+: <a class="el" href="class_h_ink_list.html#af611fa62301b8fd925f0194d786888d4">HInkList</a>
+</li>
+<li>ink_list_flags_from()
+: <a class="el" href="class_h_ink_list.html#a49bc3d22f6f3d32d030d4709d5b78539">HInkList</a>
+</li>
+<li>ink_list_iter_next()
+: <a class="el" href="struct_ink_list_iter.html#a4c8715fc22f42cc1fba8d2a8cd798db0">InkListIter</a>
+</li>
+<li>ink_runner_bind()
+: <a class="el" href="class_h_ink_runner.html#a244bd1db4c6e819bab0c277803526187">HInkRunner</a>
+</li>
+<li>ink_runner_bind_void()
+: <a class="el" href="class_h_ink_runner.html#a70126dc2ca3850b71631e22fe91d2ac3">HInkRunner</a>
+</li>
+<li>ink_runner_can_continue()
+: <a class="el" href="class_h_ink_runner.html#acfa96a79ca2d4c2cf2e0d9e9287cf9dd">HInkRunner</a>
+</li>
+<li>ink_runner_choose()
+: <a class="el" href="class_h_ink_runner.html#ab21738094bcf57aefda7b0fb1226e423">HInkRunner</a>
+</li>
+<li>ink_runner_create_snapshot()
+: <a class="el" href="class_h_ink_runner.html#a3039bd72b35c7131e74d1ddadb40838c">HInkRunner</a>
+</li>
+<li>ink_runner_delete()
+: <a class="el" href="class_h_ink_runner.html#af51fa336ac81d45210fc70f867fb0250">HInkRunner</a>
+</li>
+<li>ink_runner_get_choice()
+: <a class="el" href="class_h_ink_runner.html#a80e11730e6afafb3387e086a9a633015">HInkRunner</a>
+</li>
+<li>ink_runner_get_line()
+: <a class="el" href="class_h_ink_runner.html#a79f3397373201990fde1c603d2c80013">HInkRunner</a>
+</li>
+<li>ink_runner_num_choices()
+: <a class="el" href="class_h_ink_runner.html#ab845e33e1a0e564c48b6ff13ef3a4b00">HInkRunner</a>
+</li>
+<li>ink_runner_num_tags()
+: <a class="el" href="class_h_ink_runner.html#a5aba5cc9fd0d63b04d2491ad4ca0ca96">HInkRunner</a>
+</li>
+<li>ink_runner_tag()
+: <a class="el" href="class_h_ink_runner.html#a5faf9a0df699d8dca57edc7c8eaf79e5">HInkRunner</a>
+</li>
+<li>ink_snapshot_from_file()
+: <a class="el" href="class_h_ink_snapshot.html#a432a1ea5b1326db82ce9d87a8e55bb35">HInkSnapshot</a>
+</li>
+<li>ink_snapshot_num_runners()
+: <a class="el" href="class_h_ink_snapshot.html#a3ebe60443f4fece2c53e052f3a2b784b">HInkSnapshot</a>
+</li>
+<li>ink_snapshot_write_to_file()
+: <a class="el" href="class_h_ink_snapshot.html#a62c8e3323f8dd47b39f897460bbcead0">HInkSnapshot</a>
+</li>
+<li>ink_story_delete()
+: <a class="el" href="class_h_ink_story.html#a11b781788a630a5638a0228182a61fdc">HInkStory</a>
+</li>
+<li>ink_story_from_file()
+: <a class="el" href="class_h_ink_story.html#acbabb5e84b0d3ff46aa095c0732c33b3">HInkStory</a>
+</li>
+<li>ink_story_new_globals()
+: <a class="el" href="class_h_ink_story.html#a5c0e45fba64a72031b755b9ad51afb7e">HInkStory</a>
+</li>
+<li>ink_story_new_globals_from_snapshot()
+: <a class="el" href="class_h_ink_story.html#a4b0af0695534934b9f72c6400915b71f">HInkStory</a>
+</li>
+<li>ink_story_new_runner()
+: <a class="el" href="class_h_ink_story.html#a0b9416d38cd3bc712c9f0f50899fc10a">HInkStory</a>
+</li>
+<li>ink_story_new_runner_from_snapshot()
+: <a class="el" href="class_h_ink_story.html#aa49f130739ae0a598c7fb8a7e25c7751">HInkStory</a>
+</li>
+<li>InkExternalFunction
+: <a class="el" href="class_h_ink_runner.html#a4e79305d26dead4e612fd3c2edd6cd4d">HInkRunner</a>
+</li>
+<li>InkExternalFunctionVoid
+: <a class="el" href="class_h_ink_runner.html#ab9e2f0105357eac273213aaa255888fe">HInkRunner</a>
+</li>
+<li>InkObserver
+: <a class="el" href="class_h_ink_globals.html#aa22077672e42eb13181c17e1d494862c">HInkGlobals</a>
+</li>
+<li>int32_v
+: <a class="el" href="struct_ink_value.html#a412bb26a32f9eb10c0a7fdd8cde5ced5">InkValue</a>
+</li>
 </ul>
 
 
 <h3><a id="index_l"></a>- l -</h3><ul>
+<li>list_name
+: <a class="el" href="struct_ink_list_iter.html#a26f2ce39cba3f8c69b1a2347fb8692db">InkListIter</a>
+</li>
+<li>list_v
+: <a class="el" href="struct_ink_value.html#a8c037bbdde1e1941744bdcd195c0431a">InkValue</a>
+</li>
 <li>LoadSnapshot()
 : <a class="el" href="class_a_ink_runtime.html#a7f67085aa5b91b13e2d5bf3780697665">AInkRuntime</a>
 </li>
@@ -233,6 +373,9 @@ $(function() {
 <li>StartExisting()
 : <a class="el" href="class_a_ink_runtime.html#a302ebe3aa46fd4c7bffb76102b027497">AInkRuntime</a>
 </li>
+<li>string_v
+: <a class="el" href="struct_ink_value.html#a52d185fc6b2df75ad8bd0f96913dca17">InkValue</a>
+</li>
 </ul>
 
 
@@ -246,6 +389,19 @@ $(function() {
 <li>Type
 : <a class="el" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8">ink::runtime::value</a>
 </li>
+<li>type
+: <a class="el" href="struct_ink_value.html#a56a96d76fc3e4a67d498879da0175ef5">InkValue</a>
+</li>
+<li>Type
+: <a class="el" href="struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206">InkValue</a>
+</li>
+</ul>
+
+
+<h3><a id="index_u"></a>- u -</h3><ul>
+<li>uint32_v
+: <a class="el" href="struct_ink_value.html#aecb02464953c87f26ec35b76b4f8ba96">InkValue</a>
+</li>
 </ul>
 
 
@@ -253,11 +409,35 @@ $(function() {
 <li>value()
 : <a class="el" href="structink_1_1runtime_1_1value.html#a1eed8cfeb2cb386b7707a9d35d12ba94">ink::runtime::value</a>
 </li>
+<li>ValueTypeBool
+: <a class="el" href="struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206aa17ced9370074001541b212ecefa4da0">InkValue</a>
+</li>
+<li>ValueTypeFloat
+: <a class="el" href="struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206a91c900f864652b5cdab29f50f9e7a928">InkValue</a>
+</li>
+<li>ValueTypeInt32
+: <a class="el" href="struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206aba2fcea3cf8d50fac98e36cb48ccc549">InkValue</a>
+</li>
+<li>ValueTypeList
+: <a class="el" href="struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206a8641ae03754e8f86dd666804c3e00551">InkValue</a>
+</li>
+<li>ValueTypeNone
+: <a class="el" href="struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206a783e447c91698853ea2b5acf4462e8ad">InkValue</a>
+</li>
+<li>ValueTypeString
+: <a class="el" href="struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206a2cc9083f2d9d4ee93908cee468a62d99">InkValue</a>
+</li>
+<li>ValueTypeUint32
+: <a class="el" href="struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206acf1a01fda62030ca84daed23e9a54e94">InkValue</a>
+</li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>
