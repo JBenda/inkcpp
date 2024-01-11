@@ -21,11 +21,12 @@ int main()
 
 	ink_runner_bind(runner, "my_ink_function", ink_add, 1);
 
-	while(1) {
+	while (1) {
 		while (ink_runner_can_continue(runner)) {
 			printf("%s", ink_runner_get_line(runner));
 		}
-		if (ink_runner_num_choices(runner) == 0) break; 
+		if (ink_runner_num_choices(runner) == 0)
+			break;
 		for (int i = 0; i < ink_runner_num_choices(runner); ++i) {
 			printf("%i. %s\n", i, ink_choice_text(ink_runner_get_choice(runner, i)));
 		}

@@ -21,29 +21,32 @@ typedef struct HInkSTory    HInkStory;
 	 * C bindings for inkcpp
 	 *
 	 * There are two different ways to get the C bindings.
-	 * 1. Use the distributed `<os>-lib.zip` for a C++ and C lib combined, then use CMake for the linkadge (or do it manually)
+	 * 1. Use the distributed `<os>-lib.zip` for a C++ and C lib combined, then use CMake for the
+	 * linkadge (or do it manually)
 	 * 2. Use the distrubuted `<os>-clib.zip` for a C only lib, then use CMake, or pkg-config.
-	 * 
+	 *
 	 * Please note that the included header is different between this two installation methods.
 	 * 1. `#include <ink/c/inkcpp.h>`
 	 * 2. `#include <ink/inkcpp.h>`
 	 *
-	 * To setup an example for option `1.` and `2.` if you use cmake checkout @ref cmake and replace `target_link_libraries` with
-	 * `target_link_libraries(main inkcpp_c)`
-	 * The story and source file can be used as @ref src_main_c "noted down"
+	 * To setup an example for option `1.` and `2.` if you use cmake checkout @ref cmake and replace
+	 * `target_link_libraries` with `target_link_libraries(main inkcpp_c)` The story and source file
+	 * can be used as @ref src_main_c "noted down"
 	 *
 	 * For setup an example for option `2.` without cmake create a directory with the files below:
 	 * + `main.c`: found below
 	 * + `test.ink.json`: found at @ref src_story_json
-	 * And extract `<os>-clib.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest) to `/MY/INKCPP/EXAMPLE_INSTALL/PATH` <br/>.
-	 * To run the example do the following:
+	 * And extract `<os>-clib.zip` from the [release
+	 * page](https://github.com/JBenda/inkcpp/releases/latest) to `/MY/INKCPP/EXAMPLE_INSTALL/PATH`
+	 * <br/>. To run the example do the following:
 	 * + change the `prefix=...` in `/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig/inkcpp.pc`
 	 *   to `prefix=/MY/INKCPP_EXAMPLE_INSTALL_PATH/`
 	 * + `export PKG_CONFIG_PATH=/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig`
 	 * + `gcc -c main.c $(pkg-config --cflags inkcpp)`
 	 * + `g++ -o main main.o $(pkg-config --libs inkcpp)`
 	 * + `./main`
-	 * As a sideproduct a file named `test.bin` should be created coaining the binary format used by inkCPP.
+	 * As a sideproduct a file named `test.bin` should be created coaining the binary format used by
+	 * inkCPP.
 	 *
 	 * @subsection src_main_c main.c
 	 * @include cmake_example/main.c
