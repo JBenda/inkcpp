@@ -336,7 +336,7 @@ extern "C" {
 				str += "WARNING: " + warn + '\n';
 			}
 			for (auto& err : result.errors) {
-				str +=  "ERROR: " + err + '\n';
+				str += "ERROR: " + err + '\n';
 			}
 			*error = strdup(str.c_str());
 		}
