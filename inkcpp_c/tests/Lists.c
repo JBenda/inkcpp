@@ -1,10 +1,12 @@
-#include <assert.h>
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <inkcpp.h>
+
+#undef NDEBUG
+#include <assert.h>
 
 int main()
 {
@@ -64,8 +66,8 @@ int main()
 	assert(ink_globals_set(store, "list", val));
 
 	assert(strcmp(ink_runner_get_line(runner), "cat, snake\n") == 0);
+	assert(ink_runner_num_choices(runner) == 2);
 	const HInkChoice* choice = ink_runner_get_choice(runner, 0);
 	assert(strcmp(ink_choice_text(choice), "list: bird, white, red") == 0);
-
 	return 0;
 }

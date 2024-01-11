@@ -1,10 +1,12 @@
-#include <assert.h>
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <inkcpp.h>
+
+#undef NDEBUG
+#include <assert.h>
 
 HInkStory*   story  = NULL;
 HInkGlobals* store  = NULL;
