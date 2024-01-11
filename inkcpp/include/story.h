@@ -144,7 +144,7 @@ public:
  * @section ue Unreal Installation
  *
  * The current release is available at the [release
- * page](https://github.com/JBenda/inkcpp/releases/latest), as `unreal.zip`.<br/> 
+ * page](https://github.com/JBenda/inkcpp/releases/latest), as `unreal.zip`.<br/>
  * Unpack this folder in `/PATH/TO/UNREAL_PROJECT/Plugins/` and it will be
  * intigrated at the next startup.<br/> A MarketPlace appearance is work in progress :)
  *

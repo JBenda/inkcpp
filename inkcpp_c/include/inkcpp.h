@@ -240,7 +240,8 @@ typedef struct HInkSTory    HInkStory;
 	struct HInkGlobals;
 	/** @memberof HInkGlobals
 	 * @param new_value contains the value newly assigned
-	 * @param old_value contains the previous value or a @ref InkValue::Type::ValueTypeNone "ValueTypeNone" if the variable was previously unset.
+	 * @param old_value contains the previous value or a @ref InkValue::Type::ValueTypeNone
+	 * "ValueTypeNone" if the variable was previously unset.
 	 */
 	typedef void (*InkObserver)(InkValue new_value, InkValue old_value);
 	/** @memberof HInkGlobals
@@ -248,28 +249,29 @@ typedef struct HInkSTory    HInkStory;
 	 * @attention invalidates all assoziated @ref HInkRunner
 	 */
 	void          ink_globals_delete(HInkGlobals* self);
-	/**  @memberof HInkGlobals 
+	/**  @memberof HInkGlobals
 	 * Creates a snapshot for later reloading.
 	 * @attention All runners assoziated with the same globals will create the same snapshot.
 	 * @ref ::HInkSnapshot
 	 */
 	HInkSnapshot* ink_globals_create_snapshot(const HInkGlobals* self);
-	/** @memberof HInkGlobals 
+	/** @memberof HInkGlobals
 	 * assignes a observer to the variable with the corresponding name.
 	 * The observer is called each time the value of the variable gets assigned.
 	 * To monitor value changes compare the old with new value (see @ref InkObserver)
 	 */
 	void     ink_globals_observe(HInkGlobals* self, const char* variable_name, InkObserver observer);
-	/**  @memberof HInkGlobals 
+	/**  @memberof HInkGlobals
 	 * Gets the value of a global variable
 	 * @param variable_name name of variable (same as in ink script)
 	 * @retval @ref InkValue::Type::ValueTypeNone "ValueTypeNone" iff the variable does not exist
 	 */
 	InkValue ink_globals_get(const HInkGlobals* self, const char* variable_name);
-	/**  @memberof HInkGlobals 
+	/**  @memberof HInkGlobals
 	 * Sets the value of a globals variable.
 	 * @param variable_name name of variable (same as in ink script)
-	 * @return false if the variable was not set, because the variable with this name does no exists or the value did not match.
+	 * @return false if the variable was not set, because the variable with this name does no exists
+	 * or the value did not match.
 	 */
 	int      ink_globals_set(HInkGlobals* self, const char* variable_name, InkValue value);
 

@@ -431,6 +431,7 @@ private:
 	T  _nullValue;
 	T* _buffer;
 };
+
 template<typename T>
 inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper& snapper) const
 {
@@ -453,11 +454,13 @@ inline const unsigned char*
 	auto ptr = data;
 	ptr      = snap_read(ptr, _saved);
 	decltype(_capacity) capacity;
-	ptr      = snap_read(ptr, capacity);
+	ptr = snap_read(ptr, capacity);
 	if (buffer() == nullptr) {
 		static_cast<allocated_restorable_array<T>&>(*this).resize(capacity);
 	}
-	inkAssert(_capacity >= capacity, "New config does not allow for necessary size used by this snapshot!");
+	inkAssert(
+	    _capacity >= capacity, "New config does not allow for necessary size used by this snapshot!"
+	);
 	T null;
 	ptr = snap_read(ptr, null);
 	inkAssert(null == _null, "null value is different to snapshot!");

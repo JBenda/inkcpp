@@ -266,9 +266,9 @@ size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
 const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loader& loader)
 {
 	_globals_initialized = true;
-	ptr = snap_read(ptr, _turn_cnt);
+	ptr                  = snap_read(ptr, _turn_cnt);
 	ptr                  = _visit_counts.snap_load(ptr, loader);
-	ptr = _visit_counts_backup.snap_load(ptr, loader);
+	ptr                  = _visit_counts_backup.snap_load(ptr, loader);
 	inkAssert(_visit_counts.size() == _visit_counts_backup.size(), "Data inconsitency");
 	inkAssert(
 	    _num_containers == _visit_counts.size(),

@@ -84,13 +84,13 @@ int main()
 	val = ink_globals_get(store, "foo");
 	assert(val.type == ValueTypeNone);
 	// not existing variable
-	val.type = ValueTypeString;
+	val.type     = ValueTypeString;
 	val.string_v = "o";
-	assert(!ink_globals_set(store, "foo", val));
-	val.type = ValueTypeString;
+	assert(! ink_globals_set(store, "foo", val));
+	val.type     = ValueTypeString;
 	val.string_v = "o";
 	// wrong type
-	assert(!ink_globals_set(store, "age", val));
+	assert(! ink_globals_set(store, "age", val));
 
 	return 0;
 }

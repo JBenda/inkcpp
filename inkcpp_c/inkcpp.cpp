@@ -303,11 +303,11 @@ extern "C" {
 	{
 		const ink::runtime::snapshot& snap = *reinterpret_cast<const ink::runtime::snapshot*>(snapshot);
 		runner*                       res  = new runner(
-        global_store
-            ? reinterpret_cast<story*>(self)->new_runner_from_snapshot(
-                snap, *reinterpret_cast<globals*>(global_store), runner_id
-            )
-            : reinterpret_cast<story*>(self)->new_runner_from_snapshot(snap, nullptr, runner_id)
+		                           global_store
+		                               ? reinterpret_cast<story*>(self)->new_runner_from_snapshot(
+		                                   snap, *reinterpret_cast<globals*>(global_store), runner_id
+		                               )
+		                               : reinterpret_cast<story*>(self)->new_runner_from_snapshot(snap, nullptr, runner_id)
 		);
 		return reinterpret_cast<HInkRunner*>(res);
 	}

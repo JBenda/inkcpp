@@ -79,12 +79,9 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        "new_runner_from_snapshot", [](story& self, const snapshot& snap, globals_ptr store
 	                                    ) { return self.new_runner_from_snapshot(snap, store); }
 	    )
-	    .def(
-	        "new_runner_from_snapshot",
-	        [](story& self, const snapshot& snap) {
-		        return self.new_runner_from_snapshot(snap);
-	        }
-	    );
+	    .def("new_runner_from_snapshot", [](story& self, const snapshot& snap) {
+		    return self.new_runner_from_snapshot(snap);
+	    });
 
 	py::class_<globals, globals_ptr>(m, "Globals")
 	    .def(
@@ -144,13 +141,15 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    py_list, "Flag", "A list flag containing the name of the flag and the corresponding list"
 	)
 	    .def_readonly("name", &list::iterator::Flag::flag_name, "The flag")
-	    .def_readonly("list_name", &list::iterator::Flag::list_name, "Name of the corresponding list");
+	    .def_readonly(
+	        "list_name", &list::iterator::Flag::list_name, "Name of the corresponding list"
+	    );
 
 	py::class_<value> py_value(m, "Value", "A Value of a Ink Variable");
 	py_value.def_readonly("type", &value::type, "Type contained in value");
 	py_value.def(py::init<>());
 	py_value.def(py::init<bool>());
-	py_value.def("__init__", [](value& self, uint32_t v, value::Type type){
+	py_value.def("__init__", [](value& self, uint32_t v, value::Type type) {
 		if (type != value::Type::Uint32) {
 			throw py::key_error("only use this signture if you want to explicit pass a uint");
 		}
