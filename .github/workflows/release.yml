@@ -24,7 +24,7 @@ jobs:
         uses: marcofaggian/action-download-multiple-artifacts@v3.0.8
         with:
           names: linux-cl linux-lib linux-clib unreal macos-cl macos-lib macos-clib win64-cl win64-lib win64-clib python-package-distribution
-          paths: linux-cl linux-lib linux-clib unreal macos-cl macos-lib macos-cliswin64-cl win64-lib win64-clib dist
+          paths: linux-cl linux-lib linux-clib unreal macos-cl macos-lib macos-clib win64-cl win64-lib win64-clib dist
           workflow: build.yml
           branch: master
       - name: Zip
