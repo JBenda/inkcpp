@@ -22,8 +22,8 @@ def extract_paths(tmpdir):
 
 @pytest.fixture(scope='session', autouse=True)
 def story_path(tmpdir_factory):
-    # tmpdir = tmpdir_factory.getbasetemp()
-    tmpdir = os.fsencode('/tmp/pytest')
+    tmpdir = tmpdir_factory.getbasetemp()
+    # tmpdir = os.fsencode('/tmp/pytest')
     return {name: files 
         for (name, files) in map(extract_paths(tmpdir), 
             filter(
