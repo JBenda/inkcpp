@@ -106,7 +106,7 @@ public:
  * + Python [inkcpp_py](https://pypi.org/project/inkcpp-py/)
  *
  * @section cmake CMAKE usage
- *
+ * 
  * The current erlease is available at the [release
  * page](https://github.com/JBenda/inkcpp/releases/latest), as `<os>-lib.zip` (e.g.
  * `linux-lib.zip`). <br/> to link the libraries you can use `find_package(inkcpp CONFIG)` which
@@ -117,6 +117,9 @@ public:
  * To run your own `.ink` files you need a way to compile it to inks runtime format `.ink.json`. One
  * way is to use `inklecate <story>.ink`.<br/> Which is available at the [official release
  * page](https://github.com/inkle/ink/releases/latest).<br/>
+ *
+ * If you want to use the inkcpp with C link against the target inkcpp_c and `#include <ink/c/inkcpp.h>`
+ * The C-API documentation and example can be found @ref clib "here".
  *
  * Exampl with library extracted at /YOUR/PROJECT/linux-lib
  * And the [Example project](../cmake_example.zip) is extracted to /YOUR/PROJECT

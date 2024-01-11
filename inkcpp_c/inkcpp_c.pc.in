@@ -3,8 +3,8 @@ exec_prefix=${prefix}
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: inkcpp_c
-Description: @CMAKE_PROJECT_DESCRIPTION@
+Name: inkcpp
+Description: C Bindnigs for inkpp. @CMAKE_PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
 CFlags: -I${includedir}
 Libs: -L${libdir} -linkcpp_c
