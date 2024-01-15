@@ -167,11 +167,7 @@ public:
 	/// execute the type exclusive overwrite function and return a new value with
 	/// this new type
 	template<typename... T>
-	value redefine(const value& oth, T&... env) const
-	{
-		inkAssert(type() == oth.type(), "try to redefine value of other type");
-		return redefine<value_type::OP_BEGIN, T...>(oth, {&env...});
-	}
+	value redefine(const value& oth, T&... env) const;
 
 private:
 	template<value_type ty, typename... T>

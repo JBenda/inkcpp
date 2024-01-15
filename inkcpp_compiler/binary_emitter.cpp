@@ -410,7 +410,6 @@ namespace ink::compiler::internal
 			// Get the child's name in the hierarchy
 			std::string child_name = name.empty() ? child.first : (name + "." + child.first);
 			hash_t name_hash = hash_string(child_name.c_str());
-
 			// Write out name hash and offset
 			out.write((const char*)&name_hash, sizeof(hash_t));
 			out.write((const char*)&child.second->offset, sizeof(uint32_t));
