@@ -477,6 +477,7 @@ void runner_impl::advance_line()
 
 	// can be in save state becaues of choice
 	// Garbage collection TODO: How often do we want to do this?
+	if (_saved) {restore(); }
 	_globals->gc();
 	if (_output.saved()) {
 		_output.restore();
@@ -490,7 +491,6 @@ void runner_impl::choose(size_t index)
 	if (has_choices()) {
 		inkAssert(index < _choices.size(), "Choice index out of range");
 	}
-	restore(); // restore to stack state when choice was maked
 	_globals->turn();
 	// Get the choice
 	const auto& c = has_choices() ? _choices[index] : _fallback_choice.value();
