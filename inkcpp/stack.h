@@ -34,6 +34,8 @@ namespace ink
 				using base = restorable<entry>;
 
 			public:
+				virtual ~basic_stack() = default;
+				
 				// Sets existing value, or creates a new one at this callstack entry
 				void set(hash_t name, const value& val);
 
@@ -144,6 +146,7 @@ namespace ink
 				using base = restorable<value>;
 
 			public:
+				virtual ~basic_eval_stack() = default;
 
 				// Push value onto the stack
 				void push(const value&);

@@ -169,7 +169,7 @@ inline const char* runner_impl::read()
 choice& runner_impl::add_choice()
 {
 	inkAssert(
-	    config::maxChoices < 0 || _choices.size() < config::maxChoices, "Ran out of choice storage!"
+	    config::maxChoices < 0 || _choices.size() < static_cast<size_t>(config::maxChoices), "Ran out of choice storage!"
 	);
 	return _choices.push();
 }
@@ -453,8 +453,8 @@ void runner_impl::getall(std::ostream& out)
 FString runner_impl::getline()
 {
 	clear_tags();
-	advance_line() FString result{};
-	result.Append(_output.get_alloc(_globals->strings(), globals->lists()));
+	advance_line();
+	FString result(ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists())));
 
 	if (! has_choices() && _fallback_choice) {
 		choose(~0);
@@ -1120,7 +1120,8 @@ void runner_impl::step()
 
 					// Create choice and record it
 					if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
-						_fallback_choice = choice{}.setup(
+						_fallback_choice.emplace();
+						_fallback_choice.value().setup(
 						    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
 						    current_thread(), tags->ptr()
 						);

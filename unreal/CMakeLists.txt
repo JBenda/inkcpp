@@ -18,6 +18,9 @@ URL https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
 URL_HASH SHA256=26f4e188e02536d6e99e73e71d9b13e2c2144187f1368a87e82fd5066176cff8
 SOURCE_DIR "inkcpp/Resources/inklecate/linux"
 )
+
+set(FETCHCONTENT_QUIET OFF)
+
 FetchContent_MakeAvailable(inklecate_windows)
 if(NOT inklecate_windows_SOURCE_DIR)
 message(WARNING "failed to download inklecate for windows, "

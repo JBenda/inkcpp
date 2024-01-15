@@ -2,16 +2,16 @@
 
 #include "Kismet/GameplayStatics.h"
 
-inline FString inklecate_cmd() {
+inline std::string get_inklecate_cmd() {
 	FString platform = UGameplayStatics::GetPlatformName();
-	if (platform == TEST("Windows")) {
-		return FString(TEXT("@INKLECATE_CMD_WIN@"));
-	} else if (platform == TEST("Mac")) {
-		return FString(TEXT("@INKLECATE_CMD_MAC@"));
-	} else if (platform == TEST("Linux")) {
-		retrun FString(TEXT("@INKLECATE_CMD_LINUX@"));
+	if (platform == TEXT("Windows")) {
+		return std::string("@INKLECATE_CMD_WIN@");
+	} else if (platform == TEXT("Mac")) {
+		return std::string("@INKLECATE_CMD_MAC@");
+	} else if (platform == TEXT("Linux")) {
+		return std::string("@INKLECATE_CMD_LINUX@");
 	} else {
-		UE_LOG(InkCpp, Warning, TEXT("Platform: '") + platform + TEXT("' is not know. For compiling a .ink file a system wide 'inklecate' executable wil be tried to use."));
-		return FString(TEXT("inklecate"));
+		// UE_LOG(InkCpp, Warning, TEXT("Platform: '%s' is not know. For compiling a .ink file a system wide 'inklecate' executable wil be tried to use."), platform);
+		return std::string("inklecate");
 	}
 }

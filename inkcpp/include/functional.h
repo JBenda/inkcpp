@@ -276,7 +276,7 @@ class function_array_delegate : public function_base
 {
 public:
 	function_array_delegate(const D& del, bool lookaheadSafe)
-	    : function_baes(lookaheadSafe)
+	    : function_base(lookaheadSafe)
 	    , invocableDelegate(del)
 	{
 	}
@@ -301,14 +301,14 @@ public:
 			auto                ret    = invocableDelegate.Execute(variables);
 			ink::runtime::value result = ret.to_value();
 			if (result.type == ink::runtime::value::Type::String) {
-				const char* src    = result.v_string;
+				const char* src    = result.get<ink::runtime::value::Type::String>();
 				size_t      len    = string_handler<const char*>::length(src);
 				char*       buffer = allocate(strings, len + 1);
 				char*       ptr    = buffer;
 				while (*src != '\0')
 					*(ptr++) = *(src++);
 				*ptr            = 0;
-				result.v_string = buffer;
+				result = ink::runtime::value(buffer);
 			}
 			push(stack, result);
 		}
