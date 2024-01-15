@@ -31,7 +31,12 @@ class INKCPP_API UInkList : public UObject
 public:
 	UInkList() {}
 	UInkList(ink::runtime::list list) { list_data = list; }
+	void SetList(ink::runtime::list list) { list_data = list; }
 
+	UFUNCTION(BlueprintPure, Category = "Ink")
+	/** Checks if a flag is contained (by name)
+		* @attention no support for non unique flag names, please use @ref #ContainsEnum() for that.
+		*/
 	bool ContainsFlag(const FString& flag_name) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")

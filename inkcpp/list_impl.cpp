@@ -21,7 +21,7 @@ namespace ink::runtime::internal {
     _list = _list_table->sub(list_table::list{_list}, *flag).lid;
   }
 
-  void list_impl::next(const char*& flag_name, const char*& list_name, int& i) const {
+  void list_impl::next(const char*& flag_name, const char*& list_name, int& i, bool one_list_only) const {
     if (i == -1) { return; }
 
     list_flag flag{.list_id = static_cast<int16_t>(i >> 16), .flag = static_cast<int16_t>(i & 0xFF)};
@@ -30,6 +30,10 @@ namespace ink::runtime::internal {
     }
     if (flag.flag >= _list_table->_list_end[flag.list_id]) {
       next_list:
+      if (one_list_only) {
+        i = -1;
+        return;
+      }
       flag.flag = 0;
       do {
         ++flag.list_id;
@@ -53,6 +57,6 @@ namespace ink::runtime::internal {
 
   list_interface::iterator list_impl::begin(const char* list_name) const {
           size_t list_id = _list_table->get_list_id(list_name).list_id;
-      return ++new_iterator(nullptr, list_id<<16);
+      return ++new_iterator(nullptr, list_id<<16, true);
   }
 }

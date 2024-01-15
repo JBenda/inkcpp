@@ -63,6 +63,9 @@ struct INKCPP_API FInkVar
 	
 	TArray<UTF8CHAR> utf8{};
 	
+	/** Get the type contained in the value
+		* @retval EInkVarType::None if no value is contained (void)
+		*/
 	EInkVarType type() const {
 		uint8 id = value.GetCurrentSubtypeIndex();
 		if(id >= static_cast<uint8>(EInkVarType::None))
@@ -95,7 +98,10 @@ class INKCPP_API UInkVarLibrary : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Var Type", BlueprintAutocast), Category="Ink")
-	inline EInkVarType InkVarType(const FInkVar& InkVar) const {
+	/** Get the type contained in the value
+		* @retval EInkVarType::None if no value is contained (void)
+		*/
+	static EInkVarType InkVarType(const FInkVar& InkVar) {
 		return InkVar.type();
 	}
 

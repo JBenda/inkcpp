@@ -22,6 +22,12 @@ FInkVar::FInkVar(ink::runtime::value val) : FInkVar() {
 		case v_types::Float:
 			value.SetSubtype<float>(val.get<v_types::Float>());
 			break;
+		case v_types::List: {
+			UInkList* list = NewObject<UInkList>();
+			list->SetList(val.get<v_types::List>());
+			value.SetSubtype<UInkList*>(list);
+			break;
+		}
 		default:
 			inkFail("unknown type!, failed to convert ink::value to InkVar");
 	}

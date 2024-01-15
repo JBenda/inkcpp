@@ -52,7 +52,7 @@ namespace ink::runtime {
 			Flag      operator*() const { return Flag{ .flag_name = _flag_name, .list_name = _list_name }; };
 			iterator& operator++()
 			{
-				_list.next( _flag_name, _list_name, _i );
+				_list.next( _flag_name, _list_name, _i, _one_list_iterator);
 				return *this;
 			}
 			bool operator!=(const iterator& itr) const { return itr._i != _i; }
@@ -94,7 +94,7 @@ namespace ink::runtime {
 
 	private:
 		friend iterator;
-		virtual void next(const char*& flag_name, const char*& list_name, int& i) const {
+		virtual void next(const char*& flag_name, const char*& list_name, int& i, bool _one_list_iterator) const {
 			inkAssert(false, "Not implemented funciton from interface is called!");
 		};
 	protected:
