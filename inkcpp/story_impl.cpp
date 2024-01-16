@@ -223,6 +223,8 @@ namespace ink::runtime::internal
 					snapshot.strings(),
 					_string_table, 
 		};
+		// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to use
+		idx = (data.num_runners() - idx - 1); 
 		auto end = run->snap_load(snapshot.get_runner_snap(idx), loader);
 		inkAssert(
 			(idx + 1 < snapshot.num_runners() && end == snapshot.get_runner_snap(idx + 1))

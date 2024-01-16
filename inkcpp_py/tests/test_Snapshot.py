@@ -30,7 +30,7 @@ class TestSnapshot:
         check_end(runner)
 
         glob = story.new_globals_from_snapshot(snap0)
-        runner = story.new_runner_from_snapshot(snap0, glob, 1)
+        runner = story.new_runner_from_snapshot(snap0, glob, 0)
         assert runner.num_choices() == 3
         runner.choose(2)
         cnt_x = 0
@@ -42,7 +42,7 @@ class TestSnapshot:
         check_end(runner)
 
         glob = story.new_globals_from_snapshot(snap1)
-        runner = story.new_runner_from_snapshot(snap1, glob, 1)
+        runner = story.new_runner_from_snapshot(snap1, glob, 0)
         cnt_x = 0
         while runner.can_continue():
             runner.getline()
@@ -52,6 +52,6 @@ class TestSnapshot:
         check_end(runner)
 
         glob = story.new_globals_from_snapshot(snap2)
-        runner = story.new_runner_from_snapshot(snap2, glob, 1)
+        runner = story.new_runner_from_snapshot(snap2, glob, 0)
         assert not runner.can_continue()
         check_end(runner)

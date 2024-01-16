@@ -57,7 +57,7 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 	mTagFunctions.Reset();
 	mCurrentChoices.Reset();
 	mbHasRun   = false;
-	mbInChoice = false;
+	mbInChoice = thread->has_choices();
 
 	OnStartup();
 }
