@@ -49,7 +49,10 @@ void UInkThread::RegisterExternalEvent(
 
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)
 {
-	inkAssert(!thread->has_choices() || path.IsEmpty(), "Snapshot recovery does not work with starting path if currently at choice.");
+	inkAssert(
+	    ! thread->has_choices() || path.IsEmpty(),
+	    "Snapshot recovery does not work with starting path if currently at choice."
+	);
 	mStartPath    = path;
 	mpRuntime     = runtime;
 	mbInitialized = true;
@@ -59,7 +62,7 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 	mCurrentChoices.Reset();
 	mnChoiceToChoose = -1;
 	mbHasRun   = false;
-	mbInChoice = thread->has_choices();
+	mbInChoice       = thread->has_choices();
 
 	OnStartup();
 }
@@ -78,7 +81,7 @@ bool UInkThread::ExecuteInternal()
 		if (mStartPath.Len()) {
 			mpRunner->move_to(ink::hash_string(TCHAR_TO_ANSI(*mStartPath)));
 		}
-		
+
 		if (mbInChoice) {
 			for (ink::size_t i = 0; i < mpRunner->num_choices(); i++) {
 				UInkChoice* choice = NewObject<UInkChoice>(this);
@@ -227,6 +230,6 @@ bool UInkThread::PickChoice(int index)
 	return true;
 }
 
-bool UInkThread::CanExecute() const { return (mnYieldCounter == 0 && ! mbInChoice) || !mbHasRun; }
+bool UInkThread::CanExecute() const { return (mnYieldCounter == 0 && ! mbInChoice) || ! mbHasRun; }
 
 void UInkThread::Stop() { mbKill = true; }

@@ -38,7 +38,7 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 {
 	std::stringstream output;
 	std::stringstream cmd{};
-	const std::string inklecate_cmd = get_inklecate_cmd();
+	const std::string        inklecate_cmd = get_inklecate_cmd();
 	static const std::string ink_suffix{".ink"};
 	try
 	{

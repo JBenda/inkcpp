@@ -252,10 +252,10 @@ void AInkRuntime::ObserverVariableChange(const FString& name, const FVariableCal
 	mpGlobals->observe(TCHAR_TO_ANSI(*name), 
 		[callback](ink::runtime::value x, ink::optional<ink::runtime::value> y){
 			if (y.has_value()) {
-				callback.Execute(FInkVar(x), FInkVar(y.value()));
-			} else {
-				callback.Execute(FInkVar(x), FInkVar()); 
-			}
+			  callback.Execute(FInkVar(x), FInkVar(y.value()));
+		  } else {
+			  callback.Execute(FInkVar(x), FInkVar());
+		  }
 		}
 	);
 }

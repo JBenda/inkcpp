@@ -308,7 +308,7 @@ public:
 				while (*src != '\0')
 					*(ptr++) = *(src++);
 				*ptr            = 0;
-				result = ink::runtime::value(buffer);
+				result          = ink::runtime::value(buffer);
 			}
 			push(stack, result);
 		}

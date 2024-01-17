@@ -6,22 +6,14 @@
 FInkVar::FInkVar(ink::runtime::value val) : FInkVar() {
 	using v_types = ink::runtime::value::Type;
 	switch(val.type) {
-		case v_types::Bool:
-			value.SetSubtype<bool>(val.get<v_types::Bool>());
-			break;
+		case v_types::Bool: value.SetSubtype<bool>(val.get<v_types::Bool>()); break;
 		case v_types::Uint32:
 			UE_LOG(InkCpp, Warning, TEXT("Converting uint to int, this will cause trouble if writing it back to ink (with SetGlobalVariable)!"));
 			value.SetSubtype<int>(val.get<v_types::Uint32>());
 			break;
-		case v_types::Int32:
-			value.SetSubtype<int>(val.get<v_types::Int32>());
-			break;
-		case v_types::String:
-			value.SetSubtype<FString>(FString(val.get<v_types::String>()));
-			break;
-		case v_types::Float:
-			value.SetSubtype<float>(val.get<v_types::Float>());
-			break;
+		case v_types::Int32: value.SetSubtype<int>(val.get<v_types::Int32>()); break;
+		case v_types::String: value.SetSubtype<FString>(FString(val.get<v_types::String>())); break;
+		case v_types::Float: value.SetSubtype<float>(val.get<v_types::Float>()); break;
 		case v_types::List: {
 			UInkList* list = NewObject<UInkList>();
 			list->SetList(val.get<v_types::List>());

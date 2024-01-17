@@ -261,10 +261,11 @@ public:
 		return _has_value ? _value : static_cast<T>(u);
 	}
 
-	template<typename ... Args>
-	T& emplace(Args ... args) {
-			_value.~T();
-			return *(new (&_value) T(args ...));
+	template<typename... Args>
+	T& emplace(Args... args)
+	{
+		_value.~T();
+		return *(new (&_value) T(args...));
 	}
 
 private:

@@ -60,12 +60,12 @@ struct INKCPP_API FInkVar
 	// allow changing via Editor, but not in controle flow, it is just a wrapper type to create a new one
 	// UPROPERTY(EditAnywhere, Category = "Ink")
 	TUnion<float, int, unsigned, bool, FString, UInkList*> value;
-	
+
 	TArray<UTF8CHAR> utf8{};
-	
+
 	/** Get the type contained in the value
-		* @retval EInkVarType::None if no value is contained (void)
-		*/
+	 * @retval EInkVarType::None if no value is contained (void)
+	 */
 	EInkVarType type() const {
 		uint8 id = value.GetCurrentSubtypeIndex();
 		if(id >= static_cast<uint8>(EInkVarType::None))
@@ -97,13 +97,12 @@ class INKCPP_API UInkVarLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Var Type", BlueprintAutocast), Category="Ink")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Var Type", BlueprintAutocast), Category = "Ink")
+
 	/** Get the type contained in the value
-		* @retval EInkVarType::None if no value is contained (void)
-		*/
-	static EInkVarType InkVarType(const FInkVar& InkVar) {
-		return InkVar.type();
-	}
+	 * @retval EInkVarType::None if no value is contained (void)
+	 */
+	static EInkVarType InkVarType(const FInkVar& InkVar) { return InkVar.type(); }
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "String (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
 	static FString Conv_InkVarString(const FInkVar& InkVar);

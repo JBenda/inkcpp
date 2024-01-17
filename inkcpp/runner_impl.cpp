@@ -169,7 +169,8 @@ inline const char* runner_impl::read()
 choice& runner_impl::add_choice()
 {
 	inkAssert(
-	    config::maxChoices < 0 || _choices.size() < static_cast<size_t>(config::maxChoices), "Ran out of choice storage!"
+	    config::maxChoices < 0 || _choices.size() < static_cast<size_t>(config::maxChoices),
+	    "Ran out of choice storage!"
 	);
 	return _choices.push();
 }
@@ -477,7 +478,9 @@ void runner_impl::advance_line()
 
 	// can be in save state becaues of choice
 	// Garbage collection TODO: How often do we want to do this?
-	if (_saved) {restore(); }
+	if (_saved) {
+		restore();
+	}
 	_globals->gc();
 	if (_output.saved()) {
 		_output.restore();
