@@ -5,6 +5,7 @@ LIST Form = (Humen), Owl, Tiger
 === Transformations
 = Nothing
 	Hard you could transform if you would like
+	->END
 = ToOwl
 	You Shrink and you get feathers. And, now you are a Owl
 	~ Form = Owl
