@@ -7,24 +7,23 @@ bool UInkList::ContainsFlag(const FString& flag_name) const {
   return list_data->contains(TCHAR_TO_ANSI(*flag_name));
 }
 
-bool UInkList::ContainsEnum(const FString& enumName, const uint8& value) const {
-  UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE , *enumName, false);
+bool UInkList::ContainsEnum(const UEnum* Enum, const uint8& value) const {
   if(!Enum)
   {
-    UE_LOG(InkCpp, Warning, TEXT("Failed to find enum with name '%s'"), *enumName);
+    UE_LOG(InkCpp, Warning, TEXT("No Enum provided for ContainsEnum, it will fail therfore!"));
     return false;
   }
 
-  return list_data->contains(TCHAR_TO_ANSI(*Enum->GetNameStringByIndex(value)));  
+  return list_data->contains(TCHAR_TO_ANSI(*Enum->GetDisplayNameTextByValue(value).ToString()));  
 }
 
-TArray<uint8> UInkList::ElementsOf(const FString& enumName) const {
+TArray<uint8> UInkList::ElementsOf(const UEnum* Enum) const {
   TArray<uint8> ret;
-  UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE , *enumName, false);
   if (!Enum) {
-    UE_LOG(InkCpp, Warning, TEXT("Failed to find enum with name '%s'"), *enumName);
+    UE_LOG(InkCpp, Warning, TEXT("Failed to provide enum for elements of!"));
     return ret;
   }
+  FString enumName = Enum->GetFName().ToString();
 
   int num = Enum->NumEnums();
   std::string str(TCHAR_TO_ANSI(*enumName));
@@ -50,10 +49,11 @@ TArray<uint8> UInkList::ElementsOf(const FString& enumName) const {
   return ret;
 }
 
-TArray<FString> UInkList::ElementsOfAsString(const FString& list_name) const {
+TArray<FString> UInkList::ElementsOfAsString(const UEnum* Enum) const {
   TArray<FString> ret;
 
-  for(auto itr = list_data->begin(TCHAR_TO_ANSI(*list_name)); itr != list_data->end(); ++itr)
+  FString EnumName = Enum->GetFName().ToString();
+  for(auto itr = list_data->begin(TCHAR_TO_ANSI(*EnumName)); itr != list_data->end(); ++itr)
   {
     ret.Add(FString((*itr).flag_name));
   }

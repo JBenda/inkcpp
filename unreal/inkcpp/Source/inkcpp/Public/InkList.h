@@ -42,17 +42,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** returns true if a flag with the same spelling then the enum `value` is set in the list
 	 */
-	bool ContainsEnum(const FString& enumName, const uint8& value) const;
+	bool ContainsEnum(const UEnum* Enum, const uint8& value) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** returns all values of a list with the same name as the enum
 	 */
-	TArray<uint8> ElementsOf(const FString& enumName) const;
+	TArray<uint8> ElementsOf(const UEnum* Enum) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** returns all flag as string contained in the list from a list with the name `list_name`
 	 */
-	TArray<FString> ElementsOfAsString(const FString& list_name) const;
+	TArray<FString> ElementsOfAsString(const UEnum* Enum) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** returns all `list_name` `flag_name` toubples
