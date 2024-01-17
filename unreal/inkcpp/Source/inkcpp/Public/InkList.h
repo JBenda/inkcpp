@@ -36,7 +36,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** Checks if a flag is contained (by name)
-	 * @attention no support for non unique flag names, please use @ref #ContainsEnum() for that.
+	 * @attention If the flag name is not unique please use the full flag name aka `list_name.flag_name`
 	 */
 	bool ContainsFlag(const FString& flag_name) const;
 
@@ -51,7 +51,7 @@ public:
 	TArray<uint8> ElementsOf(const UEnum* Enum) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
-	/** returns all flag as string contained in the list from a list with the name `list_name`
+	/** returns all flag as string contained in the list from a list with the same name as the Enum`
 	 */
 	TArray<FString> ElementsOfAsString(const UEnum* Enum) const;
 

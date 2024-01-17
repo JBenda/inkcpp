@@ -32,6 +32,25 @@ SCENARIO("run a story with lists", "[lists]")
 			}
 		}
 
+		WHEN("modify with full flag name")
+		{
+			std::string out = thread->getall();
+			std::string choice1 = thread->get_choice(0)->text();
+			thread->choose(0);
+
+			list l1 = *globals->get<list>("list");
+			l1->add("animals.dog");
+			l1->remove("colors.red");
+			REQUIRE(globals->set<list>("list", l1));
+
+			std::string out2 = thread->getall();
+
+			THEN("Output should be changed")
+			{
+				REQUIRE(out2 == "list: bird, dog, yellow\ncat, snake\nbird, dog, yellow\n");
+			}
+		}
+
 		WHEN("modify")
 		{
 			std::string out = thread->getall();
