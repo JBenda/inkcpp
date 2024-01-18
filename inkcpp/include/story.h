@@ -148,11 +148,12 @@ public:
  *
  * The current release is available at the [release
  * page](https://github.com/JBenda/inkcpp/releases/latest), as `unreal.zip`.<br/>
- * Unpack this folder in `/PATH/TO/UNREAL_PROJECT/Plugins/` and it will be
+ * Unpack this foldor in `/PATH/TO/UNREAL_ENGINE/Engine/Plugins/` and it will be available
+ * as plugin in the plugin list. <br/>
+ * Or unpack this folder in `/PATH/TO/UNREAL_PROJECT/Plugins/` and it will be
  * intigrated at the next startup.<br/> A MarketPlace appearance is work in progress :)
  *
- * The overview to the UE Blueprint class can be found at @ref unreal "here".
- * A more detailed explination with images in WIP.
+ * The overview to the UE Blueprint class and examples can be found at @ref unreal "here".
  *
  * If you want to use the newest version clone the project and install the unreal component.
  * @code {sh}
