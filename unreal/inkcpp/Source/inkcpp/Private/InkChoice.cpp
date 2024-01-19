@@ -27,7 +27,7 @@ void UInkChoice::Initialize(const ink::runtime::choice* c)
 	if (c->has_tags()) {
 		TArray<FString> fstring_tags{};
 		for(unsigned i = 0; i < c->num_tags(); ++i) {
-			fstring_tags.Add(FString(c->get_tag(i)));
+			fstring_tags.Add(FString(ANSI_TO_TCHAR(c->get_tag(i))));
 		}
 		tags->Initialize(fstring_tags);
 	}

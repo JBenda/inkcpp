@@ -32,12 +32,10 @@ TArray<uint8> UInkList::ElementsOf(const UEnum* Enum) const
 	for (auto itr = list_data->begin(str.c_str()); itr != list_data->end(); ++itr) {
 		bool          hit = false;
 		const FString flag(ANSI_TO_TCHAR((*itr).flag_name));
-		UE_LOG(InkCpp, Warning, TEXT("Looking for flag: '%s'"), *flag);
 		for (int i = 0; i < num; ++i) {
 			FString enumStr = Enum->GetDisplayNameTextByIndex(i).ToString();
-			UE_LOG(InkCpp, Warning, TEXT("\tenum: %s"), *enumStr);
 			if (enumStr.EndsWith(flag)) {
-				ret.Add(i);
+				ret.Add(Enum->GetValueByIndex(i));
 				hit = true;
 				break;
 			}
