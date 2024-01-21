@@ -73,11 +73,31 @@ include(CPack)
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
+
 	set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
 	# enable if update to cmake version 3.28
 	# doxygen_add_docs(doc WORKING_DIR ${PROJECT_SOURCE_DIR} CONFIG_FILE "${PROJECT_SOURCE_DIR}/Doxyfile" COMMENT "Generate docs")
+	set(INPUT_FILTER "")
+
+	if (INKCPP_DOC_BlueprintUE)
+		# TODO: make as dependecy
+		file(DOWNLOAD 
+			"https://blueprintue.com/bue-render/render.css"
+			"${PROJECT_BINARY_DIR}/render.css"
+			EXPECTED_HASH SHA256=875364e36f8aa5d6c1d41d58043f13b48a499b5c969e8daef35bd29bbf7c6e8d)
+		file(READ "${PROJECT_SOURCE_DIR}/Doxyfile" DOXYFILE)
+		string(REPLACE "INPUT_FILTER           =" "INPUT_FILTER           = node ${PROJECT_BINARY_DIR}/blueprintue_filter.js" DOXYFILE2 ${DOXYFILE})
+		string(REPLACE "HTML_EXTRA_STYLESHEET  =" "HTML_EXTRA_STYLESHEET  = ${PROJECT_BINARY_DIR}/render.css " DOXYFILE ${DOXYFILE2})
+		file(WRITE "${PROJECT_BINARY_DIR}/Doxyfile" ${DOXYFILE})
+	else ()
+		configure_file(
+			"${PROJECT_SOURCE_DIR}/Doxyfile"
+			"${PROJECT_BINARY_DIR}/Doxyfile"
+			COPYONLY)
+	endif()
+
 	add_custom_target(doc
-		${DOXYGEN_EXECUTABLE} "${PROJECT_SOURCE_DIR}/Doxyfile"
+		${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/Doxyfile"
 		WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
 		COMMENT "Generate doxygen documentation")
 	set(PY_HTML "${PROJECT_SOURCE_DIR}/Documentation/inkcpp_py.html")

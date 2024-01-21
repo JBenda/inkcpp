@@ -3,7 +3,6 @@
 #include "Logging/LogMacros.h"
 
 /**
- * @page
  * @defgroup unreal Unreal Blueprints
  * Blueprint Classes usable in Unreal. An example can be found
  * [here](unreal/inkCPP_DEMO.zip), do not forgett to install the plugin via the marketplace(soonTM) or 

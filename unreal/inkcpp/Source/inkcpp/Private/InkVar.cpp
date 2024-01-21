@@ -126,3 +126,8 @@ FInkVar UInkVarLibrary::Conv_BoolInkVar(bool Boolean)
 {
 	return FInkVar(Boolean);
 }
+
+FInkVar UInkVarLibrary::Conv_ListInkVar(const UInkList& List)
+{
+	return FInkVar(List);
+}
