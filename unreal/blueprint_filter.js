@@ -345,7 +345,7 @@ for (const arg of argv) {
         var input = fs.readFileSync(arg).toString();
         var out_str = input;
         var offset = 0;
-        var re = /(DOC_UF|UFUNCTION)\((?<type>[^,]*), .*\).*\n\s*\/\*\*[^]*?(?<pos>@blueprint)[^]*?\*\/\n\s*(?<signature>[^;]*);/gmd;
+        var re = /(DOC_UF|UFUNCTION)\(\s*(?<type>[^,]*),[^]*?\).*\s*\/\*\*[^]*?(?<pos>@blueprint)[^]*?\*\/\s*(?<signature>[^;]*);/gmd;
         while ((m = re.exec(input)) != null) {
             let type = m.groups.type;
             let signature = m.groups.signature;
