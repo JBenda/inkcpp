@@ -59,9 +59,9 @@ public:
 		internal_observe(hash_string(name), new internal::callback(callback));
 	}
 
-	/** create a snapshot of the current runtime state. 
-		* (inclusive all runners assoziated with this globals) 
-		*/
+	/** create a snapshot of the current runtime state.
+	 * (inclusive all runners assoziated with this globals)
+	 */
 	virtual snapshot* create_snapshot() const = 0;
 
 	virtual ~globals_interface() = default;

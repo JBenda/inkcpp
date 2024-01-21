@@ -35,7 +35,7 @@ public:
 	/** Yields the thread immediatly.
 	 * This will stop the execution (after finishing the current line).
 	 * until @ref #Resume() is called.
-	 * 
+	 *
 	 * @ref #Yield() and @ref #Resume() working with a refernce counter.
 	 * therfore a thread can be yield multiple times, and must then be resumed
 	 * the same amount.
@@ -46,32 +46,33 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** Checks if the thread is stopped.
-		* @retval true if the thread currently waiting to resume
-		* @see #Yield() #Resume()
-		*
-		* @blueprint
-		*/
+	 * @retval true if the thread currently waiting to resume
+	 * @see #Yield() #Resume()
+	 *
+	 * @blueprint
+	 */
 	bool IsYielding();
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** Resumes yielded thread.
 	 * @see #Yield()
-	 * 
+	 *
 	 * @blueprint
 	 */
 	void Resume();
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** Kills thread at next possible moment
-		*
-		* @blueprint
-		*/
+	 *
+	 * @blueprint
+	 */
 	void Stop();
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
+
 	/** Access runtime the thread belongs to
 	 * @return runtime of the thread
-	 * 
+	 *
 	 * @blueprint
 	 */
 	AInkRuntime* GetRuntime() const { return mpRuntime; }
@@ -113,28 +114,28 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
 	/** triggered when the thread reached the end of context
-		* @see AInkRuntime::StartExisting()
-		*
-		* @blueprint
-		*/
+	 * @see AInkRuntime::StartExisting()
+	 *
+	 * @blueprint
+	 */
 	void OnShutdown();
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** picks a choice to continue with
-		* @see UInkChoice::GetIndex()
-		* @retval false if the index is out of range
-		*
-		* @blueprint
+	 * @see UInkChoice::GetIndex()
+	 * @retval false if the index is out of range
+	 *
+	 * @blueprint
 	 */
 	bool PickChoice(int index);
 
 	// Registers a callback for a named "tag function"
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** Register a callback for a named "tag function"
-		* @see @ref TagFunction
-		*
-		* @blueprint
-		*/
+	 * @see @ref TagFunction
+	 *
+	 * @blueprint
+	 */
 	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")

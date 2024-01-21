@@ -69,10 +69,8 @@ FString UTagList::GetValue(const FString& name) const
 bool UTagList::GetEnum(const UEnum* Enum, uint8& value) const
 {
 	FString prefix = Enum->GetFName().ToString() + ":";
-	for (const FString& tag : Tags)
-	{
-		if (tag.StartsWith(prefix))
-		{
+	for (const FString& tag : Tags) {
+		if (tag.StartsWith(prefix)) {
 			FString value = tag.RightChop(prefix.Len()).TrimStartAndEnd();
 			for (int i = 0; i < Enum->NumEnums(); ++i) {
 				FString enumStr = Enum->GetDisplayNameTextByIndex(i).ToString();
@@ -81,7 +79,7 @@ bool UTagList::GetEnum(const UEnum* Enum, uint8& value) const
 					return true;
 				}
 			}
-			
+
 			value = 0;
 			return false;
 		}
@@ -90,6 +88,4 @@ bool UTagList::GetEnum(const UEnum* Enum, uint8& value) const
 	return false;
 }
 
-const TArray<FString>& UTagList::GetTags() const {
-	return Tags;
-}
+const TArray<FString>& UTagList::GetTags() const { return Tags; }

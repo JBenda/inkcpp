@@ -42,9 +42,9 @@ public:
 	{
 	}
 
-	/** iterater for flags in a list 
-		* @todo implement `operator->`
-		*/
+	/** iterater for flags in a list
+	 * @todo implement `operator->`
+	 */
 	class iterator
 	{
 		const char*           _flag_name;
@@ -78,9 +78,9 @@ public:
 			const char* list_name; ///< name of the list
 #ifdef INK_ENABLE_STL
 			/** serelization operator
-		   * @param os
-		   * @param flag
-		   */
+			 * @param os
+			 * @param flag
+			 */
 			friend std::ostream& operator<<(std::ostream& os, const Flag& flag)
 			{
 				os << flag.list_name << "(" << flag.flag_name << ")";

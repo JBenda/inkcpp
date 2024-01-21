@@ -33,6 +33,7 @@ class INKCPP_API UInkList : public UObject
 public:
 	/** @private */
 	UInkList() {}
+
 	/** @private */
 	UInkList(ink::runtime::list list) { list_data = list; }
 
@@ -41,7 +42,8 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** Checks if a flag is contained (by name)
-	 * @attention If the flag name is not unique please use the full flag name aka `list_name.flag_name`
+	 * @attention If the flag name is not unique please use the full flag name aka
+	 * `list_name.flag_name`
 	 *
 	 * @blueprint
 	 */
@@ -81,10 +83,10 @@ public:
 	 * and assoziatet with the list
 	 *
 	 * @blueprint
-	*/
+	 */
 	bool ContainsList(const FString& ListName) const;
-	
-	
+
+
 private:
 	friend struct FInkVar;
 

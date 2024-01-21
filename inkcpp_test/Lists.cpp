@@ -34,7 +34,7 @@ SCENARIO("run a story with lists", "[lists]")
 
 		WHEN("modify with full flag name")
 		{
-			std::string out = thread->getall();
+			std::string out     = thread->getall();
 			std::string choice1 = thread->get_choice(0)->text();
 			thread->choose(0);
 

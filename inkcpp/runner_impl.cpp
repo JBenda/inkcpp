@@ -487,7 +487,7 @@ void runner_impl::advance_line()
 	}
 }
 
-bool runner_impl::can_continue() const { return _ptr != nullptr && !has_choices(); }
+bool runner_impl::can_continue() const { return _ptr != nullptr && ! has_choices(); }
 
 void runner_impl::choose(size_t index)
 {

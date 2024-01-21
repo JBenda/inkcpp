@@ -48,12 +48,12 @@ DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FInkVar, FExternalFunctionDelegate, con
 #ifdef DOXYGEN
 UFUNCTION(BlueprintImplementableEvent, )
 /** Delegate for external event.
-	* the number of arguments are defined inside the ink story
-	* @param Arguments array containing all arguments passed to this function
-	* @see @ref UInkThread::RegisterExternalFunction
-	*
-	* @blueprint
-	*/
+ * the number of arguments are defined inside the ink story
+ * @param Arguments array containing all arguments passed to this function
+ * @see @ref UInkThread::RegisterExternalFunction
+ *
+ * @blueprint
+ */
 void FExternalFunctionVoidDelegate(const TArray<FInkVar>& Arguments);
 #else
 DECLARE_DYNAMIC_DELEGATE_OneParam(FExternalFunctionVoidDelegate, const TArray<FInkVar>&, Arguments);
@@ -95,7 +95,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FVariableCallbackDelegateNewValue, const FInkV
 UFUNCTION(BlueprintImplementableEvent, )
 /** Notification containing old and new varible, send on variable change.
  * @param value new value of the variable
- * @param old_value previouse value of the variable has value @ref EInkVarType::None "None" if variable is set for the first time
+ * @param old_value previouse value of the variable has value @ref EInkVarType::None "None" if
+ * variable is set for the first time
  * @see @ref AInkRuntime::ObserverVariableChange()
  *
  * @blueprint
@@ -106,6 +107,7 @@ DECLARE_DYNAMIC_DELEGATE_TwoParams(FVariableCallbackDelegateNewOldValue, const F
 #endif
 
 UCLASS()
+
 /** @private */
 class UDelegateKeepAlive : public UObject
 {
@@ -121,5 +123,6 @@ class UDelegateKeepAlive : public UObject
  * will be ignored the corresponding tag functino will be called
  * the format for this function call is `>> FunctionName(Arg1[, Arg2]*)`
  *
- * @see To bind tag functions use @ref UInkThread::RegisterTagFunction() and @ref AInkRuntime::RegisterTagFunction()
+ * @see To bind tag functions use @ref UInkThread::RegisterTagFunction() and @ref
+ * AInkRuntime::RegisterTagFunction()
  */

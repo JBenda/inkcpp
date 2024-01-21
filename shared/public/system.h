@@ -20,9 +20,9 @@
 
 namespace ink
 {
-	/** define basic numeric type 
-	 * @todo use a less missleading name
-	*/
+/** define basic numeric type
+ * @todo use a less missleading name
+ */
 typedef unsigned int uint32_t;
 
 /** Name hash (used for temporary variables) */
@@ -74,46 +74,47 @@ constexpr list_flag null_flag{-1, -1};
 /** value representing an empty list */
 constexpr list_flag empty_flag{-1, 0};
 
-namespace internal {
-/** Checks if a string is only whitespace*/
-static bool is_whitespace(const char* string, bool includeNewline = true)
+namespace internal
 {
-	// Iterate string
-	while (true) {
-		switch (*(string++)) {
-			case 0: return true;
+	/** Checks if a string is only whitespace*/
+	static bool is_whitespace(const char* string, bool includeNewline = true)
+	{
+		// Iterate string
+		while (true) {
+			switch (*(string++)) {
+				case 0: return true;
+				case '\n':
+					if (! includeNewline)
+						return false;
+				case '\t':
+				case ' ': continue;
+				default: return false;
+			}
+		}
+	}
+
+	/** check if character can be only part of a word, when two part of word characters put together
+	 * the will be a space inserted I049
+	 */
+	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
+
+	inline constexpr bool is_whitespace(char character, bool includeNewline = true)
+	{
+		switch (character) {
 			case '\n':
 				if (! includeNewline)
 					return false;
-			case '\t':
-			case ' ': continue;
+			case '\t': [[fallthrough]];
+			case ' ': return true;
 			default: return false;
 		}
 	}
-}
-
-/** check if character can be only part of a word, when two part of word characters put together the
- * will be a space inserted I049
-	*/
-inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
-
-inline constexpr bool is_whitespace(char character, bool includeNewline = true)
-{
-	switch (character) {
-		case '\n':
-			if (! includeNewline)
-				return false;
-		case '\t': [[fallthrough]];
-		case ' ': return true;
-		default: return false;
-	}
-}
 
 #ifndef INK_ENABLE_UNREAL
-/** populate memory with Zero */
-void zero_memory(void* buffer, size_t length);
+	/** populate memory with Zero */
+	void zero_memory(void* buffer, size_t length);
 #endif
-}
+} // namespace internal
 
 #ifdef INK_ENABLE_STL
 /** exception type thrown if something goes wrong */
@@ -163,9 +164,9 @@ template<typename... Args>
 }
 #else
 /** platform indipendent assert(false) with message.
-	* @param msg formatting string
-	* @param args arguments to format string
-	*/
+ * @param msg formatting string
+ * @param args arguments to format string
+ */
 template<typename... Args>
 inline void ink_fail(const char* msg, Args... args)
 {
@@ -215,8 +216,8 @@ namespace runtime::internal
 
 #ifdef INK_ENABLE_STL
 /** custom optional implementation for usage if STL is disabled
-	* @tparam T type contaied in optional
-	*/
+ * @tparam T type contaied in optional
+ */
 template<typename T>
 using optional                   = std::optional<T>;
 /** an empty #optional */

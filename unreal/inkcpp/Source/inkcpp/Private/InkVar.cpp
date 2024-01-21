@@ -46,9 +46,7 @@ ink::runtime::value FInkVar::to_value() const {
 	
 }
 
-EInkVarType UInkVarLibrary::InkVarType(const FInkVar& InkVar) {
-	return InkVar.type();
-}
+EInkVarType UInkVarLibrary::InkVarType(const FInkVar& InkVar) { return InkVar.type(); }
 FString UInkVarLibrary::Conv_InkVarString(const FInkVar& InkVar)
 {
 	if (ensureMsgf(InkVar.type() == EInkVarType::String, TEXT("InkVar is not a String Type!")))
@@ -130,7 +128,4 @@ FInkVar UInkVarLibrary::Conv_BoolInkVar(bool Boolean)
 	return FInkVar(Boolean);
 }
 
-FInkVar UInkVarLibrary::Conv_ListInkVar(const UInkList& List)
-{
-	return FInkVar(List);
-}
+FInkVar UInkVarLibrary::Conv_ListInkVar(const UInkList& List) { return FInkVar(List); }

@@ -31,34 +31,38 @@ public:
 		 * @return managed pointer to a new global store
 		*/
 		virtual globals new_globals() = 0;
-    /** Reconstructs globals from snapshot
-      * @param obj snapshot to load
-      */
-		virtual globals new_globals_from_snapshot(const snapshot& obj) = 0;
+	  /** Reconstructs globals from snapshot
+	   * @param obj snapshot to load
+	   */
+	  virtual globals new_globals_from_snapshot(const snapshot& obj) = 0;
 
-		/**
-		 * Creates a new runner
-		 *
-		 * Creates a new runner whose initial instruction pointer
-		 * is the first instruction in this story. If no global
-		 * store is passed, a new one will be created for the runner.
-		 *
-     * @param store globals to use for the runner
-		 * @return managed pointer to a new runner
-		*/
-		virtual runner new_runner(globals store = nullptr) = 0;
-		/**
-		 * @brief reconstruct runner from a snapshot
-		 * @attention runner must be snap_shotted from the same story
-		 * @attention if globals is explicit set,
-		 * make sure the globals are from the same snapshot as
-		 * @attention if you snap_shotted a multiple runner with shared global
-		 * please reconstruct it in the same fashion
-     * @param obj
-		 * @param store can be set if explicit access to globals is required or multiple runner with a shared global are used
-		 * @param runner_id if the snapshot was of a multiple runner one global situation load first the global, and then each runner with global set and increasing idx
-		 */
-		virtual runner new_runner_from_snapshot(const snapshot& obj, globals store = nullptr, unsigned runner_id = 0) = 0;
+	  /**
+	   * Creates a new runner
+	   *
+	   * Creates a new runner whose initial instruction pointer
+	   * is the first instruction in this story. If no global
+	   * store is passed, a new one will be created for the runner.
+	   *
+	   * @param store globals to use for the runner
+	   * @return managed pointer to a new runner
+	   */
+	  virtual runner new_runner(globals store = nullptr) = 0;
+	  /**
+	   * @brief reconstruct runner from a snapshot
+	   * @attention runner must be snap_shotted from the same story
+	   * @attention if globals is explicit set,
+	   * make sure the globals are from the same snapshot as
+	   * @attention if you snap_shotted a multiple runner with shared global
+	   * please reconstruct it in the same fashion
+	   * @param obj
+	   * @param store can be set if explicit access to globals is required or multiple runner with a
+	   * shared global are used
+	   * @param runner_id if the snapshot was of a multiple runner one global situation load first the
+	   * global, and then each runner with global set and increasing idx
+	   */
+	  virtual runner new_runner_from_snapshot(
+	      const snapshot& obj, globals store = nullptr, unsigned runner_id = 0
+	  ) = 0;
 #pragma endregion
 
 #pragma region Factory Methods

@@ -67,7 +67,8 @@ public:
 	/**
 	 * Continue execution until the next newline, then allocate a c-style
 	 * string with the output. This allocated string is managed by the runtime
-	 * and will be deleted at the next @ref ink::runtime::runner_interface::choose() "choose()" or @ref ink::runtime::runner_interface::getline() "getline()"
+	 * and will be deleted at the next @ref ink::runtime::runner_interface::choose() "choose()" or
+	 * @ref ink::runtime::runner_interface::getline() "getline()"
 	 *
 	 * @return allocated c-style string with the output of a single line of execution
 	 */
@@ -171,13 +172,13 @@ public:
 	 * order of tags wont change, and new are added at the end */
 	virtual size_t      num_tags() const            = 0;
 	/** access tag.
-		* @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_tags() "num_tags()")
-		*/
+	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_tags() "num_tags()")
+	 */
 	virtual const char* get_tag(size_t index) const = 0;
 
 protected:
 	/** internal bind implementation. not for calling.
-		* @private */
+	 * @private */
 	virtual void internal_bind(hash_t name, internal::function_base* function) = 0;
 
 public:
@@ -223,10 +224,10 @@ public:
 
 #ifdef INK_ENABLE_UNREAL
 	/** bind and unreal delegate
-		* @param name hash of external function name in ink script
-		* @param functionDelegate
-		* @param lookaheadSafe @ref #bind()
-		*/
+	 * @param name hash of external function name in ink script
+	 * @param functionDelegate
+	 * @param lookaheadSafe @ref #bind()
+	 */
 	template<typename D>
 	void bind_delegate(hash_t name, D functionDelegate, bool lookaheadSafe)
 	{

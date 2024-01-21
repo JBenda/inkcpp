@@ -644,16 +644,13 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 	const char* periode = str_find(flag_name, '.');
 	if (periode) {
 		list_flag list = get_list_id(flag_name); // since flag_name is `list_name.flag_name`
-		flag_name = periode + 1;
+		flag_name      = periode + 1;
 		int list_begin = list.list_id == 0 ? 0 : _list_end[list.list_id - 1];
 		for (int i = list_begin; i != _list_end[list.list_id]; ++i) {
 			if (str_equal(flag_name, _flag_names[i])) {
 				return {
-					list_flag{
-						.list_id =list.list_id,
-						.flag = static_cast<int16_t>(i - list_begin)
-					}
-				};
+				    list_flag{.list_id = list.list_id, .flag = static_cast<int16_t>(i - list_begin)}
+        };
 			}
 		}
 	} else {
