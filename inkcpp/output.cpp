@@ -40,7 +40,7 @@ void basic_stream::append(const value& in)
 				break;
 			}
 			if (i == 0) {
-					return;
+				return;
 			}
 			--i;
 		}

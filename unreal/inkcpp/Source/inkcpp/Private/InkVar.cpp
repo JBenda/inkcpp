@@ -128,7 +128,8 @@ FInkVar UInkVarLibrary::Conv_BoolInkVar(bool Boolean)
 	return FInkVar(Boolean);
 }
 
-FInkVar UInkVarLibrary::Conv_ListInkVar(UInkList* List) { 
+FInkVar UInkVarLibrary::Conv_ListInkVar(UInkList* List)
+{
 	if (ensureMsgf(List != nullptr, TEXT("Try to set list value from empty object"))) {
 		return FInkVar(*List);
 	}

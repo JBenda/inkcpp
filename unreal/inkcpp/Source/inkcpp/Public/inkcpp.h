@@ -14,24 +14,28 @@
  * In the following the [Demo project](../unreal/inkCPP_DEMO.zip) will be @ref ue_example
  * "shown".<br/>
  * But firsta more general explenation of the @ref ue_components "UE5 Blueprits"
- * 
+ *
  * @section ue_components Components
- * 
+ *
  * @subsection ue_runtime Runtime
  * The @ref AInkRuntime handles the runtime as actor.
  * At every Tick all @ref UInkThread of the runtime will be further executed if appropiate.
- * 
- * The asset containing the story to run can be set via the Ink|InkAsset attribute.
- * 
- * The runtime is the position to set observer (e.g. @ref AInkRuntime::ObserverVariableChange() ) and create new threads  (@ref AInkRuntime::Start() & @ref AInkRuntime::StartExisting() ).
  *
- * It is adviced to create you own Blueprint which inherites @ref AInkRuntime to overwrite the events as necessary.
+ * The asset containing the story to run can be set via the Ink|InkAsset attribute.
+ *
+ * The runtime is the position to set observer (e.g. @ref AInkRuntime::ObserverVariableChange() )
+ * and create new threads  (@ref AInkRuntime::Start() & @ref AInkRuntime::StartExisting() ).
+ *
+ * It is adviced to create you own Blueprint which inherites @ref AInkRuntime to overwrite the
+ * events as necessary.
  *
  * @subsection ue_thread Thread
- * A @ref UInkThread is like a pointer inside the story. It contains informations can advance and will therby output the context it encounters.
+ * A @ref UInkThread is like a pointer inside the story. It contains informations can advance and
+ * will therby output the context it encounters.
  *
- * All threads inside the same runtime will share the same variables but can be at different points in the story.
- * 
+ * All threads inside the same runtime will share the same variables but can be at different points
+ * in the story.
+ *
  * The most importent events/functions are:
  * + @ref UInkThread::OnLineWritten() which is called by each new line of output
  * + @ref UInkThread::OnLineWritten() which is called if a choice is encounterd and must be handled
@@ -42,20 +46,21 @@
  * + @ref UInkChoice::GetText() the text of the choice
  * + @ref UInkChoice::GetIndex() the index used in @ref UInkThread::PickChoice()
  * + @ref UInkChoice::GetTags() tags assoziated with this branch/choice
- * 
+ *
  * @subsection ue_taglist TagList
  * A @ref UTagList is a wrapper for the array of tags each line of context and each choice can have.
- * 
+ *
  * @subsection ue_ivar InkVar
  * A wrapper for variables of the ink runtime.
  * To get/set variables you need access to the runtime:
  * @ref AInkRuntime::GetGlobalVariable(), @ref AInkRuntime::SetGlobalVariable()
- * 
+ *
  * please note that get returns a copy of the variables value and to change it you need to call set.
  *
  * @subsection ue_list InkList
  * @ref UInkList is a wrapper for the list type inside ink.
- * A ink list is like a set for enum values. For a in depth explenation please refer to the [offical guide](https://blueprintue.com/blueprint/hdybtdjp/)
+ * A ink list is like a set for enum values. For a in depth explenation please refer to the [offical
+ * guide](https://blueprintue.com/blueprint/hdybtdjp/)
  *
  * If you define Enums simular to the Lists in the ink script you can use them for an easier access.
  *
@@ -107,7 +112,7 @@
  *
  * @htmlonly
  * <a href="https://blueprintue.com/blueprint/owj83khu/">
- * <img 
+ * <img
  * alt="Thread Creation Blueprint"
  * src="../unreal/imgs/CreateThread.png"
  * width="80%"/></a>

@@ -54,10 +54,10 @@ inline int toStr(char* buffer, size_t size, float value)
 {
 #ifdef WIN32
 	int digits = 7;
-	for(float f = value; f > 1.f; f /= 10.f) {
+	for (float f = value; f > 1.f; f /= 10.f) {
 		++digits;
 	}
-	int res =  _gcvt_s(buffer, size, value, digits); // number of significant digits
+	int res = _gcvt_s(buffer, size, value, digits); // number of significant digits
 	return res;
 #else
 	if (buffer == nullptr || size < 1) {
