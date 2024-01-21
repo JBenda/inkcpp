@@ -71,6 +71,7 @@ set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 include(CPack)
 
+if(NOT WHEEL_BUILD)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
 
@@ -122,3 +123,4 @@ if (DOXYGEN_FOUND)
 else(DOXYGEN_FOUND)
 	message("Doxygen needed to generate documntation!")
 endif(DOXYGEN_FOUND)
+endif(NOT WHEEL_BUILD)

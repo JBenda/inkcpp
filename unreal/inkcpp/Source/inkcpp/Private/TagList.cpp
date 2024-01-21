@@ -71,10 +71,10 @@ bool UTagList::GetEnum(const UEnum* Enum, uint8& value) const
 	FString prefix = Enum->GetFName().ToString() + ":";
 	for (const FString& tag : Tags) {
 		if (tag.StartsWith(prefix)) {
-			FString value = tag.RightChop(prefix.Len()).TrimStartAndEnd();
+			FString tag_value = tag.RightChop(prefix.Len()).TrimStartAndEnd();
 			for (int i = 0; i < Enum->NumEnums(); ++i) {
 				FString enumStr = Enum->GetDisplayNameTextByIndex(i).ToString();
-				if (enumStr.EndsWith(value)) {
+				if (enumStr.EndsWith(tag_value)) {
 					value = Enum->GetValueByIndex(i);
 					return true;
 				}

@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "Delegates/Delegate.h"
 
-#include "InkRuntime.h"
 #include "InkVar.h"
 
 #include "InkDelegates.generated.h"
@@ -14,7 +13,7 @@
  */
 
 #ifdef DOXYGEN
-UFUNCTION(BlueprintImplementableEvent, )
+DOC_UF(BlueprintImplementableEvent, )
 /** Delegate for a tag function
  * @see @ref TagFunction
  * @param Caller thread which found encountered this function
@@ -23,15 +22,16 @@ UFUNCTION(BlueprintImplementableEvent, )
  * @blueprint
  */
 void FTagFunctionDelegate(UInkThread* Caller, const TArray<FString>& Params);
-#else
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FTagFunctionDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
 #endif
+/** @cond */
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FTagFunctionDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
+/** @endcond*/
 
 /** @private */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTagFunctionMulticastDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
 
 #ifdef DOXYGEN
-UFUNCTION(BlueprintImplementableEvent, )
+DOC_UF(BlueprintImplementableEvent, )
 /** Delegate for external functions.
  * the number of arugments are defined iside the ink story
  * @param Arguments array containing all arguments passed to this function
@@ -41,12 +41,13 @@ UFUNCTION(BlueprintImplementableEvent, )
  * @blueprint
  */
 FInkVar FExternalFunctionDelegate(const TArray<FInkVar>& Arguments);
-#else
-DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FInkVar, FExternalFunctionDelegate, const TArray<FInkVar>&, Arguments);
 #endif
+/** @cond */
+DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FInkVar, FExternalFunctionDelegate, const TArray<FInkVar>&, Arguments);
+/** @endcond */
 
 #ifdef DOXYGEN
-UFUNCTION(BlueprintImplementableEvent, )
+DOC_UF(BlueprintImplementableEvent, )
 /** Delegate for external event.
  * the number of arguments are defined inside the ink story
  * @param Arguments array containing all arguments passed to this function
@@ -55,9 +56,10 @@ UFUNCTION(BlueprintImplementableEvent, )
  * @blueprint
  */
 void FExternalFunctionVoidDelegate(const TArray<FInkVar>& Arguments);
-#else
-DECLARE_DYNAMIC_DELEGATE_OneParam(FExternalFunctionVoidDelegate, const TArray<FInkVar>&, Arguments);
 #endif
+/** @cond */
+DECLARE_DYNAMIC_DELEGATE_OneParam(FExternalFunctionVoidDelegate, const TArray<FInkVar>&, Arguments);
+/** @endcond */
 
 /** @private */
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FGlobalTagFunctionDelegate, UInkThread*, Caller, const TArray<FString>&, Params);
@@ -67,19 +69,20 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGlobalTagFunctionMulticastDelegate
 
 
 #ifdef DOXYGEN
-UFUNCTION(BlueprintImplementableEvent, )
+DOC_UF(BlueprintImplementableEvent, )
 /** Notification if variable changes.
  * @see @ref AInkRuntime::ObserverVariable()
  *
  * @blueprint
  */
 void FVariableCallbackDelegate();
-#else
-DECLARE_DYNAMIC_DELEGATE(FVariableCallbackDelegate);
 #endif
+/** @cond */
+DECLARE_DYNAMIC_DELEGATE(FVariableCallbackDelegate);
+/** @endcond */
 
 #ifdef DOXYGEN
-UFUNCTION(BlueprintImplementableEvent, )
+DOC_UF(BlueprintImplementableEvent, )
 /** Notification containing the new variable value, send on variable change.
  * @param value new value of the variable
  * @see @ref AInkRuntime::ObserverVariableEvent()
@@ -87,12 +90,13 @@ UFUNCTION(BlueprintImplementableEvent, )
  * @blueprint
  */
 void FVariableCallbackDelegateNewValue(const FInkVar& value);
-#else
-DECLARE_DYNAMIC_DELEGATE_OneParam(FVariableCallbackDelegateNewValue, const FInkVar&, value);
 #endif
+/** @cond */
+DECLARE_DYNAMIC_DELEGATE_OneParam(FVariableCallbackDelegateNewValue, const FInkVar&, value);
+/** @endcond */
 
 #ifdef DOXYGEN
-UFUNCTION(BlueprintImplementableEvent, )
+DOC_UF(BlueprintImplementableEvent, )
 /** Notification containing old and new varible, send on variable change.
  * @param value new value of the variable
  * @param old_value previouse value of the variable has value @ref EInkVarType::None "None" if
@@ -102,9 +106,10 @@ UFUNCTION(BlueprintImplementableEvent, )
  * @blueprint
  */
 void FVariableCallbackDelegateNewOldValue(const FInkVar& value, const FInkVar& old_value);
-#else
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FVariableCallbackDelegateNewOldValue, const FInkVar&, value, const FInkVar&, old_value);
 #endif
+/** @cond */
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FVariableCallbackDelegateNewOldValue, const FInkVar&, value, const FInkVar&, old_value);
+/** @endcond */
 
 UCLASS()
 

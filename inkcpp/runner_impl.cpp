@@ -662,7 +662,7 @@ runner_impl::change_type runner_impl::detect_change() const
 	// Check if the old newline is still present (hasn't been glu'd) and
 	//  if there is new text (non-whitespace) in the stream since saving
 	bool stillHasNewline = _output.saved_ends_with(value_type::newline);
-	bool hasAddedNewText = _output.text_past_save() || _tags.has_changed();
+	bool hasAddedNewText = _output.text_past_save() || _tags.last_size() < num_tags();
 
 	// Newline is still there and there's no new text
 	if (stillHasNewline && ! hasAddedNewText) {

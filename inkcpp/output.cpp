@@ -35,11 +35,12 @@ void basic_stream::append(const value& in)
 			if (d.type() == value_type::newline || d.type() == value_type::glue) {
 				return;
 			} else if (d.type() == value_type::string && ink::internal::is_whitespace(d.get<value_type::string>())) {
+			} else if (d.type() == value_type::func_start || d.type() == value_type::func_end) {
 			} else {
 				break;
 			}
 			if (i == 0) {
-				break;
+					return;
 			}
 			--i;
 		}
@@ -69,6 +70,7 @@ void basic_stream::append(const value& in)
 			// Nullify whitespace
 			else if (d.type() == value_type::string && ::ink::internal::is_whitespace(d.get<value_type::string>()))
 				d = value{};
+
 
 			// If it's not a newline or whitespace, stop
 			else

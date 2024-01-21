@@ -5,8 +5,8 @@ find_package(inkcpp CONFIG REQUIRED)
 
 # for CXX builds
 add_executable(main_cpp main.cpp)
-target_link_libraries(main inkcpp inkcpp_compiler)
+target_link_libraries(main_cpp inkcpp inkcpp_compiler)
 
 # for C builds
 # add_executable(main_c main.c)
-# target_link_libraries(main inkcpp_c)
+# target_link_libraries(main_c inkcpp_c)

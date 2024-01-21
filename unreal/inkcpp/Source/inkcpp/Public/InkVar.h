@@ -64,7 +64,7 @@ struct INKCPP_API FInkVar
 	}
 
 	/** @private */
-	FInkVar(const UInkList& List) { value.SetSubtype<UInkList*>(&List); }
+	FInkVar(UInkList& List) { value.SetSubtype<UInkList*>(&List); }
 
 	/** @private */
 	FInkVar(ink::runtime::value val);
@@ -231,7 +231,7 @@ public:
 	 *
 	 * @blueprint
 	 */
-	static FInkVar UInkVarLibrary::Conv_ListInkVar(const UInkList& List);
+	static FInkVar Conv_ListInkVar(UInkList* List);
 
 	// UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (UInt)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
 	// static FInkVar Conv_UIntInkVar(unsigned Number);
