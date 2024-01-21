@@ -86,7 +86,7 @@ if (DOXYGEN_FOUND)
 			"${PROJECT_BINARY_DIR}/render.css"
 			EXPECTED_HASH SHA256=875364e36f8aa5d6c1d41d58043f13b48a499b5c969e8daef35bd29bbf7c6e8d)
 		file(READ "${PROJECT_SOURCE_DIR}/Doxyfile" DOXYFILE)
-		string(REPLACE "INPUT_FILTER           =" "INPUT_FILTER           = node ${PROJECT_BINARY_DIR}/blueprintue_filter.js" DOXYFILE2 ${DOXYFILE})
+		string(REPLACE "FILTER_PATTERNS        =" "FILTER_PATTERNS        = \"*/unreal/*=node ${PROJECT_BINARY_DIR}/blueprintue_filter.js\"" DOXYFILE2 ${DOXYFILE})
 		string(REPLACE "HTML_EXTRA_STYLESHEET  =" "HTML_EXTRA_STYLESHEET  = ${PROJECT_BINARY_DIR}/render.css " DOXYFILE ${DOXYFILE2})
 		file(WRITE "${PROJECT_BINARY_DIR}/Doxyfile" ${DOXYFILE})
 	else ()

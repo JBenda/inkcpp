@@ -218,7 +218,7 @@ bool UInkThread::Execute()
 
 bool UInkThread::PickChoice(int index)
 {
-	if (index >= mCurrentChoices.Num()) {
+	if (index >= mCurrentChoices.Num() || index < 0) {
 		UE_LOG(
 		    InkCpp, Warning, TEXT("PickChoice: index(%i) out of range [0-%i)"), index,
 		    mCurrentChoices.Num()

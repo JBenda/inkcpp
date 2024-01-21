@@ -46,6 +46,9 @@ ink::runtime::value FInkVar::to_value() const {
 	
 }
 
+EInkVarType UInkVarLibrary::InkVarType(const FInkVar& InkVar) {
+	return InkVar.type();
+}
 FString UInkVarLibrary::Conv_InkVarString(const FInkVar& InkVar)
 {
 	if (ensureMsgf(InkVar.type() == EInkVarType::String, TEXT("InkVar is not a String Type!")))

@@ -85,9 +85,15 @@ public:
 	void PopExclusiveThread(UInkThread* Thread);
 	
 	UFUNCTION(BlueprintCallable, Category="Ink")
+	/** register a "tag function"
+		* This function is executed if context or a tag in a special format apears
+		* @see @ref TagFunction
+		*
+		* @blueprint
+		*/
 	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate & function);
 	
-	// for interanl use
+	/** @private for interanl use */
 	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
 	
 	UFUNCTION(BlueprintCallable, Category="Ink")
@@ -110,6 +116,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	/** Gets a ping if variable changes
+		* @see #ObserverVariableEvent() #ObserverVariableChange()
 		* 
 		* @blueprint
 		*/
@@ -117,6 +124,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	/** On variable change provides new value
+		* @see #ObserverVariable() #ObserverVariableChange()
 		*
 		* @blueprint
 		*/
@@ -124,7 +132,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	/** On variable change provides old and new value.
-		* @attention if the varibale set for the firs time, the old value has value type None
+		* @see #ObserverVariable() #ObserverVariable()
+		* @attention if the varibale set for the firs time, the old value has value type @ref EInkVarType::None
 		*
 		* @blueprint
 		*/
@@ -136,6 +145,7 @@ protected:
 
 public:	
 	// Called every frame
+	/** @private */
 	virtual void Tick(float DeltaTime) override;
 
 	// Story asset used in this level

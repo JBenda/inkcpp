@@ -18,13 +18,13 @@
 UENUM(BlueprintType)
 enum class EInkVarType : uint8
 {
-	Float,
-	Int,
-	UInt,
-	Bool,
-	String,
-	List,
-	None
+	Float, ///< contains a value of type float
+	Int,   ///< contains a value of type int or uint
+	UInt,  ///< @todo currenty not supported
+	Bool,  ///< contains a boolean
+	String,///< contains a string value
+	List,  ///< contains a @ref UInkList
+	None   ///< contains no value
 };
 
 namespace ink::runtime { struct value; }
@@ -112,39 +112,62 @@ class INKCPP_API UInkVarLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Var Type", BlueprintAutocast), Category = "Ink")
 
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Var Type", BlueprintAutocast), Category = "Ink")
 	/** Get the type contained in the value
-	 * @retval EInkVarType::None if no value is contained (void)
+	 * @retval @ref EInkVarType::None if no value is contained (void)
+	 *
+	 * @blueprint
 	 */
-	static EInkVarType InkVarType(const FInkVar& InkVar) { return InkVar.type(); }
+	static EInkVarType InkVarType(const FInkVar& InkVar);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "String (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Access String value
+		*
+		* @blueprint 
+		*/
 	static FString Conv_InkVarString(const FInkVar& InkVar);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Int (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Access Int/Uint value
+		* @todo suppurt unsigned int
+		*
+		* @blueprint 
+		*/
 	static int Conv_InkVarInt(const FInkVar& InkVar);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Float (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Access Float Value
+		*
+		* @blueprint 
+		*/
 	static float Conv_InkVarFloat(const FInkVar& InkVar);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Name (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Access String value as FName
+		*
+		* @blueprint
+		*/
 	static FName Conv_InkVarName(const FInkVar& InkVar);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Text (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Access Strnig value as FText
+		*
+		* @blueprint 
+		*/
 	static FText Conv_InkVarText(const FInkVar& InkVar);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Bool (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Access bool value
+		* 
+		* @blueprint */
 	static bool Conv_InkVarBool(const FInkVar& InkVar);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "InkList (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Access @ref UInkList "List" value
+		*
+		* @blueprint
+		*/
 	static const UInkList* Conv_InkVarInkList(const FInkVar& InkVar);
 	
 	// UFUNCTION(BlueprintPure, meta = (DisplayName = "UInt (Ink Var)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
@@ -152,31 +175,53 @@ public:
 
 	
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (String)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Convert string to @ref FInkVar
+		*
+		* @blueprint
+		*/
 	static FInkVar Conv_StringInkVar(const FString& String);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (Int)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Convert int to @ref FInkVar
+		* @todo support unsigned values
+		*
+		* @blueprint 
+		*/
 	static FInkVar Conv_IntInkVar(int Number);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (Float)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Convert float to @ref FInkVar
+		*
+		* @blueprint
+		*/
 	static FInkVar Conv_FloatInkVar(float Number);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (Text)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Convert FText to @ref FInkVar of type @ref EInkVarType::String "String"
+		*
+		* @blueprint
+		*/
 	static FInkVar Conv_TextInkVar(const FText& Text);
 	
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (Name)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Convert FName to @ref FInkVar of type @ref EInkVarType::String "String"
+		*
+		* @blueprint
+		*/
 	static FInkVar Conv_NameInkVar(const FName& Name);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (Bool)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Convert bool to @ref FInkVar
+		* 
+		* @blueprint
+		*/
 	static FInkVar Conv_BoolInkVar(bool Boolean);
 	
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (InkList)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
-	/** @blueprint */
+	/** Converts @ref UInkList "List" to @ref FInkVar
+		*
+		* @blueprint
+		*/
 	static FInkVar UInkVarLibrary::Conv_ListInkVar(const UInkList& List);
 	
 	// UFUNCTION(BlueprintPure, meta = (DisplayName = "Ink Var (UInt)", CompactNodeTitle = "->", BlueprintAutocast), Category = "Ink")
