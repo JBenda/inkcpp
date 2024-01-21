@@ -10,16 +10,19 @@ class globals_interface;
 class runner_interface;
 class snapshot;
 
+/** alias for an managed @ref ink::runtime::globals_interface pointer */
 using globals = story_ptr<globals_interface>;
+/** alias for an managed @ref ink::runtime::runner_interface pointer */
 using runner  = story_ptr<runner_interface>;
+/** alias for @ref ink::runtime::list_interface pointer */
 using list    = list_interface*;
 
 /** A Ink variable
  *
  * Used for accassing, writing and observing global variables
- * @ref globals_interface::get() const,
- * @ref globals_interface::set()
- * @ref globals_interface::observe()
+ * @ref ink::runtime::globals_interface::get()
+ * @ref ink::runtime::globals_interface::set()
+ * @ref ink::runtime::globals_interface::observe()
  *
  * and for the execution of extern functions
  * @ref ink::runtime::runner_interface::bind()
@@ -116,36 +119,42 @@ public:
 	}
 };
 
+/** access #value::Type::Bool value */
 template<>
 inline const auto& value::get<value::Type::Bool>() const
 {
 	return v_bool;
 }
 
+/** access #value::Type::Uint32 value */
 template<>
 inline const auto& value::get<value::Type::Uint32>() const
 {
 	return v_uint32;
 }
 
+/** access #value::Type::Int32 value */
 template<>
 inline const auto& value::get<value::Type::Int32>() const
 {
 	return v_int32;
 }
 
+/** access #value::Type::String value */
 template<>
 inline const auto& value::get<value::Type::String>() const
 {
 	return v_string;
 }
 
+/** access #value::Type::Float value */
 template<>
 inline const auto& value::get<value::Type::Float>() const
 {
 	return v_float;
 }
 
+/** access #value::Type::List value */
 template<>
 inline const auto& value::get<value::Type::List>() const
 {

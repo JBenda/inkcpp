@@ -115,7 +115,7 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Var Type", BlueprintAutocast), Category = "Ink")
 	/** Get the type contained in the value
-	 * @retval @ref EInkVarType::None if no value is contained (void)
+	 * @retval EInkVarType::None if no value is contained (void)
 	 *
 	 * @blueprint
 	 */

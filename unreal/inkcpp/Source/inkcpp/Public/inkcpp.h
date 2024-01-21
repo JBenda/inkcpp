@@ -29,7 +29,7 @@
  *   + Tag attributes as enums: use tags to modify choices
  * + @ref ue_example_minimal "`Minimal`": An example for a minimal, still sensible usage example of InkCPP in UE5.
  *
- * @subsection ue_exapmle_demo  Demo
+ * @subsection ue_example_demo  Demo
  *
  * The Demo map contains the Actor `DemoThread` which is a child of `InkRuntime`.
  * All UI elements and other used components are created on the `BeginPlay` event in the following order.

@@ -21,6 +21,18 @@ namespace internal
 	class list_table;
 } // namespace internal
 
+/** Interface for accessing a Ink list.
+ *
+ * Every function which takes a flag name can also be feed with
+ * a full flag name in the format `listName.flagName`
+ * @code
+ * using namespace ink::runtime;
+ * list l = globals.get<list>("list_var");
+ * l.add("flagName");
+ * l.add("listName.FlagName")
+ * globals.set("list_var", l);
+ * @endcode
+ */
 class list_interface
 {
 public:
@@ -30,6 +42,9 @@ public:
 	{
 	}
 
+	/** iterater for flags in a list 
+		* @todo implement `operator->`
+		*/
 	class iterator
 	{
 		const char*           _flag_name;
@@ -45,6 +60,7 @@ public:
 #endif
 
 	protected:
+		/** @private */
 		iterator(
 		    const char* flag_name, const list_interface& list, size_t i, bool one_list_only = false
 		)
@@ -56,10 +72,15 @@ public:
 		}
 
 	public:
+		/** contains flag data */
 		struct Flag {
-			const char* flag_name;
-			const char* list_name;
+			const char* flag_name; ///< name of the flag
+			const char* list_name; ///< name of the list
 #ifdef INK_ENABLE_STL
+			/** serelization operator
+		   * @param os
+		   * @param flag
+		   */
 			friend std::ostream& operator<<(std::ostream& os, const Flag& flag)
 			{
 				os << flag.list_name << "(" << flag.flag_name << ")";
@@ -68,16 +89,24 @@ public:
 #endif
 		};
 
+		/** access value the iterator is pointing to */
 		Flag operator*() const { return Flag{.flag_name = _flag_name, .list_name = _list_name}; };
 
+		/** continue iterator to next value */
 		iterator& operator++()
 		{
 			_list.next(_flag_name, _list_name, _i, _one_list_iterator);
 			return *this;
 		}
 
+		/** checks if iterator points not to the same element
+		 * @param itr other iterator
+		 */
 		bool operator!=(const iterator& itr) const { return itr._i != _i; }
 
+		/** checks if iterator points to the same element
+		 * @param itr other iterator
+		 */
 		bool operator==(const iterator& itr) const { return itr._i == _i; }
 	};
 
@@ -131,18 +160,22 @@ private:
 	};
 
 protected:
+	/** @private */
 	iterator new_iterator(const char* flag_name, int i, bool one_list_only = false) const
 	{
 		return iterator(flag_name, *this, i, one_list_only);
 	}
 
+	/** @private */
 	list_interface(internal::list_table& table, int list)
 	    : _list_table{&table}
 	    , _list{list}
 	{
 	}
 
+	/** @private */
 	internal::list_table* _list_table;
+	/** @private */
 	int                   _list;
 };
 } // namespace ink::runtime

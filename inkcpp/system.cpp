@@ -19,12 +19,14 @@ namespace ink
 		return h; // or return h % C;
 	}
 
+namespace internal {
 	void zero_memory(void* buffer, size_t length)
 	{
 		char* buf = static_cast<char*>(buffer);
 		for (size_t i = 0; i < length; i++)
 			*(buf++) = 0;
 	}
+}
 }
 
 #endif

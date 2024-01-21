@@ -140,7 +140,7 @@ public:
 	void ObserverVariableChange(const FString& variableName, const FVariableCallbackDelegateNewOldValue& callback);
 
 protected:
-	// Called when the game starts or when spawned
+	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
 public:	
@@ -150,6 +150,7 @@ public:
 
 	// Story asset used in this level
 	UPROPERTY(EditAnywhere, Category="Ink")
+	/** @private */
 	class UInkAsset* InkAsset;
 
 private:

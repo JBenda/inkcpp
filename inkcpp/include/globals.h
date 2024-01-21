@@ -29,8 +29,9 @@ public:
 	/**
 	 * @brief Write new value in global store.
 	 * @param name name of variable, as defined in InkScript
+	 * @param val
 	 * @tparam T c++ type of variable
-	 * @return true on success
+	 * @retval true on success
 	 */
 	template<typename T>
 	bool set(const char* name, const T& val)
@@ -45,6 +46,7 @@ public:
 	 * Calls callback with `value` or with casted value if it is one of
 	 * values variants. The callback will also be called with the current value
 	 * when the observe is bind.
+	 * @param name of variable to observe
 	 * @param callback functor with:
 	 * * 0 arguments
 	 * * 1 argument: `new_value`
@@ -57,13 +59,19 @@ public:
 		internal_observe(hash_string(name), new internal::callback(callback));
 	}
 
+	/** create a snapshot of the current runtime state. 
+		* (inclusive all runners assoziated with this globals) 
+		*/
 	virtual snapshot* create_snapshot() const = 0;
 
 	virtual ~globals_interface() = default;
 
 protected:
+	/** @private */
 	virtual optional<value> get_var(hash_t name) const                                       = 0;
+	/** @private */
 	virtual bool            set_var(hash_t name, const value& val)                           = 0;
+	/** @private */
 	virtual void            internal_observe(hash_t name, internal::callback_base* callback) = 0;
 };
 

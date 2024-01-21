@@ -40,7 +40,7 @@ UFUNCTION(BlueprintImplementableEvent, )
  *
  * @blueprint
  */
-FInkVar FExternalFunctionDelegate(const TArray<FInkVar>& Arugments);
+FInkVar FExternalFunctionDelegate(const TArray<FInkVar>& Arguments);
 #else
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FInkVar, FExternalFunctionDelegate, const TArray<FInkVar>&, Arguments);
 #endif
@@ -49,7 +49,7 @@ DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FInkVar, FExternalFunctionDelegate, con
 UFUNCTION(BlueprintImplementableEvent, )
 /** Delegate for external event.
 	* the number of arguments are defined inside the ink story
-	* @param Arugments array containing all arguments passed to this function
+	* @param Arguments array containing all arguments passed to this function
 	* @see @ref UInkThread::RegisterExternalFunction
 	*
 	* @blueprint

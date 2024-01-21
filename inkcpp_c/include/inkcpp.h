@@ -29,6 +29,8 @@ typedef struct HInkSTory    HInkStory;
 	 * 1. `#include <ink/c/inkcpp.h>`
 	 * 2. `#include <ink/inkcpp.h>`
 	 *
+	 * @section example_c Example
+	 *
 	 * To setup an example for option `1.` and `2.` if you use cmake checkout @ref cmake and replace
 	 * `target_link_libraries` with `target_link_libraries(main inkcpp_c)` The story and source file
 	 * can be used as @ref src_main_c "noted down"
@@ -66,11 +68,13 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	HInkSnapshot* ink_snapshot_from_file(const char* filename);
 	/** @memberof HInkSnapshot
-	 *  @copydoc  ink::runtime::snapshot::num_runner()
+	 *  @copydoc  ink::runtime::snapshot::num_runners()
+	 *  @param self
 	 */
 	int           ink_snapshot_num_runners(const HInkSnapshot* self);
 	/** @memberof HInkSnapshot
 	 *  @copydoc  ink::runtime::snapshot::write_to_file()
+	 *  @param self
 	 */
 	void          ink_snapshot_write_to_file(const HInkSnapshot* self, const char* filename);
 
@@ -82,14 +86,17 @@ typedef struct HInkSTory    HInkStory;
 	struct HInkChoice;
 	/** @memberof HInkChoice
 	 *  @copydoc ink::runtime::choice::text
+	 *  @param self
 	 */
 	const char* ink_choice_text(const HInkChoice* self);
 	/** @memberof HInkChoice
 	 *  @copydoc ink::runtime::choice::num_tags
+	 *  @param self
 	 */
 	int         ink_choice_num_tags(const HInkChoice* self);
 	/** @memberof HInkChoice
 	 *  @copydoc ink::runtime::choice::get_tag
+	 *  @param self
 	 */
 	const char* ink_choice_get_tag(const HInkChoice* self, int index);
 
@@ -137,7 +144,9 @@ typedef struct HInkSTory    HInkStory;
 	 * @memberof HInkList
 	 * Creates an Iterator over all flags contained in a list assziated with a defined list.
 	 * @see @ref InkListIter for a usage example
+	 * @param self
 	 * @param list_name name of defined list which elements should be filterd
+	 * @param[out] iter constructed iterator
 	 * @retval 0 if the list contains no flags and the iterator would be invalid
 	 */
 	int  ink_list_flags_from(const HInkList* self, const char* list_name, InkListIter* iter);
@@ -153,7 +162,7 @@ typedef struct HInkSTory    HInkStory;
 	 * The concret type contained is noted in @ref InkValue::type "type", please use this information
 	 * to access the corresponding field of the union
 	 * @attention a InkValue of type @ref InkValue::Type::ValueTypeNone "ValueTypeNone" dose not
-	 * contain any value! It is use e.g. at @ref ink_globals_get()
+	 * contain any value! It is use e.g. at @ref HInkGlobals::ink_globals_get() "ink_globals_get()"
 	 */
 	struct InkValue {
 		union {
@@ -228,23 +237,31 @@ typedef struct HInkSTory    HInkStory;
 	int               ink_runner_num_tags(const HInkRunner* self);
 	/** @memberof HInkRunner
 	 * @copydoc ink::runtime::runner_interface::get_tag()
+	 * @param self
 	 */
-	const char*       ink_runner_tag(const HInkRunner* self, int tag_id);
+	const char*       ink_runner_tag(const HInkRunner* self, int index);
 	/** @memberof HInkRunner
-	 * @copydoc ink::runtiem::runner_interface::num_choices()
+	 * @copydoc ink::runtime::runner_interface::num_choices()
+	 * @param self
 	 */
 	int               ink_runner_num_choices(const HInkRunner* self);
 	/** @memberof HInkRunner
 	 * @copydoc ink::runtime::runner_interface::get_choice()
+	 * @param self
 	 */
-	const HInkChoice* ink_runner_get_choice(const HInkRunner* self, int choice_id);
+	const HInkChoice* ink_runner_get_choice(const HInkRunner* self, int index);
 	/** @memberof HInkRunner
 	 * @copydoc ink::runtime::runner_interface::choose()
+	 * @param self
 	 */
-	void              ink_runner_choose(HInkRunner* self, int choice_id);
+	void              ink_runner_choose(HInkRunner* self, int index);
+
 	/** @memberof HInkRunner
 	 * Binds a external function which is called form the runtime, with no return value.
 	 * @see ink_runner_bind()
+	 * @param self
+	 * @param function_name declared in ink script
+	 * @param callback
 	 * @param lookaheadSafe if false stop glue lookahead if encounter this function
 	 *                      this prevents double execution of external functions but can lead to
 	 *                      missing glues
@@ -256,6 +273,9 @@ typedef struct HInkSTory    HInkStory;
 	/** @memberof HInkRunner
 	 * Binds a external function which is called from the runtime, with a return vallue.
 	 * @see ink_runner_bind_void()
+	 * @param self
+	 * @param function_name name of external function declared inside ink script
+	 * @param callback
 	 * @param lookaheadSafe if false stop glue lookahead if encounter this function
 	 *                      this prevents double execution of external functions but can lead to
 	 *                      missing glues
@@ -298,12 +318,15 @@ typedef struct HInkSTory    HInkStory;
 	/**  @memberof HInkGlobals
 	 * Gets the value of a global variable
 	 * @param variable_name name of variable (same as in ink script)
-	 * @retval @ref InkValue::Type::ValueTypeNone "ValueTypeNone" iff the variable does not exist
+	 * @param self
+	 * @retval InkValue::Type::ValueTypeNone iff the variable does not exist
 	 */
 	InkValue ink_globals_get(const HInkGlobals* self, const char* variable_name);
 	/**  @memberof HInkGlobals
 	 * Sets the value of a globals variable.
 	 * @param variable_name name of variable (same as in ink script)
+	 * @param self
+	 * @param value
 	 * @return false if the variable was not set, because the variable with this name does no exists
 	 * or the value did not match.
 	 */
@@ -323,27 +346,32 @@ typedef struct HInkSTory    HInkStory;
 	HInkStory*   ink_story_from_file(const char* filename);
 	/** @memberof HInkStory
 	 * deletes a story and all assoziated resources
+	 * @param self
 	 * @attention this will invalidate all ::HInkRunner and ::HInkGlobals handles assoziated with this
 	 * story
 	 */
 	void         ink_story_delete(HInkStory* self);
 	/** @memberof HInkStory
 	 *  @copydoc ink::runtime::story::new_globals
+	 *  @param self
 	 */
 	HInkGlobals* ink_story_new_globals(HInkStory* self);
 	/** @memberof HInkStory
 	 *  @copydoc ink::runtime::story::new_runner
+	 *  @param self
 	 */
-	HInkRunner*  ink_story_new_runner(HInkStory* self, HInkGlobals* globals);
+	HInkRunner*  ink_story_new_runner(HInkStory* self, HInkGlobals* store);
 	/** @memberof HInkStory
 	 *  @copydoc ink::runtime::story::new_globals_from_snapshot
+	 *  @param self
 	 */
-	HInkGlobals* ink_story_new_globals_from_snapshot(HInkStory* self, const HInkSnapshot* snapshot);
+	HInkGlobals* ink_story_new_globals_from_snapshot(HInkStory* self, const HInkSnapshot* obj);
 	/** @memberof HInkStory
 	 *  @copydoc ink::runtime::story::new_runner_from_snapshot
+	 *  @param self
 	 */
 	HInkRunner*  ink_story_new_runner_from_snapshot(
-	     HInkStory* self, const HInkSnapshot* snapshot, HInkGlobals* globals, int runner_id
+	     HInkStory* self, const HInkSnapshot* obj, HInkGlobals* store, int runner_id
 	 );
 
 	/**

@@ -1070,7 +1070,7 @@ EXCLUDE_PATTERNS       =
 # wildcard * is used, a substring. Examples: ANamespace, AClass,
 # ANamespace::AClass, ANamespace::*Test
 
-EXCLUDE_SYMBOLS        = ink::list_flag
+EXCLUDE_SYMBOLS        = ink::list_flag ink::runtime::internal* ink::internal*
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or directories
 # that contain example code fragments that are included (see the \include
@@ -2390,6 +2390,9 @@ INCLUDE_FILE_PATTERNS  =
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 PREDEFINED             = DOXYGEN \
+						 INK_ENABLE_STL \
+						 INK_ENABLE_CSTD \
+						 INK_ENABLE_UNREAL \
 						 UFUNCTION(...):=
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

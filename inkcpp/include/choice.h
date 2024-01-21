@@ -44,10 +44,16 @@ namespace ink
 			 */
 			const char* text() const { return _text; }
 
+			/** @private */
 			choice() : choice(0) {}
+			/** @private */
 			choice(int) : _tags{nullptr}, _text{nullptr}, _index{~0}, _path{~0u}, _thread{~0u} {}
 
+			/** does this choice has tags? */
 			bool has_tags() const { return _tags != nullptr; }
+			/** number of tags assoziated with this choice 
+			 * @see @ref ink::runtime::choice::has_tags() "has_tags()"
+			 */
 			size_t num_tags() const
 			{
 				size_t i = 0;
@@ -57,6 +63,7 @@ namespace ink
 				};
 				return i;
 			}
+			/** @copydoc ink::runtime::runner_interface::get_tag() */
 			const char* get_tag(size_t index) const {
 				return _tags[index];
 			}
@@ -68,11 +75,11 @@ namespace ink
 			choice&  setup( internal::basic_stream&, internal::string_table& strings, internal::list_table& lists, int index, uint32_t path, thread_t thread, const char* const* tags );
 
 		protected:
-			const char* const* _tags;
-			const char* _text;
-			int _index;
-			uint32_t _path;
-			thread_t _thread;
+			const char* const* _tags; ///< @private
+			const char* _text; ///< @private
+			int _index; ///< @private
+			uint32_t _path; ///< @private
+			thread_t _thread; ///< @private
 		};
 	}
 }

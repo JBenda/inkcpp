@@ -18,11 +18,12 @@ namespace ink::runtime::internal
 	}
 
 	template<unsigned int N, typename Arg, typename... Args>
-	struct get_ith_type : get_ith_type<N - 1, Args...> {};
+	struct get_ith_type : /** @cond */ get_ith_type<N - 1, Args...> /** @endcond */{/** @cond */};
 
 	template<typename Arg, typename... Args>
 	struct get_ith_type<0, Arg, Args...>
 	{
+		/** @endcond */
 		using type = Arg;
 	};
 

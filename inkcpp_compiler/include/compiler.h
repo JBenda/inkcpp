@@ -29,7 +29,7 @@ namespace compiler
 	/** stream -> stream */
 	void run(std::istream& in, std::ostream& out, compilation_results* results = nullptr);
 
-	/* stream -> file **/
+	/** stream -> file */
 	void run(std::istream& in, const char* filenameOut, compilation_results* results = nullptr);
 } // namespace compiler
 }

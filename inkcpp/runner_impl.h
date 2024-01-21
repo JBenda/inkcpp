@@ -53,7 +53,8 @@ namespace ink::runtime::internal
 		// Chooses a choice by index
 		virtual void choose(size_t index) override;
 
-		// runs silently
+		/** Continue one line silently. 
+		 * executes story until end of next line and discards the result. */
 		void getline_silent();
 
 		virtual bool has_tags() const override;

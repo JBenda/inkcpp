@@ -6,6 +6,7 @@ namespace ink::runtime
 {
 	namespace internal
 	{
+		/** @private */
 		struct ref_block
 		{
 			ref_block()
@@ -19,26 +20,37 @@ namespace ink::runtime
 			static void remove_reference(ref_block*&);
 		};
 
+		/** @private */
 		class story_ptr_base
 		{
 		protected:
+			/** construct a new pointer with new instance block */
 			story_ptr_base(internal::ref_block* story);
+			/** construct a new pointer with existing instance block */
 			story_ptr_base(internal::ref_block* story, internal::ref_block* instance);
+			/** construct a new pointer basedd on existing story pointer */
 			story_ptr_base(const story_ptr_base&);
 			
 			story_ptr_base& operator=(const story_ptr_base&) = delete;
 
+			/** increases reference count */
 			void add_reference();
+			/** decreses reference count
+				* @retval true if count reaches zero and object was removed
+	      */
 			bool remove_reference();
 
+			/** switch lifetime block */
 			void set(const story_ptr_base& other);
 
+			/** checks if pointer is still alive */
 			inline bool is_valid() const { 
 				return 
 					_story_block != nullptr && _instance_block != nullptr 
 					&&_story_block->valid && _instance_block->valid; 
 			}
 
+			/** checks if story still exists */
 			inline bool is_story_valid() const {
 				return _story_block != nullptr && _story_block->valid;
 			}
@@ -68,7 +80,9 @@ namespace ink::runtime
 	class story_ptr : public internal::story_ptr_base
 	{
 	public:
-		// constructor. internal use only.
+		/** constructor. internal use only.
+		 * @private
+		 */
 		story_ptr(T* ptr, internal::ref_block* story)
 			: story_ptr_base(story)
 			, _ptr(ptr)
@@ -76,7 +90,9 @@ namespace ink::runtime
 			add_reference();
 		}
 
-		// casting constructor. internal use only
+		/** casting constructor. internal use only 
+		 * @private
+		 */
 		template<typename U>
 		story_ptr(T* ptr, const story_ptr<U>& other)
 			: story_ptr_base(other)
@@ -85,7 +101,9 @@ namespace ink::runtime
 			add_reference();
 		}
 
-		// pointer constructor. for nullptr only.
+		/** pointer constructor. for nullptr only. 
+		 * @param ptr will be ignored, should be nullptr
+		 */
 		story_ptr(T* ptr)
 			: story_ptr_base(nullptr, nullptr)
 			, _ptr(nullptr)
@@ -104,10 +122,19 @@ namespace ink::runtime
 		~story_ptr();
 
 		// == copy methods ==
-		story_ptr(const story_ptr<T>&);
-		story_ptr<T>& operator=(const story_ptr<T>&);
+		/** copy constructor 
+		 * @param oth
+		 */
+		story_ptr(const story_ptr<T>& oth);
+		/** copy assigment operator 
+		 * @param oth
+		*/
+		story_ptr<T>& operator=(const story_ptr<T>& oth);
 
 		// == casting ==
+		/** pointer cast while keeping ref count
+		 * @tparam U new pointer type, valid cast form T to U must be available
+		 */
 		template<typename U>
 		story_ptr<U> cast()
 		{
@@ -126,18 +153,31 @@ namespace ink::runtime
 		}
 
 		// == equality ==
+		/** implement operator== */
 		inline bool operator==(const story_ptr<T>& other) { return _ptr == other._ptr; }
 
 		// == validity ==
+		/** checks if optional contains a value */
 		bool is_valid() const { return story_ptr_base::is_valid() && _ptr; }
+		/** auto cast to bool with value from @ref #is_valid() */
 		inline operator bool() const { return is_valid(); }
 
 		// === dereference operators ==
+		/** access value as ptr
+		 * @retval nullptr if value is not @ref #is_valid() "valid"
+		*/
 		inline T* get() { return is_valid() ? _ptr : nullptr; }
+		/** access value as ptr
+		 * @retval nullptr if value is not @ref #is_valid() "valid"
+		*/
 		inline const T* get() const { return is_valid() ? _ptr : nullptr; }
+		/** implement operator-> */
 		inline T* operator->() { return get(); }
+		/** implement operator-> */
 		inline const T* operator->() const { return get(); }
+		/** implement operator* */
 		inline T& operator*() { return *get(); }
+		/** implement operator* */
 		inline const T& operator*() const { return *get(); }
 	private:
 		T* _ptr;
