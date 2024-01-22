@@ -11,7 +11,7 @@
  *
  * The C++ API will be available soon(TM).
  *
- * In the following the [Demo project](../unreal/inkCPP_DEMO.zip) will be @ref ue_example
+ * In the following the [Demo project](../unreal/InkCPP_DEMO.zip) will be @ref ue_example
  * "shown".<br/>
  * But firsta more general explenation of the @ref ue_components "UE5 Blueprits"
  *

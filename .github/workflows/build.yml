@@ -192,7 +192,13 @@ jobs:
       with:
         python-version: "3.x"
     - name: Install Doxygen
-      run: sudo apt-get install doxygen graphviz -y
+      run: |
+        sudo apt-get install graphviz -y
+        wget https://www.doxygen.nl/files/doxygen-1.10.0.linux.bin.tar.gz
+        gunzip doxygen-*.tar.gz
+        tar xf doxygen-*.tar
+        cd doxygen-1.10.0/
+        make install
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v1.14.2
       with:
