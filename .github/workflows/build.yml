@@ -325,6 +325,8 @@ jobs:
           path: comment.txt
   
   pages:
+    permissions:
+      contents: write
     name: "Upload Ink-Proof to Github Pages"
     needs: [ compilation, build-doc ]
     runs-on: ubuntu-latest
@@ -345,7 +347,7 @@ jobs:
 
       # Deploy to Github Pages
       - name: Deploy Page
-        uses: JamesIves/github-pages-deploy-action@4
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: inkproof-page
           folder: www
