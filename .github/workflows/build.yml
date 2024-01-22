@@ -198,7 +198,7 @@ jobs:
         gunzip doxygen-*.tar.gz
         tar xf doxygen-*.tar
         cd doxygen-1.10.0/
-        make install
+        sudo make install
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v1.14.2
       with:
