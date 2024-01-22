@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.16)
 enable_testing()
 
 # Project setup
-project(inkcpp VERSION 0.1.2)
+project(inkcpp VERSION 0.1.3)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
@@ -71,13 +71,36 @@ set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 include(CPack)
 
+if(NOT WHEEL_BUILD)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
+
 	set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
 	# enable if update to cmake version 3.28
 	# doxygen_add_docs(doc WORKING_DIR ${PROJECT_SOURCE_DIR} CONFIG_FILE "${PROJECT_SOURCE_DIR}/Doxyfile" COMMENT "Generate docs")
+	set(INPUT_FILTER "")
+
+	if (INKCPP_DOC_BlueprintUE)
+		# TODO: make as dependecy
+		file(COPY "${PROJECT_SOURCE_DIR}/unreal/blueprint_filter.js" DESTINATION ${PROJECT_BINARY_DIR})
+		file(DOWNLOAD 
+			"https://blueprintue.com/bue-render/render.css"
+			"${PROJECT_BINARY_DIR}/render.css"
+			EXPECTED_HASH SHA256=875364e36f8aa5d6c1d41d58043f13b48a499b5c969e8daef35bd29bbf7c6e8d)
+		file(APPEND "${PROJECT_BINARY_DIR}/render.css" ".bue-render .icon { background-color: unset; }")
+		file(READ "${PROJECT_SOURCE_DIR}/Doxyfile" DOXYFILE)
+		string(REPLACE "FILTER_PATTERNS        =" "FILTER_PATTERNS        = \"*/unreal/*=node ${PROJECT_BINARY_DIR}/blueprint_filter.js\"" DOXYFILE2 ${DOXYFILE})
+		string(REPLACE "HTML_EXTRA_STYLESHEET  =" "HTML_EXTRA_STYLESHEET  = ${PROJECT_BINARY_DIR}/render.css " DOXYFILE ${DOXYFILE2})
+		file(WRITE "${PROJECT_BINARY_DIR}/Doxyfile" ${DOXYFILE})
+	else ()
+		configure_file(
+			"${PROJECT_SOURCE_DIR}/Doxyfile"
+			"${PROJECT_BINARY_DIR}/Doxyfile"
+			COPYONLY)
+	endif()
+
 	add_custom_target(doc
-		${DOXYGEN_EXECUTABLE} "${PROJECT_SOURCE_DIR}/Doxyfile"
+		${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/Doxyfile"
 		WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
 		COMMENT "Generate doxygen documentation")
 	set(PY_HTML "${PROJECT_SOURCE_DIR}/Documentation/inkcpp_py.html")
@@ -101,3 +124,4 @@ if (DOXYGEN_FOUND)
 else(DOXYGEN_FOUND)
 	message("Doxygen needed to generate documntation!")
 endif(DOXYGEN_FOUND)
+endif(NOT WHEEL_BUILD)

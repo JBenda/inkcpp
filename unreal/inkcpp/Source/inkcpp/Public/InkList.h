@@ -7,15 +7,17 @@ namespace ink::runtime {
 	using list = list_interface*;
 }
 
-/** A single flag of a list
+/** A single flag of a list.
  * @ingroup unreal
  */
 USTRUCT(BlueprintType)
 struct FListFlag {
 	GENERATED_BODY()
 	UPROPERTY(BlueprintReadOnly, Category = "Ink")
+	/** name of the list, the flag is part of */
 	FString list_name;
 	UPROPERTY(BlueprintReadOnly, Category = "Ink")
+	/** name of the flag */
 	FString flag_name;
 };
 
@@ -29,37 +31,62 @@ class INKCPP_API UInkList : public UObject
 	GENERATED_BODY()
 
 public:
+	/** @private */
 	UInkList() {}
+
+	/** @private */
 	UInkList(ink::runtime::list list) { list_data = list; }
 
+	/** @private */
+	void SetList(ink::runtime::list list) { list_data = list; }
+
+	UFUNCTION(BlueprintPure, Category = "Ink")
+	/** Checks if a flag is contained (by name)
+	 * @attention If the flag name is not unique please use the full flag name aka
+	 * `list_name.flag_name`
+	 *
+	 * @blueprint
+	 */
 	bool ContainsFlag(const FString& flag_name) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
-	/** returns true if a flag with the same spelling then the enum `value` is set in the list
+	/** checks if flag with the same spelling then the enum `value` is set in the list
+	 * @retval true if flag is contained in list
+	 *
+	 * @blueprint
 	 */
-	bool ContainsEnum(const FString& enumName, const uint8& value) const;
+	bool ContainsEnum(const UEnum* Enum, const uint8& value) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** returns all values of a list with the same name as the enum
+	 *
+	 * @blueprint
 	 */
-	TArray<uint8> ElementsOf(const FString& enumName) const;
+	TArray<uint8> ElementsOf(const UEnum* Enum) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
-	/** returns all flag as string contained in the list from a list with the name `list_name`
+	/** returns all flag as string contained in the list from a list with the same name as the Enum`
+	 *
+	 * @blueprint
 	 */
-	TArray<FString> ElementsOfAsString(const FString& list_name) const;
+	TArray<FString> ElementsOfAsString(const UEnum* Enum) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
-	/** returns all `list_name` `flag_name` toubples
+	/** returns all `list_name` `flag_name` tuples
+	 *
+	 * @blueprint
 	 */
 	TArray<FListFlag> Elements() const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** check if at least one value of the given list is included, OR the list is empty
-	 * and assoziatet with the list */
-	bool ContainsList(const FString& name) const;
-	
-	
+	 * and assoziatet with the list
+	 *
+	 * @blueprint
+	 */
+	bool ContainsList(const FString& ListName) const;
+
+
 private:
 	friend struct FInkVar;
 

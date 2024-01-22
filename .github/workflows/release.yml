@@ -21,12 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download artifacts
-        uses: marcofaggian/action-download-multiple-artifacts@v3.0.8
-        with:
-          names: linux-cl linux-lib linux-clib unreal macos-cl macos-lib macos-clib win64-cl win64-lib win64-clib python-package-distribution
-          paths: linux-cl linux-lib linux-clib unreal macos-cl macos-lib macos-clib win64-cl win64-lib win64-clib dist
-          workflow: build.yml
-          branch: master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ID=$(gh run list -b master --limit 1 --json databaseId | jq '.[0].databaseId')
+          gh run download $ID -n linux-cl -n linux-lib -n linux-clib -n unreal -n macos-cl -n macos-lib -n macos-clib -n win64-cl -n win64-lib -n win64-clib -n python-package-distribution
+          mv python-package-distribution dist
       - name: Zip
         run: |
           for f in linux-cl linux-lib linux-clib unreal macos-cl macos-lib macos-clib win64-cl win64-lib win64-clib; do zip -r $f $f; done

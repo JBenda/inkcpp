@@ -265,6 +265,13 @@ PYBIND11_MODULE(inkcpp_py, m)
 	        },
 	        py::arg("function_name"), py::arg("function"), py::arg_v("lookaheadSafe", false),
 	        "Bind a function with return value"
+	    )
+	    .def(
+	        "move_to",
+	        [](runner& self, const char* path) -> bool {
+		        return self.move_to(ink::hash_string(path));
+	        },
+	        "Moves execution pointer to start of container desrcipet by the path"
 	    );
 	py::class_<choice>(m, "Choice")
 	    .def("text", &choice::text, "Get choice printable content")

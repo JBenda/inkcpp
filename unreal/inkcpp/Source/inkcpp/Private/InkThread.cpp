@@ -49,6 +49,10 @@ void UInkThread::RegisterExternalEvent(
 
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)
 {
+	inkAssert(
+	    ! thread->has_choices() || path.IsEmpty(),
+	    "Snapshot recovery does not work with starting path if currently at choice."
+	);
 	mStartPath    = path;
 	mpRuntime     = runtime;
 	mbInitialized = true;
@@ -56,8 +60,9 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 	mpTags        = NewObject<UTagList>();
 	mTagFunctions.Reset();
 	mCurrentChoices.Reset();
+	mnChoiceToChoose = -1;
 	mbHasRun   = false;
-	mbInChoice = false;
+	mbInChoice       = thread->has_choices();
 
 	OnStartup();
 }
@@ -72,10 +77,20 @@ bool UInkThread::ExecuteInternal()
 	if (! mbHasRun) {
 		if (! ensureMsgf(mbInitialized, TEXT("Thread executing without call to ::Initialize")))
 			return true;
+		mbHasRun = true;
 		if (mStartPath.Len()) {
 			mpRunner->move_to(ink::hash_string(TCHAR_TO_ANSI(*mStartPath)));
 		}
-		mbHasRun = true;
+
+		if (mbInChoice) {
+			for (ink::size_t i = 0; i < mpRunner->num_choices(); i++) {
+				UInkChoice* choice = NewObject<UInkChoice>(this);
+				choice->Initialize(mpRunner->get_choice(i));
+				mCurrentChoices.Add(choice);
+			}
+			OnChoice(mCurrentChoices);
+			return false;
+		}
 	}
 
 	// Execution loop
@@ -203,7 +218,7 @@ bool UInkThread::Execute()
 
 bool UInkThread::PickChoice(int index)
 {
-	if (index >= mCurrentChoices.Num()) {
+	if (index >= mCurrentChoices.Num() || index < 0) {
 		UE_LOG(
 		    InkCpp, Warning, TEXT("PickChoice: index(%i) out of range [0-%i)"), index,
 		    mCurrentChoices.Num()
@@ -215,6 +230,6 @@ bool UInkThread::PickChoice(int index)
 	return true;
 }
 
-bool UInkThread::CanExecute() const { return mnYieldCounter == 0 && ! mbInChoice; }
+bool UInkThread::CanExecute() const { return (mnYieldCounter == 0 && ! mbInChoice) || ! mbHasRun; }
 
 void UInkThread::Stop() { mbKill = true; }

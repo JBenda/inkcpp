@@ -20,16 +20,19 @@
 
 namespace ink
 {
+/** define basic numeric type
+ * @todo use a less missleading name
+ */
 typedef unsigned int uint32_t;
 
-// Name hash (used for temporary variables)
+/** Name hash (used for temporary variables) */
 typedef uint32_t hash_t;
 
-// Invalid hash
+/** Invalid hash value */
 const hash_t InvalidHash = 0;
 
-// Simple hash for serialization of strings
 #ifdef INK_ENABLE_UNREAL
+/** Simple hash for serialization of strings */
 inline hash_t hash_string(const char* string)
 {
 	return CityHash32(string, FCStringAnsi::Strlen(string));
@@ -38,22 +41,22 @@ inline hash_t hash_string(const char* string)
 hash_t hash_string(const char* string);
 #endif
 
-// Byte type
+/** Byte type */
 typedef unsigned char byte_t;
 
-// Used to identify an offset in a data table (like a string in the string table)
+/** Used to identify an offset in a data table (like a string in the string table) */
 typedef uint32_t offset_t;
 
-// Instruction pointer used for addressing within the story instructions
+/** Instruction pointer used for addressing within the story instructions */
 typedef const unsigned char* ip_t;
 
-// Used for the size of arrays
+/** Used for the size of arrays */
 typedef unsigned int size_t;
 
-// Used as the unique identifier for an ink container
+/** Used as the unique identifier for an ink container */
 typedef uint32_t container_t;
 
-// Used to uniquely identify threads
+/** Used to uniquely identify threads */
 typedef uint32_t thread_t;
 
 /** Used to unique identify a list flag  */
@@ -66,49 +69,55 @@ struct list_flag {
 	bool operator!=(const list_flag& o) const { return ! (*this == o); }
 };
 
+/** value of an unset list_flag */
 constexpr list_flag null_flag{-1, -1};
+/** value representing an empty list */
 constexpr list_flag empty_flag{-1, 0};
 
-// Checks if a string is only whitespace
-static bool is_whitespace(const char* string, bool includeNewline = true)
+namespace internal
 {
-	// Iterate string
-	while (true) {
-		switch (*(string++)) {
-			case 0: return true;
+	/** Checks if a string is only whitespace*/
+	static bool is_whitespace(const char* string, bool includeNewline = true)
+	{
+		// Iterate string
+		while (true) {
+			switch (*(string++)) {
+				case 0: return true;
+				case '\n':
+					if (! includeNewline)
+						return false;
+				case '\t':
+				case ' ': continue;
+				default: return false;
+			}
+		}
+	}
+
+	/** check if character can be only part of a word, when two part of word characters put together
+	 * the will be a space inserted I049
+	 */
+	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
+
+	inline constexpr bool is_whitespace(char character, bool includeNewline = true)
+	{
+		switch (character) {
 			case '\n':
 				if (! includeNewline)
 					return false;
-			case '\t':
-			case ' ': continue;
+			case '\t': [[fallthrough]];
+			case ' ': return true;
 			default: return false;
 		}
 	}
-}
 
-// check if character can be only part of a word, when two part of word characters put together the
-// will be a space inserted I049
-inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
-
-inline constexpr bool is_whitespace(char character, bool includeNewline = true)
-{
-	switch (character) {
-		case '\n':
-			if (! includeNewline)
-				return false;
-		case '\t': [[fallthrough]];
-		case ' ': return true;
-		default: return false;
-	}
-}
-
-// Zero memory
 #ifndef INK_ENABLE_UNREAL
-void zero_memory(void* buffer, size_t length);
+	/** populate memory with Zero */
+	void zero_memory(void* buffer, size_t length);
 #endif
-
+} // namespace internal
 
 #ifdef INK_ENABLE_STL
+/** exception type thrown if something goes wrong */
 using ink_exception = std::runtime_error;
 #else
 // Non-STL exception class
@@ -154,6 +163,10 @@ template<typename... Args>
 	exit(EXIT_FAILURE);
 }
 #else
+/** platform indipendent assert(false) with message.
+ * @param msg formatting string
+ * @param args arguments to format string
+ */
 template<typename... Args>
 inline void ink_fail(const char* msg, Args... args)
 {
@@ -202,8 +215,12 @@ namespace runtime::internal
 
 
 #ifdef INK_ENABLE_STL
+/** custom optional implementation for usage if STL is disabled
+ * @tparam T type contaied in optional
+ */
 template<typename T>
 using optional                   = std::optional<T>;
+/** an empty #optional */
 constexpr std::nullopt_t nullopt = std::nullopt;
 #else
 struct nullopt_t {
@@ -261,6 +278,13 @@ public:
 		return _has_value ? _value : static_cast<T>(u);
 	}
 
+	template<typename... Args>
+	T& emplace(Args... args)
+	{
+		_value.~T();
+		return *(new (&_value) T(args...));
+	}
+
 private:
 	void test_value() const
 	{
@@ -282,7 +306,7 @@ private:
 #	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
 #	define inkFail                         ink::ink_fail
 #else
-#	define inkZeroMemory ink::zero_memory
+#	define inkZeroMemory ink::internal::zero_memory
 #	define inkAssert     ink::ink_assert
 #	define inkFail(...)  ink::ink_assert(false, __VA_ARGS__)
 #endif

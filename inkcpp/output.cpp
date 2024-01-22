@@ -34,12 +34,13 @@ void basic_stream::append(const value& in)
 			// ignore additional newlines after newline or glue
 			if (d.type() == value_type::newline || d.type() == value_type::glue) {
 				return;
-			} else if (d.type() == value_type::string && is_whitespace(d.get<value_type::string>())) {
+			} else if (d.type() == value_type::string && ink::internal::is_whitespace(d.get<value_type::string>())) {
+			} else if (d.type() == value_type::func_start || d.type() == value_type::func_end) {
 			} else {
 				break;
 			}
 			if (i == 0) {
-				break;
+				return;
 			}
 			--i;
 		}
@@ -67,8 +68,9 @@ void basic_stream::append(const value& in)
 			}
 
 			// Nullify whitespace
-			else if (d.type() == value_type::string && is_whitespace(d.get<value_type::string>()))
+			else if (d.type() == value_type::string && ::ink::internal::is_whitespace(d.get<value_type::string>()))
 				d = value{};
+
 
 			// If it's not a newline or whitespace, stop
 			else
@@ -434,7 +436,7 @@ bool basic_stream::text_past_save() const
 		const value& d = _data[i];
 		if (d.type() == value_type::string) {
 			// TODO: Cache what counts as whitespace?
-			if (! is_whitespace(d.get<value_type::string>(), false))
+			if (! ink::internal::is_whitespace(d.get<value_type::string>(), false))
 				return true;
 		} else if (d.printable()) {
 			return true;

@@ -58,7 +58,7 @@ jobs:
         echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
 
     # Setup python
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v4
       if: ${{ matrix.proof }}
       with:
         python-version: '3.7'
@@ -192,7 +192,13 @@ jobs:
       with:
         python-version: "3.x"
     - name: Install Doxygen
-      run: sudo apt-get install doxygen graphviz -y
+      run: |
+        sudo apt-get install graphviz -y
+        wget https://www.doxygen.nl/files/doxygen-1.10.0.linux.bin.tar.gz
+        gunzip doxygen-*.tar.gz
+        tar xf doxygen-*.tar
+        cd doxygen-1.10.0/
+        sudo make install
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v1.14.2
       with:
@@ -202,7 +208,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DINKCPP_PY=ON
+      run: cmake $GITHUB_WORKSPACE -DINKCPP_PY=ON -DINKCPP_DOC_BlueprintUE=ON
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
@@ -290,7 +296,7 @@ jobs:
       pull-requests: write
     steps:
       # Download Ink Proof Results
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: results
           path: "results"
@@ -327,19 +333,19 @@ jobs:
       - uses: actions/checkout@v4
 
       # Download Ink Proof page for Linux
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: linux-www
           path: www/proof
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: doxygen
           path: www
 
       # Deploy to Github Pages
       - name: Deploy Page
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: JamesIves/github-pages-deploy-action@4
         with:
           branch: inkproof-page
           folder: www

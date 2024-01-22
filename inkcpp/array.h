@@ -156,6 +156,8 @@ public:
 
 	bool has_changed() const { return base::size() != _last_size; }
 
+	size_t last_size() const { return _last_size; }
+
 	size_t snap(unsigned char* data, const snapshot_interface::snapper& snapper) const
 	{
 		unsigned char* ptr          = data;

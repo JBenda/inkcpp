@@ -23,9 +23,8 @@ bool UTagList::Has(const FString& tag) const
 	return false;
 }
 
-bool UTagList::HasEnum(const FString& enumName, uint8& value) const
+bool UTagList::HasEnum(const UEnum* Enum, uint8& value) const
 {
-	UEnum* Enum = FindObjectSafe<UEnum>(nullptr, *enumName, true);
 	if (!Enum)
 	{
 		value = 0;
@@ -39,7 +38,7 @@ bool UTagList::HasEnum(const FString& enumName, uint8& value) const
 		// Iterate enum values
 		for (int i = 0; i < num; i++)
 		{
-			FString enumStr = Enum->GetNameStringByIndex(i);
+			FString enumStr = Enum->GetDisplayNameTextByIndex(i).ToString();
 
 			// Instead of string comparison, check if they share a suffix (most enums have weird prefixes)
 			if (enumStr.EndsWith(tag))
@@ -66,3 +65,27 @@ FString UTagList::GetValue(const FString& name) const
 
 	return FString();
 }
+
+bool UTagList::GetEnum(const UEnum* Enum, uint8& value) const
+{
+	FString prefix = Enum->GetFName().ToString() + ":";
+	for (const FString& tag : Tags) {
+		if (tag.StartsWith(prefix)) {
+			FString tag_value = tag.RightChop(prefix.Len()).TrimStartAndEnd();
+			for (int i = 0; i < Enum->NumEnums(); ++i) {
+				FString enumStr = Enum->GetDisplayNameTextByIndex(i).ToString();
+				if (enumStr.EndsWith(tag_value)) {
+					value = Enum->GetValueByIndex(i);
+					return true;
+				}
+			}
+
+			value = 0;
+			return false;
+		}
+	}
+	value = 0;
+	return false;
+}
+
+const TArray<FString>& UTagList::GetTags() const { return Tags; }

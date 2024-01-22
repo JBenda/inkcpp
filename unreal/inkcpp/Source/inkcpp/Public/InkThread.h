@@ -32,59 +32,131 @@ public:
 
 	// Yields the thread immediately. Will wait until Resume().
 	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** Yields the thread immediatly.
+	 * This will stop the execution (after finishing the current line).
+	 * until @ref #Resume() is called.
+	 *
+	 * @ref #Yield() and @ref #Resume() working with a refernce counter.
+	 * therfore a thread can be yield multiple times, and must then be resumed
+	 * the same amount.
+	 *
+	 * @blueprint
+	 */
 	void Yield();
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
+	/** Checks if the thread is stopped.
+	 * @retval true if the thread currently waiting to resume
+	 * @see #Yield() #Resume()
+	 *
+	 * @blueprint
+	 */
 	bool IsYielding();
 
-	// Causes the thread to resume if yielded.
 	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** Resumes yielded thread.
+	 * @see #Yield()
+	 *
+	 * @blueprint
+	 */
 	void Resume();
 
-	// Kills the thread, regardless of state
 	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** Kills thread at next possible moment
+	 *
+	 * @blueprint
+	 */
 	void Stop();
 
-	// Returns the runtime which owns this thread.
 	UFUNCTION(BlueprintPure, Category = "Ink")
 
+	/** Access runtime the thread belongs to
+	 * @return runtime of the thread
+	 *
+	 * @blueprint
+	 */
 	AInkRuntime* GetRuntime() const { return mpRuntime; }
 
 	// Called before the thread begins executing
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	/** triggered after initalizing the runner
+	 *
+	 * @blueprint
+	 */
 	void OnStartup();
 
 	// Called when the thread has printed a new line
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	/** triggerd if a new line of context is available
+	 * @param line text of new line
+	 * @param tags tags assoziated with this line
+	 *
+	 * @blueprint
+	 */
 	void OnLineWritten(const FString& line, const UTagList* tags);
 
-	// Called when a tag has been processed on the current line
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
-	void OnTag(const FString& line);
+	/** triggered when a tag is encountered
+	 * @param tag_name the tag found
+	 *
+	 * @blueprint
+	 */
+	void OnTag(const FString& tag_name);
 
-	// Called when the thread has requested a branch
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	/** triggered when reached a choice point.
+	 * @param choices possible branches to choos for continue
+	 * @see #PickChoice()
+	 *
+	 * @blueprint
+	 */
 	void OnChoice(const TArray<UInkChoice*>& choices);
 
-	// Called before the thread is destroyed
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	/** triggered when the thread reached the end of context
+	 * @see AInkRuntime::StartExisting()
+	 *
+	 * @blueprint
+	 */
 	void OnShutdown();
 
-	// Picks a choice by index at the current branch
 	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** picks a choice to continue with
+	 * @see UInkChoice::GetIndex()
+	 * @retval false if the index is out of range
+	 *
+	 * @blueprint
+	 */
 	bool PickChoice(int index);
 
 	// Registers a callback for a named "tag function"
 	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** Register a callback for a named "tag function"
+	 * @see @ref TagFunction
+	 *
+	 * @blueprint
+	 */
 	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** register a external function.
+	 * A function provides a return value
+	 * @see if you do not want to return something #RegisterExternalEvent()
+	 *
+	 * @blueprint
+	 */
 	void RegisterExternalFunction(
 	    const FString& functionName, const FExternalFunctionDelegate& function,
 	    bool lookaheadSafe = false
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** register external event.
+	 * A event has the return type void.
+	 * @see  If you want to return a value use #RegisterExternalFunction()
+	 *
+	 * @blueprint
+	 */
 	void RegisterExternalEvent(
 	    const FString& functionName, const FExternalFunctionVoidDelegate& function,
 	    bool lookaheadSafe = false
@@ -92,14 +164,19 @@ public:
 
 
 protected:
+	/** @private */
 	virtual void OnStartup_Implementation() {}
 
+	/** @private */
 	virtual void OnLineWritten_Implementation(const FString& line, UTagList* tags) {}
 
+	/** @private */
 	virtual void OnTag_Implementation(const FString& line) {}
 
+	/** @private */
 	virtual void OnChoice_Implementation(const TArray<UInkChoice*>& choices) {}
 
+	/** @private */
 	virtual void OnShutdown_Implementation() {}
 
 private:

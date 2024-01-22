@@ -228,7 +228,7 @@ void globals_impl::gc()
 
 void globals_impl::save()
 {
-	for (int i = 0; i < _num_containers; ++i) {
+	for (uint32_t i = 0; i < _num_containers; ++i) {
 		_visit_counts_backup[i] = _visit_counts[i];
 	}
 	_variables.save();
@@ -236,7 +236,7 @@ void globals_impl::save()
 
 void globals_impl::restore()
 {
-	for (int i = 0; i < _num_containers; ++i) {
+	for (uint32_t i = 0; i < _num_containers; ++i) {
 		_visit_counts[i] = _visit_counts_backup[i];
 	}
 	_variables.restore();

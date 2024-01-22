@@ -169,7 +169,8 @@ inline const char* runner_impl::read()
 choice& runner_impl::add_choice()
 {
 	inkAssert(
-	    config::maxChoices < 0 || _choices.size() < config::maxChoices, "Ran out of choice storage!"
+	    config::maxChoices < 0 || _choices.size() < static_cast<size_t>(config::maxChoices),
+	    "Ran out of choice storage!"
 	);
 	return _choices.push();
 }
@@ -453,8 +454,8 @@ void runner_impl::getall(std::ostream& out)
 FString runner_impl::getline()
 {
 	clear_tags();
-	advance_line() FString result{};
-	result.Append(_output.get_alloc(_globals->strings(), globals->lists()));
+	advance_line();
+	FString result(ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists())));
 
 	if (! has_choices() && _fallback_choice) {
 		choose(~0);
@@ -477,20 +478,22 @@ void runner_impl::advance_line()
 
 	// can be in save state becaues of choice
 	// Garbage collection TODO: How often do we want to do this?
+	if (_saved) {
+		restore();
+	}
 	_globals->gc();
 	if (_output.saved()) {
 		_output.restore();
 	}
 }
 
-bool runner_impl::can_continue() const { return _ptr != nullptr; }
+bool runner_impl::can_continue() const { return _ptr != nullptr && ! has_choices(); }
 
 void runner_impl::choose(size_t index)
 {
 	if (has_choices()) {
 		inkAssert(index < _choices.size(), "Choice index out of range");
 	}
-	restore(); // restore to stack state when choice was maked
 	_globals->turn();
 	// Get the choice
 	const auto& c = has_choices() ? _choices[index] : _fallback_choice.value();
@@ -659,7 +662,7 @@ runner_impl::change_type runner_impl::detect_change() const
 	// Check if the old newline is still present (hasn't been glu'd) and
 	//  if there is new text (non-whitespace) in the stream since saving
 	bool stillHasNewline = _output.saved_ends_with(value_type::newline);
-	bool hasAddedNewText = _output.text_past_save() || _tags.has_changed();
+	bool hasAddedNewText = _output.text_past_save() || _tags.last_size() < num_tags();
 
 	// Newline is still there and there's no new text
 	if (stillHasNewline && ! hasAddedNewText) {
@@ -1120,7 +1123,8 @@ void runner_impl::step()
 
 					// Create choice and record it
 					if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
-						_fallback_choice = choice{}.setup(
+						_fallback_choice.emplace();
+						_fallback_choice.value().setup(
 						    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
 						    current_thread(), tags->ptr()
 						);
