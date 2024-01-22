@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['gen_5fseq_224',['gen_seq',['../structink_1_1runtime_1_1internal_1_1gen__seq.html',1,'ink::runtime::internal']]],
-  ['gen_5fseq_3c_200_20_3e_225',['gen_seq&lt; 0 &gt;',['../structink_1_1runtime_1_1internal_1_1gen__seq_3_010_01_4.html',1,'ink::runtime::internal']]],
-  ['gen_5fseq_3c_201_20_3e_226',['gen_seq&lt; 1 &gt;',['../structink_1_1runtime_1_1internal_1_1gen__seq_3_011_01_4.html',1,'ink::runtime::internal']]],
-  ['get_5fith_5ftype_227',['get_ith_type',['../structink_1_1runtime_1_1internal_1_1get__ith__type.html',1,'ink::runtime::internal']]],
-  ['get_5fith_5ftype_3c_200_2c_20arg_2c_20args_2e_2e_2e_20_3e_228',['get_ith_type&lt; 0, Arg, Args... &gt;',['../structink_1_1runtime_1_1internal_1_1get__ith__type_3_010_00_01_arg_00_01_args_8_8_8_01_4.html',1,'ink::runtime::internal']]],
-  ['globals_5finterface_229',['globals_interface',['../classink_1_1runtime_1_1globals__interface.html',1,'ink::runtime']]]
+  ['hinkchoice_0',['HInkChoice',['../class_h_ink_choice.html',1,'']]],
+  ['hinkglobals_1',['HInkGlobals',['../class_h_ink_globals.html',1,'']]],
+  ['hinklist_2',['HInkList',['../class_h_ink_list.html',1,'']]],
+  ['hinkrunner_3',['HInkRunner',['../class_h_ink_runner.html',1,'']]],
+  ['hinksnapshot_4',['HInkSnapshot',['../class_h_ink_snapshot.html',1,'']]],
+  ['hinkstory_5',['HInkStory',['../class_h_ink_story.html',1,'']]]
 ];

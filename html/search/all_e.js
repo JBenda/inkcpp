@@ -1,8 +1,12 @@
 var searchData=
 [
-  ['text_171',['text',['../classink_1_1runtime_1_1choice.html#a63fffcc62975372c260fb95de62e0a18',1,'ink::runtime::choice']]],
-  ['todo_20list_172',['Todo List',['../todo.html',1,'']]],
-  ['true_5ftype_173',['true_type',['../structink_1_1runtime_1_1internal_1_1true__type.html',1,'ink::runtime::internal']]],
-  ['type_174',['type',['../structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403',1,'ink::runtime::value::type()'],['../struct_ink_value.html#a56a96d76fc3e4a67d498879da0175ef5',1,'InkValue::type()']]],
-  ['type_175',['Type',['../structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8',1,'ink::runtime::value::Type()'],['../struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206',1,'InkValue::Type()']]]
+  ['registerexternalevent_0',['RegisterExternalEvent',['../class_u_ink_thread.html#aa0b70456fb3b1e068f96c1945a657f85',1,'UInkThread']]],
+  ['registerexternalfunction_1',['RegisterExternalFunction',['../class_u_ink_thread.html#aa4eddc581ddeb989518ca8fed15806fd',1,'UInkThread']]],
+  ['registertagfunction_2',['RegisterTagFunction',['../class_a_ink_runtime.html#aa307c1bde8da72639e1ff531fd97fce6',1,'AInkRuntime::RegisterTagFunction()'],['../class_u_ink_thread.html#a1b5fe9537fd8287534928bc45f4e0645',1,'UInkThread::RegisterTagFunction()']]],
+  ['remove_3',['remove',['../classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b',1,'ink::runtime::list_interface']]],
+  ['resume_4',['Resume',['../class_u_ink_thread.html#a59d417b90f494072dd08a74acbf16fab',1,'UInkThread']]],
+  ['run_5',['run',['../namespaceink_1_1compiler.html#ab0a1ff058570028c6bbde5ca96133e75',1,'ink::compiler::run(const char *filenameIn, const char *filenameOut, compilation_results *results=nullptr)'],['../namespaceink_1_1compiler.html#a384393e2ba0d54d581cf6b6de765f5fa',1,'ink::compiler::run(const char *filenameIn, std::ostream &amp;out, compilation_results *results=nullptr)'],['../namespaceink_1_1compiler.html#a8f722737a5f7e7aa0ba8134596caca25',1,'ink::compiler::run(std::istream &amp;in, std::ostream &amp;out, compilation_results *results=nullptr)'],['../namespaceink_1_1compiler.html#a98b8c52839a0d75ef30de83c22ac2c96',1,'ink::compiler::run(std::istream &amp;in, const char *filenameOut, compilation_results *results=nullptr)']]],
+  ['runner_6',['runner',['../namespaceink_1_1runtime.html#ad63cbd82595f3f52ef21543b309ba8b6',1,'ink::runtime']]],
+  ['runner_5finterface_7',['runner_interface',['../classink_1_1runtime_1_1runner__interface.html',1,'ink::runtime']]],
+  ['runtime_8',['Runtime',['../group__unreal.html#ue_runtime',1,'']]]
 ];

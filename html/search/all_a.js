@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['new_5fglobals_135',['new_globals',['../classink_1_1runtime_1_1story.html#ac9a48e930c85ed58c0d2f6bbe89c9b62',1,'ink::runtime::story']]],
-  ['new_5frunner_136',['new_runner',['../classink_1_1runtime_1_1story.html#ab0bcc61fba0c879979d334cca8e21f16',1,'ink::runtime::story']]],
-  ['new_5frunner_5ffrom_5fsnapshot_137',['new_runner_from_snapshot',['../classink_1_1runtime_1_1story.html#ac17fb51b7a165b36a4de1ece4d80d5f1',1,'ink::runtime::story']]],
-  ['num_5fchoices_138',['num_choices',['../classink_1_1runtime_1_1runner__interface.html#ae86dc739d94d0969b8d4759ac3205272',1,'ink::runtime::runner_interface']]],
-  ['num_5ftags_139',['num_tags',['../classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2',1,'ink::runtime::runner_interface']]]
+  ['main_20c_0',['main.c',['../group__clib.html#src_main_c',1,'']]],
+  ['main_20cpp_1',['main.cpp',['../index.html#src_main',1,'']]],
+  ['minimal_2',['Minimal',['../group__unreal.html#ue_example_minimal',1,'']]],
+  ['move_5fto_3',['move_to',['../classink_1_1runtime_1_1runner__interface.html#ab82d435af1828da231b1a60b6d06d492',1,'ink::runtime::runner_interface']]]
 ];

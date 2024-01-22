@@ -1,12 +1,23 @@
 var searchData=
 [
-  ['ref_5fblock_143',['ref_block',['../structink_1_1runtime_1_1internal_1_1ref__block.html',1,'ink::runtime::internal']]],
-  ['remove_144',['remove',['../classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b',1,'ink::runtime::list_interface']]],
-  ['remove_5fcv_145',['remove_cv',['../structink_1_1runtime_1_1internal_1_1remove__cv.html',1,'ink::runtime::internal']]],
-  ['remove_5fcv_3c_20const_20t_20_3e_146',['remove_cv&lt; const T &gt;',['../structink_1_1runtime_1_1internal_1_1remove__cv_3_01const_01_t_01_4.html',1,'ink::runtime::internal']]],
-  ['remove_5fcv_3c_20const_20volatile_20t_20_3e_147',['remove_cv&lt; const volatile T &gt;',['../structink_1_1runtime_1_1internal_1_1remove__cv_3_01const_01volatile_01_t_01_4.html',1,'ink::runtime::internal']]],
-  ['remove_5fcv_3c_20volatile_20t_20_3e_148',['remove_cv&lt; volatile T &gt;',['../structink_1_1runtime_1_1internal_1_1remove__cv_3_01volatile_01_t_01_4.html',1,'ink::runtime::internal']]],
-  ['remove_5fcvref_149',['remove_cvref',['../structink_1_1runtime_1_1internal_1_1remove__cvref.html',1,'ink::runtime::internal']]],
-  ['run_150',['run',['../namespaceink_1_1compiler.html#ab0a1ff058570028c6bbde5ca96133e75',1,'ink::compiler::run(const char *filenameIn, const char *filenameOut, compilation_results *results=nullptr)'],['../namespaceink_1_1compiler.html#a384393e2ba0d54d581cf6b6de765f5fa',1,'ink::compiler::run(const char *filenameIn, std::ostream &amp;out, compilation_results *results=nullptr)'],['../namespaceink_1_1compiler.html#a8f722737a5f7e7aa0ba8134596caca25',1,'ink::compiler::run(std::istream &amp;in, std::ostream &amp;out, compilation_results *results=nullptr)']]],
-  ['runner_5finterface_151',['runner_interface',['../classink_1_1runtime_1_1runner__interface.html',1,'ink::runtime']]]
+  ['observe_0',['observe',['../classink_1_1runtime_1_1globals__interface.html#a0f1d8fe7859b28ee28986a14de19be61',1,'ink::runtime::globals_interface']]],
+  ['observervariable_1',['ObserverVariable',['../class_a_ink_runtime.html#ae1965ef1d702d2a874c4a42fb04ab816',1,'AInkRuntime']]],
+  ['observervariablechange_2',['ObserverVariableChange',['../class_a_ink_runtime.html#aa2d9d975a33604846e6bb4f18676a8b7',1,'AInkRuntime']]],
+  ['observervariableevent_3',['ObserverVariableEvent',['../class_a_ink_runtime.html#a5b03be048c60644d9c983410654f258b',1,'AInkRuntime']]],
+  ['offset_5ft_4',['offset_t',['../namespaceink.html#aa0e843a037fef7431b63a23208a1685c',1,'ink']]],
+  ['onchoice_5',['OnChoice',['../class_u_ink_thread.html#a22281d2560f2544986ae807cf0b2bd75',1,'UInkThread']]],
+  ['onlinewritten_6',['OnLineWritten',['../class_u_ink_thread.html#a0ed86560d99b34f2f435494894104bbf',1,'UInkThread']]],
+  ['onshutdown_7',['OnShutdown',['../class_u_ink_thread.html#a00ee1e91e87599f5f263f350c7a02261',1,'UInkThread']]],
+  ['onstartup_8',['OnStartup',['../class_u_ink_thread.html#aefb7ba83839493187313708cafd52afd',1,'UInkThread']]],
+  ['ontag_9',['OnTag',['../class_u_ink_thread.html#ae3b326b0a949fcca049f1bb0779954f8',1,'UInkThread']]],
+  ['operator_20bool_10',['operator bool',['../classink_1_1runtime_1_1runner__interface.html#ae9d0aaad2022e67f6bf0aacbd0a829a7',1,'ink::runtime::runner_interface::operator bool()'],['../classink_1_1runtime_1_1story__ptr.html#a43ca0f2f218154db70dbaaeab829af59',1,'ink::runtime::story_ptr::operator bool()']]],
+  ['operator_21_3d_11',['operator!=',['../classink_1_1runtime_1_1list__interface_1_1iterator.html#a14902f726c2c450867edc96c378ce76e',1,'ink::runtime::list_interface::iterator']]],
+  ['operator_2a_12',['operator*',['../classink_1_1runtime_1_1list__interface_1_1iterator.html#a180559b49f2dec83fe9db01e0e250b95',1,'ink::runtime::list_interface::iterator::operator*()'],['../classink_1_1runtime_1_1story__ptr.html#aa965e2b922112bcb30cdef1a891388e8',1,'ink::runtime::story_ptr::operator*()'],['../classink_1_1runtime_1_1story__ptr.html#aaf6755764042de58fd560ff8dde2b149',1,'ink::runtime::story_ptr::operator*() const']]],
+  ['operator_2b_2b_13',['operator++',['../classink_1_1runtime_1_1list__interface_1_1iterator.html#a0a3590a763ec2107f3e4292e9e3d63eb',1,'ink::runtime::list_interface::iterator']]],
+  ['operator_2d_3e_14',['operator-&gt;',['../classink_1_1runtime_1_1story__ptr.html#a3204b8147ef63cc64594d3d8cb665d27',1,'ink::runtime::story_ptr::operator-&gt;()'],['../classink_1_1runtime_1_1story__ptr.html#ae97e3dbdb63c6037ac0ef3531c152909',1,'ink::runtime::story_ptr::operator-&gt;() const']]],
+  ['operator_3c_3c_15',['operator&lt;&lt;',['../structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html#ae1362368dd28a7c74715e23c458ac1f2',1,'ink::runtime::list_interface::iterator::Flag']]],
+  ['operator_3d_16',['operator=',['../classink_1_1runtime_1_1story__ptr.html#adb4e3777b540d94025ebcf9de4d9dc4e',1,'ink::runtime::story_ptr']]],
+  ['operator_3d_3d_17',['operator==',['../classink_1_1runtime_1_1list__interface_1_1iterator.html#ab208e39c02eef320875843eaca0d5bca',1,'ink::runtime::list_interface::iterator::operator==()'],['../classink_1_1runtime_1_1story__ptr.html#a110f9466d2b3789463df069659a71f90',1,'ink::runtime::story_ptr::operator==()']]],
+  ['operator_5b_5d_18',['operator[]',['../classink_1_1runtime_1_1runner__interface.html#ae616e2f291c7cd279b3b67ea5d1a974d',1,'ink::runtime::runner_interface']]],
+  ['optional_19',['optional',['../namespaceink.html#a1afe1efe367158356d47c906abbab8fc',1,'ink']]]
 ];

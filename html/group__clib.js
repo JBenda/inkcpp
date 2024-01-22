@@ -43,14 +43,14 @@ var group__clib =
       [ "ink_runner_bind", "class_h_ink_runner.html#a244bd1db4c6e819bab0c277803526187", null ],
       [ "ink_runner_bind_void", "class_h_ink_runner.html#a70126dc2ca3850b71631e22fe91d2ac3", null ],
       [ "ink_runner_can_continue", "class_h_ink_runner.html#acfa96a79ca2d4c2cf2e0d9e9287cf9dd", null ],
-      [ "ink_runner_choose", "class_h_ink_runner.html#ab21738094bcf57aefda7b0fb1226e423", null ],
+      [ "ink_runner_choose", "class_h_ink_runner.html#a7519820b1ee7b3448d8ec2d8585a0990", null ],
       [ "ink_runner_create_snapshot", "class_h_ink_runner.html#a3039bd72b35c7131e74d1ddadb40838c", null ],
       [ "ink_runner_delete", "class_h_ink_runner.html#af51fa336ac81d45210fc70f867fb0250", null ],
-      [ "ink_runner_get_choice", "class_h_ink_runner.html#a80e11730e6afafb3387e086a9a633015", null ],
+      [ "ink_runner_get_choice", "class_h_ink_runner.html#a14d342743ba1b56ad0f5f468693408f0", null ],
       [ "ink_runner_get_line", "class_h_ink_runner.html#a79f3397373201990fde1c603d2c80013", null ],
       [ "ink_runner_num_choices", "class_h_ink_runner.html#ab845e33e1a0e564c48b6ff13ef3a4b00", null ],
       [ "ink_runner_num_tags", "class_h_ink_runner.html#a5aba5cc9fd0d63b04d2491ad4ca0ca96", null ],
-      [ "ink_runner_tag", "class_h_ink_runner.html#a5faf9a0df699d8dca57edc7c8eaf79e5", null ]
+      [ "ink_runner_tag", "class_h_ink_runner.html#a665a93019c70b2143dba60cdb4f5acb1", null ]
     ] ],
     [ "HInkGlobals", "class_h_ink_globals.html", [
       [ "InkObserver", "class_h_ink_globals.html#aa22077672e42eb13181c17e1d494862c", null ],
@@ -64,9 +64,9 @@ var group__clib =
       [ "ink_story_delete", "class_h_ink_story.html#a11b781788a630a5638a0228182a61fdc", null ],
       [ "ink_story_from_file", "class_h_ink_story.html#acbabb5e84b0d3ff46aa095c0732c33b3", null ],
       [ "ink_story_new_globals", "class_h_ink_story.html#a5c0e45fba64a72031b755b9ad51afb7e", null ],
-      [ "ink_story_new_globals_from_snapshot", "class_h_ink_story.html#a4b0af0695534934b9f72c6400915b71f", null ],
-      [ "ink_story_new_runner", "class_h_ink_story.html#a0b9416d38cd3bc712c9f0f50899fc10a", null ],
-      [ "ink_story_new_runner_from_snapshot", "class_h_ink_story.html#aa49f130739ae0a598c7fb8a7e25c7751", null ]
+      [ "ink_story_new_globals_from_snapshot", "class_h_ink_story.html#a02d1d4361771ac6b8c4dc22a575e7440", null ],
+      [ "ink_story_new_runner", "class_h_ink_story.html#a3ed3c0da0addadcfab93b9150744ce28", null ],
+      [ "ink_story_new_runner_from_snapshot", "class_h_ink_story.html#ae73261d3ecfe6d6358255a2c96c2dc3f", null ]
     ] ],
     [ "ink_compile_json", "group__clib.html#ga807cb69b63b8d373b8900fc2136bc041", null ]
 ];

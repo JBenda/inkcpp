@@ -25,22 +25,17 @@
 var NAVTREE =
 [
   [ "inkcpp", "index.html", [
-    [ "InkCPP Documentation", "index.html", [
-      [ "CMAKE usage", "index.html#cmake", [
-        [ "main.cpp", "index.html#src_main", null ],
-        [ "CMakeLists.txt", "index.html#src_cmake", null ],
-        [ "test.ink", "index.html#src_story_json", null ]
-      ] ],
-      [ "Unreal Installation", "index.html#ue", null ],
-      [ "Python example", "index.html#py", null ]
-    ] ],
+    [ "InkCPP Documentation", "index.html", "index" ],
+    [ "TagFunction", "_tag_function.html", null ],
     [ "Todo List", "todo.html", null ],
-    [ "Modules", "modules.html", "modules" ],
+    [ "Topics", "topics.html", "topics" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
         [ "All", "namespacemembers.html", null ],
-        [ "Functions", "namespacemembers_func.html", null ]
+        [ "Functions", "namespacemembers_func.html", null ],
+        [ "Variables", "namespacemembers_vars.html", null ],
+        [ "Typedefs", "namespacemembers_type.html", null ]
       ] ]
     ] ],
     [ "Classes", "annotated.html", [
@@ -48,16 +43,21 @@ var NAVTREE =
       [ "Class Index", "classes.html", null ],
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
-        [ "All", "functions.html", null ],
+        [ "All", "functions.html", "functions_dup" ],
         [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", null ],
         [ "Typedefs", "functions_type.html", null ],
         [ "Enumerations", "functions_enum.html", null ],
-        [ "Enumerator", "functions_eval.html", null ]
+        [ "Enumerator", "functions_eval.html", null ],
+        [ "Related Symbols", "functions_rela.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
+      [ "File List", "files.html", "files_dup" ],
+      [ "File Members", "globals.html", [
+        [ "All", "globals.html", null ],
+        [ "Functions", "globals_func.html", null ]
+      ] ]
     ] ]
   ] ]
 ];
@@ -65,8 +65,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_ink_asset_8h_source.html",
-"classink_1_1runtime_1_1story__ptr.html",
-"structink_1_1runtime_1_1value.html#ae4d38935e7f7c0ea04f841cd7f451bf7"
+"classink_1_1runtime_1_1story__ptr.html#a110f9466d2b3789463df069659a71f90"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

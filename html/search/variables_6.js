@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['uint32_5fv_366',['uint32_v',['../struct_ink_value.html#aecb02464953c87f26ec35b76b4f8ba96',1,'InkValue']]]
+  ['null_5fflag_0',['null_flag',['../namespaceink.html#a022c51ad81e3aac458f31f32cec844b7',1,'ink']]],
+  ['nullopt_1',['nullopt',['../namespaceink.html#aba6ffa4b92f9738a07e5af66330e8076',1,'ink']]]
 ];

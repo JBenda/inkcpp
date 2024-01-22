@@ -8,7 +8,6 @@ var structink_1_1runtime_1_1value =
       [ "Float", "structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a22ae0e2b89e5e3d477f988cc36d3272b", null ],
       [ "List", "structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a4ee29ca12c7d126654bd0e5275de6135", null ]
     ] ],
-    [ "value", "structink_1_1runtime_1_1value.html#ac09b1c2e4ca9d78a1f4a1191f6fcd014", null ],
     [ "value", "structink_1_1runtime_1_1value.html#a1eed8cfeb2cb386b7707a9d35d12ba94", null ],
     [ "value", "structink_1_1runtime_1_1value.html#a3767029299a756c844f92a61ed11d7a6", null ],
     [ "value", "structink_1_1runtime_1_1value.html#ab769b64992b7799ea6e13e5a386a94cc", null ],
@@ -16,12 +15,6 @@ var structink_1_1runtime_1_1value =
     [ "value", "structink_1_1runtime_1_1value.html#afd35f26da56dda24b3f90dca9c768715", null ],
     [ "value", "structink_1_1runtime_1_1value.html#a8d6eae7e36845ed0684f775e4e9d10fd", null ],
     [ "value", "structink_1_1runtime_1_1value.html#a1e765052e98edf7f890289a425166115", null ],
-    [ "get", "structink_1_1runtime_1_1value.html#a5ace7131900237249099e5d89189b971", null ],
-    [ "type", "structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403", null ],
-    [ "v_bool", "structink_1_1runtime_1_1value.html#ae4d38935e7f7c0ea04f841cd7f451bf7", null ],
-    [ "v_float", "structink_1_1runtime_1_1value.html#aaaa44096459dd0823c32d2201c4905d8", null ],
-    [ "v_int32", "structink_1_1runtime_1_1value.html#a56f654a31f2c151c8ed6bd8c5867b6e8", null ],
-    [ "v_list", "structink_1_1runtime_1_1value.html#ae2b9f9736c0744127d45f91287a4846d", null ],
-    [ "v_string", "structink_1_1runtime_1_1value.html#a4936a36ed6b33a0960d91c118fe7a61e", null ],
-    [ "v_uint32", "structink_1_1runtime_1_1value.html#ab0ae793fabc9c0d1399087d65a86efb0", null ]
+    [ "get", "structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e", null ],
+    [ "type", "structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403", null ]
 ];
