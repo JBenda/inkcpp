@@ -1,8 +1,17 @@
+/* Copyright (c) 2024 Julian Benda
+ *
+ * This file is part of inkCPP which is released under MIT license.
+ * See file LICENSE.txt or go to
+ * https://github.com/JBenda/inkcpp for full license details.
+ */
 #pragma once
 
 #include "config.h"
 #ifdef INK_EXPOSE_JSON
-#include "../json.hpp"
+#	ifdef INK_ENABLE_UNREAL
+#		error Exposing JSON is not supported currently in UE
+#	endif
+#	include "../json.hpp"
 #endif
 #include "compilation_results.h"
 #include <iostream>
@@ -32,4 +41,4 @@ namespace compiler
 	/** stream -> file */
 	void run(std::istream& in, const char* filenameOut, compilation_results* results = nullptr);
 } // namespace compiler
-}
+} // namespace ink

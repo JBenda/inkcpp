@@ -1,6 +1,13 @@
+/* Copyright (c) 2024 Julian Benda
+ *
+ * This file is part of inkCPP which is released under MIT license.
+ * See file LICENSE.txt or go to 
+ * https://github.com/JBenda/inkcpp for full license details. 
+ * 
+ * Based on Copyright (c) 2020 David Colson
+ * UnrealInk @ https://github.com/DavidColson/UnrealInk
+ */
 #pragma once
-
-// NOTICE: EInkVarType and FInkVar are copied from David Colson's UnrealInk project @ https://github.com/DavidColson/UnrealInk
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"

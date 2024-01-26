@@ -60,5 +60,8 @@ target_compile_features(inkcpp PUBLIC cxx_std_17)
 
 # Unreal installation
 install(DIRECTORY "include/" DESTINATION "inkcpp/Source/inkcpp/Public/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
+list(REMOVE_ITEM SOURCE "avl_array.h")
+install(FILES "avl_array.h" DESTINATION "inkcpp/Source/ThirdParty/Private"
+		COMPONENT unreal EXCLUDE_FROM_ALL)
 install(FILES ${SOURCES} DESTINATION "inkcpp/Source/inkcpp/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
 install(FILES ${COLLECTION_SOURCES} DESTINATION "inkcpp/Source/inkcpp/Private/ink/collections/" COMPONENT unreal EXCLUDE_FROM_ALL)

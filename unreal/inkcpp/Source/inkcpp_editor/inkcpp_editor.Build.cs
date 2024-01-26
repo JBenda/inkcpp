@@ -23,6 +23,7 @@ public class inkcpp_editor : ModuleRules
 			new string[] {
                 Path.Combine(ModuleDirectory, "../shared/Private"),
 				Path.Combine(ModuleDirectory, "../shared/Public"),
+				Path.Combine(moduleDirectory, "../ThirdParty/Private"),
             }
 			);
 			

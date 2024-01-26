@@ -1,5 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+/* Copyright (c) 2024 Julian Benda
+ *
+ * This file is part of inkCPP which is released under MIT license.
+ * See file LICENSE.txt or go to 
+ * https://github.com/JBenda/inkcpp for full license details. 
+ */
 #include "InkThread.h"
 
 #include "inkcpp.h"
