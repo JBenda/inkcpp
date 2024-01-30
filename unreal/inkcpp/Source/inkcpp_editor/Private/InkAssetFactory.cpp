@@ -16,12 +16,9 @@
 #include "inklecate_cmd.cpp"
 
 #include <sstream>
-#include <fstream>
 #include <cstdlib>
 #include <filesystem>
 #include <cstdio>
-#include <cctype>
-#include <cstring>
 
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: UFactory(ObjectInitializer), FReimportHandler(), object_ptr(this)
@@ -40,56 +37,12 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	
 }
 
-void find_includes(std::filesystem::path file_path, std::vector<std::filesystem::path>& files) {
-	using path = std::filesystem::path;
-	files.push_back(file_path);
-	size_t curr_size = files.size();
-	{
-		path dir_path = file_path;
-		dir_path = file_path.remove_filename();
-		file_path.make_preferred();
-		std::ifstream file(file_path);
-		if (!file) {
-			UE_LOG(InkCpp, Error, TEXT("Failed To inspect file '%s', maybe not all dependencies for the asset were listed"), ANSI_TO_TCHAR(file_path.string().c_str()));
-			return;
-		}
-		
-		std::string line;
-		while(std::getline(file, line)) {
-			size_t i = 0;
-			// remove leading spaces
-			while(std::isspace(static_cast<unsigned char>(line[i]))) { ++i; }
-			// check for "INCLUDE"
-			if(strncmp("INCLUDE", line.c_str() + i, 7) != 0) {
-				continue;
-			}
-			i += 7;
-			size_t end = i;
-			// remove spaces (but at least one)
-			while(std::isspace(static_cast<unsigned char>(line[i]))) { ++i; }
-			if (end == i) { continue; }
-
-			path new_file_path(line.c_str() + i);
-			if (new_file_path.is_relative()) {
-				new_file_path = dir_path / new_file_path;
-			}
-			files.push_back(new_file_path);
-		}
-	}
-	size_t end = files.size();
-	for(size_t i = curr_size; i < end; ++i) {
-		find_includes(files[i], files);
-	}
-}
-
 UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled)
 {
-	using path = std::filesystem::path;
 	std::stringstream output;
 	std::stringstream cmd{};
 	const std::string        inklecate_cmd = get_inklecate_cmd();
 	static const std::string ink_suffix{".ink"};
-	std::vector<path> story_files;
 	try
 	{
 		std::string cFilename = TCHAR_TO_ANSI(*Filename);
@@ -106,11 +59,8 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 			path path_bin(TCHAR_TO_ANSI(*IPluginManager::Get().FindPlugin(TEXT("InkCPP"))->GetBaseDir()), path::format::generic_format);
 			path_bin.make_preferred();
 			path_bin /= path(inklecate_cmd, path::format::generic_format).make_preferred();
-
 			path story_path(cFilename, path::format::generic_format);
-			find_includes(story_path, story_files);
 			story_path.make_preferred();
-
 			const char* filename = std::tmpnam(nullptr);
 			if(filename == nullptr) {
 				UE_LOG(InkCpp, Error, TEXT("Failed to create temporary file"));
@@ -146,19 +96,6 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 		FMemory::Memcpy(asset->CompiledStory.GetData(), data.c_str(), data.length());
 
 		// Paths
-		TArray<FAssetImportInfo::FSourceFile> source_files;
-		for(auto& src_path : story_files) {
-			src_path.make_preferred();
-			source_files.Add(FAssetImportInfo::FSourceFile(
-				asset->AssetImportData->SanitizeImportFilename(FString(ANSI_TO_TCHAR(src_path.string().c_str()))),
-				FDateTime::UtcNow(),
-				FMD5Hash(),
-				FString(TEXT("Ink story file"))
-			));
-		}
-		if (! source_files.Num()) {
-			asset->AssetImportData->SetSourceFiles(std::move(source_files));
-		}
 		asset->AssetImportData->Update(CurrentFilename);
 
 		// Not cancelled
@@ -178,9 +115,7 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 
 bool UInkAssetFactory::FactoryCanImport(const FString& Filename)
 {
-	return Filename.EndsWith(TEXT(".ink.json"), ESearchCase::IgnoreCase)
-			|| Filename.EndsWith(TEXT(".ink"), ESearchCase::IgnoreCase)
-			|| Filename.EndsWith(TEXT(".json"), ESearchCase::IgnoreCase);
+	return true; // Fuck you Unreal
 }
 
 bool UInkAssetFactory::CanReimport(UObject* Obj, TArray<FString>& OutFilenames)
@@ -229,7 +164,6 @@ EReimportResult::Type UInkAssetFactory::Reimport(UObject* Obj)
 
 	// Run the import again
 	EReimportResult::Type Result = EReimportResult::Failed;
-	// TODO: set to true?
 	bool OutCanceled = false;
 
 	if (ImportObject(InkAsset->GetClass(), InkAsset->GetOuter(), *InkAsset->GetName(), RF_Public | RF_Standalone, Filename, nullptr, OutCanceled) != nullptr)
