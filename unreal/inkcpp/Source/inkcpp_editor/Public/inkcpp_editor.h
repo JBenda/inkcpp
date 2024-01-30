@@ -5,3 +5,5 @@
  * https://github.com/JBenda/inkcpp for full license details. 
  */
 #pragma once
+#include "Logging/LogMacros.h"
+DECLARE_LOG_CATEGORY_EXTERN(InkCpp, Log, All);

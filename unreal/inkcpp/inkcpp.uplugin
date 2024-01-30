@@ -8,9 +8,8 @@
 	"Category": "Narrative",
 	"CreatedBy": "Julian Benda",
 	"CreatedByURL": "https://github.com/JBenda/inkcpp/",
-	"DocsURL": "https://jbenda.github.io/inkcpp/html/group__unreal.html",
-	"MarketplaceURL": "com.epicgames.launcher:
-//ue/marketplace/product/494904fc50f747db879c297ee57cf122",
+	"DocsURL": "https://jbenda.github.io/inkcpp/html/group__unreal.html#ue_example",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/494904fc50f747db879c297ee57cf122",
 	"SupportURL": "https://github.com/JBenda/inkcpp/issues",
 	"CanContainContent": false,
 	"IsBetaVersion": false,
@@ -24,7 +23,7 @@
 	{
 		"Name": "inkcpp",
 		"Type": "Runtime",
-		"LoadingPhase": "Default"
+		"LoadingPhase": "Default",
 		"WhitelistPlatforms": [
 			"Win64",
 			"Mac",
@@ -34,7 +33,7 @@
 	{
 		"Name": "inkcpp_editor",
 		"Type": "Editor",
-		"LoadingPhase": "Default"
+		"LoadingPhase": "Default",
 		"WhitelistPlatforms": [
 			"Win64",
 			"Mac",

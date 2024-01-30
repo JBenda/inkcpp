@@ -10,3 +10,4 @@
 #include "Modules/ModuleManager.h"
 
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, inkcpp_editor)
+DEFINE_LOG_CATEGORY(InkCpp);

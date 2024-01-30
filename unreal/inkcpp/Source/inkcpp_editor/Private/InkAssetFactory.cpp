@@ -23,9 +23,6 @@
 #include <cctype>
 #include <cstring>
 
-DECLARE_LOG_CATEGORY_EXTERN(InkCpp, Log, All);
-DEFINE_LOG_CATEGORY(InkCpp);
-
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: UFactory(ObjectInitializer), FReimportHandler(), object_ptr(this)
 {
@@ -43,9 +40,9 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	
 }
 
-void find_includes(std::filesystem::path file_path, std::vector<std::filesystem::path>& files, std::string& line) {
+void find_includes(std::filesystem::path file_path, std::vector<std::filesystem::path>& files) {
 	using path = std::filesystem::path;
-	files.push(file_path);
+	files.push_back(file_path);
 	size_t curr_size = files.size();
 	{
 		path dir_path = file_path;
@@ -53,7 +50,7 @@ void find_includes(std::filesystem::path file_path, std::vector<std::filesystem:
 		file_path.make_preferred();
 		std::ifstream file(file_path);
 		if (!file) {
-			UE_LOG(InkCPP, Error, TEXT("Failed To inspect file '%s', maybe not all dependencies for the asset were listed"), ANSI_TO_TCHAR(path.c_str()));
+			UE_LOG(InkCpp, Error, TEXT("Failed To inspect file '%s', maybe not all dependencies for the asset were listed"), ANSI_TO_TCHAR(file_path.string().c_str()));
 			return;
 		}
 		
@@ -69,14 +66,14 @@ void find_includes(std::filesystem::path file_path, std::vector<std::filesystem:
 			i += 7;
 			size_t end = i;
 			// remove spaces (but at least one)
-			while(std::isspace(statc_cast<unsigned char>(line[i]))) { ++i; }
+			while(std::isspace(static_cast<unsigned char>(line[i]))) { ++i; }
 			if (end == i) { continue; }
 
 			path new_file_path(line.c_str() + i);
 			if (new_file_path.is_relative()) {
 				new_file_path = dir_path / new_file_path;
 			}
-			files.push(new_file_path);
+			files.push_back(new_file_path);
 		}
 	}
 	size_t end = files.size();
@@ -87,6 +84,7 @@ void find_includes(std::filesystem::path file_path, std::vector<std::filesystem:
 
 UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled)
 {
+	using path = std::filesystem::path;
 	std::stringstream output;
 	std::stringstream cmd{};
 	const std::string        inklecate_cmd = get_inklecate_cmd();
@@ -110,7 +108,7 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 			path_bin /= path(inklecate_cmd, path::format::generic_format).make_preferred();
 
 			path story_path(cFilename, path::format::generic_format);
-			find_includes(story_path, story_fiels);
+			find_includes(story_path, story_files);
 			story_path.make_preferred();
 
 			const char* filename = std::tmpnam(nullptr);
@@ -148,17 +146,17 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 		FMemory::Memcpy(asset->CompiledStory.GetData(), data.c_str(), data.length());
 
 		// Paths
-		TArray<FSourceFile> source_files;
+		TArray<FAssetImportInfo::FSourceFile> source_files;
 		for(auto& src_path : story_files) {
 			src_path.make_preferred();
-			source_files.Add(
-				SanitizeImportFilename(FString(ANSI_TO_TCHAR(src_path.c_str()))),
-				FDateTime.UtcNow(),
+			source_files.Add(FAssetImportInfo::FSourceFile(
+				asset->AssetImportData->SanitizeImportFilename(FString(ANSI_TO_TCHAR(src_path.string().c_str()))),
+				FDateTime::UtcNow(),
 				FMD5Hash(),
 				FString(TEXT("Ink story file"))
-			);
+			));
 		}
-		if (! source_files.empty()) {
+		if (! source_files.Num()) {
 			asset->AssetImportData->SetSourceFiles(std::move(source_files));
 		}
 		asset->AssetImportData->Update(CurrentFilename);

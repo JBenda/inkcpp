@@ -24,7 +24,7 @@ public class inkcpp : ModuleRules
                 Path.Combine(ModuleDirectory, "../shared/Private"),
 				Path.Combine(ModuleDirectory, "Private/ink"),
 				Path.Combine(ModuleDirectory, "Public/ink"),
-				Path.Combine(moduleDirectory, "../ThirdParty/Private"),
+				Path.Combine(ModuleDirectory, "../ThirdParty/Private"),
             }
 			);
 			
