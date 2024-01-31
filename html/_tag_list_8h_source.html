@@ -100,44 +100,48 @@ $(function(){initNavTree('_tag_list_8h_source.html',''); initResizable(); });
   <div class="headertitle"><div class="title">TagList.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">// Fill out your copyright notice in the Description page of Project Settings.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;CoreMinimal.h&quot;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;TagList.generated.h&quot;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>UCLASS()</div>
-<div class="foldopen" id="foldopen00013" data-start="{" data-end="};">
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="class_u_tag_list.html">   13</a></span>class INKCPP_API <a class="code hl_class" href="class_u_tag_list.html">UTagList</a> : public UObject</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>{</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    GENERATED_BODY()</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <a class="code hl_class" href="class_u_tag_list.html">UTagList</a>();</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keywordtype">void</span> Initialize(<span class="keyword">const</span> TArray&lt;FString&gt;&amp; tags);</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    UFUNCTION(BlueprintPure, Category = <span class="stringliteral">&quot;Ink&quot;</span>)</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#a6d96d78a3f05189b458843058222736b">   30</a></span>    bool Has(const FString&amp; tag) const;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    UFUNCTION(BlueprintPure, Category = &quot;Ink&quot;)</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#a7ee9b59f50482718fe1f8eed47f24a3e">   44</a></span>    <span class="keywordtype">bool</span> HasEnum(const UEnum* Enum, uint8&amp; value) const;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    UFUNCTION(BlueprintPure, Category = &quot;Ink&quot;)</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#a11abd35e7601d0955e888f3c076d28e5">   52</a></span>    FString GetValue(const FString&amp; name) const;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    UFUNCTION(BlueprintPure, Category = &quot;Ink&quot;)</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#a56f245a60b5145cbf37fa992e1ceef5d">   62</a></span>    <span class="keywordtype">bool</span> GetEnum(const UEnum* Enum, uint8&amp; value) const;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    UFUNCTION(BlueprintPure, Category = &quot;Ink&quot;)</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#ab2321cf84ed9dfa789916dbaf576749f">   69</a></span>    const TArray&lt;FString&gt;&amp; GetTags() const;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>private:</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    TArray&lt;FString&gt; Tags;</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>};</div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* Copyright (c) 2024 Julian Benda</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * This file is part of inkCPP which is released under MIT license.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * See file LICENSE.txt or go to</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * https://github.com/JBenda/inkcpp for full license details.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;CoreMinimal.h&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;TagList.generated.h&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>UCLASS()</div>
+<div class="foldopen" id="foldopen00017" data-start="{" data-end="};">
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="class_u_tag_list.html">   17</a></span>class INKCPP_API <a class="code hl_class" href="class_u_tag_list.html">UTagList</a> : public UObject</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>{</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    GENERATED_BODY()</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <a class="code hl_class" href="class_u_tag_list.html">UTagList</a>();</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keywordtype">void</span> Initialize(<span class="keyword">const</span> TArray&lt;FString&gt;&amp; tags);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    UFUNCTION(BlueprintPure, Category = <span class="stringliteral">&quot;Ink&quot;</span>)</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#a6d96d78a3f05189b458843058222736b">   34</a></span>    bool Has(const FString&amp; tag) const;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    UFUNCTION(BlueprintPure, Category = &quot;Ink&quot;)</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#a7ee9b59f50482718fe1f8eed47f24a3e">   48</a></span>    <span class="keywordtype">bool</span> HasEnum(const UEnum* Enum, uint8&amp; value) const;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    UFUNCTION(BlueprintPure, Category = &quot;Ink&quot;)</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#a11abd35e7601d0955e888f3c076d28e5">   56</a></span>    FString GetValue(const FString&amp; name) const;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    UFUNCTION(BlueprintPure, Category = &quot;Ink&quot;)</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#a56f245a60b5145cbf37fa992e1ceef5d">   66</a></span>    <span class="keywordtype">bool</span> GetEnum(const UEnum* Enum, uint8&amp; value) const;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    UFUNCTION(BlueprintPure, Category = &quot;Ink&quot;)</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="class_u_tag_list.html#ab2321cf84ed9dfa789916dbaf576749f">   73</a></span>    const TArray&lt;FString&gt;&amp; GetTags() const;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>private:</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    TArray&lt;FString&gt; Tags;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>};</div>
 </div>
-<div class="ttc" id="aclass_u_tag_list_html"><div class="ttname"><a href="class_u_tag_list.html">UTagList</a></div><div class="ttdoc">Helpful tag list.</div><div class="ttdef"><b>Definition</b> TagList.h:14</div></div>
+<div class="ttc" id="aclass_u_tag_list_html"><div class="ttname"><a href="class_u_tag_list.html">UTagList</a></div><div class="ttdoc">Helpful tag list.</div><div class="ttdef"><b>Definition</b> TagList.h:18</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

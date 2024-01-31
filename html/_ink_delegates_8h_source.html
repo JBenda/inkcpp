@@ -100,68 +100,74 @@ $(function(){initNavTree('_ink_delegates_8h_source.html',''); initResizable(); }
   <div class="headertitle"><div class="title">InkDelegates.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="_ink_delegates_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;CoreMinimal.h&quot;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;Delegates/Delegate.h&quot;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;InkVar.h&quot;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;InkDelegates.generated.h&quot;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>DOC_UF(BlueprintImplementableEvent, )</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#a3cc75f35b344d2f464c773bbbd4d014d">   24</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#a3cc75f35b344d2f464c773bbbd4d014d">FTagFunctionDelegate</a>(<a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>* Caller, const TArray&lt;FString&gt;&amp; Params);</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>DECLARE_DYNAMIC_DELEGATE_TwoParams(<a class="code hl_function" href="_ink_delegates_8h.html#a3cc75f35b344d2f464c773bbbd4d014d">FTagFunctionDelegate</a>, <a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>*, Caller, <span class="keyword">const</span> TArray&lt;FString&gt;&amp;, Params);</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTagFunctionMulticastDelegate, <a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>*, Caller, <span class="keyword">const</span> TArray&lt;FString&gt;&amp;, Params);</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>DOC_UF(BlueprintImplementableEvent, )</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#afd0fb24f25877b05ac8267b8cef798d6">   43</a></span><a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a> <a class="code hl_function" href="_ink_delegates_8h.html#afd0fb24f25877b05ac8267b8cef798d6">FExternalFunctionDelegate</a>(const TArray&lt;<a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&gt;&amp; Arguments);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(<a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>, <a class="code hl_function" href="_ink_delegates_8h.html#afd0fb24f25877b05ac8267b8cef798d6">FExternalFunctionDelegate</a>, <span class="keyword">const</span> TArray&lt;FInkVar&gt;&amp;, Arguments);</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>DOC_UF(BlueprintImplementableEvent, )</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#ab7ab7d019530b51bf6a526cf2f4fbdb5">   58</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#ab7ab7d019530b51bf6a526cf2f4fbdb5">FExternalFunctionVoidDelegate</a>(const TArray&lt;<a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&gt;&amp; Arguments);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>DECLARE_DYNAMIC_DELEGATE_OneParam(<a class="code hl_function" href="_ink_delegates_8h.html#ab7ab7d019530b51bf6a526cf2f4fbdb5">FExternalFunctionVoidDelegate</a>, <span class="keyword">const</span> TArray&lt;FInkVar&gt;&amp;, Arguments);</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>DECLARE_DYNAMIC_DELEGATE_TwoParams(FGlobalTagFunctionDelegate, <a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>*, Caller, <span class="keyword">const</span> TArray&lt;FString&gt;&amp;, Params);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGlobalTagFunctionMulticastDelegate, <a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>*, Caller, <span class="keyword">const</span> TArray&lt;FString&gt;&amp;, Params);</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>DOC_UF(BlueprintImplementableEvent, )</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#a0bd8541641fbc63cef5bfb441941096f">   78</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#a0bd8541641fbc63cef5bfb441941096f">FVariableCallbackDelegate</a>();</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>DECLARE_DYNAMIC_DELEGATE(<a class="code hl_function" href="_ink_delegates_8h.html#a0bd8541641fbc63cef5bfb441941096f">FVariableCallbackDelegate</a>);</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>DOC_UF(BlueprintImplementableEvent, )</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#a0b4a526c8b809e74499e19409e923087">   92</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#a0b4a526c8b809e74499e19409e923087">FVariableCallbackDelegateNewValue</a>(const <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp; value);</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>DECLARE_DYNAMIC_DELEGATE_OneParam(<a class="code hl_function" href="_ink_delegates_8h.html#a0b4a526c8b809e74499e19409e923087">FVariableCallbackDelegateNewValue</a>, <span class="keyword">const</span> <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp;, value);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>DOC_UF(BlueprintImplementableEvent, )</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#af78ef9644a3d4996d1cba334813ccce7">  108</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#af78ef9644a3d4996d1cba334813ccce7">FVariableCallbackDelegateNewOldValue</a>(const <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp; value, const <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp; old_value);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>DECLARE_DYNAMIC_DELEGATE_TwoParams(<a class="code hl_function" href="_ink_delegates_8h.html#af78ef9644a3d4996d1cba334813ccce7">FVariableCallbackDelegateNewOldValue</a>, <span class="keyword">const</span> <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp;, value, <span class="keyword">const</span> <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp;, old_value);</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>UCLASS()</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>class UDelegateKeepAlive : public UObject</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>{</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    GENERATED_BODY()</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>};</div>
+<a href="_ink_delegates_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* Copyright (c) 2024 Julian Benda</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * This file is part of inkCPP which is released under MIT license.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * See file LICENSE.txt or go to</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * https://github.com/JBenda/inkcpp for full license details.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;CoreMinimal.h&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;Delegates/Delegate.h&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;InkVar.h&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;InkDelegates.generated.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>DOC_UF(BlueprintImplementableEvent, )</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#a3cc75f35b344d2f464c773bbbd4d014d">   30</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#a3cc75f35b344d2f464c773bbbd4d014d">FTagFunctionDelegate</a>(<a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>* Caller, const TArray&lt;FString&gt;&amp; Params);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>DECLARE_DYNAMIC_DELEGATE_TwoParams(<a class="code hl_function" href="_ink_delegates_8h.html#a3cc75f35b344d2f464c773bbbd4d014d">FTagFunctionDelegate</a>, <a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>*, Caller, <span class="keyword">const</span> TArray&lt;FString&gt;&amp;, Params);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTagFunctionMulticastDelegate, <a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>*, Caller, <span class="keyword">const</span> TArray&lt;FString&gt;&amp;, Params);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>DOC_UF(BlueprintImplementableEvent, )</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#afd0fb24f25877b05ac8267b8cef798d6">   49</a></span><a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a> <a class="code hl_function" href="_ink_delegates_8h.html#afd0fb24f25877b05ac8267b8cef798d6">FExternalFunctionDelegate</a>(const TArray&lt;<a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&gt;&amp; Arguments);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(<a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>, <a class="code hl_function" href="_ink_delegates_8h.html#afd0fb24f25877b05ac8267b8cef798d6">FExternalFunctionDelegate</a>, <span class="keyword">const</span> TArray&lt;FInkVar&gt;&amp;, Arguments);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>DOC_UF(BlueprintImplementableEvent, )</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#ab7ab7d019530b51bf6a526cf2f4fbdb5">   64</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#ab7ab7d019530b51bf6a526cf2f4fbdb5">FExternalFunctionVoidDelegate</a>(const TArray&lt;<a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&gt;&amp; Arguments);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>DECLARE_DYNAMIC_DELEGATE_OneParam(<a class="code hl_function" href="_ink_delegates_8h.html#ab7ab7d019530b51bf6a526cf2f4fbdb5">FExternalFunctionVoidDelegate</a>, <span class="keyword">const</span> TArray&lt;FInkVar&gt;&amp;, Arguments);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>DECLARE_DYNAMIC_DELEGATE_TwoParams(FGlobalTagFunctionDelegate, <a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>*, Caller, <span class="keyword">const</span> TArray&lt;FString&gt;&amp;, Params);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGlobalTagFunctionMulticastDelegate, <a class="code hl_class" href="class_u_ink_thread.html">UInkThread</a>*, Caller, <span class="keyword">const</span> TArray&lt;FString&gt;&amp;, Params);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>DOC_UF(BlueprintImplementableEvent, )</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#a0bd8541641fbc63cef5bfb441941096f">   84</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#a0bd8541641fbc63cef5bfb441941096f">FVariableCallbackDelegate</a>();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>DECLARE_DYNAMIC_DELEGATE(<a class="code hl_function" href="_ink_delegates_8h.html#a0bd8541641fbc63cef5bfb441941096f">FVariableCallbackDelegate</a>);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>DOC_UF(BlueprintImplementableEvent, )</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#a0b4a526c8b809e74499e19409e923087">   98</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#a0b4a526c8b809e74499e19409e923087">FVariableCallbackDelegateNewValue</a>(const <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp; value);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>DECLARE_DYNAMIC_DELEGATE_OneParam(<a class="code hl_function" href="_ink_delegates_8h.html#a0b4a526c8b809e74499e19409e923087">FVariableCallbackDelegateNewValue</a>, <span class="keyword">const</span> <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp;, value);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="preprocessor">#ifdef DOXYGEN</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>DOC_UF(BlueprintImplementableEvent, )</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="_ink_delegates_8h.html#af78ef9644a3d4996d1cba334813ccce7">  114</a></span>void <a class="code hl_function" href="_ink_delegates_8h.html#af78ef9644a3d4996d1cba334813ccce7">FVariableCallbackDelegateNewOldValue</a>(const <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp; value, const <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp; old_value);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>DECLARE_DYNAMIC_DELEGATE_TwoParams(<a class="code hl_function" href="_ink_delegates_8h.html#af78ef9644a3d4996d1cba334813ccce7">FVariableCallbackDelegateNewOldValue</a>, <span class="keyword">const</span> <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp;, value, <span class="keyword">const</span> <a class="code hl_struct" href="struct_f_ink_var.html">FInkVar</a>&amp;, old_value);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>UCLASS()</div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>class UDelegateKeepAlive : public UObject</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>{</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    GENERATED_BODY()</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>};</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
 <div class="ttc" id="a_ink_delegates_8h_html_a0b4a526c8b809e74499e19409e923087"><div class="ttname"><a href="_ink_delegates_8h.html#a0b4a526c8b809e74499e19409e923087">FVariableCallbackDelegateNewValue</a></div><div class="ttdeci">void FVariableCallbackDelegateNewValue(const FInkVar &amp;value)</div><div class="ttdoc">Notification containing the new variable value, send on variable change.</div></div>
 <div class="ttc" id="a_ink_delegates_8h_html_a0bd8541641fbc63cef5bfb441941096f"><div class="ttname"><a href="_ink_delegates_8h.html#a0bd8541641fbc63cef5bfb441941096f">FVariableCallbackDelegate</a></div><div class="ttdeci">void FVariableCallbackDelegate()</div><div class="ttdoc">Notification if variable changes.</div></div>
 <div class="ttc" id="a_ink_delegates_8h_html_a3cc75f35b344d2f464c773bbbd4d014d"><div class="ttname"><a href="_ink_delegates_8h.html#a3cc75f35b344d2f464c773bbbd4d014d">FTagFunctionDelegate</a></div><div class="ttdeci">void FTagFunctionDelegate(UInkThread *Caller, const TArray&lt; FString &gt; &amp;Params)</div><div class="ttdoc">Delegate for a tag function.</div></div>
 <div class="ttc" id="a_ink_delegates_8h_html_ab7ab7d019530b51bf6a526cf2f4fbdb5"><div class="ttname"><a href="_ink_delegates_8h.html#ab7ab7d019530b51bf6a526cf2f4fbdb5">FExternalFunctionVoidDelegate</a></div><div class="ttdeci">void FExternalFunctionVoidDelegate(const TArray&lt; FInkVar &gt; &amp;Arguments)</div><div class="ttdoc">Delegate for external event.</div></div>
 <div class="ttc" id="a_ink_delegates_8h_html_af78ef9644a3d4996d1cba334813ccce7"><div class="ttname"><a href="_ink_delegates_8h.html#af78ef9644a3d4996d1cba334813ccce7">FVariableCallbackDelegateNewOldValue</a></div><div class="ttdeci">void FVariableCallbackDelegateNewOldValue(const FInkVar &amp;value, const FInkVar &amp;old_value)</div><div class="ttdoc">Notification containing old and new varible, send on variable change.</div></div>
 <div class="ttc" id="a_ink_delegates_8h_html_afd0fb24f25877b05ac8267b8cef798d6"><div class="ttname"><a href="_ink_delegates_8h.html#afd0fb24f25877b05ac8267b8cef798d6">FExternalFunctionDelegate</a></div><div class="ttdeci">FInkVar FExternalFunctionDelegate(const TArray&lt; FInkVar &gt; &amp;Arguments)</div><div class="ttdoc">Delegate for external functions.</div></div>
-<div class="ttc" id="aclass_u_ink_thread_html"><div class="ttname"><a href="class_u_ink_thread.html">UInkThread</a></div><div class="ttdoc">Base class for all ink threads.</div><div class="ttdef"><b>Definition</b> InkThread.h:26</div></div>
-<div class="ttc" id="astruct_f_ink_var_html"><div class="ttname"><a href="struct_f_ink_var.html">FInkVar</a></div><div class="ttdoc">A wrapper for passing around ink vars to and from ink itself.</div><div class="ttdef"><b>Definition</b> InkVar.h:39</div></div>
+<div class="ttc" id="aclass_u_ink_thread_html"><div class="ttname"><a href="class_u_ink_thread.html">UInkThread</a></div><div class="ttdoc">Base class for all ink threads.</div><div class="ttdef"><b>Definition</b> InkThread.h:30</div></div>
+<div class="ttc" id="astruct_f_ink_var_html"><div class="ttname"><a href="struct_f_ink_var.html">FInkVar</a></div><div class="ttdoc">A wrapper for passing around ink vars to and from ink itself.</div><div class="ttdef"><b>Definition</b> InkVar.h:46</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

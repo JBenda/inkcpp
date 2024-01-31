@@ -100,29 +100,35 @@ $(function(){initNavTree('compilation__results_8h_source.html',''); initResizabl
   <div class="headertitle"><div class="title">compilation_results.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="foldopen" id="foldopen00006" data-start="{" data-end="}">
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno"><a class="line" href="namespaceink_1_1compiler.html">    6</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceink_1_1compiler.html">ink::compiler</a></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>{</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">    9</a></span><span class="keyword">typedef</span> std::vector&lt;std::string&gt; <a class="code hl_typedef" href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">error_list</a>;</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="foldopen" id="foldopen00012" data-start="{" data-end="};">
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="structink_1_1compiler_1_1compilation__results.html">   12</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structink_1_1compiler_1_1compilation__results.html">compilation_results</a> {</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="structink_1_1compiler_1_1compilation__results.html#a52e9f6cd22e165d6fdbe27e9c635dec8">   13</a></span>    <a class="code hl_typedef" href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">error_list</a> <a class="code hl_variable" href="structink_1_1compiler_1_1compilation__results.html#a52e9f6cd22e165d6fdbe27e9c635dec8">warnings</a>; </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="structink_1_1compiler_1_1compilation__results.html#af6993be5cd9a76b849b61792b6177399">   14</a></span>    <a class="code hl_typedef" href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">error_list</a> <a class="code hl_variable" href="structink_1_1compiler_1_1compilation__results.html#af6993be5cd9a76b849b61792b6177399">errors</a>;   </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>};</div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* Copyright (c) 2024 Julian Benda</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * This file is part of inkCPP which is released under MIT license.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * See file LICENSE.txt or go to</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * https://github.com/JBenda/inkcpp for full license details.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="foldopen" id="foldopen00012" data-start="{" data-end="}">
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="namespaceink_1_1compiler.html">   12</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceink_1_1compiler.html">ink::compiler</a></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>{</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">   15</a></span><span class="keyword">typedef</span> std::vector&lt;std::string&gt; <a class="code hl_typedef" href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">error_list</a>;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="foldopen" id="foldopen00018" data-start="{" data-end="};">
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="structink_1_1compiler_1_1compilation__results.html">   18</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structink_1_1compiler_1_1compilation__results.html">compilation_results</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="structink_1_1compiler_1_1compilation__results.html#a52e9f6cd22e165d6fdbe27e9c635dec8">   19</a></span>    <a class="code hl_typedef" href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">error_list</a> <a class="code hl_variable" href="structink_1_1compiler_1_1compilation__results.html#a52e9f6cd22e165d6fdbe27e9c635dec8">warnings</a>; </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="structink_1_1compiler_1_1compilation__results.html#af6993be5cd9a76b849b61792b6177399">   20</a></span>    <a class="code hl_typedef" href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">error_list</a> <a class="code hl_variable" href="structink_1_1compiler_1_1compilation__results.html#af6993be5cd9a76b849b61792b6177399">errors</a>;   </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>};</div>
 </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>} <span class="comment">// namespace ink::compiler</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>} <span class="comment">// namespace ink::compiler</span></div>
 </div>
-<div class="ttc" id="anamespaceink_1_1compiler_html"><div class="ttname"><a href="namespaceink_1_1compiler.html">ink::compiler</a></div><div class="ttdoc">collection of functions to compile a story.json to story.bin</div><div class="ttdef"><b>Definition</b> compilation_results.h:7</div></div>
-<div class="ttc" id="anamespaceink_1_1compiler_html_ade23f04236aa333345402ccbf6e95448"><div class="ttname"><a href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">ink::compiler::error_list</a></div><div class="ttdeci">std::vector&lt; std::string &gt; error_list</div><div class="ttdoc">list of errors/warnings</div><div class="ttdef"><b>Definition</b> compilation_results.h:9</div></div>
-<div class="ttc" id="astructink_1_1compiler_1_1compilation__results_html"><div class="ttname"><a href="structink_1_1compiler_1_1compilation__results.html">ink::compiler::compilation_results</a></div><div class="ttdoc">stores results from the compilation process</div><div class="ttdef"><b>Definition</b> compilation_results.h:12</div></div>
-<div class="ttc" id="astructink_1_1compiler_1_1compilation__results_html_a52e9f6cd22e165d6fdbe27e9c635dec8"><div class="ttname"><a href="structink_1_1compiler_1_1compilation__results.html#a52e9f6cd22e165d6fdbe27e9c635dec8">ink::compiler::compilation_results::warnings</a></div><div class="ttdeci">error_list warnings</div><div class="ttdoc">list of all warnings generated</div><div class="ttdef"><b>Definition</b> compilation_results.h:13</div></div>
-<div class="ttc" id="astructink_1_1compiler_1_1compilation__results_html_af6993be5cd9a76b849b61792b6177399"><div class="ttname"><a href="structink_1_1compiler_1_1compilation__results.html#af6993be5cd9a76b849b61792b6177399">ink::compiler::compilation_results::errors</a></div><div class="ttdeci">error_list errors</div><div class="ttdoc">list of all errors generated</div><div class="ttdef"><b>Definition</b> compilation_results.h:14</div></div>
+<div class="ttc" id="anamespaceink_1_1compiler_html"><div class="ttname"><a href="namespaceink_1_1compiler.html">ink::compiler</a></div><div class="ttdoc">collection of functions to compile a story.json to story.bin</div><div class="ttdef"><b>Definition</b> compilation_results.h:13</div></div>
+<div class="ttc" id="anamespaceink_1_1compiler_html_ade23f04236aa333345402ccbf6e95448"><div class="ttname"><a href="namespaceink_1_1compiler.html#ade23f04236aa333345402ccbf6e95448">ink::compiler::error_list</a></div><div class="ttdeci">std::vector&lt; std::string &gt; error_list</div><div class="ttdoc">list of errors/warnings</div><div class="ttdef"><b>Definition</b> compilation_results.h:15</div></div>
+<div class="ttc" id="astructink_1_1compiler_1_1compilation__results_html"><div class="ttname"><a href="structink_1_1compiler_1_1compilation__results.html">ink::compiler::compilation_results</a></div><div class="ttdoc">stores results from the compilation process</div><div class="ttdef"><b>Definition</b> compilation_results.h:18</div></div>
+<div class="ttc" id="astructink_1_1compiler_1_1compilation__results_html_a52e9f6cd22e165d6fdbe27e9c635dec8"><div class="ttname"><a href="structink_1_1compiler_1_1compilation__results.html#a52e9f6cd22e165d6fdbe27e9c635dec8">ink::compiler::compilation_results::warnings</a></div><div class="ttdeci">error_list warnings</div><div class="ttdoc">list of all warnings generated</div><div class="ttdef"><b>Definition</b> compilation_results.h:19</div></div>
+<div class="ttc" id="astructink_1_1compiler_1_1compilation__results_html_af6993be5cd9a76b849b61792b6177399"><div class="ttname"><a href="structink_1_1compiler_1_1compilation__results.html#af6993be5cd9a76b849b61792b6177399">ink::compiler::compilation_results::errors</a></div><div class="ttdeci">error_list errors</div><div class="ttdoc">list of all errors generated</div><div class="ttdef"><b>Definition</b> compilation_results.h:20</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

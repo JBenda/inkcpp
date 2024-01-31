@@ -100,25 +100,31 @@ $(function(){initNavTree('_ink_snapshot_8h_source.html',''); initResizable(); })
   <div class="headertitle"><div class="title">InkSnapshot.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;InkSnapshot.generated.h&quot;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>USTRUCT(BlueprintType)</div>
-<div class="foldopen" id="foldopen00010" data-start="{" data-end="};">
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="struct_f_ink_snapshot.html">   10</a></span>struct INKCPP_API <a class="code hl_struct" href="struct_f_ink_snapshot.html">FInkSnapshot</a></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>{</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    GENERATED_BODY()</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <a class="code hl_struct" href="struct_f_ink_snapshot.html">FInkSnapshot</a>() {}</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <a class="code hl_struct" href="struct_f_ink_snapshot.html">FInkSnapshot</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* snap_data, <span class="keywordtype">size_t</span> snap_len)</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        : data(<span class="keyword">reinterpret_cast&lt;</span><span class="keyword">const </span>uint8*<span class="keyword">&gt;</span>(snap_data), snap_len)</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    {}</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    UPROPERTY(BlueprintReadWrite, SaveGame, Category = <span class="stringliteral">&quot;ink|SaveGame&quot;</span>)</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="struct_f_ink_snapshot.html#a214483e287f977384e960c4b22dc9cc9">   23</a></span>    TArray&lt;uint8&gt; data;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>};</div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* Copyright (c) 2024 Julian Benda</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * This file is part of inkCPP which is released under MIT license.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * See file LICENSE.txt or go to</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * https://github.com/JBenda/inkcpp for full license details.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;InkSnapshot.generated.h&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>USTRUCT(BlueprintType)</div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="};">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="struct_f_ink_snapshot.html">   16</a></span>struct INKCPP_API <a class="code hl_struct" href="struct_f_ink_snapshot.html">FInkSnapshot</a></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>{</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    GENERATED_BODY()</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <a class="code hl_struct" href="struct_f_ink_snapshot.html">FInkSnapshot</a>() {}</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <a class="code hl_struct" href="struct_f_ink_snapshot.html">FInkSnapshot</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* snap_data, <span class="keywordtype">size_t</span> snap_len)</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        : data(<span class="keyword">reinterpret_cast&lt;</span><span class="keyword">const </span>uint8*<span class="keyword">&gt;</span>(snap_data), snap_len)</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    {}</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    UPROPERTY(BlueprintReadWrite, SaveGame, Category = <span class="stringliteral">&quot;ink|SaveGame&quot;</span>)</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="struct_f_ink_snapshot.html#a214483e287f977384e960c4b22dc9cc9">   29</a></span>    TArray&lt;uint8&gt; data;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>};</div>
 </div>
-<div class="ttc" id="astruct_f_ink_snapshot_html"><div class="ttname"><a href="struct_f_ink_snapshot.html">FInkSnapshot</a></div><div class="ttdoc">A serelizable snapshot of a runtime state Can be used as variable in a USaveGame to be stored and rel...</div><div class="ttdef"><b>Definition</b> InkSnapshot.h:11</div></div>
+<div class="ttc" id="astruct_f_ink_snapshot_html"><div class="ttname"><a href="struct_f_ink_snapshot.html">FInkSnapshot</a></div><div class="ttdoc">A serelizable snapshot of a runtime state Can be used as variable in a USaveGame to be stored and rel...</div><div class="ttdef"><b>Definition</b> InkSnapshot.h:17</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
