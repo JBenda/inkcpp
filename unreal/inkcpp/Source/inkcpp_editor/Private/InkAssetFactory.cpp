@@ -1,3 +1,9 @@
+/* Copyright (c) 2024 Julian Benda
+ *
+ * This file is part of inkCPP which is released under MIT license.
+ * See file LICENSE.txt or go to
+ * https://github.com/JBenda/inkcpp for full license details.
+ */
 #include "InkAssetFactory.h"
 
 #include "EditorFramework/AssetImportData.h"
@@ -13,9 +19,6 @@
 #include <cstdlib>
 #include <filesystem>
 #include <cstdio>
-
-DECLARE_LOG_CATEGORY_EXTERN(InkCpp, Log, All);
-DEFINE_LOG_CATEGORY(InkCpp);
 
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: UFactory(ObjectInitializer), FReimportHandler(), object_ptr(this)

@@ -1,19 +1,51 @@
+/* Copyright (c) 2024 Julian Benda
+ *
+ * This file is part of inkCPP which is released under MIT license.
+ * See file LICENSE.txt or go to
+ * https://github.com/JBenda/inkcpp for full license details.
+ */
 #pragma once
-
 #include "Logging/LogMacros.h"
 
 /**
  * @defgroup unreal Unreal Blueprints
  * Blueprint Classes usable in Unreal. An example can be found
  * [here](unreal/inkCPP_DEMO.zip), do not forgett to install the plugin via the marketplace(soonTM)
- * or unzipping the `unreal.zip` from the [release page]() to `/UNREAL_ENGINE/Engine/Plugins`. <br/>
+ * or unzipping the `unreal.zip` from the [release
+ * page](https://github.com/JBenda/inkcpp/releases/latest) to `/YOUR_UNREAL_PROJECT/Plugins/`. <br/>
  * And eitherway activating the plugin.
  *
  * The C++ API will be available soon(TM).
  *
- * In the following the [Demo project](../unreal/InkCPP_DEMO.zip) will be @ref ue_example
- * "shown".<br/>
- * But firsta more general explenation of the @ref ue_components "UE5 Blueprits"
+ * + @ref ue_setup "General setup"
+ * + @ref ue_components "UE5 Blueprits"
+ * + @ref ue_example "Demo project & setup"
+ *
+ * @section ue_setup Setup
+ *
+ * After installing the plugin (see above) you need to activate it via `Plugins->...`.
+ * Then to run your Ink script you need a instance of @ref AInkRuntime. The story will
+ * only proceed if this actor is active.
+ *
+ * On this instance set the `Ink|InkAsset` property to the story that you will run.
+ * To create this InkAsset you need to import a `.ink` file or `.ink.json` file.
+ *
+ * With the @ref AInkRuntime you can then create @ref UInkThreads with @ref AInkRuntime::Start().
+ * In addition does the runtime allows you access to the global variables via @ref
+ * AInkRuntime::ObserveChange() "observer" or directly @ref AInkRuntime::Set() "setter" und @ref
+ * AInkRuntime::Get() "getter".
+ *
+ * Notice that all threads spawned in the
+ * same runtime will share a global state. So if you want to play the same story with different
+ * states, you need multiple runtimes.
+ *
+ * The @ref UInkThread class provides will fire events when new context is available. The easiest
+ * way to implement then is to create a custom Blueprint based on @ref UInkThread. For a overview
+ * see @ref ue_thread.
+ *
+ * Below you can find the blueprints of a  @ref ue_example_minimal "minimal example". Which is
+ * included for further inspection inside the @ref ue_example "Example project" (in the map
+ * `Minimal`).
  *
  * @section ue_components Components
  *
@@ -38,7 +70,7 @@
  *
  * The most importent events/functions are:
  * + @ref UInkThread::OnLineWritten() which is called by each new line of output
- * + @ref UInkThread::OnLineWritten() which is called if a choice is encounterd and must be handled
+ * + @ref UInkThread::OnChoice() which is called if a choice is encounterd and must be handled
  * + @ref UInkThread::PickChoice()  to pick a choice and continue the thread.
  *
  * @subsection ue_choice Choice
@@ -67,6 +99,17 @@
  * @section ue_example The Example project
  *
  * [Download](../unreal/inkCPP_DEMO.zip)
+ *
+ * @subsection ue_example_setup Setup
+ *
+ * To setup the [example project](../unreal/inkCPP_DEMO.zip) install the Plugin via the [UE
+ * marketplace](https://www.unrealengine.com/product/494904fc50f747db879c297ee57cf122) place unpack
+ * the `unreal.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest) inside
+ * `/PATH/inkCPP_DEMO/Plugins/`.
+ *
+ * Next open the project via the `inkCPP_DEMO/inkCPP_DEMO.uproject` flie.
+ *
+ * Than you can hit play to run the demo.
  *
  * The example contains two maps:
  * + @ref ue_example_demo "`Demo`": An extensive example demonstrating many but not all features

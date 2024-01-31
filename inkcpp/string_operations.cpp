@@ -1,3 +1,9 @@
+/* Copyright (c) 2024 Julian Benda
+ *
+ * This file is part of inkCPP which is released under MIT license.
+ * See file LICENSE.txt or go to
+ * https://github.com/JBenda/inkcpp for full license details.
+ */
 /// implementation for commands on strings
 /// string_cast is a class which convert an value to a string.
 /// if the value is already a string it dose nothing (just serve the pointer),

@@ -23,7 +23,8 @@ public class inkcpp : ModuleRules
 			new string[] {
                 Path.Combine(ModuleDirectory, "../shared/Private"),
 				Path.Combine(ModuleDirectory, "Private/ink"),
-				Path.Combine(ModuleDirectory, "Public/ink")
+				Path.Combine(ModuleDirectory, "Public/ink"),
+				Path.Combine(ModuleDirectory, "../ThirdParty/Private"),
             }
 			);
 			

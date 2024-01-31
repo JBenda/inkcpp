@@ -10,5 +10,5 @@ FILE(GLOB PUBLIC_HEADERS "public/*")
 set_target_properties(inkcpp_shared PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 # Unreal installation
-install(DIRECTORY "public/" DESTINATION "inkcpp/Source/shared/Public/" COMPONENT unreal EXCLUDE_FROM_ALL)
+install(DIRECTORY "public/" DESTINATION "inkcpp/Source/shared/Public" COMPONENT unreal EXCLUDE_FROM_ALL)
 install(DIRECTORY "private/" DESTINATION "inkcpp/Source/shared/Private/" COMPONENT unreal EXCLUDE_FROM_ALL)

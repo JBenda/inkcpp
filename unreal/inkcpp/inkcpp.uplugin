@@ -1,15 +1,16 @@
 {
-	"FileVersion": 3,
+	"FileVersion": 1,
+	"EngineVersion": "5.3",
 	"Version": 1,
-	"VersionName": "1.0",
+	"VersionName": "0.1.3",
 	"FriendlyName": "inkcpp",
 	"Description": "inkcpp integration",
 	"Category": "Narrative",
-	"CreatedBy": "brwarner",
-	"CreatedByURL": "",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"SupportURL": "",
+	"CreatedBy": "Julian Benda",
+	"CreatedByURL": "https://github.com/JBenda/inkcpp/",
+	"DocsURL": "https://jbenda.github.io/inkcpp/html/group__unreal.html#ue_example",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/494904fc50f747db879c297ee57cf122",
+	"SupportURL": "https://github.com/JBenda/inkcpp/issues",
 	"CanContainContent": false,
 	"IsBetaVersion": false,
 	"Installed": false,
@@ -19,15 +20,25 @@
 		"Linux"
 	],
 	"Modules": [
-    {
-      "Name": "inkcpp",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "inkcpp_editor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    }
+	{
+		"Name": "inkcpp",
+		"Type": "Runtime",
+		"LoadingPhase": "Default",
+		"WhitelistPlatforms": [
+			"Win64",
+			"Mac",
+			"Linux"
+		]
+	},
+	{
+		"Name": "inkcpp_editor",
+		"Type": "Editor",
+		"LoadingPhase": "Default",
+		"WhitelistPlatforms": [
+			"Win64",
+			"Mac",
+			"Linux"
+		]
+	}
 	]
 }

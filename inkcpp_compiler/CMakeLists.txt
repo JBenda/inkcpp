@@ -3,7 +3,6 @@ list(APPEND SOURCES
     json_compiler.h json_compiler.cpp 
     emitter.h emitter.cpp
     reporter.h reporter.cpp
-    text_emitter.h text_emitter.cpp
     binary_emitter.h binary_emitter.cpp
 	list_data.h list_data.cpp
     command.cpp
@@ -31,5 +30,8 @@ target_compile_features(inkcpp_compiler PUBLIC cxx_std_17)
 target_compile_features(inkcpp_compiler PUBLIC cxx_std_17)
 
 # Unreal installation
+list(REMOVE_ITEM SOURCES "json.hpp")
+install(FILES "json.hpp" DESTINATION "inkcpp/Source/ThirdParty/Private/"
+	COMPONENT unreal EXCLUDE_FROM_ALL)
 install(DIRECTORY "include/" DESTINATION "inkcpp/Source/inkcpp_editor/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
 install(FILES ${SOURCES} DESTINATION "inkcpp/Source/inkcpp_editor/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
