@@ -11,7 +11,8 @@
  * @defgroup unreal Unreal Blueprints
  * Blueprint Classes usable in Unreal. An example can be found
  * [here](unreal/inkCPP_DEMO.zip), do not forgett to install the plugin via the marketplace(soonTM)
- * or unzipping the `unreal.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest) to `/YOUR_UNREAL_PROJECT/Plugins/`. <br/>
+ * or unzipping the `unreal.zip` from the [release
+ * page](https://github.com/JBenda/inkcpp/releases/latest) to `/YOUR_UNREAL_PROJECT/Plugins/`. <br/>
  * And eitherway activating the plugin.
  *
  * The C++ API will be available soon(TM).
@@ -30,17 +31,21 @@
  * To create this InkAsset you need to import a `.ink` file or `.ink.json` file.
  *
  * With the @ref AInkRuntime you can then create @ref UInkThreads with @ref AInkRuntime::Start().
- * In addition does the runtime allows you access to the global variables via @ref AInkRuntime::ObserveChange() "observer" or directly @ref AInkRuntime::Set() "setter" und @ref AInkRuntime::Get() "getter".
+ * In addition does the runtime allows you access to the global variables via @ref
+ * AInkRuntime::ObserveChange() "observer" or directly @ref AInkRuntime::Set() "setter" und @ref
+ * AInkRuntime::Get() "getter".
  *
  * Notice that all threads spawned in the
- * same runtime will share a global state. So if you want to play the same story with different 
+ * same runtime will share a global state. So if you want to play the same story with different
  * states, you need multiple runtimes.
  *
- * The @ref UInkThread class provides will fire events when new context is available. The easiest way to
- * implement then is to create a custom Blueprint based on @ref UInkThread. For a overview see @ref ue_thread.
+ * The @ref UInkThread class provides will fire events when new context is available. The easiest
+ * way to implement then is to create a custom Blueprint based on @ref UInkThread. For a overview
+ * see @ref ue_thread.
  *
- * Below you can find the blueprints of a  @ref ue_example_minimal "minimal example". Which is included
- * for further inspection inside the @ref ue_example "Example project" (in the map `Minimal`).
+ * Below you can find the blueprints of a  @ref ue_example_minimal "minimal example". Which is
+ * included for further inspection inside the @ref ue_example "Example project" (in the map
+ * `Minimal`).
  *
  * @section ue_components Components
  *
