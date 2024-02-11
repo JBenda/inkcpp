@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.16)
 enable_testing()
 
 # Project setup
-project(inkcpp VERSION 0.1.3)
+project(inkcpp VERSION 0.1.4)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
