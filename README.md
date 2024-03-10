@@ -160,8 +160,6 @@ pip install inkcpp
 
 The python bindnigs are defined in `inkcpp_py` subfolder.
 
-A downloadable version of the `inkcpp_py` lib can be found at the [release page](https://github.com/JBenda/inkcpp/releases/latest) with the name `<os>_py` eg `linux_py`.
-
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
 
