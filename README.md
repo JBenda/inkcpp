@@ -30,10 +30,13 @@ KeyFeatures: snapshots, observers, binding ink functions, support ink [function 
 
 ## Unreal Plugin
 
-The current version of the UE plugin can be downloaded from the [release page](https://github.com/JBenda/inkcpp/releases/latest) with te corresponding name of the OS (e.g. win64-unreal).
+InkCPP is available via the [UE Marketplace](https://www.unrealengine.com/marketplace/product/inkcpp).
+
+Alternativly is the latest version of the UE plugin can be downloaded from the [release page](https://github.com/JBenda/inkcpp/releases/latest) (`unreal.zip`).
 Place the content of this file at your plugin folder of your UE project and at the next start up it will be intigrated.
 
-A example project can be found [here](https://cloud.julian-benda.de/index.php/s/cRMBGBWbHPCcdwb). 
+
+A example project can be found [here](https://jbenda.github.io/inkcpp/unreal/InkCPP_DEMO.zip). And here the [Documentation](https://jbenda.github.io/inkcpp/html/group__unreal.html). 
 
 Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run `cmake --install . --component unreal --prefix Path/To/Unreal/Plugins/` which will add an `inkcpp` folder there with the `.uplugin`, the code for the UClasses, and all the inkcpp source files required. `config.h` will automatically detect it is being built in an Unreal plugin environment and disable STL and enable Unreal extensions (FString support, Unreal asserts, CityHash, etc.).
 
@@ -56,7 +59,7 @@ Nice features for testing:
 
 Instructions:
 
-1. Download the for your OS macthing lib archive from the [release page](https://github.com/brwarner/inkcpp/releases/latest) (e.g. linux-lib).
+1. Download the for your OS macthing lib archive from the [release page](https://github.com/brwarner/inkcpp/releases/lastest) (e.g. linux-lib).
 2. The following must be linked into your build solution for your C++ to compile correctly:
 	- `include/ink`: contains important shared headers.
 		+ For a Visual Studio project, link this directory as an Include Directory in VC++ Directories.
