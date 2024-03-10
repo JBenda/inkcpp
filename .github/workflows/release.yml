@@ -26,12 +26,12 @@ jobs:
         run: |
           mkdir artifacts
           ID=$(gh run list -b master --limit 1 --json databaseId | jq '.[0].databaseId')
-          gh run download $ID -D artifacts -n linux-cl -n linux-lib -n linux-clib -n unreal -n macos-cl -n macos-lib -n macos-clib -n win64-cl -n win64-lib -n win64-clib -n python-package-distribution
+          gh run download $ID -D artifacts -n linux-cl -n linux-lib -n linux-clib -n unreal -n macos-cl -n macos-lib -n macos-clib -n macos-arm-cl -n macos-arm-lib -n macos-arm-clib -n win64-cl -n win64-lib -n win64-clib -n python-package-distribution
           mv artifacts/python-package-distribution dist
       - name: Zip
         working-directory: ${{github.workspace}}/artifacts
         run: |
-          for f in linux-cl linux-lib linux-clib unreal macos-cl macos-lib macos-clib win64-cl win64-lib win64-clib; do zip -r ../$f.zip $f; done
+          for f in linux-cl linux-lib linux-clib unreal macos-cl macos-lib macos-clib macos-arm-cl macos-arm-lib macos-arm-clib win64-cl win64-lib win64-clib; do zip -r ../$f.zip $f; done
       - name: List
         run: tree
       - name: Publish to PyPI
@@ -45,5 +45,5 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
               --generate-notes \
-              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-clib.zip" "unreal.zip" "macos-cl.zip" "macos-lib.zip" "macos-clib.zip" "win64-cl.zip" "win64-lib.zip" "win64-clib.zip"
+              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-clib.zip" "unreal.zip" "macos-cl.zip" "macos-lib.zip" "macos-clib.zip" "win64-cl.zip" "macos-arm-cl.zip" "macos-arm-lib.zip" "macos-arm-clib.zip "win64-lib.zip" "win64-clib.zip"
 

@@ -11,9 +11,8 @@ inkcpp_cl/*.ink
 *.code-workspace
 
 # Doxygen
-Documentation/*
-!Documentation/cmake_example/
-!Documentation/cmake_example.zip
+Documentation/html/
+Documentation/inkcpp_py.html
 
 # Output
 Build/*
