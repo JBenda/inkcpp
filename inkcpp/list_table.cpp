@@ -5,6 +5,7 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "list_table.h"
+#include "system.h"
 #include "traits.h"
 #include "header.h"
 #include "random.h"
@@ -119,7 +120,7 @@ size_t list_table::stringLen(const list_flag& e) const { return c_str_len(toStri
 const char* list_table::toString(const list_flag& e) const
 {
 	if (e.list_id < 0 || e.flag < 0) {
-		return nullptr;
+		return "";
 	}
 	return _flag_names[toFid(e)];
 }
@@ -282,7 +283,7 @@ list_table::list list_table::sub(list lh, list rh)
 	for (int i = 0; i < numLists(); ++i) {
 		if (hasList(r, i)) {
 			if (hasList(l, i)) {
-				for (int j = listBegin(i); j < _list_end[j]; ++j) {
+				for (int j = listBegin(i); j < _list_end[i]; ++j) {
 					if (hasFlag(o, j)) {
 						setList(o, i);
 						active_flag = true;
@@ -351,7 +352,7 @@ list_table::list list_table::add(list arg, int n)
 	for (int i = 0; i < numLists(); ++i) {
 		if (hasList(l, i)) {
 			bool has_flag = false;
-			for (int j = listBegin(i); j < _list_end[i] - i; ++j) {
+			for (int j = listBegin(i); j < _list_end[i] - n; ++j) {
 				if (hasFlag(l, j)) {
 					setFlag(o, j + n);
 					has_flag = true;
@@ -372,7 +373,7 @@ list_table::list list_table::add(list arg, int n)
 list_flag list_table::add(list_flag arg, int i)
 {
 	arg.flag += i;
-	if (arg.flag < 0 || arg.flag > _list_end[arg.list_id] - listBegin(arg.list_id)) {
+	if (arg.flag < 0 || arg.flag >= _list_end[arg.list_id] - listBegin(arg.list_id)) {
 		arg.flag = -1;
 	}
 	return arg;
@@ -391,7 +392,7 @@ list_table::list list_table::sub(list arg, int n)
 	for (int i = 0; i < numLists(); ++i) {
 		if (hasList(l, i)) {
 			bool has_flag = false;
-			for (int j = listBegin(i) + i; j < _list_end[i]; ++j) {
+			for (int j = listBegin(i) + n; j < _list_end[i]; ++j) {
 				if (hasFlag(l, j)) {
 					setFlag(o, j - n);
 					has_flag = true;
@@ -411,21 +412,22 @@ list_table::list list_table::sub(list arg, int n)
 
 list_flag list_table::sub(list_flag arg, int i)
 {
-	arg.flag -= i;
-	if (arg.flag < 0 || arg.flag > _list_end[arg.list_id] - listBegin(arg.list_id)) {
-		arg.flag = -1;
-	}
-	return arg;
+	return add(arg, -i);
 }
 
+int list_table::count(list_flag lf) const {
+	if (lf == empty_flag || lf == null_flag || lf.flag == -1) { return 0; }
+	if (_flag_names[toFid(lf)] == nullptr) { return 0; }
+	return 1;
+}
 int list_table::count(list l) const
 {
 	int           count = 0;
 	const data_t* data  = getPtr(l.lid);
 	for (int i = 0; i < numLists(); ++i) {
 		if (hasList(data, i)) {
-			for (int j = listBegin(i); j < _list_end[j]; ++j) {
-				if (hasFlag(data, j)) {
+			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+				if (_flag_names[j] != nullptr && hasFlag(data, j)) {
 					++count;
 				}
 			}

@@ -140,9 +140,10 @@ public:
 
 	list_flag intersect(list_flag lh, list_flag rh) { return lh == rh ? lh : null_flag; }
 
+	bool to_bool(list l) const { return count(l) > 0; }
+	bool to_bool(list_flag lf) const { return count(lf) > 0; }
 	int count(list l) const;
-
-	int count(list_flag f) const { return f.flag < 0 ? 0 : 1; }
+	int count(list_flag f) const;
 
 	list_flag min(list l) const;
 

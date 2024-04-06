@@ -144,6 +144,7 @@ namespace ink::runtime::internal {
 		call4(list_flag, list_flag, list, list_flag, intersect);
 	}
 
+	call2(NOT, boolean, boolean, to_bool);
 	call2(LIST_COUNT, int32, int32, count);
 	call2(LIST_MIN, list_flag, list_flag, min);
 	call2(LIST_MAX, list_flag, list_flag, max);
@@ -201,6 +202,44 @@ namespace ink::runtime::internal {
 						vals[0].get<value_type::list>(),
 						get_limit(vals[1]),
 						get_limit(vals[2]))));
+	}
+	void convert_bools(value* vals, const list_table& lists, bool* res) {
+		for(int i = 0; i < 2; ++i) {
+			switch (vals[i].type()) {
+				case value_type::list:
+					res[i] = lists.to_bool(vals[i].get<value_type::list>());
+					break;
+				case value_type::list_flag:
+					res[i] = lists.to_bool(vals[i].get<value_type::list_flag>());
+					break;
+				default:
+					res[i] = casting::numeric_cast<value_type::boolean>(vals[i]);
+			}
+		}
+	}
+	void operation<Command::AND, value_type::list, void>::operator()(basic_eval_stack& stack, value* vals)
+	{
+		bool res[2];
+		convert_bools(vals, _list_table, res);
+		stack.push(value{}.set<value_type::boolean>(res[0] && res[1]));
+	}
+	void operation<Command::AND, value_type::list_flag, void>::operator()(basic_eval_stack& stack, value* vals)
+	{
+		bool res[2];
+		convert_bools(vals, _list_table, res);
+		stack.push(value{}.set<value_type::boolean>(res[0] && res[1]));
+	}
+	void operation<Command::OR, value_type::list, void>::operator()(basic_eval_stack& stack, value* vals)
+	{
+		bool res[2];
+		convert_bools(vals, _list_table, res);
+		stack.push(value{}.set<value_type::boolean>(res[0] || res[1]));
+	}
+	void operation<Command::OR, value_type::list_flag, void>::operator()(basic_eval_stack& stack, value* vals)
+	{
+		bool res[2];
+		convert_bools(vals, _list_table, res);
+		stack.push(value{}.set<value_type::boolean>(res[0] || res[1]));
 	}
 }
 

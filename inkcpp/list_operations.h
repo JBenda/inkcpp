@@ -8,6 +8,7 @@
 
 /// defines operations on lists
 
+#include "value.h"
 namespace ink::runtime::internal {
 
 	namespace casting {
@@ -19,12 +20,19 @@ namespace ink::runtime::internal {
 		struct cast<value_type::uint32, value_type::list>
 		{ static constexpr value_type value = value_type::list; };
 		template<>
+		struct cast<value_type::boolean, value_type::list>
+		{ static constexpr value_type value = value_type::list; };
 
+		template<>
 		struct cast<value_type::int32, value_type::list_flag>
 		{ static constexpr value_type value = value_type::list_flag; };
 		template<>
 		struct cast<value_type::uint32, value_type::list_flag>
 		{ static constexpr value_type value = value_type::list_flag; };
+		template<>
+		struct cast<value_type::boolean, value_type::list_flag>
+		{ static constexpr value_type value = value_type::list_flag; };
+		
 
 		template<>
 		struct cast<value_type::list, value_type::list_flag>
@@ -90,6 +98,43 @@ namespace ink::runtime::internal {
 	};
 	template<>
 	class operation<Command::LIST_COUNT, value_type::list_flag, void> : public operation_base<list_table> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
+
+	template<>
+	class operation<Command::NOT, value_type::list, void> : public operation_base<list_table> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+};
+	template<>
+	class operation<Command::NOT, value_type::list_flag, void> : public operation_base<list_table> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+};
+	template<>
+	class operation<Command::AND, value_type::list, void> : public operation_base<list_table> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
+	template<>
+	class operation<Command::AND, value_type::list_flag, void> : public operation_base<list_table> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
+	template<>
+	class operation<Command::OR, value_type::list_flag, void> : public operation_base<list_table> {
+	public:
+		using operation_base::operation_base;
+		void operator()(basic_eval_stack& stack, value* vals);
+	};
+	template<>
+	class operation<Command::OR, value_type::list, void> : public operation_base<list_table> {
 	public:
 		using operation_base::operation_base;
 		void operator()(basic_eval_stack& stack, value* vals);

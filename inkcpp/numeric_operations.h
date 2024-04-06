@@ -42,6 +42,16 @@ namespace ink::runtime::internal {
 		template<>
 		struct cast<value_type::int32, value_type::float32>
 		{	static constexpr value_type value = value_type::float32; };
+		template<>
+		struct cast<value_type::uint32, value_type::float32>
+		{	static constexpr value_type value = value_type::float32; };
+		template<>
+		struct cast<value_type::boolean, value_type::float32>
+		{	static constexpr value_type value = value_type::float32; };
+
+		template<>
+		struct cast<value_type::int32, value_type::uint32>
+		{	static constexpr value_type value = value_type::int32; };
 
 		/// result of operation with uint and bool is uint
 		template<>
@@ -84,6 +94,8 @@ namespace ink::runtime::internal {
 			switch(v.type()) {
 				case value_type::int32:
 					return v.get<value_type::int32>();
+				case value_type::uint32:
+					return static_cast<int32_t>(v.get<value_type::uint32>());
 				case value_type::boolean:
 					return static_cast<int32_t>(v.get<value_type::boolean>());
 				default:
@@ -101,6 +113,8 @@ namespace ink::runtime::internal {
 				// int value can cast to float
 				case value_type::int32:
 					return static_cast<float>(v.get<value_type::int32>());
+				case value_type::uint32:
+					return static_cast<float>(v.get<value_type::uint32>());
 				default:
 					inkFail("invalid numeric_cast!");
 					return 0;

@@ -42,8 +42,7 @@ bool truthy_impl<value_type::list_flag>(const value& v, const list_table& lists)
 {
 	// if list is not empty -> valid flag -> filled list
 	if (v.type() == value_type::list_flag) {
-		auto flag = v.get<value_type::list_flag>();
-		return flag != null_flag && flag != empty_flag;
+		return lists.to_bool(v.get<value_type::list_flag>());
 	} else {
 		return truthy_impl<value_type::list_flag + 1>(v, lists);
 	}
@@ -54,7 +53,7 @@ bool truthy_impl<value_type::list>(const value& v, const list_table& lists)
 {
 	// if list is not empty
 	if (v.type() == value_type::list) {
-		return lists.count(v.get<value_type::list>()) > 0;
+		return lists.to_bool(v.get<value_type::list>());
 	} else {
 		return truthy_impl<value_type::list + 1>(v, lists);
 	}
