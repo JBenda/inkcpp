@@ -31,7 +31,8 @@ globals_impl::globals_impl(const story_impl* story)
 		while (*flags != null_flag) {
 			list_table::list l = _lists.create_permament();
 			while (*flags != null_flag) {
-				_lists.add_inplace(l, *flags);
+				list_flag flag = _lists.external_fvalue_to_internal(*flags);
+				_lists.add_inplace(l, flag);
 				++flags;
 			}
 			++flags;

@@ -389,7 +389,7 @@ namespace ink::compiler::internal
 				for ( const auto& [key,value] : list.items()) {
 					entries.push_back({
 							_list_meta.get_lid(key.substr(0,key.find('.'))),
-							static_cast<decltype(list_flag::flag)>(value.get<int>() - 1)
+							static_cast<decltype(list_flag::flag)>(value.get<int>())
 					});
 
 				}

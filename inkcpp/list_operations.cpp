@@ -144,7 +144,7 @@ namespace ink::runtime::internal {
 		call4(list_flag, list_flag, list, list_flag, intersect);
 	}
 
-	call2(NOT, boolean, boolean, to_bool);
+	call2(NOT, boolean, boolean, not_bool);
 	call2(LIST_COUNT, int32, int32, count);
 	call2(LIST_MIN, list_flag, list_flag, min);
 	call2(LIST_MAX, list_flag, list_flag, max);
@@ -182,7 +182,8 @@ namespace ink::runtime::internal {
 		inkAssert(vals[0].type() == value_type::string, "list_flag construction needs the list name as string as first argument!");
 		inkAssert(vals[1].type() == value_type::int32, "list_flag construction needs the flag numeric value as second argument!");
 		list_flag entry = _list_table.get_list_id(vals[0].get<value_type::string>());
-		entry.flag = vals[1].get<value_type::int32>() - 1;
+		entry.flag = vals[1].get<value_type::int32>();
+		entry = _list_table.external_fvalue_to_internal(entry);
 		stack.push(value{}.set<value_type::list_flag>(entry));
 	}
 

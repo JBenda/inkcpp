@@ -41,6 +41,7 @@ list_table::list_table(const char* data, const ink::internal::header& header)
 	const char* ptr   = data;
 	int         start = 0;
 	while ((flag = header.read_list_flag(ptr)) != null_flag) {
+		// start of new list
 		if (_list_end.size() == flag.list_id) {
 			start              = _list_end.size() == 0 ? 0 : _list_end.back();
 			_list_end.push()   = start;
@@ -49,8 +50,9 @@ list_table::list_table(const char* data, const ink::internal::header& header)
 				++ptr;
 			}
 			++ptr; // skip string
+			_list_flag_offset.push() = flag.flag;
 		}
-		while (_list_end.back() - start < flag.flag) {
+		while (_list_end.back() - start + _list_flag_offset.back() < flag.flag) {
 			_flag_names.push() = nullptr;
 			++_list_end.back();
 		}
@@ -122,7 +124,8 @@ const char* list_table::toString(const list_flag& e) const
 	if (e.list_id < 0 || e.flag < 0) {
 		return "";
 	}
-	return _flag_names[toFid(e)];
+	const char* res = _flag_names[toFid(e)];
+	return res == nullptr ? "" : res;
 }
 
 size_t list_table::stringLen(const list& l) const
@@ -147,6 +150,7 @@ size_t list_table::stringLen(const list& l) const
 	return len;
 }
 
+/// @todo check ouput order for explicit valued lists
 char* list_table::toString(char* out, const list& l) const
 {
 	char* itr = out;
@@ -193,7 +197,8 @@ list_table::list list_table::range(list_table::list l, int min, int max)
 		if (hasList(in, i)) {
 			bool has_flag = false;
 			for (int j = listBegin(i); j < _list_end[i]; ++j) {
-				if (j - listBegin(i) < min || j - listBegin(i) > max) {
+				int value = j - listBegin(i) + _list_flag_offset[i];
+				if (value  < min || value > max) {
 					continue;
 				}
 				if (hasFlag(in, j)) {
@@ -354,8 +359,10 @@ list_table::list list_table::add(list arg, int n)
 			bool has_flag = false;
 			for (int j = listBegin(i); j < _list_end[i] - n; ++j) {
 				if (hasFlag(l, j)) {
-					setFlag(o, j + n);
-					has_flag = true;
+					if (_flag_names[j+n] != nullptr) {
+						setFlag(o, j + n);
+						has_flag = true;
+					}
 				}
 			}
 			if (has_flag) {
@@ -372,8 +379,15 @@ list_table::list list_table::add(list arg, int n)
 
 list_flag list_table::add(list_flag arg, int i)
 {
+	if (arg == null_flag || arg == empty_flag || arg.flag == -1) {
+		return arg;
+	}
 	arg.flag += i;
 	if (arg.flag < 0 || arg.flag >= _list_end[arg.list_id] - listBegin(arg.list_id)) {
+		arg.flag = -1;
+		return arg;
+	}
+	if (_flag_names[toFid(arg)] == nullptr) {
 		arg.flag = -1;
 	}
 	return arg;
@@ -394,8 +408,10 @@ list_table::list list_table::sub(list arg, int n)
 			bool has_flag = false;
 			for (int j = listBegin(i) + n; j < _list_end[i]; ++j) {
 				if (hasFlag(l, j)) {
-					setFlag(o, j - n);
-					has_flag = true;
+					if (_flag_names[j - n] != nullptr) {
+						setFlag(o, j - n);
+						has_flag = true;
+					}
 				}
 			}
 			if (has_flag) {

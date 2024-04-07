@@ -61,6 +61,21 @@ public:
 	/** @return list_flag with list_id set to list with name list_name */
 	list_flag get_list_id(const char* list_name) const;
 
+
+	/** @brief converts external flag value to internal */
+	list_flag external_fvalue_to_internal(list_flag flag) const {
+		flag.flag -= 1 + _list_flag_offset[flag.list_id];
+		if (flag.flag < 0 || flag.flag >= _list_end[flag.list_id]) {
+			flag.flag = -1;
+			return flag;
+		}
+		// a flag wich is not explicit named will result in a emtpy list
+		if(_flag_names[toFid(flag)] == nullptr) {
+			flag.flag = -1;
+		}
+		return flag;
+	}
+
 	/// zeros all usage values
 	void clear_usage();
 
@@ -141,7 +156,10 @@ public:
 	list_flag intersect(list_flag lh, list_flag rh) { return lh == rh ? lh : null_flag; }
 
 	bool to_bool(list l) const { return count(l) > 0; }
+	bool not_bool(list l) const { return !to_bool(l); }
 	bool to_bool(list_flag lf) const { return count(lf) > 0; }
+	bool not_bool(list_flag lf) const { return !to_bool(lf); }
+
 	int count(list l) const;
 	int count(list_flag f) const;
 
@@ -305,6 +323,7 @@ private:
 
 	// defined list (meta data)
 	managed_array<int, config::maxListTypes>                  _list_end;
+	managed_array<int, config::maxListTypes>                  _list_flag_offset;
 	managed_array<const char*, config::maxFlags>              _flag_names;
 	managed_array<const char*, config::maxListTypes>          _list_names;
 	/// keep track over lists accessed with get_var, and clear then at gc time
