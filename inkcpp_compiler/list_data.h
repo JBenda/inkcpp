@@ -37,12 +37,8 @@ namespace ink::compiler::internal
 
 		bool empty() const { return _lists.empty(); }
 		struct named_list_flag {
-			const std::string& name;
+			const std::string* name;
 			list_flag flag;
-			bool operator=(const named_list_flag& oth) const {
-				inkAssert(flag.list_id == oth.flag.list_id, "Compare flags from different lists is not supported");
-				return flag.flag == oth.flag.flag;
-			}
 			bool operator<(const named_list_flag& oth) const {
 				inkAssert(flag.list_id == oth.flag.list_id, "Compare flags from different lists is not supported");
 				return flag.flag < oth.flag.flag;

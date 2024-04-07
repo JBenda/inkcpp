@@ -147,38 +147,49 @@ size_t list_table::stringLen(const list& l) const
 }
 
 /// @todo check ouput order for explicit valued lists
+/// @sa list_table::write()
 char* list_table::toString(char* out, const list& l) const
 {
 	char* itr = out;
 
 	const data_t* entry        = getPtr(l.lid);
-	bool          first        = true;
-	int           max_list_len = 0;
-	for (int i = 0; i < numLists(); ++i) {
-		if (hasList(entry, i)) {
-			int len = _list_end[i] - listBegin(i);
-			if (len > max_list_len)
-				max_list_len = len;
-		}
-	}
-	for (int j = 0; j < max_list_len; ++j) {
-		for (int i = 0; i < numLists(); ++i) {
-			int len = _list_end[i] - listBegin(i);
-			if (j < len && hasList(entry, i)) {
-				int flag = j + listBegin(i);
-				if (hasFlag(entry, flag) && _flag_names[flag]) {
-					if (! first) {
-						*itr++ = ',';
-						*itr++ = ' ';
-					} else {
-						first = false;
-					}
-					for (const char* c = _flag_names[flag]; *c; ++c) {
-						*itr++ = *c;
+	int last_value = 0;
+	int last_list = -1;
+	bool first = true;
+	int min_value = 0;
+	int min_id = -1;
+
+	while(1) {
+		bool change = false;
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(entry, i)) {
+				for(int j = listBegin(i); j < _list_end[i]; ++j) {
+					int value = _flag_values[j];
+					if(first || value > last_value || (value == last_value && i > last_list))
+					{
+						if (min_id == -1 || value < min_value) {
+							change = true;
+							last_list = i;
+							min_value = value;
+							min_id = j;
+						} else {
+							break;
+						}
 					}
 				}
 			}
 		}
+		if (!change) { break; }
+		if (!first) {
+			*itr++ = ',';
+			*itr++ = ' ';
+		}
+		first = false;
+		for(const char* c = _flag_names[min_id]; *c; ++c) {
+			*itr++ = *c;
+		}
+		last_value = min_value;
+		min_id = -1;
 	}
 	return itr;
 }
@@ -757,34 +768,47 @@ list_interface* list_table::handout_list(list l)
 }
 
 #ifdef INK_ENABLE_STL
+/// @sa list_table::toString(char*,const list&)
 std::ostream& list_table::write(std::ostream& os, list l) const
 {
-	bool first = true;
-
 	const data_t* entry        = getPtr(l.lid);
-	int           max_list_len = 0;
-	for (int i = 0; i < numLists(); ++i) {
-		if (hasList(entry, i)) {
-			int len = _list_end[i] - listBegin(i);
-			if (len > max_list_len)
-				max_list_len = len;
-		}
-	}
-	for (int j = 0; j < max_list_len; ++j) {
-		for (int i = 0; i < numLists(); ++i) {
-			int len = _list_end[i] - listBegin(i);
-			if (j < len && hasList(entry, i)) {
-				int flag = listBegin(i) + j;
-				if (hasFlag(entry, flag) && _flag_names[flag]) {
-					if (! first) {
-						os << ", ";
-					} else {
-						first = false;
+	int last_value = 0;
+	int last_list = -1;
+	bool first = true;
+	int min_value = 0;
+	int min_id = -1;
+
+	while(1) {
+		bool change = false;
+		for(int i = 0; i < numLists(); ++i) {
+			if(hasList(entry, i)) {
+				for(int j = listBegin(i); j < _list_end[i]; ++j) {
+					if (!hasFlag(entry, j)) {
+						continue;
 					}
-					os << _flag_names[flag];
+					int value = _flag_values[j];
+					if(first || value > last_value || (value == last_value && i > last_list))
+					{
+						if (min_id == -1 || value < min_value) {
+							last_list = i;
+							min_value = value;
+							min_id = j;
+							change = true;
+						} else {
+							break;
+						}
+					}
 				}
 			}
 		}
+		if (!change) { break; }
+		if (!first) {
+			os << ", ";
+		}
+		first = false;
+		os << _flag_names[min_id];
+		last_value = min_value;
+		min_id = -1;
 	}
 	return os;
 }
