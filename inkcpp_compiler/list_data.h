@@ -25,7 +25,10 @@ namespace ink::compiler::internal
 		void new_list(const std::string& list_name);
 
 		// add flag to current list
-		void new_flag(const std::string& flag_name, size_t value);
+		void new_flag(const std::string& flag_name, int value);
+
+		// sort flags per list
+		void sort();
 
 		lid_t get_lid(const std::string_view& list_name) {
 			auto itr = _lists.find(list_name);
@@ -36,16 +39,23 @@ namespace ink::compiler::internal
 		struct named_list_flag {
 			const std::string& name;
 			list_flag flag;
+			bool operator=(const named_list_flag& oth) const {
+				inkAssert(flag.list_id == oth.flag.list_id, "Compare flags from different lists is not supported");
+				return flag.flag == oth.flag.flag;
+			}
+			bool operator<(const named_list_flag& oth) const {
+				inkAssert(flag.list_id == oth.flag.list_id, "Compare flags from different lists is not supported");
+				return flag.flag < oth.flag.flag;
+			}
 		};
-		std::vector<named_list_flag> get_flags() const;
+		const std::vector<named_list_flag>& get_flags() const { return _flags; }
 		const std::vector<std::string_view>& get_list_names() const {
 			return _list_name;
 		}
 	private:
 		std::map<std::string, int,std::less<>> _lists;
-		std::vector<size_t> _list_end;
 		std::vector<std::string_view> _list_name;
-		size_t _current_list_start = 0;
-		std::vector<std::string> _flag_names;
+		std::vector<int> _list_end;
+		std::vector<named_list_flag> _flags;
 	};
 }

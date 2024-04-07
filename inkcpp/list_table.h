@@ -64,15 +64,13 @@ public:
 
 	/** @brief converts external flag value to internal */
 	list_flag external_fvalue_to_internal(list_flag flag) const {
-		flag.flag -= 1 + _list_flag_offset[flag.list_id];
-		if (flag.flag < 0 || flag.flag >= _list_end[flag.list_id]) {
-			flag.flag = -1;
-			return flag;
+		for(int i = listBegin(flag.list_id); i < _list_end[flag.list_id]; ++i) {
+			if (_flag_values[i] == flag.flag) {
+				flag.flag = i - listBegin(flag.list_id);
+				return flag;
+			}
 		}
-		// a flag wich is not explicit named will result in a emtpy list
-		if(_flag_names[toFid(flag)] == nullptr) {
-			flag.flag = -1;
-		}
+		flag.flag = -1;
 		return flag;
 	}
 
@@ -323,8 +321,8 @@ private:
 
 	// defined list (meta data)
 	managed_array<int, config::maxListTypes>                  _list_end;
-	managed_array<int, config::maxListTypes>                  _list_flag_offset;
 	managed_array<const char*, config::maxFlags>              _flag_names;
+	managed_array<int, config::maxFlags>                      _flag_values;
 	managed_array<const char*, config::maxListTypes>          _list_names;
 	/// keep track over lists accessed with get_var, and clear then at gc time
 	managed_array<list_interface, config::limitEditableLists> _list_handouts;

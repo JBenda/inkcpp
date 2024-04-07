@@ -427,5 +427,6 @@ namespace ink::compiler::internal
 				_list_meta.new_flag(flag_name, value.get<int>());
 			}
 		}
+		_list_meta.sort();
 	}
 }
