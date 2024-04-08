@@ -158,23 +158,26 @@ char* list_table::toString(char* out, const list& l) const
 	bool first = true;
 	int min_value = 0;
 	int min_id = -1;
+	int min_list = -1;
 
 	while(1) {
 		bool change = false;
 		for(int i = 0; i < numLists(); ++i) {
 			if(hasList(entry, i)) {
 				for(int j = listBegin(i); j < _list_end[i]; ++j) {
+					if(!hasFlag(entry, j)) {
+						continue;
+					}
 					int value = _flag_values[j];
 					if(first || value > last_value || (value == last_value && i > last_list))
 					{
 						if (min_id == -1 || value < min_value) {
 							change = true;
-							last_list = i;
+							min_list = i;
 							min_value = value;
 							min_id = j;
-						} else {
-							break;
 						}
+						break;
 					}
 				}
 			}
@@ -189,6 +192,7 @@ char* list_table::toString(char* out, const list& l) const
 			*itr++ = *c;
 		}
 		last_value = min_value;
+		last_list = min_list;
 		min_id = -1;
 	}
 	return itr;
@@ -777,6 +781,7 @@ std::ostream& list_table::write(std::ostream& os, list l) const
 	bool first = true;
 	int min_value = 0;
 	int min_id = -1;
+	int min_list = -1;
 
 	while(1) {
 		bool change = false;
@@ -790,13 +795,12 @@ std::ostream& list_table::write(std::ostream& os, list l) const
 					if(first || value > last_value || (value == last_value && i > last_list))
 					{
 						if (min_id == -1 || value < min_value) {
-							last_list = i;
 							min_value = value;
 							min_id = j;
+							min_list = i;
 							change = true;
-						} else {
-							break;
 						}
+						break;
 					}
 				}
 			}
@@ -808,6 +812,7 @@ std::ostream& list_table::write(std::ostream& os, list l) const
 		first = false;
 		os << _flag_names[min_id];
 		last_value = min_value;
+		last_list = min_list;
 		min_id = -1;
 	}
 	return os;
