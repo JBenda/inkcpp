@@ -1,9 +1,14 @@
 LIST list = (A=2),B,(C=5),Z=-1
 {list}
+{list: yes}
+{not list}
+{list and true}
+{not list or true}
+{true or not list}
+{true and list}
 VAR x = A
 ~ x += B
 // expect  list "A, B"
-{x}
 // expect list "A"
 ~ x -= 1
 {x}

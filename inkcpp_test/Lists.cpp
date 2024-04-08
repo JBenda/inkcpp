@@ -18,6 +18,29 @@ SCENARIO("List logic operations", "[lists]")
 		WHEN("just run")
 		{
 			std::string out = thread->getall();
+
+  REQUIRE( out == R"==(A, C
+yes
+false
+true
+true
+true
+true
+A
+B
+>B
+>
+> Z, A, B, C
+>
+>
+B, C
+>C > > >
+>A, C >B >
+>B
+>
+> >Z >A >
+Hey
+)==" );
 		}
 	}
 }
