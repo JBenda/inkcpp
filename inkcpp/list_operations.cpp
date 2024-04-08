@@ -187,12 +187,12 @@ namespace ink::runtime::internal {
 		stack.push(value{}.set<value_type::list_flag>(entry));
 	}
 
-	int get_limit(const value& val) {
+	int get_limit(const value& val, const list_table& lists) {
 		if(val.type() == value_type::int32) {
-			return val.get<value_type::int32>() - 1;
+			return val.get<value_type::int32>();
 		} else {
 			inkAssert(val.type() == value_type::list_flag, "flag value must be a integer or a list_flag");
-			return val.get<value_type::list_flag>().flag;
+			return lists.get_flag_value(val.get<value_type::list_flag>());
 		}
 	}
 	void operation<Command::LIST_RANGE, value_type::list, void>::operator()(
@@ -201,8 +201,8 @@ namespace ink::runtime::internal {
 		inkAssert(vals[0].type() == value_type::list, "Can't get range of non list type!");
 		stack.push(value{}.set<value_type::list>(_list_table.range(
 						vals[0].get<value_type::list>(),
-						get_limit(vals[1]),
-						get_limit(vals[2]))));
+						get_limit(vals[1], _list_table),
+						get_limit(vals[2], _list_table))));
 	}
 	void convert_bools(value* vals, const list_table& lists, bool* res) {
 		for(int i = 0; i < 2; ++i) {

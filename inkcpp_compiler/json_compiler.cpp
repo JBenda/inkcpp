@@ -396,7 +396,8 @@ namespace ink::compiler::internal
 			} else {
 				if(has(command, "origins")) {
 					for( const auto& origin_list : command["origins"]) {
-						entries.push_back({ _list_meta.get_lid(origin_list.get<std::string>()), -1 });
+						// list id < -1 -> origin flag 
+						entries.push_back({ static_cast<int16_t>(-2-_list_meta.get_lid(origin_list.get<std::string>())), -1 });
 					}
 				} else {
 					entries.push_back(empty_flag);
