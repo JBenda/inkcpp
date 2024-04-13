@@ -19,6 +19,7 @@ class UInkAssetFactory : public UFactory, public FReimportHandler
 	
 public:
 	UInkAssetFactory(const FObjectInitializer& ObjectInitializer);
+	~UInkAssetFactory();
 
 	// Begin UFactory
 	virtual UObject* FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, 

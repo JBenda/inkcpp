@@ -37,8 +37,11 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 
 	// Fuck data tables TODO - some criteria?
 	ImportPriority = 99999;
-	
+	FReimportManager::Instance().RegisterHandler(*this);
 }
+ UInkAssetFactory::~UInkAssetFactory() {
+ 	FReimportManager::Instance().UnregisterHandler(*this);
+ }
 
 /// @todo only finds first include match?
 void TraversImports(UAssetImportData& AssetImportData, std::unordered_set<std::filesystem::path>& visited, std::filesystem::path filepath) {
