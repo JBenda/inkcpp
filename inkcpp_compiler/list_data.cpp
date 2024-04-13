@@ -31,15 +31,14 @@ void list_data::new_flag(const std::string& flag_name, int value)
 	    &flag_name,
 	    list_flag{
 	        .list_id = static_cast<typeof(list_flag::list_id)>(_list_name.size() - 1),
-	        .flag    = static_cast<typeof(list_flag::flag)>(value)
-	    }
+	        .flag    = static_cast<typeof(list_flag::flag)>(value)}
 	);
 }
 
 void list_data::sort()
 {
-	size_t begin = 0;
-	std::vector<int> ab= {5, 3, 2, 7};
+	size_t           begin = 0;
+	std::vector<int> ab    = {5, 3, 2, 7};
 	std::sort(ab.begin(), ab.end());
 	for (size_t i = 0; i < _list_end.size(); ++i) {
 		std::sort(_flags.begin() + begin, _flags.begin() + _list_end[i]);

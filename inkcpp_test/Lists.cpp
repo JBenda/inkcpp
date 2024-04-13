@@ -9,17 +9,18 @@
 #include <string.h>
 
 using namespace ink::runtime;
+
 SCENARIO("List logic operations", "[lists]")
 {
 	GIVEN("a demo story")
 	{
-		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "ListLogicStory.bin");
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "ListLogicStory.bin");
 		runner thread = ink->new_runner();
 		WHEN("just run")
 		{
 			std::string out = thread->getall();
 
-  REQUIRE( out == R"==(A, C
+			REQUIRE(out == R"==(A, C
 yes
 false
 true
@@ -40,7 +41,7 @@ B, C
 >
 > >Z >A >
 Hey
-)==" );
+)==");
 		}
 	}
 }

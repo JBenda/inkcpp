@@ -153,47 +153,48 @@ char* list_table::toString(char* out, const list& l) const
 	char* itr = out;
 
 	const data_t* entry        = getPtr(l.lid);
-	int last_value = 0;
-	int last_list = -1;
-	bool first = true;
-	int min_value = 0;
-	int min_id = -1;
-	int min_list = -1;
+	int           last_value   = 0;
+	int           last_list    = -1;
+	bool          first        = true;
+	int           min_value    = 0;
+	int           min_id       = -1;
+	int           min_list     = -1;
 
-	while(1) {
+	while (1) {
 		bool change = false;
-		for(int i = 0; i < numLists(); ++i) {
-			if(hasList(entry, i)) {
-				for(int j = listBegin(i); j < _list_end[i]; ++j) {
-					if(!hasFlag(entry, j)) {
+		for (int i = 0; i < numLists(); ++i) {
+			if (hasList(entry, i)) {
+				for (int j = listBegin(i); j < _list_end[i]; ++j) {
+					if (! hasFlag(entry, j)) {
 						continue;
 					}
 					int value = _flag_values[j];
-					if(first || value > last_value || (value == last_value && i > last_list))
-					{
+					if (first || value > last_value || (value == last_value && i > last_list)) {
 						if (min_id == -1 || value < min_value) {
-							change = true;
-							min_list = i;
+							change    = true;
+							min_list  = i;
 							min_value = value;
-							min_id = j;
+							min_id    = j;
 						}
 						break;
 					}
 				}
 			}
 		}
-		if (!change) { break; }
-		if (!first) {
+		if (! change) {
+			break;
+		}
+		if (! first) {
 			*itr++ = ',';
 			*itr++ = ' ';
 		}
 		first = false;
-		for(const char* c = _flag_names[min_id]; *c; ++c) {
+		for (const char* c = _flag_names[min_id]; *c; ++c) {
 			*itr++ = *c;
 		}
 		last_value = min_value;
-		last_list = min_list;
-		min_id = -1;
+		last_list  = min_list;
+		min_id     = -1;
 	}
 	return itr;
 }
@@ -209,7 +210,7 @@ list_table::list list_table::range(list_table::list l, int min, int max)
 			bool has_flag = false;
 			for (int j = listBegin(i); j < _list_end[i]; ++j) {
 				int value = _flag_values[j];
-				if (value  < min) {
+				if (value < min) {
 					continue;
 				}
 				if (value > max) {
@@ -375,7 +376,7 @@ list_table::list list_table::add(list arg, int n)
 			for (int j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(l, j)) {
 					int value = _flag_values[j] + n;
-					for(int k = j+1; k < _list_end[i]; ++k) {
+					for (int k = j + 1; k < _list_end[i]; ++k) {
 						if (value == _flag_values[k]) {
 							setFlag(o, k);
 							has_flag = true;
@@ -402,7 +403,7 @@ list_flag list_table::add(list_flag arg, int n)
 		return arg;
 	}
 	int value = _flag_values[arg.flag] + n;
-	for(int i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
+	for (int i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
 		if (_flag_values[i] == value) {
 			arg.flag = i;
 			return arg;
@@ -429,7 +430,7 @@ list_table::list list_table::sub(list arg, int n)
 			for (int j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(l, j)) {
 					int value = _flag_values[j] - n;
-					for(int k = j -1; k >= listBegin(i); --k) {
+					for (int k = j - 1; k >= listBegin(i); --k) {
 						if (_flag_values[k] == value) {
 							setFlag(o, k);
 							has_flag = true;
@@ -450,14 +451,16 @@ list_table::list list_table::sub(list arg, int n)
 	return res;
 }
 
-list_flag list_table::sub(list_flag arg, int i)
-{
-	return add(arg, -i);
-}
+list_flag list_table::sub(list_flag arg, int i) { return add(arg, -i); }
 
-int list_table::count(list_flag lf) const {
-	if (lf == empty_flag || lf == null_flag || lf.flag == -1) { return 0; }
-	if (_flag_names[toFid(lf)] == nullptr) { return 0; }
+int list_table::count(list_flag lf) const
+{
+	if (lf == empty_flag || lf == null_flag || lf.flag == -1) {
+		return 0;
+	}
+	if (_flag_names[toFid(lf)] == nullptr) {
+		return 0;
+	}
 	return 1;
 }
 int list_table::count(list l) const
@@ -776,44 +779,45 @@ list_interface* list_table::handout_list(list l)
 std::ostream& list_table::write(std::ostream& os, list l) const
 {
 	const data_t* entry        = getPtr(l.lid);
-	int last_value = 0;
-	int last_list = -1;
-	bool first = true;
-	int min_value = 0;
-	int min_id = -1;
-	int min_list = -1;
+	int           last_value   = 0;
+	int           last_list    = -1;
+	bool          first        = true;
+	int           min_value    = 0;
+	int           min_id       = -1;
+	int           min_list     = -1;
 
-	while(1) {
+	while (1) {
 		bool change = false;
-		for(int i = 0; i < numLists(); ++i) {
-			if(hasList(entry, i)) {
-				for(int j = listBegin(i); j < _list_end[i]; ++j) {
-					if (!hasFlag(entry, j)) {
+		for (int i = 0; i < numLists(); ++i) {
+			if (hasList(entry, i)) {
+				for (int j = listBegin(i); j < _list_end[i]; ++j) {
+					if (! hasFlag(entry, j)) {
 						continue;
 					}
 					int value = _flag_values[j];
-					if(first || value > last_value || (value == last_value && i > last_list))
-					{
+					if (first || value > last_value || (value == last_value && i > last_list)) {
 						if (min_id == -1 || value < min_value) {
 							min_value = value;
-							min_id = j;
-							min_list = i;
-							change = true;
+							min_id    = j;
+							min_list  = i;
+							change    = true;
 						}
 						break;
 					}
 				}
 			}
 		}
-		if (!change) { break; }
-		if (!first) {
+		if (! change) {
+			break;
+		}
+		if (! first) {
 			os << ", ";
 		}
 		first = false;
 		os << _flag_names[min_id];
 		last_value = min_value;
-		last_list = min_list;
-		min_id = -1;
+		last_list  = min_list;
+		min_id     = -1;
 	}
 	return os;
 }
