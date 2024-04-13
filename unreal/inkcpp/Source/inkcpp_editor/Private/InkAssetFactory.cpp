@@ -39,27 +39,41 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	ImportPriority = 99999;
 	FReimportManager::Instance().RegisterHandler(*this);
 }
- UInkAssetFactory::~UInkAssetFactory() {
- 	FReimportManager::Instance().UnregisterHandler(*this);
- }
+
+UInkAssetFactory::~UInkAssetFactory() { FReimportManager::Instance().UnregisterHandler(*this); }
 
 /// @todo only finds first include match?
-void TraversImports(UAssetImportData& AssetImportData, std::unordered_set<std::filesystem::path>& visited, std::filesystem::path filepath) {
-	UE_LOG(InkCpp, Display, TEXT("InkAsset Import: Traverse '%s'"), *FString(filepath.string().c_str()));
-	if (visited.find(filepath) != visited.end()) { return; }
+void TraversImports(
+    UAssetImportData& AssetImportData, std::unordered_set<std::filesystem::path>& visited,
+    std::filesystem::path filepath
+)
+{
+	UE_LOG(
+	    InkCpp, Display, TEXT("InkAsset Import: Traverse '%s'"), *FString(filepath.string().c_str())
+	);
+	if (visited.find(filepath) != visited.end()) {
+		return;
+	}
 	int id = visited.size();
 	visited.insert(filepath);
-	AssetImportData.AddFileName(FString(filepath.string().c_str()), id, id == 0 ? TEXT("MainFile") : TEXT("Include"));
+	AssetImportData.AddFileName(
+	    FString(filepath.string().c_str()), id, id == 0 ? TEXT("MainFile") : TEXT("Include")
+	);
 
 	std::ifstream file(filepath);
-	if(!file) {
-		UE_LOG(InkCpp, Warning, TEXT("Failed to open story file: %s"), *FString(filepath.string().c_str()));
+	if (! file) {
+		UE_LOG(
+		    InkCpp, Warning, TEXT("Failed to open story file: %s"), *FString(filepath.string().c_str())
+		);
 		return;
 	}
 	std::stringstream file_data;
 	file_data << file.rdbuf();
-	FRegexMatcher matcher(FRegexPattern(FString("^[ \t]*INCLUDE[ \t]+(.*)"), ERegexPatternFlags{0}), FString(file_data.str().c_str()));
-	while(matcher.FindNext()) {
+	FRegexMatcher matcher(
+	    FRegexPattern(FString("^[ \t]*INCLUDE[ \t]+(.*)"), ERegexPatternFlags{0}),
+	    FString(file_data.str().c_str())
+	);
+	while (matcher.FindNext()) {
 		std::filesystem::path match_file_path = filepath;
 		match_file_path.replace_filename(TCHAR_TO_ANSI(*matcher.GetCaptureGroup(1)));
 		TraversImports(AssetImportData, visited, match_file_path);
@@ -74,9 +88,9 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 	static const std::string ink_suffix{".ink"};
 	try
 	{
-		using path = std::filesystem::path;
+		using path            = std::filesystem::path;
 		std::string cFilename = TCHAR_TO_ANSI(*Filename);
-		path story_path(cFilename, path::format::generic_format);
+		path        story_path(cFilename, path::format::generic_format);
 		story_path.make_preferred();
 		bool use_temp_file = false;
 		if (cFilename.size() > ink_suffix.size()
@@ -166,8 +180,7 @@ void UInkAssetFactory::SetReimportPaths(UObject* Obj, const TArray<FString>& New
 {
 	UE_LOG(InkCpp, Warning, TEXT("SetReimportPaths"));
 	UInkAsset* InkAsset = Cast<UInkAsset>(Obj);
-	if (InkAsset != nullptr && NewReimportPaths.Num() > 0)
-	{
+	if (InkAsset != nullptr && NewReimportPaths.Num() > 0) {
 		InkAsset->AssetImportData->UpdateFilenameOnly(NewReimportPaths[0]);
 	}
 }
