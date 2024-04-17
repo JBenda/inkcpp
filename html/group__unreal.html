@@ -160,9 +160,9 @@ Enumerations</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Blueprint Classes usable in Unreal. </p>
-<p>An example can be found <a href="unreal/InkCPP_DEMO.zip">here</a>, do not forgett to install the plugin via the marketplace(soonTM) or unzipping the <code>unreal.zip</code> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> to <code>/YOUR_UNREAL_PROJECT/Plugins/</code>. <br  />
+<p>An example can be found <a href="unreal/InkCPP_DEMO.zip">here</a>, do not forgett to install the plugin via the <a href="https://www.unrealengine.com/marketplace/product/inkcpp">marketplace</a> or unzipping the <code>unreal.zip</code> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> to <code>/YOUR_UNREAL_PROJECT/Plugins/</code>. <br  />
  And eitherway activating the plugin.</p>
-<p>The C++ API will be available soon(TM).</p>
+<p>The C++ API will be available soon(<a href="https://github.com/JBenda/inkcpp/issues/60">Issue</a>).</p>
 <ul>
 <li><a class="el" href="#ue_setup">General setup</a></li>
 <li><a class="el" href="#ue_components">UE5 Blueprits</a></li>
@@ -172,7 +172,7 @@ Enumerations</h2></td></tr>
 Setup</h1>
 <p>After installing the plugin (see above) you need to activate it via <code>Plugins-&gt;...</code>. Then to run your Ink script you need a instance of <a class="el" href="class_a_ink_runtime.html">AInkRuntime</a>. The story will only proceed if this actor is active.</p>
 <p>On this instance set the <code>Ink|InkAsset</code> property to the story that you will run. To create this InkAsset you need to import a <code>.ink</code> file or <code>.ink.json</code> file.</p>
-<p>With the <a class="el" href="class_a_ink_runtime.html">AInkRuntime</a> you can then create UInkThreads with <a class="el" href="class_a_ink_runtime.html#a2ccd1df155f725cbebc53860b4c205ab">AInkRuntime::Start()</a>. In addition does the runtime allows you access to the global variables via observer or directly setter und getter.</p>
+<p>With the <a class="el" href="class_a_ink_runtime.html">AInkRuntime</a> you can then create a <a class="el" href="class_u_ink_thread.html">UInkThread</a> with <a class="el" href="class_a_ink_runtime.html#a2ccd1df155f725cbebc53860b4c205ab">AInkRuntime::Start()</a>. In addition does the runtime allows you access to the global variables via <a class="el" href="class_a_ink_runtime.html#aa2d9d975a33604846e6bb4f18676a8b7">observer</a> or directly <a class="el" href="class_a_ink_runtime.html#a0c0fe7bbce05df84dba52a2e0d218bd3">setter</a> und <a class="el" href="class_a_ink_runtime.html#a26dc6ff0aed1892a913dde81b60ab1ec">getter</a>.</p>
 <p>Notice that all threads spawned in the same runtime will share a global state. So if you want to play the same story with different states, you need multiple runtimes.</p>
 <p>The <a class="el" href="class_u_ink_thread.html">UInkThread</a> class provides will fire events when new context is available. The easiest way to implement then is to create a custom Blueprint based on <a class="el" href="class_u_ink_thread.html">UInkThread</a>. For a overview see <a class="el" href="#ue_thread">Thread</a>.</p>
 <p>Below you can find the blueprints of a <a class="el" href="#ue_example_minimal">minimal example</a>. Which is included for further inspection inside the <a class="el" href="#ue_example">Example project</a> (in the map <code>Minimal</code>).</p>
@@ -216,7 +216,7 @@ The Example project</h1>
 <p><a href="../unreal/InkCPP_DEMO.zip">Download</a></p>
 <h2><a class="anchor" id="ue_example_setup"></a>
 Setup</h2>
-<p>To setup the <a href="../unreal/InkCPP_DEMO.zip">example project</a> install the Plugin via the <a href="https://www.unrealengine.com/product/494904fc50f747db879c297ee57cf122">UE marketplace</a> place unpack the <code>unreal.zip</code> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> inside <code>/PATH/InkCPP_DEMO/Plugins/</code>.</p>
+<p>To setup the <a href="../unreal/InkCPP_DEMO.zip">example project</a> install the Plugin via the <a href="https://www.unrealengine.com/product/inkcpp">UE marketplace</a> place unpack the <code>unreal.zip</code> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> inside <code>/PATH/InkCPP_DEMO/Plugins/</code>.</p>
 <p>Next open the project via the <code>InkCPP_DEMO/InkCPP_DEMO.uproject</code> flie.</p>
 <p>Than you can hit play to run the demo.</p>
 <p>The example contains two maps:</p><ul>
@@ -236,7 +236,7 @@ Setup</h2>
 Demo</h2>
 <p>The Demo map contains the Actor <code>DemoThread</code> which is a child of <code>InkRuntime</code>. All UI elements and other used components are created on the <code>BeginPlay</code> event in the following order.</p><ol type="1">
 <li>The UI components are created and configured</li>
-<li>Load an existing save game if its exists.</li>
+<li>Load an existing save game if its exists (the Save game is stored at <code>InkCPP_DEMO/Saved/SaveGames</code>).</li>
 <li>Create the main thread of class <code>DemoThread</code> and register the external function.</li>
 <li>Create menu thread(<code>InfoThread</code>), set path to <code>Wait</code> to avoid any output in the beginging.</li>
 <li>Set observer for the variable <code>Heath</code> to update the healthbar.</li>
