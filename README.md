@@ -40,11 +40,11 @@ A example project can be found [here](https://jbenda.github.io/inkcpp/unreal/Ink
 
 Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run `cmake --install . --component unreal --prefix Path/To/Unreal/Plugins/` which will add an `inkcpp` folder there with the `.uplugin`, the code for the UClasses, and all the inkcpp source files required. `config.h` will automatically detect it is being built in an Unreal plugin environment and disable STL and enable Unreal extensions (FString support, Unreal asserts, CityHash, etc.).
 
-If you compile the UE Plugin by your self feel free to visit the [wiki page](https://github.com/brwarner/inkcpp/wiki/Unreal) for a more debug oriented build process.
+If you compile the UE Plugin by your self feel free to visit the [wiki page](https://github.com/JBenda/inkcpp/wiki/Unreal) for a more debug oriented build process.
 
 ## Use standalone
 
-1. Grep the current version from the [release page](https://github.com/brwarner/inkcpp/releases/latest) depending on your OS (e.g. macos-cl).
+1. Grep the current version from the [release page](https://github.com/JBenda/inkcpp/releases/latest) depending on your OS (e.g. macos-cl).
 2. unpack it to a location found by your path
 3. run your story: `inkcpp-cl -p story.json`
 4. if you want to compile `.ink` flies directly make sure `inklecate` is in your path. If you not have it you can grep it from the [official page](https://github.com/inkle/ink/releases/latest)
@@ -59,7 +59,7 @@ Nice features for testing:
 
 Instructions:
 
-1. Download the for your OS macthing lib archive from the [release page](https://github.com/brwarner/inkcpp/releases/lastest) (e.g. linux-lib).
+1. Download the for your OS macthing lib archive from the [release page](https://github.com/JBenda/inkcpp/releases/latest) (e.g. linux-lib).
 2. The following must be linked into your build solution for your C++ to compile correctly:
 	- `include/ink`: contains important shared headers.
 		+ For a Visual Studio project, link this directory as an Include Directory in VC++ Directories.
@@ -73,7 +73,7 @@ Instructions:
 #include <ink/runner.h>
 #include <ink/choice.h>
 ```
-6. if you use cmake checkout the (wiki)[https://github.com/brwarner/inkcpp/wiki/building#cmake-example] for including the library via cmake
+6. if you use cmake checkout the (wiki)[https://github.com/JBenda/inkcpp/wiki/building#cmake-example] for including the library via cmake
 
 
 ### Example
@@ -132,7 +132,7 @@ To install the different components use `cmake --install . --component <lib|cl|u
 + `cl` command line application
 + `unreal` UE-plugin
 
-For a more in depth installation description please checkout the [wiki](https://github.com/brwarner/inkcpp/wiki/building).
+For a more in depth installation description please checkout the [wiki](https://github.com/JBenda/inkcpp/wiki/building).
 
 
 ### Troubleshooting
