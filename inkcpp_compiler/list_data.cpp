@@ -37,7 +37,7 @@ void list_data::new_flag(const std::string& flag_name, int value)
 
 void list_data::sort()
 {
-	size_t           begin = 0;
+	size_t begin = 0;
 	for (size_t i = 0; i < _list_end.size(); ++i) {
 		std::sort(_flags.begin() + begin, _flags.begin() + _list_end[i]);
 		begin = _list_end[i];

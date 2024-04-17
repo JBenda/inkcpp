@@ -39,7 +39,12 @@ public:
 	bool empty() const { return _lists.empty(); }
 
 	struct named_list_flag {
-		named_list_flag(const std::string* name, list_flag flag) : name{name}, flag{flag} {}
+		named_list_flag(const std::string* name, list_flag flag)
+		    : name{name}
+		    , flag{flag}
+		{
+		}
+
 		const std::string* name;
 		list_flag          flag;
 
