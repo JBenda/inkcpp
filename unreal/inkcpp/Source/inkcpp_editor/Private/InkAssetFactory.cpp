@@ -37,10 +37,10 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 
 	// Fuck data tables TODO - some criteria?
 	ImportPriority = 99999;
-	FReimportManager::Instance().RegisterHandler(*this);
+	FReimportManager::Instance()->RegisterHandler(*this);
 }
 
-UInkAssetFactory::~UInkAssetFactory() { FReimportManager::Instance().UnregisterHandler(*this); }
+UInkAssetFactory::~UInkAssetFactory() { FReimportManager::Instance()->UnregisterHandler(*this); }
 
 /// @todo only finds first include match?
 void TraversImports(
@@ -70,12 +70,12 @@ void TraversImports(
 	std::stringstream file_data;
 	file_data << file.rdbuf();
 	FRegexMatcher matcher(
-	    FRegexPattern(FString("^[ \t]*INCLUDE[ \t]+(.*)"), ERegexPatternFlags{0}),
+	    FRegexPattern(FString("(^|\n)[ \t]*INCLUDE[ \t]+(.*)"), ERegexPatternFlags{0}),
 	    FString(file_data.str().c_str())
 	);
 	while (matcher.FindNext()) {
 		std::filesystem::path match_file_path = filepath;
-		match_file_path.replace_filename(TCHAR_TO_ANSI(*matcher.GetCaptureGroup(1)));
+		match_file_path.replace_filename(TCHAR_TO_ANSI(*matcher.GetCaptureGroup(2)));
 		TraversImports(AssetImportData, visited, match_file_path);
 	}
 }
