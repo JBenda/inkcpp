@@ -30,10 +30,10 @@
  * On this instance set the `Ink|InkAsset` property to the story that you will run.
  * To create this InkAsset you need to import a `.ink` file or `.ink.json` file.
  *
- * With the @ref AInkRuntime you can then create @ref UInkThreads with @ref AInkRuntime::Start().
+ * With the @ref AInkRuntime you can then create a @ref UInkThread with @ref AInkRuntime::Start().
  * In addition does the runtime allows you access to the global variables via @ref
- * AInkRuntime::ObserveChange() "observer" or directly @ref AInkRuntime::Set() "setter" und @ref
- * AInkRuntime::Get() "getter".
+ * AInkRuntime::ObserverVariableChange() "observer" or directly @ref AInkRuntime::SetGlobalVariable() "setter" und @ref
+ * AInkRuntime::GetGlobalVariable() "getter".
  *
  * Notice that all threads spawned in the
  * same runtime will share a global state. So if you want to play the same story with different
