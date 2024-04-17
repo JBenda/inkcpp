@@ -61,6 +61,33 @@ public:
 	/** @return list_flag with list_id set to list with name list_name */
 	list_flag get_list_id(const char* list_name) const;
 
+	/** @brief converts external flag value to internal */
+	list_flag external_fvalue_to_internal(list_flag flag) const
+	{
+		if (flag == null_flag || flag == empty_flag) {
+			return flag;
+		}
+		// origin flag (no flag but list origin)
+		if (flag.list_id < -1) {
+			flag.list_id = -flag.list_id - 2;
+			flag.flag    = -1;
+			return flag;
+		}
+		for (int i = listBegin(flag.list_id); i < _list_end[flag.list_id]; ++i) {
+			if (_flag_values[i] == flag.flag) {
+				flag.flag = i - listBegin(flag.list_id);
+				return flag;
+			}
+		}
+		flag.flag = -1;
+		return flag;
+	}
+
+	int get_flag_value(list_flag flag) const
+	{
+		return _flag_values[listBegin(flag.list_id) + flag.flag];
+	}
+
 	/// zeros all usage values
 	void clear_usage();
 
@@ -140,9 +167,16 @@ public:
 
 	list_flag intersect(list_flag lh, list_flag rh) { return lh == rh ? lh : null_flag; }
 
-	int count(list l) const;
+	bool to_bool(list l) const { return count(l) > 0; }
 
-	int count(list_flag f) const { return f.flag < 0 ? 0 : 1; }
+	bool not_bool(list l) const { return ! to_bool(l); }
+
+	bool to_bool(list_flag lf) const { return count(lf) > 0; }
+
+	bool not_bool(list_flag lf) const { return ! to_bool(lf); }
+
+	int count(list l) const;
+	int count(list_flag f) const;
 
 	list_flag min(list l) const;
 
@@ -305,6 +339,7 @@ private:
 	// defined list (meta data)
 	managed_array<int, config::maxListTypes>                  _list_end;
 	managed_array<const char*, config::maxFlags>              _flag_names;
+	managed_array<int, config::maxFlags>                      _flag_values;
 	managed_array<const char*, config::maxListTypes>          _list_names;
 	/// keep track over lists accessed with get_var, and clear then at gc time
 	managed_array<list_interface, config::limitEditableLists> _list_handouts;

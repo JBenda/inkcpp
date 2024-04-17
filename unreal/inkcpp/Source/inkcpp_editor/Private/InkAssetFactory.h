@@ -19,6 +19,7 @@ class UInkAssetFactory : public UFactory, public FReimportHandler
 	
 public:
 	UInkAssetFactory(const FObjectInitializer& ObjectInitializer);
+	~UInkAssetFactory();
 
 	// Begin UFactory
 	virtual UObject* FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, 
@@ -28,10 +29,13 @@ public:
 	// End UFactory
 
 	// Begin FReimportHandler
-	bool CanReimport(UObject* Obj, TArray<FString>& OutFilenames) override;
-	TObjectPtr<UObject>* GetFactoryObject() const override;
-	EReimportResult::Type Reimport(UObject* Obj) override;
-	void SetReimportPaths(UObject* Obj, const TArray<FString>& NewReimportPaths) override;
+	virtual bool                  CanReimport(UObject* Obj, TArray<FString>& OutFilenames) override;
+	virtual TObjectPtr<UObject>*  GetFactoryObject() const override;
+	virtual EReimportResult::Type Reimport(UObject* Obj, int SourceID) override;
+
+	virtual EReimportResult::Type Reimport(UObject* Obj) override { return Reimport(Obj, 0); }
+
+	virtual void  SetReimportPaths(UObject* Obj, const TArray<FString>& NewReimportPaths) override;
 	virtual int32 GetPriority() const override;
 	// End FReimportHandle
 private:

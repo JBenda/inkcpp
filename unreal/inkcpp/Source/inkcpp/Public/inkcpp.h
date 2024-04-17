@@ -10,12 +10,12 @@
 /**
  * @defgroup unreal Unreal Blueprints
  * Blueprint Classes usable in Unreal. An example can be found
- * [here](unreal/InkCPP_DEMO.zip), do not forgett to install the plugin via the marketplace(soonTM)
- * or unzipping the `unreal.zip` from the [release
- * page](https://github.com/JBenda/inkcpp/releases/latest) to `/YOUR_UNREAL_PROJECT/Plugins/`. <br/>
- * And eitherway activating the plugin.
+ * [here](unreal/InkCPP_DEMO.zip), do not forgett to install the plugin via the
+ * [marketplace](https://www.unrealengine.com/marketplace/product/inkcpp) or unzipping the
+ * `unreal.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest) to
+ * `/YOUR_UNREAL_PROJECT/Plugins/`. <br/> And eitherway activating the plugin.
  *
- * The C++ API will be available soon(TM).
+ * The C++ API will be available soon([Issue](https://github.com/JBenda/inkcpp/issues/60)).
  *
  * + @ref ue_setup "General setup"
  * + @ref ue_components "UE5 Blueprits"
@@ -30,10 +30,10 @@
  * On this instance set the `Ink|InkAsset` property to the story that you will run.
  * To create this InkAsset you need to import a `.ink` file or `.ink.json` file.
  *
- * With the @ref AInkRuntime you can then create @ref UInkThreads with @ref AInkRuntime::Start().
+ * With the @ref AInkRuntime you can then create a @ref UInkThread with @ref AInkRuntime::Start().
  * In addition does the runtime allows you access to the global variables via @ref
- * AInkRuntime::ObserveChange() "observer" or directly @ref AInkRuntime::Set() "setter" und @ref
- * AInkRuntime::Get() "getter".
+ * AInkRuntime::ObserverVariableChange() "observer" or directly @ref
+ * AInkRuntime::SetGlobalVariable() "setter" und @ref AInkRuntime::GetGlobalVariable() "getter".
  *
  * Notice that all threads spawned in the
  * same runtime will share a global state. So if you want to play the same story with different
@@ -103,7 +103,7 @@
  * @subsection ue_example_setup Setup
  *
  * To setup the [example project](../unreal/InkCPP_DEMO.zip) install the Plugin via the [UE
- * marketplace](https://www.unrealengine.com/product/494904fc50f747db879c297ee57cf122) place unpack
+ * marketplace](https://www.unrealengine.com/product/inkcpp) place unpack
  * the `unreal.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest) inside
  * `/PATH/InkCPP_DEMO/Plugins/`.
  *
@@ -130,7 +130,8 @@
  * All UI elements and other used components are created on the `BeginPlay` event in the following
  * order.
  * 1. The UI components are created and configured
- * 2. Load an existing save game if its exists.
+ * 2. Load an existing save game if its exists (the Save game is stored at
+ * `InkCPP_DEMO/Saved/SaveGames`).
  * 3. Create the main thread of class `DemoThread` and register the external function.
  * 4. Create menu thread(`InfoThread`), set path to `Wait` to avoid any output in the beginging.
  * 5. Set observer for the variable `Heath` to update the healthbar.

@@ -136,7 +136,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	/** On variable change provides old and new value.
-	 * @see #ObserverVariable() #ObserverVariable()
+	 * @see #ObserverVariableEvent() #ObserverVariable()
 	 * @attention if the varibale set for the firs time, the old value has value type @ref
 	 * EInkVarType::None
 	 *

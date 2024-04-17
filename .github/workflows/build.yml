@@ -21,6 +21,12 @@ jobs:
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
             proof: false
             unreal: false
+          - os: macos-14
+            artifact: macos-arm
+            name: MacOSX-ARM
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
+            proof: false
+            unreal: false
           - os: windows-latest
             artifact: win64
             name: Windows x64

@@ -439,7 +439,7 @@ void binary_emitter::set_list_meta(const list_data& list_defs)
 			++list_names;
 			_lists.write('\0');
 		}
-		_lists.write(reinterpret_cast<const byte_t*>(flag.name.c_str()), flag.name.size() + 1);
+		_lists.write(reinterpret_cast<const byte_t*>(flag.name->c_str()), flag.name->size() + 1);
 	}
 	_lists.write(null_flag);
 }

@@ -10,6 +10,7 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Interfaces/IPluginManager.h"
+#include "Internationalization/Regex.h"
 
 #include "InkAsset.h"
 #include "ink/compiler.h"
@@ -18,6 +19,8 @@
 #include <sstream>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
+#include <unordered_set>
 #include <cstdio>
 
 UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
@@ -34,7 +37,47 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 
 	// Fuck data tables TODO - some criteria?
 	ImportPriority = 99999;
-	
+	FReimportManager::Instance()->RegisterHandler(*this);
+}
+
+UInkAssetFactory::~UInkAssetFactory() { FReimportManager::Instance()->UnregisterHandler(*this); }
+
+/// @todo only finds first include match?
+void TraversImports(
+    UAssetImportData& AssetImportData, std::unordered_set<std::filesystem::path>& visited,
+    std::filesystem::path filepath
+)
+{
+	UE_LOG(
+	    InkCpp, Display, TEXT("InkAsset Import: Traverse '%s'"), *FString(filepath.string().c_str())
+	);
+	if (visited.find(filepath) != visited.end()) {
+		return;
+	}
+	int id = visited.size();
+	visited.insert(filepath);
+	AssetImportData.AddFileName(
+	    FString(filepath.string().c_str()), id, id == 0 ? TEXT("MainFile") : TEXT("Include")
+	);
+
+	std::ifstream file(filepath);
+	if (! file) {
+		UE_LOG(
+		    InkCpp, Warning, TEXT("Failed to open story file: %s"), *FString(filepath.string().c_str())
+		);
+		return;
+	}
+	std::stringstream file_data;
+	file_data << file.rdbuf();
+	FRegexMatcher matcher(
+	    FRegexPattern(FString("(^|\n)[ \t]*INCLUDE[ \t]+(.*)"), ERegexPatternFlags{0}),
+	    FString(file_data.str().c_str())
+	);
+	while (matcher.FindNext()) {
+		std::filesystem::path match_file_path = filepath;
+		match_file_path.replace_filename(TCHAR_TO_ANSI(*matcher.GetCaptureGroup(2)));
+		TraversImports(AssetImportData, visited, match_file_path);
+	}
 }
 
 UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutOperationCanceled)
@@ -45,7 +88,10 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 	static const std::string ink_suffix{".ink"};
 	try
 	{
+		using path            = std::filesystem::path;
 		std::string cFilename = TCHAR_TO_ANSI(*Filename);
+		path        story_path(cFilename, path::format::generic_format);
+		story_path.make_preferred();
 		bool use_temp_file = false;
 		if (cFilename.size() > ink_suffix.size()
 				&& std::equal(ink_suffix.rbegin(), ink_suffix.rend(), cFilename.rbegin()))
@@ -55,12 +101,9 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 				UE_LOG(InkCpp, Warning, TEXT("Inklecate provided with the plugin, please import ink.json files"));
 				return nullptr;
 			}
-			using path = std::filesystem::path;
 			path path_bin(TCHAR_TO_ANSI(*IPluginManager::Get().FindPlugin(TEXT("InkCPP"))->GetBaseDir()), path::format::generic_format);
 			path_bin.make_preferred();
 			path_bin /= path(inklecate_cmd, path::format::generic_format).make_preferred();
-			path story_path(cFilename, path::format::generic_format);
-			story_path.make_preferred();
 			const char* filename = std::tmpnam(nullptr);
 			if(filename == nullptr) {
 				UE_LOG(InkCpp, Error, TEXT("Failed to create temporary file"));
@@ -96,7 +139,8 @@ UObject* UInkAssetFactory::FactoryCreateFile(UClass* InClass, UObject* InParent,
 		FMemory::Memcpy(asset->CompiledStory.GetData(), data.c_str(), data.length());
 
 		// Paths
-		asset->AssetImportData->Update(CurrentFilename);
+		std::unordered_set<std::filesystem::path> visited{};
+		TraversImports(*asset->AssetImportData, visited, story_path);
 
 		// Not cancelled
 		bOutOperationCanceled = false;
@@ -124,18 +168,19 @@ bool UInkAssetFactory::CanReimport(UObject* Obj, TArray<FString>& OutFilenames)
 	UInkAsset* InkAsset = Cast<UInkAsset>(Obj);
 	if (InkAsset != nullptr && InkAsset->AssetImportData)
 	{
+		UE_LOG(InkCpp, Warning, TEXT("Can Reimport"));
 		InkAsset->AssetImportData->ExtractFilenames(OutFilenames);
 		return true;
 	}
-
+	UE_LOG(InkCpp, Warning, TEXT("Failed to reimport"));
 	return false;
 }
 
 void UInkAssetFactory::SetReimportPaths(UObject* Obj, const TArray<FString>& NewReimportPaths)
 {
+	UE_LOG(InkCpp, Warning, TEXT("SetReimportPaths"));
 	UInkAsset* InkAsset = Cast<UInkAsset>(Obj);
-	if (InkAsset && ensure(NewReimportPaths.Num() == 1))
-	{
+	if (InkAsset != nullptr && NewReimportPaths.Num() > 0) {
 		InkAsset->AssetImportData->UpdateFilenameOnly(NewReimportPaths[0]);
 	}
 }
@@ -150,8 +195,9 @@ TObjectPtr<UObject>* UInkAssetFactory::GetFactoryObject() const
 	return const_cast<TObjectPtr<UObject>*>(&object_ptr);
 }
 
-EReimportResult::Type UInkAssetFactory::Reimport(UObject* Obj)
+EReimportResult::Type UInkAssetFactory::Reimport(UObject* Obj, int SourceID)
 {
+	UE_LOG(InkCpp, Warning, TEXT("Reimport started"));
 	UInkAsset* InkAsset = Cast<UInkAsset>(Obj);
 	if (!InkAsset)
 		return EReimportResult::Failed;
@@ -168,6 +214,7 @@ EReimportResult::Type UInkAssetFactory::Reimport(UObject* Obj)
 
 	if (ImportObject(InkAsset->GetClass(), InkAsset->GetOuter(), *InkAsset->GetName(), RF_Public | RF_Standalone, Filename, nullptr, OutCanceled) != nullptr)
 	{
+		/// TODO: add aditional pathes
 		InkAsset->AssetImportData->Update(Filename);
 
 		// Try to find the outer package so we can dirty it up
