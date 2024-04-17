@@ -32,8 +32,8 @@
  *
  * With the @ref AInkRuntime you can then create a @ref UInkThread with @ref AInkRuntime::Start().
  * In addition does the runtime allows you access to the global variables via @ref
- * AInkRuntime::ObserverVariableChange() "observer" or directly @ref AInkRuntime::SetGlobalVariable() "setter" und @ref
- * AInkRuntime::GetGlobalVariable() "getter".
+ * AInkRuntime::ObserverVariableChange() "observer" or directly @ref
+ * AInkRuntime::SetGlobalVariable() "setter" und @ref AInkRuntime::GetGlobalVariable() "getter".
  *
  * Notice that all threads spawned in the
  * same runtime will share a global state. So if you want to play the same story with different
