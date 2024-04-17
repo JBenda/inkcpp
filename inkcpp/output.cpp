@@ -76,7 +76,7 @@ void basic_stream::append(const value& in)
 			// Nullify whitespace
 			else if (d.type() == value_type::string && ::ink::internal::is_whitespace(d.get<value_type::string>()))
 				d = value{};
-
+			else if (d.type() == value_type::func_start || d.type() == value_type::func_end) {}
 
 			// If it's not a newline or whitespace, stop
 			else
