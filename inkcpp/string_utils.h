@@ -190,12 +190,12 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 	auto dst = begin;
 	for (auto src = begin; src != end; ++src) {
 		if (dst == begin) {
-			if (LEADING_SPACES && (src[0] == ' ' || src[0] == '\n')) {
+			if (LEADING_SPACES && isspace(src[0])) {
 				continue;
 			}
-		} else if (src[-1] == '\n' && (src[0] == ' ' || src[0] == '\n')) {
+		} else if (src[-1] == '\n' && isspace(src[0])) {
 			continue;
-		} else if (src[0] == ' ' && ((src + 1 == end && TAILING_SPACES) || ((src + 1 != end) && (src[1] == ' ' || src[1] == '\n')))) {
+		} else if ((isspace(src[0]) && src[0] != '\n') && ((src + 1 == end && TAILING_SPACES) || ((src + 1 != end) && isspace(src[1])))) {
 			continue;
 		} else if (src[0] == '\n' && dst != begin && dst[-1] == '\n') {
 			continue;
