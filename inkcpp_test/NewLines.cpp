@@ -58,4 +58,19 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 			}
 		}
 	}
+	GIVEN("a complex story")
+	{
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "TheIntercept.bin");
+		runner thread = ink->new_runner();
+		// based on issue #82
+		WHEN("run sequence 1 3 3 3 2 3")
+		{
+			for (int i : {1, 3, 3, 3, 2, 3}) {
+				thread->getall();
+				thread->choose(i - 1);
+			}
+			std::string text = thread->getall();
+			THEN("no newline before dot") { REQUIRE(text == "\"I don't see why,\" I reply.\n"); }
+		}
+	}
 }

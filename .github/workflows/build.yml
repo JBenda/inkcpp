@@ -43,12 +43,12 @@ jobs:
     steps:
 
     # Checkout project
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
     # Download inklecate
-    - uses: suisei-cn/actions-download-file@v1.4.0
+    - uses: suisei-cn/actions-download-file@v1.6.0
       name: Download Inklecate 
       id: download_inklecate 
       with:
@@ -64,14 +64,14 @@ jobs:
         echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
 
     # Setup python
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       if: ${{ matrix.proof }}
       with:
-        python-version: '3.7'
+        python-version: '3.x'
 
     # Setup CMake
     - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v1.14.2
+      uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.22.x'
 
@@ -103,7 +103,7 @@ jobs:
       shell: bash
       run: cmake --install . --config $BUILD_TYPE --prefix comp_cl --component cl
     - name: Upload Cl
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact }}-cl
         path: build/comp_cl/
@@ -113,7 +113,7 @@ jobs:
       shell: bash
       run: cmake --install . --config $BUILD_TYPE --prefix comp_lib --component lib
     - name: Upload Lib
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact }}-lib
         path: build/comp_lib/
@@ -123,7 +123,7 @@ jobs:
       shell: bash
       run: cmake --install . --config $BUILD_TYPE --prefix comp_clib --component clib
     - name: Upload Clib
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{matrix.artifact}}-clib
         path: build/comp_clib
@@ -135,7 +135,7 @@ jobs:
       run: cmake --install . --config $BUILD_TYPE --prefix comp_unreal --component unreal
     - name: Upload UE
       if: ${{ matrix.unreal }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: unreal
         path: build/comp_unreal/
@@ -172,15 +172,15 @@ jobs:
 
     # Upload results artifact
     - name: Upload Results Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: results
+        name: result-${{ matrix.artifact }}
         path: proofing/ink-proof/${{ matrix.artifact }}.txt
 
     # Upload website artifact
     - name: Upload Ink-Proof Website Artifact
       if: ${{ matrix.proof }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact }}-www
         path: proofing/ink-proof/out
@@ -194,7 +194,7 @@ jobs:
       with:
         submodules: true
     - name: Set upt Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.x"
     - name: Install Doxygen
@@ -206,7 +206,7 @@ jobs:
         cd doxygen-1.10.0/
         sudo make install
     - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v1.14.2
+      uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.22.x'
     - name: Create Build Environment
@@ -220,7 +220,7 @@ jobs:
       shell: bash
       run: cmake --build . --target doc
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: doxygen
         path: Documentation/
@@ -234,7 +234,7 @@ jobs:
       with:
         submodules: true
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.x"
     - name: install build
@@ -247,7 +247,7 @@ jobs:
     - name: Build python release
       run: python3 -m build
 
-    - uses: suisei-cn/actions-download-file@v1.4.0
+    - uses: suisei-cn/actions-download-file@v1.6.0
       name: Download Inklecate 
       id: download_inklecate 
       with:
@@ -268,7 +268,7 @@ jobs:
       run: |
         rm dist/*.whl
     - name: Upload Python files
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: python-package-distribution
         path: dist/
@@ -278,7 +278,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'master' }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Fetch master branch
         run: |
           git fetch origin master
@@ -302,10 +302,11 @@ jobs:
       pull-requests: write
     steps:
       # Download Ink Proof Results
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: results
+          pattern: result-*
           path: "results"
+          merge-multiple: true
 
       # Create comment text
       - name: Create Comment Text File
@@ -325,7 +326,7 @@ jobs:
           done
       
       # Post Comment
-      - uses: marocchino/sticky-pull-request-comment@v2.8.0
+      - uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
           recreate: true
           path: comment.txt
@@ -341,12 +342,12 @@ jobs:
       - uses: actions/checkout@v4
 
       # Download Ink Proof page for Linux
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: linux-www
           path: www/proof
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: doxygen
           path: www

@@ -65,6 +65,7 @@ void basic_stream::append(const value& in)
 	if ((in.type() == value_type::glue || in.type() == value_type::func_end) && _size > 1) {
 		// Run backwards
 		size_t i = _size - 2;
+		int    func_end_cnt = 0;
 		while (true) {
 			value& d = _data[i];
 
@@ -76,7 +77,11 @@ void basic_stream::append(const value& in)
 			// Nullify whitespace
 			else if (d.type() == value_type::string && ::ink::internal::is_whitespace(d.get<value_type::string>()))
 				d = value{};
-
+			else if (d.type() == value_type::func_end) {
+				++func_end_cnt;
+			} else if (d.type() == value_type::func_start && func_end_cnt > 0) {
+				--func_end_cnt;
+			}
 
 			// If it's not a newline or whitespace, stop
 			else
