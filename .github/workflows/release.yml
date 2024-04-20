@@ -19,7 +19,7 @@ jobs:
       id-token: write
       contents: write 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
