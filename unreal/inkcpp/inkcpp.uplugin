@@ -2,7 +2,7 @@
 	"FileVersion": 1,
 	"EngineVersion": "5.3",
 	"Version": 1,
-	"VersionName": "0.1.3",
+	"VersionName": "0.1.5",
 	"FriendlyName": "inkcpp",
 	"Description": "inkcpp integration",
 	"Category": "Narrative",
