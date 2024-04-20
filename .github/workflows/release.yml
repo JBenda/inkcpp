@@ -45,5 +45,5 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
               --generate-notes \
-              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-clib.zip" "unreal.zip" "macos-cl.zip" "macos-lib.zip" "macos-clib.zip" "win64-cl.zip" "macos-arm-cl.zip" "macos-arm-lib.zip" "macos-arm-clib.zip "win64-lib.zip" "win64-clib.zip"
+              "$tag" "linux-cl.zip" "linux-lib.zip" "linux-clib.zip" "unreal.zip" "macos-cl.zip" "macos-lib.zip" "macos-clib.zip" "win64-cl.zip" "macos-arm-cl.zip" "macos-arm-lib.zip" "macos-arm-clib.zip" "win64-lib.zip" "win64-clib.zip"
 
