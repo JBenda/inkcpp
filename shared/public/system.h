@@ -24,6 +24,20 @@
 #	include <cstdarg>
 #endif
 
+// Platform specific defines //
+
+#ifdef INK_ENABLE_UNREAL
+#	define inkZeroMemory(buff, len)        FMemory::Memset(buff, 0, len)
+#	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
+#	define inkFail(text,...)                         checkf(false, TEXT(text), ##__VA_ARGS__)
+#define FORMAT_STRING_STR "%hs"
+#else
+#	define inkZeroMemory ink::internal::zero_memory
+#	define inkAssert     ink::ink_assert
+#	define inkFail(...)  ink::ink_assert(false, __VA_ARGS__)
+#define FORMAT_STRING_STR "%s"
+#endif
+
 namespace ink
 {
 /** define basic numeric type
@@ -168,20 +182,6 @@ template<typename... Args>
 	ink_assert(false, msg, args...);
 	exit(EXIT_FAILURE);
 }
-#else
-/** platform indipendent assert(false) with message.
- * @param msg formatting string
- * @param args arguments to format string
- */
-template<typename... Args>
-inline void ink_fail(const char* msg, Args... args)
-{
-	if (sizeof...(args) > 0) {
-		checkf(false, UTF8_TO_TCHAR(msg), args...)
-	} else {
-		checkf(false, UTF8_TO_TCHAR(msg));
-	}
-}
 #endif
 
 namespace runtime::internal
@@ -295,7 +295,7 @@ private:
 	void test_value() const
 	{
 		if (! _has_value) {
-			ink_fail("Can't access empty optional!");
+			inkFail("Can't access empty optional!");
 		}
 	}
 
@@ -305,14 +305,3 @@ private:
 #endif
 } // namespace ink
 
-// Platform specific defines //
-
-#ifdef INK_ENABLE_UNREAL
-#	define inkZeroMemory(buff, len)        FMemory::Memset(buff, 0, len)
-#	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
-#	define inkFail                         ink::ink_fail
-#else
-#	define inkZeroMemory ink::internal::zero_memory
-#	define inkAssert     ink::ink_assert
-#	define inkFail(...)  ink::ink_assert(false, __VA_ARGS__)
-#endif

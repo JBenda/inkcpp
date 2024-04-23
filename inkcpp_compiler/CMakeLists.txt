@@ -7,7 +7,7 @@ list(APPEND SOURCES
 	list_data.h list_data.cpp
     command.cpp
     )
-add_definitions(-DINK_COMPILER -DINK_EXPOSE_JSON)
+add_definitions(-DINK_EXPOSE_JSON)
 add_library(inkcpp_compiler_o OBJECT ${SOURCES})
 add_library(inkcpp_compiler $<TARGET_OBJECTS:inkcpp_compiler_o>)
 

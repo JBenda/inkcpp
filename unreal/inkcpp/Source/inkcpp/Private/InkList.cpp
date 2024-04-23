@@ -8,6 +8,7 @@
 
 #include "InkList.h"
 #include <string>
+#include "ink/list.h"
 
 bool UInkList::ContainsFlag(const FString& flag_name) const
 {

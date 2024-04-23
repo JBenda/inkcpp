@@ -373,7 +373,7 @@ void binary_emitter::process_paths()
 				// Otherwise, write container address
 				if (container == nullptr) {
 					_containers.set(position, 0);
-					inkAssert(optional, "Was not able to resolve a not optional path! '%s'", path.c_str());
+					inkAssert(optional, "Was not able to resolve a not optional path! '%hs'", path.c_str());
 				} else {
 					_containers.set(position, container->offset);
 				}
