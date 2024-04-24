@@ -13,7 +13,6 @@ var namespaceink =
     [ "thread_t", "namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a", null ],
     [ "uint32_t", "namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67", null ],
     [ "hash_string", "namespaceink.html#add30d4ab28415ba7fdbbc67ed0de9630", null ],
-    [ "ink_fail", "namespaceink.html#aa6e14787806452d4847c90ddc60e4157", null ],
     [ "empty_flag", "namespaceink.html#ad600938294c97cacf02ab21ca278bf7d", null ],
     [ "InkBinVersion", "namespaceink.html#a8426126aa837a035525e2bf89ad1bddc", null ],
     [ "InkVersion", "namespaceink.html#a32a7e445e0f95e8d26971e7b752c108b", null ],
