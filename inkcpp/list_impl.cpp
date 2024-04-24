@@ -13,21 +13,23 @@ namespace ink::runtime::internal
 bool list_impl::contains(const char* flag_name) const
 {
 	auto flag = _list_table->toFlag(flag_name);
-	inkAssert(flag.has_value(), "No flag with name found! '%s'", flag_name);
+	inkAssert(flag.has_value(), "No flag with name found! " FORMAT_STRING_STR "'", flag_name);
 	return _list_table->has(list_table::list{_list}, *flag);
 }
 
 void list_impl::add(const char* flag_name)
 {
 	auto flag = _list_table->toFlag(flag_name);
-	inkAssert(flag.has_value(), "No flag with name found to add! '%s'", flag_name);
+	inkAssert(flag.has_value(), "No flag with name found to add! '" FORMAT_STRING_STR "'", flag_name);
 	_list = _list_table->add(list_table::list{_list}, *flag).lid;
 }
 
 void list_impl::remove(const char* flag_name)
 {
 	auto flag = _list_table->toFlag(flag_name);
-	inkAssert(flag.has_value(), "No flag with name found to remove! '%s'", flag_name);
+	inkAssert(
+	    flag.has_value(), "No flag with name found to remove! '" FORMAT_STRING_STR "'", flag_name
+	);
 	_list = _list_table->sub(list_table::list{_list}, *flag).lid;
 }
 

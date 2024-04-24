@@ -168,7 +168,5 @@ namespace ink
 	template<typename PayloadType>
 	constexpr unsigned int CommandSize = sizeof(Command) + sizeof(CommandFlag) + sizeof(PayloadType);
 
-#ifdef INK_COMPILER
-	extern const char* CommandStrings[];
-#endif
+  extern const char* CommandStrings[];
 }
