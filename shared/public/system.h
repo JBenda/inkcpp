@@ -29,13 +29,13 @@
 #ifdef INK_ENABLE_UNREAL
 #	define inkZeroMemory(buff, len)        FMemory::Memset(buff, 0, len)
 #	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
-#	define inkFail(text,...)                         checkf(false, TEXT(text), ##__VA_ARGS__)
-#define FORMAT_STRING_STR "%hs"
+#	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
+#	define FORMAT_STRING_STR               "%hs"
 #else
-#	define inkZeroMemory ink::internal::zero_memory
-#	define inkAssert     ink::ink_assert
-#	define inkFail(...)  ink::ink_assert(false, __VA_ARGS__)
-#define FORMAT_STRING_STR "%s"
+#	define inkZeroMemory     ink::internal::zero_memory
+#	define inkAssert         ink::ink_assert
+#	define inkFail(...)      ink::ink_assert(false, __VA_ARGS__)
+#	define FORMAT_STRING_STR "%s"
 #endif
 
 namespace ink
@@ -304,4 +304,3 @@ private:
 };
 #endif
 } // namespace ink
-

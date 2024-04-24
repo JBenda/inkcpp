@@ -27,7 +27,9 @@ void list_impl::add(const char* flag_name)
 void list_impl::remove(const char* flag_name)
 {
 	auto flag = _list_table->toFlag(flag_name);
-	inkAssert(flag.has_value(), "No flag with name found to remove! '" FORMAT_STRING_STR "'", flag_name);
+	inkAssert(
+	    flag.has_value(), "No flag with name found to remove! '" FORMAT_STRING_STR "'", flag_name
+	);
 	_list = _list_table->sub(list_table::list{_list}, *flag).lid;
 }
 
