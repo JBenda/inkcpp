@@ -1,8 +1,8 @@
 {
 	"FileVersion": 1,
-	"EngineVersion": "5.3",
+	"EngineVersion": "5.4",
 	"Version": 1,
-	"VersionName": "0.1.5",
+	"VersionName": "0.1.6",
 	"FriendlyName": "inkcpp",
 	"Description": "inkcpp integration",
 	"Category": "Narrative",
