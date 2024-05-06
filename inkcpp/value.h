@@ -213,7 +213,7 @@ private:
 
 		struct {
 			hash_t name;
-			char   ci;
+			int    ci;
 		} pointer;
 	};
 
