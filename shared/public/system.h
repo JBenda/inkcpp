@@ -21,6 +21,7 @@
 #	include <optional>
 #	include <cctype>
 #	include <cstdint>
+#	include <cstdio>
 #	include <cstdarg>
 #endif
 
