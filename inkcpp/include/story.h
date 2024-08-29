@@ -132,6 +132,7 @@ public:
  * To run your own `.ink` files you need a way to compile it to inks runtime format `.ink.json`. One
  * way is to use `inklecate <story>.ink`.<br/> Which is available at the [official release
  * page](https://github.com/inkle/ink/releases/latest).<br/>
+ * Alternativly set the enviroment variable `INKLECATE` so that `%INKLECATE%` executes inklecate.
  *
  * If you want to use the inkcpp with C link against the target inkcpp_c and `#include
  * <ink/c/inkcpp.h>` The C-API documentation and example can be found @ref clib "here".
@@ -143,10 +144,12 @@ public:
  * ls # expected output: CMakeLists.txt main.cpp test.ink test.ink.json linux-lib
  * mkdir build
  * cd build
- * inkcpp_DIR=../linux-lib cmake ..
- * cmake --build .
- * cp ../test.ink.json .
- * ./main_cpp
+ * inkcpp_DIR=../linux-lib cmake .. -DCMAKE_BUILD_TYPE=Release  # linux
+ * set inkcpp_DIR=../win64-lib                                  # windows
+ * cmake ..                                                     # windows
+ * cmake --build . --config=Release
+ * cd ..
+ * ./build/main_cpp                                             # exact path depends on build system used
  * @endcode
  *
  * @subsection src_main main.cpp
