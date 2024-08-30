@@ -12,10 +12,19 @@
 #include <compiler.h>
 #include <choice.h>
 
-void inklecate(const std::string& inkFilename, const std::string& jsonFilename)
+void inklecate(const std::string& inkFilename, const std::string& jsonFilename, const std::string* inklecateOverwrite)
 {
 	// Get environment specific inklecate invocation command
-	const char* inklecateCmd = std::getenv("INKLECATE");
+	
+	const char* inklecateCmd = nullptr;
+	if (inklecateCmd == nullptr) {
+		if (inklecateOverwrite) {
+			inklecateCmd = inklecateOverwrite->c_str();
+		}
+	}
+	if (inklecateCmd == nullptr) {
+		std::getenv("INKLECATE");
+	}
 	if (inklecateCmd == nullptr)
 		inklecateCmd = "inklecate";
 

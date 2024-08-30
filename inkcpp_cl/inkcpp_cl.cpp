@@ -23,6 +23,7 @@ void usage()
 	        "snapshot file enter '-1' as choice\n"
 	     << "\t--ommit-choice-tags:\tdo not print tags after choices, primarly used to be compatible "
 	        "with inkclecat output"
+	     << "\t--inklecate <path-to-inklecate>:\toverwrites INKLECATE enviroment variable\n"
 	     << endl;
 }
 
@@ -38,6 +39,7 @@ int main(int argc, const char** argv)
 	std::string outputFilename;
 	bool        playMode = false, testMode = false, testDirectory = false, ommit_choice_tags = false;
 	std::string snapshotFile;
+	std::string inklecateOverwrite;
 	for (int i = 1; i < argc - 1; i++) {
 		std::string option = argv[i];
 		if (option == "-o") {
@@ -56,6 +58,11 @@ int main(int argc, const char** argv)
 		} else if (option == "-td") {
 			testMode      = true;
 			testDirectory = true;
+		} else if (option == "--inklecate") {
+			if (i + 1 < argc - 1 && argv[i + 1][0] != '-') {
+				++i;
+				inklecateOverwrite = argv[i];
+			}
 		} else {
 			std::cerr << "Unrecognized option: '" << option << "'\n";
 		}
