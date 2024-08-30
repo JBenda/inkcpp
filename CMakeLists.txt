@@ -7,22 +7,20 @@ include(FetchContent)
 FetchContent_Declare(inklecate_mac
 URL https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
 URL_HASH SHA256=c516402bca5fa249a7712e62591b048b137eba3098c53f9fb85a4253f9b9e2c0
-SOURCE_DIR "inkcpp/Source/ThirdParty/inklecate/mac"
+SOURCE_DIR "inklecate/mac"
 )
 FetchContent_Declare(inklecate_windows
 URL https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_windows.zip
 URL_HASH SHA256=6f317cb4c59bf1b31c6dd61e80c6a2287a1d8c241a703f0586f736ae00871aab
-SOURCE_DIR "inkcpp/Source/ThirdParty/inklecate/windows"
+SOURCE_DIR "inklecate/windows"
 )
 FetchContent_Declare(inklecate_linux
 URL https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
 URL_HASH SHA256=26f4e188e02536d6e99e73e71d9b13e2c2144187f1368a87e82fd5066176cff8
-SOURCE_DIR "inkcpp/Source/ThirdParty/inklecate/linux"
+SOURCE_DIR "inklecate/linux"
 )
 set(FETCHCONTENT_QUIET OFF)
 set(CMAKE_TLS_VERIFY true)
-include(FetchContent)
-
 # Testing enabled
 enable_testing()
 

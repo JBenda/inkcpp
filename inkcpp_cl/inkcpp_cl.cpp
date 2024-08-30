@@ -39,7 +39,7 @@ int main(int argc, const char** argv)
 	std::string outputFilename;
 	bool        playMode = false, testMode = false, testDirectory = false, ommit_choice_tags = false;
 	std::string snapshotFile;
-	std::string inklecateOverwrite;
+	const char* inklecateOverwrite = nullptr;
 	for (int i = 1; i < argc - 1; i++) {
 		std::string option = argv[i];
 		if (option == "-o") {
@@ -72,16 +72,16 @@ int main(int argc, const char** argv)
 	std::string inputFilename = argv[argc - 1];
 
 	// Test mode
-	if (testMode) {
-		bool result;
-		if (testDirectory) {
-			result = test_directory(inputFilename);
-		} else {
-			result = test(inputFilename);
-		}
+	// if (testMode) {
+	// 	bool result;
+	// 	if (testDirectory) {
+	// 		result = test_directory(inputFilename);
+	// 	} else {
+	// 		result = test(inputFilename);
+	// 	}
 
-		return result ? 0 : -1;
-	}
+	// 	return result ? 0 : -1;
+	// }
 
 	// If output filename not specified, use input filename as guideline
 	if (outputFilename.empty()) {
@@ -97,7 +97,7 @@ int main(int argc, const char** argv)
 
 		// Then we need to do a compilation with inklecate
 		try {
-			inklecate(inputFilename, jsonFile);
+			inklecate(inputFilename, jsonFile, inklecateOverwrite);
 		} catch (const std::exception& e) {
 			std::cerr << "Inklecate Error: " << e.what() << std::endl;
 			return 1;

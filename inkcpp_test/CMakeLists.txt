@@ -44,12 +44,12 @@ else()
   set(INKLECATE_CMD "inklecate")
 endif()
 
-
-if((inkcpp_inklecate_upper STREQUAL "ALL") OR (incpp_inklecate_upper STREQUAL "OS"))
+string(TOUPPER "${INKCPP_INKLECATE}" inkcpp_inklecate_upper)
+if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "OS"))
   if(UNIX AND NOT APPLE)
     FetchContent_GetProperties(inklecate_linux)
     if(inklecate_linux_POPULATED)
-      set(inklecate_overwrite "--inklecate ${inklecate_linux_SOURCE_DIR}/inklecate")
+      set(INKLECATE_CMD "${inklecate_linux_SOURCE_DIR}/inklecate")
     else()
     message(FATAL_ERROR "inklecate download is not provided, please check if the download failed.
       You may set INCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
@@ -57,7 +57,7 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (incpp_inklecate_upper STREQUAL "O
     endif(inklecate_linux_POPULATED)
   elseif(APPLE)
     if(inklecate_mac_POPULATED)
-      set(inklecate_overwrite "--inklecate ${inklecate_mac_SOURCE_DIR}/inklecate")
+      set(INKLECATE_CMD "${inklecate_mac_SOURCE_DIR}/inklecate")
     else()
     message(FATAL_ERROR "inklecate download is not provided, please check if the download failed.
       You may set INCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
@@ -65,7 +65,7 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (incpp_inklecate_upper STREQUAL "O
     endif(inklecate_mac_POPULATED)
   elseif(MSYS OR MINGW OR WIN32 OR CYGWIN)
     if(inklecate_windows_POPULATED)
-      set(inklecate_overwrite "--inklecate ${inklecate_windows_SOURCE_DIR}/inklecate")
+      set(INKLECATE_CMD "${inklecate_windows_SOURCE_DIR}/inklecate")
     else()
     message(FATAL_ERROR "inklecate download is not provided, please check if the download failed.
       You may set INCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
@@ -76,7 +76,7 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (incpp_inklecate_upper STREQUAL "O
       please set INKCPP_INKLECATE=NONE and provide inklecate via your PATH or the INKLECATE enviroment variables.
       Alternatily disable tests by setting INKCPP_TEST=OFF.")
   endif()
-endif((inkcpp_inklecate_upper STREQUAL "ALL") OR (incpp_inklecate_upper STREQUAL "OS"))
+endif((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "OS"))
 
 set(INK_TEST_RESOURCE_DIR "${PROJECT_BINARY_DIR}/ink")
 file(MAKE_DIRECTORY "${INK_TEST_RESOURCE_DIR}")
@@ -93,7 +93,7 @@ foreach(INK_FILE IN LISTS INK_FILES)
   set(output "${INK_TEST_RESOURCE_DIR}/${INK_FILENAME}.bin")
   add_custom_command(
     OUTPUT ${output} 
-    COMMAND $<TARGET_FILE:inkcpp_cl> -o "${output}" "${inklecate_overwrite}" "${INK_FILE}"
+    COMMAND $<TARGET_FILE:inkcpp_cl> -o "${output}" --inklecate "${INKLECATE_CMD}" "${INK_FILE}"
     DEPENDS ${INK_FILE}
     COMMENT "Compile test ink file '${INK_FILENAME}.ink' -> '${output}'"
   )
