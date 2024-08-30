@@ -19,6 +19,7 @@ Doxygen Documentation: https://jbenda.github.io/inkcpp/html
 
 Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must be in the same folder or in the PATH.
 `inklecate` can be downloaded from the [official release page](https://github.com/inkle/ink/releases) and will be downloaded from CMake at  configure time (located at `build/unreal/inkcpp/Resources/inklecate`).
+Or do it automatically with the `INKCPP_INKLECATE=OS` CMake flag. (It will be downloaded to `<build-dir>/inklecate/<os>/` and will be installed with `cmake --install . --component cl`)
 
 Without the `-p` flag, it'll just compile the JSON/Ink file into InkCPP's binary format (see the Wiki on GitHub).
 
@@ -129,6 +130,7 @@ To build, either run the generated buildfiles OR you can use `cmake --build . --
 
 To install the different components use `cmake --install . --component <lib|cl|unreal>`
 + `lib` C++ library to link against
++ `clib` C library to link against
 + `cl` command line application
 + `unreal` UE-plugin
 
@@ -142,7 +144,29 @@ If you recieve an error like "Mismatch Detected for Runtime Library," it means y
 
 ### Running Tests
 
-Run `ctest` from the build folder to execute unit tests configured with CMake. Use `ctest -V` for more verbose error output.
+To enable testing set the CMake flag `INKCPP_TEST=ON`. If you do not have inklecate at your path you can set `INKCPP_INKLECATE=OS` to download und use the current supported verision.
+Run `ctest -C Release` from the build folder to execute unit tests configured with CMake. Use `ctest -V -Release` for more verbose error output.
+Do not forgett that the C libs are only testet if `INKCPP_C=ON` is set.
+
+```sh
+mkdir build; cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DINKCPP_TEST=ON -DINKCPP_INKLECATE=OS
+cmake --build . --config Release
+ctest -C Release
+```
+
+To test the python bindings use:
+
+```sh
+pip install .
+python -m pip install build pytest
+python -m build
+python -m pip install dist/*.whl --user
+# if inklecate is not in the same directory / inside Path set INKLECATE enviroment variable
+export INKLECATE=<PATH-TO-inklecate> # unix
+set INKLECTATE=<PATH-TO-inklecate>   # windows
+python -m pytest
+```
 
 Right now this only executes the internal unit tests which test the functions of particular classes. Soon it'll run more complex tests on .ink files using ink-proof.
 
@@ -155,7 +179,7 @@ To build it from source use:
 
 ```sh
 git clone --recurse-submodules https://github.com/JBenda/inkcpp.git
-pip install inkcpp
+pip install .
 ```
 
 The python bindnigs are defined in `inkcpp_py` subfolder.

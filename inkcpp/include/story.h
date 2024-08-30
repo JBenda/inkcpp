@@ -127,7 +127,7 @@ public:
  * `linux-lib.zip`). <br/> to link the libraries you can use `find_package(inkcpp CONFIG)` which
  * provides two targets:
  * + inkcpp: the runtime enviroment
- * + inkcpp_comopiler: functionality to compile a story.json to story.bin
+ * + inkcpp_compiler: functionality to compile a story.json to story.bin
  *
  * To run your own `.ink` files you need a way to compile it to inks runtime format `.ink.json`. One
  * way is to use `inklecate <story>.ink`.<br/> Which is available at the [official release
@@ -151,6 +151,19 @@ public:
  * cd ..
  * ./build/main_cpp                                             # exact path depends on build system used
  * @endcode
+ *
+ * @subsection cmake_flags CMake Flags
+ * + INKCPP_TEST: (ON|OFF) weather or not execute tests
+ *                requires `inklecate` to be in the PATH or `INKCPP_INKLECATE=OS` or `=ALL`
+ * + INKCPP_INKLECATE: (NONE|OS|ALL) download the current supported inklecate version from the official [release page](https://github.com/inkle/ink/releases/latest)</br>
+ *                     They are stored at `<build-dir>/inklecate/<os>/` and will be automatcilly used for the tests
+ *   + NONE: disable this function
+ *   + OS: only the version supported for the OS
+ *   + ALL: all versions
+ * + INKCPP_C: (ON|OFF) Build the inkcpp c bindings (and thest them if test is enabled)
+ * + INKCPP_PY: (ON|OFF) Build python bindings (build system only)
+ * + WHEEL_BUILD: (ON|OFF) Settings to work with a python wheel build (build system only)
+ * + INKCPP_DOC_BlueprintUE: (ON|OFF) enables nice blueprint renders for the documentation
  *
  * @subsection src_main main.cpp
  * @include cmake_example/main.cpp
