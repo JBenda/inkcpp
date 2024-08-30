@@ -149,14 +149,16 @@ public:
  * cmake ..                                                     # windows
  * cmake --build . --config=Release
  * cd ..
- * ./build/main_cpp                                             # exact path depends on build system used
+ * ./build/main_cpp                                             # exact path depends on build system
+ * used
  * @endcode
  *
  * @subsection cmake_flags CMake Flags
  * + INKCPP_TEST: (ON|OFF) weather or not execute tests
  *                requires `inklecate` to be in the PATH or `INKCPP_INKLECATE=OS` or `=ALL`
- * + INKCPP_INKLECATE: (NONE|OS|ALL) download the current supported inklecate version from the official [release page](https://github.com/inkle/ink/releases/latest)</br>
- *                     They are stored at `<build-dir>/inklecate/<os>/` and will be automatcilly used for the tests
+ * + INKCPP_INKLECATE: (NONE|OS|ALL) download the current supported inklecate version from the
+ * official [release page](https://github.com/inkle/ink/releases/latest)</br> They are stored at
+ * `<build-dir>/inklecate/<os>/` and will be automatcilly used for the tests
  *   + NONE: disable this function
  *   + OS: only the version supported for the OS
  *   + ALL: all versions
@@ -177,8 +179,9 @@ public:
  *
  * @section ue Unreal Installation
  *
- * The easiest way is to install it via the [unreal marcetplace](https://www.unrealengine.com/marketplace/en-US/product/inkcpp).
- * The overview to the UE Blueprint class and examples can be found at @ref unreal "here".
+ * The easiest way is to install it via the [unreal
+ * marcetplace](https://www.unrealengine.com/marketplace/en-US/product/inkcpp). The overview to the
+ * UE Blueprint class and examples can be found at @ref unreal "here".
  *
  * The current release is also available at the [release
  * page](https://github.com/JBenda/inkcpp/releases/latest), as `unreal.zip`.<br/>

@@ -31,7 +31,8 @@ void list_data::new_flag(const std::string& flag_name, int value)
 	    &flag_name,
 	    list_flag{
 	        .list_id = static_cast<decltype(list_flag::list_id)>(_list_name.size() - 1),
-	        .flag    = static_cast<decltype(list_flag::flag)>(value)}
+	        .flag    = static_cast<decltype(list_flag::flag)>(value)
+	    }
 	);
 }
 
