@@ -12,10 +12,21 @@
 #include <compiler.h>
 #include <choice.h>
 
-void inklecate(const std::string& inkFilename, const std::string& jsonFilename)
+void inklecate(
+    const std::string& inkFilename, const std::string& jsonFilename, const char* inklecateOverwrite
+)
 {
 	// Get environment specific inklecate invocation command
-	const char* inklecateCmd = std::getenv("INKLECATE");
+
+	const char* inklecateCmd = nullptr;
+	if (inklecateCmd == nullptr) {
+		if (inklecateOverwrite) {
+			inklecateCmd = inklecateOverwrite;
+		}
+	}
+	if (inklecateCmd == nullptr) {
+		std::getenv("INKLECATE");
+	}
 	if (inklecateCmd == nullptr)
 		inklecateCmd = "inklecate";
 
@@ -55,7 +66,7 @@ bool test(const std::string& inkFilename)
 	std::cout << std::filesystem::path(inkFilename).filename().string() << std::endl;
 
 	// Compile into a temporary json file
-	inklecate(inkFilename, "test.tmp");
+	inklecate(inkFilename, "test.tmp", nullptr);
 
 	// Compile into binary
 	ink::compiler::compilation_results results;

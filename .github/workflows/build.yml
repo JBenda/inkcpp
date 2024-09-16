@@ -47,22 +47,6 @@ jobs:
       with:
         submodules: true
 
-    # Download inklecate
-    - uses: suisei-cn/actions-download-file@v1.6.0
-      name: Download Inklecate 
-      id: download_inklecate 
-      with:
-        url: ${{ matrix.inklecate_url }}
-        target: "inklecate/"
-
-    # Install Inklecate
-    - name: Deploy Inkelcate 
-      shell: bash
-      run: |
-        cd inklecate
-        unzip *.zip
-        echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
-
     # Setup python
     - uses: actions/setup-python@v5
       if: ${{ matrix.proof }}
@@ -83,7 +67,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DINKCPP_PY=OFF -DINKCPP_C=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DINKCPP_PY=OFF -DINKCPP_C=ON -DINKCPP_TEST=ON -DINKCPP_INKLECATE=OS
 
     # Build using CMake and OS toolkit
     - name: Build

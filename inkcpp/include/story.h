@@ -127,11 +127,12 @@ public:
  * `linux-lib.zip`). <br/> to link the libraries you can use `find_package(inkcpp CONFIG)` which
  * provides two targets:
  * + inkcpp: the runtime enviroment
- * + inkcpp_comopiler: functionality to compile a story.json to story.bin
+ * + inkcpp_compiler: functionality to compile a story.json to story.bin
  *
  * To run your own `.ink` files you need a way to compile it to inks runtime format `.ink.json`. One
  * way is to use `inklecate <story>.ink`.<br/> Which is available at the [official release
  * page](https://github.com/inkle/ink/releases/latest).<br/>
+ * Alternativly set the enviroment variable `INKLECATE` so that `%INKLECATE%` executes inklecate.
  *
  * If you want to use the inkcpp with C link against the target inkcpp_c and `#include
  * <ink/c/inkcpp.h>` The C-API documentation and example can be found @ref clib "here".
@@ -143,11 +144,28 @@ public:
  * ls # expected output: CMakeLists.txt main.cpp test.ink test.ink.json linux-lib
  * mkdir build
  * cd build
- * inkcpp_DIR=../linux-lib cmake ..
- * cmake --build .
- * cp ../test.ink.json .
- * ./main_cpp
+ * inkcpp_DIR=../linux-lib cmake .. -DCMAKE_BUILD_TYPE=Release  # linux
+ * set inkcpp_DIR=../win64-lib                                  # windows
+ * cmake ..                                                     # windows
+ * cmake --build . --config=Release
+ * cd ..
+ * ./build/main_cpp                                             # exact path depends on build system
+ * used
  * @endcode
+ *
+ * @subsection cmake_flags CMake Flags
+ * + INKCPP_TEST: (ON|OFF) weather or not execute tests
+ *                requires `inklecate` to be in the PATH or `INKCPP_INKLECATE=OS` or `=ALL`
+ * + INKCPP_INKLECATE: (NONE|OS|ALL) download the current supported inklecate version from the
+ * official [release page](https://github.com/inkle/ink/releases/latest)</br> They are stored at
+ * `<build-dir>/inklecate/<os>/` and will be automatcilly used for the tests
+ *   + NONE: disable this function
+ *   + OS: only the version supported for the OS
+ *   + ALL: all versions
+ * + INKCPP_C: (ON|OFF) Build the inkcpp c bindings (and thest them if test is enabled)
+ * + INKCPP_PY: (ON|OFF) Build python bindings (build system only)
+ * + WHEEL_BUILD: (ON|OFF) Settings to work with a python wheel build (build system only)
+ * + INKCPP_DOC_BlueprintUE: (ON|OFF) enables nice blueprint renders for the documentation
  *
  * @subsection src_main main.cpp
  * @include cmake_example/main.cpp
@@ -161,14 +179,16 @@ public:
  *
  * @section ue Unreal Installation
  *
- * The current release is available at the [release
+ * The easiest way is to install it via the [unreal
+ * marcetplace](https://www.unrealengine.com/marketplace/en-US/product/inkcpp). The overview to the
+ * UE Blueprint class and examples can be found at @ref unreal "here".
+ *
+ * The current release is also available at the [release
  * page](https://github.com/JBenda/inkcpp/releases/latest), as `unreal.zip`.<br/>
  * Unpack this foldor in `/PATH/TO/UNREAL_ENGINE/Engine/Plugins/` and it will be available
  * as plugin in the plugin list. <br/>
  * Or unpack this folder in `/PATH/TO/UNREAL_PROJECT/Plugins/` and it will be
  * intigrated at the next startup.<br/> A MarketPlace appearance is work in progress :)
- *
- * The overview to the UE Blueprint class and examples can be found at @ref unreal "here".
  *
  * If you want to use the newest version clone the project and install the unreal component.
  * @code {sh}
