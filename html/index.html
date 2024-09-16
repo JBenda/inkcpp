@@ -96,7 +96,8 @@ $(function(){initNavTree('index.html',''); initResizable(); });
 </div><!--header-->
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
-<ul><li class="level1"><a href="#cmake">CMAKE usage</a><ul><li class="level2"><a href="#src_main">main.cpp</a></li>
+<ul><li class="level1"><a href="#cmake">CMAKE usage</a><ul><li class="level2"><a href="#cmake_flags">CMake Flags</a></li>
+<li class="level2"><a href="#src_main">main.cpp</a></li>
 <li class="level2"><a href="#src_cmake">CMakeLists.txt</a></li>
 <li class="level2"><a href="#src_story_json">test.ink</a></li>
 </ul>
@@ -116,21 +117,39 @@ CMAKE usage</h1>
 <p>The current erlease is available at the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a>, as <code>&lt;os&gt;-lib.zip</code> (e.g. <code>linux-lib.zip</code>). <br  />
  to link the libraries you can use <code>find_package(inkcpp CONFIG)</code> which provides two targets:</p><ul>
 <li>inkcpp: the runtime enviroment</li>
-<li>inkcpp_comopiler: functionality to compile a story.json to story.bin</li>
+<li>inkcpp_compiler: functionality to compile a story.json to story.bin</li>
 </ul>
 <p>To run your own <code>.ink</code> files you need a way to compile it to inks runtime format <code>.ink.json</code>. One way is to use <code>inklecate &lt;story&gt;.ink</code>.<br  />
  Which is available at the <a href="https://github.com/inkle/ink/releases/latest">official release page</a>.<br  />
-</p>
+ Alternativly set the enviroment variable <code>INKLECATE</code> so that <code>INKLECATE%</code> executes inklecate.</p>
 <p>If you want to use the inkcpp with C link against the target inkcpp_c and <code>#include &lt;ink/c/inkcpp.h&gt;</code> The C-API documentation and example can be found <a class="el" href="group__clib.html">here</a>.</p>
 <p>Exampl with library extracted at /YOUR/PROJECT/linux-lib And the <a href="../cmake_example.zip">Example project</a> is extracted to /YOUR/PROJECT </p><div class="fragment"><div class="line">cd /YOUR/PROJECT</div>
 <div class="line">ls # expected output: CMakeLists.txt main.cpp test.ink test.ink.json linux-lib</div>
 <div class="line">mkdir build</div>
 <div class="line">cd build</div>
-<div class="line">inkcpp_DIR=../linux-lib cmake ..</div>
-<div class="line">cmake --build .</div>
-<div class="line">cp ../test.ink.json .</div>
-<div class="line">./main_cpp</div>
-</div><!-- fragment --><h2><a class="anchor" id="src_main"></a>
+<div class="line">inkcpp_DIR=../linux-lib cmake .. -DCMAKE_BUILD_TYPE=Release  # linux</div>
+<div class="line">set inkcpp_DIR=../win64-lib                                  # windows</div>
+<div class="line">cmake ..                                                     # windows</div>
+<div class="line">cmake --build . --config=Release</div>
+<div class="line">cd ..</div>
+<div class="line">./build/main_cpp                                             # exact path depends on build system</div>
+<div class="line">used</div>
+</div><!-- fragment --><h2><a class="anchor" id="cmake_flags"></a>
+CMake Flags</h2>
+<ul>
+<li>INKCPP_TEST: (ON|OFF) weather or not execute tests requires <code>inklecate</code> to be in the PATH or <code>INKCPP_INKLECATE=OS</code> or <code>=ALL</code></li>
+<li>INKCPP_INKLECATE: (NONE|OS|ALL) download the current supported inklecate version from the official <a href="https://github.com/inkle/ink/releases/latest">release page</a> They are stored at <code>&lt;build-dir&gt;/inklecate/&lt;os&gt;/</code> and will be automatcilly used for the tests<ul>
+<li>NONE: disable this function</li>
+<li>OS: only the version supported for the OS</li>
+<li>ALL: all versions</li>
+</ul>
+</li>
+<li>INKCPP_C: (ON|OFF) Build the inkcpp c bindings (and thest them if test is enabled)</li>
+<li>INKCPP_PY: (ON|OFF) Build python bindings (build system only)</li>
+<li>WHEEL_BUILD: (ON|OFF) Settings to work with a python wheel build (build system only)</li>
+<li>INKCPP_DOC_BlueprintUE: (ON|OFF) enables nice blueprint renders for the documentation</li>
+</ul>
+<h2><a class="anchor" id="src_main"></a>
 main.cpp</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;ink/system.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;ink/choice.h&gt;</span></div>
@@ -187,6 +206,7 @@ CMakeLists.txt</h2>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># for CXX builds</span></div>
 <div class="line">add_executable(main_cpp main.cpp)</div>
+<div class="line">set_property(TARGET main_cpp PROPERTY CXX_STANDARD 20)</div>
 <div class="line">target_link_libraries(main_cpp inkcpp inkcpp_compiler)</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># for C builds</span></div>
@@ -205,11 +225,11 @@ test.ink</h2>
 </div><!-- fragment --><p> compiled: <a href="../cmake_example/test.ink.json">test.ink.json</a></p>
 <h1><a class="anchor" id="ue"></a>
 Unreal Installation</h1>
-<p>The current release is available at the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a>, as <code>unreal.zip</code>.<br  />
+<p>The easiest way is to install it via the <a href="https://www.unrealengine.com/marketplace/en-US/product/inkcpp">unreal marcetplace</a>. The overview to the UE Blueprint class and examples can be found at <a class="el" href="group__unreal.html">here</a>.</p>
+<p>The current release is also available at the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a>, as <code>unreal.zip</code>.<br  />
  Unpack this foldor in <code>/PATH/TO/UNREAL_ENGINE/Engine/Plugins/</code> and it will be available as plugin in the plugin list. <br  />
  Or unpack this folder in <code>/PATH/TO/UNREAL_PROJECT/Plugins/</code> and it will be intigrated at the next startup.<br  />
  A MarketPlace appearance is work in progress :)</p>
-<p>The overview to the UE Blueprint class and examples can be found at <a class="el" href="group__unreal.html">here</a>.</p>
 <p>If you want to use the newest version clone the project and install the unreal component. </p><div class="fragment"><div class="line">git clone https://github.com/JBenda/inkcpp</div>
 <div class="line">cd inkcpp</div>
 <div class="line">mkdir build</div>
