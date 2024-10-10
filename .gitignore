@@ -19,3 +19,7 @@ Build/*
 build/*
 bin/
 Bin/
+
+# Visual Studio
+/out/build/
+/.vs
