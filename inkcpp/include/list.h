@@ -96,7 +96,7 @@ public:
 		};
 
 		/** access value the iterator is pointing to */
-		Flag operator*() const { return Flag{.flag_name = _flag_name, .list_name = _list_name}; };
+		Flag operator*() const { return Flag{ _flag_name, _list_name }; };
 
 		/** continue iterator to next value */
 		iterator& operator++()
