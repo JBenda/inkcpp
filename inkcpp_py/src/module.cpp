@@ -67,22 +67,6 @@ PYBIND11_MODULE(inkcpp_py, m)
 {
 	m.doc()
 	    = "Python bindings for InkCPP https://github.com/JBenda/inkcpp"; // optional module docstring
-
-	py::class_<story>(m, "Story")
-	    .def("from_file", &story::from_file, "Creates a new story from a .bin file")
-	    .def("new_globals", &story::new_globals, "creates new globals store for the current story")
-	    .def("new_runner", [](story& self) { return self.new_runner(); })
-	    .def("new_runner", &story::new_runner, "creates a new runner for the current story")
-	    .def("new_globals_from_snapshot", &story::new_globals_from_snapshot)
-	    .def("new_runner_from_snapshot", &story::new_runner_from_snapshot)
-	    .def(
-	        "new_runner_from_snapshot", [](story& self, const snapshot& snap, globals_ptr store
-	                                    ) { return self.new_runner_from_snapshot(snap, store); }
-	    )
-	    .def("new_runner_from_snapshot", [](story& self, const snapshot& snap) {
-		    return self.new_runner_from_snapshot(snap);
-	    });
-
 	py::class_<globals, globals_ptr>(m, "Globals")
 	    .def(
 	        "create_snapshot", &globals::create_snapshot,
@@ -106,7 +90,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 		        }
 		        return res.value();
 	        },
-	        "Access global varible if exists, if not throws an key_error"
+	        "Access global varible if exists, if not throws an KeyError"
 	    )
 	    .def("__setattr__", [](globals& self, const std::string& key, const value& val) {
 		    if (! self.set<value>(key.c_str(), val)) {
@@ -116,6 +100,34 @@ PYBIND11_MODULE(inkcpp_py, m)
 			    );
 		    }
 	    });
+
+	py::class_<story>(m, "Story")
+	    .def_static("from_file", &story::from_file, "Creates a new story from a .bin file", py::arg("filename").none(false))
+	    .def("new_globals", &story::new_globals, "creates new globals store for the current story")
+	    .def("new_runner", &story::new_runner, R"(
+	         Creates a new runner.
+
+	         Args:
+	           globals (Globals, optional): pass a global to use, else use a new inetrnal one.
+
+	         Returns:
+	           Runner: a newly created runner, initelized at start of story
+	    )", py::arg("globals").none(true) = py::none())
+	    .def("new_globals_from_snapshot", &story::new_globals_from_snapshot, R"(
+          Loads a global store from a snapshot.
+
+          Returns:
+            Globals: a new global store with the same state then stored in the snapshot.
+	    )",py::arg("snapshot").none(false))
+	    .def("new_runner_from_snapshot", &story::new_runner_from_snapshot)
+	    .def(
+	        "new_runner_from_snapshot", [](story& self, const snapshot& snap, globals_ptr store
+	                                    ) { return self.new_runner_from_snapshot(snap, store); }
+	    )
+	    .def("new_runner_from_snapshot", [](story& self, const snapshot& snap) {
+		    return self.new_runner_from_snapshot(snap);
+	    });
+
 
 	py::class_<list, std::unique_ptr<list, py::nodelete>> py_list(
 	    m, "List",
@@ -300,9 +312,9 @@ PYBIND11_MODULE(inkcpp_py, m)
 	    .def("from_file", &snapshot::from_file, "Load snapshot from file");
 	m.def(
 	    "compile_json",
-	    [](const char* input_file_name, const char* output_filen_ame) {
+	    [](const char* input_file_name, const char* output_file_name) {
 		    ink::compiler::compilation_results results;
-		    ink::compiler::run(input_file_name, output_filen_ame, &results);
+		    ink::compiler::run(input_file_name, output_file_name, &results);
 		    if (! results.errors.empty()) {
 			    std::string str;
 			    for (auto& error : results.errors) {
