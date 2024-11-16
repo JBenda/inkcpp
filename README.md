@@ -17,6 +17,12 @@ Doxygen Documentation: https://jbenda.github.io/inkcpp/html
 
 ## Current Status
 
+supported languages ([latest release](https://github.com/JBenda/inkcpp/releases/latest)):
+	+ C++ [doc](https://jbenda.github.io/inkcpp/html/index.html)[example](https://jbenda.github.io/inkcpp/html/index.html)
+	+ C [doc](https://jbenda.github.io/inkcpp/html/group__clib.html)[example](https://jbenda.github.io/inkcpp/html/group__clib.html#example_c)
+	+ UE Blueprints [doc](https://jbenda.github.io/inkcpp/html/group__unreal.html)[distribution](https://www.unrealengine.com/marketplace/product/inkcpp)[example](https://jbenda.github.io/inkcpp/html/group__unreal.html#ue_example)
+	+ Python [doc](https://jbenda.github.io/inkcpp/html/inkcpp_py.html)[distribution](https://pypi.org/project/inkcpp-py/)[example](https://jbenda.github.io/inkcpp/html/index.html#py)
+
 Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must be in the same folder or in the PATH.
 `inklecate` can be downloaded from the [official release page](https://github.com/inkle/ink/releases) and will be downloaded from CMake at  configure time (located at `build/unreal/inkcpp/Resources/inklecate`).
 Or do it automatically with the `INKCPP_INKLECATE=OS` CMake flag. (It will be downloaded to `<build-dir>/inklecate/<os>/` and will be installed with `cmake --install . --component cl`)
