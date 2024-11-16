@@ -154,15 +154,16 @@ if (DOXYGEN_FOUND)
         COMPONENTS Interpreter
 		)
 		add_custom_target(inkcpp_py_doc
-			python -m pydoc -w inkcpp_py
-			COMMAND mv "./inkcpp_py.html" ${PY_HTML}
+			python -m pybind11_stubgen -o . inkcpp_py
+			COMMAND python -m pdoc -d google -o . inkcpp_py.pyi
+			COMMAND ${CMAKE_COMMAND} -E copy "./inkcpp_py.html" ${PY_HTML}
 			DEPENDS inkcpp_py
-			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/inkcpp_py"
+			WORKING_DIRECTORY $<TARGET_FILE_DIR:inkcpp_py>
 			COMMENT "Generates simple python documentation") 
 		add_dependencies(doc inkcpp_py_doc)
 	else()
 			message(WARNING "The python target is disabled, therfore no python documentation will be build. Set INKCPP_PY to change this")
-			file(WRITE ${PY_HTML} "<html><head></head><body><h2>Python Documenattion was not build!</h2></body></html>")
+			file(WRITE ${PY_HTML}/index.html "<html><head></head><body><h2>Python Documenattion was not build!</h2></body></html>")
 	endif(INKCPP_PY)
 else(DOXYGEN_FOUND)
 	message("Doxygen needed to generate documntation!")

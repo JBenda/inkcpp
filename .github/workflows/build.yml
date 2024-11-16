@@ -206,11 +206,11 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DINKCPP_PY=ON -DINKCPP_DOC_BlueprintUE=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DINKCPP_PY=ON -DINKCPP_DOC_BlueprintUE=ON
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: cmake --build . --target doc
+      run: cmake --build . --target doc --config Release
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
@@ -234,6 +234,8 @@ jobs:
         python3 -m
         pip install
         build
+        pybind11-stubgen
+        pdoc
         pytest
         --user
     - name: Build python release
