@@ -212,7 +212,8 @@ public:
  * `pip install .`
  *
  * Here can you find an
- * [example](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_python/example.py) inclusive
+ * [example](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_python/example.py)
+ * inclusive
  * [story](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_python/unreal_example.ink).
  *
  * [Python module documentation](./inkcpp_py.html)
