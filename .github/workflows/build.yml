@@ -117,8 +117,10 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: |
-        cmake -DINKCPP_UNREAL_TARGET_VERSION="5.5" --install . --config $BUILD_TYPE --prefix comp_unreal_5_5 --component unreal
-        cmake -DINKCPP_UNREAL_TARGET_VERSION="5.4" --install . --config $BUILD_TYPE --prefix comp_unreal_5_4 --component unreal
+        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.5"
+        cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_5 --component unreal
+        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.4"
+        cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_4 --component unreal
     - name: Upload UE 5.5
       if: ${{ matrix.unreal }}
       uses: actions/upload-artifact@v4

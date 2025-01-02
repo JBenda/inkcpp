@@ -45,9 +45,18 @@ Place the content of this file at your plugin folder of your UE project and at t
 
 A example project can be found [here](https://jbenda.github.io/inkcpp/unreal/InkCPP_DEMO.zip). And here the [Documentation](https://jbenda.github.io/inkcpp/html/group__unreal.html). 
 
-Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run `cmake --install . --component unreal --prefix Path/To/Unreal/Plugins/` which will add an `inkcpp` folder there with the `.uplugin`, the code for the UClasses, and all the inkcpp source files required. `config.h` will automatically detect it is being built in an Unreal plugin environment and disable STL and enable Unreal extensions (FString support, Unreal asserts, CityHash, etc.).
-
-If you compile the UE Plugin by your self feel free to visit the [wiki page](https://github.com/JBenda/inkcpp/wiki/Unreal) for a more debug oriented build process.
+Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run
+```sh
+mkdir build
+cd build
+mkdir plugin
+mkdir plugin-build
+cmake -DINKCPP_UNREAL_TARGET_VERSION="5.5" .
+cmake --install . --component unreal --prefix .\plugin  # create source files for plugin
+\PATH\TO\UNREAL_ENGINE\Build\BatchFiles\RunUAT.bat BuildPlugin -plugin=GIT_REPO\build\plugin\inkcpp\inkcpp.uplugin -package=GIT_REPO\build\plugin-build\inkcpp -TargetPlatforms=Win64 # compile plugin
+move plugin-build\inkcpp UE_ENGINE\Engine\Plugins\inkcpp
+```
+Adapt `TargetPlatforms` as nessesarry. You might also want to install the Plugin directly into a project or the in UE5.5 introduced external plugin directory. Just adapt the pathets accordendly.
 
 ## Use standalone
 
