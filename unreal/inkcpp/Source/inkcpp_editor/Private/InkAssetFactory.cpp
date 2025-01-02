@@ -37,11 +37,11 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	);
 
 	// Set class
-	SupportedClass    = UInkAsset::StaticClass();
-	bCreateNew        = false;
+	SupportedClass     = UInkAsset::StaticClass();
+	bCreateNew         = false;
 	bAutomatedReimport = true;
-	bForceShowDialog  = true;
-	bEditorImport     = true;
+	bForceShowDialog   = true;
+	bEditorImport      = true;
 
 	ImportPriority = 20;
 }

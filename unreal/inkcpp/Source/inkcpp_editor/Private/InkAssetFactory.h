@@ -31,7 +31,7 @@ public:
 	// Begin FReimportHandler
 	virtual bool                  CanReimport(UObject* Obj, TArray<FString>& OutFilenames) override;
 	virtual TObjectPtr<UObject>*  GetFactoryObject() const override;
-	virtual EReimportResult::Type Reimport( UObject* Obj ) override;
+	virtual EReimportResult::Type Reimport(UObject* Obj) override;
 
 	virtual void  SetReimportPaths(UObject* Obj, const TArray<FString>& NewReimportPaths) override;
 	virtual int32 GetPriority() const override;
