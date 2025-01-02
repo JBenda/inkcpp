@@ -57,7 +57,7 @@ endif()
 
 if (INKCPP_PY)
 	add_compile_options(-fPIC)
-	add_subdirectory(inkcpp_py)
+	add_subdirectory(inkcpp_python)
 endif(INKCPP_PY)
 add_subdirectory(shared)
 add_subdirectory(inkcpp)

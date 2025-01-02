@@ -259,7 +259,7 @@ jobs:
     - name: Test python release
       run: |
         python3 -m pip install dist/*.whl --user
-        python3 -m pytest
+        python3 -m pytest inkcpp_python/tests
     - name: Remove wheel
       run: |
         rm dist/*.whl
