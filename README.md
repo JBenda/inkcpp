@@ -7,6 +7,12 @@ Ink Proofing Test Results: https://jbenda.github.io/inkcpp/proof
 
 Doxygen Documentation: https://jbenda.github.io/inkcpp/html
 
+CLib Documentation: https://jbenda.github.io/inkcpp/html/group__clib.html
+
+UE Documentation: https://jbenda.github.io/inkcpp/html/group__unreal.html
+
+Python Documentation: https://jbenda.github.io/inkcpp/html/inkcpp_py.html
+
 ## Project Goals
 * Fast, simple, clean syntax
 * No heap allocations during execution (unless in emergencies)

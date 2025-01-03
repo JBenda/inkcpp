@@ -2,7 +2,7 @@
 	"FileVersion": 1,
 	"EngineVersion": "${INKCPP_UNREAL_TARGET_VERSION}",
 	"Version": 1,
-	"VersionName": "0.1.6",
+	"VersionName": "${CMAKE_PROJECT_VERSION}",
 	"FriendlyName": "inkcpp",
 	"Description": "inkcpp integration",
 	"Category": "Narrative",
