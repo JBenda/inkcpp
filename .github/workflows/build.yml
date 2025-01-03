@@ -191,6 +191,13 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
+    - name: install pyton libs
+      run: >-
+        python3 -m
+        pip install
+        pybind11-stubgen
+        pdoc
+        --user
     - name: Install Doxygen
       run: |
         sudo apt-get install graphviz -y
