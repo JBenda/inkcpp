@@ -232,6 +232,8 @@ If you want convert it to a string use: `str(value)`.)"
 			    throw py::value_error(str);
 		    }
 	    },
+	    py::arg("input_file_name").none(false),
+	    py::arg("output_file_name").none(false),
 	    "Converts a story.json file to a story.bin file used by inkcpp"
 	);
 	py::class_<choice>(m, "Choice")
@@ -301,12 +303,12 @@ Args:
 	        "create_snapshot", &runner::create_snapshot,
 	        R"(Creates a snapshot from the current state for later usage.
 
-	        This snapshot will also contain the global state.
-	        To reload:
+This snapshot will also contain the global state.
+To reload:
 
-          >>> snapshot = old_runner.create_snapshot()
-	        >>> story = Story.from_file("story.bin")
-	        >>> runner = story.new_runner_from_snapshot(snapshot)
+>>> snapshot = old_runner.create_snapshot()
+>>> story = Story.from_file("story.bin")
+>>> runner = story.new_runner_from_snapshot(snapshot)
 	        )"
 	    )
 	    .def("can_continue", &runner::can_continue, "check if there is content left in story")
@@ -343,7 +345,7 @@ Args:
 	        "get_choice", &runner::get_choice, R"(
 Get current choice at index.
 
-iter(inkcpp_py.Runtime) returns a iterator over all current choices.)",
+iter(inkcpp_py.Runner) returns a iterator over all current choices.)",
 	        py::arg("index").none(false), py::return_value_policy::reference_internal
 	    )
 	    .def("num_choices", &runner::num_choices, "Number of current open choices")
