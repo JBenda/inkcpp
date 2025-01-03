@@ -160,7 +160,10 @@ Enumerations</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Blueprint Classes usable in Unreal. </p>
-<p>An example can be found <a href="unreal/InkCPP_DEMO.zip">here</a>, do not forgett to install the plugin via the <a href="https://www.unrealengine.com/marketplace/product/inkcpp">marketplace</a> or unzipping the <code>unreal.zip</code> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> to <code>/YOUR_UNREAL_PROJECT/Plugins/</code>. <br  />
+<p>An example can be found <a href="../unreal/InkCPP_DEMO.zip">here</a>, do not forgett to install the plugin via the <a href="https://www.unrealengine.com/marketplace/product/inkcpp">marketplace</a> or unzipping the <code>unreal_X_x.zip</code> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> to <code>/AN_TEMP_DIRECTORY/</code> and build it with: </p><div class="fragment"><div class="line">/UNREAL_ENGINE/Build/BatchFiles/RunUAT.bat BuildPlugin</div>
+<div class="line">-plugin=/AN_TEMP_DIRECTORY/inkcpp/inkcpp.uplugin -package=/YOUR_UNREAL_PROJECT/Plugins/inkcpp</div>
+<div class="line">-TargetPlatforms=Win64`</div>
+</div><!-- fragment --><p> <br  />
  And eitherway activating the plugin.</p>
 <p>The C++ API will be available soon(<a href="https://github.com/JBenda/inkcpp/issues/60">Issue</a>).</p>
 <ul>
@@ -216,7 +219,7 @@ The Example project</h1>
 <p><a href="../unreal/InkCPP_DEMO.zip">Download</a></p>
 <h2><a class="anchor" id="ue_example_setup"></a>
 Setup</h2>
-<p>To setup the <a href="../unreal/InkCPP_DEMO.zip">example project</a> install the Plugin via the <a href="https://www.unrealengine.com/product/inkcpp">UE marketplace</a> place unpack the <code>unreal.zip</code> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> inside <code>/PATH/InkCPP_DEMO/Plugins/</code>.</p>
+<p>To setup the <a href="../unreal/InkCPP_DEMO.zip">example project</a> install the Plugin via the <a href="https://www.unrealengine.com/product/inkcpp">UE marketplace</a> place unpack the <code>unreal_X_x.zip</code> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> inside <code>/PATH/InkCPP_DEMO/Plugins/</code>.</p>
 <p>Next open the project via the <code>InkCPP_DEMO/InkCPP_DEMO.uproject</code> flie.</p>
 <p>Than you can hit play to run the demo.</p>
 <p>The example contains two maps:</p><ul>
