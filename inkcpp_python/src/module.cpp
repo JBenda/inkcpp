@@ -232,8 +232,7 @@ If you want convert it to a string use: `str(value)`.)"
 			    throw py::value_error(str);
 		    }
 	    },
-	    py::arg("input_file_name").none(false),
-	    py::arg("output_file_name").none(false),
+	    py::arg("input_file_name").none(false), py::arg("output_file_name").none(false),
 	    "Converts a story.json file to a story.bin file used by inkcpp"
 	);
 	py::class_<choice>(m, "Choice")
