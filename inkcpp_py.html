@@ -790,7 +790,7 @@ Overloaded function.</p>
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">compile_json</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">arg0</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">arg1</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+        <span class="name">compile_json</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">input_file_name</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">output_file_name</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
         
     </div>
@@ -968,13 +968,15 @@ Overloaded function.</p>
     
             <div class="docstring"><p>Creates a snapshot from the current state for later usage.</p>
 
-<pre><code>            This snapshot will also contain the global state.
-            To reload:
+<p>This snapshot will also contain the global state.
+To reload:</p>
 
-      &gt;&gt;&gt; snapshot = old_runner.create_snapshot()
-            &gt;&gt;&gt; story = <a href="#Story.from_file">Story.from_file</a>("story.bin")
-            &gt;&gt;&gt; runner = story.new_runner_from_snapshot(snapshot)
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">snapshot</span> <span class="o">=</span> <span class="n">old_runner</span><span class="o">.</span><span class="n">create_snapshot</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">story</span> <span class="o">=</span> <span class="n"><a href="#Story.from_file">Story.from_file</a></span><span class="p">(</span><span class="s2">&quot;story.bin&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">runner</span> <span class="o">=</span> <span class="n">story</span><span class="o">.</span><span class="n">new_runner_from_snapshot</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
 </code></pre>
+</div>
 </div>
 
 
@@ -1111,7 +1113,7 @@ Overloaded function.</p>
     
             <div class="docstring"><p>Get current choice at index.</p>
 
-<p>iter(inkcpp_py.Runtime) returns a iterator over all current choices.</p>
+<p>iter(<a href="#Runner">inkcpp_py.Runner</a>) returns a iterator over all current choices.</p>
 </div>
 
 
