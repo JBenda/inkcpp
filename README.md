@@ -7,6 +7,12 @@ Ink Proofing Test Results: https://jbenda.github.io/inkcpp/proof
 
 Doxygen Documentation: https://jbenda.github.io/inkcpp/html
 
+CLib Documentation: https://jbenda.github.io/inkcpp/html/group__clib.html
+
+UE Documentation: https://jbenda.github.io/inkcpp/html/group__unreal.html
+
+Python Documentation: https://jbenda.github.io/inkcpp/html/inkcpp_py.html
+
 ## Project Goals
 * Fast, simple, clean syntax
 * No heap allocations during execution (unless in emergencies)
@@ -16,6 +22,12 @@ Doxygen Documentation: https://jbenda.github.io/inkcpp/html
 
 
 ## Current Status
+
+supported languages ([latest release](https://github.com/JBenda/inkcpp/releases/latest)):
+	+ C++ [doc](https://jbenda.github.io/inkcpp/html/index.html)[example](https://jbenda.github.io/inkcpp/html/index.html)
+	+ C [doc](https://jbenda.github.io/inkcpp/html/group__clib.html)[example](https://jbenda.github.io/inkcpp/html/group__clib.html#example_c)
+	+ UE Blueprints [doc](https://jbenda.github.io/inkcpp/html/group__unreal.html)[distribution](https://www.unrealengine.com/marketplace/product/inkcpp)[example](https://jbenda.github.io/inkcpp/html/group__unreal.html#ue_example)
+	+ Python [doc](https://jbenda.github.io/inkcpp/html/inkcpp_py.html)[distribution](https://pypi.org/project/inkcpp-py/)[example](https://jbenda.github.io/inkcpp/html/index.html#py)
 
 Run `inkcpp_cl.exe -p myfile.json` to execute a compiled Ink JSON file in play mode. It can also operate on `.ink` files but `inklecate.exe` must be in the same folder or in the PATH.
 `inklecate` can be downloaded from the [official release page](https://github.com/inkle/ink/releases) and will be downloaded from CMake at  configure time (located at `build/unreal/inkcpp/Resources/inklecate`).
@@ -39,9 +51,18 @@ Place the content of this file at your plugin folder of your UE project and at t
 
 A example project can be found [here](https://jbenda.github.io/inkcpp/unreal/InkCPP_DEMO.zip). And here the [Documentation](https://jbenda.github.io/inkcpp/html/group__unreal.html). 
 
-Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run `cmake --install . --component unreal --prefix Path/To/Unreal/Plugins/` which will add an `inkcpp` folder there with the `.uplugin`, the code for the UClasses, and all the inkcpp source files required. `config.h` will automatically detect it is being built in an Unreal plugin environment and disable STL and enable Unreal extensions (FString support, Unreal asserts, CityHash, etc.).
-
-If you compile the UE Plugin by your self feel free to visit the [wiki page](https://github.com/JBenda/inkcpp/wiki/Unreal) for a more debug oriented build process.
+Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run
+```sh
+mkdir build
+cd build
+mkdir plugin
+mkdir plugin-build
+cmake -DINKCPP_UNREAL_TARGET_VERSION="5.5" .
+cmake --install . --component unreal --prefix .\plugin  # create source files for plugin
+\PATH\TO\UNREAL_ENGINE\Build\BatchFiles\RunUAT.bat BuildPlugin -plugin=GIT_REPO\build\plugin\inkcpp\inkcpp.uplugin -package=GIT_REPO\build\plugin-build\inkcpp -TargetPlatforms=Win64 # compile plugin
+move plugin-build\inkcpp UE_ENGINE\Engine\Plugins\inkcpp
+```
+Adapt `TargetPlatforms` as nessesarry. You might also want to install the Plugin directly into a project or the in UE5.5 introduced external plugin directory. Just adapt the pathets accordendly.
 
 ## Use standalone
 
@@ -165,7 +186,7 @@ python -m pip install dist/*.whl --user
 # if inklecate is not in the same directory / inside Path set INKLECATE enviroment variable
 export INKLECATE=<PATH-TO-inklecate> # unix
 set INKLECTATE=<PATH-TO-inklecate>   # windows
-python -m pytest
+python -m pytest inkcpp_python/tests
 ```
 
 Right now this only executes the internal unit tests which test the functions of particular classes. Soon it'll run more complex tests on .ink files using ink-proof.
@@ -174,7 +195,7 @@ Right now this only executes the internal unit tests which test the functions of
 ## Python Bindings
 
 The easy way to start is installing it with pip: `pip install inkcpp_py`.
-An example can be found at [example.py](./inkcpp_py/example.py).
+An example can be found at [example.py](./inkcpp_python/example.py).
 To build it from source use:
 
 ```sh
@@ -182,7 +203,7 @@ git clone --recurse-submodules https://github.com/JBenda/inkcpp.git
 pip install .
 ```
 
-The python bindnigs are defined in `inkcpp_py` subfolder.
+The python bindnigs are defined in `inkcpp_python` subfolder.
 
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.

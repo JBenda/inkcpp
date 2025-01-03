@@ -1,4 +1,9 @@
 # download inklecate for unreal plugin
+set(INKCPP_UNREAL_TARGET_VERSION "5.5" CACHE STRING "Unreal engine version the plugin should target (e.g: 5.5)")
+configure_file(
+	"${CMAKE_CURRENT_SOURCE_DIR}/inkcpp/inkcpp.uplugin.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/inkcpp/inkcpp.uplugin"
+)
 install(CODE "
 include(FetchContent)
 FetchContent_Populate(inklecate_mac

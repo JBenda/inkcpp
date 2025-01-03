@@ -157,7 +157,7 @@ public:
  * + INKCPP_TEST: (ON|OFF) weather or not execute tests
  *                requires `inklecate` to be in the PATH or `INKCPP_INKLECATE=OS` or `=ALL`
  * + INKCPP_INKLECATE: (NONE|OS|ALL) download the current supported inklecate version from the
- * official [release page](https://github.com/inkle/ink/releases/latest)</br> They are stored at
+ * official [release page](https://github.com/inkle/ink/releases/latest)<br/> They are stored at
  * `<build-dir>/inklecate/<os>/` and will be automatcilly used for the tests
  *   + NONE: disable this function
  *   + OS: only the version supported for the OS
@@ -212,8 +212,9 @@ public:
  * `pip install .`
  *
  * Here can you find an
- * [example](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_py/example.py) inclusive
- * [story](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_py/unreal_example.ink).
+ * [example](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_python/example.py)
+ * inclusive
+ * [story](https://raw.githubusercontent.com/JBenda/inkcpp/master/inkcpp_python/unreal_example.ink).
  *
  * [Python module documentation](./inkcpp_py.html)
  */

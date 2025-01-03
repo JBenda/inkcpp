@@ -35,13 +35,15 @@ void UInkAsset::PostInitProperties()
 	Super::PostInitProperties();
 }
 
-void UInkAsset::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const
+void UInkAsset::GetAssetRegistryTags(FAssetRegistryTagsContext Context) const
 {
 	if (AssetImportData)
 	{
-		OutTags.Add(FAssetRegistryTag(SourceFileTagName(), AssetImportData->GetSourceData().ToJson(), FAssetRegistryTag::TT_Hidden));
+		Context.AddTag(FAssetRegistryTag(
+		    SourceFileTagName(), AssetImportData->GetSourceData().ToJson(), FAssetRegistryTag::TT_Hidden
+		));
 	}
 
-	Super::GetAssetRegistryTags(OutTags);
+	Super::GetAssetRegistryTags(Context);
 }
 #endif

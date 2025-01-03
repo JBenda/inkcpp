@@ -25,7 +25,7 @@ set(CMAKE_TLS_VERIFY true)
 enable_testing()
 
 # Project setup
-project(inkcpp VERSION 0.1.6)
+project(inkcpp VERSION 0.1.7)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
@@ -57,7 +57,7 @@ endif()
 
 if (INKCPP_PY)
 	add_compile_options(-fPIC)
-	add_subdirectory(inkcpp_py)
+	add_subdirectory(inkcpp_python)
 endif(INKCPP_PY)
 add_subdirectory(shared)
 add_subdirectory(inkcpp)
@@ -154,10 +154,11 @@ if (DOXYGEN_FOUND)
         COMPONENTS Interpreter
 		)
 		add_custom_target(inkcpp_py_doc
-			python -m pydoc -w inkcpp_py
-			COMMAND mv "./inkcpp_py.html" ${PY_HTML}
+			python -m pybind11_stubgen -o . inkcpp_py
+			COMMAND python -m pdoc -d google -o . inkcpp_py.pyi
+			COMMAND ${CMAKE_COMMAND} -E copy "./inkcpp_py.html" ${PY_HTML}
 			DEPENDS inkcpp_py
-			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/inkcpp_py"
+			WORKING_DIRECTORY $<TARGET_FILE_DIR:inkcpp_py>
 			COMMENT "Generates simple python documentation") 
 		add_dependencies(doc inkcpp_py_doc)
 	else()
