@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21)
 
 if(${CMAKE_VERSION} VERSION_GREATER "3.24.0")
 	cmake_policy(SET CMP0135 NEW)
@@ -20,7 +20,23 @@ URL_HASH SHA256=26f4e188e02536d6e99e73e71d9b13e2c2144187f1368a87e82fd5066176cff8
 SOURCE_DIR "inklecate/linux"
 )
 set(FETCHCONTENT_QUIET OFF)
+mark_as_advanced(FETCHCONTENT_QUIET)
 set(CMAKE_TLS_VERIFY true)
+mark_as_advanced(CMAKE_TLS_VERIFY)
+mark_as_advanced(FETCHCONTENT_BASE_DIR)
+mark_as_advanced(FETCHCONTENT_FULLY_DISCONNECTED)
+mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED)
+mark_as_advanced(PYBIND11_DISABLE_HANDLE_TYPE_NAME_DEFAULT_IMPLEMENTATION)
+mark_as_advanced(PYBIND11_FINDPYTHON)
+mark_as_advanced(PYBIND11_INSTALL)
+mark_as_advanced(PYBIND11_INTERNALS_VERSION)
+mark_as_advanced(PYBIND11_NOPYTHON)
+mark_as_advanced(PYBIND11_NUMPY_1_ONLY)
+mark_as_advanced(PYBIND11_PYTHONLIBS_OVERWRITE)
+mark_as_advanced(PYBIND11_PYTHON_VERSION)
+mark_as_advanced(PYBIND11_SIMPLE_GIL_MANAGEMENT)
+mark_as_advanced(PYBIND11_TEST)
+mark_as_advanced(PYBIND11_USE_CROSSCOMPILING)
 # Testing enabled
 enable_testing()
 
@@ -32,13 +48,13 @@ SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
 
 # Add subdirectories
-set(INKCPP_PY OFF CACHE BOOL "Build python bindings")
-set(WHEEL_BUILD OFF CACHE BOOL "Set for build wheel python lib (do not forgett INKCPP_PY")
-set(INKCPP_C OFF CACHE BOOL "Build c library")
-set(INKCPP_TEST OFF CACHE BOOL "Build inkcpp tests (requires: inklecate in path / env: INKLECATE set / INKCPP_INKLECATE=OS or ALL)")
+include(CMakeDependentOption)
+option(INKCPP_PY "Build python bindings" OFF)
+cmake_dependent_option(WHEEL_BUILD "Set for build wheel python lib. (see setup.py for ussage)" OFF "INKCPP_PY" OFF)
+option(INKCPP_C "Build c library" OFF)
+option(INKCPP_TEST "Build inkcpp tests (requires: inklecate in path / env: INKLECATE set / INKCPP_INKLECATE=OS or ALL)" OFF)
 set(INKCPP_INKLECATE "NONE" CACHE STRING "If inklecate should be downloaded automatically from the official release page. NONE -> No, OS -> Yes, but only for the current OS, ALL -> Yes, for all availible OSs")
 set_property(CACHE INKCPP_INKLECATE PROPERTY STRINGS "NONE" "OS" "ALL")
-set(INKCPP_DOC_BlueprintUE ON CACHE BOOL "Building doxygen documentation with BlueprintUE visualisation for unreal blueprints.")
 
 string(TOUPPER "${INKCPP_INKLECATE}" inkcpp_inklecate_upper)
 if (inkcpp_inklecate_upper STREQUAL "ALL")
@@ -116,13 +132,25 @@ include(CPack)
 if(NOT WHEEL_BUILD)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
+	option(INKCPP_DOC_BlueprintUE "Building doxygen documentation with BlueprintUE visualisation for unreal blueprints. (Requires node js)" ON)
+	if (INKCPP_DOC_BlueprintUE)
+		set(NODEJS_PATH "None" CACHE PATH "Directory of NodeJS executable to use for generating BlueprintUE visualisation.")
+		if (IS_DIRECTORY "${NODEJS_PATH}")
+			find_program(NODEJS node PATHS ${NODEJS_PATH} DOC "NodeJS executable to build BlueprintUE visualisation in documentation.")
+		else()
+			find_program(NODEJS node DOC "NodeJS executable to build BlueprintUE visualisation in documentation.")
+		endif (IS_DIRECTORY "${NODEJS_PATH}")
+		if ("${NODEJS}" STREQUAL "NODEJS-NOTFOUND")
+			message(SEND_ERROR "NodeJS is required to build BlueprintUE visualisation. But it was not found. Install NodeJS set NODEJS_PATH to a directory containing the executable. Or disable building the visualisation with setting INKCPP_DOC_BlueprintUE=OFF")
+		endif("${NODEJS}" STREQUAL "NODEJS-NOTFOUND")
+	endif(INKCPP_DOC_BlueprintUE)
 
 	set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
 	# enable if update to cmake version 3.28
 	# doxygen_add_docs(doc WORKING_DIR ${PROJECT_SOURCE_DIR} CONFIG_FILE "${PROJECT_SOURCE_DIR}/Doxyfile" COMMENT "Generate docs")
 	set(INPUT_FILTER "")
 
-	if (INKCPP_DOC_BlueprintUE)
+	if (INKCPP_DOC_BlueprintUE AND NOT "${NODEJS}" STREQUAL "NODEJS-NOTFOUND")
 		# TODO: make as dependecy
 		file(COPY "${PROJECT_SOURCE_DIR}/unreal/blueprint_filter.js" DESTINATION ${PROJECT_BINARY_DIR})
 		# file(DOWNLOAD 
@@ -141,11 +169,19 @@ if (DOXYGEN_FOUND)
 			"${PROJECT_BINARY_DIR}/Doxyfile"
 			COPYONLY)
 	endif()
-
+# "Build Doxygen documentation in ${PROJECT_SOURCE_DIR}/Documentation." "To view them you can for example use" "'python -m http.server -d \"${PROJECT_SOURCE_DIR}/Documentation\" 8080'" "'explorer http://localhost:8080/html'"
 	add_custom_target(doc
 		${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/Doxyfile"
 		WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-		COMMENT "Generate doxygen documentation")
+		COMMAND ${CMAKE_COMMAND} -E echo
+		COMMENT "Generate DoxygenDocumentation")
+	add_custom_command(TARGET doc POST_BUILD
+	                   COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
+										"Build Doxygen documentation in ${PROJECT_SOURCE_DIR}/Documentation."
+										"To view them you can for example use"
+										"\"    python -m http.server -d \\\"${PROJECT_SOURCE_DIR}/Documentation\\\" 8080\""
+										"    explorer http://localhost:8080/html")
+
 	set(PY_HTML "${PROJECT_SOURCE_DIR}/Documentation/inkcpp_py.html")
 	if (INKCPP_PY)
 		find_package(

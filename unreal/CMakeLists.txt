@@ -1,5 +1,6 @@
 # download inklecate for unreal plugin
 set(INKCPP_UNREAL_TARGET_VERSION "5.5" CACHE STRING "Unreal engine version the plugin should target (e.g: 5.5)")
+set(INKCPP_UNREAL_RunUAT_PATH CACHE FILEPATH "Path to Unreal engine installation RunUAT file. Used to automatcally build the plugin.")
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/inkcpp/inkcpp.uplugin.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/inkcpp/inkcpp.uplugin"
