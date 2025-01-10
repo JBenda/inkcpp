@@ -31,7 +31,13 @@ target_compile_features(inkcpp_compiler PUBLIC cxx_std_17)
 
 # Unreal installation
 list(REMOVE_ITEM SOURCES "json.hpp")
-install(FILES "json.hpp" DESTINATION "inkcpp/Source/ThirdParty/Private/"
-	COMPONENT unreal EXCLUDE_FROM_ALL)
-install(DIRECTORY "include/" DESTINATION "inkcpp/Source/inkcpp_editor/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
-install(FILES ${SOURCES} DESTINATION "inkcpp/Source/inkcpp_editor/Private/ink/" COMPONENT unreal EXCLUDE_FROM_ALL)
+configure_file("json.hpp" "${CMAKE_CURRENT_BINARY_DIR}/../unreal/inkcpp/Source/ThirdParty/Private/json.hpp" COPYONLY)
+file(GLOB_RECURSE INCLUDE_FILES LIST_DIRECTORIES TRUE RELATIVE "include/" "include/*")
+foreach(INCLUDE_FILE IN LISTS INCLUDE_FILES)
+	if(NOT IS_DIRECTORY "include/${INCLUDE_FILE}")
+		configure_file("include/${INCLUDE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/../unreal/inkcpp/Source/inkcpp_editor/Private/ink/" COPYONLY)
+	endif()
+endforeach()
+foreach(FILE IN LISTS SOURCES)
+	configure_file("${FILE}" "${CMAKE_CURRENT_BINARY_DIR}/../unreal/inkcpp/Source/inkcpp_editor/Private/ink" COPYONLY)
+endforeach()
