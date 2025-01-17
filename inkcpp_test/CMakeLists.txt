@@ -52,7 +52,7 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "
       set(INKLECATE_CMD "${inklecate_linux_SOURCE_DIR}/inklecate")
     else()
     message(FATAL_ERROR "inklecate download is not provided, please check if the download failed.
-      You may set INCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
+      You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
       You can also disable tests altogether by setting INKCPP_TEST=OFF")
     endif(inklecate_linux_POPULATED)
   elseif(APPLE)
@@ -60,7 +60,7 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "
       set(INKLECATE_CMD "${inklecate_mac_SOURCE_DIR}/inklecate")
     else()
     message(FATAL_ERROR "inklecate download is not provided, please check if the download failed.
-      You may set INCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
+      You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
       You can also disable tests altogether by setting INKCPP_TEST=OFF")
     endif(inklecate_mac_POPULATED)
   elseif(MSYS OR MINGW OR WIN32 OR CYGWIN)
@@ -68,7 +68,7 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "
       set(INKLECATE_CMD "${inklecate_windows_SOURCE_DIR}/inklecate")
     else()
     message(FATAL_ERROR "inklecate download is not provided, please check if the download failed.
-      You may set INCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
+      You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or the INKLECATE enviroment variable.
       You can also disable tests altogether by setting INKCPP_TEST=OFF")
     endif(inklecate_windows_POPULATED)
   else()

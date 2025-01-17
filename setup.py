@@ -11,7 +11,7 @@ from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
 
-# echo "[\n$(find shared/** inkcpp/** inkcpp_compiler/** inkcpp_py/** -not -path '*/.*' | tr '\n' ' ' | sed -e 's/[^ ]\+/"\0"/g' -e 's/[[:blank:]]*$//' -e 's/ /,\n/g')\n]"
+# echo "[\n$(find shared/** inkcpp/** inkcpp_compiler/** inkcpp_python/** -not -path '*/.*' | tr '\n' ' ' | sed -e 's/[^ ]\+/"\0"/g' -e 's/[[:blank:]]*$//' -e 's/ /,\n/g')\n]"
 # + "CMakeLists.txt"
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
@@ -37,7 +37,7 @@ def src_files(dir):
 
 def glob_src_files():
     files = []
-    dirs = ['./inkcpp', './inkcpp_compiler', './inkcpp_py', './shared']
+    dirs = ['./inkcpp', './inkcpp_compiler', './inkcpp_python', './shared']
     for dir in dirs:
         files += src_files(dir)
     return files
@@ -46,7 +46,7 @@ def glob_src_files():
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "") -> None:
         src_files = glob_src_files()
-        # src_files = json.load(open('inkcpp_py/sources.json'))
+        # src_files = json.load(open('inkcpp_python/sources.json'))
         src_files += ["CMakeLists.txt", "Config.cmake.in"]
         super().__init__(name, sources=src_files)
         self.sourcedir = os.fspath(Path(sourcedir).resolve())
@@ -153,7 +153,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name="inkcpp-py",
-    version="0.1.6",
+    version="0.1.7",
     author="Julian Benda",
     author_email="julian.benda@ovgu.de",
     description="Python bindings for InkCPP a Inkle runtime written in C++",

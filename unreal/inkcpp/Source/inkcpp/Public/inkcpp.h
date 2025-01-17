@@ -10,10 +10,15 @@
 /**
  * @defgroup unreal Unreal Blueprints
  * Blueprint Classes usable in Unreal. An example can be found
- * [here](unreal/InkCPP_DEMO.zip), do not forgett to install the plugin via the
+ * [here](../unreal/InkCPP_DEMO.zip), do not forgett to install the plugin via the
  * [marketplace](https://www.unrealengine.com/marketplace/product/inkcpp) or unzipping the
- * `unreal.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest) to
- * `/YOUR_UNREAL_PROJECT/Plugins/`. <br/> And eitherway activating the plugin.
+ * `unreal_X_x.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest) to
+ * `/AN_TEMP_DIRECTORY/` and build it with:
+ * ```sh
+ * /UNREAL_ENGINE/Build/BatchFiles/RunUAT.bat BuildPlugin
+ * -plugin=/AN_TEMP_DIRECTORY/inkcpp/inkcpp.uplugin -package=/YOUR_UNREAL_PROJECT/Plugins/inkcpp
+ * -TargetPlatforms=Win64`
+ * ``` <br/> And eitherway activating the plugin.
  *
  * The C++ API will be available soon([Issue](https://github.com/JBenda/inkcpp/issues/60)).
  *
@@ -104,7 +109,8 @@
  *
  * To setup the [example project](../unreal/InkCPP_DEMO.zip) install the Plugin via the [UE
  * marketplace](https://www.unrealengine.com/product/inkcpp) place unpack
- * the `unreal.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest) inside
+ * the `unreal_X_x.zip` from the [release page](https://github.com/JBenda/inkcpp/releases/latest)
+ * inside
  * `/PATH/InkCPP_DEMO/Plugins/`.
  *
  * Next open the project via the `InkCPP_DEMO/InkCPP_DEMO.uproject` flie.
