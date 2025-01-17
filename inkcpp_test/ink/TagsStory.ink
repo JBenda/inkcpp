@@ -1,10 +1,22 @@
 # global_tag
+-> global_tags_only
+===global_tags_only
+First line has no tags
+Second line has one tag # tagged
+# tag next line
+# more tags
+Third line has two tags
+# above
+Fourth line has three tags # side # across
 ->start
 ===start
 # knot_tag_start
-# second_knot_tag_start
+# second_knot_tag_start #third_knot_tag
 
 Hello # output_tag_h
+Second line has no tags
+# my_tag
+Third line has a tag above it
 * a
 * [b # choice_tag_b # choice_tag_b_2]->knot2
 - World! # output_tag_w

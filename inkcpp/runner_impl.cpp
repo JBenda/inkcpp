@@ -68,7 +68,7 @@ const value* runner_impl::get_var(hash_t variableName) const
 
 template<>
 void runner_impl::set_var<runner_impl::Scope::GLOBAL>(
-    hash_t variableName, const value& val, bool is_redef
+	hash_t variableName, const value& val, bool is_redef
 )
 {
 	if (is_redef) {
@@ -94,7 +94,7 @@ const value* runner_impl::dereference(const value& val)
 
 template<>
 void runner_impl::set_var<runner_impl::Scope::LOCAL>(
-    hash_t variableName, const value& val, bool is_redef
+	hash_t variableName, const value& val, bool is_redef
 )
 {
 	if (val.type() == value_type::value_pointer) {
@@ -121,7 +121,7 @@ void runner_impl::set_var<runner_impl::Scope::LOCAL>(
 				auto [name, ci] = src->get<value_type::value_pointer>();
 				inkAssert(ci == 0, "Only global pointer are allowed on _stack!");
 				set_var<Scope::GLOBAL>(
-				    name, get_var<Scope::GLOBAL>(name)->redefine(val, _globals->lists()), true
+					name, get_var<Scope::GLOBAL>(name)->redefine(val, _globals->lists()), true
 				);
 			} else {
 				_stack.set(variableName, src->redefine(val, _globals->lists()));
@@ -134,7 +134,7 @@ void runner_impl::set_var<runner_impl::Scope::LOCAL>(
 
 template<>
 void runner_impl::set_var<runner_impl::Scope::NONE>(
-    hash_t variableName, const value& val, bool is_redef
+	hash_t variableName, const value& val, bool is_redef
 )
 {
 	inkAssert(is_redef, "define set scopeless variables!");
@@ -154,7 +154,7 @@ inline T runner_impl::read()
 
 	// Read memory
 	T val = *( const T* ) _ptr;
-	if (_story->get_header().endien == header::endian_types::differ) {
+	if ((_story->get_header().endien & header::endian_types::differ) != 0) {
 		val = header::swap_bytes(val);
 	}
 
@@ -175,8 +175,8 @@ inline const char* runner_impl::read()
 choice& runner_impl::add_choice()
 {
 	inkAssert(
-	    config::maxChoices < 0 || _choices.size() < static_cast<size_t>(config::maxChoices),
-	    "Ran out of choice storage!"
+		config::maxChoices < 0 || _choices.size() < static_cast<size_t>(config::maxChoices),
+		"Ran out of choice storage!"
 	);
 	return _choices.push();
 }
@@ -283,8 +283,8 @@ void runner_impl::jump(ip_t dest, bool record_visits)
 		const ContainerData* iData = nullptr;
 		size_t               level = _container.size();
 		while (_container.iter(iData)
-		       && (level > comm_end
-		           || _story->container_flag(iData->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)
+			   && (level > comm_end
+				   || _story->container_flag(iData->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)
 		) {
 			auto parrent_offset = iData->offset;
 			inkAssert(child_position >= parrent_offset, "Container stack order is broken");
@@ -330,8 +330,8 @@ frame_type runner_impl::execute_return()
 		// TODO: write all refs to new frame
 		offset_t   o = _ref_stack.pop_frame(&t, eval);
 		inkAssert(
-		    o == offset && t == type && eval == _evaluation_mode,
-		    "_ref_stack and _stack should be in frame sync!"
+			o == offset && t == type && eval == _evaluation_mode,
+			"_ref_stack and _stack should be in frame sync!"
 		);
 	}
 
@@ -351,8 +351,8 @@ frame_type runner_impl::execute_return()
 
 	// Jump to the old offset
 	inkAssert(
-	    _story->instructions() + offset < _story->end(),
-	    "Callstack return is outside bounds of story!"
+		_story->instructions() + offset < _story->end(),
+		"Callstack return is outside bounds of story!"
 	);
 	jump(_story->instructions() + offset, false);
 
@@ -361,17 +361,17 @@ frame_type runner_impl::execute_return()
 }
 
 runner_impl::runner_impl(const story_impl* data, globals global)
-    : _story(data)
-    , _globals(global.cast<globals_impl>())
-    , _operations(
-          global.cast<globals_impl>()->strings(), global.cast<globals_impl>()->lists(), _rng,
-          *global.cast<globals_impl>(), *data, static_cast<const runner_interface&>(*this)
-      )
-    , _backup(nullptr)
-    , _done(nullptr)
-    , _choices()
-    , _container(ContainerData{})
-    , _rng(time(NULL))
+	: _story(data)
+	, _globals(global.cast<globals_impl>())
+	, _operations(
+		  global.cast<globals_impl>()->strings(), global.cast<globals_impl>()->lists(), _rng,
+		  *global.cast<globals_impl>(), *data, static_cast<const runner_interface&>(*this)
+	  )
+	, _backup(nullptr)
+	, _done(nullptr)
+	, _choices()
+	, _container(ContainerData{})
+	, _rng(time(NULL))
 {
 	_ptr               = _story->instructions();
 	_evaluation_mode   = false;
@@ -755,10 +755,10 @@ void runner_impl::step()
 
 		// If we're falling and we hit a non-fallthrough command, stop the fall.
 		if (_is_falling
-		    && ! (
-		        (cmd == Command::DIVERT && flag & CommandFlag::DIVERT_IS_FALLTHROUGH)
-		        || cmd == Command::END_CONTAINER_MARKER
-		    )) {
+			&& ! (
+				(cmd == Command::DIVERT && flag & CommandFlag::DIVERT_IS_FALLTHROUGH)
+				|| cmd == Command::END_CONTAINER_MARKER
+			)) {
 			_is_falling = false;
 			set_done_ptr(nullptr);
 		}
@@ -868,7 +868,7 @@ void runner_impl::step()
 						// Wait! We may be returning from a function!
 						frame_type type;
 						if (_stack.has_frame(&type)
-						    && type == frame_type::function) // implicit return is only for functions
+							&& type == frame_type::function) // implicit return is only for functions
 						{
 							// push null and return
 							_eval.push(values::null);
@@ -884,7 +884,7 @@ void runner_impl::step()
 
 					// Do the jump
 					inkAssert(
-					    _story->instructions() + target < _story->end(), "Diverting past end of story data!"
+						_story->instructions() + target < _story->end(), "Diverting past end of story data!"
 					);
 					jump(_story->instructions() + target, true);
 				} break;
@@ -942,8 +942,8 @@ void runner_impl::step()
 						if (_eval.top_value().type() == value_type::ex_fn_not_found) {
 							_eval.pop();
 							inkAssert(
-							    target != 0,
-							    "Exetrnal function was not binded, and no fallback function provided!"
+								target != 0,
+								"Exetrnal function was not binded, and no fallback function provided!"
 							);
 							start_frame<frame_type::function>(target);
 						}
@@ -959,10 +959,10 @@ void runner_impl::step()
 					// TODO We push ahead of a single divert. Is that correct in all cases....?????
 					auto returnTo = _ptr + CommandSize<uint32_t>;
 					_stack.push_frame<frame_type::thread>(
-					    returnTo - _story->instructions(), _evaluation_mode
+						returnTo - _story->instructions(), _evaluation_mode
 					);
 					_ref_stack.push_frame<frame_type::thread>(
-					    returnTo - _story->instructions(), _evaluation_mode
+						returnTo - _story->instructions(), _evaluation_mode
 					);
 
 					// Fork a new thread on the callstack
@@ -1059,7 +1059,7 @@ void runner_impl::step()
 					// Load value from output stream
 					// Push onto stack
 					_eval.push(value{}.set<value_type::string>(
-					    _output.get_alloc<false>(_globals->strings(), _globals->lists())
+						_output.get_alloc<false>(_globals->strings(), _globals->lists())
 					));
 				} break;
 
@@ -1122,7 +1122,7 @@ void runner_impl::step()
 					const snap_tag* tags = nullptr;
 					if (_choice_tags_begin >= 0 && _tags[_tags.size() - 1] != nullptr) {
 						for (tags = _tags.end() - 1;
-						     *(tags - 1) != nullptr && (tags - _tags.begin()) > _choice_tags_begin; --tags)
+							 *(tags - 1) != nullptr && (tags - _tags.begin()) > _choice_tags_begin; --tags)
 							;
 						_tags.push() = nullptr;
 					}
@@ -1131,13 +1131,13 @@ void runner_impl::step()
 					if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
 						_fallback_choice.emplace();
 						_fallback_choice.value().setup(
-						    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
-						    current_thread(), tags->ptr()
+							_output, _globals->strings(), _globals->lists(), _choices.size(), path,
+							current_thread(), tags->ptr()
 						);
 					} else {
 						add_choice().setup(
-						    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
-						    current_thread(), tags->ptr()
+							_output, _globals->strings(), _globals->lists(), _choices.size(), path,
+							current_thread(), tags->ptr()
 						);
 					}
 					// save stack at last choice
@@ -1154,7 +1154,7 @@ void runner_impl::step()
 
 					// Increment visit count
 					if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS
-					    || flag & CommandFlag::CONTAINER_MARKER_TRACK_TURNS) {
+						|| flag & CommandFlag::CONTAINER_MARKER_TRACK_TURNS) {
 						_globals->visit(_container.top().id, true);
 					}
 
@@ -1177,8 +1177,8 @@ void runner_impl::step()
 							on_done(false);
 							break;
 						} else if (_stack.has_frame(&type) && type == frame_type::function) // implicit return
-						                                                                    // is only for
-						                                                                    // functions
+																							// is only for
+																							// functions
 						{
 							// push null and return
 							_eval.push(values::null);
@@ -1187,8 +1187,8 @@ void runner_impl::step()
 							_ptr += sizeof(Command) + sizeof(CommandFlag);
 							execute_return();
 						} else if (_ptr == _story->end()) { // check needed, because it colud exist an unnamed
-							                                  // toplevel container (empty named container stack
-							                                  // != empty container stack)
+															  // toplevel container (empty named container stack
+															  // != empty container stack)
 							on_done(true);
 						}
 					}
@@ -1197,7 +1197,7 @@ void runner_impl::step()
 					// Push the visit count for the current container to the top
 					//  is 0-indexed for some reason. idk why but this is what ink expects
 					_eval.push(
-					    value{}.set<value_type::int32>(( int ) _globals->visits(_container.top().id) - 1)
+						value{}.set<value_type::int32>(( int ) _globals->visits(_container.top().id) - 1)
 					);
 				} break;
 				case Command::TURN: {
@@ -1259,8 +1259,8 @@ void runner_impl::on_done(bool setDone)
 		// Go to where the thread started
 		frame_type type = execute_return();
 		inkAssert(
-		    type == frame_type::thread,
-		    "Expected thread frame marker to hold return to value but none found..."
+			type == frame_type::thread,
+			"Expected thread frame marker to hold return to value but none found..."
 		);
 		// if thread ends, move stave point with, else the thread end marker is missing
 		// and we can't collect the other threads
