@@ -154,7 +154,7 @@ inline T runner_impl::read()
 
 	// Read memory
 	T val = *( const T* ) _ptr;
-	if ((_story->get_header().endien & header::endian_types::differ) != 0) {
+	if (_story->get_header().endien == header::endian_types::differ) {
 		val = header::swap_bytes(val);
 	}
 
@@ -175,7 +175,7 @@ inline const char* runner_impl::read()
 choice& runner_impl::add_choice()
 {
 	inkAssert(
-		config::maxChoices < 0 || _choices.size() < static_cast<size_t>(config::maxChoices),
+		config::maxChoices < 0 || _choices.size() < static_cast<size_t>(abs(config::maxChoices)),
 		"Ran out of choice storage!"
 	);
 	return _choices.push();
