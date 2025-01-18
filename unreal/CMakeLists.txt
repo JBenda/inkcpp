@@ -5,27 +5,28 @@ configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/inkcpp/inkcpp.uplugin.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/inkcpp/inkcpp.uplugin"
 )
+set(INKCPP_UNREAL_TARGET_PLATFORM "Win64")
 
-if (IS_READABLE  "${INKCPP_UNREAL_RunUAT_PATH}")
+if (IS_READABLE  "${INKCPP_UNREAL_RunUAT_PATH}" AND NOT IS_DIRECTORY "${INKCPP_UNREAL_RunUAT_PATH}")
 	include(FetchContent)
 	include(FetchContent)
 	FetchContent_Populate(inklecate_mac
 	URL https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
 	URL_HASH SHA256=c516402bca5fa249a7712e62591b048b137eba3098c53f9fb85a4253f9b9e2c0
-	SOURCE_DIR "inklecate/mac"
-	SUBBUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/../_deps/inklecate_mac-subbuild"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/inklecate/mac"
+	SUBBUILD_DIR "${CMAKE_BINARY_DIR}/_deps/inklecate_mac-subbuild"
 	)
 	FetchContent_Populate(inklecate_windows
 	URL https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_windows.zip
 	URL_HASH SHA256=6f317cb4c59bf1b31c6dd61e80c6a2287a1d8c241a703f0586f736ae00871aab
-	SOURCE_DIR "inklecate/windows"
-	SUBBUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/../_deps/inklecate_windows-subbuild"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/inklecate/windows"
+	SUBBUILD_DIR "${CMAKE_BINARY_DIR}/_deps/inklecate_windows-subbuild"
 	)
 	FetchContent_Populate(inklecate_linux
 	URL https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
 	URL_HASH SHA256=26f4e188e02536d6e99e73e71d9b13e2c2144187f1368a87e82fd5066176cff8
-	SOURCE_DIR "inklecate/linux"
-	SUBBUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/../_deps/inklecate_linux-subbuild"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/inklecate/linux"
+	SUBBUILD_DIR "${CMAKE_BINARY_DIR}/_deps/inklecate_linux-subbuild"
 	)
 	set(FETCHCONTENT_QUIET OFF)
 	set(CMAKE_TLS_VERIFY true)
@@ -34,18 +35,21 @@ if (IS_READABLE  "${INKCPP_UNREAL_RunUAT_PATH}")
 		"the unreal plugin will be unable use a .ink file as asset directly")
 	else()
 	set(INKLECATE_CMD_WIN "Source/ThirdParty/inklecate/windows/inklecate.exe")
+	file(COPY "${CMAKE_BINARY_DIR}/inklecate/windows" DESTINATION "inkcpp/Source/ThirdParty/inklecate/")
 	endif()
 	if(NOT inklecate_mac_SOURCE_DIR)
 		message(WARNING "failed to download inklecate for MacOS, "
 			"the unreal plugin will be unable use a .ink file as asset directly")
 	else()
 	set(INKLECATE_CMD_MAC "Source/ThirdParty/inklecate/mac/inklecate")
+	file(COPY "${CMAKE_BINARY_DIR}/inklecate/mac" DESTINATION "inkcpp/Source/ThirdParty/inklecate/")
 	endif()
 	if(NOT inklecate_linux_SOURCE_DIR)
 		message(WARNING "failed to download inklecate for linux, "
 			"the unreal plugin will be unable use a .ink file as asset directly")
 	else()
 	set(INKLECATE_CMD_LINUX "Source/ThirdParty/inklecate/linux/inklecate")
+	file(COPY "${CMAKE_BINARY_DIR}/inklecate/linux" DESTINATION "inkcpp/Source/ThirdParty/inklecate/")
 	endif()
 	configure_file(
 		"${CMAKE_CURRENT_SOURCE_DIR}/inkcpp/Source/inkcpp_editor/Private/inklecate_cmd.cpp.in"
@@ -53,19 +57,23 @@ if (IS_READABLE  "${INKCPP_UNREAL_RunUAT_PATH}")
 	)	
 	file(GLOB_RECURSE SOURCE_FILES LIST_DIRECTORIES TRUE RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/inkcpp/*")
 	list(FILTER SOURCE_FILES EXCLUDE REGEX ".*\.in$")
-	file(GLOB_RECURSE INKLECATE_FILES LIST_DIRECTORIES TRUE RELATIVE "${CMAKE_CURRENT_BINARY_DIR}/../inklecate/" "${CMAKE_CURRENT_BINARY_DIR}/../inklecate/*")
 	foreach(SRC_FILE IN LISTS SOURCE_FILES)
 		if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${SRC_FILE}")
-			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${SRC_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/${SRC_FILE}" COPYONLY)
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${SRC_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/${SRC_FILE}" COPYONLY)
 		endif()
 	endforeach()
-	foreach(SRC_FILE IN LISTS INKLECATE_FILES)
-		if (NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../inklecate/${SRC_FILE}")
-			configure_file("${CMAKE_CURRENT_BINARY_DIR}/../inklecate/${SRC_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/ThirdParty/${SRC_FILE}")
-		endif()
-	endforeach()
+	# file(GLOB_RECURSE INKLECATE_FILES LIST_DIRECTORIES TRUE RELATIVE "${CMAKE_CURRENT_BINARY_DIR}/../inklecate/" "${CMAKE_CURRENT_BINARY_DIR}/../inklecate/*")
+	# foreach(SRC_FILE IN LISTS INKLECATE_FILES)
+	# 	if (NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../inklecate/${SRC_FILE}")
+	# 		configure_file("${CMAKE_CURRENT_BINARY_DIR}/../inklecate/${SRC_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/ThirdParty/${SRC_FILE}")
+	# 	endif()
+	# endforeach()
 	install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}}/inkcpp/" DESTINATION "inkcpp" COMPONENT unreal EXCLUDE_FROM_ALL)
-	# runuat to bin/inkcpp_plugin
-	# install unreal_plugin bin/inkcpp_plugin -> inkcpp
+	file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Plugins/inkcpp/")
+	add_custom_target(unreal 
+		"${INKCPP_UNREAL_RunUAT_PATH}" BuildPlugin "-plugin=${CMAKE_CURRENT_BINARY_DIR}/inkcpp/inkcpp.uplugin" "-package=${CMAKE_CURRENT_BINARY_DIR}/Plugins/inkcpp" "-TargetPlatforms=${INKCPP_UNREAL_TARGET_PLATFORM}"
+		COMMENT "Compile UE Plugin.")
+	# TODO: install unreal_plugin bin/inkcpp_plugin -> inkcpp
+	# TODO: reduce code duplicates by move more to shared
 endif()
 
