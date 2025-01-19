@@ -149,11 +149,12 @@ The documentation can be build iff Doxygen is installed with `cmake --build . --
 
 To build, either run the generated buildfiles OR you can use `cmake --build . --config <Release|Debug>` from the build folder to automatically execute the relevant toolchain.
 
-To install the different components use `cmake --install . --component <lib|cl|unreal>`
+To install the different components use `cmake --install . --component <lib|cl|unreal|unreal_plugin>`
 + `lib` C++ library to link against
 + `clib` C library to link against
 + `cl` command line application
-+ `unreal` UE-plugin
++ `unreal` UE-plugin Source
++ `unreal_plugin` UE-plugin compiled, requires to call `cmake --build . --target unreal` before!
 
 For a more in depth installation description please checkout the [wiki](https://github.com/JBenda/inkcpp/wiki/building).
 
@@ -183,8 +184,8 @@ python -m pip install build pytest
 python -m build
 python -m pip install dist/*.whl --user
 # if inklecate is not in the same directory / inside Path set INKLECATE enviroment variable
-export INKLECATE=<PATH-TO-inklecate> # unix
-set INKLECTATE=<PATH-TO-inklecate>   # windows
+export INKLECATE=$PWD/build/inklecate/linux/inklecate # linux
+set INKLECTATE=%CD%/build/inklecate/windows/inklecate.exe   # windows
 python -m pytest inkcpp_python/tests
 ```
 
