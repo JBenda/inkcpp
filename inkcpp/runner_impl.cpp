@@ -364,9 +364,13 @@ runner_impl::runner_impl(const story_impl* data, globals global)
 	: _story(data)
 	, _globals(global.cast<globals_impl>())
 	, _operations(
-		  global.cast<globals_impl>()->strings(), global.cast<globals_impl>()->lists(), _rng,
-		  *global.cast<globals_impl>(), *data, static_cast<const runner_interface&>(*this)
-	  )
+		global.cast<globals_impl>()->strings(),
+		global.cast<globals_impl>()->lists(),
+		_rng,
+		*global.cast<globals_impl>(),
+		*data,
+		static_cast<const runner_interface&>(*this)
+	)
 	, _backup(nullptr)
 	, _done(nullptr)
 	, _choices()
@@ -404,54 +408,37 @@ runner_impl::~runner_impl()
 #ifdef INK_ENABLE_STL
 std::string runner_impl::getline()
 {
-	advance_line();
-	std::string result = _output.get();
-	if (! has_choices() && _fallback_choice) {
-		choose(~0);
-	}
-	// Return result
-	inkAssert(_output.is_empty(), "Output should be empty after getline!");
-	return result;
+	std::stringstream str;
+	getline(str);
+	return str.str();
 }
 
 void runner_impl::getline(std::ostream& out)
 {
-	// Advance interpreter one line
+	// Advance interpreter one line and write to output
 	advance_line();
-	// Write into out
 	out << _output;
-	if (! has_choices() && _fallback_choice) {
+
+	// Fall through the fallback choice, if available
+	if (!has_choices() && _fallback_choice) {
 		choose(~0);
 	}
-
-	// Make sure we read everything
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 }
 
 std::string runner_impl::getall()
 {
-	// Advance interpreter until we're stopped
-	std::stringstream str;
-	while (can_continue()) {
-		getline(str);
-	}
-
-	// Read output into std::string
-
-	// Return result
-	inkAssert(_output.is_empty(), "Output should be empty after getall!");
-	return str.str();
+	std::stringstream out;
+	getall(out);
+	return out.str();
 }
 
 void runner_impl::getall(std::ostream& out)
 {
-	// Advance interpreter until we're stopped
+	// Advance interpreter and write lines to output
 	while (can_continue()) {
-		advance_line();
-		// Send output into stream
-		out << _output;
+		getline(out);
 	}
-	// Return result
 	inkAssert(_output.is_empty(), "Output should be empty after getall!");
 }
 
