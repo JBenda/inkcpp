@@ -263,6 +263,7 @@ private:
 	// Evaluation stack
 	bool _evaluation_mode = false;
 	bool _string_mode     = false;
+	bool _tag_mode        = false;
 	internal::eval_stack < abs(config::limitEvalStackDepth), config::limitEvalStackDepth<0> _eval;
 	bool _saved_evaluation_mode = false;
 

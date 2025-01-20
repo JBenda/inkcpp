@@ -679,7 +679,9 @@ runner_impl::change_type runner_impl::detect_change() const
 bool runner_impl::line_step()
 {
 	// Step the interpreter
-	step();
+	do {
+		step();
+	} while (!_tag_mode);
 
 	// If we're not within string evaluation
 	if (! _output.has_marker()) {
@@ -1050,8 +1052,15 @@ void runner_impl::step()
 					));
 				} break;
 
+				// == Tag commands
 				case Command::START_TAG: {
 					_output << values::marker;
+					_tag_mode = true;
+				} break;
+
+				case Command::TAG: {
+					_tags.push() = read<const char*>();
+					_tag_mode = false;
 				} break;
 
 				case Command::END_TAG: {
@@ -1060,6 +1069,7 @@ void runner_impl::step()
 						_choice_tags_begin = _tags.size();
 					}
 					_tags.push() = tag;
+					_tag_mode = false;
 				} break;
 
 				// == Choice commands
@@ -1215,9 +1225,7 @@ void runner_impl::step()
 					// Push the read count for the requested container index
 					_eval.push(value{}.set<value_type::int32>(( int ) _globals->visits(container)));
 				} break;
-				case Command::TAG: {
-					_tags.push() = read<const char*>();
-				} break;
+				
 				default: inkAssert(false, "Unrecognized command!"); break;
 			}
 		}
