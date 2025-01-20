@@ -17,10 +17,8 @@
 namespace ink::runtime::internal
 {
 basic_stream::basic_stream(value* buffer, size_t len)
-    : _data(buffer)
-    , _max(len)
-    , _size(0)
-    , _save(~0)
+	: _data(buffer)
+	, _max(len)
 {
 }
 
@@ -184,9 +182,9 @@ std::string basic_stream::get()
 FString basic_stream::get()
 {
 	UE_LOG(
-	    InkCpp, Warning,
-	    TEXT("Basic stream::get is not implemented correctly and should not be used implemented "
-	         "correctly!")
+		InkCpp, Warning,
+		TEXT("Basic stream::get is not implemented correctly and should not be used implemented "
+			 "correctly!")
 	);
 	FString str;
 	return str;
@@ -241,14 +239,12 @@ void basic_stream::get(value* ptr, size_t length)
 	_size = start;
 }
 
-bool basic_stream::has_marker() const { return entries_since_marker() >= 0; }
-
-int basic_stream::entries_since_marker() const
+int basic_stream::entries_since_type(value_type type) const
 {
 	// TODO: Cache?
-	for (size_t i = 0; i < _size; i++) {
-		if (_data[i].type() == value_type::marker)
-			return i;
+	for (size_t i = 0; i < _size; ++i) {
+		if (_data[i].type() == type)
+			return static_cast<int>(i);
 	}
 
 	return -1;
@@ -409,7 +405,7 @@ size_t basic_stream::find_start() const
 bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const
 {
 	if (_data[iter].printable() && _data[iter].type() != value_type::newline
-	    && _data[iter].type() != value_type::string) {
+		&& _data[iter].type() != value_type::string) {
 		lastNewline = false;
 		hasGlue     = false;
 	} else {
@@ -525,4 +521,5 @@ const unsigned char* basic_stream::snap_load(const unsigned char* ptr, const loa
 	}
 	return ptr;
 }
+
 } // namespace ink::runtime::internal

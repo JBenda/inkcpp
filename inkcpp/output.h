@@ -67,12 +67,11 @@ namespace ink
 				// Check if the stream is empty
 				bool is_empty() const { return _size == 0; }
 
-				// Check if the stream has a marker
-				bool has_marker() const;
-
-				// how many entries are behind last marker
-				/// \ratval -1 if no marker is set
-				int entries_since_marker() const;
+				/** Returns the entry index since the type was last seen
+				 * @param type type to look for in the output
+				 * @return entry index or -1 if the type could not be found
+				 */
+				int entries_since_type(value_type type) const;
 
 				// Checks if the stream ends with a specific type
 				bool ends_with(value_type) const;
@@ -118,17 +117,17 @@ namespace ink
 				void copy_string(const char* str, size_t& dataIter, T& output);
 				
 			private:
-				char _last_char;
+				char _last_char = '\0';
 
 				// data stream
-				value* _data;
-				size_t _max;
+				value* _data = nullptr;
+				size_t _max = 0;
 
 				// size
-				size_t _size;
+				size_t _size = 0;
 
 				// save point
-				size_t _save;
+				size_t _save = ~0;
 
 				const list_table* _lists_table = nullptr;
 			};
@@ -137,7 +136,6 @@ namespace ink
 			std::ostream& operator <<(std::ostream&, basic_stream&);
 			basic_stream& operator >>(basic_stream&, std::string&);
 #endif
-
 
 			template<size_t N>
 			class stream : public basic_stream

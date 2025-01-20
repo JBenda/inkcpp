@@ -684,7 +684,7 @@ bool runner_impl::line_step()
 	} while (!_tag_mode);
 
 	// If we're not within string evaluation
-	if (! _output.has_marker()) {
+	if (_output.entries_since_type(value_type::marker) == -1) {
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice
 		if (_saved && ! has_choices() && ! _fallback_choice) {
