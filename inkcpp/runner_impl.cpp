@@ -678,13 +678,16 @@ runner_impl::change_type runner_impl::detect_change() const
 
 bool runner_impl::line_step()
 {
-	// Step the interpreter
+	// Step the interpreter until we've parsed all tags
 	do {
 		step();
-	} while (!_tag_mode);
+	} while (_tag_mode);
+
+	const int last_newline = _output.entries_since_type(value_type::newline);
 
 	// If we're not within string evaluation
-	if (_output.entries_since_type(value_type::marker) == -1) {
+	const int last_marker = _output.entries_since_type(value_type::marker);
+	if (last_marker == -1) {
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice
 		if (_saved && ! has_choices() && ! _fallback_choice) {
