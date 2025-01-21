@@ -67,11 +67,17 @@ namespace ink
 				// Check if the stream is empty
 				bool is_empty() const { return _size == 0; }
 
-				/** Returns the entry index since the type was last seen
+				/** Find the first occurrence of the type in the output
 				 * @param type type to look for in the output
 				 * @return entry index or -1 if the type could not be found
 				 */
-				int entries_since_type(value_type type) const;
+				int find_first_of(value_type type) const;
+
+				/** Find the last occurrence of the type in the output
+				 * @param type type to look for in the output
+				 * @return entry index or -1 if the type could not be found
+				 */
+				int find_last_of(value_type type) const;
 
 				// Checks if the stream ends with a specific type
 				bool ends_with(value_type) const;

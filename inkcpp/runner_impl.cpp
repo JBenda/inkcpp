@@ -683,10 +683,10 @@ bool runner_impl::line_step()
 		step();
 	} while (_tag_mode);
 
-	const int last_newline = _output.entries_since_type(value_type::newline);
+	const int last_newline = _output.find_last_of(value_type::newline);
 
 	// If we're not within string evaluation
-	const int last_marker = _output.entries_since_type(value_type::marker);
+	const int last_marker = _output.find_last_of(value_type::marker);
 	if (last_marker == -1) {
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice

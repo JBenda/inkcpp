@@ -239,10 +239,30 @@ void basic_stream::get(value* ptr, size_t length)
 	_size = start;
 }
 
-int basic_stream::entries_since_type(value_type type) const
+int basic_stream::find_first_of(value_type type) const
 {
+	if (_size == 0)
+		return -1;
+
 	// TODO: Cache?
 	for (size_t i = 0; i < _size; ++i) {
+		if (_data[i].type() == type)
+			return static_cast<int>(i);
+	}
+
+	return -1;
+}
+
+int basic_stream::find_last_of(value_type type) const
+{
+	if (_size == 0)
+		return -1;
+
+	// Special case when size is 1 to make the reverse loop easier
+	if (_size == 1)
+		return (_data[0].type() == type) ? 0 : -1;
+
+	for (size_t i = _size - 1; i > 0; --i) {
 		if (_data[i].type() == type)
 			return static_cast<int>(i);
 	}
