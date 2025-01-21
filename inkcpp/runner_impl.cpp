@@ -678,12 +678,29 @@ runner_impl::change_type runner_impl::detect_change() const
 
 bool runner_impl::line_step()
 {
+	// inkAssert(! _saved, "Save should be empty when retrieving the next line.");
+
 	// Step the interpreter until we've parsed all tags
+	size_t tags_seen = _tags.size();
+	// int last_newline = _output.find_last_of(value_type::newline);
+	int last_newline = -1;
 	do {
 		step();
-	} while (_tag_mode);
 
-	const int last_newline = _output.find_last_of(value_type::newline);
+		if (last_newline == -1) {
+			last_newline = _output.find_last_of(value_type::newline);
+			tags_seen = _tags.size();
+			/*if (last_newline >= 0) {
+				// save();
+				continue;
+			}*/
+		} else {
+			int last_marker = _output.find_last_of(value_type::marker);
+			if (last_marker <= last_newline) {
+				break;
+			}
+		}
+	} while (_tag_mode || last_newline > -1);
 
 	// If we're not within string evaluation
 	const int last_marker = _output.find_last_of(value_type::marker);
