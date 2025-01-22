@@ -15,11 +15,8 @@ Fourth line has three tags # side # across
 
 Hello # output_tag_h
 Second line has no tags
-# my_tag
-Third line has a tag above it
 * a
-# choice_tag_b # choice_tag_b_2
-* [b] -> knot2
+* [b # choice_tag_b # choice_tag_b_2] -> knot2
 - World! # output_tag_w
 * c # choice_tag_c
 * d # choice_tag_d

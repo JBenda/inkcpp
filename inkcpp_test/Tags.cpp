@@ -26,135 +26,166 @@ SCENARIO("run story with tags", "[tags]")
 {
 	GIVEN("a story with tags")
 	{
-		WHEN("start thread")
+		WHEN("starting the thread")
 		{
-			THEN("no tags")
+			CHECK_FALSE(_thread->has_tags());
+		}
+		WHEN("on the first line")
+		{
+			CHECK(_thread->getline() == "First line has global tags only\n");
+			THEN("it has the global tags")
 			{
-				REQUIRE(_thread->has_tags() == false);
+				CHECK(_thread->has_tags());
+				CHECK(_thread->num_tags() == 1);
+				CHECK(std::string(_thread->get_tag(0)) == "global_tag");
 			}
 		}
-		WHEN("first line")
+		WHEN("on the second line")
 		{
-			std::string line = _thread->getline();
-			THEN("global tags only")
+			CHECK(_thread->getline() == "Second line has one tag\n");
+			THEN("it has one tag")
 			{
-				REQUIRE(line == "First line has global tags only\n");
-				REQUIRE(_thread->has_tags() == true);
+				CHECK(_thread->has_tags());;
 				REQUIRE(_thread->num_tags() == 1);
-				REQUIRE(std::string(_thread->get_tag(0)) == "global_tag");
+				CHECK(std::string(_thread->get_tag(0)) == "tagged");
 			}
 		}
-		WHEN("second line")
+		WHEN("on the third line")
 		{
-			std::string line = _thread->getline();
-			THEN("one tag")
+			CHECK(_thread->getline() == "Third line has two tags\n");
+			THEN("it has two tags")
 			{
-				REQUIRE(line == "Second line has one tag\n");
-				REQUIRE(_thread->has_tags() == true);
-				REQUIRE(_thread->num_tags() == 1);
-				REQUIRE(std::string(_thread->get_tag(0)) == "tagged");
-			}
-		}
-		WHEN("third line")
-		{
-			std::string line = _thread->getline();
-			THEN("two tags")
-			{
-				REQUIRE(line == "Third line has two tags\n");
-				REQUIRE(_thread->has_tags() == true);
+				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 2);
-				REQUIRE(std::string(_thread->get_tag(0)) == "tag next line");
-				REQUIRE(std::string(_thread->get_tag(1)) == "more tags");
+				CHECK(std::string(_thread->get_tag(0)) == "tag next line");
+				CHECK(std::string(_thread->get_tag(1)) == "more tags");
 			}
 		}
-		WHEN("fourth line")
+		WHEN("on the fourth line")
 		{
-			std::string line = _thread->getline();
-			THEN("three tags")
+			CHECK(_thread->getline() == "Fourth line has three tags\n");
+
+			THEN("it has three tags")
 			{
-				REQUIRE(line == "Fourth line has three tags\n");
-				REQUIRE(_thread->has_tags() == true);
+				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 3);
-				REQUIRE(std::string(_thread->get_tag(0)) == "above");
-				REQUIRE(std::string(_thread->get_tag(1)) == "side");
-				REQUIRE(std::string(_thread->get_tag(2)) == "across");
+				CHECK(std::string(_thread->get_tag(0)) == "above");
+				CHECK(std::string(_thread->get_tag(1)) == "side");
+				CHECK(std::string(_thread->get_tag(2)) == "across");
 			}
 		}
-		WHEN("print choices")
+		WHEN("entering a knot")
 		{
-			_thread->getall();
-			auto itr = _thread->begin();
-			std::string choices[2] = {itr[0].text(), itr[1].text()};
-			THEN("choices won't print tags, tags are still the same, but they can contain tags")
+			CHECK(_thread->getline() == "Hello\n");
+			THEN("it has four tags")
 			{
-				REQUIRE(choices[0] == "a");
-				REQUIRE(choices[1] == "b");
-				REQUIRE(_thread->has_tags());
+				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 4);
-				REQUIRE(std::string(_thread->get_tag(0)) == "global_tag");
-				REQUIRE(std::string(_thread->get_tag(1)) == "knot_tag_start");
-				REQUIRE(std::string(_thread->get_tag(2)) == "second_knot_tag_start");
-				REQUIRE(std::string(_thread->get_tag(3)) == "output_tag_h");
-
-				REQUIRE_FALSE(itr[0].has_tags());
-				REQUIRE(itr[0].num_tags() == 0);
-				REQUIRE(itr[1].has_tags());
-
-				REQUIRE(itr[1].num_tags() == 2);
-				REQUIRE(std::string(itr[1].get_tag(0)) == "choice_tag_b");
-				REQUIRE(std::string(itr[1].get_tag(1)) == "choice_tag_b_2");
+				CHECK(std::string(_thread->get_tag(0)) == "knot_tag_start");
+				CHECK(std::string(_thread->get_tag(1)) == "second_knot_tag_start");
+				CHECK(std::string(_thread->get_tag(2)) == "third_knot_tag");
+				CHECK(std::string(_thread->get_tag(3)) == "output_tag_h");
 			}
 		}
-		WHEN("choose divert")
+		WHEN("on the next line")
 		{
-			_thread->choose(1);
-			THEN("choosing won't add tags!")
+			CHECK(_thread->getline() == "Second line has no tags\n");
+			THEN("it has no tags")
 			{
-				REQUIRE_FALSE(_thread->has_tags());
+				CHECK_FALSE(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 0);
 			}
 		}
-		WHEN("proceed")
+		WHEN("at the first choice list")
 		{
-			std::string line = _thread->getall();
-			THEN("new knot tag and now line tag, also choice tag. AND dont print tag in choice")
+			CHECK(_thread->getline() == "");
+
+			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 2);
+			auto choice_list = _thread->begin();
+
+			THEN("first choice has no tags")
 			{
-				REQUIRE(line == "Knot2\n");
-				REQUIRE(_thread->has_tags());
-				REQUIRE(_thread->num_tags() == 2);
-				REQUIRE(std::string(_thread->get_tag(0)) == "knot_tag_2");
-				REQUIRE(std::string(_thread->get_tag(1)) == "output_tag_k");
-
-				auto itr = _thread->begin();
-				REQUIRE(std::string(itr[0].text()) == "e");
-				REQUIRE(std::string(itr[1].text()) == "f with detail");
-				REQUIRE(std::string(itr[2].text()) == "g");
-
-				REQUIRE_FALSE(itr[0].has_tags());
-				REQUIRE(itr[0].num_tags() == 0);
-				REQUIRE(itr[1].has_tags());
-				REQUIRE(itr[1].num_tags() == 4);
-				REQUIRE(std::string(itr[1].get_tag(0)) == "shared_tag");
-				REQUIRE(std::string(itr[1].get_tag(1)) == "shared_tag_2");
-				REQUIRE(std::string(itr[1].get_tag(2)) == "choice_tag");
-				REQUIRE(std::string(itr[1].get_tag(3)) == "choice_tag_2");
-				REQUIRE(itr[2].has_tags());
-				REQUIRE(itr[2].num_tags() == 1);
+				CHECK(std::string(choice_list[0].text()) == "a");
+				CHECK_FALSE(choice_list[0].has_tags());
+				REQUIRE(choice_list[0].num_tags() == 0);
+			}
+			THEN("second choice has two tags")
+			{
+				CHECK(std::string(choice_list[1].text()) == "b");
+				CHECK(choice_list[1].has_tags());
+				REQUIRE(choice_list[1].num_tags() == 2);
+				CHECK(std::string(choice_list[1].get_tag(0)) == "choice_tag_b");
+				CHECK(std::string(choice_list[1].get_tag(1)) == "choice_tag_b_2");
 			}
 		}
-		WHEN("choose choice with tag, and proceed to end")
+		WHEN("selecting the second choice")
 		{
 			_thread->choose(1);
-			auto line = _thread->getall();
 
-			REQUIRE(line == "f and content\nout");
-			REQUIRE(_thread->has_tags());
-			REQUIRE(_thread->num_tags() == 5);
-			REQUIRE(std::string(_thread->get_tag(0)) == "shared_tag");
-			REQUIRE(std::string(_thread->get_tag(1)) == "shared_tag_2");
-			REQUIRE(std::string(_thread->get_tag(2)) == "content_tag");
-			REQUIRE(std::string(_thread->get_tag(3)) == "content_tag_2");
-			REQUIRE(std::string(_thread->get_tag(4)) == "close_tag");
+			CHECK(_thread->getline() == "Knot2\n");
+			THEN("it has two tags")
+			{
+				CHECK(_thread->has_tags());
+				REQUIRE(_thread->num_tags() == 2);
+				CHECK(std::string(_thread->get_tag(0)) == "knot_tag_2");
+				CHECK(std::string(_thread->get_tag(1)) == "output_tag_k");
+			}
+		}
+		WHEN("at the second choice list")
+		{
+			CHECK(_thread->getline() == "");
+
+			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 3);
+			auto choice_list = _thread->begin();
+
+			THEN("first choice has no tags")
+			{
+				CHECK(std::string(choice_list[0].text()) == "e");
+				CHECK_FALSE(choice_list[0].has_tags());
+				REQUIRE(choice_list[0].num_tags() == 0);
+			}
+			THEN("second choice has four tags")
+			{
+				CHECK(std::string(choice_list[1].text()) == "f with detail");
+				CHECK(choice_list[1].has_tags());
+				REQUIRE(choice_list[1].num_tags() == 4);
+				CHECK(std::string(choice_list[1].get_tag(0)) == "shared_tag");
+				CHECK(std::string(choice_list[1].get_tag(1)) == "shared_tag_2");
+				CHECK(std::string(choice_list[1].get_tag(2)) == "choice_tag");
+				CHECK(std::string(choice_list[1].get_tag(3)) == "choice_tag_2");
+			}
+			THEN("third choice has one tag")
+			{
+				CHECK(std::string(choice_list[2].text()) == "g");
+				CHECK(choice_list[2].has_tags());
+				REQUIRE(choice_list[2].num_tags() == 1);
+				CHECK(std::string(choice_list[2].get_tag(0)) == "choice_tag_g");
+			}
+		}
+		WHEN("selecting the choice with shared tags")
+		{
+			_thread->choose(1);
+
+			CHECK(_thread->getline() == "f and content\n");
+			THEN("it has four tags")
+			{
+				CHECK(_thread->has_tags());
+				REQUIRE(_thread->num_tags() == 4);
+				CHECK(std::string(_thread->get_tag(0)) == "shared_tag");
+				CHECK(std::string(_thread->get_tag(1)) == "shared_tag_2");
+				CHECK(std::string(_thread->get_tag(2)) == "content_tag");
+				CHECK(std::string(_thread->get_tag(3)) == "content_tag_2");
+			}
+		}
+		WHEN("on the last line")
+		{
+			CHECK(_thread->getline() == "out\n");
+			THEN("it has one tag")
+			{
+				CHECK(_thread->has_tags());
+				REQUIRE(_thread->num_tags() == 1);
+				CHECK(std::string(_thread->get_tag(0)) == "close_tag");
+			}
 		}
 	}
 }
