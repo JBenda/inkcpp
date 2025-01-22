@@ -461,6 +461,8 @@ FString runner_impl::getline()
 
 void runner_impl::advance_line()
 {
+	_tags.clear();
+
 	// Step while we still have instructions to execute
 	while (_ptr != nullptr) {
 		// Stop if we hit a new line
@@ -658,7 +660,7 @@ runner_impl::change_type runner_impl::detect_change() const
 	//  if there is new text (non-whitespace) in the stream since saving
 	const bool stillHasNewline = _output.ends_with(value_type::newline, _output.save_offset());
 	if (! stillHasNewline) {
-		return change_type::newline_removed;
+		return change_type::extended_past_newline;
 	}
 
 	// If there's new text content, we went too far
@@ -673,17 +675,21 @@ runner_impl::change_type runner_impl::detect_change() const
 		return change_type::extended_past_newline;
 	}
 
+	const size_t last_marker  = _output.ends_with(value_type::marker);
+	const size_t saved_marker = _output.ends_with(value_type::marker, _output.save_offset());
+	if (last_marker > saved_marker) {
+		return change_type::extended_past_newline;
+	}
+
 	// No change detected
 	return change_type::no_change;
 }
 
 bool runner_impl::line_step()
 {
-	_tags.clear();
-
 	// Step the interpreter until we've parsed all tags for the line
 	size_t last_newline = basic_stream::npos;
-	while (last_newline == basic_stream::npos) {
+	while (_ptr != nullptr && last_newline == basic_stream::npos) {
 		step();
 
 		last_newline = _output.find_last_of(value_type::newline);
@@ -716,7 +722,8 @@ bool runner_impl::line_step()
 					// Newline was removed. Proceed as if we never hit it
 					forget();
 					break;
-				case change_type::no_change: break;
+				case change_type::no_change:
+					break;
 			}
 		}
 
@@ -731,7 +738,7 @@ bool runner_impl::line_step()
 		_output.forget();
 	}
 
-	return false;
+	return true;
 }
 
 void runner_impl::step()

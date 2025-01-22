@@ -296,8 +296,6 @@ void basic_stream::restore()
 
 void basic_stream::forget()
 {
-	inkAssert(!saved(), "No save point to forget!");
-
 	// Just null the save point and continue as normal
 	_save = npos;
 }
