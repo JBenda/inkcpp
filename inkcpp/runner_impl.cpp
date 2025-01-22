@@ -680,38 +680,30 @@ bool runner_impl::line_step()
 {
 	_tags.clear();
 
-	// Step the interpreter until we've parsed all tags
+	// Step the interpreter until we've parsed all tags for the line
 	int last_newline = -1;
-	size_t tags_seen = _tags.size();
-	const bool was_saved = _saved;
-	do {
+	while (last_newline == -1) {
 		step();
 
-		if (last_newline == -1) {
-			// Track tags state between steps and read to the next new line
-			tags_seen = _tags.size();
-			last_newline = _output.find_last_of(value_type::newline);
-			if (! was_saved && last_newline >= 0) {
-				save();
-			}
-		} else {
-			// Roll back the interpreter when we run out of tags
-			const int last_marker = _output.find_last_of(value_type::marker);
-			if (last_marker <= last_newline) {
-				if (! was_saved) {
-					restore();
-				}
-				break;
-			}
-		}
-	} while (_tag_mode || last_newline > -1 || tags_seen == _tags.size());
+		last_newline = _output.find_last_of(value_type::newline);
+	}
 
-	// If we're not within string evaluation
-	const int last_marker = _output.find_last_of(value_type::marker);
-	if (last_marker == -1) {
+	// Unless we are out of content, we are going to try
+	//  to continue a little further. This is to check for
+	//  glue (which means there is potentially more content
+	//  in this line) OR for non-text content such as choices.
+	if (_ptr != nullptr) {
+		// Save a snapshot and step one more command
+		if (_saved) {
+			forget();
+		}
+
+		save();
+		step();
+
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice
-		if (_saved && ! has_choices() && ! _fallback_choice) {
+		if (! has_choices() && ! _fallback_choice) {
 			// Check for changes in the output stream
 			switch (detect_change()) {
 				case change_type::extended_past_newline:
@@ -727,28 +719,15 @@ bool runner_impl::line_step()
 			}
 		}
 
-		// If we're on a newline
-		if (_output.ends_with(value_type::newline)) {
-			// Unless we are out of content, we are going to try
-			//  to continue a little further. This is to check for
-			//  glue (which means there is potentially more content
-			//  in this line) OR for non-text content such as choices.
-			if (_ptr != nullptr) {
-				// Save a snapshot of the current runtime state so we
-				//  can return here if we end up hitting a new line
-				// forget();
-				if (! _saved) {
-					save();
-				}
-			}
-			// Otherwise, make sure we don't have any snapshots hanging around
-			// expect we are in choice handleing
-			else if (! has_choices() && ! _fallback_choice) {
-				forget();
-			} else {
-				_output.forget();
-			}
-		}
+		return false;
+	}
+
+	// Otherwise, make sure we don't have any snapshots hanging around
+	// expect we are in choice handling
+	if (! has_choices() && ! _fallback_choice) {
+		forget();
+	} else {
+		_output.forget();
 	}
 
 	return false;
