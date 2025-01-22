@@ -652,27 +652,28 @@ void runner_impl::internal_bind(hash_t name, internal::function_base* function)
 
 runner_impl::change_type runner_impl::detect_change() const
 {
-	// Check if the old newline is still present (hasn't been glu'd) and
+	inkAssert(_output.saved(), "Cannot detect changes in non-saved stream.");
+
+	// Check if the old newline is still present (hasn't been glued) and
 	//  if there is new text (non-whitespace) in the stream since saving
-	bool stillHasNewline = _output.saved_ends_with(value_type::newline);
-	bool hasAddedNewText = _output.text_past_save() || _tags.last_size() < num_tags();
-
-	// Newline is still there and there's no new text
-	if (stillHasNewline && ! hasAddedNewText) {
-		return change_type::no_change;
-	}
-
-	// If the newline is gone, we got glue'd. Continue as if we never had that newline
+	const bool stillHasNewline = _output.ends_with(value_type::newline, _output.save_offset());
 	if (! stillHasNewline) {
 		return change_type::newline_removed;
 	}
 
 	// If there's new text content, we went too far
+	const bool hasAddedNewText = _output.text_past_save();
 	if (hasAddedNewText) {
 		return change_type::extended_past_newline;
 	}
 
-	inkFail("Invalid change detction. Never should be here!");
+	// New tags should be attached to the next line
+	const bool isParsingTags = _tags.last_size() < num_tags();
+	if (isParsingTags) {
+		return change_type::extended_past_newline;
+	}
+
+	// No change detected
 	return change_type::no_change;
 }
 
@@ -681,8 +682,8 @@ bool runner_impl::line_step()
 	_tags.clear();
 
 	// Step the interpreter until we've parsed all tags for the line
-	int last_newline = -1;
-	while (last_newline == -1) {
+	size_t last_newline = basic_stream::npos;
+	while (last_newline == basic_stream::npos) {
 		step();
 
 		last_newline = _output.find_last_of(value_type::newline);
@@ -1006,7 +1007,7 @@ void runner_impl::step()
 					auto* fn = _functions.find(functionName);
 					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
-					} else if (_output.saved() && _output.saved_ends_with(value_type::newline) && ! fn->lookaheadSafe()) {
+					} else if (_output.saved() && _output.ends_with(value_type::newline, _output.save_offset()) && ! fn->lookaheadSafe()) {
 						// TODO: seperate token?
 						_output.append(values::null);
 					} else {

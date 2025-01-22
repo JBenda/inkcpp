@@ -191,7 +191,7 @@ FString basic_stream::get()
 }
 #endif
 
-int basic_stream::queued() const
+size_t basic_stream::queued() const
 {
 	size_t start = find_start();
 	return _size - start;
@@ -205,10 +205,8 @@ const value& basic_stream::peek() const
 
 void basic_stream::discard(size_t length)
 {
-	// discard elements
-	_size -= length;
-	if (_size < 0)
-		_size = 0;
+	// Protect against size underflow
+	_size -= std::min(length, _size);
 }
 
 void basic_stream::get(value* ptr, size_t length)
@@ -239,58 +237,49 @@ void basic_stream::get(value* ptr, size_t length)
 	_size = start;
 }
 
-int basic_stream::find_first_of(value_type type) const
+size_t basic_stream::find_first_of(value_type type, size_t offset /*= 0*/) const
 {
 	if (_size == 0)
-		return -1;
+		return npos;
 
 	// TODO: Cache?
-	for (size_t i = 0; i < _size; ++i) {
+	for (size_t i = offset; i < _size; ++i) {
 		if (_data[i].type() == type)
-			return static_cast<int>(i);
+			return i;
 	}
 
-	return -1;
+	return npos;
 }
 
-int basic_stream::find_last_of(value_type type) const
+size_t basic_stream::find_last_of(value_type type, size_t offset /*= 0*/) const
 {
 	if (_size == 0)
 		return -1;
 
-	// Special case when size is 1 to make the reverse loop easier
-	if (_size == 1)
-		return (_data[0].type() == type) ? 0 : -1;
+	// Special case to make the reverse loop easier
+	if (_size == 1 && offset == 0)
+		return (_data[0].type() == type) ? 0 : npos;
 
-	for (size_t i = _size - 1; i > 0; --i) {
+	for (size_t i = _size - 1; i > offset; --i) {
 		if (_data[i].type() == type)
-			return static_cast<int>(i);
+			return i;
 	}
 
-	return -1;
+	return npos;
 }
 
-bool basic_stream::ends_with(value_type type) const
+bool basic_stream::ends_with(value_type type, size_t offset /*= 0*/) const
 {
 	if (_size == 0)
 		return false;
 
-	return _data[_size - 1].type() == type;
-}
-
-bool basic_stream::saved_ends_with(value_type type) const
-{
-	inkAssert(_save != ~0, "Stream is not saved!");
-
-	if (_save == 0)
-		return false;
-
-	return _data[_save - 1].type() == type;
+	const size_t index = _size + offset - 1;
+	return (index < _size) ? _data[_size - 1].type() == type : false;
 }
 
 void basic_stream::save()
 {
-	inkAssert(_save == ~0, "Can not save over existing save point!");
+	inkAssert(!saved(), "Can not save over existing save point!");
 
 	// Save the current size
 	_save = _size;
@@ -298,19 +287,19 @@ void basic_stream::save()
 
 void basic_stream::restore()
 {
-	inkAssert(_save != ~0, "No save point to restore!");
+	inkAssert(saved(), "No save point to restore!");
 
 	// Restore size to saved position
 	_size = _save;
-	_save = ~0;
+	_save = npos;
 }
 
 void basic_stream::forget()
 {
-	inkAssert(_save != ~0, "No save point to forget!");
+	inkAssert(!saved(), "No save point to forget!");
 
 	// Just null the save point and continue as normal
-	_save = ~0;
+	_save = npos;
 }
 
 template char* basic_stream::get_alloc<true>(string_table& strings, list_table& lists);
@@ -412,7 +401,7 @@ size_t basic_stream::find_start() const
 	}
 
 	// Make sure we're not violating a save point
-	if (_save != ~0 && start < _save) {
+	if (saved() && start < _save) {
 		// TODO: check if we don't reset save correct
 		// at some point we can modifiy the output even behind save (probally discard?) and push a new
 		// element -> invalid save point
@@ -478,7 +467,7 @@ bool basic_stream::text_past_save() const
 
 void basic_stream::clear()
 {
-	_save = ~0;
+	_save = npos;
 	_size = 0;
 }
 
