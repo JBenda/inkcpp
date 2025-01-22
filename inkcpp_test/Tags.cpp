@@ -8,7 +8,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("tags", "[tags]")
+SCENARIO("tags", "[ahf]")
 {
 	auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "AHF.bin");
 	runner thread = ink->new_runner();
