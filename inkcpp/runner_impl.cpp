@@ -700,12 +700,13 @@ bool runner_impl::line_step()
 	//  glue (which means there is potentially more content
 	//  in this line) OR for non-text content such as choices.
 	if (_ptr != nullptr) {
-		// Save a snapshot and step one more command
+		// Save a snapshot
 		if (_saved) {
 			forget();
 		}
-
 		save();
+
+		// Step one more command
 		step();
 
 		// If we have a saved state after a previous newline
@@ -1129,25 +1130,24 @@ void runner_impl::step()
 					// fetch relevant tags
 					const snap_tag* tags = nullptr;
 					if (_choice_tags_begin >= 0 && _tags[_tags.size() - 1] != nullptr) {
-						for (tags = _tags.end() - 1;
-							 *(tags - 1) != nullptr && (tags - _tags.begin()) > _choice_tags_begin; --tags)
-							;
+						tags = _tags.end() - 1;
+						while (*(tags - 1) != nullptr && (tags - _tags.begin()) > _choice_tags_begin)
+							--tags;
 						_tags.push() = nullptr;
 					}
 
 					// Create choice and record it
+					choice* last_choice = nullptr;
 					if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
 						_fallback_choice.emplace();
-						_fallback_choice.value().setup(
-							_output, _globals->strings(), _globals->lists(), _choices.size(), path,
-							current_thread(), tags->ptr()
-						);
+						last_choice = &_fallback_choice.value();
 					} else {
-						add_choice().setup(
-							_output, _globals->strings(), _globals->lists(), _choices.size(), path,
-							current_thread(), tags->ptr()
-						);
+						last_choice = &add_choice();
 					}
+					last_choice->setup(
+						_output, _globals->strings(), _globals->lists(), _choices.size(), path,
+						current_thread(), tags->ptr()
+					);
 					// save stack at last choice
 					if (_saved) {
 						forget();
