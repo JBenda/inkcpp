@@ -6,25 +6,23 @@
  */
 #pragma once
 
-#include "value.h"
-#include "system.h"
-#include "output.h"
-#include "stack.h"
+#include "array.h"
+#include "choice.h"
 #include "choice.h"
 #include "config.h"
-#include "simple_restorable_stack.h"
-#include "types.h"
-#include "functions.h"
-#include "string_table.h"
-#include "list_table.h"
-#include "array.h"
-#include "random.h"
-#include "snapshot_impl.h"
-
-#include "runner.h"
-#include "choice.h"
-
 #include "executioner.h"
+#include "functions.h"
+#include "list_table.h"
+#include "output.h"
+#include "random.h"
+#include "runner.h"
+#include "simple_restorable_stack.h"
+#include "snapshot_impl.h"
+#include "stack.h"
+#include "string_table.h"
+#include "system.h"
+#include "types.h"
+#include "value.h"
 
 namespace ink::runtime::internal
 {
@@ -33,8 +31,8 @@ class globals_impl;
 class snapshot_impl;
 
 class runner_impl
-    : public runner_interface
-    , public snapshot_interface
+	: public runner_interface
+	, public snapshot_interface
 {
 public:
 	// Creates a new runner at the start of a loaded ink story
@@ -153,13 +151,18 @@ private:
 	choice& add_choice();
 	void    clear_choices();
 
-	void clear_tags();
+	struct tags_clear_type {
+		enum {
+			GLOBALS = 1 << 0,
+			SHARED  = 1 << 1,
+			LINE    = 1 << 2,
+			ALL     = GLOBALS | SHARED | LINE,
+		};
+	};
+	void clear_tags(uint8_t type = tags_clear_type::ALL);
 
 	// Special code for jumping from the current IP to another
 	void jump(ip_t, bool record_visits);
-
-	void run_binary_operator(unsigned char cmd);
-	void run_unary_operator(unsigned char cmd);
 
 	frame_type execute_return();
 	template<frame_type type>
@@ -179,16 +182,16 @@ public:
 	public:
 		template<bool... D, bool con = dynamic, enable_if_t<con, bool> = true>
 		threads()
-		    : base(~0)
-		    , _threadDone(nullptr, reinterpret_cast<ip_t>(~0))
+			: base(~0)
+			, _threadDone(nullptr, reinterpret_cast<ip_t>(~0))
 		{
 			static_assert(sizeof...(D) == 0, "Don't use explicit template arguments!");
 		}
 
 		template<bool... D, bool con = dynamic, enable_if_t<! con, bool> = true>
 		threads()
-		    : base(~0)
-		    , _threadDone(nullptr, reinterpret_cast<ip_t>(~0))
+			: base(~0)
+			, _threadDone(nullptr, reinterpret_cast<ip_t>(~0))
 		{
 			static_assert(sizeof...(D) == 0, "Don't use explicit template arguments");
 			_threadDone.clear(nullptr);
@@ -233,8 +236,8 @@ public:
 
 	private:
 		using array_type = if_t<
-		    dynamic, internal::allocated_restorable_array<ip_t>,
-		    internal::fixed_restorable_array<ip_t, N>>;
+			dynamic, internal::allocated_restorable_array<ip_t>,
+			internal::fixed_restorable_array<ip_t, N>>;
 
 		void resize(size_t size, int) { _threadDone.resize(size); }
 
@@ -244,14 +247,14 @@ public:
 private:
 	const story_impl* const _story;
 	story_ptr<globals_impl> _globals;
-	executer                _operations;
+	executer _operations;
 
 	// == State ==
 
 	// Instruction pointer
-	ip_t _ptr;
-	ip_t _backup; // backup pointer
-	ip_t _done;   // when we last hit a done
+	ip_t _ptr = nullptr;
+	ip_t _backup = nullptr; // backup pointer
+	ip_t _done = nullptr;   // when we last hit a done
 
 	// Output stream
 	internal::stream<config::limitOutputSize> _output;
@@ -262,8 +265,8 @@ private:
 
 	// Evaluation stack
 	bool _evaluation_mode = false;
-	bool _string_mode     = false;
-	bool _tag_mode        = false;
+	bool _string_mode = false;
+	bool _tag_mode = false;
 	internal::eval_stack < abs(config::limitEvalStackDepth), config::limitEvalStackDepth<0> _eval;
 	bool _saved_evaluation_mode = false;
 
@@ -275,17 +278,19 @@ private:
 	optional<snap_choice> _fallback_choice;
 
 	// Tag list
-	managed_restorable_array < snap_tag,
-	    config::limitActiveTags<0, abs(config::limitActiveTags)> _tags;
-	int                                                          _choice_tags_begin;
+	managed_restorable_array< snap_tag,
+		config::limitActiveTags<0, abs(config::limitActiveTags)> _tags;
+	int _choice_tags_begin = 0;
+	size_t _global_tags_end = 0;
+	size_t _shared_tags_end = 0;
 
 	// TODO: Move to story? Both?
 	functions _functions;
 
 	// Container set
 	struct ContainerData {
-		container_t id     = ~0u;
-		ip_t        offset = 0;
+		container_t id = ~0u;
+		ip_t offset = 0;
 
 		bool operator==(const ContainerData& oth) const { return oth.id == id && oth.offset == offset; }
 
@@ -293,8 +298,9 @@ private:
 	};
 
 	internal::managed_restorable_stack < ContainerData,
-	    config::limitContainerDepth<0, abs(config::limitContainerDepth)> _container;
-	bool                                                                 _is_falling = false;
+		config::limitContainerDepth<0, abs(config::limitContainerDepth)> _container;
+	
+	bool _is_falling = false;
 
 	bool _saved = false;
 
@@ -321,7 +327,7 @@ size_t runner_impl::threads<dynamic, N>::snap(unsigned char* data, const snapper
 
 template<bool dynamic, size_t N>
 const unsigned char*
-    runner_impl::threads<dynamic, N>::snap_load(const unsigned char* ptr, const loader& loader)
+	runner_impl::threads<dynamic, N>::snap_load(const unsigned char* ptr, const loader& loader)
 {
 	ptr = base::snap_load(ptr, loader);
 	ptr = _threadDone.snap_load(ptr, loader);

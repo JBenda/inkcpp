@@ -5,13 +5,14 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "runner_impl.h"
-#include "story_impl.h"
-#include "command.h"
+
 #include "choice.h"
+#include "command.h"
 #include "globals_impl.h"
 #include "header.h"
-#include "string_utils.h"
 #include "snapshot_impl.h"
+#include "story_impl.h"
+#include "string_utils.h"
 #include "system.h"
 #include "value.h"
 
@@ -188,9 +189,12 @@ void runner_impl::clear_choices()
 	_choices.clear();
 }
 
-void runner_impl::clear_tags()
+void runner_impl::clear_tags(uint8_t type /*= tags_clear_type::ALL*/)
 {
-	_tags.clear();
+	if ((type & tags_clear_type::ALL) != 0) {
+		_tags.resize(_global_tags_end);
+	}
+
 	_choice_tags_begin = -1;
 }
 
@@ -715,8 +719,8 @@ bool runner_impl::line_step()
 			// Check for changes in the output stream
 			switch (detect_change()) {
 				case change_type::extended_past_newline:
-					// We've gone too far. Restore to before we moved past the newline and return that we are
-					// done
+					// We've gone too far. Restore to before we moved past the newline and return
+					// that we are done
 					restore();
 					return true;
 				case change_type::newline_removed:
