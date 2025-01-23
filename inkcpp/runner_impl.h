@@ -72,6 +72,22 @@ public:
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
 
+	choice& add_choice();
+	void    clear_choices();
+
+	enum class tags_level {
+		GLOBAL, //< global tags can be retrieved separately
+		CHOICE, //< tags for the current choice list, if any
+		LINE,   //< tags for the current line
+	};
+	snap_tag& add_tag(const char* value, tags_level where);
+
+	enum class tags_clear_type {
+		ALL,          //< clear all tags, including globals
+		KEEP_GLOBALS, //< keep global tags (default)
+		KEEP_CHOICE,  //< keep current choice list tags
+	};
+	void clear_tags(tags_clear_type type = tags_clear_type::KEEP_GLOBALS);
 
 #ifdef INK_ENABLE_CSTD
 	// c-style getline
@@ -143,23 +159,6 @@ private:
 private:
 	template<typename T>
 	inline T read();
-
-	choice& add_choice();
-	void    clear_choices();
-
-	enum class tags_level {
-		GLOBAL,          //< global tags can be retrieved separately
-		CHOICE,          //< tags for the current choice list, if any
-		LINE,            //< tags for the current line
-	};
-	snap_tag& add_tag(const char* value, tags_level where);
-
-	enum class tags_clear_type {
-		ALL,             //< clear all tags, including globals
-		KEEP_GLOBALS,    //< keep global tags (default)
-		KEEP_CHOICE,     //< keep current choice list tags
-	};
-	void clear_tags(tags_clear_type type = tags_clear_type::KEEP_GLOBALS);
 
 	// Special code for jumping from the current IP to another
 	void jump(ip_t, bool record_visits);

@@ -26,7 +26,7 @@ namespace ink::runtime::internal
 
 	class snap_tag : public snapshot_interface {
 	public:
-		snap_tag() : _str{nullptr} {}
+		snap_tag() = default;
 		snap_tag(const char* str) : _str{str} {}
 		operator const char*() const { return _str; }
 		snap_tag& operator=( const char* str) { _str = str; return *this; }
@@ -34,7 +34,7 @@ namespace ink::runtime::internal
 		const unsigned char* snap_load(const unsigned char* data, const loader&);
 		const char* const* ptr() const { return &_str; }
 	private:
-		const char* _str;
+		const char* _str = nullptr;
 	};
 	static_assert(sizeof(snap_tag) == sizeof(const char*));
 

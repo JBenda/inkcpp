@@ -1,10 +1,11 @@
 #include "catch.hpp"
 
-#include <story.h>
+#include <../runner_impl.h>
+#include <choice.h>
+#include <compiler.h>
 #include <globals.h>
 #include <runner.h>
-#include <compiler.h>
-#include <choice.h>
+#include <story.h>
 
 using namespace ink::runtime;
 
@@ -19,10 +20,94 @@ SCENARIO("tags", "[ahf]")
 	REQUIRE(thread->can_continue() == false);
 }
 
+SCENARIO("adding and removing tags", "[tags][interface]")
+{
+	story* ink = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
+
+	using tags_level = internal::runner_impl::tags_level;
+
+	GIVEN("an empty thread")
+	{
+		auto thread = ink->new_runner().cast<internal::runner_impl>();
+
+		WHEN("adding a global tag")
+		{
+			CHECK(std::string((const char*)*thread->add_tag("kittens", tags_level::GLOBAL).ptr()) == "kittens");
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 1);
+			CHECK(std::string(thread->get_tag(0)) == "kittens");
+		}
+
+		WHEN("adding a choice tag")
+		{
+			CHECK(std::string((const char*)*thread->add_tag("chance", tags_level::CHOICE).ptr()) == "chance");
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 1);
+			CHECK(std::string(thread->get_tag(0)) == "chance");
+		}
+
+		WHEN("adding a line tag")
+		{
+			CHECK(std::string((const char*)*thread->add_tag("chicken", tags_level::LINE).ptr()) == "chicken");
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 1);
+			CHECK(std::string(thread->get_tag(0)) == "chicken");
+		}
+
+		WHEN("adding two tags of the same type")
+		{
+			CHECK(std::string((const char*)*thread->add_tag("bacon", tags_level::LINE).ptr()) == "bacon");
+			CHECK(std::string((const char*)*thread->add_tag("cheese", tags_level::LINE).ptr()) == "cheese");
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 2);
+			CHECK(std::string(thread->get_tag(0)) == "bacon");
+			CHECK(std::string(thread->get_tag(1)) == "cheese");
+		}
+
+		WHEN("adding multiple tags in the correct order")
+		{
+			CHECK(std::string((const char*)*thread->add_tag("written by wake", tags_level::GLOBAL).ptr()) == "written by wake");
+			CHECK(std::string((const char*)*thread->add_tag("turn on flashlight", tags_level::CHOICE).ptr()) == "turn on flashlight");
+			CHECK(std::string((const char*)*thread->add_tag("cover", tags_level::CHOICE).ptr()) == "cover");
+			CHECK(std::string((const char*)*thread->add_tag("point at darkness", tags_level::LINE).ptr()) == "point at darkness");
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 4);
+			CHECK(std::string(thread->get_tag(0)) == "written by wake");
+			CHECK(std::string(thread->get_tag(1)) == "turn on flashlight");
+			CHECK(std::string(thread->get_tag(2)) == "cover");
+			CHECK(std::string(thread->get_tag(3)) == "point at darkness");
+		}
+
+		WHEN("adding multiple tags in the wrong order")
+		{
+			CHECK(std::string((const char*)*thread->add_tag("across", tags_level::LINE).ptr()) == "across");
+			CHECK(std::string((const char*)*thread->add_tag("fox", tags_level::CHOICE).ptr()) == "fox");
+			CHECK(std::string((const char*)*thread->add_tag("the", tags_level::GLOBAL).ptr()) == "the");
+			CHECK(std::string((const char*)*thread->add_tag("time", tags_level::LINE).ptr()) == "time");
+			CHECK(std::string((const char*)*thread->add_tag("dashes", tags_level::CHOICE).ptr()) == "dashes");
+			CHECK(std::string((const char*)*thread->add_tag("busy", tags_level::GLOBAL).ptr()) == "busy");
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 6);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+			CHECK(std::string(thread->get_tag(2)) == "fox");
+			CHECK(std::string(thread->get_tag(3)) == "dashes");
+			CHECK(std::string(thread->get_tag(4)) == "across");
+			CHECK(std::string(thread->get_tag(5)) == "time");
+		}
+	}
+}
+
 story* _ink = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
 runner _thread = _ink->new_runner();
 
-SCENARIO("run story with tags", "[tags]")
+SCENARIO("run story with tags", "[tags][story]")
 {
 	GIVEN("a story with tags")
 	{

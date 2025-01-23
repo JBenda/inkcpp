@@ -193,10 +193,10 @@ void runner_impl::clear_choices()
 
 snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 {
-	snap_tag& result = _tags.push();
-	result = value;
+	// Push tag to end of the stack
+	_tags.push() = value;
 
-	// Figure out insertion index for tag
+	// Determine insertion index for tag level
 	size_t index = 0;
 	switch (where) {
 	case tags_level::GLOBAL:
@@ -218,7 +218,7 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 
 	// Nothing to do
 	if (index == _tags.size() - 1) {
-		return result;
+		return _tags[index];
 	}
 
 	// Special case: either we swap or we don't
@@ -226,16 +226,18 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 		if (index == 0) {
 			std::iter_swap(_tags.begin() + 1, _tags.begin());
 		}
-		return result;
+		return _tags[index];
 	}
 
 	// Swap items backwards until we reach our desired index
-	snap_tag* it = _tags.begin();
-	for (size_t i = _tags.size() - 2; i > index; --i) {
-		std::iter_swap(it + i, it + i + 1);
+	const size_t count = _tags.size() - index - 1;
+	snap_tag* it = _tags.begin() + _tags.size() - 2;
+	for (size_t i = 0; i < count; ++i) {
+		std::iter_swap(it + 1, it);
+		it--;
 	}
 
-	return result;
+	return _tags[index];
 }
 
 void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOBALS*/)
