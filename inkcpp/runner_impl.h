@@ -147,15 +147,19 @@ private:
 	choice& add_choice();
 	void    clear_choices();
 
-	struct tags_clear_type {
-		enum {
-			GLOBALS = 1 << 0,
-			SHARED  = 1 << 1,
-			LINE    = 1 << 2,
-			ALL     = GLOBALS | SHARED | LINE,
-		};
+	enum class tags_level {
+		GLOBAL,          //< global tags can be retrieved separately
+		CHOICE,          //< tags for the current choice list, if any
+		LINE,            //< tags for the current line
 	};
-	void clear_tags(uint8_t type = tags_clear_type::ALL);
+	snap_tag& add_tag(const char* value, tags_level where);
+
+	enum class tags_clear_type {
+		ALL,             //< clear all tags, including globals
+		KEEP_GLOBALS,    //< keep global tags (default)
+		KEEP_CHOICE,     //< keep current choice list tags
+	};
+	void clear_tags(tags_clear_type type = tags_clear_type::KEEP_GLOBALS);
 
 	// Special code for jumping from the current IP to another
 	void jump(ip_t, bool record_visits);
@@ -276,9 +280,10 @@ private:
 	// Tag list
 	managed_restorable_array< snap_tag,
 		config::limitActiveTags<0, abs(config::limitActiveTags)> _tags;
+	tags_level _tags_where = tags_level::GLOBAL;
 	int _choice_tags_begin = 0;
-	size_t _global_tags_end = 0;
-	size_t _shared_tags_end = 0;
+	size_t _global_tags_count = 0;
+	size_t _choice_tags_count = 0;
 
 	// TODO: Move to story? Both?
 	functions _functions;

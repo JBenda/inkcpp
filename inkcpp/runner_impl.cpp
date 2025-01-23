@@ -6,6 +6,8 @@
  */
 #include "runner_impl.h"
 
+#include <algorithm>
+
 #include "choice.h"
 #include "command.h"
 #include "globals_impl.h"
@@ -189,10 +191,81 @@ void runner_impl::clear_choices()
 	_choices.clear();
 }
 
-void runner_impl::clear_tags(uint8_t type /*= tags_clear_type::ALL*/)
+snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 {
-	if ((type & tags_clear_type::ALL) != 0) {
-		_tags.resize(_global_tags_end);
+	snap_tag& result = _tags.push();
+	result = value;
+
+	// Figure out insertion index for tag
+	size_t index = 0;
+	switch (where) {
+	case tags_level::GLOBAL:
+		index = _global_tags_count;
+		_global_tags_count++;
+		break;
+	case tags_level::CHOICE:
+		index = _global_tags_count + _choice_tags_count;
+		_choice_tags_count++;
+		break;
+	case tags_level::LINE:
+		index = _tags.size() - 1;
+		break;
+	default:
+		inkAssert(false, "Failed to add tag at unhandled location %d.",
+			static_cast<int32_t>(where));
+		break;
+	}
+
+	// Nothing to do
+	if (index == _tags.size() - 1) {
+		return result;
+	}
+
+	// Special case: either we swap or we don't
+	if (_tags.size() == 2) {
+		if (index == 0) {
+			std::iter_swap(_tags.begin() + 1, _tags.begin());
+		}
+		return result;
+	}
+
+	// Swap items backwards until we reach our desired index
+	snap_tag* it = _tags.begin();
+	for (size_t i = _tags.size() - 2; i > index; --i) {
+		std::iter_swap(it + i, it + i + 1);
+	}
+
+	return result;
+}
+
+void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOBALS*/)
+{
+	// To explain how this works, let's imagine we have the following tags:
+	// 
+	// index | tag value      | level
+	// ------|----------------|---------
+	// 0     | global_tag     | GLOBAL
+	// 1     | choice_tag_1   | CHOICE
+	// 2     | choice_tag_2   | CHOICE
+	// 3     | content_tag_1  | LINE
+	//
+	// * Clearing all tags means we can clear the entire array
+	// * Keeping the global tags means resizing to length 1
+	// * Keeping the choice tags means resizing to length 3 (globals + choices)
+
+	switch (type) {
+	case tags_clear_type::ALL:
+		_tags.clear();
+		break;
+	case tags_clear_type::KEEP_GLOBALS:
+		_tags.resize(_global_tags_count);
+		break;
+	case tags_clear_type::KEEP_CHOICE:
+		_tags.resize(_global_tags_count + _choice_tags_count);
+		break;
+	default:
+		inkAssert(false, "Unhandled clear type %d for tags.", static_cast<int32_t>(type));
+		break;
 	}
 
 	_choice_tags_begin = -1;
@@ -459,7 +532,7 @@ void runner_impl::getall(std::ostream& out)
 
 void runner_impl::advance_line()
 {
-	_tags.clear();
+	clear_tags(tags_clear_type::KEEP_GLOBALS);
 
 	// Step while we still have instructions to execute
 	while (_ptr != nullptr) {
@@ -685,12 +758,21 @@ runner_impl::change_type runner_impl::detect_change() const
 
 bool runner_impl::line_step()
 {
+	const bool at_story_start = _ptr == _story->instructions();
+	const size_t tags_before = num_tags();
+	const size_t choices_before = num_choices();
+
 	// Step the interpreter until we've parsed all tags for the line
 	size_t last_newline = basic_stream::npos;
 	while (_ptr != nullptr && last_newline == basic_stream::npos) {
 		step();
 
 		last_newline = _output.find_last_of(value_type::newline);
+	}
+
+	if (_tags_where == tags_level::GLOBAL &&
+		num_choices() == 0) {
+		_tags_where = tags_level::LINE;
 	}
 
 	// Unless we are out of content, we are going to try
@@ -1397,4 +1479,5 @@ std::ostream& operator<<(std::ostream& out, runner_impl& in)
 	return out;
 }
 #endif
+
 } // namespace ink::runtime::internal
