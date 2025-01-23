@@ -409,57 +409,51 @@ runner_impl::~runner_impl()
 	}
 }
 
-#ifdef INK_ENABLE_STL
-std::string runner_impl::getline()
-{
-	std::stringstream str;
-	getline(str);
-	return str.str();
-}
-
-void runner_impl::getline(std::ostream& out)
+runner_impl::line_type runner_impl::getline()
 {
 	// Advance interpreter one line and write to output
 	advance_line();
-	out << _output;
+
+#ifdef INK_ENABLE_STL
+	line_type result{ _output.get() };
+#elif defined(INK_ENABLE_UNREAL)
+	line_type result{ ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists())) };
+#endif
 
 	// Fall through the fallback choice, if available
-	if (!has_choices() && _fallback_choice) {
+	if (! has_choices() && _fallback_choice) {
 		choose(~0);
 	}
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
+
+	return result;
 }
 
-std::string runner_impl::getall()
+runner_impl::line_type runner_impl::getall()
 {
-	std::stringstream out;
-	getall(out);
-	return out.str();
+	line_type result;
+
+	while (can_continue()) {
+		result += getline();
+	}
+	inkAssert(_output.is_empty(), "Output should be empty after getall!");
+
+	return result;
+}
+
+#ifdef INK_ENABLE_STL
+void runner_impl::getline(std::ostream& out)
+{
+	out << getline();
 }
 
 void runner_impl::getall(std::ostream& out)
 {
 	// Advance interpreter and write lines to output
 	while (can_continue()) {
-		getline(out);
+		out << getline();
 	}
 	inkAssert(_output.is_empty(), "Output should be empty after getall!");
-}
-
-#endif
-#ifdef INK_ENABLE_UNREAL
-FString runner_impl::getline()
-{
-	clear_tags();
-	advance_line();
-	FString result(ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists())));
-
-	if (! has_choices() && _fallback_choice) {
-		choose(~0);
-	}
-	// Return result
-	inkAssert(_output.is_empty(), "Output should be empty after getline!");
-	return result;
 }
 #endif
 
