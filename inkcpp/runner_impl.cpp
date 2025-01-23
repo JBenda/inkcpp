@@ -251,16 +251,19 @@ void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOB
 	// 2     | choice_tag_2   | CHOICE
 	// 3     | content_tag_1  | LINE
 	//
-	// * Clearing all tags means we can clear the entire array
-	// * Keeping the global tags means resizing to length 1
+	// * Clearing all tags means we can clear the entire array and clear the counts
+	// * Keeping the global tags means resizing to length 1 and clear tags count
 	// * Keeping the choice tags means resizing to length 3 (globals + choices)
 
 	switch (type) {
 	case tags_clear_type::ALL:
 		_tags.clear();
+		_global_tags_count = 0;
+		_choice_tags_count = 0;
 		break;
 	case tags_clear_type::KEEP_GLOBALS:
 		_tags.resize(_global_tags_count);
+		_choice_tags_count = 0;
 		break;
 	case tags_clear_type::KEEP_CHOICE:
 		_tags.resize(_global_tags_count + _choice_tags_count);

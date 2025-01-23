@@ -25,6 +25,7 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 	story* ink = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
 
 	using tags_level = internal::runner_impl::tags_level;
+	using tags_clear_type = internal::runner_impl::tags_clear_type;
 
 	GIVEN("an empty thread")
 	{
@@ -100,6 +101,135 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 			CHECK(std::string(thread->get_tag(3)) == "dashes");
 			CHECK(std::string(thread->get_tag(4)) == "across");
 			CHECK(std::string(thread->get_tag(5)) == "time");
+		}
+	}
+
+	GIVEN("a thread with tags")
+	{
+		auto thread = ink->new_runner().cast<internal::runner_impl>();
+		thread->add_tag("the", tags_level::GLOBAL);
+		thread->add_tag("busy", tags_level::GLOBAL);
+		thread->add_tag("fox", tags_level::CHOICE);
+		thread->add_tag("dashes", tags_level::CHOICE);
+		thread->add_tag("across", tags_level::LINE);
+		thread->add_tag("time", tags_level::LINE);
+
+		WHEN("clearing all tags")
+		{
+			thread->clear_tags(tags_clear_type::ALL);
+
+			CHECK_FALSE(thread->has_tags());
+			REQUIRE(thread->num_tags() == 0);
+		}
+
+		WHEN("keeping choice tags when clearing")
+		{
+			thread->clear_tags(tags_clear_type::KEEP_CHOICE);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 4);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+			CHECK(std::string(thread->get_tag(2)) == "fox");
+			CHECK(std::string(thread->get_tag(3)) == "dashes");
+		}
+
+		WHEN("keeping global tags when clearing")
+		{
+			thread->clear_tags(tags_clear_type::KEEP_GLOBALS);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 2);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+		}
+
+		WHEN("adding a tag after clearing all")
+		{
+			thread->clear_tags(tags_clear_type::ALL);
+			thread->add_tag("tracked", tags_level::LINE);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 1);
+			CHECK(std::string(thread->get_tag(0)) == "tracked");
+		}
+
+		WHEN("adding a global tag after keeping choice tags")
+		{
+			thread->clear_tags(tags_clear_type::KEEP_CHOICE);
+			thread->add_tag("handsome", tags_level::GLOBAL);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 5);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+			CHECK(std::string(thread->get_tag(2)) == "handsome");
+			CHECK(std::string(thread->get_tag(3)) == "fox");
+			CHECK(std::string(thread->get_tag(4)) == "dashes");
+		}
+
+		WHEN("adding a choice tag after keeping choice tags")
+		{
+			thread->clear_tags(tags_clear_type::KEEP_CHOICE);
+			thread->add_tag("away", tags_level::CHOICE);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 5);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+			CHECK(std::string(thread->get_tag(2)) == "fox");
+			CHECK(std::string(thread->get_tag(3)) == "dashes");
+			CHECK(std::string(thread->get_tag(4)) == "away");
+		}
+
+		WHEN("adding a line tag after keeping choice tags")
+		{
+			thread->clear_tags(tags_clear_type::KEEP_CHOICE);
+			thread->add_tag("forward", tags_level::LINE);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 5);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+			CHECK(std::string(thread->get_tag(2)) == "fox");
+			CHECK(std::string(thread->get_tag(3)) == "dashes");
+			CHECK(std::string(thread->get_tag(4)) == "forward");
+		}
+
+		WHEN("adding a global tag after keeping global tags")
+		{
+			thread->clear_tags(tags_clear_type::KEEP_GLOBALS);
+			thread->add_tag("elk", tags_level::GLOBAL);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 3);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+			CHECK(std::string(thread->get_tag(2)) == "elk");
+		}
+
+		WHEN("adding a choice tag after keeping global tags")
+		{
+			thread->clear_tags(tags_clear_type::KEEP_GLOBALS);
+			thread->add_tag("mouse", tags_level::CHOICE);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 3);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+			CHECK(std::string(thread->get_tag(2)) == "mouse");
+		}
+
+		WHEN("adding a line tag after keeping global tags")
+		{
+			thread->clear_tags(tags_clear_type::KEEP_GLOBALS);
+			thread->add_tag("driver", tags_level::LINE);
+
+			CHECK(thread->has_tags());
+			REQUIRE(thread->num_tags() == 3);
+			CHECK(std::string(thread->get_tag(0)) == "the");
+			CHECK(std::string(thread->get_tag(1)) == "busy");
+			CHECK(std::string(thread->get_tag(2)) == "driver");
 		}
 	}
 }
