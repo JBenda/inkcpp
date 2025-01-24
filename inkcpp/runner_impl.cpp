@@ -273,7 +273,7 @@ void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOB
 		break;
 	}
 
-	_choice_tags_begin = -1;
+	_choice_tags_begin = ~0;
 }
 
 void runner_impl::jump(ip_t dest, bool record_visits)
@@ -773,9 +773,15 @@ bool runner_impl::line_step()
 		last_newline = _output.find_last_of(value_type::newline);
 	}
 
-	if (_tags_where == tags_level::GLOBAL &&
-		num_choices() == 0) {
-		_tags_where = tags_level::LINE;
+	_tags_where = tags_level::LINE;
+
+	if (at_story_start) {
+		// Copy global tags to the first line
+		if (_global_tags_count > 0) {
+			for (size_t i = 0; i < _global_tags_count; ++i) {
+				add_tag(get_global_tag(i), tags_level::LINE);
+			}
+		}
 	}
 
 	// Unless we are out of content, we are going to try
@@ -1154,16 +1160,16 @@ void runner_impl::step()
 				} break;
 
 				case Command::TAG: {
-					_tags.push() = read<const char*>();
+					add_tag(read<const char*>(), _tags_where);
 					_tag_mode = false;
 				} break;
 
 				case Command::END_TAG: {
 					auto tag = _output.get_alloc<true>(_globals->strings(), _globals->lists());
-					if (_string_mode && _choice_tags_begin < 0) {
+					if (_string_mode && _choice_tags_begin == ~0) {
 						_choice_tags_begin = _tags.size();
 					}
-					_tags.push() = tag;
+					add_tag(tag, _tags_where);
 					_tag_mode = false;
 				} break;
 
@@ -1210,26 +1216,36 @@ void runner_impl::step()
 						_output << stack[sc - 1];
 					}
 
-					// fetch relevant tags
-					const snap_tag* tags = nullptr;
-					if (_choice_tags_begin >= 0 && _tags[_tags.size() - 1] != nullptr) {
-						tags = _tags.end() - 1;
-						while (*(tags - 1) != nullptr && (tags - _tags.begin()) > _choice_tags_begin)
-							--tags;
-						_tags.push() = nullptr;
+					// Fetch tags related to the current choice
+					const snap_tag* tags_start = nullptr;
+					const snap_tag* tags_end = nullptr;
+
+					if (_choice_tags_begin != ~0) {
+						// Retroactively mark added tags as choice tags
+						_choice_tags_count = _tags.size() - _choice_tags_begin;
+						_tags_where = tags_level::CHOICE;
+
+						tags_start = _tags.begin() + _choice_tags_begin;
+						tags_end = tags_start + _choice_tags_count;
 					}
 
 					// Create choice and record it
-					choice* last_choice = nullptr;
+					choice* current_choice = nullptr;
 					if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
 						_fallback_choice.emplace();
-						last_choice = &_fallback_choice.value();
+						current_choice = &_fallback_choice.value();
 					} else {
-						last_choice = &add_choice();
+						current_choice = &add_choice();
 					}
-					last_choice->setup(
-						_output, _globals->strings(), _globals->lists(), _choices.size(), path,
-						current_thread(), tags->ptr()
+					current_choice->setup(
+						_output,
+						_globals->strings(),
+						_globals->lists(),
+						_choices.size(),
+						path,
+						current_thread(),
+						tags_start,
+						tags_end
 					);
 					// save stack at last choice
 					if (_saved) {

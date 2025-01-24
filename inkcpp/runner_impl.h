@@ -283,7 +283,7 @@ private:
 	managed_restorable_array< snap_tag,
 		config::limitActiveTags<0, abs(config::limitActiveTags)> _tags;
 	tags_level _tags_where = tags_level::GLOBAL;
-	int _choice_tags_begin = 0;
+	size_t _choice_tags_begin = ~0;
 	size_t _global_tags_count = 0;
 	size_t _choice_tags_count = 0;
 

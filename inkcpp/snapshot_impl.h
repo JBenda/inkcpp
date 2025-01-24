@@ -32,6 +32,7 @@ namespace ink::runtime::internal
 		snap_tag& operator=( const char* str) { _str = str; return *this; }
 		size_t snap(unsigned char*, const snapper&) const;
 		const unsigned char* snap_load(const unsigned char* data, const loader&);
+		const char* text() const { return _str; }
 		const char* const* ptr() const { return &_str; }
 	private:
 		const char* _str = nullptr;
