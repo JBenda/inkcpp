@@ -728,7 +728,7 @@ runner_impl::change_type runner_impl::detect_change() const
 	//  if there is new text (non-whitespace) in the stream since saving
 	const bool stillHasNewline = _output.ends_with(value_type::newline, _output.save_offset());
 	if (! stillHasNewline) {
-		return change_type::extended_past_newline;
+		return change_type::newline_removed;
 	}
 
 	// If there's new text content, we went too far
@@ -787,10 +787,28 @@ bool runner_impl::line_step()
 		}
 		save();
 
-		// Step commands until we've processed any diverts
+		// Step commands until we're satisfied it doesn't affect the current line
+		bool keep_stepping = false;
+		bool is_gluing = false;
 		do {
 			step();
-		} while (_evaluation_mode);
+
+			// If we find glue, keep going until the next line
+			if (is_gluing) {
+				keep_stepping = ! _output.ends_with(value_type::newline);
+			} else {
+				is_gluing = _output.ends_with(value_type::glue);
+				keep_stepping = is_gluing;
+			}
+
+			// Process any diverts
+			keep_stepping |= _evaluation_mode;
+
+			// // Inside a function
+			keep_stepping = keep_stepping || _output.ends_with(value_type::func_start);
+			keep_stepping = keep_stepping || _output.ends_with(value_type::func_end);
+
+		} while (keep_stepping);
 
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice

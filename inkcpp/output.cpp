@@ -273,8 +273,8 @@ bool basic_stream::ends_with(value_type type, size_t offset /*= 0*/) const
 	if (_size == 0)
 		return false;
 
-	const size_t index = _size + offset - 1;
-	return (index < _size) ? _data[_size - 1].type() == type : false;
+	const size_t index = _size - 1;
+	return (index < _size) ? _data[index].type() == type : false;
 }
 
 void basic_stream::save()
