@@ -605,17 +605,15 @@ void runner_impl::getline_silent()
 	_output.clear();
 }
 
-bool runner_impl::has_tags() const { return num_tags() > 0; }
-
-size_t runner_impl::num_tags() const
-{
-	return _choice_tags_begin < 0 ? _tags.size() : _choice_tags_begin;
-}
-
 const char* runner_impl::get_tag(size_t index) const
 {
-	inkAssert(index < _tags.size(), "Tag index exceeds _num_tags");
-	return _tags[index];
+	const size_t adjusted = index + _global_tags_count;
+	return (adjusted < _tags.size()) ? _tags[adjusted] : nullptr;
+}
+
+const char* runner_impl::get_global_tag(size_t index) const
+{
+	return (index < _global_tags_count) ? _tags[index] : nullptr;
 }
 
 snapshot* runner_impl::create_snapshot() const { return _globals->create_snapshot(); }

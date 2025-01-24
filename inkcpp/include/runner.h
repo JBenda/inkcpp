@@ -164,19 +164,55 @@ public:
 	 */
 	virtual void choose(size_t index) = 0;
 
-	/** check if since last choice selection tags have been added */
-	virtual bool        has_tags() const            = 0;
+	/**
+	 * Check if the current line has any tags. Excludes global tags.
+	 * 
+	 * @return true if the line has tags, false if not
+	 * 
+	 * @sa num_tags
+	 * @sa get_tag
+	 */
+	virtual bool has_tags() const = 0;
 
-	/** return the number of current.
+	/**
+	 * Returns the number of tags on the current line. Excludes global tags.
+	 * 
+	 * @sa get_tag
+	 * @sa num_global_tags
+	 */
+	virtual size_t num_tags() const = 0;
+
+	/**
+	 * Access a tag by index.
 	 *
-	 * The tags will be accumulated since last choice
-	 * order of tags wont change, and new are added at the end */
-	virtual size_t      num_tags() const            = 0;
-
-	/** access tag.
+	 * Note that this method only allows the retrieval of tags attached to the current line. For
+	 * tags at the top of the script, use get_global_tag()
+	 *
 	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_tags() "num_tags()")
+	 *
+	 * @return pointer to the tag string memory or nullptr if the index is invalid
+	 * 
+	 * @sa num_tags
 	 */
 	virtual const char* get_tag(size_t index) const = 0;
+
+	/**
+	 * Returns the number of tags at the top of the document.
+	 */
+	virtual size_t num_global_tags() const = 0;
+
+	/**
+	 * Access a global tag by index.
+	 *
+	 * Global tags are placed at the top of the script instead of above or next to the current line.
+	 * For tags related to the current line, use @sa get_tag
+	 *
+	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_global_tags()
+	 * "num_global_tags()")
+	 *
+	 * @return pointer to the tag string memory or nullptr if the index is invalid
+	 */
+	virtual const char* get_global_tag(size_t index) const = 0;
 
 protected:
 	/** internal bind implementation. not for calling.

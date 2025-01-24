@@ -63,9 +63,12 @@ public:
 	 * executes story until end of next line and discards the result. */
 	void getline_silent();
 
-	virtual bool        has_tags() const override;
-	virtual size_t      num_tags() const override;
+	virtual bool has_tags() const override { return num_tags() > 0; }
+	virtual size_t num_tags() const override { return _tags.size() - _global_tags_count; }
 	virtual const char* get_tag(size_t index) const override;
+
+	virtual size_t num_global_tags() const override { return _global_tags_count; }
+	virtual const char* get_global_tag(size_t index) const override;
 
 	snapshot* create_snapshot() const override;
 
