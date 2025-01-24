@@ -35,7 +35,7 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 
 			THEN("consume function result")
 			{
-				CHECK(lines_thread->getline() == "Function Result");
+				CHECK(lines_thread->getline() == "Function Result\n");
 			}
 		}
 		WHEN("consuming lines with tunnels")

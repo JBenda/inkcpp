@@ -724,33 +724,14 @@ runner_impl::change_type runner_impl::detect_change() const
 {
 	inkAssert(_output.saved(), "Cannot detect changes in non-saved stream.");
 
-	// Check if the old newline is still present (hasn't been glued) and
-	//  if there is new text (non-whitespace) in the stream since saving
+	// Check if the old newline is still present (hasn't been glued)
 	const bool stillHasNewline = _output.ends_with(value_type::newline, _output.save_offset());
 	if (! stillHasNewline) {
 		return change_type::newline_removed;
 	}
 
-	// If there's new text content, we went too far
-	const bool hasAddedNewText = _output.text_past_save();
-	if (hasAddedNewText) {
-		return change_type::extended_past_newline;
-	}
+	return change_type::extended_past_newline;
 
-	// New tags should be attached to the next line
-	const bool isParsingTags = _tags.last_size() < num_tags();
-	if (isParsingTags) {
-		return change_type::extended_past_newline;
-	}
-
-	const size_t last_marker  = _output.ends_with(value_type::marker);
-	const size_t saved_marker = _output.ends_with(value_type::marker, _output.save_offset());
-	if (last_marker > saved_marker) {
-		return change_type::extended_past_newline;
-	}
-
-	// No change detected
-	return change_type::no_change;
 }
 
 bool runner_impl::line_step()
