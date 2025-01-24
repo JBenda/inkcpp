@@ -787,8 +787,10 @@ bool runner_impl::line_step()
 		}
 		save();
 
-		// Step one more command
-		step();
+		// Step commands until we've processed any diverts
+		do {
+			step();
+		} while (_evaluation_mode);
 
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice

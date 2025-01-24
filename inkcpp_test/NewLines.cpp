@@ -7,54 +7,47 @@
 
 using namespace ink::runtime;
 
+auto   _ink    = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
+runner _thread = _ink->new_runner();
+
 SCENARIO("a story has the proper line breaks", "[lines]")
 {
 	GIVEN("a story with line breaks")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
-		runner thread = ink->new_runner();
-		WHEN("start thread")
+		WHEN("starting thread")
 		{
-			THEN("thread can continue") { REQUIRE(thread->can_continue()); }
-			WHEN("consume lines")
+			THEN("thread can continue")
 			{
-				std::string line1 = thread->getline();
-				std::string line2 = thread->getline();
-				std::string line3 = thread->getline();
-				std::string line4 = thread->getline();
-				THEN("lines are correct")
-				{
-					REQUIRE(line1 == "Line 1\n");
-					REQUIRE(line2 == "Line 2\n");
-					REQUIRE(line3 == "Line 3\n");
-					REQUIRE(line4 == "Line 4\n");
-				}
+				REQUIRE(_thread->can_continue());
 			}
-			WHEN("consume lines with functions")
+			THEN("consume lines")
 			{
-				thread->move_to(ink::hash_string("Functions"));
-				std::string line1 = thread->getline();
-				std::string line2 = thread->getline();
-
-				THEN("function lines are correct")
-				{
-					REQUIRE(line1 == "Function Line\n");
-					REQUIRE(line2 == "Function Result\n");
-				}
+				CHECK(_thread->getline() == "Line 1\n");
+				CHECK(_thread->getline() == "Line 2\n");
+				CHECK(_thread->getline() == "Line 3\n");
+				CHECK(_thread->getline() == "Line 4\n");
 			}
-			WHEN("consume lines with tunnels")
+		}
+		WHEN("running functions")
+		{
+			_thread->move_to(ink::hash_string("Functions"));
+			CHECK(_thread->getline() == "Function Line\n");
+
+			THEN("consume function result")
 			{
-				thread->move_to(ink::hash_string("Tunnels"));
-				std::string line1 = thread->getline();
-				std::string line2 = thread->getline();
+				CHECK(_thread->getline() == "Function Result");
+			}
+		}
+		WHEN("conuming lines with tunnels")
+		{
+			_thread->move_to(ink::hash_string("Tunnels"));
 
-				THEN("tunnel lines are correct")
-				{
-					REQUIRE(line1 == "Tunnel Line\n");
-					REQUIRE(line2 == "Tunnel Result\n");
-				}
-
-				THEN("thread cannot continue") { REQUIRE(! thread->can_continue()); }
+			THEN("tunnel lines are correct")
+			{
+				CHECK(_thread->getline() == "Tunnel Line\n");
+				CHECK(_thread->getline() == "Tunnel Result\n");
+				CHECK(_thread->getline() == "");
+				CHECK_FALSE(_thread->can_continue());
 			}
 		}
 	}
