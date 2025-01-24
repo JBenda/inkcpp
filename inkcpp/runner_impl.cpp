@@ -768,26 +768,57 @@ bool runner_impl::line_step()
 		}
 		save();
 
-		// Step commands until we're satisfied it doesn't affect the current line
+		// Step execution until we're satisfied it doesn't affect the current line
 		bool keep_stepping = false;
 		bool is_gluing = false;
+		bool is_newline = false;
 		do {
+			if (_ptr == nullptr) {
+				break;
+			}
+
 			step();
 
 			// If we find glue, keep going until the next line
 			if (is_gluing) {
-				keep_stepping = ! _output.ends_with(value_type::newline);
+				is_gluing = ! _output.text_past_save();
 			} else {
 				is_gluing = _output.ends_with(value_type::glue);
-				keep_stepping = is_gluing;
+
+				// Make a new save point to track the glue changes
+				if (is_gluing) {
+					is_newline = true;
+
+					if (_saved) {
+						forget();
+					}
+					save();
+				}
 			}
 
-			// Process any diverts
+			// Are we gluing?
+			keep_stepping = is_gluing;
+
+			// Find the next newline after gluing
+			if (! keep_stepping && is_newline) {
+				keep_stepping |= ! _output.ends_with(value_type::newline);
+
+				// Just one more command...
+				/*if (!keep_stepping) {
+					keep_stepping = true;
+					is_newline = false;
+				}*/
+			}
+
+			// Are we diverting?
 			keep_stepping |= _evaluation_mode;
 
-			// // Inside a function
+			// Are we inside a function?
 			keep_stepping = keep_stepping || _output.ends_with(value_type::func_start);
 			keep_stepping = keep_stepping || _output.ends_with(value_type::func_end);
+
+			// Haven't added more text
+			keep_stepping = keep_stepping || ! _output.text_past_save();
 
 		} while (keep_stepping);
 
@@ -804,7 +835,7 @@ bool runner_impl::line_step()
 				case change_type::newline_removed:
 					// Newline was removed. Proceed as if we never hit it
 					forget();
-					break;
+					return false;
 				case change_type::no_change:
 					break;
 			}
