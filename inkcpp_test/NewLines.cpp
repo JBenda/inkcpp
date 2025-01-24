@@ -7,8 +7,8 @@
 
 using namespace ink::runtime;
 
-auto   _ink    = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
-runner _thread = _ink->new_runner();
+auto   lines_ink    = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
+runner lines_thread = lines_ink->new_runner();
 
 SCENARIO("a story has the proper line breaks", "[lines]")
 {
@@ -18,37 +18,42 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 		{
 			THEN("thread can continue")
 			{
-				REQUIRE(_thread->can_continue());
+				REQUIRE(lines_thread->can_continue());
 			}
 			THEN("consume lines")
 			{
-				CHECK(_thread->getline() == "Line 1\n");
-				CHECK(_thread->getline() == "Line 2\n");
-				CHECK(_thread->getline() == "Line 3\n");
-				CHECK(_thread->getline() == "Line 4\n");
+				CHECK(lines_thread->getline() == "Line 1\n");
+				CHECK(lines_thread->getline() == "Line 2\n");
+				CHECK(lines_thread->getline() == "Line 3\n");
+				CHECK(lines_thread->getline() == "Line 4\n");
 			}
 		}
 		WHEN("running functions")
 		{
-			_thread->move_to(ink::hash_string("Functions"));
-			CHECK(_thread->getline() == "Function Line\n");
+			lines_thread->move_to(ink::hash_string("Functions"));
+			CHECK(lines_thread->getline() == "Function Line\n");
 
 			THEN("consume function result")
 			{
-				CHECK(_thread->getline() == "Function Result");
+				CHECK(lines_thread->getline() == "Function Result");
 			}
 		}
-		WHEN("conuming lines with tunnels")
+		WHEN("consuming lines with tunnels")
 		{
-			_thread->move_to(ink::hash_string("Tunnels"));
+			lines_thread->move_to(ink::hash_string("Tunnels"));
 
 			THEN("tunnel lines are correct")
 			{
-				CHECK(_thread->getline() == "Tunnel Line\n");
-				CHECK(_thread->getline() == "Tunnel Result\n");
-				CHECK(_thread->getline() == "");
-				CHECK_FALSE(_thread->can_continue());
+				CHECK(lines_thread->getline() == "Tunnel Line\n");
+				CHECK(lines_thread->getline() == "Tunnel Result\n");
+				CHECK(lines_thread->getline() == "");
+				CHECK_FALSE(lines_thread->can_continue());
 			}
+		}
+		WHEN("ignoring functions when applying glue")
+		{
+			lines_thread->move_to(ink::hash_string("ignore_functions_when_applying_glue"));
+			CHECK(lines_thread->getline() == "\"I don't see why,\" I reply.\n");
 		}
 	}
 	GIVEN("a complex story")
