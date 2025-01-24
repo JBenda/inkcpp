@@ -268,12 +268,12 @@ size_t basic_stream::find_last_of(value_type type, size_t offset /*= 0*/) const
 	return npos;
 }
 
-bool basic_stream::ends_with(value_type type, size_t offset /*= 0*/) const
+bool basic_stream::ends_with(value_type type, size_t offset /*= npos*/) const
 {
 	if (_size == 0)
 		return false;
 
-	const size_t index = _size - 1;
+	const size_t index = (offset != npos) ? offset : _size - 1;
 	return (index < _size) ? _data[index].type() == type : false;
 }
 

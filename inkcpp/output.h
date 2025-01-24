@@ -98,7 +98,7 @@ namespace ink
 				 * @param offset offset into buffer
 				 * @return true on success, false on failure
 				 */
-				bool ends_with(value_type type, size_t offset = 0) const;
+				bool ends_with(value_type type, size_t offset = npos) const;
 
 				// Checks if there are any elements past the save that
 				//  are non-whitespace strings
