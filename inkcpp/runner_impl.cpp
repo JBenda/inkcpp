@@ -259,10 +259,12 @@ void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOB
 	case tags_clear_type::ALL:
 		_tags.clear();
 		_global_tags_count = 0;
+		_choice_tags_begin = ~0;
 		_choice_tags_count = 0;
 		break;
 	case tags_clear_type::KEEP_GLOBALS:
 		_tags.resize(_global_tags_count);
+		_choice_tags_begin = ~0;
 		_choice_tags_count = 0;
 		break;
 	case tags_clear_type::KEEP_CHOICE:
@@ -272,8 +274,6 @@ void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOB
 		inkAssert(false, "Unhandled clear type %d for tags.", static_cast<int32_t>(type));
 		break;
 	}
-
-	_choice_tags_begin = ~0;
 }
 
 void runner_impl::jump(ip_t dest, bool record_visits)
@@ -453,16 +453,10 @@ runner_impl::runner_impl(const story_impl* data, globals global)
 		*data,
 		static_cast<const runner_interface&>(*this)
 	)
-	, _backup(nullptr)
-	, _done(nullptr)
-	, _choices()
+	, _ptr(_story->instructions())
 	, _container(ContainerData{})
-	, _rng(time(NULL))
+	, _rng(time(nullptr))
 {
-	_ptr               = _story->instructions();
-	_evaluation_mode   = false;
-	_choice_tags_begin = -1;
-
 	// register with globals
 	_globals->add_runner(this);
 	if (_globals->lists()) {
@@ -761,9 +755,8 @@ runner_impl::change_type runner_impl::detect_change() const
 
 bool runner_impl::line_step()
 {
+	// Track if added tags are global ones
 	const bool at_story_start = _ptr == _story->instructions();
-	const size_t tags_before = num_tags();
-	const size_t choices_before = num_choices();
 
 	// Step the interpreter until we've parsed all tags for the line
 	size_t last_newline = basic_stream::npos;
@@ -773,16 +766,15 @@ bool runner_impl::line_step()
 		last_newline = _output.find_last_of(value_type::newline);
 	}
 
-	_tags_where = tags_level::LINE;
-
-	if (at_story_start) {
-		// Copy global tags to the first line
-		if (_global_tags_count > 0) {
-			for (size_t i = 0; i < _global_tags_count; ++i) {
-				add_tag(get_global_tag(i), tags_level::LINE);
-			}
+	// Copy global tags to the first line
+	if (at_story_start &&_global_tags_count > 0) {
+		for (size_t i = 0; i < _global_tags_count; ++i) {
+			add_tag(get_global_tag(i), tags_level::LINE);
 		}
 	}
+
+	// Next tags are always added to the line
+	_tags_where = tags_level::LINE;
 
 	// Unless we are out of content, we are going to try
 	//  to continue a little further. This is to check for
@@ -1222,11 +1214,14 @@ void runner_impl::step()
 
 					if (_choice_tags_begin != ~0) {
 						// Retroactively mark added tags as choice tags
-						_choice_tags_count = _tags.size() - _choice_tags_begin;
+						const size_t tags_count = _tags.size() - _choice_tags_begin;
+						_choice_tags_count += tags_count;
 						_tags_where = tags_level::CHOICE;
 
 						tags_start = _tags.begin() + _choice_tags_begin;
-						tags_end = tags_start + _choice_tags_count;
+						tags_end = tags_start + tags_count;
+
+						_choice_tags_begin = ~0;
 					}
 
 					// Create choice and record it
