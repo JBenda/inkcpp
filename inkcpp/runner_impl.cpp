@@ -193,7 +193,7 @@ void runner_impl::clear_choices()
 
 snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 {
-	// Push tag to end of the stack
+	// Push tag to the end of the stack
 	_tags.push() = value;
 
 	// Determine insertion index for tag level
@@ -209,7 +209,7 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 		break;
 	case tags_level::LINE:
 		index = _tags.size() - 1;
-		break;
+		return _tags[index];
 	default:
 		inkAssert(false, "Failed to add tag at unhandled location %d.",
 			static_cast<int32_t>(where));
@@ -221,7 +221,7 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 		return _tags[index];
 	}
 
-	// Special case: either we swap or we don't
+	// Special case: Either we swap or we don't
 	if (_tags.size() == 2) {
 		if (index == 0) {
 			std::iter_swap(_tags.begin() + 1, _tags.begin());
@@ -244,15 +244,15 @@ void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOB
 {
 	// To explain how this works, let's imagine we have the following tags:
 	// 
-	// index | tag value      | level
-	// ------|----------------|---------
-	// 0     | global_tag     | GLOBAL
-	// 1     | choice_tag_1   | CHOICE
-	// 2     | choice_tag_2   | CHOICE
-	// 3     | content_tag_1  | LINE
+	// index | length | tag value      | level
+	// ------|--------|----------------|---------
+	// 0     | 1      | global_tag     | GLOBAL
+	// 1     | 2      | choice_tag_1   | CHOICE
+	// 2     | 3      | choice_tag_2   | CHOICE
+	// 3     | 4      | content_tag_1  | LINE
 	//
-	// * Clearing all tags means we can clear the entire array and clear the counts
-	// * Keeping the global tags means resizing to length 1 and clear tags count
+	// * Clearing all tags means we clear the entire array and clear the counts
+	// * Keeping the global tags means resizing to length 1 and clearing the tags count
 	// * Keeping the choice tags means resizing to length 3 (globals + choices)
 
 	switch (type) {
