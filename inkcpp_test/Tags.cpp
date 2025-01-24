@@ -327,14 +327,12 @@ SCENARIO("run story with tags", "[tags][story]")
 			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 2);
 			auto choice_list = _thread->begin();
 
-			THEN("first choice has no tags")
+			THEN("check tags on choices")
 			{
 				CHECK(std::string(choice_list[0].text()) == "a");
 				CHECK_FALSE(choice_list[0].has_tags());
 				REQUIRE(choice_list[0].num_tags() == 0);
-			}
-			THEN("second choice has two tags")
-			{
+			
 				CHECK(std::string(choice_list[1].text()) == "b");
 				CHECK(choice_list[1].has_tags());
 				REQUIRE(choice_list[1].num_tags() == 2);
@@ -362,14 +360,12 @@ SCENARIO("run story with tags", "[tags][story]")
 			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 3);
 			auto choice_list = _thread->begin();
 
-			THEN("first choice has no tags")
+			THEN("check tags on choices")
 			{
 				CHECK(std::string(choice_list[0].text()) == "e");
 				CHECK_FALSE(choice_list[0].has_tags());
 				REQUIRE(choice_list[0].num_tags() == 0);
-			}
-			THEN("second choice has four tags")
-			{
+
 				CHECK(std::string(choice_list[1].text()) == "f with detail");
 				CHECK(choice_list[1].has_tags());
 				REQUIRE(choice_list[1].num_tags() == 4);
@@ -377,9 +373,7 @@ SCENARIO("run story with tags", "[tags][story]")
 				CHECK(std::string(choice_list[1].get_tag(1)) == "shared_tag_2");
 				CHECK(std::string(choice_list[1].get_tag(2)) == "choice_tag");
 				CHECK(std::string(choice_list[1].get_tag(3)) == "choice_tag_2");
-			}
-			THEN("third choice has one tag")
-			{
+
 				CHECK(std::string(choice_list[2].text()) == "g");
 				CHECK(choice_list[2].has_tags());
 				REQUIRE(choice_list[2].num_tags() == 1);
