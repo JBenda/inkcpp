@@ -22,7 +22,6 @@ SCENARIO("Observer", "[variables][observer]")
 
 		WHEN("Run without observers")
 		{
-			debug.clear();
 			CHECK(thread->getall() == "hello line 1 1 hello line 2 5 test line 3 5\n");
 
 			std::string output = debug.str();

@@ -7,6 +7,7 @@
 #include "runner_impl.h"
 
 #include <algorithm>
+#include <iomanip>
 
 #include "choice.h"
 #include "command.h"
@@ -20,6 +21,15 @@
 
 namespace ink::runtime
 {
+static void write_hash(std::ostream& out, ink::hash_t value)
+{
+	using namespace std;
+
+	ios::fmtflags state{out.flags()};
+	out << "0x" << hex << setfill('0') << setw(8) << static_cast<uint32_t>(value);
+	out.flags(state);
+}
+
 const choice* runner_interface::get_choice(size_t index) const
 {
 	inkAssert(index < num_choices(), "Choice out of bounds!");
@@ -872,7 +882,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 		CommandFlag flag = read<CommandFlag>();
 
 		if (debug_stream != nullptr) {
-			*debug_stream << "cmd " << cmd << " flags " << flag << std::endl;
+			*debug_stream << "cmd " << cmd << " flags " << flag << " ";
 		}
 
 		// If we're falling and we hit a non-fallthrough command, stop the fall.
@@ -891,6 +901,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					// == Value Commands ==
 				case Command::STR: {
 					const char* str = read<const char*>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "str \"" << str << "\"";
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::string>(str));
 					} else {
@@ -899,6 +914,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 				} break;
 				case Command::INT: {
 					int val = read<int>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "int " << val;
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::int32>(val));
 					}
@@ -906,6 +926,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 				} break;
 				case Command::BOOL: {
 					bool val = read<int>() ? true : false;
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "bool " << (val ? "true" : "false");
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::boolean>(val));
 					} else {
@@ -914,6 +939,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 				} break;
 				case Command::FLOAT: {
 					float val = read<float>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "float " << val;
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::float32>(val));
 					}
@@ -921,6 +951,12 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 				} break;
 				case Command::VALUE_POINTER: {
 					hash_t val = read<hash_t>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "value_pointer ";
+						write_hash(*debug_stream, val);
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::value_pointer>(val, static_cast<char>(flag) - 1));
 					} else {
@@ -929,6 +965,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 				} break;
 				case Command::LIST: {
 					list_table::list list(read<int>());
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "list " << list.lid;
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::list>(list));
 					} else {
@@ -970,6 +1011,10 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 				case Command::DIVERT: {
 					// Find divert address
 					uint32_t target = read<uint32_t>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "target " << target;
+					}
 
 					// Check for condition
 					if (flag & CommandFlag::DIVERT_HAS_CONDITION && ! _eval.pop().truthy(_globals->lists())) {
@@ -1014,6 +1059,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					// Get variable value
 					hash_t variable = read<hash_t>();
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "variable ";
+						write_hash(*debug_stream, variable);
+					}
+
 					// Check for condition
 					if (flag & CommandFlag::DIVERT_HAS_CONDITION && ! _eval.pop().truthy(_globals->lists())) {
 						break;
@@ -1044,6 +1094,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					} else {
 						target = read<uint32_t>();
 					}
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "target " << target;
+					}
+
 					start_frame<frame_type::tunnel>(target);
 				} break;
 				case Command::FUNCTION: {
@@ -1057,6 +1112,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					} else {
 						target = read<uint32_t>();
 					}
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "target " << target;
+					}
+
 					if (! (flag & CommandFlag::FALLBACK_FUNCTION)) {
 						start_frame<frame_type::function>(target);
 					} else {
@@ -1094,14 +1154,24 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 						inkAssert(t == thread, "ref_stack and stack should be in sync!");
 					}
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "thread " << thread;
+					}
+
 					// Push that thread onto our thread stack
 					_threads.push(thread);
 				} break;
 
-				// == set temporärie variable
+				// == set temporary variable
 				case Command::DEFINE_TEMP: {
 					hash_t variableName = read<hash_t>();
 					bool   is_redef     = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "variable_name ";
+						write_hash(*debug_stream, variableName);
+						*debug_stream << " is_redef " << (is_redef ? "yes" : "no");
+					}
 
 					// Get the top value and put it into the variable
 					value v = _eval.pop();
@@ -1117,6 +1187,13 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					// If not, we're setting a global (temporary variables are explicitely defined as such,
 					//  where globals are defined using SET_VARIABLE).
 					value val = _eval.pop();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "variable_name ";
+						write_hash(*debug_stream, variableName);
+						*debug_stream << " is_redef " << (is_redef ? "yes" : "no");
+					}
+
 					if (is_redef) {
 						set_var(variableName, val, is_redef);
 					} else {
@@ -1131,6 +1208,12 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 
 					// Interpret flag as argument count
 					int numArguments = ( int ) flag;
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "function_name ";
+						write_hash(*debug_stream, functionName);
+						*debug_stream << " numArguments " << numArguments;
+					}
 
 					// find and execute. will automatically push a valid if applicable
 					auto* fn = _functions.find(functionName);
@@ -1162,6 +1245,12 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					hash_t       variableName = read<hash_t>();
 					const value* val          = get_var(variableName);
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "variable_name ";
+						write_hash(*debug_stream, variableName);
+						*debug_stream << " val \"" << val << "\"";
+					}
+
 					inkAssert(val != nullptr, "Could not find variable!");
 					_eval.push(*val);
 					break;
@@ -1192,7 +1281,13 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 				} break;
 
 				case Command::TAG: {
-					add_tag(read<const char*>(), _tags_where);
+					const char* tag = read<const char*>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "tag \"" << tag << "\"";
+					}
+
+					add_tag(tag, _tags_where);
 					_tag_mode = false;
 				} break;
 
@@ -1201,6 +1296,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					if (_string_mode && _choice_tags_begin == ~0) {
 						_choice_tags_begin = _tags.size();
 					}
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "tag \"" << tag << "\"";
+					}
+
 					add_tag(tag, _tags_where);
 					_tag_mode = false;
 				} break;
@@ -1209,6 +1309,10 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 				case Command::CHOICE: {
 					// Read path
 					uint32_t path = read<uint32_t>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "path " << path;
+					}
 
 					// If we're a once only choice, make sure our destination hasn't
 					//  been visited
@@ -1360,6 +1464,10 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					int32_t seed = _eval.pop().get<value_type::int32>();
 					_rng.srand(seed);
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "seed " << seed;
+					}
+
 					_eval.push(values::null);
 				} break;
 
@@ -1375,6 +1483,9 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 			}
 		}
 
+		if (debug_stream != nullptr) {
+			*debug_stream << std::endl;
+		}
 	}
 #ifndef INK_ENABLE_UNREAL
 	catch (...) {
