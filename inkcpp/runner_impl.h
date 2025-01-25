@@ -42,6 +42,12 @@ public:
 	// used by the globals object to do garbage collection
 	void mark_used(string_table&, list_table&) const;
 
+	// enable debugging when stepping through the execution
+	void set_debug_enabled(std::ostream* debug_stream)
+	{
+		_debug_stream = debug_stream;
+	}
+
 #pragma region runner Implementation
 
 	// sets seed for prng in runner
@@ -121,14 +127,14 @@ protected:
 
 private:
 	// Advances the interpreter by a line. This fills the output buffer
-	void advance_line();
+	void advance_line(std::ostream* debug_stream = nullptr);
 
 	// Steps the interpreter a single instruction and returns
 	//  when it has hit a new line
-	bool line_step();
+	bool line_step(std::ostream* debug_stream = nullptr);
 
 	// Steps the interpreter a single instruction
-	void step();
+	void step(std::ostream* debug_stream = nullptr);
 
 	// Resets the runtime
 	void reset();
@@ -308,6 +314,8 @@ private:
 	bool _saved = false;
 
 	prng _rng;
+
+	std::ostream* _debug_stream = nullptr;
 };
 
 template<bool dynamic, size_t N>

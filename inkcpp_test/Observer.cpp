@@ -1,5 +1,6 @@
 #include "catch.hpp"
 
+#include <../runner_impl.h>
 #include <choice.h>
 #include <compiler.h>
 #include <globals.h>
@@ -14,10 +15,18 @@ SCENARIO("Observer", "[variables][observer]")
 	{
 		auto ink		 = story::from_file(INK_TEST_RESOURCE_DIR "ObserverStory.bin");
 		auto globals = ink->new_globals();
-		runner thread	= ink->new_runner(globals);
+		auto thread  = ink->new_runner(globals).cast<internal::runner_impl>();
+
+		std::stringstream debug;
+		thread->set_debug_enabled(&debug);
+
 		WHEN("Run without observers")
 		{
+			debug.clear();
 			CHECK(thread->getall() == "hello line 1 1 hello line 2 5 test line 3 5\n");
+
+			std::string output = debug.str();
+			int         i      = 0;
 		}
 		WHEN("Run with observers read only, with specific type")
 		{

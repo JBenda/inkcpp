@@ -484,7 +484,7 @@ runner_impl::~runner_impl()
 runner_impl::line_type runner_impl::getline()
 {
 	// Advance interpreter one line and write to output
-	advance_line();
+	advance_line(_debug_stream);
 
 #ifdef INK_ENABLE_STL
 	line_type result{ _output.get() };
@@ -503,6 +503,10 @@ runner_impl::line_type runner_impl::getline()
 
 runner_impl::line_type runner_impl::getall()
 {
+	if (_debug_stream != nullptr) {
+		_debug_stream->clear();
+	}
+
 	line_type result;
 
 	while (can_continue()) {
@@ -529,14 +533,14 @@ void runner_impl::getall(std::ostream& out)
 }
 #endif
 
-void runner_impl::advance_line()
+void runner_impl::advance_line(std::ostream* debug_stream /*= nullptr*/)
 {
 	clear_tags(tags_clear_type::KEEP_GLOBALS);
 
 	// Step while we still have instructions to execute
 	while (_ptr != nullptr) {
 		// Stop if we hit a new line
-		if (line_step()) {
+		if (line_step(debug_stream)) {
 			break;
 		}
 	}
@@ -688,7 +692,7 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 #ifdef INK_ENABLE_CSTD
 const char* runner_impl::getline_alloc()
 {
-	advance_line();
+	advance_line(_debug_stream);
 	const char* res = _output.get_alloc(_globals->strings(), _globals->lists());
 	if (! has_choices() && _fallback_choice) {
 		choose(~0);
@@ -734,7 +738,7 @@ runner_impl::change_type runner_impl::detect_change() const
 
 }
 
-bool runner_impl::line_step()
+bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 {
 	// Track if added tags are global ones
 	const bool at_story_start = _ptr == _story->instructions();
@@ -742,7 +746,7 @@ bool runner_impl::line_step()
 	// Step the interpreter until we've parsed all tags for the line
 	size_t last_newline = basic_stream::npos;
 	while (_ptr != nullptr && last_newline == basic_stream::npos) {
-		step();
+		step(debug_stream);
 
 		last_newline = _output.find_last_of(value_type::newline);
 	}
@@ -777,7 +781,7 @@ bool runner_impl::line_step()
 				break;
 			}
 
-			step();
+			step(debug_stream);
 
 			// If we find glue, keep going until the next line
 			if (is_gluing) {
@@ -855,7 +859,7 @@ bool runner_impl::line_step()
 	return true;
 }
 
-void runner_impl::step()
+void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 {
 #ifndef INK_ENABLE_UNREAL
 	try
@@ -866,6 +870,10 @@ void runner_impl::step()
 		// Load current command
 		Command     cmd  = read<Command>();
 		CommandFlag flag = read<CommandFlag>();
+
+		if (debug_stream != nullptr) {
+			*debug_stream << "cmd " << cmd << " flags " << flag << std::endl;
+		}
 
 		// If we're falling and we hit a non-fallthrough command, stop the fall.
 		if (_is_falling
