@@ -84,14 +84,14 @@ public:
 	choice& add_choice();
 	void    clear_choices();
 
-	enum class tags_level {
+	enum class tags_level: uint8_t {
 		GLOBAL, //< global tags can be retrieved separately
 		CHOICE, //< tags for the current choice list, if any
 		LINE,   //< tags for the current line
 	};
 	snap_tag& add_tag(const char* value, tags_level where);
 
-	enum class tags_clear_type {
+	enum class tags_clear_type : uint8_t {
 		ALL,          //< clear all tags, including globals
 		KEEP_GLOBALS, //< keep global tags (default)
 		KEEP_CHOICE,  //< keep current choice list tags
