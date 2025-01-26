@@ -640,6 +640,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr                         = snap_write(ptr, _rng.get_state(), should_write);
 	ptr                         = snap_write(ptr, _evaluation_mode, should_write);
 	ptr                         = snap_write(ptr, _string_mode, should_write);
+	ptr                         = snap_write(ptr, _tag_mode, should_write);
 	ptr                         = snap_write(ptr, _saved_evaluation_mode, should_write);
 	ptr                         = snap_write(ptr, _saved, should_write);
 	ptr                         = snap_write(ptr, _is_falling, should_write);
@@ -677,6 +678,7 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	_rng.srand(seed);
 	ptr                        = snap_read(ptr, _evaluation_mode);
 	ptr                        = snap_read(ptr, _string_mode);
+	ptr                        = snap_read(ptr, _tag_mode);
 	ptr                        = snap_read(ptr, _saved_evaluation_mode);
 	ptr                        = snap_read(ptr, _saved);
 	ptr                        = snap_read(ptr, _is_falling);
