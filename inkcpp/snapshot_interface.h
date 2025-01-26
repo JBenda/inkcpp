@@ -12,10 +12,11 @@
 namespace ink::runtime::internal
 {
 	class globals_impl;
-	class value;
-	class string_table;
 	template<typename,bool,size_t>
 	class managed_array;
+	class snap_tag;
+	class string_table;
+	class value;
 
 	class snapshot_interface {
 	public:
@@ -44,12 +45,12 @@ namespace ink::runtime::internal
 		struct snapper {
 			const string_table& strings;
 			const char* story_string_table;
-			const char*const* current_runner_tags;
+			const snap_tag* runner_tags = nullptr;
 		};
 		struct loader {
 			managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 			const char* story_string_table;
-			const char*const* current_runner_tags;
+			const snap_tag* runner_tags = nullptr;
 		};
 		size_t snap(unsigned char* data, snapper&) const { inkFail("Snap function not implemented"); return 0; };
 		const unsigned char* snap_load(const unsigned char* data, loader&) { inkFail("Snap function not implemented"); return nullptr;};

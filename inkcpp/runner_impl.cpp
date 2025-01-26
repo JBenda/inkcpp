@@ -630,7 +630,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
-	snapper.current_runner_tags = _tags[0].ptr();
+	snapper.runner_tags         = _tags.begin();
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
 	ptr                         = snap_write(ptr, offset, should_write);
 	offset                      = _backup - _story->instructions();
@@ -689,7 +689,7 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	ptr                        = snap_read(ptr, _global_tags_count);
 	ptr                        = snap_read(ptr, _choice_tags_count);
 	ptr                        = _tags.snap_load(ptr, loader);
-	loader.current_runner_tags = _tags[0].ptr();
+	loader.runner_tags         = _tags.begin();
 	ptr                        = _container.snap_load(ptr, loader);
 	ptr                        = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;

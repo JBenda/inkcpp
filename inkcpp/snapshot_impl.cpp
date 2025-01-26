@@ -128,9 +128,10 @@ namespace ink::runtime::internal
 			ptr = snap_write(ptr, false, should_write);
 		} else {
 			ptr = snap_write(ptr, true, should_write);
-			// #TODO: Fix saving snapshot tags
-			// std::uintptr_t offset = _tags != nullptr ? _tags - snapper.current_runner_tags : 0;
-			// ptr = snap_write(ptr, offset, should_write);
+			std::uintptr_t offset_start = _tags_start != nullptr ? _tags_start - snapper.runner_tags : 0;
+			ptr = snap_write(ptr, offset_start, should_write);
+			std::uintptr_t offset_end   = _tags_end != nullptr ? _tags_end - snapper.runner_tags : 0;
+			ptr = snap_write(ptr, offset_end, should_write);
 		}
 		ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);
 		return ptr - data;
@@ -144,10 +145,12 @@ namespace ink::runtime::internal
 		bool has_tags;
 		ptr = snap_read(ptr, has_tags);
 		if (has_tags) {
-			// #TODO: Fix loading snapshot tags
-			// std::uintptr_t offset;
-			// ptr = snap_read(ptr, offset);
-			// _tags = loader.current_runner_tags + offset;
+			std::uintptr_t offset_start = 0;
+			ptr                         = snap_read(ptr, offset_start);
+			_tags_start                 = loader.runner_tags + offset_start;
+			std::uintptr_t offset_end   = 0;
+			ptr                         = snap_read(ptr, offset_end);
+			_tags_end                   = loader.runner_tags + offset_end;
 		} else {
 			_tags_start = nullptr;
 			_tags_end = nullptr;
