@@ -216,34 +216,13 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 			index = _global_tags_count + _choice_tags_count;
 			_choice_tags_count++;
 			break;
-		case tags_level::LINE: index = _tags.size() - 1; return _tags[index];
+		case tags_level::LINE: index = _tags.size(); break;
 		default:
 			inkAssert(false, "Failed to add tag at unhandled location %d.", static_cast<int32_t>(where));
 			break;
 	}
 
-	// Nothing to do
-	if (index == _tags.size() - 1) {
-		return _tags[index];
-	}
-
-	// Special case: Either we swap or we don't
-	if (_tags.size() == 2) {
-		if (index == 0) {
-			std::iter_swap(_tags.begin() + 1, _tags.begin());
-		}
-		return _tags[index];
-	}
-
-	// Swap items backwards until we reach our desired index
-	const size_t count = _tags.size() - index - 1;
-	snap_tag*    it    = _tags.begin() + _tags.size() - 2;
-	for (size_t i = 0; i < count; ++i) {
-		std::iter_swap(it + 1, it);
-		it--;
-	}
-
-	return _tags[index];
+	return _tags.insert(index) = value;
 }
 
 void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOBALS*/)
@@ -663,24 +642,24 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
-	ptr                        = snap_read(ptr, _evaluation_mode);
-	ptr                        = snap_read(ptr, _string_mode);
-	ptr                        = snap_read(ptr, _tag_mode);
-	ptr                        = snap_read(ptr, _saved_evaluation_mode);
-	ptr                        = snap_read(ptr, _saved);
-	ptr                        = snap_read(ptr, _is_falling);
-	ptr                        = _output.snap_load(ptr, loader);
-	ptr                        = _stack.snap_load(ptr, loader);
-	ptr                        = _ref_stack.snap_load(ptr, loader);
-	ptr                        = _eval.snap_load(ptr, loader);
-	ptr                        = snap_read(ptr, _tags_where);
-	ptr                        = snap_read(ptr, _choice_tags_begin);
-	ptr                        = snap_read(ptr, _global_tags_count);
-	ptr                        = snap_read(ptr, _choice_tags_count);
-	ptr                        = _tags.snap_load(ptr, loader);
-	loader.runner_tags         = _tags.begin();
-	ptr                        = _container.snap_load(ptr, loader);
-	ptr                        = _threads.snap_load(ptr, loader);
+	ptr                = snap_read(ptr, _evaluation_mode);
+	ptr                = snap_read(ptr, _string_mode);
+	ptr                = snap_read(ptr, _tag_mode);
+	ptr                = snap_read(ptr, _saved_evaluation_mode);
+	ptr                = snap_read(ptr, _saved);
+	ptr                = snap_read(ptr, _is_falling);
+	ptr                = _output.snap_load(ptr, loader);
+	ptr                = _stack.snap_load(ptr, loader);
+	ptr                = _ref_stack.snap_load(ptr, loader);
+	ptr                = _eval.snap_load(ptr, loader);
+	ptr                = snap_read(ptr, _tags_where);
+	ptr                = snap_read(ptr, _choice_tags_begin);
+	ptr                = snap_read(ptr, _global_tags_count);
+	ptr                = snap_read(ptr, _choice_tags_count);
+	ptr                = _tags.snap_load(ptr, loader);
+	loader.runner_tags = _tags.begin();
+	ptr                = _container.snap_load(ptr, loader);
+	ptr                = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
 	ptr              = snap_read(ptr, has_fallback_choice);
 	_fallback_choice = nullopt;

@@ -298,9 +298,8 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "First line has global tags only\n");
 			THEN("it has the global tags")
 			{
-				CHECK(_thread->has_tags());
-				CHECK(_thread->num_tags() == 1);
-				CHECK(std::string(_thread->get_tag(0)) == "global_tag");
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
 			}
 		}
 		WHEN("on the second line")

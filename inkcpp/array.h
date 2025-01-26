@@ -78,10 +78,25 @@ public:
 				extend();
 			}
 		} else {
-			inkAssert(_size <= _capacity, "Stack Overflow!");
-			/// FIXME silent fail!!
+			inkAssert(_size <= _capacity, "Try to append to a full array!");
+			// TODO(JBenda): Silent fail?
 		}
 		return data()[_size++];
+	}
+
+	virtual T& insert(size_t position)
+	{
+		inkAssert(
+		    position <= _size,
+		    "Array must be dense, cannot insert value at position larger then array.size."
+		);
+		push();
+		if (_size >= 2) {
+			for (size_t i = _size - 2; i >= position && i < std::numeric_limits<size_t>::max(); --i) {
+				data()[i + 1] = data()[i];
+			}
+		}
+		return data()[position];
 	}
 
 	void clear() { _size = 0; }
@@ -154,7 +169,17 @@ public:
 	{
 	}
 
-	void restore() { base::resize(_last_size); }
+	virtual T& insert(size_t position) override
+	{
+		inkAssert(position >= _last_size, "Cannot insert data before last save point.");
+		return base::insert(position);
+	}
+
+	void restore()
+	{
+		base::resize(_last_size);
+		_last_size = 0;
+	}
 
 	void save() { _last_size = this->size(); }
 
@@ -286,7 +311,6 @@ private:
 	// null
 	const T _null;
 };
-
 
 template<typename T>
 inline void basic_restorable_array<T>::set(size_t index, const T& value)
