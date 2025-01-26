@@ -22,14 +22,9 @@ namespace runtime {
 	}
 
 	choice& choice::setup(
-		internal::basic_stream& in,
-		internal::string_table& strings,
-		internal::list_table& lists,
-		int index,
-		uint32_t path,
-		thread_t thread,
-		const internal::snap_tag* tags_start,
-		const internal::snap_tag* tags_end
+	    internal::basic_stream& in, internal::string_table& strings, internal::list_table& lists,
+	    int index, uint32_t path, thread_t thread, const internal::snap_tag* tags_start,
+	    const internal::snap_tag* tags_end
 	)
 	{
 		// Index/path
@@ -50,8 +45,7 @@ namespace runtime {
 				text = strings.duplicate(data.get<internal::value_type::string>());
 				in.discard( 2 );
 				break;
-			default:
-				text = in.get_alloc(strings, lists);
+			default: text = in.get_alloc(strings, lists);
 			}
 		} else {
 			// Non-string. Must allocate
@@ -62,11 +56,11 @@ namespace runtime {
 		while (*end != '\0') {
 			++end;
 		}
-		end = ink::runtime::internal::clean_string<true, true>(text, end);
+		end  = ink::runtime::internal::clean_string<true, true>(text, end);
 		*end = '\0';
 
 		_text = text;
-		
+
 		return *this;
 	}
 }

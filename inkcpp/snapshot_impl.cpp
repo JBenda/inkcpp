@@ -124,16 +124,16 @@ namespace ink::runtime::internal
 		ptr = snap_write(ptr, _path, should_write);
 		ptr = snap_write(ptr, _thread, should_write);
 		// handle difference between no tag and first tag
-		if (num_tags() == 0) {
-			ptr = snap_write(ptr, false, should_write);
-		} else {
-			ptr = snap_write(ptr, true, should_write);
-			std::uintptr_t offset_start = _tags_start != nullptr ? _tags_start - snapper.runner_tags : 0;
-			ptr = snap_write(ptr, offset_start, should_write);
-			std::uintptr_t offset_end   = _tags_end != nullptr ? _tags_end - snapper.runner_tags : 0;
-			ptr = snap_write(ptr, offset_end, should_write);
-		}
-		ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);
+	  if (num_tags() == 0) {
+		  ptr = snap_write(ptr, false, should_write);
+	  } else {
+		  ptr = snap_write(ptr, true, should_write);
+		  std::uintptr_t offset_start = _tags_start != nullptr ? _tags_start - snapper.runner_tags : 0;
+		  ptr                         = snap_write(ptr, offset_start, should_write);
+		  std::uintptr_t offset_end   = _tags_end != nullptr ? _tags_end - snapper.runner_tags : 0;
+		  ptr                         = snap_write(ptr, offset_end, should_write);
+	  }
+	  ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);
 		return ptr - data;
 	}
 
@@ -145,16 +145,16 @@ namespace ink::runtime::internal
 		bool has_tags;
 		ptr = snap_read(ptr, has_tags);
 		if (has_tags) {
-			std::uintptr_t offset_start = 0;
-			ptr                         = snap_read(ptr, offset_start);
-			_tags_start                 = loader.runner_tags + offset_start;
-			std::uintptr_t offset_end   = 0;
-			ptr                         = snap_read(ptr, offset_end);
-			_tags_end                   = loader.runner_tags + offset_end;
-		} else {
-			_tags_start = nullptr;
-			_tags_end = nullptr;
-		}
+		  std::uintptr_t offset_start = 0;
+		  ptr                         = snap_read(ptr, offset_start);
+		  _tags_start                 = loader.runner_tags + offset_start;
+		  std::uintptr_t offset_end   = 0;
+		  ptr                         = snap_read(ptr, offset_end);
+		  _tags_end                   = loader.runner_tags + offset_end;
+	  } else {
+		  _tags_start = nullptr;
+		  _tags_end   = nullptr;
+	  }
 		size_t string_id;
 		ptr = snap_read(ptr, string_id);
 		_text = loader.string_table[string_id];

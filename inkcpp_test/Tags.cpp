@@ -24,7 +24,7 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 {
 	story* ink = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
 
-	using tags_level = internal::runner_impl::tags_level;
+	using tags_level      = internal::runner_impl::tags_level;
 	using tags_clear_type = internal::runner_impl::tags_clear_type;
 
 	GIVEN("an empty thread")
@@ -41,7 +41,10 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 
 		WHEN("adding a global tag")
 		{
-			CHECK(std::string((const char*)*thread->add_tag("kittens", tags_level::GLOBAL).ptr()) == "kittens");
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("kittens", tags_level::GLOBAL).ptr())
+			    == "kittens"
+			);
 
 			REQUIRE(thread->num_global_tags() == 1);
 			CHECK(std::string(thread->get_global_tag(0)) == "kittens");
@@ -50,7 +53,10 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 
 		WHEN("adding a choice tag")
 		{
-			CHECK(std::string((const char*)*thread->add_tag("chance", tags_level::CHOICE).ptr()) == "chance");
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("chance", tags_level::CHOICE).ptr())
+			    == "chance"
+			);
 
 			REQUIRE(thread->num_global_tags() == 0);
 			REQUIRE(thread->num_tags() == 1);
@@ -59,7 +65,10 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 
 		WHEN("adding a line tag")
 		{
-			CHECK(std::string((const char*)*thread->add_tag("chicken", tags_level::LINE).ptr()) == "chicken");
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("chicken", tags_level::LINE).ptr())
+			    == "chicken"
+			);
 
 			REQUIRE(thread->num_global_tags() == 0);
 			REQUIRE(thread->num_tags() == 1);
@@ -68,8 +77,13 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 
 		WHEN("adding two tags of the same type")
 		{
-			CHECK(std::string((const char*)*thread->add_tag("bacon", tags_level::LINE).ptr()) == "bacon");
-			CHECK(std::string((const char*)*thread->add_tag("cheese", tags_level::LINE).ptr()) == "cheese");
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("bacon", tags_level::LINE).ptr()) == "bacon"
+			);
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("cheese", tags_level::LINE).ptr())
+			    == "cheese"
+			);
 
 			REQUIRE(thread->num_global_tags() == 0);
 			REQUIRE(thread->num_tags() == 2);
@@ -79,10 +93,24 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 
 		WHEN("adding multiple tags in the correct order")
 		{
-			CHECK(std::string((const char*)*thread->add_tag("written by wake", tags_level::GLOBAL).ptr()) == "written by wake");
-			CHECK(std::string((const char*)*thread->add_tag("turn on flashlight", tags_level::CHOICE).ptr()) == "turn on flashlight");
-			CHECK(std::string((const char*)*thread->add_tag("cover", tags_level::CHOICE).ptr()) == "cover");
-			CHECK(std::string((const char*)*thread->add_tag("point at darkness", tags_level::LINE).ptr()) == "point at darkness");
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("written by wake", tags_level::GLOBAL).ptr())
+			    == "written by wake"
+			);
+			CHECK(
+			    std::string(
+			        ( const char* ) *thread->add_tag("turn on flashlight", tags_level::CHOICE).ptr()
+			    )
+			    == "turn on flashlight"
+			);
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("cover", tags_level::CHOICE).ptr())
+			    == "cover"
+			);
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("point at darkness", tags_level::LINE).ptr())
+			    == "point at darkness"
+			);
 
 			REQUIRE(thread->num_global_tags() == 1);
 			CHECK(std::string(thread->get_global_tag(0)) == "written by wake");
@@ -94,12 +122,26 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 
 		WHEN("adding multiple tags in the wrong order")
 		{
-			CHECK(std::string((const char*)*thread->add_tag("across", tags_level::LINE).ptr()) == "across");
-			CHECK(std::string((const char*)*thread->add_tag("fox", tags_level::CHOICE).ptr()) == "fox");
-			CHECK(std::string((const char*)*thread->add_tag("the", tags_level::GLOBAL).ptr()) == "the");
-			CHECK(std::string((const char*)*thread->add_tag("time", tags_level::LINE).ptr()) == "time");
-			CHECK(std::string((const char*)*thread->add_tag("dashes", tags_level::CHOICE).ptr()) == "dashes");
-			CHECK(std::string((const char*)*thread->add_tag("busy", tags_level::GLOBAL).ptr()) == "busy");
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("across", tags_level::LINE).ptr())
+			    == "across"
+			);
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("fox", tags_level::CHOICE).ptr()) == "fox"
+			);
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("the", tags_level::GLOBAL).ptr()) == "the"
+			);
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("time", tags_level::LINE).ptr()) == "time"
+			);
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("dashes", tags_level::CHOICE).ptr())
+			    == "dashes"
+			);
+			CHECK(
+			    std::string(( const char* ) *thread->add_tag("busy", tags_level::GLOBAL).ptr()) == "busy"
+			);
 
 			REQUIRE(thread->num_global_tags() == 2);
 			CHECK(std::string(thread->get_global_tag(0)) == "the");
@@ -243,17 +285,14 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 	}
 }
 
-story* _ink = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
+story* _ink    = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
 runner _thread = _ink->new_runner();
 
 SCENARIO("run story with tags", "[tags][story]")
 {
 	GIVEN("a story with tags")
 	{
-		WHEN("starting the thread")
-		{
-			CHECK_FALSE(_thread->has_tags());
-		}
+		WHEN("starting the thread") { CHECK_FALSE(_thread->has_tags()); }
 		WHEN("on the first line")
 		{
 			CHECK(_thread->getline() == "First line has global tags only\n");
@@ -269,7 +308,8 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "Second line has one tag\n");
 			THEN("it has one tag")
 			{
-				CHECK(_thread->has_tags());;
+				CHECK(_thread->has_tags());
+				;
 				REQUIRE(_thread->num_tags() == 1);
 				CHECK(std::string(_thread->get_tag(0)) == "tagged");
 			}
@@ -332,7 +372,7 @@ SCENARIO("run story with tags", "[tags][story]")
 				CHECK(std::string(choice_list[0].text()) == "a");
 				CHECK_FALSE(choice_list[0].has_tags());
 				REQUIRE(choice_list[0].num_tags() == 0);
-			
+
 				CHECK(std::string(choice_list[1].text()) == "b");
 				CHECK(choice_list[1].has_tags());
 				REQUIRE(choice_list[1].num_tags() == 2);

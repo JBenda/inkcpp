@@ -68,23 +68,18 @@ namespace runtime
 		uint32_t path() const { return _path; }
 
 		choice& setup(
-			internal::basic_stream&,
-			internal::string_table& strings,
-			internal::list_table& lists,
-			int index,
-			uint32_t path,
-			thread_t thread,
-			const internal::snap_tag* tags_start,
-			const internal::snap_tag* tags_end
+		    internal::basic_stream&, internal::string_table& strings, internal::list_table& lists,
+		    int index, uint32_t path, thread_t thread, const internal::snap_tag* tags_start,
+		    const internal::snap_tag* tags_end
 		);
 
 	protected:
-		int _index = -1;									///< @private
-		const char* _text = nullptr;						///< @private
-		uint32_t _path = ~0;								///< @private
-		thread_t _thread = ~0;								///< @private
-		const internal::snap_tag* _tags_start = nullptr;	///< @private
-		const internal::snap_tag* _tags_end = nullptr;		///< @private
+		int                       _index      = -1;      ///< @private
+		const char*               _text       = nullptr; ///< @private
+		uint32_t                  _path       = ~0;      ///< @private
+		thread_t                  _thread     = ~0;      ///< @private
+		const internal::snap_tag* _tags_start = nullptr; ///< @private
+		const internal::snap_tag* _tags_end   = nullptr; ///< @private
 	};
 } // namespace runtime
 } // namespace ink

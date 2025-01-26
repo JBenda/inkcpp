@@ -17,8 +17,8 @@
 namespace ink::runtime::internal
 {
 basic_stream::basic_stream(value* buffer, size_t len)
-	: _data(buffer)
-	, _max(len)
+    : _data(buffer)
+    , _max(len)
 {
 }
 
@@ -182,9 +182,9 @@ std::string basic_stream::get()
 FString basic_stream::get()
 {
 	UE_LOG(
-		InkCpp, Warning,
-		TEXT("Basic stream::get is not implemented correctly and should not be used implemented "
-			 "correctly!")
+	    InkCpp, Warning,
+	    TEXT("Basic stream::get is not implemented correctly and should not be used implemented "
+	         "correctly!")
 	);
 	FString str;
 	return str;
@@ -279,7 +279,7 @@ bool basic_stream::ends_with(value_type type, size_t offset /*= npos*/) const
 
 void basic_stream::save()
 {
-	inkAssert(!saved(), "Can not save over existing save point!");
+	inkAssert(! saved(), "Can not save over existing save point!");
 
 	// Save the current size
 	_save = _size;
@@ -412,7 +412,7 @@ size_t basic_stream::find_start() const
 bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const
 {
 	if (_data[iter].printable() && _data[iter].type() != value_type::newline
-		&& _data[iter].type() != value_type::string) {
+	    && _data[iter].type() != value_type::string) {
 		lastNewline = false;
 		hasGlue     = false;
 	} else {

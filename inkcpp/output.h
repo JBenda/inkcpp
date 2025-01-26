@@ -23,10 +23,10 @@ namespace ink
 			protected:
 				basic_stream(value*, size_t);
 			public:
-				// Constant to identify an invalid position in the stream
-				static constexpr size_t npos = ~0;
+			  // Constant to identify an invalid position in the stream
+			  static constexpr size_t npos = ~0;
 
-				// Append data to stream
+			  // Append data to stream
 				void append(const value&);
 
 				// Append data array to stream
@@ -40,9 +40,9 @@ namespace ink
 				}
 
 				// Returns the number of data items that will be extracted by the next get
-				size_t queued() const;
+			  size_t queued() const;
 
-				// Peeks the top entry
+			  // Peeks the top entry
 				const value& peek() const;
 
 				// discards data
@@ -67,40 +67,40 @@ namespace ink
 				FString get();
 #endif
 
-				// Get filled size of output buffer
-				size_t filled() const { _size; }
+			  // Get filled size of output buffer
+			  size_t filled() const { return _size; }
 
-				// Check if the stream is empty
-				bool is_empty() const { return _size == 0; }
+			  // Check if the stream is empty
+			  bool is_empty() const { return _size == 0; }
 
-				// Get offset for save point
-				size_t save_offset() const { return _save; }
+			  // Get offset for save point
+			  size_t save_offset() const { return _save; }
 
-				// Checks if the output was saved
-				bool saved() const { return _save != npos; }
+			  // Checks if the output was saved
+			  bool saved() const { return _save != npos; }
 
-				/** Find the first occurrence of the type in the output
-				 * @param type type to look for in the output
-				 * @param offset offset into buffer
-				 * @return index or @ref npos if the type could not be found
-				 */
-				size_t find_first_of(value_type type, size_t offset = 0) const;
+			  /** Find the first occurrence of the type in the output
+			   * @param type type to look for in the output
+			   * @param offset offset into buffer
+			   * @return index or @ref npos if the type could not be found
+			   */
+			  size_t find_first_of(value_type type, size_t offset = 0) const;
 
-				/** Find the last occurrence of the type in the output
-				 * @param type type to look for in the output
-				 * @param offset offset into buffer
-				 * @return index or @ref npos if the type could not be found
-				 */
-				size_t find_last_of(value_type type, size_t offset = 0) const;
+			  /** Find the last occurrence of the type in the output
+			   * @param type type to look for in the output
+			   * @param offset offset into buffer
+			   * @return index or @ref npos if the type could not be found
+			   */
+			  size_t find_last_of(value_type type, size_t offset = 0) const;
 
-				/** Checks if the stream ends with a specific type
-				 * @param type type to look for in the output
-				 * @param offset offset into buffer
-				 * @return true on success, false on failure
-				 */
-				bool ends_with(value_type type, size_t offset = npos) const;
+			  /** Checks if the stream ends with a specific type
+			   * @param type type to look for in the output
+			   * @param offset offset into buffer
+			   * @return true on success, false on failure
+			   */
+			  bool ends_with(value_type type, size_t offset = npos) const;
 
-				// Checks if there are any elements past the save that
+			  // Checks if there are any elements past the save that
 				//  are non-whitespace strings
 				bool text_past_save() const;
 
@@ -124,7 +124,7 @@ namespace ink
 					return _last_char;
 				}
 
-				// snapshot interface
+			  // snapshot interface
 				size_t snap(unsigned char* data, const snapper&) const;
 				const unsigned char* snap_load(const unsigned char* data, const loader&);
 
@@ -136,19 +136,19 @@ namespace ink
 				void copy_string(const char* str, size_t& dataIter, T& output);
 				
 			private:
-				char _last_char = '\0';
+			  char _last_char = '\0';
 
-				// data stream
-				value* _data = nullptr;
-				size_t _max = 0;
+			  // data stream
+			  value* _data = nullptr;
+			  size_t _max  = 0;
 
-				// size
-				size_t _size = 0;
+			  // size
+			  size_t _size = 0;
 
-				// save point
-				size_t _save = npos;
+			  // save point
+			  size_t _save = npos;
 
-				const list_table* _lists_table = nullptr;
+			  const list_table* _lists_table = nullptr;
 			};
 
 #ifdef INK_ENABLE_STL
@@ -156,7 +156,7 @@ namespace ink
 			basic_stream& operator >>(basic_stream&, std::string&);
 #endif
 
-			template<size_t N>
+		  template<size_t N>
 			class stream : public basic_stream
 			{
 			public:
