@@ -202,9 +202,6 @@ void runner_impl::clear_choices()
 
 snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 {
-	// Push tag to the end of the stack
-	_tags.push() = value;
-
 	// Determine insertion index for tag level
 	size_t index = 0;
 	switch (where) {

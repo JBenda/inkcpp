@@ -46,8 +46,8 @@ SCENARIO("adding and removing tags", "[tags][interface]")
 			    == "kittens"
 			);
 
-			REQUIRE(thread->num_global_tags() == 1);
-			CHECK(std::string(thread->get_global_tag(0)) == "kittens");
+			CHECK(thread->num_global_tags() == 1);
+			REQUIRE(std::string(thread->get_global_tag(0)) == "kittens");
 			REQUIRE(thread->num_tags() == 0);
 		}
 
