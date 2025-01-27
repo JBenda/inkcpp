@@ -722,10 +722,10 @@ bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 	const bool at_story_start = _ptr == _story->instructions();
 
 	// Step the interpreter until we've parsed all tags for the line
-	size_t last_newline = basic_stream::npos;
-	while (_ptr != nullptr && last_newline == basic_stream::npos) {
+	size_t   already_had_newline = _output.find_last_of(value_type::newline);
+	size_t last_newline        = basic_stream::npos;
+	while (_ptr != nullptr && (already_had_newline == last_newline || last_newline == basic_stream::npos)) {
 		step(debug_stream);
-
 		last_newline = _output.find_last_of(value_type::newline);
 	}
 
