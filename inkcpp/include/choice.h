@@ -17,6 +17,7 @@ namespace runtime
 		class runner_impl;
 		class string_table;
 		class list_table;
+		class snap_tag;
 	} // namespace internal
 
 	/**
@@ -50,40 +51,16 @@ namespace runtime
 		 */
 		const char* text() const { return _text; }
 
-		/** @private */
-		choice()
-		    : choice(0)
-		{
-		}
-
-		/** @private */
-		choice(int)
-		    : _tags{nullptr}
-		    , _text{nullptr}
-		    , _index{~0}
-		    , _path{~0u}
-		    , _thread{~0u}
-		{
-		}
-
 		/** does this choice has tags? */
-		bool has_tags() const { return _tags != nullptr; }
+		bool has_tags() const { return _tags_start != _tags_end; }
 
-		/** number of tags assoziated with this choice
+		/** number of tags associated with this choice
 		 * @see @ref ink::runtime::choice::has_tags() "has_tags()"
 		 */
-		size_t num_tags() const
-		{
-			size_t i = 0;
-			if (has_tags())
-				while (_tags[i] != nullptr) {
-					++i;
-				};
-			return i;
-		}
+		size_t num_tags() const;
 
 		/** @copydoc ink::runtime::runner_interface::get_tag() */
-		const char* get_tag(size_t index) const { return _tags[index]; }
+		const char* get_tag(size_t index) const;
 
 	private:
 		friend class internal::runner_impl;
@@ -92,15 +69,17 @@ namespace runtime
 
 		choice& setup(
 		    internal::basic_stream&, internal::string_table& strings, internal::list_table& lists,
-		    int index, uint32_t path, thread_t thread, const char* const* tags
+		    int index, uint32_t path, thread_t thread, const internal::snap_tag* tags_start,
+		    const internal::snap_tag* tags_end
 		);
 
 	protected:
-		const char* const* _tags;   ///< @private
-		const char*        _text;   ///< @private
-		int                _index;  ///< @private
-		uint32_t           _path;   ///< @private
-		thread_t           _thread; ///< @private
+		int                       _index      = -1;      ///< @private
+		const char*               _text       = nullptr; ///< @private
+		uint32_t                  _path       = ~0;      ///< @private
+		thread_t                  _thread     = ~0;      ///< @private
+		const internal::snap_tag* _tags_start = nullptr; ///< @private
+		const internal::snap_tag* _tags_end   = nullptr; ///< @private
 	};
 } // namespace runtime
 } // namespace ink

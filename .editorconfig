@@ -1,0 +1,9 @@
+root = true
+
+[*]
+guidelines = 100
+indent_style = tab
+indent_size = 4
+# Unix-style newlines
+end_of_line = lf
+insert_final_newline = true

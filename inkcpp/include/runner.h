@@ -36,7 +36,14 @@ class choice;
 class runner_interface
 {
 public:
-	virtual ~runner_interface(){};
+	virtual ~runner_interface() {};
+
+	// String type to simplify interfaces working with strings
+#ifdef INK_ENABLE_STL
+	using line_type = std::string;
+#elif defined(INK_ENABLE_UNREAL)
+	using line_type = FString;
+#endif
 
 #pragma region Interface Methods
 	/**
@@ -88,17 +95,27 @@ public:
 	 */
 	virtual snapshot* create_snapshot() const = 0;
 
-#ifdef INK_ENABLE_STL
 	/**
-	 * Gets the next line of output using C++ STL string.
+	 * Execute the next line of the script.
 	 *
-	 * Continue execution until the next newline, then return the output as
-	 * an STL C++ std::string. Requires INK_ENABLE_STL
+	 * Continue execution until the next newline, then returns the output as an STL C++
+	 *`std::string` or Unreal's `FString`.
 	 *
-	 * @return std::string with the next line of output
+	 * @return string with the next line of output
 	 */
-	virtual std::string getline() = 0;
+	virtual line_type getline() = 0;
 
+	/**
+	 * Execute the script until the next choice or the end of the script.
+	 *
+	 * Continue execution until the next choice or the story ends, then returns the output as an STL
+	 * C++ `std::string` or Unreal's `FString`.
+	 *
+	 * @return string with the next line of output
+	 */
+	virtual line_type getall() = 0;
+
+#ifdef INK_ENABLE_STL
 	/**
 	 * Gets the next line of output using C++ STL string.
 	 *
@@ -111,33 +128,10 @@ public:
 	 * Gets all the text until the next choice or end
 	 *
 	 * Continue execution until the next choice or the story ends,
-	 * then return the output as an STL C++ std::string.
-	 * Requires INK_ENABLE_STL
-	 *
-	 * @return std::string with the next line of output
-	 */
-	virtual std::string getall() = 0;
-
-	/**
-	 * Gets all the text until the next choice or end
-	 *
-	 * Continue execution until the next choice or the story ends,
 	 * then return the output to an STL C++ std::ostream.
 	 * Requires INK_ENABLE_STL
 	 */
 	virtual void getall(std::ostream&) = 0;
-#endif
-
-#ifdef INK_ENABLE_UNREAL
-	/**
-	 * Gets the next line of output using unreal string allocation
-	 *
-	 * Continue execution until the next newline, then return the output as
-	 * an Unreal FString. Requires INK_ENABLE_UNREAL
-	 *
-	 * @return FString with the next line of output
-	 */
-	virtual FString getline() = 0;
 #endif
 
 	/**
@@ -170,17 +164,55 @@ public:
 	 */
 	virtual void choose(size_t index) = 0;
 
-	/** check if since last choice selection tags have been added */
-	virtual bool        has_tags() const            = 0;
-	/** return the number of current.
+	/**
+	 * Check if the current line has any tags. Excludes global tags.
 	 *
-	 * The tags will be accumulated since last choice
-	 * order of tags wont change, and new are added at the end */
-	virtual size_t      num_tags() const            = 0;
-	/** access tag.
+	 * @return true if the line has tags, false if not
+	 *
+	 * @sa num_tags
+	 * @sa get_tag
+	 */
+	virtual bool has_tags() const = 0;
+
+	/**
+	 * Returns the number of tags on the current line. Excludes global tags.
+	 *
+	 * @sa get_tag
+	 * @sa num_global_tags
+	 */
+	virtual size_t num_tags() const = 0;
+
+	/**
+	 * Access a tag by index.
+	 *
+	 * Note that this method only allows the retrieval of tags attached to the current line. For
+	 * tags at the top of the script, use get_global_tag()
+	 *
 	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_tags() "num_tags()")
+	 *
+	 * @return pointer to the tag string memory or nullptr if the index is invalid
+	 *
+	 * @sa num_tags
 	 */
 	virtual const char* get_tag(size_t index) const = 0;
+
+	/**
+	 * Returns the number of tags at the top of the document.
+	 */
+	virtual size_t num_global_tags() const = 0;
+
+	/**
+	 * Access a global tag by index.
+	 *
+	 * Global tags are placed at the top of the script instead of above or next to the current line.
+	 * For tags related to the current line, use @sa get_tag
+	 *
+	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_global_tags()
+	 * "num_global_tags()")
+	 *
+	 * @return pointer to the tag string memory or nullptr if the index is invalid
+	 */
+	virtual const char* get_global_tag(size_t index) const = 0;
 
 protected:
 	/** internal bind implementation. not for calling.

@@ -7,55 +7,47 @@
 
 using namespace ink::runtime;
 
+auto   lines_ink    = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
+runner lines_thread = lines_ink->new_runner();
+
 SCENARIO("a story has the proper line breaks", "[lines]")
 {
 	GIVEN("a story with line breaks")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
-		runner thread = ink->new_runner();
-		WHEN("start thread")
+		WHEN("starting thread")
 		{
-			THEN("thread can continue") { REQUIRE(thread->can_continue()); }
-			WHEN("consume lines")
+			THEN("thread can continue") { REQUIRE(lines_thread->can_continue()); }
+			THEN("consume lines")
 			{
-				std::string line1 = thread->getline();
-				std::string line2 = thread->getline();
-				std::string line3 = thread->getline();
-				std::string line4 = thread->getline();
-				THEN("lines are correct")
-				{
-					REQUIRE(line1 == "Line 1\n");
-					REQUIRE(line2 == "Line 2\n");
-					REQUIRE(line3 == "Line 3\n");
-					REQUIRE(line4 == "Line 4\n");
-				}
+				CHECK(lines_thread->getline() == "Line 1\n");
+				CHECK(lines_thread->getline() == "Line 2\n");
+				CHECK(lines_thread->getline() == "Line 3\n");
+				CHECK(lines_thread->getline() == "Line 4\n");
 			}
-			WHEN("consume lines with functions")
+		}
+		WHEN("running functions")
+		{
+			lines_thread->move_to(ink::hash_string("Functions"));
+			CHECK(lines_thread->getline() == "Function Line\n");
+
+			THEN("consume function result") { CHECK(lines_thread->getline() == "Function Result\n"); }
+		}
+		WHEN("consuming lines with tunnels")
+		{
+			lines_thread->move_to(ink::hash_string("Tunnels"));
+
+			THEN("tunnel lines are correct")
 			{
-				thread->move_to(ink::hash_string("Functions"));
-				std::string line1 = thread->getline();
-				std::string line2 = thread->getline();
-
-				THEN("function lines are correct")
-				{
-					REQUIRE(line1 == "Function Line\n");
-					REQUIRE(line2 == "Function Result\n");
-				}
+				CHECK(lines_thread->getline() == "Tunnel Line\n");
+				CHECK(lines_thread->getline() == "Tunnel Result\n");
+				CHECK(lines_thread->getline() == "");
+				CHECK_FALSE(lines_thread->can_continue());
 			}
-			WHEN("consume lines with tunnels")
-			{
-				thread->move_to(ink::hash_string("Tunnels"));
-				std::string line1 = thread->getline();
-				std::string line2 = thread->getline();
-
-				THEN("tunnel lines are correct")
-				{
-					REQUIRE(line1 == "Tunnel Line\n");
-					REQUIRE(line2 == "Tunnel Result\n");
-				}
-
-				THEN("thread cannot continue") { REQUIRE(! thread->can_continue()); }
-			}
+		}
+		WHEN("ignoring functions when applying glue")
+		{
+			lines_thread->move_to(ink::hash_string("ignore_functions_when_applying_glue"));
+			CHECK(lines_thread->getline() == "\"I don't see why,\" I reply.\n");
 		}
 	}
 	GIVEN("a complex story")

@@ -5,18 +5,31 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "runner_impl.h"
-#include "story_impl.h"
-#include "command.h"
+
+#include <algorithm>
+#include <iomanip>
+
 #include "choice.h"
+#include "command.h"
 #include "globals_impl.h"
 #include "header.h"
-#include "string_utils.h"
 #include "snapshot_impl.h"
+#include "story_impl.h"
+#include "string_utils.h"
 #include "system.h"
 #include "value.h"
 
 namespace ink::runtime
 {
+static void write_hash(std::ostream& out, ink::hash_t value)
+{
+	using namespace std;
+
+	ios::fmtflags state{out.flags()};
+	out << "0x" << hex << setfill('0') << setw(8) << static_cast<uint32_t>(value);
+	out.flags(state);
+}
+
 const choice* runner_interface::get_choice(size_t index) const
 {
 	inkAssert(index < num_choices(), "Choice out of bounds!");
@@ -175,7 +188,7 @@ inline const char* runner_impl::read()
 choice& runner_impl::add_choice()
 {
 	inkAssert(
-	    config::maxChoices < 0 || _choices.size() < static_cast<size_t>(config::maxChoices),
+	    config::maxChoices < 0 || _choices.size() < static_cast<size_t>(abs(config::maxChoices)),
 	    "Ran out of choice storage!"
 	);
 	return _choices.push();
@@ -188,10 +201,84 @@ void runner_impl::clear_choices()
 	_choices.clear();
 }
 
-void runner_impl::clear_tags()
+snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 {
-	_tags.clear();
-	_choice_tags_begin = -1;
+	// Push tag to the end of the stack
+	_tags.push() = value;
+
+	// Determine insertion index for tag level
+	size_t index = 0;
+	switch (where) {
+		case tags_level::GLOBAL:
+			index = _global_tags_count;
+			_global_tags_count++;
+			break;
+		case tags_level::CHOICE:
+			index = _global_tags_count + _choice_tags_count;
+			_choice_tags_count++;
+			break;
+		case tags_level::LINE: index = _tags.size() - 1; return _tags[index];
+		default:
+			inkAssert(false, "Failed to add tag at unhandled location %d.", static_cast<int32_t>(where));
+			break;
+	}
+
+	// Nothing to do
+	if (index == _tags.size() - 1) {
+		return _tags[index];
+	}
+
+	// Special case: Either we swap or we don't
+	if (_tags.size() == 2) {
+		if (index == 0) {
+			std::iter_swap(_tags.begin() + 1, _tags.begin());
+		}
+		return _tags[index];
+	}
+
+	// Swap items backwards until we reach our desired index
+	const size_t count = _tags.size() - index - 1;
+	snap_tag*    it    = _tags.begin() + _tags.size() - 2;
+	for (size_t i = 0; i < count; ++i) {
+		std::iter_swap(it + 1, it);
+		it--;
+	}
+
+	return _tags[index];
+}
+
+void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOBALS*/)
+{
+	// To explain how this works, let's imagine we have the following tags:
+	//
+	// index | length | tag value      | level
+	// ------|--------|----------------|---------
+	// 0     | 1      | global_tag     | GLOBAL
+	// 1     | 2      | choice_tag_1   | CHOICE
+	// 2     | 3      | choice_tag_2   | CHOICE
+	// 3     | 4      | content_tag_1  | LINE
+	//
+	// * Clearing all tags means we clear the entire array and clear the counts
+	// * Keeping the global tags means resizing to length 1 and clearing the tags count
+	// * Keeping the choice tags means resizing to length 3 (globals + choices)
+
+	switch (type) {
+		case tags_clear_type::ALL:
+			_tags.clear();
+			_global_tags_count = 0;
+			_choice_tags_begin = ~0;
+			_choice_tags_count = 0;
+			break;
+		case tags_clear_type::KEEP_GLOBALS:
+			_tags.resize(_global_tags_count);
+			_choice_tags_begin = ~0;
+			_choice_tags_count = 0;
+			break;
+		case tags_clear_type::KEEP_CHOICE: _tags.resize(_global_tags_count + _choice_tags_count); break;
+		default:
+			inkAssert(false, "Unhandled clear type %d for tags.", static_cast<int32_t>(type));
+			break;
+	}
 }
 
 void runner_impl::jump(ip_t dest, bool record_visits)
@@ -367,16 +454,10 @@ runner_impl::runner_impl(const story_impl* data, globals global)
           global.cast<globals_impl>()->strings(), global.cast<globals_impl>()->lists(), _rng,
           *global.cast<globals_impl>(), *data, static_cast<const runner_interface&>(*this)
       )
-    , _backup(nullptr)
-    , _done(nullptr)
-    , _choices()
+    , _ptr(_story->instructions())
     , _container(ContainerData{})
-    , _rng(time(NULL))
+    , _rng(time(nullptr))
 {
-	_ptr               = _story->instructions();
-	_evaluation_mode   = false;
-	_choice_tags_begin = -1;
-
 	// register with globals
 	_globals->add_runner(this);
 	if (_globals->lists()) {
@@ -401,83 +482,63 @@ runner_impl::~runner_impl()
 	}
 }
 
-#ifdef INK_ENABLE_STL
-std::string runner_impl::getline()
+runner_impl::line_type runner_impl::getline()
 {
-	advance_line();
-	std::string result = _output.get();
+	// Advance interpreter one line and write to output
+	advance_line(_debug_stream);
+
+#ifdef INK_ENABLE_STL
+	line_type result{_output.get()};
+#elif defined(INK_ENABLE_UNREAL)
+	line_type result{ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists()))};
+#endif
+
+	// Fall through the fallback choice, if available
 	if (! has_choices() && _fallback_choice) {
 		choose(~0);
 	}
-	// Return result
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
+
 	return result;
 }
 
-void runner_impl::getline(std::ostream& out)
+runner_impl::line_type runner_impl::getall()
 {
-	// Advance interpreter one line
-	advance_line();
-	// Write into out
-	out << _output;
-	if (! has_choices() && _fallback_choice) {
-		choose(~0);
+	if (_debug_stream != nullptr) {
+		_debug_stream->clear();
 	}
 
-	// Make sure we read everything
-	inkAssert(_output.is_empty(), "Output should be empty after getline!");
-}
+	line_type result;
 
-std::string runner_impl::getall()
-{
-	// Advance interpreter until we're stopped
-	std::stringstream str;
 	while (can_continue()) {
-		getline(str);
+		result += getline();
 	}
-
-	// Read output into std::string
-
-	// Return result
 	inkAssert(_output.is_empty(), "Output should be empty after getall!");
-	return str.str();
+
+	return result;
 }
+
+#ifdef INK_ENABLE_STL
+void runner_impl::getline(std::ostream& out) { out << getline(); }
 
 void runner_impl::getall(std::ostream& out)
 {
-	// Advance interpreter until we're stopped
+	// Advance interpreter and write lines to output
 	while (can_continue()) {
-		advance_line();
-		// Send output into stream
-		out << _output;
+		out << getline();
 	}
-	// Return result
 	inkAssert(_output.is_empty(), "Output should be empty after getall!");
 }
-
-#endif
-#ifdef INK_ENABLE_UNREAL
-FString runner_impl::getline()
-{
-	clear_tags();
-	advance_line();
-	FString result(ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists())));
-
-	if (! has_choices() && _fallback_choice) {
-		choose(~0);
-	}
-	// Return result
-	inkAssert(_output.is_empty(), "Output should be empty after getline!");
-	return result;
-}
 #endif
 
-void runner_impl::advance_line()
+void runner_impl::advance_line(std::ostream* debug_stream /*= nullptr*/)
 {
+	clear_tags(tags_clear_type::KEEP_GLOBALS);
+
 	// Step while we still have instructions to execute
 	while (_ptr != nullptr) {
 		// Stop if we hit a new line
-		if (line_step()) {
+		if (line_step(debug_stream)) {
 			break;
 		}
 	}
@@ -540,17 +601,15 @@ void runner_impl::getline_silent()
 	_output.clear();
 }
 
-bool runner_impl::has_tags() const { return num_tags() > 0; }
-
-size_t runner_impl::num_tags() const
-{
-	return _choice_tags_begin < 0 ? _tags.size() : _choice_tags_begin;
-}
-
 const char* runner_impl::get_tag(size_t index) const
 {
-	inkAssert(index < _tags.size(), "Tag index exceeds _num_tags");
-	return _tags[index];
+	const size_t adjusted = index + _global_tags_count;
+	return (adjusted < _tags.size()) ? _tags[adjusted] : nullptr;
+}
+
+const char* runner_impl::get_global_tag(size_t index) const
+{
+	return (index < _global_tags_count) ? _tags[index] : nullptr;
 }
 
 snapshot* runner_impl::create_snapshot() const { return _globals->create_snapshot(); }
@@ -559,7 +618,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
-	snapper.current_runner_tags = _tags[0].ptr();
+	snapper.runner_tags         = _tags.begin();
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
 	ptr                         = snap_write(ptr, offset, should_write);
 	offset                      = _backup - _story->instructions();
@@ -569,6 +628,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr                         = snap_write(ptr, _rng.get_state(), should_write);
 	ptr                         = snap_write(ptr, _evaluation_mode, should_write);
 	ptr                         = snap_write(ptr, _string_mode, should_write);
+	ptr                         = snap_write(ptr, _tag_mode, should_write);
 	ptr                         = snap_write(ptr, _saved_evaluation_mode, should_write);
 	ptr                         = snap_write(ptr, _saved, should_write);
 	ptr                         = snap_write(ptr, _is_falling, should_write);
@@ -576,7 +636,10 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr += _stack.snap(data ? ptr : nullptr, snapper);
 	ptr += _ref_stack.snap(data ? ptr : nullptr, snapper);
 	ptr += _eval.snap(data ? ptr : nullptr, snapper);
+	ptr = snap_write(ptr, _tags_where, should_write);
 	ptr = snap_write(ptr, _choice_tags_begin, should_write);
+	ptr = snap_write(ptr, _global_tags_count, should_write);
+	ptr = snap_write(ptr, _choice_tags_count, should_write);
 	ptr += _tags.snap(data ? ptr : nullptr, snapper);
 	ptr += _container.snap(data ? ptr : nullptr, snapper);
 	ptr += _threads.snap(data ? ptr : nullptr, snapper);
@@ -601,22 +664,24 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
-	ptr = snap_read(ptr, _evaluation_mode);
-	ptr = snap_read(ptr, _string_mode);
-	ptr = snap_read(ptr, _saved_evaluation_mode);
-	ptr = snap_read(ptr, _saved);
-	ptr = snap_read(ptr, _is_falling);
-	ptr = _output.snap_load(ptr, loader);
-	ptr = _stack.snap_load(ptr, loader);
-	ptr = _ref_stack.snap_load(ptr, loader);
-	ptr = _eval.snap_load(ptr, loader);
-	int choice_tags_begin;
-	ptr                        = snap_read(ptr, choice_tags_begin);
-	_choice_tags_begin         = choice_tags_begin;
-	ptr                        = _tags.snap_load(ptr, loader);
-	loader.current_runner_tags = _tags[0].ptr();
-	ptr                        = _container.snap_load(ptr, loader);
-	ptr                        = _threads.snap_load(ptr, loader);
+	ptr                = snap_read(ptr, _evaluation_mode);
+	ptr                = snap_read(ptr, _string_mode);
+	ptr                = snap_read(ptr, _tag_mode);
+	ptr                = snap_read(ptr, _saved_evaluation_mode);
+	ptr                = snap_read(ptr, _saved);
+	ptr                = snap_read(ptr, _is_falling);
+	ptr                = _output.snap_load(ptr, loader);
+	ptr                = _stack.snap_load(ptr, loader);
+	ptr                = _ref_stack.snap_load(ptr, loader);
+	ptr                = _eval.snap_load(ptr, loader);
+	ptr                = snap_read(ptr, _tags_where);
+	ptr                = snap_read(ptr, _choice_tags_begin);
+	ptr                = snap_read(ptr, _global_tags_count);
+	ptr                = snap_read(ptr, _choice_tags_count);
+	ptr                = _tags.snap_load(ptr, loader);
+	loader.runner_tags = _tags.begin();
+	ptr                = _container.snap_load(ptr, loader);
+	ptr                = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
 	ptr              = snap_read(ptr, has_fallback_choice);
 	_fallback_choice = nullopt;
@@ -631,7 +696,7 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 #ifdef INK_ENABLE_CSTD
 const char* runner_impl::getline_alloc()
 {
-	advance_line();
+	advance_line(_debug_stream);
 	const char* res = _output.get_alloc(_globals->strings(), _globals->lists());
 	if (! has_choices() && _fallback_choice) {
 		choose(~0);
@@ -665,83 +730,134 @@ void runner_impl::internal_bind(hash_t name, internal::function_base* function)
 
 runner_impl::change_type runner_impl::detect_change() const
 {
-	// Check if the old newline is still present (hasn't been glu'd) and
-	//  if there is new text (non-whitespace) in the stream since saving
-	bool stillHasNewline = _output.saved_ends_with(value_type::newline);
-	bool hasAddedNewText = _output.text_past_save() || _tags.last_size() < num_tags();
+	inkAssert(_output.saved(), "Cannot detect changes in non-saved stream.");
 
-	// Newline is still there and there's no new text
-	if (stillHasNewline && ! hasAddedNewText) {
-		return change_type::no_change;
-	}
-
-	// If the newline is gone, we got glue'd. Continue as if we never had that newline
+	// Check if the old newline is still present (hasn't been glued)
+	const bool stillHasNewline = _output.ends_with(value_type::newline, _output.save_offset());
 	if (! stillHasNewline) {
 		return change_type::newline_removed;
 	}
 
-	// If there's new text content, we went too far
-	if (hasAddedNewText) {
-		return change_type::extended_past_newline;
-	}
-
-	inkFail("Invalid change detction. Never should be here!");
-	return change_type::no_change;
+	return change_type::extended_past_newline;
 }
 
-bool runner_impl::line_step()
+bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 {
-	// Step the interpreter
-	step();
+	// Track if added tags are global ones
+	const bool at_story_start = _ptr == _story->instructions();
 
-	// If we're not within string evaluation
-	if (! _output.has_marker()) {
+	// Step the interpreter until we've parsed all tags for the line
+	const size_t last_newline = _output.find_last_of(value_type::newline);
+	size_t       next_newline = basic_stream::npos;
+	while (_ptr != nullptr && (next_newline == basic_stream::npos || last_newline == next_newline)) {
+		step(debug_stream);
+		next_newline = _output.find_last_of(value_type::newline);
+	}
+
+	// Copy global tags to the first line
+	if (at_story_start && _global_tags_count > 0) {
+		for (size_t i = 0; i < _global_tags_count; ++i) {
+			add_tag(get_global_tag(i), tags_level::LINE);
+		}
+	}
+
+	// Next tags are always added to the line
+	_tags_where = tags_level::LINE;
+
+	// Unless we are out of content, we are going to try
+	//  to continue a little further. This is to check for
+	//  glue (which means there is potentially more content
+	//  in this line) OR for non-text content such as choices.
+	if (_ptr != nullptr) {
+		// Save a snapshot
+		if (_saved) {
+			forget();
+		}
+		save();
+
+		// Step execution until we're satisfied it doesn't affect the current line
+		bool keep_stepping = false;
+		bool is_gluing     = false;
+		do {
+			if (_ptr == nullptr) {
+				break;
+			}
+
+			// Step the next command
+			step(debug_stream);
+
+			// Make a new save point to track the glue changes
+			if (_output.ends_with(value_type::glue)) {
+				is_gluing = true;
+
+				if (_saved) {
+					forget();
+				}
+				save();
+			} else if (is_gluing) {
+				// If we find glue, keep going until the next line
+				if (_output.ends_with(value_type::newline)) {
+					is_gluing = false;
+
+					// Uncomment to fix the first LookaheadSafe test
+					// and break all the other tests :')
+					/*if (_saved) {
+					  forget();
+					}
+					save();*/
+
+					continue;
+				}
+			}
+
+			// Are we gluing?
+			keep_stepping = is_gluing;
+
+			// Are we diverting?
+			keep_stepping |= _evaluation_mode;
+
+			// Are we inside a function?
+			keep_stepping = keep_stepping || _output.ends_with(value_type::func_start);
+			keep_stepping = keep_stepping || _output.ends_with(value_type::func_end);
+
+			// Haven't added more text
+			keep_stepping = keep_stepping || ! _output.text_past_save();
+
+		} while (keep_stepping);
+
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice
-		if (_saved && ! has_choices() && ! _fallback_choice) {
+		if (! has_choices() && ! _fallback_choice) {
 			// Check for changes in the output stream
 			switch (detect_change()) {
 				case change_type::extended_past_newline:
-					// We've gone too far. Restore to before we moved past the newline and return that we are
-					// done
+					// We've gone too far. Restore to before we moved past the newline and return
+					// that we are done
 					restore();
 					return true;
 				case change_type::newline_removed:
 					// Newline was removed. Proceed as if we never hit it
 					forget();
-					break;
+					return false;
 				case change_type::no_change: break;
 			}
 		}
 
-		// If we're on a newline
-		if (_output.ends_with(value_type::newline)) {
-			// Unless we are out of content, we are going to try
-			//  to continue a little further. This is to check for
-			//  glue (which means there is potentially more content
-			//  in this line) OR for non-text content such as choices.
-			if (_ptr != nullptr) {
-				// Save a snapshot of the current runtime state so we
-				//  can return here if we end up hitting a new line
-				// forget();
-				if (! _saved) {
-					save();
-				}
-			}
-			// Otherwise, make sure we don't have any snapshots hanging around
-			// expect we are in choice handleing
-			else if (! has_choices() && ! _fallback_choice) {
-				forget();
-			} else {
-				_output.forget();
-			}
-		}
+		return false;
 	}
 
-	return false;
+	// Otherwise, make sure we don't have any snapshots hanging around
+	// expect we are in choice handling
+	if (! has_choices() && ! _fallback_choice) {
+		forget();
+	} else {
+		_output.forget();
+	}
+
+	return true;
 }
 
-void runner_impl::step()
+void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 {
 #ifndef INK_ENABLE_UNREAL
 	try
@@ -752,6 +868,10 @@ void runner_impl::step()
 		// Load current command
 		Command     cmd  = read<Command>();
 		CommandFlag flag = read<CommandFlag>();
+
+		if (debug_stream != nullptr) {
+			*debug_stream << "cmd " << cmd << " flags " << flag << " ";
+		}
 
 		// If we're falling and we hit a non-fallthrough command, stop the fall.
 		if (_is_falling
@@ -769,6 +889,11 @@ void runner_impl::step()
 					// == Value Commands ==
 				case Command::STR: {
 					const char* str = read<const char*>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "str \"" << str << "\"";
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::string>(str));
 					} else {
@@ -777,6 +902,11 @@ void runner_impl::step()
 				} break;
 				case Command::INT: {
 					int val = read<int>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "int " << val;
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::int32>(val));
 					}
@@ -784,6 +914,11 @@ void runner_impl::step()
 				} break;
 				case Command::BOOL: {
 					bool val = read<int>() ? true : false;
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "bool " << (val ? "true" : "false");
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::boolean>(val));
 					} else {
@@ -792,6 +927,11 @@ void runner_impl::step()
 				} break;
 				case Command::FLOAT: {
 					float val = read<float>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "float " << val;
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::float32>(val));
 					}
@@ -799,6 +939,12 @@ void runner_impl::step()
 				} break;
 				case Command::VALUE_POINTER: {
 					hash_t val = read<hash_t>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "value_pointer ";
+						write_hash(*debug_stream, val);
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::value_pointer>(val, static_cast<char>(flag) - 1));
 					} else {
@@ -807,6 +953,11 @@ void runner_impl::step()
 				} break;
 				case Command::LIST: {
 					list_table::list list(read<int>());
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "list " << list.lid;
+					}
+
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::list>(list));
 					} else {
@@ -848,6 +999,10 @@ void runner_impl::step()
 				case Command::DIVERT: {
 					// Find divert address
 					uint32_t target = read<uint32_t>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "target " << target;
+					}
 
 					// Check for condition
 					if (flag & CommandFlag::DIVERT_HAS_CONDITION && ! _eval.pop().truthy(_globals->lists())) {
@@ -892,6 +1047,11 @@ void runner_impl::step()
 					// Get variable value
 					hash_t variable = read<hash_t>();
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "variable ";
+						write_hash(*debug_stream, variable);
+					}
+
 					// Check for condition
 					if (flag & CommandFlag::DIVERT_HAS_CONDITION && ! _eval.pop().truthy(_globals->lists())) {
 						break;
@@ -922,6 +1082,11 @@ void runner_impl::step()
 					} else {
 						target = read<uint32_t>();
 					}
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "target " << target;
+					}
+
 					start_frame<frame_type::tunnel>(target);
 				} break;
 				case Command::FUNCTION: {
@@ -935,6 +1100,11 @@ void runner_impl::step()
 					} else {
 						target = read<uint32_t>();
 					}
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "target " << target;
+					}
+
 					if (! (flag & CommandFlag::FALLBACK_FUNCTION)) {
 						start_frame<frame_type::function>(target);
 					} else {
@@ -972,14 +1142,24 @@ void runner_impl::step()
 						inkAssert(t == thread, "ref_stack and stack should be in sync!");
 					}
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "thread " << thread;
+					}
+
 					// Push that thread onto our thread stack
 					_threads.push(thread);
 				} break;
 
-				// == set temporärie variable
+				// == set temporary variable
 				case Command::DEFINE_TEMP: {
 					hash_t variableName = read<hash_t>();
 					bool   is_redef     = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "variable_name ";
+						write_hash(*debug_stream, variableName);
+						*debug_stream << " is_redef " << (is_redef ? "yes" : "no");
+					}
 
 					// Get the top value and put it into the variable
 					value v = _eval.pop();
@@ -995,6 +1175,13 @@ void runner_impl::step()
 					// If not, we're setting a global (temporary variables are explicitely defined as such,
 					//  where globals are defined using SET_VARIABLE).
 					value val = _eval.pop();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "variable_name ";
+						write_hash(*debug_stream, variableName);
+						*debug_stream << " is_redef " << (is_redef ? "yes" : "no");
+					}
+
 					if (is_redef) {
 						set_var(variableName, val, is_redef);
 					} else {
@@ -1010,11 +1197,19 @@ void runner_impl::step()
 					// Interpret flag as argument count
 					int numArguments = ( int ) flag;
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "function_name ";
+						write_hash(*debug_stream, functionName);
+						*debug_stream << " numArguments " << numArguments;
+					}
+
 					// find and execute. will automatically push a valid if applicable
 					auto* fn = _functions.find(functionName);
 					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
-					} else if (_output.saved() && _output.saved_ends_with(value_type::newline) && ! fn->lookaheadSafe()) {
+					} else if (_output.saved()
+					           && _output.ends_with(value_type::newline, _output.save_offset())
+					           && ! fn->lookaheadSafe()) {
 						// TODO: seperate token?
 						_output.append(values::null);
 					} else {
@@ -1040,6 +1235,12 @@ void runner_impl::step()
 					hash_t       variableName = read<hash_t>();
 					const value* val          = get_var(variableName);
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "variable_name ";
+						write_hash(*debug_stream, variableName);
+						*debug_stream << " val \"" << val << "\"";
+					}
+
 					inkAssert(val != nullptr, "Could not find variable!");
 					_eval.push(*val);
 					break;
@@ -1063,22 +1264,45 @@ void runner_impl::step()
 					));
 				} break;
 
+				// == Tag commands
 				case Command::START_TAG: {
 					_output << values::marker;
+					_tag_mode = true;
+				} break;
+
+				case Command::TAG: {
+					const char* tag = read<const char*>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "tag \"" << tag << "\"";
+					}
+
+					add_tag(tag, _tags_where);
+					_tag_mode = false;
 				} break;
 
 				case Command::END_TAG: {
 					auto tag = _output.get_alloc<true>(_globals->strings(), _globals->lists());
-					if (_string_mode && _choice_tags_begin < 0) {
+					if (_string_mode && _choice_tags_begin == ~0) {
 						_choice_tags_begin = _tags.size();
 					}
-					_tags.push() = tag;
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "tag \"" << tag << "\"";
+					}
+
+					add_tag(tag, _tags_where);
+					_tag_mode = false;
 				} break;
 
 				// == Choice commands
 				case Command::CHOICE: {
 					// Read path
 					uint32_t path = read<uint32_t>();
+
+					if (debug_stream != nullptr) {
+						*debug_stream << "path " << path;
+					}
 
 					// If we're a once only choice, make sure our destination hasn't
 					//  been visited
@@ -1118,28 +1342,34 @@ void runner_impl::step()
 						_output << stack[sc - 1];
 					}
 
-					// fetch relevant tags
-					const snap_tag* tags = nullptr;
-					if (_choice_tags_begin >= 0 && _tags[_tags.size() - 1] != nullptr) {
-						for (tags = _tags.end() - 1;
-						     *(tags - 1) != nullptr && (tags - _tags.begin()) > _choice_tags_begin; --tags)
-							;
-						_tags.push() = nullptr;
+					// Fetch tags related to the current choice
+					const snap_tag* tags_start = nullptr;
+					const snap_tag* tags_end   = nullptr;
+
+					if (_choice_tags_begin != ~0) {
+						// Retroactively mark added tags as choice tags
+						const size_t tags_count = _tags.size() - _choice_tags_begin;
+						_choice_tags_count += tags_count;
+						_tags_where = tags_level::CHOICE;
+
+						tags_start = _tags.begin() + _choice_tags_begin;
+						tags_end   = tags_start + tags_count;
+
+						_choice_tags_begin = ~0;
 					}
 
 					// Create choice and record it
+					choice* current_choice = nullptr;
 					if (flag & CommandFlag::CHOICE_IS_INVISIBLE_DEFAULT) {
 						_fallback_choice.emplace();
-						_fallback_choice.value().setup(
-						    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
-						    current_thread(), tags->ptr()
-						);
+						current_choice = &_fallback_choice.value();
 					} else {
-						add_choice().setup(
-						    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
-						    current_thread(), tags->ptr()
-						);
+						current_choice = &add_choice();
 					}
+					current_choice->setup(
+					    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
+					    current_thread(), tags_start, tags_end
+					);
 					// save stack at last choice
 					if (_saved) {
 						forget();
@@ -1218,6 +1448,10 @@ void runner_impl::step()
 					int32_t seed = _eval.pop().get<value_type::int32>();
 					_rng.srand(seed);
 
+					if (debug_stream != nullptr) {
+						*debug_stream << "seed " << seed;
+					}
+
 					_eval.push(values::null);
 				} break;
 
@@ -1228,13 +1462,14 @@ void runner_impl::step()
 					// Push the read count for the requested container index
 					_eval.push(value{}.set<value_type::int32>(( int ) _globals->visits(container)));
 				} break;
-				case Command::TAG: {
-					_tags.push() = read<const char*>();
-				} break;
+
 				default: inkAssert(false, "Unrecognized command!"); break;
 			}
 		}
 
+		if (debug_stream != nullptr) {
+			*debug_stream << std::endl;
+		}
 	}
 #ifndef INK_ENABLE_UNREAL
 	catch (...) {
@@ -1393,4 +1628,5 @@ std::ostream& operator<<(std::ostream& out, runner_impl& in)
 	return out;
 }
 #endif
+
 } // namespace ink::runtime::internal
