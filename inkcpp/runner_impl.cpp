@@ -81,7 +81,7 @@ const value* runner_impl::get_var(hash_t variableName) const
 
 template<>
 void runner_impl::set_var<runner_impl::Scope::GLOBAL>(
-	hash_t variableName, const value& val, bool is_redef
+    hash_t variableName, const value& val, bool is_redef
 )
 {
 	if (is_redef) {
@@ -107,7 +107,7 @@ const value* runner_impl::dereference(const value& val)
 
 template<>
 void runner_impl::set_var<runner_impl::Scope::LOCAL>(
-	hash_t variableName, const value& val, bool is_redef
+    hash_t variableName, const value& val, bool is_redef
 )
 {
 	if (val.type() == value_type::value_pointer) {
@@ -134,7 +134,7 @@ void runner_impl::set_var<runner_impl::Scope::LOCAL>(
 				auto [name, ci] = src->get<value_type::value_pointer>();
 				inkAssert(ci == 0, "Only global pointer are allowed on _stack!");
 				set_var<Scope::GLOBAL>(
-					name, get_var<Scope::GLOBAL>(name)->redefine(val, _globals->lists()), true
+				    name, get_var<Scope::GLOBAL>(name)->redefine(val, _globals->lists()), true
 				);
 			} else {
 				_stack.set(variableName, src->redefine(val, _globals->lists()));
@@ -147,7 +147,7 @@ void runner_impl::set_var<runner_impl::Scope::LOCAL>(
 
 template<>
 void runner_impl::set_var<runner_impl::Scope::NONE>(
-	hash_t variableName, const value& val, bool is_redef
+    hash_t variableName, const value& val, bool is_redef
 )
 {
 	inkAssert(is_redef, "define set scopeless variables!");
@@ -188,8 +188,8 @@ inline const char* runner_impl::read()
 choice& runner_impl::add_choice()
 {
 	inkAssert(
-		config::maxChoices < 0 || _choices.size() < static_cast<size_t>(abs(config::maxChoices)),
-		"Ran out of choice storage!"
+	    config::maxChoices < 0 || _choices.size() < static_cast<size_t>(abs(config::maxChoices)),
+	    "Ran out of choice storage!"
 	);
 	return _choices.push();
 }
@@ -209,21 +209,18 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 	// Determine insertion index for tag level
 	size_t index = 0;
 	switch (where) {
-	case tags_level::GLOBAL:
-		index = _global_tags_count;
-		_global_tags_count++;
-		break;
-	case tags_level::CHOICE:
-		index = _global_tags_count + _choice_tags_count;
-		_choice_tags_count++;
-		break;
-	case tags_level::LINE:
-		index = _tags.size() - 1;
-		return _tags[index];
-	default:
-		inkAssert(false, "Failed to add tag at unhandled location %d.",
-			static_cast<int32_t>(where));
-		break;
+		case tags_level::GLOBAL:
+			index = _global_tags_count;
+			_global_tags_count++;
+			break;
+		case tags_level::CHOICE:
+			index = _global_tags_count + _choice_tags_count;
+			_choice_tags_count++;
+			break;
+		case tags_level::LINE: index = _tags.size() - 1; return _tags[index];
+		default:
+			inkAssert(false, "Failed to add tag at unhandled location %d.", static_cast<int32_t>(where));
+			break;
 	}
 
 	// Nothing to do
@@ -241,7 +238,7 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 
 	// Swap items backwards until we reach our desired index
 	const size_t count = _tags.size() - index - 1;
-	snap_tag* it = _tags.begin() + _tags.size() - 2;
+	snap_tag*    it    = _tags.begin() + _tags.size() - 2;
 	for (size_t i = 0; i < count; ++i) {
 		std::iter_swap(it + 1, it);
 		it--;
@@ -253,7 +250,7 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOBALS*/)
 {
 	// To explain how this works, let's imagine we have the following tags:
-	// 
+	//
 	// index | length | tag value      | level
 	// ------|--------|----------------|---------
 	// 0     | 1      | global_tag     | GLOBAL
@@ -266,23 +263,21 @@ void runner_impl::clear_tags(tags_clear_type type /*= tags_clear_type::KEEP_GLOB
 	// * Keeping the choice tags means resizing to length 3 (globals + choices)
 
 	switch (type) {
-	case tags_clear_type::ALL:
-		_tags.clear();
-		_global_tags_count = 0;
-		_choice_tags_begin = ~0;
-		_choice_tags_count = 0;
-		break;
-	case tags_clear_type::KEEP_GLOBALS:
-		_tags.resize(_global_tags_count);
-		_choice_tags_begin = ~0;
-		_choice_tags_count = 0;
-		break;
-	case tags_clear_type::KEEP_CHOICE:
-		_tags.resize(_global_tags_count + _choice_tags_count);
-		break;
-	default:
-		inkAssert(false, "Unhandled clear type %d for tags.", static_cast<int32_t>(type));
-		break;
+		case tags_clear_type::ALL:
+			_tags.clear();
+			_global_tags_count = 0;
+			_choice_tags_begin = ~0;
+			_choice_tags_count = 0;
+			break;
+		case tags_clear_type::KEEP_GLOBALS:
+			_tags.resize(_global_tags_count);
+			_choice_tags_begin = ~0;
+			_choice_tags_count = 0;
+			break;
+		case tags_clear_type::KEEP_CHOICE: _tags.resize(_global_tags_count + _choice_tags_count); break;
+		default:
+			inkAssert(false, "Unhandled clear type %d for tags.", static_cast<int32_t>(type));
+			break;
 	}
 }
 
@@ -375,8 +370,8 @@ void runner_impl::jump(ip_t dest, bool record_visits)
 		const ContainerData* iData = nullptr;
 		size_t               level = _container.size();
 		while (_container.iter(iData)
-			   && (level > comm_end
-				   || _story->container_flag(iData->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)
+		       && (level > comm_end
+		           || _story->container_flag(iData->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)
 		) {
 			auto parrent_offset = iData->offset;
 			inkAssert(child_position >= parrent_offset, "Container stack order is broken");
@@ -422,8 +417,8 @@ frame_type runner_impl::execute_return()
 		// TODO: write all refs to new frame
 		offset_t   o = _ref_stack.pop_frame(&t, eval);
 		inkAssert(
-			o == offset && t == type && eval == _evaluation_mode,
-			"_ref_stack and _stack should be in frame sync!"
+		    o == offset && t == type && eval == _evaluation_mode,
+		    "_ref_stack and _stack should be in frame sync!"
 		);
 	}
 
@@ -443,8 +438,8 @@ frame_type runner_impl::execute_return()
 
 	// Jump to the old offset
 	inkAssert(
-		_story->instructions() + offset < _story->end(),
-		"Callstack return is outside bounds of story!"
+	    _story->instructions() + offset < _story->end(),
+	    "Callstack return is outside bounds of story!"
 	);
 	jump(_story->instructions() + offset, false);
 
@@ -453,19 +448,15 @@ frame_type runner_impl::execute_return()
 }
 
 runner_impl::runner_impl(const story_impl* data, globals global)
-	: _story(data)
-	, _globals(global.cast<globals_impl>())
-	, _operations(
-		global.cast<globals_impl>()->strings(),
-		global.cast<globals_impl>()->lists(),
-		_rng,
-		*global.cast<globals_impl>(),
-		*data,
-		static_cast<const runner_interface&>(*this)
-	)
-	, _ptr(_story->instructions())
-	, _container(ContainerData{})
-	, _rng(time(nullptr))
+    : _story(data)
+    , _globals(global.cast<globals_impl>())
+    , _operations(
+          global.cast<globals_impl>()->strings(), global.cast<globals_impl>()->lists(), _rng,
+          *global.cast<globals_impl>(), *data, static_cast<const runner_interface&>(*this)
+      )
+    , _ptr(_story->instructions())
+    , _container(ContainerData{})
+    , _rng(time(nullptr))
 {
 	// register with globals
 	_globals->add_runner(this);
@@ -497,9 +488,9 @@ runner_impl::line_type runner_impl::getline()
 	advance_line(_debug_stream);
 
 #ifdef INK_ENABLE_STL
-	line_type result{ _output.get() };
+	line_type result{_output.get()};
 #elif defined(INK_ENABLE_UNREAL)
-	line_type result{ ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists())) };
+	line_type result{ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists()))};
 #endif
 
 	// Fall through the fallback choice, if available
@@ -528,10 +519,7 @@ runner_impl::line_type runner_impl::getall()
 }
 
 #ifdef INK_ENABLE_STL
-void runner_impl::getline(std::ostream& out)
-{
-	out << getline();
-}
+void runner_impl::getline(std::ostream& out) { out << getline(); }
 
 void runner_impl::getall(std::ostream& out)
 {
@@ -676,24 +664,24 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
-	ptr                        = snap_read(ptr, _evaluation_mode);
-	ptr                        = snap_read(ptr, _string_mode);
-	ptr                        = snap_read(ptr, _tag_mode);
-	ptr                        = snap_read(ptr, _saved_evaluation_mode);
-	ptr                        = snap_read(ptr, _saved);
-	ptr                        = snap_read(ptr, _is_falling);
-	ptr                        = _output.snap_load(ptr, loader);
-	ptr                        = _stack.snap_load(ptr, loader);
-	ptr                        = _ref_stack.snap_load(ptr, loader);
-	ptr                        = _eval.snap_load(ptr, loader);
-	ptr                        = snap_read(ptr, _tags_where);
-	ptr                        = snap_read(ptr, _choice_tags_begin);
-	ptr                        = snap_read(ptr, _global_tags_count);
-	ptr                        = snap_read(ptr, _choice_tags_count);
-	ptr                        = _tags.snap_load(ptr, loader);
-	loader.runner_tags         = _tags.begin();
-	ptr                        = _container.snap_load(ptr, loader);
-	ptr                        = _threads.snap_load(ptr, loader);
+	ptr                = snap_read(ptr, _evaluation_mode);
+	ptr                = snap_read(ptr, _string_mode);
+	ptr                = snap_read(ptr, _tag_mode);
+	ptr                = snap_read(ptr, _saved_evaluation_mode);
+	ptr                = snap_read(ptr, _saved);
+	ptr                = snap_read(ptr, _is_falling);
+	ptr                = _output.snap_load(ptr, loader);
+	ptr                = _stack.snap_load(ptr, loader);
+	ptr                = _ref_stack.snap_load(ptr, loader);
+	ptr                = _eval.snap_load(ptr, loader);
+	ptr                = snap_read(ptr, _tags_where);
+	ptr                = snap_read(ptr, _choice_tags_begin);
+	ptr                = snap_read(ptr, _global_tags_count);
+	ptr                = snap_read(ptr, _choice_tags_count);
+	ptr                = _tags.snap_load(ptr, loader);
+	loader.runner_tags = _tags.begin();
+	ptr                = _container.snap_load(ptr, loader);
+	ptr                = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
 	ptr              = snap_read(ptr, has_fallback_choice);
 	_fallback_choice = nullopt;
@@ -751,7 +739,6 @@ runner_impl::change_type runner_impl::detect_change() const
 	}
 
 	return change_type::extended_past_newline;
-
 }
 
 bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
@@ -760,15 +747,15 @@ bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 	const bool at_story_start = _ptr == _story->instructions();
 
 	// Step the interpreter until we've parsed all tags for the line
-	size_t last_newline = basic_stream::npos;
-	while (_ptr != nullptr && last_newline == basic_stream::npos) {
+	size_t last_newline = _output.find_last_of(value_type::newline);
+	size_t next_newline = basic_stream::npos;
+	while (_ptr != nullptr && (next_newline == basic_stream::npos || last_newline == next_newline)) {
 		step(debug_stream);
-
-		last_newline = _output.find_last_of(value_type::newline);
+		next_newline = _output.find_last_of(value_type::newline);
 	}
 
 	// Copy global tags to the first line
-	if (at_story_start &&_global_tags_count > 0) {
+	if (at_story_start && _global_tags_count > 0) {
 		for (size_t i = 0; i < _global_tags_count; ++i) {
 			add_tag(get_global_tag(i), tags_level::LINE);
 		}
@@ -790,8 +777,8 @@ bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 
 		// Step execution until we're satisfied it doesn't affect the current line
 		bool keep_stepping = false;
-		bool is_gluing = false;
-		bool is_newline = false;
+		bool is_gluing     = false;
+		bool is_newline    = false;
 		do {
 			if (_ptr == nullptr) {
 				break;
@@ -825,8 +812,8 @@ bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 
 				// Just one more command...
 				/*if (!keep_stepping) {
-					keep_stepping = true;
-					is_newline = false;
+				  keep_stepping = true;
+				  is_newline = false;
 				}*/
 			}
 
@@ -856,8 +843,7 @@ bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 					// Newline was removed. Proceed as if we never hit it
 					forget();
 					return false;
-				case change_type::no_change:
-					break;
+				case change_type::no_change: break;
 			}
 		}
 
@@ -893,10 +879,10 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 
 		// If we're falling and we hit a non-fallthrough command, stop the fall.
 		if (_is_falling
-			&& ! (
-				(cmd == Command::DIVERT && flag & CommandFlag::DIVERT_IS_FALLTHROUGH)
-				|| cmd == Command::END_CONTAINER_MARKER
-			)) {
+		    && ! (
+		        (cmd == Command::DIVERT && flag & CommandFlag::DIVERT_IS_FALLTHROUGH)
+		        || cmd == Command::END_CONTAINER_MARKER
+		    )) {
 			_is_falling = false;
 			set_done_ptr(nullptr);
 		}
@@ -1041,7 +1027,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 						// Wait! We may be returning from a function!
 						frame_type type;
 						if (_stack.has_frame(&type)
-							&& type == frame_type::function) // implicit return is only for functions
+						    && type == frame_type::function) // implicit return is only for functions
 						{
 							// push null and return
 							_eval.push(values::null);
@@ -1057,7 +1043,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 
 					// Do the jump
 					inkAssert(
-						_story->instructions() + target < _story->end(), "Diverting past end of story data!"
+					    _story->instructions() + target < _story->end(), "Diverting past end of story data!"
 					);
 					jump(_story->instructions() + target, true);
 				} break;
@@ -1130,8 +1116,8 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 						if (_eval.top_value().type() == value_type::ex_fn_not_found) {
 							_eval.pop();
 							inkAssert(
-								target != 0,
-								"Exetrnal function was not binded, and no fallback function provided!"
+							    target != 0,
+							    "Exetrnal function was not binded, and no fallback function provided!"
 							);
 							start_frame<frame_type::function>(target);
 						}
@@ -1147,10 +1133,10 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					// TODO We push ahead of a single divert. Is that correct in all cases....?????
 					auto returnTo = _ptr + CommandSize<uint32_t>;
 					_stack.push_frame<frame_type::thread>(
-						returnTo - _story->instructions(), _evaluation_mode
+					    returnTo - _story->instructions(), _evaluation_mode
 					);
 					_ref_stack.push_frame<frame_type::thread>(
-						returnTo - _story->instructions(), _evaluation_mode
+					    returnTo - _story->instructions(), _evaluation_mode
 					);
 
 					// Fork a new thread on the callstack
@@ -1225,7 +1211,9 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					auto* fn = _functions.find(functionName);
 					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
-					} else if (_output.saved() && _output.ends_with(value_type::newline, _output.save_offset()) && ! fn->lookaheadSafe()) {
+					} else if (_output.saved()
+					           && _output.ends_with(value_type::newline, _output.save_offset())
+					           && ! fn->lookaheadSafe()) {
 						// TODO: seperate token?
 						_output.append(values::null);
 					} else {
@@ -1276,7 +1264,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					// Load value from output stream
 					// Push onto stack
 					_eval.push(value{}.set<value_type::string>(
-						_output.get_alloc<false>(_globals->strings(), _globals->lists())
+					    _output.get_alloc<false>(_globals->strings(), _globals->lists())
 					));
 				} break;
 
@@ -1360,7 +1348,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 
 					// Fetch tags related to the current choice
 					const snap_tag* tags_start = nullptr;
-					const snap_tag* tags_end = nullptr;
+					const snap_tag* tags_end   = nullptr;
 
 					if (_choice_tags_begin != ~0) {
 						// Retroactively mark added tags as choice tags
@@ -1369,7 +1357,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 						_tags_where = tags_level::CHOICE;
 
 						tags_start = _tags.begin() + _choice_tags_begin;
-						tags_end = tags_start + tags_count;
+						tags_end   = tags_start + tags_count;
 
 						_choice_tags_begin = ~0;
 					}
@@ -1383,14 +1371,8 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 						current_choice = &add_choice();
 					}
 					current_choice->setup(
-						_output,
-						_globals->strings(),
-						_globals->lists(),
-						_choices.size(),
-						path,
-						current_thread(),
-						tags_start,
-						tags_end
+					    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
+					    current_thread(), tags_start, tags_end
 					);
 					// save stack at last choice
 					if (_saved) {
@@ -1406,7 +1388,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 
 					// Increment visit count
 					if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS
-						|| flag & CommandFlag::CONTAINER_MARKER_TRACK_TURNS) {
+					    || flag & CommandFlag::CONTAINER_MARKER_TRACK_TURNS) {
 						_globals->visit(_container.top().id, true);
 					}
 
@@ -1429,8 +1411,8 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 							on_done(false);
 							break;
 						} else if (_stack.has_frame(&type) && type == frame_type::function) // implicit return
-																							// is only for
-																							// functions
+						                                                                    // is only for
+						                                                                    // functions
 						{
 							// push null and return
 							_eval.push(values::null);
@@ -1439,8 +1421,8 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 							_ptr += sizeof(Command) + sizeof(CommandFlag);
 							execute_return();
 						} else if (_ptr == _story->end()) { // check needed, because it colud exist an unnamed
-															  // toplevel container (empty named container stack
-															  // != empty container stack)
+							                                  // toplevel container (empty named container stack
+							                                  // != empty container stack)
 							on_done(true);
 						}
 					}
@@ -1449,7 +1431,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					// Push the visit count for the current container to the top
 					//  is 0-indexed for some reason. idk why but this is what ink expects
 					_eval.push(
-						value{}.set<value_type::int32>(( int ) _globals->visits(_container.top().id) - 1)
+					    value{}.set<value_type::int32>(( int ) _globals->visits(_container.top().id) - 1)
 					);
 				} break;
 				case Command::TURN: {
@@ -1484,7 +1466,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					// Push the read count for the requested container index
 					_eval.push(value{}.set<value_type::int32>(( int ) _globals->visits(container)));
 				} break;
-				
+
 				default: inkAssert(false, "Unrecognized command!"); break;
 			}
 		}
@@ -1516,8 +1498,8 @@ void runner_impl::on_done(bool setDone)
 		// Go to where the thread started
 		frame_type type = execute_return();
 		inkAssert(
-			type == frame_type::thread,
-			"Expected thread frame marker to hold return to value but none found..."
+		    type == frame_type::thread,
+		    "Expected thread frame marker to hold return to value but none found..."
 		);
 		// if thread ends, move stave point with, else the thread end marker is missing
 		// and we can't collect the other threads
