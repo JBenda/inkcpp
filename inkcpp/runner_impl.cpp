@@ -747,8 +747,8 @@ bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 	const bool at_story_start = _ptr == _story->instructions();
 
 	// Step the interpreter until we've parsed all tags for the line
-	size_t last_newline = _output.find_last_of(value_type::newline);
-	size_t next_newline = basic_stream::npos;
+	const size_t last_newline = _output.find_last_of(value_type::newline);
+	size_t       next_newline = basic_stream::npos;
 	while (_ptr != nullptr && (next_newline == basic_stream::npos || last_newline == next_newline)) {
 		step(debug_stream);
 		next_newline = _output.find_last_of(value_type::newline);
@@ -778,44 +778,40 @@ bool runner_impl::line_step(std::ostream* debug_stream /*= nullptr*/)
 		// Step execution until we're satisfied it doesn't affect the current line
 		bool keep_stepping = false;
 		bool is_gluing     = false;
-		bool is_newline    = false;
 		do {
 			if (_ptr == nullptr) {
 				break;
 			}
 
+			// Step the next command
 			step(debug_stream);
 
-			// If we find glue, keep going until the next line
-			if (is_gluing) {
-				is_gluing = ! _output.text_past_save();
-			} else {
-				is_gluing = _output.ends_with(value_type::glue);
+			// Make a new save point to track the glue changes
+			if (_output.ends_with(value_type::glue)) {
+				is_gluing = true;
 
-				// Make a new save point to track the glue changes
-				if (is_gluing) {
-					is_newline = true;
+				if (_saved) {
+					forget();
+				}
+				save();
+			} else if (is_gluing) {
+				// If we find glue, keep going until the next line
+				if (_output.ends_with(value_type::newline)) {
+					is_gluing = false;
 
-					if (_saved) {
-						forget();
+					// Uncomment to fix the first LookaheadSafe test
+					// and break all the other tests :')
+					/*if (_saved) {
+					  forget();
 					}
-					save();
+					save();*/
+
+					continue;
 				}
 			}
 
 			// Are we gluing?
 			keep_stepping = is_gluing;
-
-			// Find the next newline after gluing
-			if (! keep_stepping && is_newline) {
-				keep_stepping |= ! _output.ends_with(value_type::newline);
-
-				// Just one more command...
-				/*if (!keep_stepping) {
-				  keep_stepping = true;
-				  is_newline = false;
-				}*/
-			}
 
 			// Are we diverting?
 			keep_stepping |= _evaluation_mode;

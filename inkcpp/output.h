@@ -70,7 +70,7 @@ namespace runtime
 #endif
 
 			// Get filled size of output buffer
-			size_t filled() const { _size; }
+			size_t filled() const { return _size; }
 
 			// Check if the stream is empty
 			bool is_empty() const { return _size == 0; }

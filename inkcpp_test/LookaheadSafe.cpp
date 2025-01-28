@@ -1,9 +1,10 @@
 #include "catch.hpp"
 
-#include <story.h>
+#include <../runner_impl.h>
+#include <compiler.h>
 #include <globals.h>
 #include <runner.h>
-#include <compiler.h>
+#include <story.h>
 
 using namespace ink::runtime;
 
@@ -20,18 +21,24 @@ SCENARIO("a story with external functions and glue", "[external]")
 
 		WHEN("the external function is safe for look-ahead")
 		{
-			auto thread = ink->new_runner();
+			auto thread = ink->new_runner().cast<internal::runner_impl>();
+			std::stringstream commands;
+			thread->set_debug_enabled(&commands);
 			thread->bind("foo", foo, true);
 			CHECK(thread->getline() == "Call1 glued to Call 2\n");
+			std::string c = commands.str();
 			CHECK(cnt == 3);
 			CHECK(thread->getline() == "Call 3 is seperated\n");
 			CHECK(cnt == 4);
 		}
 		WHEN("the external function is unsafe for look-ahead")
 		{
-			auto thread = ink->new_runner();
+			auto thread = ink->new_runner().cast<internal::runner_impl>();
+			std::stringstream commands;
+			thread->set_debug_enabled(&commands);
 			thread->bind("foo", foo, false);
 			CHECK(thread->getline() == "Call1\n");
+			std::string c = commands.str();
 			CHECK(cnt == 1);
 			CHECK(thread->getline() == "glued to Call 2\n");
 			CHECK(cnt == 2);
