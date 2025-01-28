@@ -29,7 +29,9 @@ SCENARIO("Story with tags and glues", "[tags][glue]")
 		}
 		WHEN("glue stops tags lookahead")
 		{
-			CHECK(tg_thread->getline() == "I'm Do! Most people can't pronounce it, just think 'Kee-vah\".\n");
+			CHECK(
+			    tg_thread->getline() == "I'm Do! Most people can't pronounce it, just think 'Kee-vah\".\n"
+			);
 			REQUIRE(tg_thread->num_tags() == 2);
 			CHECK(std::string(tg_thread->get_tag(0)) == "name fae03_name");
 			CHECK(std::string(tg_thread->get_tag(1)) == "meet-character 5");

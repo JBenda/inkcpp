@@ -36,7 +36,7 @@ class choice;
 class runner_interface
 {
 public:
-	virtual ~runner_interface(){};
+	virtual ~runner_interface() {};
 
 	// String type to simplify interfaces working with strings
 #ifdef INK_ENABLE_STL
@@ -166,9 +166,9 @@ public:
 
 	/**
 	 * Check if the current line has any tags. Excludes global tags.
-	 * 
+	 *
 	 * @return true if the line has tags, false if not
-	 * 
+	 *
 	 * @sa num_tags
 	 * @sa get_tag
 	 */
@@ -176,7 +176,7 @@ public:
 
 	/**
 	 * Returns the number of tags on the current line. Excludes global tags.
-	 * 
+	 *
 	 * @sa get_tag
 	 * @sa num_global_tags
 	 */
@@ -191,7 +191,7 @@ public:
 	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_tags() "num_tags()")
 	 *
 	 * @return pointer to the tag string memory or nullptr if the index is invalid
-	 * 
+	 *
 	 * @sa num_tags
 	 */
 	virtual const char* get_tag(size_t index) const = 0;

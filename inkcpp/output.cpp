@@ -17,8 +17,8 @@
 namespace ink::runtime::internal
 {
 basic_stream::basic_stream(value* buffer, size_t len)
-	: _data(buffer)
-	, _max(len)
+    : _data(buffer)
+    , _max(len)
 {
 }
 
@@ -38,7 +38,8 @@ void basic_stream::append(const value& in)
 			// ignore additional newlines after newline or glue
 			if (d.type() == value_type::newline || d.type() == value_type::glue) {
 				return;
-			} else if (d.type() == value_type::string && ink::internal::is_whitespace(d.get<value_type::string>())) {
+			} else if (d.type() == value_type::string
+			           && ink::internal::is_whitespace(d.get<value_type::string>())) {
 			} else if (d.type() == value_type::func_start || d.type() == value_type::func_end) {
 			} else {
 				break;
@@ -62,7 +63,7 @@ void basic_stream::append(const value& in)
 	//  This also applies when a function ends to trim trailing whitespace.
 	if ((in.type() == value_type::glue || in.type() == value_type::func_end) && _size > 1) {
 		// Run backwards
-		size_t i = _size - 2;
+		size_t i            = _size - 2;
 		int    func_end_cnt = 0;
 		while (true) {
 			value& d = _data[i];
@@ -73,7 +74,8 @@ void basic_stream::append(const value& in)
 			}
 
 			// Nullify whitespace
-			else if (d.type() == value_type::string && ::ink::internal::is_whitespace(d.get<value_type::string>()))
+			else if (d.type() == value_type::string
+			         && ::ink::internal::is_whitespace(d.get<value_type::string>()))
 				d = value{};
 			else if (d.type() == value_type::func_end) {
 				++func_end_cnt;
@@ -182,9 +184,9 @@ std::string basic_stream::get()
 FString basic_stream::get()
 {
 	UE_LOG(
-		InkCpp, Warning,
-		TEXT("Basic stream::get is not implemented correctly and should not be used implemented "
-			 "correctly!")
+	    InkCpp, Warning,
+	    TEXT("Basic stream::get is not implemented correctly and should not be used implemented "
+	         "correctly!")
 	);
 	FString str;
 	return str;
@@ -279,7 +281,7 @@ bool basic_stream::ends_with(value_type type, size_t offset /*= npos*/) const
 
 void basic_stream::save()
 {
-	inkAssert(!saved(), "Can not save over existing save point!");
+	inkAssert(! saved(), "Can not save over existing save point!");
 
 	// Save the current size
 	_save = _size;
@@ -412,7 +414,7 @@ size_t basic_stream::find_start() const
 bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const
 {
 	if (_data[iter].printable() && _data[iter].type() != value_type::newline
-		&& _data[iter].type() != value_type::string) {
+	    && _data[iter].type() != value_type::string) {
 		lastNewline = false;
 		hasGlue     = false;
 	} else {

@@ -16,10 +16,7 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 	{
 		WHEN("starting thread")
 		{
-			THEN("thread can continue")
-			{
-				REQUIRE(lines_thread->can_continue());
-			}
+			THEN("thread can continue") { REQUIRE(lines_thread->can_continue()); }
 			THEN("consume lines")
 			{
 				CHECK(lines_thread->getline() == "Line 1\n");
@@ -33,10 +30,7 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 			lines_thread->move_to(ink::hash_string("Functions"));
 			CHECK(lines_thread->getline() == "Function Line\n");
 
-			THEN("consume function result")
-			{
-				CHECK(lines_thread->getline() == "Function Result\n");
-			}
+			THEN("consume function result") { CHECK(lines_thread->getline() == "Function Result\n"); }
 		}
 		WHEN("consuming lines with tunnels")
 		{

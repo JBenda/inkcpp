@@ -12,7 +12,7 @@ SCENARIO("a story with an external function evaluates the function at the right 
 {
 	GIVEN("a story with an external function")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "ExternalFunctionsExecuteProperly.bin");
+		auto ink    = story::from_file(INK_TEST_RESOURCE_DIR "ExternalFunctionsExecuteProperly.bin");
 		auto thread = ink->new_runner().cast<internal::runner_impl>();
 
 		std::stringstream debug;

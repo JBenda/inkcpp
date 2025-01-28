@@ -11,8 +11,10 @@
 #include "string_table.h"
 #include "string_utils.h"
 
-namespace ink {
-namespace runtime {
+namespace ink
+{
+namespace runtime
+{
 
 	size_t choice::num_tags() const { return std::distance(_tags_start, _tags_end); }
 
@@ -22,14 +24,9 @@ namespace runtime {
 	}
 
 	choice& choice::setup(
-		internal::basic_stream& in,
-		internal::string_table& strings,
-		internal::list_table& lists,
-		int index,
-		uint32_t path,
-		thread_t thread,
-		const internal::snap_tag* tags_start,
-		const internal::snap_tag* tags_end
+	    internal::basic_stream& in, internal::string_table& strings, internal::list_table& lists,
+	    int index, uint32_t path, thread_t thread, const internal::snap_tag* tags_start,
+	    const internal::snap_tag* tags_end
 	)
 	{
 		// Index/path
@@ -44,14 +41,12 @@ namespace runtime {
 		if (in.queued() == 2) {
 			// If it's a string, just grab it. Otherwise, use allocation
 			const internal::value& data = in.peek();
-			switch ( data.type() )
-			{
-			case internal::value_type::string:
-				text = strings.duplicate(data.get<internal::value_type::string>());
-				in.discard( 2 );
-				break;
-			default:
-				text = in.get_alloc(strings, lists);
+			switch (data.type()) {
+				case internal::value_type::string:
+					text = strings.duplicate(data.get<internal::value_type::string>());
+					in.discard(2);
+					break;
+				default: text = in.get_alloc(strings, lists);
 			}
 		} else {
 			// Non-string. Must allocate
@@ -62,12 +57,12 @@ namespace runtime {
 		while (*end != '\0') {
 			++end;
 		}
-		end = ink::runtime::internal::clean_string<true, true>(text, end);
+		end  = ink::runtime::internal::clean_string<true, true>(text, end);
 		*end = '\0';
 
 		_text = text;
-		
+
 		return *this;
 	}
-}
-}   // namespace ink::runtime
+} // namespace runtime
+} // namespace ink
