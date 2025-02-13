@@ -26,7 +26,7 @@ globals_impl::globals_impl(const story_impl* story)
 	_visit_counts.resize(_num_containers);
 	_visit_counts_backup.resize(_num_containers);
 	if (_lists) {
-		// initelize static lists
+		// initialize static lists
 		const list_flag* flags = story->lists();
 		while (*flags != null_flag) {
 			list_table::list l = _lists.create_permament();

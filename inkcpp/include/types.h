@@ -25,7 +25,7 @@ using list    = list_interface*;
 
 /** A Ink variable
  *
- * Used for accassing, writing and observing global variables
+ * Used for accessing, writing and observing global variables
  * @ref ink::runtime::globals_interface::get()
  * @ref ink::runtime::globals_interface::set()
  * @ref ink::runtime::globals_interface::observe()

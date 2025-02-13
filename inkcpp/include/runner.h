@@ -22,8 +22,8 @@ class choice;
 /**
  * A runner to execute ink script from a story.
  *
- * An independant runner which can execute ink script from a
- * story independant of other runners. Think of the ink story
+ * An independent runner which can execute ink script from a
+ * story independent of other runners. Think of the ink story
  * object like an executable file and the runners as 'threads'
  * (not to be confused with ink threads, which are a language
  * feature). Runners track their own instruction pointer, choice

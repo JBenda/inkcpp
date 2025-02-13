@@ -22,7 +22,7 @@ namespace ink::runtime::internal
 			return;
 		}
 
-		// Otherwise, derecement references
+		// Otherwise, decrement references
 		block->references--;
 	}
 

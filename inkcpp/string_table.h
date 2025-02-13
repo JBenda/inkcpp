@@ -18,7 +18,7 @@ namespace ink::runtime::internal
 	public:
 		virtual ~string_table();
 
-		// Create a dynmaic string of a particular length
+		// Create a dynamic string of a particular length
 		char* create(size_t length);
 		char* duplicate(const char* str);
 
