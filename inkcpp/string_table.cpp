@@ -41,7 +41,7 @@ char* string_table::create(size_t length)
 
 	// Add to the tree
 	bool success = _table.insert(data, true); // TODO: Should it start as used?
-	inkAssert(success, "Duplicate string pointer in the string_table. How is that possible?");
+	inkAssert(success, "String table is full, unable to add new data.");
 	if (! success) {
 		delete[] data;
 		return nullptr;

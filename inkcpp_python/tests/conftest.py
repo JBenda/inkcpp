@@ -1,13 +1,26 @@
 import pytest
 import os
 import sys
+import subprocess
 import inkcpp_py as ink
+import warnings
 
 @pytest.fixture(scope='session', autouse=True)
 def inklecate_cmd():
     res = os.getenv("INKLECATE")
     if res is None or res == "":
-        return "inklecate"
+        res = "inklecate"
+    try:
+        output = subprocess.run([res], capture_output=True)
+        is_inklecate = output.stdout.decode("utf-8").split("\n")[0].find("inklecate") > -1
+    except FileNotFoundError as err:
+        pytest.fail(f"Unable to find '{res}', needed to compile .ink to .ink.json\n\tErr ({err.errno}): {err.strerror}\n\ttry setting the correct inklecate executable via the INKLECATE enviroment variable.")
+        return None
+    except OSError as err:
+        pytest.fail(f"Unable to execute '{res}', needed to compile .ink to .ink.json\n\tMsg ({err.errno}): {err.strerror}\n\ttry setting the correct inklecate executable via the INKLECATE enviroment variable.")
+        return None
+    if not is_inklecate:
+        warning.warn(RuntimeWarning(f"Executing '{res}' behaved unexpeted, may results in errors!"))
     return res
 
 
@@ -33,10 +46,16 @@ def story_path(tmpdir_factory):
 @pytest.fixture(scope='session', autouse=True)
 def assets(story_path, inklecate_cmd):
     res = {}
-    for (name, files) in story_path.items():
+    print()
+    try:
+        from tqdm import tqdm
+    except ImportError:
+        print("Compiling ink scripts takes a while, `pip install tqdm` for a nice progress bar")
+        tqdm = lambda x: x
+    for (name, files) in tqdm(story_path.items()):
         if not os.path.exists(files[0]):
             if not os.path.exists(files[1]):
-                os.system('{} -o {} {}'.format(inklecate_cmd, files[1], files[2]))
+                subprocess.run([inklecate_cmd, "-o", files[1], files[2]], check=True)
             ink.compile_json(str(files[1]), str(files[0]))
         res[name] = ink.Story.from_file(str(files[0]))
     return res
