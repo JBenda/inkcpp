@@ -179,7 +179,6 @@ ctest -C Release
 To test the python bindings use:
 
 ```sh
-pip install .
 python -m pip install build pytest
 python -m build
 python -m pip install dist/*.whl --user
