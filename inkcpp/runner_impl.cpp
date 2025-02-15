@@ -499,7 +499,7 @@ void runner_impl::choose(size_t index)
 {
 	if (has_choices()) {
 		inkAssert(index < _choices.size(), "Choice index out of range");
-	} else if (!_fallback_choice){
+	} else if (! _fallback_choice) {
 		inkAssert(false, "No choice and no Fallbackchoice!! can not choose");
 	}
 	_globals->turn();

@@ -63,7 +63,7 @@ inline int toStr(char* buffer, size_t size, float value)
 	for (float f = value; f > 1.f; f /= 10.f) {
 		++digits;
 	}
-	int ec =  _gcvt_s(buffer, size, value, digits); // number of significant digits
+	int ec = _gcvt_s(buffer, size, value, digits); // number of significant digits
 #else
 	if (buffer == nullptr || size < 1) {
 		return EINVAL;
@@ -193,7 +193,9 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 			}
 		} else if (src[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
 			continue;
-		} else if ((isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n') && ((src + 1 == end && TAILING_SPACES) || ((src + 1 != end) && isspace(static_cast<unsigned char>(src[1]))))) {
+		} else if ((isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n')
+		           && ((src + 1 == end && TAILING_SPACES)
+		               || ((src + 1 != end) && isspace(static_cast<unsigned char>(src[1]))))) {
 			continue;
 		} else if (src[0] == '\n' && dst != begin && dst[-1] == '\n') {
 			continue;

@@ -87,20 +87,24 @@ namespace ink::runtime::internal {
 	}
 
 	bool has(const char* lh, const char* rh) {
-		while(isspace(static_cast<unsigned char>(*lh))) { ++lh; }
-		while(isspace(static_cast<unsigned char>(*rh))) { ++rh; }
-		if(!*lh && !*rh) { return true; }
+	  while (isspace(static_cast<unsigned char>(*lh))) {
+		  ++lh;
+	  }
+	  while (isspace(static_cast<unsigned char>(*rh))) {
+		  ++rh;
+	  }
+	  if(!*lh && !*rh) { return true; }
 		for(const char* li = lh; *li; ++li) {
 			const char* ri = rh;
 			bool match = true;
 			int offset = 0;
 			for(int i = 0; ri[i] != 0; ++i) {
 				if(li[i + offset] != ri[i]) {
-					if(isspace(static_cast<unsigned char>(ri[i]))) {
-						--offset;
+				  if (isspace(static_cast<unsigned char>(ri[i]))) {
+					  --offset;
 						continue;
-					}
-					match = false; break;
+				  }
+				  match = false; break;
 				}
 			}
 			if(match) { return true; }
