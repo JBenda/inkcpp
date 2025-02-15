@@ -80,8 +80,8 @@ struct INKCPP_API FInkVar
 	ink::runtime::value to_value() const;
 
 
-	// allow changing via Editor, but not in control flow, it is just a wrapper type to create a new one
-	// UPROPERTY(EditAnywhere, Category = "Ink")
+	// allow changing via Editor, but not in control flow, it is just a wrapper type to create a new
+	// one UPROPERTY(EditAnywhere, Category = "Ink")
 	/** @private */
 	TUnion<float, int, unsigned, bool, FString, UInkList*> value;
 

@@ -10,7 +10,7 @@ using namespace ink::runtime;
 
 SCENARIO( "run story with hidden choice" )
 {
-	GIVEN( "a story with choice visible by second visit" )
+	GIVEN("a story with choice visible by second visit")
 	{
 		auto    ink     = story::from_file(INK_TEST_RESOURCE_DIR "LabelConditionStory.bin");
 		globals globals = ink->new_globals();

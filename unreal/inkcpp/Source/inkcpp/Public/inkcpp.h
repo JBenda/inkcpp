@@ -96,8 +96,8 @@
  *
  * @subsection ue_list InkList
  * @ref UInkList is a wrapper for the list type inside ink.
- * A ink list is like a set for enum values. For a in depth explanation please refer to the [official
- * guide](https://blueprintue.com/blueprint/hdybtdjp/)
+ * A ink list is like a set for enum values. For a in depth explanation please refer to the
+ * [official guide](https://blueprintue.com/blueprint/hdybtdjp/)
  *
  * If you define Enums similar to the Lists in the ink script you can use them for an easier access.
  *
