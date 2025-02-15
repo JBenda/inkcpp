@@ -87,8 +87,8 @@ namespace ink::runtime::internal {
 	}
 
 	bool has(const char* lh, const char* rh) {
-		while(isspace(*lh)) { ++lh; }
-		while(isspace(*rh)) { ++rh; }
+		while(isspace(static_cast<unsigned char>(*lh))) { ++lh; }
+		while(isspace(static_cast<unsigned char>(*rh))) { ++rh; }
 		if(!*lh && !*rh) { return true; }
 		for(const char* li = lh; *li; ++li) {
 			const char* ri = rh;
@@ -96,7 +96,7 @@ namespace ink::runtime::internal {
 			int offset = 0;
 			for(int i = 0; ri[i] != 0; ++i) {
 				if(li[i + offset] != ri[i]) {
-					if(isspace(ri[i])) {
+					if(isspace(static_cast<unsigned char>(ri[i]))) {
 						--offset;
 						continue;
 					}
