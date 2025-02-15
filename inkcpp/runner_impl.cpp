@@ -499,6 +499,8 @@ void runner_impl::choose(size_t index)
 {
 	if (has_choices()) {
 		inkAssert(index < _choices.size(), "Choice index out of range");
+	} else if (!_fallback_choice){
+		inkAssert(false, "No choice and no Fallbackchoice!! can not choose");
 	}
 	_globals->turn();
 	// Get the choice
@@ -526,6 +528,7 @@ void runner_impl::choose(size_t index)
 	_stack.collapse_to_thread(choiceThread);
 	_ref_stack.collapse_to_thread(choiceThread);
 	_threads.clear();
+	_eval.clear();
 
 	// Jump to destination and clear choice list
 	jump(_story->instructions() + c.path(), true);
