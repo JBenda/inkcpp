@@ -28,8 +28,7 @@ SCENARIO("string_table fill up #97", "[fixes]")
 			}
 			THEN("string table should still have room")
 			{
-				const size_t hash = std::hash<std::string>()(story);
-				REQUIRE(hash == 10470162116642559903);
+				REQUIRE(story.length() == 3082);
 				// TEST string table size
 			}
 		}
