@@ -118,7 +118,7 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Handler for a <a class="el" href="classink_1_1runtime_1_1snapshot.html">ink snapshot</a>. </p>
-<p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all assoziated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and runner_interface::create_snapshot() . If the runner is assoziated to the globals the snapshot will be identical. If multiple runners are assoziated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a></p>
+<p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all associated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and runner_interface::create_snapshot() . If the runner is associated to the globals the snapshot will be identical. If multiple runners are associated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a></p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo</a></b></dt><dd>Currently the id is equal to the creation order, a way to name the single runner/threads is WIP </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a432a1ea5b1326db82ce9d87a8e55bb35" name="a432a1ea5b1326db82ce9d87a8e55bb35"></a>
@@ -205,7 +205,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">ink_exception</td><td>if it failt to open the file   </td></tr>
+    <tr><td class="paramname">ink_exception</td><td>if it fails to open the file   </td></tr>
   </table>
   </dd>
 </dl>

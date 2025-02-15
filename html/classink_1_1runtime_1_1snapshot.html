@@ -109,7 +109,7 @@ $(function(){initNavTree('classink_1_1runtime_1_1snapshot.html',''); initResizab
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aec7b9ba65e59556a3187422fb0236c5f" id="r_aec7b9ba65e59556a3187422fb0236c5f"><td class="memItemLeft" align="right" valign="top"><a id="aec7b9ba65e59556a3187422fb0236c5f" name="aec7b9ba65e59556a3187422fb0236c5f"></a>
 virtual const unsigned char *&#160;</td><td class="memItemRight" valign="bottom"><b>get_data</b> () const =0</td></tr>
-<tr class="memdesc:aec7b9ba65e59556a3187422fb0236c5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">acces blob inside snapshot <br /></td></tr>
+<tr class="memdesc:aec7b9ba65e59556a3187422fb0236c5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">access blob inside snapshot <br /></td></tr>
 <tr class="separator:aec7b9ba65e59556a3187422fb0236c5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f1eb6f110928e49aa548309eec5d80b" id="r_a6f1eb6f110928e49aa548309eec5d80b"><td class="memItemLeft" align="right" valign="top"><a id="a6f1eb6f110928e49aa548309eec5d80b" name="a6f1eb6f110928e49aa548309eec5d80b"></a>
 virtual <a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>get_data_len</b> () const =0</td></tr>
@@ -134,7 +134,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Container for an InkCPP runtime snapshot. </p>
-<p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all assoziated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a38aa102610dbd4764133b50d2474db6c" title="creates a snapshot containing the runner, globals and all other runners connected to the globals.">runner_interface::create_snapshot()</a> . If the runner is assoziated to the globals the snapshot will be identical. If multiple runners are assoziated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a></p>
+<p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all associated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a38aa102610dbd4764133b50d2474db6c" title="creates a snapshot containing the runner, globals and all other runners connected to the globals.">runner_interface::create_snapshot()</a> . If the runner is associated to the globals the snapshot will be identical. If multiple runners are associated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a></p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo</a></b></dt><dd>Currently the id is equal to the creation order, a way to name the single runner/threads is WIP </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="ae24288652c3cc9fefbf72e3f1c15b47f" name="ae24288652c3cc9fefbf72e3f1c15b47f"></a>
@@ -245,7 +245,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">ink_exception</td><td>if it failt to open the file </td></tr>
+    <tr><td class="paramname">ink_exception</td><td>if it fails to open the file </td></tr>
   </table>
   </dd>
 </dl>
