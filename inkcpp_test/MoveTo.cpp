@@ -28,11 +28,11 @@ SCENARIO("run a story, but jump around manually", "[move_to]")
 				REQUIRE(main->num_choices() == 1);
 				REQUIRE(main->get_choice(0)->text() == std::string("Hellow mister menistery"));
 				main->choose(0);
-				REQUIRE(main->getall() == "Hellow mister menistery\nYou are head to head to the minister\nIt seems you are out of options, you shold give up\n");
+				REQUIRE(main->getall() == "Hellow mister menistery\nYou are head to head to the minister\nIt seems you are out of options, you should give up\n");
 			}
 		}
 
-		WHEN("skip intorduction")
+		WHEN("skip introduction")
 		{
 			main->move_to(ink::hash_string("Dialog.core"));
 			THEN("expect output minus introduction")
@@ -41,7 +41,7 @@ SCENARIO("run a story, but jump around manually", "[move_to]")
 				REQUIRE(main->num_choices() == 1);
 				REQUIRE(main->get_choice(0)->text() == std::string("Hellow mister menistery"));
 				main->choose(0);
-				REQUIRE(main->getall() == "Hellow mister menistery\nYou are head to head to the minister\nIt seems you are out of options, you shold give up\n");
+				REQUIRE(main->getall() == "Hellow mister menistery\nYou are head to head to the minister\nIt seems you are out of options, you should give up\n");
 			}
 		}
 
@@ -57,7 +57,7 @@ SCENARIO("run a story, but jump around manually", "[move_to]")
 				REQUIRE(main->num_choices() == 1);
 				REQUIRE(main->get_choice(0)->text() == std::string("Hellow mister menistery"));
 				main->choose(0);
-				REQUIRE(main->getall() == "Hellow mister menistery\nYou are head to head to the minister\nIt seems you are out of options, you shold give up\n");
+				REQUIRE(main->getall() == "Hellow mister menistery\nYou are head to head to the minister\nIt seems you are out of options, you should give up\n");
 			}
 		}
 		WHEN("second runner modifies value")
@@ -71,10 +71,10 @@ SCENARIO("run a story, but jump around manually", "[move_to]")
 				REQUIRE(main->num_choices() == 1);
 				REQUIRE(main->get_choice(0)->text() == std::string("Roar"));
 				main->choose(0);
-				REQUIRE(main->getall() == "Grrrrh, Roarrr\nThe people are quit confused\nYou are head to head to the minister\nIt seems you are out of options, you shold give up\n");
+				REQUIRE(main->getall() == "Grrrrh, Roarrr\nThe people are quit confused\nYou are head to head to the minister\nIt seems you are out of options, you should give up\n");
 			}
 		}
-		WHEN("execute mutliple small runners with sideeffects")
+		WHEN("execute multiple small runners with sideeffects")
 		{
 			main->move_to(ink::hash_string("Dialog.core"));
 			side->move_to(ink::hash_string("Transformations.ToTiger"));
@@ -88,7 +88,7 @@ SCENARIO("run a story, but jump around manually", "[move_to]")
 				REQUIRE(main->num_choices() == 1);
 				REQUIRE(main->get_choice(0)->text() == std::string("Roar"));
 				main->choose(0);
-				REQUIRE(main->getall() == "Grrrrh, Roarrr\nThe people are quit confused\nYou are head to head to the minister\nIt seems you are out of options, you shold give up\n");
+				REQUIRE(main->getall() == "Grrrrh, Roarrr\nThe people are quit confused\nYou are head to head to the minister\nIt seems you are out of options, you should give up\n");
 			}
 		}
 	}

@@ -16,7 +16,7 @@ class TestExternalFunctions:
         assert out == "Call1 glued to Call 2\n"
         assert cnt.cnt == 3
         out = runner.getline()
-        assert out == "Call 3 is seperated\n"
+        assert out == "Call 3 is separated\n"
         assert cnt.cnt == 4
 
     def test_lookahadeUnsafe(self, assets, generate):
@@ -30,6 +30,6 @@ class TestExternalFunctions:
         assert out == "glued to Call 2\n"
         assert cnt.cnt == 2
         out = runner.getline()
-        assert out == "Call 3 is seperated\n"
+        assert out == "Call 3 is separated\n"
         assert cnt.cnt == 3
     

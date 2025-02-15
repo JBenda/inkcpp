@@ -28,7 +28,7 @@ template<>
 int32_t function_base::pop<int32_t>(basic_eval_stack* stack, list_table& lists)
 {
 	value val = stack->pop();
-	inkAssert(val.type() == value_type::int32, "Type missmatch!");
+	inkAssert(val.type() == value_type::int32, "Type mismatch!");
 	return val.get<value_type::int32>();
 }
 
@@ -36,7 +36,7 @@ template<>
 const char* function_base::pop<const char*>(basic_eval_stack* stack, list_table& lists)
 {
 	value val = stack->pop();
-	inkAssert(val.type() == value_type::string, "Type missmatch!");
+	inkAssert(val.type() == value_type::string, "Type mismatch!");
 	return val.get<value_type::string>().str;
 }
 

@@ -8,7 +8,7 @@
 
 #include "InkSnapshot.generated.h"
 
-/** A serelizable snapshot of a runtime state
+/** A serializable snapshot of a runtime state
  * Can be used as variable in a USaveGame to be stored and reloaded
  * @ingroup unreal
  */

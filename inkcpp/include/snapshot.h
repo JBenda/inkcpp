@@ -13,10 +13,10 @@ namespace ink::runtime
 /**
  * Container for an InkCPP runtime snapshot.
  * Each snapshot contains a @ref ink::runtime::globals_interface "globals store"
- * and all assoziated @ref ink::runtime::runner_interface "runners/threads"
+ * and all associated @ref ink::runtime::runner_interface "runners/threads"
  * For convinience there exist @ref ink::runtime::globals_interface::create_snapshot() and
- * runner_interface::create_snapshot() . If the runner is assoziated to the globals the snapshot
- * will be identical. If multiple runners are assoziated to the same globals all will be contained,
+ * runner_interface::create_snapshot() . If the runner is associated to the globals the snapshot
+ * will be identical. If multiple runners are associated to the same globals all will be contained,
  * and cann be reconsrtucted with the id parameter of @ref
  * ink::runtime::story::new_runner_from_snapshot()
  *
@@ -38,7 +38,7 @@ public:
 	 */
 	static snapshot* from_binary(const unsigned char* data, size_t length, bool freeOnDestroy = true);
 
-	/** acces blob inside snapshot */
+	/** access blob inside snapshot */
 	virtual const unsigned char* get_data() const     = 0;
 	/** size of blob inside snapshot */
 	virtual size_t               get_data_len() const = 0;
@@ -53,7 +53,7 @@ public:
 	static snapshot* from_file(const char* filename);
 	/** serialize snapshot to file
 	 * @param filename output file filename, if already exist it will be overwritten
-	 * @throws ink_exception if it failt to open the file
+	 * @throws ink_exception if it fails to open the file
 	 */
 	void             write_to_file(const char* filename) const;
 #endif

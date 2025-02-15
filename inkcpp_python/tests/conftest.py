@@ -32,7 +32,6 @@ def story_path(tmpdir_factory):
             
 @pytest.fixture(scope='session', autouse=True)
 def assets(story_path, inklecate_cmd):
-    print(ink.__dict__, file=sys.stderr)
     res = {}
     for (name, files) in story_path.items():
         if not os.path.exists(files[0]):

@@ -25,7 +25,7 @@ SCENARIO("A story with external functions and glue", "[external]")
 			REQUIRE(cnt == 3);
 			REQUIRE(out == "Call1 glued to Call 2\n");
 			out = thread->getline();
-			REQUIRE(out == "Call 3 is seperated\n");
+			REQUIRE(out == "Call 3 is separated\n");
 			REQUIRE(cnt == 4);
 		}
 		WHEN("the function is not lookahead save")
@@ -39,7 +39,7 @@ SCENARIO("A story with external functions and glue", "[external]")
 			REQUIRE(out == "glued to Call 2\n");
 			REQUIRE(cnt == 2);
 			out = thread->getline();
-			REQUIRE(out == "Call 3 is seperated\n");
+			REQUIRE(out == "Call 3 is separated\n");
 			REQUIRE(cnt == 3);
 		}
 	}
