@@ -1017,7 +1017,8 @@ void runner_impl::step()
 					auto* fn = _functions.find(functionName);
 					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
-					} else if (_output.saved() && _output.saved_ends_with(value_type::newline) && ! fn->lookaheadSafe()) {
+					} else if (_output.saved() && _output.saved_ends_with(value_type::newline)
+					           && ! fn->lookaheadSafe()) {
 						// TODO: seperate token?
 						_output.append(values::null);
 					} else {
@@ -1061,9 +1062,11 @@ void runner_impl::step()
 
 					// Load value from output stream
 					// Push onto stack
-					_eval.push(value{}.set<value_type::string>(
-					    _output.get_alloc<false>(_globals->strings(), _globals->lists())
-					));
+					_eval.push(
+					    value{}.set<value_type::string>(
+					        _output.get_alloc<false>(_globals->strings(), _globals->lists())
+					    )
+					);
 				} break;
 
 				case Command::START_TAG: {
@@ -1200,7 +1203,9 @@ void runner_impl::step()
 					// Push the visit count for the current container to the top
 					//  is 0-indexed for some reason. idk why but this is what ink expects
 					_eval.push(
-					    value{}.set<value_type::int32>(static_cast<int32_t>(_globals->visits(_container.top().id) - 1))
+					    value{}.set<value_type::int32>(
+					        static_cast<int32_t>(_globals->visits(_container.top().id) - 1)
+					    )
 					);
 				} break;
 				case Command::TURN: {
@@ -1214,7 +1219,8 @@ void runner_impl::step()
 					int sequenceLength = _eval.pop().get<value_type::int32>();
 					int index          = _eval.pop().get<value_type::int32>();
 
-					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
+					_eval.push(
+					    value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
 					);
 				} break;
 				case Command::SEED: {
@@ -1229,7 +1235,9 @@ void runner_impl::step()
 					container_t container = read<container_t>();
 
 					// Push the read count for the requested container index
-					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_globals->visits(container))));
+					_eval.push(
+					    value{}.set<value_type::int32>(static_cast<int32_t>(_globals->visits(container)))
+					);
 				} break;
 				case Command::TAG: {
 					_tags.push() = read<const char*>();
