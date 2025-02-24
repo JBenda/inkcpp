@@ -169,16 +169,14 @@ public:
 	 *
 	 * @return true if the line has tags, false if not
 	 *
-	 * @sa num_tags
-	 * @sa get_tag
+	 * @sa num_tags get_tag
 	 */
 	virtual bool has_tags() const = 0;
 
 	/**
 	 * Returns the number of tags on the current line. Excludes global tags.
 	 *
-	 * @sa get_tag
-	 * @sa num_global_tags
+	 * @sa get_tag num_global_tags
 	 */
 	virtual size_t num_tags() const = 0;
 
@@ -197,7 +195,18 @@ public:
 	virtual const char* get_tag(size_t index) const = 0;
 
 	/**
-	 * Returns the number of tags at the top of the document.
+	 * Check if the there are global tags.
+	 *
+	 * @return ture if there are global tags.
+	 *
+	 * @sa get_global_tags num_global_tags
+	 */
+	virtual bool has_global_tags() const = 0;
+	
+	/**
+	 * Get Number of global tags.
+	 * @sa get_global_tags num_tags
+	 * @return the number of tags at the top of the document.
 	 */
 	virtual size_t num_global_tags() const = 0;
 

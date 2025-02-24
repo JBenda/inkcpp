@@ -6,23 +6,25 @@
  */
 #pragma once
 
-#include "array.h"
-#include "choice.h"
+#include "value.h"
+#include "system.h"
+#include "output.h"
+#include "stack.h"
 #include "choice.h"
 #include "config.h"
-#include "executioner.h"
-#include "functions.h"
-#include "list_table.h"
-#include "output.h"
-#include "random.h"
-#include "runner.h"
 #include "simple_restorable_stack.h"
-#include "snapshot_impl.h"
-#include "stack.h"
-#include "string_table.h"
-#include "system.h"
 #include "types.h"
-#include "value.h"
+#include "functions.h"
+#include "string_table.h"
+#include "list_table.h"
+#include "array.h"
+#include "random.h"
+#include "snapshot_impl.h"
+
+#include "runner.h"
+#include "choice.h"
+
+#include "executioner.h"
 
 namespace ink::runtime::internal
 {
@@ -42,8 +44,10 @@ public:
 	// used by the globals object to do garbage collection
 	void mark_used(string_table&, list_table&) const;
 
-	// enable debugging when stepping through the execution
+	// enable debugging when steppnig through the execution
+#ifdef INK_ENABLE_STL
 	void set_debug_enabled(std::ostream* debug_stream) { _debug_stream = debug_stream; }
+#endif
 
 #pragma region runner Implementation
 
@@ -66,13 +70,11 @@ public:
 	 * executes story until end of next line and discards the result. */
 	void getline_silent();
 
-	virtual bool has_tags() const override { return num_tags() > 0; }
-
-	virtual size_t      num_tags() const override { return _tags.size() - _global_tags_count; }
+	virtual bool        has_tags() const override;
+	virtual size_t      num_tags() const override;
 	virtual const char* get_tag(size_t index) const override;
-
-	virtual size_t num_global_tags() const override { return _global_tags_count; }
-
+	virtual size_t      num_global_tags() const override;
+	virtual bool        has_global_tags() const override;
 	virtual const char* get_global_tag(size_t index) const override;
 
 	snapshot* create_snapshot() const override;
@@ -80,22 +82,6 @@ public:
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
 
-	choice& add_choice();
-	void    clear_choices();
-
-	enum class tags_level : uint8_t {
-		GLOBAL, //< global tags can be retrieved separately
-		CHOICE, //< tags for the current choice list, if any
-		LINE,   //< tags for the current line
-	};
-	snap_tag& add_tag(const char* value, tags_level where);
-
-	enum class tags_clear_type : uint8_t {
-		ALL,          //< clear all tags, including globals
-		KEEP_GLOBALS, //< keep global tags (default)
-		KEEP_CHOICE,  //< keep current choice list tags
-	};
-	void clear_tags(tags_clear_type type = tags_clear_type::KEEP_GLOBALS);
 
 #ifdef INK_ENABLE_CSTD
 	// c-style getline
@@ -105,11 +91,7 @@ public:
 	// move to path
 	virtual bool move_to(hash_t path) override;
 
-	// Gets a single line of output
 	virtual line_type getline() override;
-
-	// get all into string
-	virtual line_type getall() override;
 
 #ifdef INK_ENABLE_STL
 	// Reads a line into a std::ostream
@@ -126,14 +108,14 @@ protected:
 
 private:
 	// Advances the interpreter by a line. This fills the output buffer
-	void advance_line(std::ostream* debug_stream = nullptr);
+	void advance_line();
 
 	// Steps the interpreter a single instruction and returns
 	//  when it has hit a new line
-	bool line_step(std::ostream* debug_stream = nullptr);
+	bool line_step();
 
 	// Steps the interpreter a single instruction
-	void step(std::ostream* debug_stream = nullptr);
+	void step();
 
 	// Resets the runtime
 	void reset();
@@ -168,8 +150,33 @@ private:
 	template<typename T>
 	inline T read();
 
+	choice& add_choice();
+	void    clear_choices();
+
+	enum class tags_level : int {
+		GLOBAL,  ///< A tag at the begining of the file
+		KNOT,    ///< A tag inside a knot before any text
+		CHOICE,  ///< A choice tag
+		LINE,    ///< A tags assoziated with last line
+		UNKNOWN, ///< tags currently undecided where there belong
+	};
+	snap_tag& add_tag(const char* value, tags_level where);
+	// Assigne UNKNOWN tags to level `where`
+	void      assign_tags(tags_level where);
+	void copy_tags(tags_level src, tags_level dst);
+	enum class tags_clear_level : int {
+		KEEP_NONE,
+		KEEP_GLOBAL,
+		KEEP_KNOT, ///< keep knot and global tags
+	};
+	void clear_tags(tags_clear_level which);
+
 	// Special code for jumping from the current IP to another
 	void jump(ip_t, bool record_visits);
+	bool _jumped = false; // if we are in the first action after a jump to an snitch/knot
+
+	void run_binary_operator(unsigned char cmd);
+	void run_unary_operator(unsigned char cmd);
 
 	frame_type execute_return();
 	template<frame_type type>
@@ -273,7 +280,6 @@ private:
 	// Evaluation stack
 	bool _evaluation_mode = false;
 	bool _string_mode     = false;
-	bool _tag_mode        = false;
 	internal::eval_stack < abs(config::limitEvalStackDepth), config::limitEvalStackDepth<0> _eval;
 	bool _saved_evaluation_mode = false;
 
@@ -286,11 +292,9 @@ private:
 
 	// Tag list
 	managed_restorable_array < snap_tag,
-	    config::limitActiveTags<0, abs(config::limitActiveTags)> _tags;
-	tags_level                                                   _tags_where = tags_level::GLOBAL;
-	size_t                                                       _choice_tags_begin = ~0;
-	size_t                                                       _global_tags_count = 0;
-	size_t                                                       _choice_tags_count = 0;
+	    config::limitActiveTags<0, abs(config::limitActiveTags)>                    _tags;
+	// where to the different tags type start
+	managed_restorable_array<int, false, static_cast<int>(tags_level::UNKNOWN) + 2> _tags_begin;
 
 	// TODO: Move to story? Both?
 	functions _functions;
@@ -307,14 +311,15 @@ private:
 
 	internal::managed_restorable_stack < ContainerData,
 	    config::limitContainerDepth<0, abs(config::limitContainerDepth)> _container;
-
-	bool _is_falling = false;
+	bool                                                                 _is_falling = false;
 
 	bool _saved = false;
 
 	prng _rng;
 
+#ifdef INK_ENABLE_STL
 	std::ostream* _debug_stream = nullptr;
+#endif
 };
 
 template<bool dynamic, size_t N>

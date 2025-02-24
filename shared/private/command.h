@@ -23,7 +23,7 @@ enum class Command : uint8_t {
 	NEWLINE,
 	GLUE,
 	VOID,
-	TAG,
+	TAG, ///< deprepcated with inkVersion 21
 
 	// == Diverts
 	DIVERT,
