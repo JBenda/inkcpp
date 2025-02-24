@@ -36,6 +36,14 @@ class runner_impl
     : public runner_interface
     , public snapshot_interface
 {
+	enum class tags_level : int {
+		GLOBAL,  ///< A tag at the begining of the file
+		KNOT,    ///< A tag inside a knot before any text
+		CHOICE,  ///< A choice tag
+		LINE,    ///< A tags assoziated with last line
+		UNKNOWN, ///< tags currently undecided where there belong
+	};
+
 public:
 	// Creates a new runner at the start of a loaded ink story
 	runner_impl(const story_impl*, globals);
@@ -70,12 +78,41 @@ public:
 	 * executes story until end of next line and discards the result. */
 	void getline_silent();
 
-	virtual bool        has_tags() const override;
-	virtual size_t      num_tags() const override;
-	virtual const char* get_tag(size_t index) const override;
-	virtual size_t      num_global_tags() const override;
-	virtual bool        has_global_tags() const override;
-	virtual const char* get_global_tag(size_t index) const override;
+private:
+	template<tags_level L>
+	bool has_tags() const;
+	template<tags_level L>
+	size_t num_tags() const;
+	template<tags_level L>
+	const char* get_tag(size_t index) const;
+
+public:
+	virtual bool has_tags() const override { return has_tags<tags_level::LINE>(); }
+
+	virtual size_t num_tags() const override { return num_tags<tags_level::LINE>(); }
+
+	virtual const char* get_tag(size_t index) const override
+	{
+		return get_tag<tags_level::LINE>(index);
+	}
+
+	virtual size_t num_global_tags() const override { return has_tags<tags_level::GLOBAL>(); }
+
+	virtual bool has_global_tags() const override { return num_tags<tags_level::GLOBAL>(); }
+
+	virtual const char* get_global_tag(size_t index) const override
+	{
+		return get_tag<tags_level::GLOBAL>(index);
+	};
+
+	virtual size_t num_knot_tags() const override { return has_tags<tags_level::KNOT>(); }
+
+	virtual bool has_knot_tags() const override { return num_tags<tags_level::KNOT>(); }
+
+	virtual const char* get_knot_tag(size_t index) const override
+	{
+		return get_tag<tags_level::KNOT>(index);
+	};
 
 	snapshot* create_snapshot() const override;
 
@@ -92,6 +129,7 @@ public:
 	virtual bool move_to(hash_t path) override;
 
 	virtual line_type getline() override;
+	virtual line_type getall() override;
 
 #ifdef INK_ENABLE_STL
 	// Reads a line into a std::ostream
@@ -153,17 +191,10 @@ private:
 	choice& add_choice();
 	void    clear_choices();
 
-	enum class tags_level : int {
-		GLOBAL,  ///< A tag at the begining of the file
-		KNOT,    ///< A tag inside a knot before any text
-		CHOICE,  ///< A choice tag
-		LINE,    ///< A tags assoziated with last line
-		UNKNOWN, ///< tags currently undecided where there belong
-	};
 	snap_tag& add_tag(const char* value, tags_level where);
 	// Assigne UNKNOWN tags to level `where`
 	void      assign_tags(tags_level where);
-	void copy_tags(tags_level src, tags_level dst);
+	void      copy_tags(tags_level src, tags_level dst);
 	enum class tags_clear_level : int {
 		KEEP_NONE,
 		KEEP_GLOBAL,

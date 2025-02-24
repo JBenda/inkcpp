@@ -36,7 +36,7 @@ class choice;
 class runner_interface
 {
 public:
-	virtual ~runner_interface(){};
+	virtual ~runner_interface() {};
 
 	// String type to simplify interfaces working with strings
 #ifdef INK_ENABLE_STL
@@ -169,14 +169,14 @@ public:
 	 *
 	 * @return true if the line has tags, false if not
 	 *
-	 * @sa num_tags get_tag
+	 * @sa num_tags get_tag has_global_tags has_knot_tags
 	 */
 	virtual bool has_tags() const = 0;
 
 	/**
 	 * Returns the number of tags on the current line. Excludes global tags.
 	 *
-	 * @sa get_tag num_global_tags
+	 * @sa get_tag has_tags num_global_tags num_knot_tags
 	 */
 	virtual size_t num_tags() const = 0;
 
@@ -189,8 +189,8 @@ public:
 	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_tags() "num_tags()")
 	 *
 	 * @return pointer to the tag string memory or nullptr if the index is invalid
-	 *
-	 * @sa num_tags
+	 * @info global tags  are also assoziated to the first line in the knot/stitch
+	 * @sa has_tags num_tags get_global_tag get_knot_tag
 	 */
 	virtual const char* get_tag(size_t index) const = 0;
 
@@ -198,14 +198,15 @@ public:
 	 * Check if the there are global tags.
 	 *
 	 * @return ture if there are global tags.
-	 *
-	 * @sa get_global_tags num_global_tags
+	 * @info global tags  are also assoziated to the first line in the knot/stitch
+	 * @sa num_global_tags get_global_tags  has_tags has_knot_tags
 	 */
 	virtual bool has_global_tags() const = 0;
-	
+
 	/**
 	 * Get Number of global tags.
-	 * @sa get_global_tags num_tags
+	 * @info global tags  are also assoziated to the first line in the knot/stitch
+	 * @sa has_global_tags get_global_tags num_knot_tags num_tags
 	 * @return the number of tags at the top of the document.
 	 */
 	virtual size_t num_global_tags() const = 0;
@@ -220,8 +221,37 @@ public:
 	 * "num_global_tags()")
 	 *
 	 * @return pointer to the tag string memory or nullptr if the index is invalid
+	 * @sa has_global_tags num_global_tags get_tag get_knot_tag
 	 */
 	virtual const char* get_global_tag(size_t index) const = 0;
+
+	/**
+	 * Check if there are knot/stitch tags.
+	 *
+	 * @info knot/stitch tags  are also assoziated to the first line in the knot/stitch
+	 * @return true if there are knot/stitch tags.
+	 * @sa num_knot_tags get_knot_tag has_global_tags has_tags
+	 */
+	virtual bool has_knot_tags() const = 0;
+
+	/**
+	 * Get Number of knot/stitch tags.
+	 * @info knot/stitch tags are also assoziated to the first line in the knot/stitch
+	 * @return number of tags at the top of a knot/stitch
+	 * @sa has_knot_tags get_knot_tag num_global_tags num_tags
+	 */
+	virtual size_t num_knot_tags() const = 0;
+
+	/**
+	 * Access a knot/stitch tag by index.
+	*
+	* Knot stitch tags are placed at the top of a knot/stitch.
+	* @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_knot_tags() "num_knot_tags()")
+	* @return pointor to tag string memory or nullptr if the index is invalid
+	* @sa has_knot_tag num_knot_tags get_global_tag get_tag
+	*/
+	virtual const char* get_knot_tag(size_t index) const = 0;
+
 
 protected:
 	/** internal bind implementation. not for calling.

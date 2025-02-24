@@ -10,7 +10,6 @@
 #include "choice.h"
 #include "globals_impl.h"
 #include "header.h"
-#include "string_utils.h"
 #include "snapshot_impl.h"
 #include "system.h"
 #include "value.h"
@@ -198,17 +197,17 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 	return _tags.insert(position) = value;
 }
 
-void runner_impl::copy_tags(tags_level src, tags_level dst) {
+void runner_impl::copy_tags(tags_level src, tags_level dst)
+{
 	inkAssert(dst < src, "Only support copieng to higher state!");
 	size_t old_size;
 	size_t idx = _tags_begin[static_cast<int>(src)];
-	size_t n = _tags_begin[static_cast<int>(src) + 1] - idx;
+	size_t n   = _tags_begin[static_cast<int>(src) + 1] - idx;
 	size_t idy = _tags_begin[static_cast<int>(dst) + 1];
-	for(int i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i) {
 		_tags.insert(idy + n) = _tags[idx + i * 2];
 	}
 	inkAssert(_tags.size() == old_size + n, "Expected n new elements");
-	
 }
 
 void runner_impl::assign_tags(tags_level where)
@@ -443,9 +442,8 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _container(ContainerData{})
     , _rng(time(NULL))
 {
-	_ptr               = _story->instructions();
-	_evaluation_mode   = false;
-	_choice_tags_begin = -1;
+	_ptr             = _story->instructions();
+	_evaluation_mode = false;
 
 	// register with globals
 	_globals->add_runner(this);
@@ -489,14 +487,9 @@ void runner_impl::getline(std::ostream& out)
 
 void runner_impl::getall(std::ostream& out)
 {
-	// Advance interpreter until we're stopped
 	while (can_continue()) {
-		advance_line();
-		// Send output into stream
-		out << _output;
+		getline(out);
 	}
-	// Return result
-	inkAssert(_output.is_empty(), "Output should be empty after getall!");
 }
 
 #endif
@@ -516,6 +509,15 @@ runner_impl::line_type runner_impl::getline()
 		choose(~0);
 	}
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
+	return result;
+}
+
+runner_impl::line_type runner_impl::getall()
+{
+	line_type result{};
+	while (can_continue()) {
+		result += getline();
+	}
 	return result;
 }
 
@@ -589,17 +591,27 @@ void runner_impl::getline_silent()
 	_output.clear();
 }
 
-bool runner_impl::has_tags() const { return num_tags() > 0; }
-
-size_t runner_impl::num_tags() const
+template<runner_impl::tags_level L>
+bool runner_impl::has_tags() const
 {
-	return _choice_tags_begin < 0 ? _tags.size() : _choice_tags_begin;
+	return num_tags<L>() > 0;
 }
 
+template<runner_impl::tags_level L>
+size_t runner_impl::num_tags() const
+{
+	return _tags_begin[static_cast<int>(L) + 1] - _tags_begin[static_cast<int>(L)];
+}
+
+template<runner_impl::tags_level L>
 const char* runner_impl::get_tag(size_t index) const
 {
-	inkAssert(index < _tags.size(), "Tag index exceeds _num_tags");
-	return _tags[index];
+	size_t begin = _tags_begin[static_cast<int>(L)];
+	size_t end   = _tags_begin[static_cast<int>(L) + 1];
+	if (begin + index >= end || begin + index < begin) {
+		return nullptr;
+	}
+	return _tags[begin + index];
 }
 
 snapshot* runner_impl::create_snapshot() const { return _globals->create_snapshot(); }
@@ -608,7 +620,6 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
-	snapper.current_runner_tags = _tags[0].ptr();
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
 	ptr                         = snap_write(ptr, offset, should_write);
 	offset                      = _backup - _story->instructions();
@@ -625,7 +636,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr += _stack.snap(data ? ptr : nullptr, snapper);
 	ptr += _ref_stack.snap(data ? ptr : nullptr, snapper);
 	ptr += _eval.snap(data ? ptr : nullptr, snapper);
-	ptr = snap_write(ptr, _choice_tags_begin, should_write);
+	ptr += _tags_begin.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags.snap(data ? ptr : nullptr, snapper);
 	ptr += _container.snap(data ? ptr : nullptr, snapper);
 	ptr += _threads.snap(data ? ptr : nullptr, snapper);
@@ -659,13 +670,10 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	ptr = _stack.snap_load(ptr, loader);
 	ptr = _ref_stack.snap_load(ptr, loader);
 	ptr = _eval.snap_load(ptr, loader);
-	int choice_tags_begin;
-	ptr                        = snap_read(ptr, choice_tags_begin);
-	_choice_tags_begin         = choice_tags_begin;
-	ptr                        = _tags.snap_load(ptr, loader);
-	loader.current_runner_tags = _tags[0].ptr();
-	ptr                        = _container.snap_load(ptr, loader);
-	ptr                        = _threads.snap_load(ptr, loader);
+	ptr = _tags.snap_load(ptr, loader);
+	ptr = _tags.snap_load(ptr, loader);
+	ptr = _container.snap_load(ptr, loader);
+	ptr = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
 	ptr              = snap_read(ptr, has_fallback_choice);
 	_fallback_choice = nullopt;
@@ -716,7 +724,7 @@ runner_impl::change_type runner_impl::detect_change() const
 {
 	// Check if the old newline is still present (hasn't been glu'd) and
 	//  if there is new text (non-whitespace) in the stream since saving
-	bool stillHasNewline = _output.saved_ends_with(value_type::newline);
+	bool stillHasNewline = _output.ends_with(value_type::newline, _output.save_offset());
 	bool hasAddedNewText = _output.text_past_save() || _tags.last_size() < num_tags();
 
 	// Newline is still there and there's no new text
@@ -746,7 +754,7 @@ bool runner_impl::line_step()
 
 	// If we're not within string evaluation
 	if (_output.find_first_of(value_type::marker) != _output.npos) {
-		if (_jumped && !_output.is_empty()) {
+		if (_jumped && ! _output.is_empty()) {
 			assign_tags(tags_level::LINE);
 			if (is_at_start) {
 				copy_tags(tags_level::LINE, tags_level::GLOBAL);
@@ -1074,7 +1082,8 @@ void runner_impl::step()
 					auto* fn = _functions.find(functionName);
 					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
-					} else if (_output.saved() && _output.saved_ends_with(value_type::newline)
+					} else if (_output.saved()
+					           && _output.ends_with(value_type::newline, _output.save_offset())
 					           && ! fn->lookaheadSafe()) {
 						// TODO: seperate token?
 						_output.append(values::null);
