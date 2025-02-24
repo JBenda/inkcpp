@@ -31,7 +31,7 @@ jobs:
             artifact: win64
             name: Windows x64
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_windows.zip
-            proof: false
+            proof: true
             unreal: false
           - os: "ubuntu-20.04"
             artifact: linux
@@ -287,7 +287,7 @@ jobs:
           git fetch origin master
       - name: Check clang-format
         run: |
-          diff=$(git clang-format-14 --extensions c,cpp,h,hpp --style file -q --diff origin/master)
+          diff=$(git clang-format-18 --extensions c,cpp,h,hpp --style file -q --diff origin/master)
           echo $diff
           if [ "$diff" != "" ]; then
             echo run git clang-format --extensions c,cpp,h,hpp --style file master

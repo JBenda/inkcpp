@@ -13,7 +13,7 @@
 #	include <string>
 #endif
 
-/** Util templates and implimentation of STL if STL is not available */
+/** Util templates and implementation of STL if STL is not available */
 namespace ink::runtime::internal
 {
 template<typename... Ts>

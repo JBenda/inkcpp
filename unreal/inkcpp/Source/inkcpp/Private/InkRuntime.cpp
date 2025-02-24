@@ -101,7 +101,7 @@ void AInkRuntime::Tick(float DeltaTime)
 	{
 		UInkThread* pNextThread = *iter;
 
-		// Ignore threads that aren't eligable for execution
+		// Ignore threads that aren't eligible for execution
 		if (!pNextThread->CanExecute())
 			continue;
 

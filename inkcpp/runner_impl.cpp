@@ -535,6 +535,8 @@ void runner_impl::choose(size_t index)
 {
 	if (has_choices()) {
 		inkAssert(index < _choices.size(), "Choice index out of range");
+	} else if (! _fallback_choice) {
+		inkAssert(false, "No choice and no Fallbackchoice!! can not choose");
 	}
 	_globals->turn();
 	// Get the choice
@@ -562,6 +564,7 @@ void runner_impl::choose(size_t index)
 	_stack.collapse_to_thread(choiceThread);
 	_ref_stack.collapse_to_thread(choiceThread);
 	_threads.clear();
+	_eval.clear();
 
 	// Jump to destination and clear choice list
 	jump(_story->instructions() + c.path(), true);
@@ -887,7 +890,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					}
 
 					if (_evaluation_mode) {
-						_eval.push(value{}.set<value_type::int32>(val));
+						_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(val)));
 					}
 					// TEST-CASE B006 don't print integers
 				} break;
@@ -1174,7 +1177,7 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					hash_t functionName = read<hash_t>();
 
 					// Interpret flag as argument count
-					int numArguments = ( int ) flag;
+					int numArguments = static_cast<int>(flag);
 
 					if (debug_stream != nullptr) {
 						*debug_stream << "function_name ";
@@ -1238,9 +1241,11 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 
 					// Load value from output stream
 					// Push onto stack
-					_eval.push(value{}.set<value_type::string>(
-					    _output.get_alloc<false>(_globals->strings(), _globals->lists())
-					));
+					_eval.push(
+					    value{}.set<value_type::string>(
+					        _output.get_alloc<false>(_globals->strings(), _globals->lists())
+					    )
+					);
 				} break;
 
 				// == Tag commands
@@ -1406,11 +1411,13 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					// Push the visit count for the current container to the top
 					//  is 0-indexed for some reason. idk why but this is what ink expects
 					_eval.push(
-					    value{}.set<value_type::int32>(( int ) _globals->visits(_container.top().id) - 1)
+					    value{}.set<value_type::int32>(
+					        static_cast<int32_t>(_globals->visits(_container.top().id) - 1)
+					    )
 					);
 				} break;
 				case Command::TURN: {
-					_eval.push(value{}.set<value_type::int32>(( int ) _globals->turns()));
+					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_globals->turns())));
 				} break;
 				case Command::SEQUENCE: {
 					// TODO: The C# ink runtime does a bunch of fancy logic
@@ -1420,7 +1427,8 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					int sequenceLength = _eval.pop().get<value_type::int32>();
 					int index          = _eval.pop().get<value_type::int32>();
 
-					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
+					_eval.push(
+					    value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
 					);
 				} break;
 				case Command::SEED: {
@@ -1439,7 +1447,9 @@ void runner_impl::step(std::ostream* debug_stream /*= nullptr*/)
 					container_t container = read<container_t>();
 
 					// Push the read count for the requested container index
-					_eval.push(value{}.set<value_type::int32>(( int ) _globals->visits(container)));
+					_eval.push(
+					    value{}.set<value_type::int32>(static_cast<int32_t>(_globals->visits(container)))
+					);
 				} break;
 
 				default: inkAssert(false, "Unrecognized command!"); break;

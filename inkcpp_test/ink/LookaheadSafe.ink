@@ -10,5 +10,5 @@ Call1
 ~ foo()
 <> glued to Call 2
 ~ foo()
-Call 3 is seperated
+Call 3 is separated
 -> DONE

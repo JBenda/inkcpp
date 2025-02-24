@@ -32,7 +32,7 @@ public:
 	FString GetText() const;
 
 	UFUNCTION(BlueprintPure, Category="Ink")
-	/** Get idintifcator for @ref UInkThread::PickChoice()
+	/** Get identifier for @ref UInkThread::PickChoice()
 	 * @return id used in @ref UInkThread::PickChoice()
 	 *
 	 * @blueprint
@@ -40,8 +40,8 @@ public:
 	int GetIndex() const;
 
 	UFUNCTION(BlueprintPure, Category="Ink")
-	/** Tags asszoiated with the choice.
-	 * @return with choice assoziated tags
+	/** Tags associated with the choice.
+	 * @return with choice associated tags
 	 *
 	 * @blueprint
 	 */

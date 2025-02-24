@@ -30,7 +30,7 @@ You are head to head to the minister
 	The people are quit confused
 * {Form == Humen} Hellow mister menistery
 * ->
-	It seems you are out of options, you shold give up
+	It seems you are out of options, you should give up
 	-> END
 - -> core
 	

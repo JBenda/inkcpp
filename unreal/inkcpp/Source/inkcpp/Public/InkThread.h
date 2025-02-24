@@ -36,12 +36,12 @@ public:
 
 	// Yields the thread immediately. Will wait until Resume().
 	UFUNCTION(BlueprintCallable, Category = "Ink")
-	/** Yields the thread immediatly.
+	/** Yields the thread immediately.
 	 * This will stop the execution (after finishing the current line).
 	 * until @ref #Resume() is called.
 	 *
-	 * @ref #Yield() and @ref #Resume() working with a refernce counter.
-	 * therfore a thread can be yield multiple times, and must then be resumed
+	 * @ref #Yield() and @ref #Resume() working with a reference counter.
+	 * therefore a thread can be yield multiple times, and must then be resumed
 	 * the same amount.
 	 *
 	 * @blueprint
@@ -83,7 +83,7 @@ public:
 
 	// Called before the thread begins executing
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
-	/** triggered after initalizing the runner
+	/** triggered after initializing the runner
 	 *
 	 * @blueprint
 	 */
@@ -91,9 +91,9 @@ public:
 
 	// Called when the thread has printed a new line
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
-	/** triggerd if a new line of context is available
+	/** triggered if a new line of context is available
 	 * @param line text of new line
-	 * @param tags tags assoziated with this line
+	 * @param tags tags associated with this line
 	 *
 	 * @blueprint
 	 */
@@ -109,7 +109,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
 	/** triggered when reached a choice point.
-	 * @param choices possible branches to choos for continue
+	 * @param choices possible branches to choose from, in order to continue
 	 * @see #PickChoice()
 	 *
 	 * @blueprint
@@ -197,7 +197,7 @@ private:
 private:
 	ink::runtime::runner mpRunner;
 	UTagList*            mpTags;
-	TArray<UInkChoice*>  mCurrentChoices; /// @TODO: make accassible?
+	TArray<UInkChoice*>  mCurrentChoices; /// @TODO: make accessible?
 
 	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
 

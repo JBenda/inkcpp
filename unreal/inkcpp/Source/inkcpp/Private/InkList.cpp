@@ -18,7 +18,10 @@ bool UInkList::ContainsFlag(const FString& flag_name) const
 bool UInkList::ContainsEnum(const UEnum* Enum, const uint8& value) const
 {
 	if (! Enum) {
-		UE_LOG(InkCpp, Warning, TEXT("No Enum provided for ContainsEnum, it will fail therfore!"));
+		UE_LOG(
+		    InkCpp, Warning,
+		    TEXT("No Enum provided for ContainsEnum; therefore ContainsEnum has failed!")
+		);
 		return false;
 	}
 

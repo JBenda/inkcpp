@@ -63,8 +63,7 @@ inline int toStr(char* buffer, size_t size, float value)
 	for (float f = value; f > 1.f; f /= 10.f) {
 		++digits;
 	}
-	int res = _gcvt_s(buffer, size, value, digits); // number of significant digits
-	return res;
+	int ec = _gcvt_s(buffer, size, value, digits); // number of significant digits
 #else
 	if (buffer == nullptr || size < 1) {
 		return EINVAL;
@@ -74,17 +73,16 @@ inline int toStr(char* buffer, size_t size, float value)
 		return EINVAL;
 	}
 	// trunc cat zeros B007
-	char* itr = buffer + res - 1;
+	int ec = 0;
+#endif
+	char* itr = buffer + strlen(buffer) - 1;
 	while (*itr == '0') {
 		*itr-- = 0;
-		--res;
 	}
 	if (*itr == '.') {
 		*itr-- = 0;
-		--res;
 	}
-	return 0;
-#endif
+	return ec;
 }
 
 inline int toStr(char* buffer, size_t size, const char* c)
@@ -190,12 +188,14 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 	auto dst = begin;
 	for (auto src = begin; src != end; ++src) {
 		if (dst == begin) {
-			if (LEADING_SPACES && isspace(src[0])) {
+			if (LEADING_SPACES && isspace(static_cast<unsigned char>(src[0]))) {
 				continue;
 			}
-		} else if (src[-1] == '\n' && isspace(src[0])) {
+		} else if (src[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
 			continue;
-		} else if ((isspace(src[0]) && src[0] != '\n') && ((src + 1 == end && TAILING_SPACES) || ((src + 1 != end) && isspace(src[1])))) {
+		} else if ((isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n')
+		           && ((src + 1 == end && TAILING_SPACES)
+		               || ((src + 1 != end) && isspace(static_cast<unsigned char>(src[1]))))) {
 			continue;
 		} else if (src[0] == '\n' && dst != begin && dst[-1] == '\n') {
 			continue;

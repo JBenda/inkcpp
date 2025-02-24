@@ -28,7 +28,7 @@ struct FListFlag {
 };
 
 /**
- * Allowes reading ink lists.
+ * Allows reading ink lists.
  * @ingroup unreal
  */
 UCLASS(Blueprintable, BlueprintType)
@@ -86,7 +86,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** check if at least one value of the given list is included, OR the list is empty
-	 * and assoziatet with the list
+	 * and associated with the list
 	 *
 	 * @blueprint
 	 */

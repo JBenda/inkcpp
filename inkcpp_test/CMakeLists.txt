@@ -20,6 +20,7 @@ add_executable(inkcpp_test catch.hpp Main.cpp
   LookaheadSafe.cpp
   EmptyStringForDivert.cpp
   MoveTo.cpp
+  Fixes.cpp
 )
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
