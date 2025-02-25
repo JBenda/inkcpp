@@ -189,23 +189,26 @@ void runner_impl::clear_choices()
 
 snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 {
-	int idx = static_cast<int>(where);
-	for (int i = idx + 1; i < _tags_begin.size(); ++i) {
-		_tags_begin[i] += 1;
+	int end = static_cast<int>(where) + 1;
+	int position = _tags_begin[end];
+	for (int i = end; i < _tags_begin.capacity(); ++i) {
+		_tags_begin.set(i, _tags_begin[i] + 1);
 	}
-	int position                  = _tags_begin[idx + 1];
 	return _tags.insert(position) = value;
 }
 
 void runner_impl::copy_tags(tags_level src, tags_level dst)
 {
 	inkAssert(dst < src, "Only support copieng to higher state!");
-	size_t old_size;
+	size_t old_size = _tags.size();
 	size_t idx = _tags_begin[static_cast<int>(src)];
 	size_t n   = _tags_begin[static_cast<int>(src) + 1] - idx;
 	size_t idy = _tags_begin[static_cast<int>(dst) + 1];
 	for (int i = 0; i < n; ++i) {
 		_tags.insert(idy + n) = _tags[idx + i * 2];
+	}
+	for (int i = static_cast<int>(dst) + 1; i < _tags_begin.capacity(); ++i) {
+		_tags_begin.set(i, _tags_begin[i] + n);
 	}
 	inkAssert(_tags.size() == old_size + n, "Expected n new elements");
 }
@@ -217,11 +220,12 @@ void runner_impl::assign_tags(tags_level where)
 	size_t idy      = _tags_begin[static_cast<int>(tags_level::UNKNOWN)];
 	size_t end      = _tags_begin[static_cast<int>(tags_level::UNKNOWN) + 1];
 	size_t n        = end - idy;
+	if (n == 0) { return; }
 	for (int i = 0; i < n; ++i) {
 		_tags.insert(idx + i) = _tags[idy + i * 2];
 	}
-	for (int i = static_cast<int>(where) + 1; i < _tags_begin.size() - 1; ++i) {
-		_tags_begin[i] += n;
+	for (int i = static_cast<int>(where) + 1; i < _tags_begin.capacity() - 1; ++i) {
+		_tags_begin.set(i, _tags_begin[i] + n);
 	}
 	_tags.resize(end);
 
@@ -240,20 +244,20 @@ void runner_impl::clear_tags(tags_clear_level which)
 	switch (which) {
 		case tags_clear_level::KEEP_NONE:
 			_tags.clear();
-			for (int i = 0; i < _tags_begin.size(); ++i) {
-				_tags_begin[i] = 0;
+			for (int i = 0; i < _tags_begin.capacity(); ++i) {
+				_tags_begin.set(i, 0);
 			}
 			break;
 		case tags_clear_level::KEEP_GLOBAL:
 			_tags.resize(_tags_begin[static_cast<int>(tags_level::KNOT)]);
-			for (int i = static_cast<int>(tags_level::KNOT); i < _tags_begin.size(); ++i) {
-				_tags_begin[i] = _tags_begin[static_cast<int>(tags_level::KNOT)];
+			for (int i = static_cast<int>(tags_level::KNOT); i < _tags_begin.capacity(); ++i) {
+				_tags_begin.set(i, _tags_begin[static_cast<int>(tags_level::KNOT)]);
 			}
 			break;
 		case tags_clear_level::KEEP_KNOT:
 			_tags.resize(_tags_begin[static_cast<int>(tags_level::CHOICE)]);
-			for (int i = static_cast<int>(tags_level::CHOICE); i <= _tags_begin.size(); ++i) {
-				_tags_begin[i] = _tags_begin[static_cast<int>(tags_level::CHOICE)];
+			for (int i = static_cast<int>(tags_level::CHOICE); i < _tags_begin.capacity(); ++i) {
+				_tags_begin.set(i, _tags_begin[static_cast<int>(tags_level::CHOICE)]);
 			}
 			break;
 		default: inkAssert(false, "Unhandeld clear type %d for tags.", static_cast<int>(which));
@@ -441,6 +445,7 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _choices()
     , _container(ContainerData{})
     , _rng(time(NULL))
+    , _tags_begin(0, ~0)
 {
 	_ptr             = _story->instructions();
 	_evaluation_mode = false;
@@ -523,6 +528,7 @@ runner_impl::line_type runner_impl::getall()
 
 void runner_impl::advance_line()
 {
+	clear_tags(tags_clear_level::KEEP_KNOT);
 	// Step while we still have instructions to execute
 	while (_ptr != nullptr) {
 		// Stop if we hit a new line
@@ -748,15 +754,14 @@ runner_impl::change_type runner_impl::detect_change() const
 
 bool runner_impl::line_step()
 {
-	bool is_at_start = _ptr == _story->instructions();
 	// Step the interpreter
 	step();
 
 	// If we're not within string evaluation
-	if (_output.find_first_of(value_type::marker) != _output.npos) {
+	if (_output.find_first_of(value_type::marker) == _output.npos) {
 		if (_jumped && ! _output.is_empty()) {
 			assign_tags(tags_level::LINE);
-			if (is_at_start) {
+			if (_container.size() == 0) {
 				copy_tags(tags_level::LINE, tags_level::GLOBAL);
 			} else {
 				copy_tags(tags_level::LINE, tags_level::KNOT);
@@ -1400,6 +1405,7 @@ void runner_impl::save()
 	_threads.save();
 	_choices.save();
 	_tags.save();
+	_tags_begin.save();
 	_saved_evaluation_mode = _evaluation_mode;
 
 	// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1422,6 +1428,7 @@ void runner_impl::restore()
 	_threads.restore();
 	_choices.restore();
 	_tags.restore();
+	_tags_begin.restore();
 	_evaluation_mode = _saved_evaluation_mode;
 
 	// Not doing this anymore. There can be lingering stack entries from function returns
@@ -1446,7 +1453,7 @@ void runner_impl::forget()
 	_threads.forget();
 	_choices.forgett();
 	_tags.forgett();
-
+	_tags_begin.forget();
 	// Nothing to do for eval stack. It should just stay as it is
 
 	_saved = false;

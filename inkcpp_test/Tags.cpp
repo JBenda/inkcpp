@@ -298,8 +298,13 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "First line has global tags only\n");
 			THEN("it has the global tags")
 			{
-				CHECK(_thread->num_global_tags() == 1);
+				CHECK(_thread->has_global_tags());
+				CHECK(_thread->has_tags());
+				REQUIRE(_thread->num_global_tags() == 1);
 				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
+				REQUIRE(_thread->num_tags() == 1);
+				CHECK(std::string(_thread->get_tag(0)) == "global_tag");
+
 			}
 		}
 		WHEN("on the second line")
@@ -309,7 +314,6 @@ SCENARIO("run story with tags", "[tags][story]")
 			THEN("it has one tag")
 			{
 				CHECK(_thread->has_tags());
-				;
 				REQUIRE(_thread->num_tags() == 1);
 				CHECK(std::string(_thread->get_tag(0)) == "tagged");
 			}
@@ -381,6 +385,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->getline();
 			_thread->getline();
+			_thread->getline();
 			CHECK(!_thread->can_continue());
 
 			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 2);
@@ -406,6 +411,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->getline();
 			_thread->getline();
+			_thread->getline();
 			_thread->choose(1);
 
 			CHECK(_thread->getline() == "Knot2\n");
@@ -419,6 +425,7 @@ SCENARIO("run story with tags", "[tags][story]")
 		}
 		WHEN("at the second choice list")
 		{
+			_thread->getline();
 			_thread->getline();
 			_thread->getline();
 			_thread->getline();
@@ -457,6 +464,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->getline();
 			_thread->getline();
+			_thread->getline();
 			_thread->choose(1);
 			_thread->choose(1);
 
@@ -473,6 +481,7 @@ SCENARIO("run story with tags", "[tags][story]")
 		}
 		WHEN("on the last line")
 		{
+			_thread->getline();
 			_thread->getline();
 			_thread->getline();
 			_thread->getline();

@@ -107,7 +107,7 @@ namespace internal
 				case '\n':
 					if (! includeNewline)
 						return false;
-				case '\t':
+				case '\t': [[fallthrough]];
 				case ' ': continue;
 				default: return false;
 			}
