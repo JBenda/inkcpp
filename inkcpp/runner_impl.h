@@ -39,8 +39,8 @@ class runner_impl
 	enum class tags_level : int {
 		GLOBAL,  ///< A tag at the begining of the file
 		KNOT,    ///< A tag inside a knot before any text
-		CHOICE,  ///< A choice tag
 		LINE,    ///< A tags assoziated with last line
+		CHOICE,  ///< A choice tag
 		UNKNOWN, ///< tags currently undecided where there belong
 	};
 
@@ -193,7 +193,7 @@ private:
 
 	snap_tag& add_tag(const char* value, tags_level where);
 	// Assigne UNKNOWN tags to level `where`
-	void      assign_tags(tags_level where);
+	void      assign_tags(std::initializer_list<tags_level> where);
 	void      copy_tags(tags_level src, tags_level dst);
 	enum class tags_clear_level : int {
 		KEEP_NONE,

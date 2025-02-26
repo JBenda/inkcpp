@@ -386,7 +386,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->getline();
 			_thread->getline();
-			CHECK(!_thread->can_continue());
+			CHECK_FALSE(_thread->can_continue());
 
 			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 2);
 			auto choice_list = _thread->begin();
@@ -432,6 +432,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->getline();
 			_thread->choose(1);
+			_thread->getline();
 			CHECK(!_thread->can_continue());
 
 			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 3);
@@ -466,6 +467,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->getline();
 			_thread->choose(1);
+			_thread->getline();
 			_thread->choose(1);
 
 			CHECK(_thread->getline() == "f and content\n");
@@ -488,6 +490,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->getline();
 			_thread->choose(1);
+			_thread->getline();
 			_thread->choose(1);
 			_thread->getline();
 			CHECK(_thread->getline() == "out\n");

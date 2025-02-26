@@ -189,7 +189,7 @@ void runner_impl::clear_choices()
 
 snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 {
-	int end = static_cast<int>(where) + 1;
+	int end      = static_cast<int>(where) + 1;
 	int position = _tags_begin[end];
 	for (int i = end; i < _tags_begin.capacity(); ++i) {
 		_tags_begin.set(i, _tags_begin[i] + 1);
@@ -201,9 +201,9 @@ void runner_impl::copy_tags(tags_level src, tags_level dst)
 {
 	inkAssert(dst < src, "Only support copieng to higher state!");
 	size_t old_size = _tags.size();
-	size_t idx = _tags_begin[static_cast<int>(src)];
-	size_t n   = _tags_begin[static_cast<int>(src) + 1] - idx;
-	size_t idy = _tags_begin[static_cast<int>(dst) + 1];
+	size_t idx      = _tags_begin[static_cast<int>(src)];
+	size_t n        = _tags_begin[static_cast<int>(src) + 1] - idx;
+	size_t idy      = _tags_begin[static_cast<int>(dst) + 1];
 	for (int i = 0; i < n; ++i) {
 		_tags.insert(idy + n) = _tags[idx + i * 2];
 	}
@@ -213,28 +213,33 @@ void runner_impl::copy_tags(tags_level src, tags_level dst)
 	inkAssert(_tags.size() == old_size + n, "Expected n new elements");
 }
 
-void runner_impl::assign_tags(tags_level where)
+void runner_impl::assign_tags(std::initializer_list<tags_level> wheres)
 {
 	size_t old_size = _tags.size();
-	size_t idx      = _tags_begin[static_cast<int>(where) + 1];
 	size_t idy      = _tags_begin[static_cast<int>(tags_level::UNKNOWN)];
 	size_t end      = _tags_begin[static_cast<int>(tags_level::UNKNOWN) + 1];
 	size_t n        = end - idy;
-	if (n == 0) { return; }
-	for (int i = 0; i < n; ++i) {
-		_tags.insert(idx + i) = _tags[idy + i * 2];
+	if (n == 0) {
+		return;
 	}
-	for (int i = static_cast<int>(where) + 1; i < _tags_begin.capacity() - 1; ++i) {
-		_tags_begin.set(i, _tags_begin[i] + n);
+	for (const tags_level& where : wheres) {
+		size_t idx = _tags_begin[static_cast<int>(where) + 1];
+		idy        = _tags_begin[static_cast<int>(tags_level::UNKNOWN)];
+		end        = _tags_begin[static_cast<int>(tags_level::UNKNOWN) + 1];
+		inkAssert(n == end - idy, "Same size in each iteration");
+		for (int i = 0; i < n; ++i) {
+			_tags.insert(idx + i) = _tags[idy + i * 2];
+		}
+		for (int i = static_cast<int>(where) + 1; i < _tags_begin.capacity(); ++i) {
+			_tags_begin.set(i, _tags_begin[i] + n);
+		}
 	}
-	_tags.resize(end);
-
-	inkAssert(_tags.size() == old_size, "Expected to preserve size!");
-	inkAssert(
-	    _tags_begin[static_cast<int>(tags_level::UNKNOWN)]
-	        == _tags_begin[static_cast<int>(tags_level::UNKNOWN) + 1],
-	    "Expected to have no uknown tags left."
+	_tags_begin.set(
+	    static_cast<int>(tags_level::UNKNOWN) + 1, _tags_begin[static_cast<int>(tags_level::UNKNOWN)]
 	);
+	_tags.resize(_tags_begin[static_cast<int>(tags_level::UNKNOWN)]);
+
+	inkAssert(_tags.size() == old_size + (wheres.size() - 1) * n, "Expected to preserve size!");
 }
 
 void runner_impl::clear_tags(tags_clear_level which)
@@ -255,9 +260,9 @@ void runner_impl::clear_tags(tags_clear_level which)
 			}
 			break;
 		case tags_clear_level::KEEP_KNOT:
-			_tags.resize(_tags_begin[static_cast<int>(tags_level::CHOICE)]);
-			for (int i = static_cast<int>(tags_level::CHOICE); i < _tags_begin.capacity(); ++i) {
-				_tags_begin.set(i, _tags_begin[static_cast<int>(tags_level::CHOICE)]);
+			_tags.resize(_tags_begin[static_cast<int>(tags_level::KNOT) + 1]);
+			for (int i = static_cast<int>(tags_level::KNOT) + 2; i < _tags_begin.capacity(); ++i) {
+				_tags_begin.set(i, _tags_begin[static_cast<int>(tags_level::KNOT) + 1]);
 			}
 			break;
 		default: inkAssert(false, "Unhandeld clear type %d for tags.", static_cast<int>(which));
@@ -341,7 +346,6 @@ void runner_impl::jump(ip_t dest, bool record_visits)
 	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
 		clear_tags(tags_clear_level::KEEP_GLOBAL
 		); // clear knot tags since whe are entering another knot
-		_jumped = true;
 		_ptr += 6;
 		_container.push({.id = id, .offset = offset});
 		if (reversed && comm_end == _container.size() - 1) {
@@ -731,7 +735,7 @@ runner_impl::change_type runner_impl::detect_change() const
 	// Check if the old newline is still present (hasn't been glu'd) and
 	//  if there is new text (non-whitespace) in the stream since saving
 	bool stillHasNewline = _output.ends_with(value_type::newline, _output.save_offset());
-	bool hasAddedNewText = _output.text_past_save() || _tags.last_size() < num_tags();
+	bool hasAddedNewText = _output.text_past_save() || _tags.last_size() < _tags.size();
 
 	// Newline is still there and there's no new text
 	if (stillHasNewline && ! hasAddedNewText) {
@@ -754,22 +758,26 @@ runner_impl::change_type runner_impl::detect_change() const
 
 bool runner_impl::line_step()
 {
+	static bool start = true;
+	if (_ptr == _story->instructions()) {
+		start = true;
+	}
+
 	// Step the interpreter
 	step();
 
 	// If we're not within string evaluation
 	if (_output.find_first_of(value_type::marker) == _output.npos) {
-		if (_jumped && ! _output.is_empty()) {
-			assign_tags(tags_level::LINE);
-			if (_container.size() == 0) {
-				copy_tags(tags_level::LINE, tags_level::GLOBAL);
-			} else {
-				copy_tags(tags_level::LINE, tags_level::KNOT);
-			}
-			_jumped = false;
-		}
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice
+		if (_output.is_empty()) {
+			if (_jumped) {
+				assign_tags({tags_level::LINE, start ? tags_level::GLOBAL : tags_level::KNOT});
+				start = false;
+			}
+		} else {
+			_jumped = false;
+		}
 		if (_saved && ! has_choices() && ! _fallback_choice) {
 			// Check for changes in the output stream
 			switch (detect_change()) {
@@ -777,7 +785,7 @@ bool runner_impl::line_step()
 					// We've gone too far. Restore to before we moved past the newline and return that we are
 					// done
 					restore();
-					assign_tags(tags_level::LINE);
+					assign_tags({tags_level::LINE});
 					return true;
 				case change_type::newline_removed:
 					// Newline was removed. Proceed as if we never hit it
@@ -790,14 +798,14 @@ bool runner_impl::line_step()
 		// If we're on a newline
 		if (_output.ends_with(value_type::newline)) {
 			// Unless we are out of content, we are going to try
-			//  to continue a little further. This is to check for
-			//  glue (which means there is potentially more content
-			//  in this line) OR for non-text content such as choices.
+			// to continue a little further. This is to check for
+			// glue (which means there is potentially more content
+			// in this line) OR for non-text content such as choices.
 			if (_ptr != nullptr) {
 				// Save a snapshot of the current runtime state so we
-				//  can return here if we end up hitting a new line
-				// forget();
+				// can return here if we end up hitting a new line
 				if (! _saved) {
+					assign_tags({tags_level::LINE});
 					save();
 				}
 			}
@@ -959,6 +967,7 @@ void runner_impl::step()
 					inkAssert(
 					    _story->instructions() + target < _story->end(), "Diverting past end of story data!"
 					);
+					_jumped = true;
 					jump(_story->instructions() + target, true);
 				} break;
 				case Command::DIVERT_TO_VARIABLE: {
@@ -1087,9 +1096,7 @@ void runner_impl::step()
 					auto* fn = _functions.find(functionName);
 					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
-					} else if (_output.saved()
-					           && _output.ends_with(value_type::newline, _output.save_offset())
-					           && ! fn->lookaheadSafe()) {
+					} else if (_output.saved() && _output.ends_with(value_type::newline, _output.save_offset()) && ! fn->lookaheadSafe()) {
 						// TODO: seperate token?
 						_output.append(values::null);
 					} else {
@@ -1191,9 +1198,9 @@ void runner_impl::step()
 					}
 
 
-					const snap_tag* tags_start
-					    = _tags.data() + _tags_begin[static_cast<int>(tags_level::CHOICE) + 1];
-					assign_tags(tags_level::CHOICE);
+					size_t start = _tags_begin[static_cast<int>(tags_level::CHOICE) + 1];
+					assign_tags({tags_level::CHOICE});
+					const snap_tag* tags_start = _tags.data() + start;
 					const snap_tag* tags_end
 					    = _tags.data() + _tags_begin[static_cast<int>(tags_level::CHOICE) + 1];
 
