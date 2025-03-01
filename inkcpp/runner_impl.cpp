@@ -344,7 +344,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
 	// it will get visited in the next step
 	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
-		if (track_knot_visit) {
+		if (track_knot_visit && static_cast<CommandFlag>(offset[1]) & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
 			_entered_knot = true;
 		}
 		_ptr += 6;
@@ -1238,6 +1238,9 @@ void runner_impl::step()
 					if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS
 					    || flag & CommandFlag::CONTAINER_MARKER_TRACK_TURNS) {
 						_globals->visit(_container.top().id, true);
+					}
+					if (flag & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
+						_entered_knot = true;
 					}
 
 				} break;
