@@ -96,18 +96,18 @@ public:
 		return get_tag<tags_level::LINE>(index);
 	}
 
-	virtual size_t num_global_tags() const override { return has_tags<tags_level::GLOBAL>(); }
+	virtual size_t num_global_tags() const override { return num_tags<tags_level::GLOBAL>(); }
 
-	virtual bool has_global_tags() const override { return num_tags<tags_level::GLOBAL>(); }
+	virtual bool has_global_tags() const override { return has_tags<tags_level::GLOBAL>(); }
 
 	virtual const char* get_global_tag(size_t index) const override
 	{
 		return get_tag<tags_level::GLOBAL>(index);
 	};
 
-	virtual size_t num_knot_tags() const override { return has_tags<tags_level::KNOT>(); }
+	virtual size_t num_knot_tags() const override { return num_tags<tags_level::KNOT>(); }
 
-	virtual bool has_knot_tags() const override { return num_tags<tags_level::KNOT>(); }
+	virtual bool has_knot_tags() const override { return has_tags<tags_level::KNOT>(); }
 
 	virtual const char* get_knot_tag(size_t index) const override
 	{
@@ -197,13 +197,13 @@ private:
 	void      copy_tags(tags_level src, tags_level dst);
 	enum class tags_clear_level : int {
 		KEEP_NONE,
-		KEEP_GLOBAL,
+		KEEP_GLOBAL_AND_UNKNOWN,
 		KEEP_KNOT, ///< keep knot and global tags
 	};
 	void clear_tags(tags_clear_level which);
 
 	// Special code for jumping from the current IP to another
-	void jump(ip_t, bool record_visits);
+	void jump(ip_t, bool record_visits, bool set_jumped);
 	bool _jumped = true; // if we are in the first action after a jump to an snitch/knot
 
 	void run_binary_operator(unsigned char cmd);

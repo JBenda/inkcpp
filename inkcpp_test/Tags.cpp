@@ -299,6 +299,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			THEN("it has the global tags")
 			{
 				CHECK(_thread->has_global_tags());
+				CHECK_FALSE(_thread->has_knot_tags());
 				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_global_tags() == 1);
 				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
@@ -314,6 +315,8 @@ SCENARIO("run story with tags", "[tags][story]")
 			THEN("it has one tag")
 			{
 				CHECK(_thread->has_tags());
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(_thread->num_knot_tags() == 0);
 				REQUIRE(_thread->num_tags() == 1);
 				CHECK(std::string(_thread->get_tag(0)) == "tagged");
 			}
@@ -326,6 +329,8 @@ SCENARIO("run story with tags", "[tags][story]")
 			THEN("it has two tags")
 			{
 				CHECK(_thread->has_tags());
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(_thread->num_knot_tags() == 0);
 				REQUIRE(_thread->num_tags() == 2);
 				CHECK(std::string(_thread->get_tag(0)) == "tag next line");
 				CHECK(std::string(_thread->get_tag(1)) == "more tags");
@@ -341,6 +346,8 @@ SCENARIO("run story with tags", "[tags][story]")
 			THEN("it has three tags")
 			{
 				CHECK(_thread->has_tags());
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(_thread->num_knot_tags() == 0);
 				REQUIRE(_thread->num_tags() == 3);
 				CHECK(std::string(_thread->get_tag(0)) == "above");
 				CHECK(std::string(_thread->get_tag(1)) == "side");
@@ -357,11 +364,16 @@ SCENARIO("run story with tags", "[tags][story]")
 			THEN("it has four tags")
 			{
 				CHECK(_thread->has_tags());
+				CHECK(_thread->num_global_tags() == 1);
 				REQUIRE(_thread->num_tags() == 4);
 				CHECK(std::string(_thread->get_tag(0)) == "knot_tag_start");
 				CHECK(std::string(_thread->get_tag(1)) == "second_knot_tag_start");
 				CHECK(std::string(_thread->get_tag(2)) == "third_knot_tag");
 				CHECK(std::string(_thread->get_tag(3)) == "output_tag_h");
+				REQUIRE(_thread->num_knot_tags() == 3);
+				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_start");
+				CHECK(std::string(_thread->get_knot_tag(1)) == "second_knot_tag_start");
+				CHECK(std::string(_thread->get_knot_tag(2)) == "third_knot_tag");
 			}
 		}
 		WHEN("on the next line")
@@ -374,6 +386,8 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "Second line has no tags\n");
 			THEN("it has no tags")
 			{
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(_thread->num_knot_tags() == 3);
 				CHECK_FALSE(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 0);
 			}
@@ -393,6 +407,8 @@ SCENARIO("run story with tags", "[tags][story]")
 
 			THEN("check tags on choices")
 			{
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(_thread->num_knot_tags() == 3);
 				CHECK(std::string(choice_list[0].text()) == "a");
 				CHECK_FALSE(choice_list[0].has_tags());
 				REQUIRE(choice_list[0].num_tags() == 0);
@@ -417,10 +433,14 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "Knot2\n");
 			THEN("it has two tags")
 			{
+				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 2);
 				CHECK(std::string(_thread->get_tag(0)) == "knot_tag_2");
 				CHECK(std::string(_thread->get_tag(1)) == "output_tag_k");
+				CHECK(_thread->has_knot_tags());
+				REQUIRE(_thread->num_knot_tags() == 1);
+				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_2");
 			}
 		}
 		WHEN("at the second choice list")
@@ -440,6 +460,9 @@ SCENARIO("run story with tags", "[tags][story]")
 
 			THEN("check tags on choices")
 			{
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(_thread->num_knot_tags() == 1);
+				CHECK(_thread->num_tags() == 2);
 				CHECK(std::string(choice_list[0].text()) == "e");
 				CHECK_FALSE(choice_list[0].has_tags());
 				REQUIRE(choice_list[0].num_tags() == 0);
@@ -470,9 +493,11 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->choose(1);
 
-			CHECK(_thread->getline() == "f and content\n");
+			REQUIRE(_thread->getline() == "f and content\n");
 			THEN("it has four tags")
 			{
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(_thread->num_knot_tags() == 1);
 				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 4);
 				CHECK(std::string(_thread->get_tag(0)) == "shared_tag");
@@ -496,6 +521,10 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "out\n");
 			THEN("it has one tag")
 			{
+				CHECK(_thread->num_global_tags() == 1);
+				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
+				REQUIRE(_thread->num_knot_tags() == 1);
+				CHECK(std::string(_thread->get_knot_tag(0)) == "kont_tag_2");
 				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 1);
 				CHECK(std::string(_thread->get_tag(0)) == "close_tag");

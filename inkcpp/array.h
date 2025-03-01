@@ -99,6 +99,15 @@ public:
 		return data()[position];
 	}
 
+	virtual void remove(size_t begin, size_t end) { 
+		inkAssert(end <= _size, "can not delete behind end of array.");
+		inkAssert(begin <= end, "can not remove negative range.");
+		for (size_t i = 0; i < (end - begin) && end + i < _size; ++i) {
+			data()[begin + i] = data()[end + i];
+		}
+		_size -= end - begin;
+	}
+
 	void clear() { _size = 0; }
 
 	void resize(size_t size)
@@ -173,6 +182,12 @@ public:
 	{
 		inkAssert(position >= _last_size, "Cannot insert data before last save point.");
 		return base::insert(position);
+	}
+
+	virtual void remove(size_t begin, size_t end) override
+	{
+		inkAssert(begin >= _last_size, "Cannot delete data before last save point.");
+		base::remove(begin, end);
 	}
 
 	void restore()

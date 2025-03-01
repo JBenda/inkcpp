@@ -253,11 +253,12 @@ void runner_impl::clear_tags(tags_clear_level which)
 				_tags_begin.set(i, 0);
 			}
 			break;
-		case tags_clear_level::KEEP_GLOBAL:
-			_tags.resize(_tags_begin[static_cast<int>(tags_level::KNOT)]);
+		case tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN:
+			_tags.remove(_tags_begin[static_cast<int>(tags_level::KNOT)], _tags_begin[static_cast<int>(tags_level::UNKNOWN)]);
 			for (int i = static_cast<int>(tags_level::KNOT); i < _tags_begin.capacity(); ++i) {
 				_tags_begin.set(i, _tags_begin[static_cast<int>(tags_level::KNOT)]);
 			}
+			_tags_begin.set(static_cast<int>(tags_level::UNKNOWN) + 1, _tags.size());
 			break;
 		case tags_clear_level::KEEP_KNOT:
 			_tags.resize(_tags_begin[static_cast<int>(tags_level::KNOT) + 1]);
@@ -269,7 +270,7 @@ void runner_impl::clear_tags(tags_clear_level which)
 	}
 }
 
-void runner_impl::jump(ip_t dest, bool record_visits)
+void runner_impl::jump(ip_t dest, bool record_visits, bool set_jumped)
 {
 	// Optimization: if we are _is_falling, then we can
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
@@ -340,12 +341,13 @@ void runner_impl::jump(ip_t dest, bool record_visits)
 		}
 	}
 	_ptr = dest;
+	if (set_jumped) {
+		_jumped = true;
+	}
 
 	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
 	// it will get visited in the next step
 	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
-		clear_tags(tags_clear_level::KEEP_GLOBAL
-		); // clear knot tags since whe are entering another knot
 		_ptr += 6;
 		_container.push({.id = id, .offset = offset});
 		if (reversed && comm_end == _container.size() - 1) {
@@ -391,7 +393,7 @@ void runner_impl::start_frame(uint32_t target)
 
 	// Do the jump
 	inkAssert(_story->instructions() + target < _story->end(), "Diverting past end of story data!");
-	jump(_story->instructions() + target, true);
+	jump(_story->instructions() + target, true, false);
 }
 
 frame_type runner_impl::execute_return()
@@ -431,7 +433,7 @@ frame_type runner_impl::execute_return()
 	    _story->instructions() + offset < _story->end(),
 	    "Callstack return is outside bounds of story!"
 	);
-	jump(_story->instructions() + offset, false);
+	jump(_story->instructions() + offset, false, false);
 
 	// Return frame type
 	return type;
@@ -580,7 +582,7 @@ void runner_impl::choose(size_t index)
 	inkAssert(prev != nullptr, "No 'done' point recorded before finishing choice output");
 
 	// Move to the previous pointer so we track our movements correctly
-	jump(prev, false);
+	jump(prev, false, false);
 	_done = nullptr;
 
 	// Collapse callstacks to the correct thread
@@ -590,8 +592,9 @@ void runner_impl::choose(size_t index)
 	_eval.clear();
 
 	// Jump to destination and clear choice list
-	jump(_story->instructions() + c.path(), true);
+	jump(_story->instructions() + c.path(), true, false);
 	clear_choices();
+	_jumped = false;
 }
 
 void runner_impl::getline_silent()
@@ -720,7 +723,7 @@ bool runner_impl::move_to(hash_t path)
 	// Clear state and move to destination
 	reset();
 	_ptr = _story->instructions();
-	jump(destination, false);
+	jump(destination, false, true);
 
 	return true;
 }
@@ -764,10 +767,14 @@ bool runner_impl::line_step()
 	}
 
 	// Step the interpreter
-	bool   was_empty = _output.is_empty();
+	size_t   o_size = _output.filled();
 	step();
-	if (was_empty && !_output.is_empty() && _output.find_first_of(value_type::marker) == _output.npos && !_evaluation_mode) {
-		if (_jumped) {
+	if (o_size < _output.filled() && _output.find_first_of(value_type::marker) == _output.npos && !_evaluation_mode) {
+		if (_jumped ) {
+			if (has_knot_tags()) {
+				clear_tags(tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
+				); // clear knot tags since whe are entering another knot
+			}
 			assign_tags({tags_level::LINE, start ? tags_level::GLOBAL : tags_level::KNOT});
 			start = false;
 		} 
@@ -967,8 +974,7 @@ void runner_impl::step()
 					inkAssert(
 					    _story->instructions() + target < _story->end(), "Diverting past end of story data!"
 					);
-					_jumped = true;
-					jump(_story->instructions() + target, true);
+					jump(_story->instructions() + target, true, !(flag & CommandFlag::DIVERT_HAS_CONDITION));
 				} break;
 				case Command::DIVERT_TO_VARIABLE: {
 					// Get variable value
@@ -983,7 +989,7 @@ void runner_impl::step()
 					inkAssert(val, "Jump destiniation needs to be defined!");
 
 					// Move to location
-					jump(_story->instructions() + val->get<value_type::divert>(), true);
+					jump(_story->instructions() + val->get<value_type::divert>(), true, ! (flag & CommandFlag::DIVERT_HAS_CONDITION));
 					inkAssert(_ptr < _story->end(), "Diverted past end of story data!");
 				} break;
 
