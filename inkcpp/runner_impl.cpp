@@ -764,20 +764,20 @@ bool runner_impl::line_step()
 	}
 
 	// Step the interpreter
+	bool   was_empty = _output.is_empty();
 	step();
+	if (was_empty && !_output.is_empty() && _output.find_first_of(value_type::marker) == _output.npos && !_evaluation_mode) {
+		if (_jumped) {
+			assign_tags({tags_level::LINE, start ? tags_level::GLOBAL : tags_level::KNOT});
+			start = false;
+		} 
+		_jumped = false;
+	} 
 
 	// If we're not within string evaluation
 	if (_output.find_first_of(value_type::marker) == _output.npos) {
 		// If we have a saved state after a previous newline
 		// don't do this if we behind choice
-		if (_output.is_empty()) {
-			if (_jumped) {
-				assign_tags({tags_level::LINE, start ? tags_level::GLOBAL : tags_level::KNOT});
-				start = false;
-			}
-		} else {
-			_jumped = false;
-		}
 		if (_saved && ! has_choices() && ! _fallback_choice) {
 			// Check for changes in the output stream
 			switch (detect_change()) {
