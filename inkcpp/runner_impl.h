@@ -203,8 +203,8 @@ private:
 	void clear_tags(tags_clear_level which);
 
 	// Special code for jumping from the current IP to another
-	void jump(ip_t, bool record_visits, bool set_jumped);
-	bool _jumped = true; // if we are in the first action after a jump to an snitch/knot
+	void jump(ip_t, bool record_visits, bool track_knot_visit);
+	bool _entered_knot = true; // if we are in the first action after a jump to an snitch/knot
 
 	void run_binary_operator(unsigned char cmd);
 	void run_unary_operator(unsigned char cmd);

@@ -270,7 +270,7 @@ void runner_impl::clear_tags(tags_clear_level which)
 	}
 }
 
-void runner_impl::jump(ip_t dest, bool record_visits, bool set_jumped)
+void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 {
 	// Optimization: if we are _is_falling, then we can
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
@@ -344,8 +344,8 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool set_jumped)
 	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
 	// it will get visited in the next step
 	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
-		if (set_jumped) {
-			_jumped = true;
+		if (track_knot_visit) {
+			_entered_knot = true;
 		}
 		_ptr += 6;
 		_container.push({.id = id, .offset = offset});
@@ -593,7 +593,7 @@ void runner_impl::choose(size_t index)
 	// Jump to destination and clear choice list
 	jump(_story->instructions() + c.path(), true, false);
 	clear_choices();
-	_jumped = false;
+	_entered_knot = false;
 }
 
 void runner_impl::getline_silent()
@@ -769,7 +769,7 @@ bool runner_impl::line_step()
 	size_t   o_size = _output.filled();
 	step();
 	if (o_size < _output.filled() && _output.find_first_of(value_type::marker) == _output.npos && !_evaluation_mode && !_saved) {
-		if (_jumped) {
+		if (_entered_knot) {
 			if (has_knot_tags()) {
 				clear_tags(tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
 				); // clear knot tags since whe are entering another knot
@@ -777,7 +777,7 @@ bool runner_impl::line_step()
 			assign_tags({tags_level::LINE, start ? tags_level::GLOBAL : tags_level::KNOT});
 			start = false;
 		} 
-		_jumped = false;
+		_entered_knot = false;
 	} 
 
 	// If we're not within string evaluation
