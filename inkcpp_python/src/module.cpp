@@ -10,6 +10,7 @@
 #include <pybind11/functional.h>
 
 namespace py = pybind11;
+using namespace pybind11::literals;
 
 #include <story.h>
 #include <runner.h>
@@ -319,8 +320,8 @@ To reload:
 	        "getall", static_cast<std::string (runner::*)()>(&runner::getall),
 	        "execute getline and append until inkcp_py.Runner.can_continue is false"
 	    )
-	    .def("has_tags", &runner::has_tags, "Where there tags since last choice")
-	    .def("num_tags", &runner::num_tags, "Number of tags currently stored")
+	    .def("has_tags", &runner::has_tags, "Where there tags assoziated with the last line.")
+	    .def("num_tags", &runner::num_tags, "Number of tags assoziated with last line.")
 	    .def(
 	        "get_tag", &runner::get_tag, "Get Tag currently stored at index",
 	        py::arg("index").none(false), py::return_value_policy::reference_internal
@@ -336,6 +337,63 @@ To reload:
 	        },
 	        "Get all current assigned tags"
 	    )
+	    .def("has_knot_tags", &runner::has_tags, "Are there tags assoziated with current knot.")
+	    .def("num_knot_tags", &runner::num_tags, "Number of tags assoziated with current knot.")
+	    .def(
+	        "get_knot_tag", &runner::get_tag, "Get knot tag stored at index.",
+	        py::arg("index").none(false), py::return_value_policy::reference_internal
+	    )
+	    .def(
+	        "knot_tags",
+	        [](const runner& self) {
+		        std::vector<const char*> tags(self.num_knot_tags());
+		        for (size_t i = 0; i < self.num_knot_tags(); ++i) {
+			        tags[i] = self.get_knot_tag(i);
+		        }
+		        return tags;
+	        },
+	        "Get all tags assoziated with current knot."
+	    )
+	    .def("has_global_tags", &runner::has_tags, "Are there tags assoziated with current global.")
+	    .def("num_global_tags", &runner::num_tags, "Number of tags assoziated with current global.")
+	    .def(
+	        "get_global_tag", &runner::get_tag, "Get global tag stored at index.",
+	        py::arg("index").none(false), py::return_value_policy::reference_internal
+	    )
+	    .def(
+	        "global_tags",
+	        [](const runner& self) {
+		        std::vector<const char*> tags(self.num_global_tags());
+		        for (size_t i = 0; i < self.num_global_tags(); ++i) {
+			        tags[i] = self.get_global_tag(i);
+		        }
+		        return tags;
+	        },
+	        "Get all tags assoziated with current global."
+	    )
+			.def(
+				"all_tags",
+				[](const runner& self) {
+					std::vector<const char*> line_tags(self.num_tags());
+					for (size_t i = 0; i < self.num_tags(); ++i) {
+						line_tags[i] = self.get_tag(i);
+					}
+					std::vector<const char*> knot_tags(self.num_knot_tags());
+					for(size_t i = 0; i < self.num_knot_tags(); ++i) {
+						knot_tags[i] = self.get_knot_tag(i);
+					}
+					std::vector<const char*> global_tags(self.num_global_tags());
+					for(size_t i = 0; i < self.num_global_tags(); ++i) {
+						global_tags[i] = self.get_global_tag(i);
+					}
+					return py::dict(
+						"line"_a=line_tags,
+						"knot"_a=knot_tags,
+						"global"_a=global_tags
+					);
+				},
+				"Get a dictionary with tags for different levels. Be aware that global and knot tags are also part of the next output line after their definition."
+			)
 	    .def(
 	        "has_choices", &runner::has_choices,
 	        "Check if there is at least one open choice at the moment."

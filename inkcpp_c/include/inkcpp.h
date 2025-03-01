@@ -241,6 +241,26 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	const char*       ink_runner_tag(const HInkRunner* self, int index);
 	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::num_knot_tags()
+	 * @param self
+	 */
+	int               ink_runner_num_knot_tags(const HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::knot_tag()
+	 * @param self
+	 */
+	const char*       ink_runner_knot_tag(const HInkRunner* self, int index);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::num_global_tags()
+	 * @param self
+	 */
+	int               ink_runner_num_global_tags(const HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::global_tag()
+	 * @param self
+	 */
+	const char*       ink_runner_global_tag(const HInkRunner* self, int index);
+	/** @memberof HInkRunner
 	 * @copydoc ink::runtime::runner_interface::num_choices()
 	 * @param self
 	 */
@@ -266,10 +286,10 @@ typedef struct HInkSTory    HInkStory;
 	 *                      this prevents double execution of external functions but can lead to
 	 *                      missing glues
 	 */
-	void              ink_runner_bind_void(
-	                 HInkRunner* self, const char* function_name, InkExternalFunctionVoid callback,
-	                 int lookaheadSafe
-	             );
+	void ink_runner_bind_void(
+	    HInkRunner* self, const char* function_name, InkExternalFunctionVoid callback,
+	    int lookaheadSafe
+	);
 	/** @memberof HInkRunner
 	 * Binds a external function which is called from the runtime, with a return vallue.
 	 * @see ink_runner_bind_void()
