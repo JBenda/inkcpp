@@ -154,6 +154,7 @@ enum class Command : uint8_t {
 	  CONTAINER_MARKER_TRACK_VISITS = 1 << 0,
 	  CONTAINER_MARKER_TRACK_TURNS  = 1 << 1,
 	  CONTAINER_MARKER_ONLY_FIRST   = 1 << 2,
+	  CONTAINER_MARKER_IS_KNOT      = 1 << 3,
 
 	  // == Variable assignment
 	  ASSIGNMENT_IS_REDEFINE = 1 << 0,

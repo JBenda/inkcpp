@@ -443,6 +443,21 @@ SCENARIO("run story with tags", "[tags][story]")
 				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_2");
 			}
 		}
+		WHEN("jumping to a knot")
+		{
+			_thread->move_to(ink::hash_string("knot2"));
+			REQUIRE(_thread->getline() == "Knot2\n");
+			THEN("global tags are missing") {
+				CHECK(_thread->num_global_tags() == 0);
+				CHECK(_thread->has_tags());
+				REQUIRE(_thread->num_tags() == 2);
+				CHECK(std::string(_thread->get_tag(0)) == "knot_tag_2");
+				CHECK(std::string(_thread->get_tag(1)) == "output_tag_k");
+				CHECK(_thread->has_knot_tags());
+				REQUIRE(_thread->num_knot_tags() == 1);
+				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_2");
+			}
+		}
 		WHEN("at the second choice list")
 		{
 			_thread->getline();
@@ -524,7 +539,7 @@ SCENARIO("run story with tags", "[tags][story]")
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
 				REQUIRE(_thread->num_knot_tags() == 1);
-				CHECK(std::string(_thread->get_knot_tag(0)) == "kont_tag_2");
+				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_2");
 				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 1);
 				CHECK(std::string(_thread->get_tag(0)) == "close_tag");

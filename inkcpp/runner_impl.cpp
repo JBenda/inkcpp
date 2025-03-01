@@ -341,13 +341,12 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool set_jumped)
 		}
 	}
 	_ptr = dest;
-	if (set_jumped) {
-		_jumped = true;
-	}
-
 	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
 	// it will get visited in the next step
 	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
+		if (set_jumped) {
+			_jumped = true;
+		}
 		_ptr += 6;
 		_container.push({.id = id, .offset = offset});
 		if (reversed && comm_end == _container.size() - 1) {
@@ -769,8 +768,8 @@ bool runner_impl::line_step()
 	// Step the interpreter
 	size_t   o_size = _output.filled();
 	step();
-	if (o_size < _output.filled() && _output.find_first_of(value_type::marker) == _output.npos && !_evaluation_mode) {
-		if (_jumped ) {
+	if (o_size < _output.filled() && _output.find_first_of(value_type::marker) == _output.npos && !_evaluation_mode && !_saved) {
+		if (_jumped) {
 			if (has_knot_tags()) {
 				clear_tags(tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
 				); // clear knot tags since whe are entering another knot
