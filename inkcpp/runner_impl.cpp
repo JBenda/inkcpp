@@ -254,7 +254,10 @@ void runner_impl::clear_tags(tags_clear_level which)
 			}
 			break;
 		case tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN:
-			_tags.remove(_tags_begin[static_cast<int>(tags_level::KNOT)], _tags_begin[static_cast<int>(tags_level::UNKNOWN)]);
+			_tags.remove(
+			    _tags_begin[static_cast<int>(tags_level::KNOT)],
+			    _tags_begin[static_cast<int>(tags_level::UNKNOWN)]
+			);
 			for (int i = static_cast<int>(tags_level::KNOT); i < _tags_begin.capacity(); ++i) {
 				_tags_begin.set(i, _tags_begin[static_cast<int>(tags_level::KNOT)]);
 			}
@@ -344,7 +347,8 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
 	// it will get visited in the next step
 	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
-		if (track_knot_visit && static_cast<CommandFlag>(offset[1]) & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
+		if (track_knot_visit
+		    && static_cast<CommandFlag>(offset[1]) & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
 			_entered_knot = true;
 		}
 		_ptr += 6;
@@ -650,6 +654,8 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr += _eval.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags_begin.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags.snap(data ? ptr : nullptr, snapper);
+	ptr = snap_write(ptr, _entered_global, should_write);
+	ptr = snap_write(ptr, _entered_knot, should_write);
 	ptr += _container.snap(data ? ptr : nullptr, snapper);
 	ptr += _threads.snap(data ? ptr : nullptr, snapper);
 	ptr = snap_write(ptr, _fallback_choice.has_value(), should_write);
@@ -682,8 +688,10 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	ptr = _stack.snap_load(ptr, loader);
 	ptr = _ref_stack.snap_load(ptr, loader);
 	ptr = _eval.snap_load(ptr, loader);
+	ptr = _tags_begin.snap_load(ptr, loader);
 	ptr = _tags.snap_load(ptr, loader);
-	ptr = _tags.snap_load(ptr, loader);
+	ptr = snap_read(ptr, _entered_global);
+	ptr = snap_read(ptr, _entered_knot);
 	ptr = _container.snap_load(ptr, loader);
 	ptr = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
@@ -760,25 +768,26 @@ runner_impl::change_type runner_impl::detect_change() const
 
 bool runner_impl::line_step()
 {
-	static bool start = true;
 	if (_ptr == _story->instructions()) {
-		start = true;
+		_entered_global = true;
 	}
-
 	// Step the interpreter
-	size_t   o_size = _output.filled();
+	size_t o_size = _output.filled();
 	step();
-	if (o_size < _output.filled() && _output.find_first_of(value_type::marker) == _output.npos && !_evaluation_mode && !_saved) {
-		if (_entered_knot) {
+	if (o_size < _output.filled() && _output.find_first_of(value_type::marker) == _output.npos
+	    && ! _evaluation_mode && ! _saved) {
+		if (_entered_global) {
+			assign_tags({tags_level::LINE, tags_level::GLOBAL});
+		} else if (_entered_knot) {
 			if (has_knot_tags()) {
 				clear_tags(tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
 				); // clear knot tags since whe are entering another knot
 			}
-			assign_tags({tags_level::LINE, start ? tags_level::GLOBAL : tags_level::KNOT});
-			start = false;
-		} 
-		_entered_knot = false;
-	} 
+			assign_tags({tags_level::LINE, tags_level::KNOT});
+		}
+		_entered_global = false;
+		_entered_knot   = false;
+	}
 
 	// If we're not within string evaluation
 	if (_output.find_first_of(value_type::marker) == _output.npos) {
@@ -973,7 +982,7 @@ void runner_impl::step()
 					inkAssert(
 					    _story->instructions() + target < _story->end(), "Diverting past end of story data!"
 					);
-					jump(_story->instructions() + target, true, !(flag & CommandFlag::DIVERT_HAS_CONDITION));
+					jump(_story->instructions() + target, true, ! (flag & CommandFlag::DIVERT_HAS_CONDITION));
 				} break;
 				case Command::DIVERT_TO_VARIABLE: {
 					// Get variable value
@@ -988,7 +997,10 @@ void runner_impl::step()
 					inkAssert(val, "Jump destiniation needs to be defined!");
 
 					// Move to location
-					jump(_story->instructions() + val->get<value_type::divert>(), true, ! (flag & CommandFlag::DIVERT_HAS_CONDITION));
+					jump(
+					    _story->instructions() + val->get<value_type::divert>(), true,
+					    ! (flag & CommandFlag::DIVERT_HAS_CONDITION)
+					);
 					inkAssert(_ptr < _story->end(), "Diverted past end of story data!");
 				} break;
 
@@ -1101,7 +1113,9 @@ void runner_impl::step()
 					auto* fn = _functions.find(functionName);
 					if (fn == nullptr) {
 						_eval.push(values::ex_fn_not_found);
-					} else if (_output.saved() && _output.ends_with(value_type::newline, _output.save_offset()) && ! fn->lookaheadSafe()) {
+					} else if (_output.saved()
+					           && _output.ends_with(value_type::newline, _output.save_offset())
+					           && ! fn->lookaheadSafe()) {
 						// TODO: seperate token?
 						_output.append(values::null);
 					} else {

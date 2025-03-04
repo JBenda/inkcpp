@@ -204,7 +204,8 @@ private:
 
 	// Special code for jumping from the current IP to another
 	void jump(ip_t, bool record_visits, bool track_knot_visit);
-	bool _entered_knot = true; // if we are in the first action after a jump to an snitch/knot
+	bool _entered_knot   = false;  // if we are in the first action after a jump to an snitch/knot
+	bool _entered_global = false; // if we are in the first action after a jump to an snitch/knot
 
 	void run_binary_operator(unsigned char cmd);
 	void run_unary_operator(unsigned char cmd);
@@ -323,7 +324,7 @@ private:
 
 	// Tag list
 	managed_restorable_array < snap_tag,
-	    config::limitActiveTags<0, abs(config::limitActiveTags)>                    _tags;
+	    config::limitActiveTags<0, abs(config::limitActiveTags)>                     _tags;
 	// where to the different tags type start
 	internal::fixed_restorable_array<int, static_cast<int>(tags_level::UNKNOWN) + 2> _tags_begin;
 
