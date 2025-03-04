@@ -172,7 +172,7 @@ extern "C" {
 		return reinterpret_cast<runner*>(self)->get()->getline_alloc();
 	}
 
-	int ink_runner_get_num_tags(const HInkRunner* self)
+	int ink_runner_num_tags(const HInkRunner* self)
 	{
 		return reinterpret_cast<const runner*>(self)->get()->num_tags();
 	}
@@ -182,24 +182,24 @@ extern "C" {
 		return reinterpret_cast<const runner*>(self)->get()->get_tag(tag_id);
 	}
 
-	int ink_runner_get_num_knot_tags(const HInkRunner* self)
+	int ink_runner_num_knot_tags(const HInkRunner* self)
 	{
 		return reinterpret_cast<const runner*>(self)->get()->num_knot_tags();
 	}
 
 	const char* ink_runner_knot_tag(const HInkRunner* self, int tag_id)
 	{
-		return std::reinterpret_cast<const runner*>(self)->get()->get_knot_tag(tag_id);
+		return reinterpret_cast<const runner*>(self)->get()->get_knot_tag(tag_id);
 	}
 
-	int ink_runner_get_num_global_tags(const HInkRunner* self)
+	int ink_runner_num_global_tags(const HInkRunner* self)
 	{
 		return reinterpret_cast<const runner*>(self)->get()->num_global_tags();
 	}
 
 	const char* ink_runner_global_tag(const HInkRunner* self, int tag_id)
 	{
-		return std::reinterpret_cast<const runner*>(self)->get()->get_global_tag(tag_id);
+		return reinterpret_cast<const runner*>(self)->get()->get_global_tag(tag_id);
 	}
 
 	int ink_runner_num_choices(const HInkRunner* self)
