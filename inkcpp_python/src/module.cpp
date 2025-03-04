@@ -337,10 +337,10 @@ To reload:
 	        },
 	        "Get all current assigned tags"
 	    )
-	    .def("has_knot_tags", &runner::has_tags, "Are there tags assoziated with current knot.")
-	    .def("num_knot_tags", &runner::num_tags, "Number of tags assoziated with current knot.")
+	    .def("has_knot_tags", &runner::has_knot_tags, "Are there tags assoziated with current knot.")
+	    .def("num_knot_tags", &runner::num_knot_tags, "Number of tags assoziated with current knot.")
 	    .def(
-	        "get_knot_tag", &runner::get_tag, "Get knot tag stored at index.",
+	        "get_knot_tag", &runner::get_knot_tag, "Get knot tag stored at index.",
 	        py::arg("index").none(false), py::return_value_policy::reference_internal
 	    )
 	    .def(
@@ -354,10 +354,10 @@ To reload:
 	        },
 	        "Get all tags assoziated with current knot."
 	    )
-	    .def("has_global_tags", &runner::has_tags, "Are there tags assoziated with current global.")
-	    .def("num_global_tags", &runner::num_tags, "Number of tags assoziated with current global.")
+	    .def("has_global_tags", &runner::has_global_tags, "Are there tags assoziated with current global.")
+	    .def("num_global_tags", &runner::num_global_tags, "Number of tags assoziated with current global.")
 	    .def(
-	        "get_global_tag", &runner::get_tag, "Get global tag stored at index.",
+	        "get_global_tag", &runner::get_global_tag, "Get global tag stored at index.",
 	        py::arg("index").none(false), py::return_value_policy::reference_internal
 	    )
 	    .def(
