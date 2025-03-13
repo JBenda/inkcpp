@@ -168,8 +168,8 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 	}
 	if (! condition) {
 		if constexpr (sizeof...(args) > 0) {
-			size_t size = snprintf(nullptr, 0, msg, args...) + 1;
-			char* message = static_cast<char*>(malloc(size));
+			size_t size    = snprintf(nullptr, 0, msg, args...) + 1;
+			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
 			throw ink_exception(message);
 		} else {
