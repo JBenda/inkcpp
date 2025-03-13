@@ -292,7 +292,6 @@ jobs:
           if [ "$diff" != "" ]; then
             echo run git clang-format-18 --extensions c,cpp,h,hpp --style file master
             echo or upstream/master depending on your setup
-            clang
           fi
 
   reporting:
