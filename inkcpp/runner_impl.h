@@ -326,8 +326,6 @@ private:
 	    config::limitActiveTags<0, abs(config::limitActiveTags)>                     _tags;
 	// where to the different tags type start
 	internal::fixed_restorable_array<int, static_cast<int>(tags_level::UNKNOWN) + 2> _tags_begin;
-	size_t                                                       _global_tags_count = 0;
-	size_t                                                       _choice_tags_count = 0;
 
 	// TODO: Move to story? Both?
 	functions _functions;
