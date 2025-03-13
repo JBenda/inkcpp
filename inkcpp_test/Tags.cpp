@@ -39,7 +39,6 @@ SCENARIO("run story with tags", "[tags][story]")
 				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
 				REQUIRE(_thread->num_tags() == 1);
 				CHECK(std::string(_thread->get_tag(0)) == "global_tag");
-
 			}
 		}
 		WHEN("on the second line")
@@ -181,7 +180,8 @@ SCENARIO("run story with tags", "[tags][story]")
 		{
 			_thread->move_to(ink::hash_string("knot2"));
 			REQUIRE(_thread->getline() == "Knot2\n");
-			THEN("global tags are missing") {
+			THEN("global tags are missing")
+			{
 				CHECK(_thread->num_global_tags() == 0);
 				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 2);
@@ -202,7 +202,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			_thread->getline();
 			_thread->choose(1);
 			_thread->getline();
-			CHECK(!_thread->can_continue());
+			CHECK(! _thread->can_continue());
 
 			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 3);
 			auto choice_list = _thread->begin();

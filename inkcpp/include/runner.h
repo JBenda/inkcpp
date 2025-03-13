@@ -189,7 +189,7 @@ public:
 	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_tags() "num_tags()")
 	 *
 	 * @return pointer to the tag string memory or nullptr if the index is invalid
-	 * 
+	 *
 	 * @sa has_tags num_tags get_global_tag get_knot_tag
 	 */
 	virtual const char* get_tag(size_t index) const = 0;
@@ -244,12 +244,13 @@ public:
 
 	/**
 	 * Access a knot/stitch tag by index.
-	*
-	* Knot stitch tags are placed at the top of a knot/stitch.
-	* @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_knot_tags() "num_knot_tags()")
-	* @return pointor to tag string memory or nullptr if the index is invalid
-	* @sa has_knot_tag num_knot_tags get_global_tag get_tag
-	*/
+	 *
+	 * Knot stitch tags are placed at the top of a knot/stitch.
+	 * @param index tag id to fetch [0;@ref ink::runtime::runner_interface::num_knot_tags()
+	 * "num_knot_tags()")
+	 * @return pointor to tag string memory or nullptr if the index is invalid
+	 * @sa has_knot_tag num_knot_tags get_global_tag get_tag
+	 */
 	virtual const char* get_knot_tag(size_t index) const = 0;
 
 

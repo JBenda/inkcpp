@@ -21,7 +21,7 @@ SCENARIO("a story with external functions and glue", "[external]")
 
 		WHEN("the external function is safe for look-ahead")
 		{
-			auto thread = ink->new_runner().cast<internal::runner_impl>();
+			auto              thread = ink->new_runner().cast<internal::runner_impl>();
 			std::stringstream commands;
 			thread->set_debug_enabled(&commands);
 			thread->bind("foo", foo, true);
@@ -33,7 +33,7 @@ SCENARIO("a story with external functions and glue", "[external]")
 		}
 		WHEN("the external function is unsafe for look-ahead")
 		{
-			auto thread = ink->new_runner().cast<internal::runner_impl>();
+			auto              thread = ink->new_runner().cast<internal::runner_impl>();
 			std::stringstream commands;
 			thread->set_debug_enabled(&commands);
 			thread->bind("foo", foo, false);

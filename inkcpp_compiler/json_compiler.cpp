@@ -121,15 +121,16 @@ void json_compiler::handle_container_metadata(const json& meta, container_meta& 
 			}
 		}
 	} else if (is_knot) {
-		container_t myIndex = _next_container_index++;
-		data.indexToReturn  = myIndex;
+		container_t myIndex       = _next_container_index++;
+		data.indexToReturn        = myIndex;
 		data.cmd_flags            = CommandFlag::CONTAINER_MARKER_IS_KNOT;
 		data.recordInContainerMap = true;
 	}
 }
 
 void json_compiler::compile_container(
-    const nlohmann::json& container, int index_in_parent, int depth, const std::string& name_override
+    const nlohmann::json& container, int index_in_parent, int depth,
+    const std::string& name_override
 )
 {
 	// Grab metadata from the last object in this container

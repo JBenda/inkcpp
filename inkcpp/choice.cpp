@@ -46,7 +46,7 @@ namespace runtime
 					text = strings.duplicate(data.get<internal::value_type::string>());
 					in.discard(2);
 					break;
-			default: text = in.get_alloc(strings, lists);
+				default: text = in.get_alloc(strings, lists);
 			}
 		} else {
 			// Non-string. Must allocate

@@ -39,7 +39,7 @@ static_assert(sizeof(snap_choice) == sizeof(choice));
 class snap_tag : public snapshot_interface
 {
 public:
-		snap_tag() = default;
+	snap_tag() = default;
 
 	snap_tag(const char* str)
 	    : _str{str}
@@ -55,15 +55,15 @@ public:
 	}
 
 	size_t               snap(unsigned char*, const snapper&) const;
-		const unsigned char* snap_load(const unsigned char* data, const loader&);
+	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
-		const char* text() const { return _str; }
+	const char* text() const { return _str; }
 
-		const char* const* ptr() const { return &_str; }
+	const char* const* ptr() const { return &_str; }
 
 private:
-		const char* _str = nullptr;
-	};
+	const char* _str = nullptr;
+};
 
 static_assert(sizeof(snap_tag) == sizeof(const char*));
 

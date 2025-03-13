@@ -85,7 +85,7 @@ int main()
 	ink_runner_choose(runner, 1);
 	assert(ink_runner_can_continue(runner));
 	assert(strcmp(ink_runner_get_line(runner), "Knot2\n") == 0);
-	assert(!ink_runner_can_continue(runner));
+	assert(! ink_runner_can_continue(runner));
 	assert(ink_runner_num_tags(runner) == 2);
 	assert(strcmp(ink_runner_tag(runner, 0), "knot_tag_2") == 0);
 	assert(strcmp(ink_runner_tag(runner, 1), "output_tag_k") == 0);
@@ -108,7 +108,7 @@ int main()
 	assert(strcmp(ink_choice_text(choice), "g") == 0);
 	assert(ink_choice_num_tags(choice) == 1);
 	assert(strcmp(ink_choice_get_tag(choice, 0), "choice_tag_g") == 0);
-	assert(!ink_runner_can_continue(runner));
+	assert(! ink_runner_can_continue(runner));
 
 	ink_runner_choose(runner, 1);
 	assert(ink_runner_can_continue(runner));
@@ -123,7 +123,7 @@ int main()
 	assert(strcmp(ink_runner_tag(runner, 2), "content_tag") == 0);
 	assert(strcmp(ink_runner_tag(runner, 3), "content_tag_2") == 0);
 
-	
+
 	assert(strcmp(ink_runner_get_line(runner), "out\n") == 0);
 	assert(ink_runner_num_global_tags(runner) == 1);
 	assert(strcmp(ink_runner_global_tag(runner, 0), "global_tag") == 0);
@@ -131,5 +131,5 @@ int main()
 	assert(strcmp(ink_runner_knot_tag(runner, 0), "knot_tag_2") == 0);
 	assert(ink_runner_num_tags(runner) == 1);
 
-	assert(!ink_runner_can_continue(runner));
+	assert(! ink_runner_can_continue(runner));
 }

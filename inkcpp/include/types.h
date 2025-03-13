@@ -101,7 +101,7 @@ public:
 
 	value(const value& v)
 	    : v_string{nullptr}
-		,type{v.type}
+	    , type{v.type}
 	{
 		switch (type) {
 			case Type::Bool: v_bool = v.v_bool; break;

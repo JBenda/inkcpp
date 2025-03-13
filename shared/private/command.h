@@ -23,7 +23,7 @@ enum class Command : uint8_t {
 	NEWLINE,
 	GLUE,
 	VOID,
-		TAG,
+	TAG,
 
 	// == Diverts
 	DIVERT,
@@ -124,58 +124,58 @@ enum class Command : uint8_t {
 	NUM_COMMANDS,
 };
 
-	extern const char* CommandStrings[];
+extern const char* CommandStrings[];
 
-	inline std::ostream& operator<<(std::ostream& out, Command cmd)
-	{
-		using number = std::underlying_type_t<Command>;
-		out << CommandStrings[static_cast<number>(cmd)];
+inline std::ostream& operator<<(std::ostream& out, Command cmd)
+{
+	using number = std::underlying_type_t<Command>;
+	out << CommandStrings[static_cast<number>(cmd)];
 
-		return out;
+	return out;
+}
+
+// Flags for commands
+enum class CommandFlag : uint8_t {
+	NO_FLAGS = 0,
+
+	// == Choice Flags ==
+	CHOICE_HAS_CONDITION           = 1 << 0,
+	CHOICE_HAS_START_CONTENT       = 1 << 1,
+	CHOICE_HAS_CHOICE_ONLY_CONTENT = 1 << 2,
+	CHOICE_IS_INVISIBLE_DEFAULT    = 1 << 3,
+	CHOICE_IS_ONCE_ONLY            = 1 << 4,
+
+	// == Divert flags
+	DIVERT_HAS_CONDITION = 1 << 0,
+	DIVERT_IS_FALLTHROUGH
+	    = 1 << 1, // Divert was auto-generated as a result of falling out of a containers content
+
+	// == Container marker
+	CONTAINER_MARKER_TRACK_VISITS = 1 << 0,
+	CONTAINER_MARKER_TRACK_TURNS  = 1 << 1,
+	CONTAINER_MARKER_ONLY_FIRST   = 1 << 2,
+	CONTAINER_MARKER_IS_KNOT      = 1 << 3,
+
+	// == Variable assignment
+	ASSIGNMENT_IS_REDEFINE = 1 << 0,
+
+	// == Function/Tunnel flags
+	FUNCTION_TO_VARIABLE = 1 << 0,
+	TUNNEL_TO_VARIABLE   = 1 << 0,
+	FALLBACK_FUNCTION    = 1 << 1,
+	// note a internal function which should only be called if external reference is not working
+};
+
+inline std::ostream& operator<<(std::ostream& out, CommandFlag cmd)
+{
+	using number = std::underlying_type_t<CommandFlag>;
+
+	if (cmd == CommandFlag::NO_FLAGS) {
+		return out << "NO_FLAGS";
 	}
 
-	// Flags for commands
-	enum class CommandFlag : uint8_t {
-		NO_FLAGS                       = 0,
-
-		// == Choice Flags ==
-		CHOICE_HAS_CONDITION           = 1 << 0,
-		CHOICE_HAS_START_CONTENT       = 1 << 1,
-		CHOICE_HAS_CHOICE_ONLY_CONTENT = 1 << 2,
-		CHOICE_IS_INVISIBLE_DEFAULT    = 1 << 3,
-		CHOICE_IS_ONCE_ONLY            = 1 << 4,
-
-		// == Divert flags
-		DIVERT_HAS_CONDITION           = 1 << 0,
-	  DIVERT_IS_FALLTHROUGH
-	      = 1 << 1, // Divert was auto-generated as a result of falling out of a containers content
-
-		// == Container marker
-		CONTAINER_MARKER_TRACK_VISITS  = 1 << 0,
-		CONTAINER_MARKER_TRACK_TURNS   = 1 << 1,
-		CONTAINER_MARKER_ONLY_FIRST    = 1 << 2,
-	  CONTAINER_MARKER_IS_KNOT      = 1 << 3,
-
-		// == Variable assignment
-		ASSIGNMENT_IS_REDEFINE         = 1 << 0,
-
-		// == Function/Tunnel flags
-		FUNCTION_TO_VARIABLE           = 1 << 0,
-		TUNNEL_TO_VARIABLE             = 1 << 0,
-		FALLBACK_FUNCTION              = 1 << 1,
-		// note a internal function which should only be called if external reference is not working
-	};
-
-	inline std::ostream& operator<<(std::ostream& out, CommandFlag cmd)
-	{
-		using number = std::underlying_type_t<CommandFlag>;
-
-		if (cmd == CommandFlag::NO_FLAGS) {
-			return out << "NO_FLAGS";
-		}
-
-		const size_t value = static_cast<number>(cmd);
-		size_t count = 0;
+	const size_t value = static_cast<number>(cmd);
+	size_t       count = 0;
 
 #define CHECK_FLAG(_NAME)                                       \
 	if ((value & static_cast<number>(CommandFlag::_NAME)) != 0) { \
@@ -185,40 +185,40 @@ enum class Command : uint8_t {
 		out << #_NAME;                                              \
 	}
 
-		CHECK_FLAG(CHOICE_HAS_CONDITION);
-		CHECK_FLAG(CHOICE_HAS_START_CONTENT);
-		CHECK_FLAG(CHOICE_HAS_CHOICE_ONLY_CONTENT);
-		CHECK_FLAG(CHOICE_IS_INVISIBLE_DEFAULT);
-		CHECK_FLAG(CHOICE_IS_ONCE_ONLY);
-		CHECK_FLAG(DIVERT_HAS_CONDITION);
-		CHECK_FLAG(DIVERT_IS_FALLTHROUGH);
-		CHECK_FLAG(CONTAINER_MARKER_TRACK_VISITS);
-		CHECK_FLAG(CONTAINER_MARKER_TRACK_TURNS);
-		CHECK_FLAG(CONTAINER_MARKER_ONLY_FIRST);
-		CHECK_FLAG(ASSIGNMENT_IS_REDEFINE);
-		CHECK_FLAG(FUNCTION_TO_VARIABLE);
-		CHECK_FLAG(TUNNEL_TO_VARIABLE);
-		CHECK_FLAG(FALLBACK_FUNCTION);
+	CHECK_FLAG(CHOICE_HAS_CONDITION);
+	CHECK_FLAG(CHOICE_HAS_START_CONTENT);
+	CHECK_FLAG(CHOICE_HAS_CHOICE_ONLY_CONTENT);
+	CHECK_FLAG(CHOICE_IS_INVISIBLE_DEFAULT);
+	CHECK_FLAG(CHOICE_IS_ONCE_ONLY);
+	CHECK_FLAG(DIVERT_HAS_CONDITION);
+	CHECK_FLAG(DIVERT_IS_FALLTHROUGH);
+	CHECK_FLAG(CONTAINER_MARKER_TRACK_VISITS);
+	CHECK_FLAG(CONTAINER_MARKER_TRACK_TURNS);
+	CHECK_FLAG(CONTAINER_MARKER_ONLY_FIRST);
+	CHECK_FLAG(ASSIGNMENT_IS_REDEFINE);
+	CHECK_FLAG(FUNCTION_TO_VARIABLE);
+	CHECK_FLAG(TUNNEL_TO_VARIABLE);
+	CHECK_FLAG(FALLBACK_FUNCTION);
 
 #undef CHECK_FLAG
 
-		return out;
-	}
+	return out;
+}
 
-	inline bool operator&(CommandFlag lhs, CommandFlag rhs)
-	{
-		using number = std::underlying_type_t<CommandFlag>;
-		return (static_cast<number>(lhs) & static_cast<number>(rhs)) > 0;
-	}
+inline bool operator&(CommandFlag lhs, CommandFlag rhs)
+{
+	using number = std::underlying_type_t<CommandFlag>;
+	return (static_cast<number>(lhs) & static_cast<number>(rhs)) > 0;
+}
 
-	inline CommandFlag& operator|=(CommandFlag& lhs, CommandFlag rhs)
-	{
-		using number = std::underlying_type_t<CommandFlag>;
-		lhs = static_cast<CommandFlag>(static_cast<number>(lhs) | static_cast<number>(rhs));
-		return lhs;
+inline CommandFlag& operator|=(CommandFlag& lhs, CommandFlag rhs)
+{
+	using number = std::underlying_type_t<CommandFlag>;
+	lhs          = static_cast<CommandFlag>(static_cast<number>(lhs) | static_cast<number>(rhs));
+	return lhs;
 }
 
 template<typename PayloadType>
 constexpr unsigned int CommandSize = sizeof(Command) + sizeof(CommandFlag) + sizeof(PayloadType);
 
-  } // namespace ink
+} // namespace ink

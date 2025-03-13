@@ -257,7 +257,7 @@ void runner_impl::assign_tags(std::initializer_list<tags_level> wheres)
 void runner_impl::clear_tags(tags_clear_level which)
 {
 	// clear all tags begin which we do not want to keep
-	// 
+	//
 	// resize to first other field which begins which should not be cleared
 	switch (which) {
 		case tags_clear_level::KEEP_NONE:
@@ -703,10 +703,10 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	ptr                        = _stack.snap_load(ptr, loader);
 	ptr                        = _ref_stack.snap_load(ptr, loader);
 	ptr                        = _eval.snap_load(ptr, loader);
-	ptr = _tags_begin.snap_load(ptr, loader);
+	ptr                        = _tags_begin.snap_load(ptr, loader);
 	ptr                        = _tags.snap_load(ptr, loader);
-	ptr = snap_read(ptr, _entered_global);
-	ptr = snap_read(ptr, _entered_knot);
+	ptr                        = snap_read(ptr, _entered_global);
+	ptr                        = snap_read(ptr, _entered_knot);
 	ptr                        = _container.snap_load(ptr, loader);
 	ptr                        = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
@@ -822,22 +822,21 @@ bool runner_impl::line_step()
 
 		// Make a new save point to track the glue changes
 	}
-			// Step the next command
-			// If we find glue, keep going until the next line
-				// Make a new save point to track the glue changes
+	// Step the next command
+	// If we find glue, keep going until the next line
+	// Make a new save point to track the glue changes
 	// and break all the other tests :')
 	/*if (_saved) {
 	  forget();
 	}
 	save();*/
 
-					// Uncomment to fix the first LookaheadSafe test
-					// and break all the other tests :')
-					/*if (_saved) {
-					  forget();
-					}
-					save();*/
-
+	// Uncomment to fix the first LookaheadSafe test
+	// and break all the other tests :')
+	/*if (_saved) {
+	  forget();
+	}
+	save();*/
 
 
 	// Are we gluing?
