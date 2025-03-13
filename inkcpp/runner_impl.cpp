@@ -622,29 +622,6 @@ void runner_impl::getline_silent()
 	_output.clear();
 }
 
-template<runner_impl::tags_level L>
-bool runner_impl::has_tags() const
-{
-	return num_tags<L>() > 0;
-}
-
-template<runner_impl::tags_level L>
-size_t runner_impl::num_tags() const
-{
-	return _tags_begin[static_cast<int>(L) + 1] - _tags_begin[static_cast<int>(L)];
-}
-
-template<runner_impl::tags_level L>
-const char* runner_impl::get_tag(size_t index) const
-{
-	size_t begin = _tags_begin[static_cast<int>(L)];
-	size_t end   = _tags_begin[static_cast<int>(L) + 1];
-	if (begin + index >= end || begin + index < begin) {
-		return nullptr;
-	}
-	return _tags[begin + index];
-}
-
 snapshot* runner_impl::create_snapshot() const { return _globals->create_snapshot(); }
 
 size_t runner_impl::snap(unsigned char* data, snapper& snapper) const

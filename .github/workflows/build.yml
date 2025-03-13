@@ -288,7 +288,7 @@ jobs:
       - name: Check clang-format
         run: |
           diff=$(git clang-format-18 --extensions c,cpp,h,hpp --style file -q --diff origin/master)
-          echo $diff
+          echo "::error Format diff >$diff<"
           if [ "$diff" != "" ]; then
             echo run git clang-format-18 --extensions c,cpp,h,hpp --style file master
             echo or upstream/master depending on your setup
