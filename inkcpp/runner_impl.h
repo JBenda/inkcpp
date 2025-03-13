@@ -119,7 +119,6 @@ public:
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
 
-
 #ifdef INK_ENABLE_CSTD
 	// c-style getline
 	virtual const char* getline_alloc() override;
@@ -128,7 +127,10 @@ public:
 	// move to path
 	virtual bool move_to(hash_t path) override;
 
+	// Gets a single line of output
 	virtual line_type getline() override;
+
+	// get all into string
 	virtual line_type getall() override;
 
 #ifdef INK_ENABLE_STL
@@ -206,9 +208,6 @@ private:
 	void jump(ip_t, bool record_visits, bool track_knot_visit);
 	bool _entered_knot   = false;  // if we are in the first action after a jump to an snitch/knot
 	bool _entered_global = false; // if we are in the first action after a jump to an snitch/knot
-
-	void run_binary_operator(unsigned char cmd);
-	void run_unary_operator(unsigned char cmd);
 
 	frame_type execute_return();
 	template<frame_type type>
@@ -327,6 +326,8 @@ private:
 	    config::limitActiveTags<0, abs(config::limitActiveTags)>                     _tags;
 	// where to the different tags type start
 	internal::fixed_restorable_array<int, static_cast<int>(tags_level::UNKNOWN) + 2> _tags_begin;
+	size_t                                                       _global_tags_count = 0;
+	size_t                                                       _choice_tags_count = 0;
 
 	// TODO: Move to story? Both?
 	functions _functions;
@@ -343,6 +344,7 @@ private:
 
 	internal::managed_restorable_stack < ContainerData,
 	    config::limitContainerDepth<0, abs(config::limitContainerDepth)> _container;
+
 	bool                                                                 _is_falling = false;
 
 	bool _saved = false;
