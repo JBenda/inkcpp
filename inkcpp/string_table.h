@@ -12,36 +12,36 @@
 
 namespace ink::runtime::internal
 {
-	// hash tree sorted by string pointers
-	class string_table final : public snapshot_interface
-	{
-	public:
-		virtual ~string_table();
+// hash tree sorted by string pointers
+class string_table final : public snapshot_interface
+{
+public:
+	virtual ~string_table();
 
-		// Create a dynmaic string of a particular length
-		char* create(size_t length);
-		char* duplicate(const char* str);
+	// Create a dynamic string of a particular length
+	char* create(size_t length);
+	char* duplicate(const char* str);
 
-		// zeroes all usage values
-		void clear_usage();
+	// zeroes all usage values
+	void clear_usage();
 
-		// mark a string as used
-		void mark_used(const char* string);
+	// mark a string as used
+	void mark_used(const char* string);
 
 
-		// snapshot interface implementation
-		size_t snap(unsigned char* data, const snapper&) const;
-		const unsigned char* snap_load(const unsigned char* data, const loader&);
+	// snapshot interface implementation
+	size_t               snap(unsigned char* data, const snapper&) const;
+	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
-		// get position of string when iterate through data
-		// used to enable storing a string table references
-		size_t get_id(const char* string) const;
+	// get position of string when iterate through data
+	// used to enable storing a string table references
+	size_t get_id(const char* string) const;
 
-		// deletes all unused strings
-		void gc();
+	// deletes all unused strings
+	void gc();
 
-	private:
-		avl_array<const char*, bool, ink::size_t, 100> _table;
-	  static constexpr const char*                   EMPTY_STRING = "\x03";
-  };
-}
+private:
+	avl_array<const char*, bool, ink::size_t, 100> _table;
+	static constexpr const char*                   EMPTY_STRING = "\x03";
+};
+} // namespace ink::runtime::internal

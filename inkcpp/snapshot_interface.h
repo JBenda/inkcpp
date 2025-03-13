@@ -72,5 +72,5 @@ public:
 		inkFail("Snap function not implemented");
 		return nullptr;
 	};
-};
+	};
 } // namespace ink::runtime::internal

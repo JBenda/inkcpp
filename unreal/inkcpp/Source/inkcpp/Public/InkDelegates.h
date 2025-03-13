@@ -39,9 +39,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTagFunctionMulticastDelegate, UInk
 #ifdef DOXYGEN
 DOC_UF(BlueprintImplementableEvent, )
 /** Delegate for external functions.
- * the number of arugments are defined iside the ink story
+ * the number of arguments are defined inside the ink story
  * @param Arguments array containing all arguments passed to this function
- * @return value to be put on the stack in the inkruntime
+ * @return value to be put on the stack in the ink runtime
  * @see @ref UInkThread::RegisterExternalEvent
  *
  * @blueprint
@@ -103,9 +103,9 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FVariableCallbackDelegateNewValue, const FInkV
 
 #ifdef DOXYGEN
 DOC_UF(BlueprintImplementableEvent, )
-/** Notification containing old and new varible, send on variable change.
+/** Notification containing old and new variable, send on variable change.
  * @param value new value of the variable
- * @param old_value previouse value of the variable has value @ref EInkVarType::None "None" if
+ * @param old_value previous value of the variable has value @ref EInkVarType::None "None" if
  * variable is set for the first time
  * @see @ref AInkRuntime::ObserverVariableChange()
  *
@@ -126,12 +126,12 @@ class UDelegateKeepAlive : public UObject
 };
 
 /** @page TagFunction TagFunction
- * "tag functions" allowes converting tags or context lines to function calls
+ * "tag functions" allows converting tags or context lines to function calls
  * if a tag in the form `functionName_arg1_arg2` is found for a registered tag function
  * the function will be executed
  *
  * Also if a context line starts with a `>>` the normal processing of tags and context
- * will be ignored the corresponding tag functino will be called
+ * will be ignored the corresponding tag function will be called
  * the format for this function call is `>> FunctionName(Arg1[, Arg2]*)`
  *
  * @see To bind tag functions use @ref UInkThread::RegisterTagFunction() and @ref

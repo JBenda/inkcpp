@@ -23,7 +23,7 @@ class UInkThread;
 struct FInkVar;
 namespace ink::runtime { class story; }
 
-/** Instanciated story with global variable storage and access, used to instanciate new threads.
+/** Instantiated story with global variable storage and access, used to instantiate new threads.
  * @ingroup unreal
  */
 UCLASS()
@@ -63,7 +63,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/**
-	 * Loads a snapshot file, therfore deletes globals and invalidate all current Threads
+	 * Loads a snapshot file, therefore deletes globals and invalidate all current Threads
 	 * After this Start and StartExisting will load the corresponding Threads (on at a time)
 	 *
 	 * @blueprint
@@ -90,14 +90,14 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	/** register a "tag function"
-	 * This function is executed if context or a tag in a special format apears
+	 * This function is executed if context or a tag in a special format appears
 	 * @see @ref TagFunction
 	 *
 	 * @blueprint
 	 */
 	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate & function);
 
-	/** @private for interanl use */
+	/** @private for internal use */
 	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
 	
 	UFUNCTION(BlueprintCallable, Category="Ink")
@@ -137,7 +137,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Ink")
 	/** On variable change provides old and new value.
 	 * @see #ObserverVariableEvent() #ObserverVariable()
-	 * @attention if the varibale set for the firs time, the old value has value type @ref
+	 * @attention if the variable set for the firs time, the old value has value type @ref
 	 * EInkVarType::None
 	 *
 	 * @blueprint

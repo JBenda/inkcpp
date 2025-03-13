@@ -71,6 +71,7 @@ public:
 		    const char* flag_name, const list_interface& list, size_t i, bool one_list_only = false
 		)
 		    : _flag_name(flag_name)
+		    , _list_name(nullptr)
 		    , _list(list)
 		    , _i(i)
 		    , _one_list_iterator(one_list_only)

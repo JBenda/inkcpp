@@ -31,7 +31,7 @@ jobs:
             artifact: win64
             name: Windows x64
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_windows.zip
-            proof: false
+            proof: true
             unreal: false
           - os: "ubuntu-20.04"
             artifact: linux

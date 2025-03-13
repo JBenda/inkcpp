@@ -10,10 +10,10 @@
 
 #include "InkAsset.generated.h"
 
-/** Assets contanining a InkCPP .bin.
- * Asset can be constructed from a `.ink.json` file outputed from inky or inklecate.
- * And generall also directly from a `.ink` file (it may fail if the shipped version of inklecate is
- * incopatible with your system).
+/** Assets containing a InkCPP .bin.
+ * Asset can be constructed from a `.ink.json` file outputted from inky or inklecate.
+ * And generally also directly from a `.ink` file (it may fail if the shipped version of inklecate
+ * is incompatible with your system).
  *
  * @todo Please note that reimport does not work properly if your ink file has includes.
  * Since the reimport only watches the main file for changes.

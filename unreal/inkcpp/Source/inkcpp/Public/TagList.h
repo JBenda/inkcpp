@@ -35,10 +35,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** Check if tag list contains enum flag.
-	 * Check if one of the enum flag string represntations is equal
+	 * Check if one of the enum flag string representations is equal
 	 * to one flag in the list.
 	 * @param Enum the enum class to check flags from
-	 * @param value of the flag iff one was found
+	 * @param value of the flag if one was found
 	 * @retval true if a flag was found
 	 * @attention if multiple flags are present in the list, only the first will be returned
 	 * @see #GetEnum()
@@ -56,7 +56,7 @@ public:
 	FString GetValue(const FString& name) const;
 
 	UFUNCTION(BlueprintPure, Category = "Ink")
-	/** Searches for a tag thats begins with 'EnumName:' and returns the enum value corresponding to
+	/** Searches for a tag that begins with 'EnumName:' and returns the enum value corresponding to
 	 * the text after the ':'
 	 * @attention If the enum appears multiple times, the first instance will be used
 	 * @retval true if a tag in the form "EnumName:FlagName" was found

@@ -29,8 +29,8 @@ namespace ink::compiler::internal
 		void compile(const nlohmann::json& input, emitter* output, compilation_results* results = nullptr);
 
 	private: // == Compiler methods ==
-		void handle_container_metadata(const nlohmann::json& meta, container_meta& data);
-		void compile_container(const nlohmann::json& container, int index_in_parent, const std::string& name_override = "");
+		void handle_container_metadata(const nlohmann::json& meta, container_meta& data, bool is_knot);
+		void compile_container(const nlohmann::json& container, int index_in_parent, int depth, const std::string& name_override = "");
 		void compile_command(const std::string& command);
 		void compile_complex_command(const nlohmann::json& command);
 		void compile_lists_definition(const nlohmann::json& list_defs);

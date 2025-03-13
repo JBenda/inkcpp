@@ -28,7 +28,7 @@ SCENARIO("a story with external functions and glue", "[external]")
 			CHECK(thread->getline() == "Call1 glued to Call 2\n");
 			std::string c = commands.str();
 			CHECK(cnt == 3);
-			CHECK(thread->getline() == "Call 3 is seperated\n");
+			REQUIRE(thread->getline() == "Call 3 is separated\n");
 			CHECK(cnt == 4);
 		}
 		WHEN("the external function is unsafe for look-ahead")
@@ -42,7 +42,7 @@ SCENARIO("a story with external functions and glue", "[external]")
 			CHECK(cnt == 1);
 			CHECK(thread->getline() == "glued to Call 2\n");
 			CHECK(cnt == 2);
-			CHECK(thread->getline() == "Call 3 is seperated\n");
+			CHECK(thread->getline() == "Call 3 is separated\n");
 			CHECK(cnt == 3);
 		}
 	}

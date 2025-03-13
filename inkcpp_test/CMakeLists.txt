@@ -20,6 +20,7 @@ add_executable(inkcpp_test catch.hpp Main.cpp
   LookaheadSafe.cpp
   EmptyStringForDivert.cpp
   MoveTo.cpp
+  Fixes.cpp
 )
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
@@ -94,7 +95,7 @@ foreach(INK_FILE IN LISTS INK_FILES)
   add_custom_command(
     OUTPUT ${output} 
     COMMAND $<TARGET_FILE:inkcpp_cl> -o "${output}" --inklecate "${INKLECATE_CMD}" "${INK_FILE}"
-    DEPENDS ${INK_FILE}
+    DEPENDS ${INK_FILE} inkcpp_compiler
     COMMENT "Compile test ink file '${INK_FILENAME}.ink' -> '${output}'"
   )
   list(APPEND INK_OUT_FILES ${output})

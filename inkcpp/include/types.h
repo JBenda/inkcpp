@@ -25,7 +25,7 @@ using list    = list_interface*;
 
 /** A Ink variable
  *
- * Used for accassing, writing and observing global variables
+ * Used for accessing, writing and observing global variables
  * @ref ink::runtime::globals_interface::get()
  * @ref ink::runtime::globals_interface::set()
  * @ref ink::runtime::globals_interface::observe()
@@ -100,7 +100,8 @@ public:
 	}
 
 	value(const value& v)
-	    : type{v.type}
+	    : v_string{nullptr}
+		,type{v.type}
 	{
 		switch (type) {
 			case Type::Bool: v_bool = v.v_bool; break;

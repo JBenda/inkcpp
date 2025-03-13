@@ -45,7 +45,7 @@ void json_compiler::compile(
 		_emitter->set_list_meta(_list_meta);
 	}
 	// Compile the root container
-	compile_container(input["root"], 0);
+	compile_container(input["root"], 0, 0);
 
 	// finalize
 	_emitter->finish(_next_container_index);
@@ -64,7 +64,7 @@ struct container_meta {
 	CommandFlag         cmd_flags = CommandFlag::NO_FLAGS;
 };
 
-void json_compiler::handle_container_metadata(const json& meta, container_meta& data)
+void json_compiler::handle_container_metadata(const json& meta, container_meta& data, bool is_knot)
 {
 	if (meta.is_object()) {
 		for (auto& meta_iter : meta.items()) {
@@ -91,7 +91,7 @@ void json_compiler::handle_container_metadata(const json& meta, container_meta& 
 					onlyFirst = true;
 				}
 
-				if (visits || turns) {
+				if (visits || turns || is_knot) {
 					container_t myIndex = _next_container_index++;
 
 					// Make appropriate flags
@@ -102,6 +102,8 @@ void json_compiler::handle_container_metadata(const json& meta, container_meta& 
 						data.cmd_flags |= CommandFlag::CONTAINER_MARKER_TRACK_TURNS;
 					if (onlyFirst)
 						data.cmd_flags |= CommandFlag::CONTAINER_MARKER_ONLY_FIRST;
+					if (is_knot)
+						data.cmd_flags |= CommandFlag::CONTAINER_MARKER_IS_KNOT;
 
 
 					data.indexToReturn = myIndex;
@@ -118,16 +120,22 @@ void json_compiler::handle_container_metadata(const json& meta, container_meta& 
 				data.deferred.push_back(std::make_tuple(meta_iter.value(), meta_iter.key()));
 			}
 		}
+	} else if (is_knot) {
+		container_t myIndex = _next_container_index++;
+		data.indexToReturn  = myIndex;
+		data.cmd_flags            = CommandFlag::CONTAINER_MARKER_IS_KNOT;
+		data.recordInContainerMap = true;
 	}
 }
 
 void json_compiler::compile_container(
-    const nlohmann::json& container, int index_in_parent, const std::string& name_override
+    const nlohmann::json& container, int index_in_parent, int depth, const std::string& name_override
 )
 {
 	// Grab metadata from the last object in this container
 	container_meta meta;
-	handle_container_metadata(*container.rbegin(), meta);
+	bool           is_knot = depth == 1 && name_override != "" && index_in_parent == -1;
+	handle_container_metadata(*container.rbegin(), meta, is_knot);
 
 	// tell the emitter we're beginning a new container
 	uint32_t position = _emitter->start_container(
@@ -151,7 +159,7 @@ void json_compiler::compile_container(
 
 		// Arrays are child containers. Recurse.
 		if (iter->is_array())
-			compile_container(*iter, index);
+			compile_container(*iter, index, depth + 1);
 
 		// Strings are either commands, nops, or raw strings
 		else if (iter->is_string()) {
@@ -205,7 +213,7 @@ void json_compiler::compile_container(
 			using std::get;
 
 			// Add to named child list
-			compile_container(get<0>(t), -1, get<1>(t));
+			compile_container(get<0>(t), -1, depth + 1, get<1>(t));
 
 			// Need a divert here
 			uint32_t pos = _emitter->fallthrough_divert();
