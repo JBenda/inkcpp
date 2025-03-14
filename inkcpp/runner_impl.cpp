@@ -240,7 +240,8 @@ void runner_impl::assign_tags(std::initializer_list<tags_level> wheres)
 		end        = _tags_begin[static_cast<int>(tags_level::UNKNOWN) + 1];
 		inkAssert(n == end - idy, "Same size in each iteration");
 		for (int i = 0; i < n; ++i) {
-			_tags.insert(idx + i) = _tags[idy + i * 2];
+			const char* tag = _tags[idy + i * 2];
+			_tags.insert(idx + i) = tag;
 		}
 		for (int i = static_cast<int>(where) + 1; i < _tags_begin.capacity(); ++i) {
 			_tags_begin.set(i, _tags_begin[i] + n);

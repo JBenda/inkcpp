@@ -10,6 +10,8 @@
 #include "system.h"
 #include "traits.h"
 
+#include <limits>
+
 namespace ink::runtime::internal
 {
 template<typename T, bool dynamic, size_t initialCapacity>
