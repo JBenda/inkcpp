@@ -166,6 +166,22 @@ public:
 	    bool lookaheadSafe = false
 	);
 
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** get knots assoziated with current knot.
+	 * knot tags are tags listed behind a knot `== knot name ==` before the first line of content
+	 *
+	 * @blueprint
+	 */
+	const UTagList* GetKnotTags();
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** get global tags.
+	 * global tags are tags listed at the top of the file before the first line of content
+	 *
+	 * @blueprint
+	 */
+	const UTagList* GetGlobalTags();
+
 
 protected:
 	/** @private */
@@ -197,6 +213,8 @@ private:
 private:
 	ink::runtime::runner mpRunner;
 	UTagList*            mpTags;
+	UTagList*            mkTags = nullptr;
+	UTagList*            mgTags = nullptr;
 	TArray<UInkChoice*>  mCurrentChoices; /// @TODO: make accessible?
 
 	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;

@@ -29,6 +29,28 @@ void UInkThread::Yield() { mnYieldCounter++; }
 
 bool UInkThread::IsYielding() { return mnYieldCounter > 0; }
 
+const UTagList* UInkThread::GetKnotTags()
+{
+	TArray<FString> tags;
+	for (size_t i = 0; i < mpRunner->num_knot_tags(); ++i) {
+		tags.Add(FString(mpRunner->get_knot_tag(i)));
+	}
+	mkTags->Initelize(tags);
+	return mkTags;
+}
+
+const UTagList* UInkThread::GetGlobalTags()
+{
+	if (mgTags.GetTags().Length() == 0) {
+		TArray<FString> tags;
+		for (size_t i = 0; i < mpRunner->num_global_tags(); ++i) {
+			tags.Add(FString(mpRunner->get_global_tag(i)));
+		}
+		mgTags->Initelize(tags);
+	}
+	return mgTags;
+}
+
 void UInkThread::Resume() { mnYieldCounter--; }
 
 void UInkThread::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
@@ -62,6 +84,8 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 	mbInitialized = true;
 	mpRunner      = thread;
 	mpTags        = NewObject<UTagList>();
+	mkTags        = NewObject<UTagList>();
+	mgTags        = NewObject<UTagList>();
 	mTagFunctions.Reset();
 	mCurrentChoices.Reset();
 	mnChoiceToChoose = -1;
