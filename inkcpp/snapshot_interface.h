@@ -21,7 +21,7 @@ class value;
 class snapshot_interface
 {
 public:
-	constexpr snapshot_interface(){};
+	constexpr snapshot_interface() {};
 
 	static unsigned char* snap_write(unsigned char* ptr, const void* data, size_t length, bool write)
 	{

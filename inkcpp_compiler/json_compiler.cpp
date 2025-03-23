@@ -146,7 +146,8 @@ void json_compiler::compile_container(
 					break;
 				}
 			}
-		} else if (name_override == "s" || name_override == "b" ) { // it is not a shared part of a choice
+		} else if (name_override == "s"
+		           || name_override == "b") { // it is not a shared part of a choice
 			is_knot = false;
 		}
 	}

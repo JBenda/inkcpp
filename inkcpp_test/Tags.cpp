@@ -27,7 +27,8 @@ SCENARIO("run story with tags", "[tags][story]")
 	{
 		story* _ink    = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
 		runner _thread = _ink->new_runner();
-		WHEN("starting the thread") {
+		WHEN("starting the thread")
+		{
 			CHECK_FALSE(_thread->has_tags());
 			CHECK(_thread->get_current_knot() == 0);
 		}
