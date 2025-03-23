@@ -40,6 +40,11 @@ size_t runner_interface::num_choices() const { return end() - begin(); }
 namespace ink::runtime::internal
 {
 
+hash_t runner_impl::get_current_knot() const
+{
+	return _current_knot_id == ~0 ? 0 : _story->container_hash(_current_knot_id);
+}
+
 template<>
 value* runner_impl::get_var<runner_impl::Scope::GLOBAL>(hash_t variableName)
 {
@@ -203,7 +208,7 @@ snap_tag& runner_impl::add_tag(const char* value, tags_level where)
 {
 	int end      = static_cast<int>(where) + 1;
 	int position = _tags_begin[end];
-	for (int i = end; i < _tags_begin.capacity(); ++i) {
+	for (size_t i = end; i < _tags_begin.capacity(); ++i) {
 		_tags_begin.set(i, _tags_begin[i] + 1);
 	}
 	return _tags.insert(position) = value;
@@ -216,10 +221,10 @@ void runner_impl::copy_tags(tags_level src, tags_level dst)
 	size_t idx      = _tags_begin[static_cast<int>(src)];
 	size_t n        = _tags_begin[static_cast<int>(src) + 1] - idx;
 	size_t idy      = _tags_begin[static_cast<int>(dst) + 1];
-	for (int i = 0; i < n; ++i) {
+	for (size_t i = 0; i < n; ++i) {
 		_tags.insert(idy + n) = _tags[idx + i * 2];
 	}
-	for (int i = static_cast<int>(dst) + 1; i < _tags_begin.capacity(); ++i) {
+	for (size_t i = static_cast<int>(dst) + 1; i < _tags_begin.capacity(); ++i) {
 		_tags_begin.set(i, _tags_begin[i] + n);
 	}
 	inkAssert(_tags.size() == old_size + n, "Expected n new elements");
@@ -239,11 +244,11 @@ void runner_impl::assign_tags(std::initializer_list<tags_level> wheres)
 		idy        = _tags_begin[static_cast<int>(tags_level::UNKNOWN)];
 		end        = _tags_begin[static_cast<int>(tags_level::UNKNOWN) + 1];
 		inkAssert(n == end - idy, "Same size in each iteration");
-		for (int i = 0; i < n; ++i) {
+		for (size_t i = 0; i < n; ++i) {
 			const char* tag       = _tags[idy + i * 2];
 			_tags.insert(idx + i) = tag;
 		}
-		for (int i = static_cast<int>(where) + 1; i < _tags_begin.capacity(); ++i) {
+		for (size_t i = static_cast<int>(where) + 1; i < _tags_begin.capacity(); ++i) {
 			_tags_begin.set(i, _tags_begin[i] + n);
 		}
 	}
@@ -263,7 +268,7 @@ void runner_impl::clear_tags(tags_clear_level which)
 	switch (which) {
 		case tags_clear_level::KEEP_NONE:
 			_tags.clear();
-			for (int i = 0; i < _tags_begin.capacity(); ++i) {
+			for (size_t i = 0; i < _tags_begin.capacity(); ++i) {
 				_tags_begin.set(i, 0);
 			}
 			break;
@@ -272,14 +277,14 @@ void runner_impl::clear_tags(tags_clear_level which)
 			    _tags_begin[static_cast<int>(tags_level::KNOT)],
 			    _tags_begin[static_cast<int>(tags_level::UNKNOWN)]
 			);
-			for (int i = static_cast<int>(tags_level::KNOT); i < _tags_begin.capacity(); ++i) {
+			for (size_t i = static_cast<int>(tags_level::KNOT); i < _tags_begin.capacity(); ++i) {
 				_tags_begin.set(i, _tags_begin[static_cast<int>(tags_level::KNOT)]);
 			}
 			_tags_begin.set(static_cast<int>(tags_level::UNKNOWN) + 1, _tags.size());
 			break;
 		case tags_clear_level::KEEP_KNOT:
 			_tags.resize(_tags_begin[static_cast<int>(tags_level::KNOT) + 1]);
-			for (int i = static_cast<int>(tags_level::KNOT) + 2; i < _tags_begin.capacity(); ++i) {
+			for (size_t i = static_cast<int>(tags_level::KNOT) + 2; i < _tags_begin.capacity(); ++i) {
 				_tags_begin.set(i, _tags_begin[static_cast<int>(tags_level::KNOT) + 1]);
 			}
 			break;
@@ -364,7 +369,8 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
 		if (track_knot_visit
 		    && static_cast<CommandFlag>(offset[1]) & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
-			_entered_knot = true;
+			_current_knot_id = id;
+			_entered_knot    = true;
 		}
 		_ptr += 6;
 		_container.push({.id = id, .offset = offset});
@@ -467,11 +473,11 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _ptr(_story->instructions())
     , _backup(nullptr)
     , _done(nullptr)
+    , _evaluation_mode{false}
     , _choices()
+    , _tags_begin(0, ~0)
     , _container(ContainerData{})
     , _rng(time(NULL))
-    , _tags_begin(0, ~0)
-    , _evaluation_mode{false}
 {
 
 
@@ -523,9 +529,11 @@ runner_impl::line_type runner_impl::getline()
 
 runner_impl::line_type runner_impl::getall()
 {
+#ifdef INK_ENABLE_STL
 	if (_debug_stream != nullptr) {
 		_debug_stream->clear();
 	}
+#endif
 
 	line_type result{};
 
@@ -649,6 +657,8 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr += _tags.snap(data ? ptr : nullptr, snapper);
 	ptr = snap_write(ptr, _entered_global, should_write);
 	ptr = snap_write(ptr, _entered_knot, should_write);
+	ptr = snap_write(ptr, _current_knot_id, should_write);
+	ptr = snap_write(ptr, _current_knot_id_backup, should_write);
 	ptr += _container.snap(data ? ptr : nullptr, snapper);
 	ptr += _threads.snap(data ? ptr : nullptr, snapper);
 	ptr = snap_write(ptr, _fallback_choice.has_value(), should_write);
@@ -672,21 +682,23 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
-	ptr                        = snap_read(ptr, _evaluation_mode);
-	ptr                        = snap_read(ptr, _string_mode);
-	ptr                        = snap_read(ptr, _saved_evaluation_mode);
-	ptr                        = snap_read(ptr, _saved);
-	ptr                        = snap_read(ptr, _is_falling);
-	ptr                        = _output.snap_load(ptr, loader);
-	ptr                        = _stack.snap_load(ptr, loader);
-	ptr                        = _ref_stack.snap_load(ptr, loader);
-	ptr                        = _eval.snap_load(ptr, loader);
-	ptr                        = _tags_begin.snap_load(ptr, loader);
-	ptr                        = _tags.snap_load(ptr, loader);
-	ptr                        = snap_read(ptr, _entered_global);
-	ptr                        = snap_read(ptr, _entered_knot);
-	ptr                        = _container.snap_load(ptr, loader);
-	ptr                        = _threads.snap_load(ptr, loader);
+	ptr = snap_read(ptr, _evaluation_mode);
+	ptr = snap_read(ptr, _string_mode);
+	ptr = snap_read(ptr, _saved_evaluation_mode);
+	ptr = snap_read(ptr, _saved);
+	ptr = snap_read(ptr, _is_falling);
+	ptr = _output.snap_load(ptr, loader);
+	ptr = _stack.snap_load(ptr, loader);
+	ptr = _ref_stack.snap_load(ptr, loader);
+	ptr = _eval.snap_load(ptr, loader);
+	ptr = _tags_begin.snap_load(ptr, loader);
+	ptr = _tags.snap_load(ptr, loader);
+	ptr = snap_read(ptr, _entered_global);
+	ptr = snap_read(ptr, _entered_knot);
+	ptr = snap_read(ptr, _current_knot_id);
+	ptr = snap_read(ptr, _current_knot_id_backup);
+	ptr = _container.snap_load(ptr, loader);
+	ptr = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
 	ptr              = snap_read(ptr, has_fallback_choice);
 	_fallback_choice = nullopt;
@@ -766,16 +778,20 @@ bool runner_impl::line_step()
 	if (_ptr == _story->instructions()) {
 
 		// Step the interpreter until we've parsed all tags for the line
-		_entered_global = true;
+		_entered_global  = true;
+		_current_knot_id = ~0;
+		_entered_knot    = false;
 	}
 	// Step the interpreter
 	// Copy global tags to the first line
 	size_t o_size = _output.filled();
 	step();
-	if (o_size < _output.filled() && _output.find_first_of(value_type::marker) == _output.npos
-	    && ! _evaluation_mode && ! _saved) {
+	if ((o_size < _output.filled() && _output.find_first_of(value_type::marker) == _output.npos
+	     && ! _evaluation_mode && ! _saved)
+	    || (_entered_knot && _entered_global)) {
 		if (_entered_global) {
 			assign_tags({tags_level::LINE, tags_level::GLOBAL});
+			_entered_global = false;
 		} else if (_entered_knot) {
 			if (has_knot_tags()) {
 				clear_tags(tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
@@ -790,35 +806,9 @@ bool runner_impl::line_step()
 			//  glue (which means there is potentially more content
 			//  in this line) OR for non-text content such as choices.
 			// Save a snapshot
+			_entered_knot = false;
 		}
-
-		// Step execution until we're satisfied it doesn't affect the current line
-		_entered_global = false;
-
-		// Step the next command
-		_entered_knot = false;
-
-		// Make a new save point to track the glue changes
 	}
-	// Step the next command
-	// If we find glue, keep going until the next line
-	// Make a new save point to track the glue changes
-	// and break all the other tests :')
-	/*if (_saved) {
-	  forget();
-	}
-	save();*/
-
-	// Uncomment to fix the first LookaheadSafe test
-	// and break all the other tests :')
-	/*if (_saved) {
-	  forget();
-	}
-	save();*/
-
-
-	// Are we gluing?
-	// Are we diverting?
 
 	// If we're not within string evaluation
 	if (_output.find_first_of(value_type::marker) == _output.npos) {
@@ -884,9 +874,11 @@ void runner_impl::step()
 		Command     cmd  = read<Command>();
 		CommandFlag flag = read<CommandFlag>();
 
+#ifdef INK_ENABLE_STL
 		if (_debug_stream != nullptr) {
 			*_debug_stream << "cmd " << cmd << " flags " << flag << " ";
 		}
+#endif
 
 		// If we're falling and we hit a non-fallthrough command, stop the fall.
 		if (_is_falling
@@ -905,9 +897,11 @@ void runner_impl::step()
 				case Command::STR: {
 					const char* str = read<const char*>();
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "str \"" << str << "\"";
 					}
+#endif
 
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::string>(str));
@@ -918,9 +912,11 @@ void runner_impl::step()
 				case Command::INT: {
 					int val = read<int>();
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "int " << val;
 					}
+#endif
 
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(val)));
@@ -930,9 +926,11 @@ void runner_impl::step()
 				case Command::BOOL: {
 					bool val = read<int>() ? true : false;
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "bool " << (val ? "true" : "false");
 					}
+#endif
 
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::boolean>(val));
@@ -943,9 +941,11 @@ void runner_impl::step()
 				case Command::FLOAT: {
 					float val = read<float>();
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "float " << val;
 					}
+#endif
 
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::float32>(val));
@@ -955,10 +955,12 @@ void runner_impl::step()
 				case Command::VALUE_POINTER: {
 					hash_t val = read<hash_t>();
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "value_pointer ";
 						write_hash(*_debug_stream, val);
 					}
+#endif
 
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::value_pointer>(val, static_cast<char>(flag) - 1));
@@ -969,9 +971,11 @@ void runner_impl::step()
 				case Command::LIST: {
 					list_table::list list(read<int>());
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "list " << list.lid;
 					}
+#endif
 
 					if (_evaluation_mode) {
 						_eval.push(value{}.set<value_type::list>(list));
@@ -1015,9 +1019,11 @@ void runner_impl::step()
 					// Find divert address
 					uint32_t target = read<uint32_t>();
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "target " << target;
 					}
+#endif
 
 					// Check for condition
 					if (flag & CommandFlag::DIVERT_HAS_CONDITION && ! _eval.pop().truthy(_globals->lists())) {
@@ -1062,10 +1068,12 @@ void runner_impl::step()
 					// Get variable value
 					hash_t variable = read<hash_t>();
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "variable ";
 						write_hash(*_debug_stream, variable);
 					}
+#endif
 
 					// Check for condition
 					if (flag & CommandFlag::DIVERT_HAS_CONDITION && ! _eval.pop().truthy(_globals->lists())) {
@@ -1101,9 +1109,11 @@ void runner_impl::step()
 						target = read<uint32_t>();
 					}
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "target " << target;
 					}
+#endif
 
 					start_frame<frame_type::tunnel>(target);
 				} break;
@@ -1119,9 +1129,11 @@ void runner_impl::step()
 						target = read<uint32_t>();
 					}
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "target " << target;
 					}
+#endif
 
 					if (! (flag & CommandFlag::FALLBACK_FUNCTION)) {
 						start_frame<frame_type::function>(target);
@@ -1160,9 +1172,11 @@ void runner_impl::step()
 						inkAssert(t == thread, "ref_stack and stack should be in sync!");
 					}
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "thread " << thread;
 					}
+#endif
 
 					// Push that thread onto our thread stack
 					_threads.push(thread);
@@ -1173,11 +1187,13 @@ void runner_impl::step()
 					hash_t variableName = read<hash_t>();
 					bool   is_redef     = flag & CommandFlag::ASSIGNMENT_IS_REDEFINE;
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "variable_name ";
 						write_hash(*_debug_stream, variableName);
 						*_debug_stream << " is_redef " << (is_redef ? "yes" : "no");
 					}
+#endif
 
 					// Get the top value and put it into the variable
 					value v = _eval.pop();
@@ -1194,11 +1210,13 @@ void runner_impl::step()
 					//  where globals are defined using SET_VARIABLE).
 					value val = _eval.pop();
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "variable_name ";
 						write_hash(*_debug_stream, variableName);
 						*_debug_stream << " is_redef " << (is_redef ? "yes" : "no");
 					}
+#endif
 
 					if (is_redef) {
 						set_var(variableName, val, is_redef);
@@ -1215,11 +1233,13 @@ void runner_impl::step()
 					// Interpret flag as argument count
 					int numArguments = static_cast<int>(flag);
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "function_name ";
 						write_hash(*_debug_stream, functionName);
 						*_debug_stream << " numArguments " << numArguments;
 					}
+#endif
 
 					// find and execute. will automatically push a valid if applicable
 					auto* fn = _functions.find(functionName);
@@ -1253,11 +1273,13 @@ void runner_impl::step()
 					hash_t       variableName = read<hash_t>();
 					const value* val          = get_var(variableName);
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "variable_name ";
 						write_hash(*_debug_stream, variableName);
 						*_debug_stream << " val \"" << val << "\"";
 					}
+#endif
 
 					inkAssert(val != nullptr, "Could not find variable!");
 					_eval.push(*val);
@@ -1298,9 +1320,11 @@ void runner_impl::step()
 					// Read path
 					uint32_t path = read<uint32_t>();
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "path " << path;
 					}
+#endif
 
 					// If we're a once only choice, make sure our destination hasn't
 					//  been visited
@@ -1378,7 +1402,8 @@ void runner_impl::step()
 						_globals->visit(_container.top().id, true);
 					}
 					if (flag & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
-						_entered_knot = true;
+						_current_knot_id = index;
+						_entered_knot    = true;
 					}
 
 				} break;
@@ -1441,9 +1466,11 @@ void runner_impl::step()
 					int32_t seed = _eval.pop().get<value_type::int32>();
 					_rng.srand(seed);
 
+#ifdef INK_ENABLE_STL
 					if (_debug_stream != nullptr) {
 						*_debug_stream << "seed " << seed;
 					}
+#endif
 
 					_eval.push(values::null);
 				} break;
@@ -1463,9 +1490,11 @@ void runner_impl::step()
 			}
 		}
 
+#ifdef INK_ENABLE_STL
 		if (_debug_stream != nullptr) {
 			*_debug_stream << std::endl;
 		}
+#endif
 	}
 #ifndef INK_ENABLE_UNREAL
 	catch (...) {
@@ -1566,7 +1595,8 @@ void runner_impl::save()
 	_choices.save();
 	_tags.save();
 	_tags_begin.save();
-	_saved_evaluation_mode = _evaluation_mode;
+	_saved_evaluation_mode  = _evaluation_mode;
+	_current_knot_id_backup = _current_knot_id;
 
 	// Not doing this anymore. There can be lingering stack entries from function returns
 	// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
@@ -1589,8 +1619,9 @@ void runner_impl::restore()
 	_choices.restore();
 	_tags.restore();
 	_tags_begin.restore();
-	_evaluation_mode = _saved_evaluation_mode;
-
+	_evaluation_mode        = _saved_evaluation_mode;
+	_current_knot_id        = _current_knot_id_backup;
+	_current_knot_id_backup = ~0;
 	// Not doing this anymore. There can be lingering stack entries from function returns
 	// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
 
@@ -1614,6 +1645,7 @@ void runner_impl::forget()
 	_choices.forgett();
 	_tags.forgett();
 	_tags_begin.forget();
+	_current_knot_id_backup = ~0;
 	// Nothing to do for eval stack. It should just stay as it is
 
 	_saved = false;

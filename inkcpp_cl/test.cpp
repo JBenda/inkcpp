@@ -26,7 +26,7 @@ void inklecate(
 	}
 	if (inklecateCmd == nullptr) {
 		inklecateCmd = std::getenv("INKLECATE");
-		if (*inklecateCmd == 0) {
+		if (inklecateCmd == nullptr || *inklecateCmd == 0) {
 			inklecateCmd = nullptr;
 		}
 	}

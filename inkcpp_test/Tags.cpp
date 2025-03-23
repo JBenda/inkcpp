@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include "system.h"
 
 #include <../runner_impl.h>
 #include <choice.h>
@@ -26,12 +27,16 @@ SCENARIO("run story with tags", "[tags][story]")
 	{
 		story* _ink    = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
 		runner _thread = _ink->new_runner();
-		WHEN("starting the thread") { CHECK_FALSE(_thread->has_tags()); }
+		WHEN("starting the thread") {
+			CHECK_FALSE(_thread->has_tags());
+			CHECK(_thread->get_current_knot() == 0);
+		}
 		WHEN("on the first line")
 		{
 			CHECK(_thread->getline() == "First line has global tags only\n");
 			THEN("it has the global tags")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("global_tags_only"));
 				CHECK(_thread->has_global_tags());
 				CHECK_FALSE(_thread->has_knot_tags());
 				CHECK(_thread->has_tags());
@@ -47,6 +52,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "Second line has one tag\n");
 			THEN("it has one tag")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("global_tags_only"));
 				CHECK(_thread->has_tags());
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->num_knot_tags() == 0);
@@ -61,6 +67,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "Third line has two tags\n");
 			THEN("it has two tags")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("global_tags_only"));
 				CHECK(_thread->has_tags());
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->num_knot_tags() == 0);
@@ -78,6 +85,7 @@ SCENARIO("run story with tags", "[tags][story]")
 
 			THEN("it has three tags")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("global_tags_only"));
 				CHECK(_thread->has_tags());
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->num_knot_tags() == 0);
@@ -96,6 +104,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "Hello\n");
 			THEN("it has four tags")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("start"));
 				CHECK(_thread->has_tags());
 				CHECK(_thread->num_global_tags() == 1);
 				REQUIRE(_thread->num_tags() == 4);
@@ -119,6 +128,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "Second line has no tags\n");
 			THEN("it has no tags")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("start"));
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->num_knot_tags() == 3);
 				CHECK_FALSE(_thread->has_tags());
@@ -140,6 +150,7 @@ SCENARIO("run story with tags", "[tags][story]")
 
 			THEN("check tags on choices")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("start"));
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->num_knot_tags() == 3);
 				CHECK(std::string(choice_list[0].text()) == "a");
@@ -166,6 +177,8 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "Knot2\n");
 			THEN("it has two tags")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
+				INFO(_thread->get_knot_tag(0));
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 2);
@@ -182,6 +195,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			REQUIRE(_thread->getline() == "Knot2\n");
 			THEN("global tags are missing")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
 				CHECK(_thread->num_global_tags() == 0);
 				CHECK(_thread->has_tags());
 				REQUIRE(_thread->num_tags() == 2);
@@ -209,6 +223,7 @@ SCENARIO("run story with tags", "[tags][story]")
 
 			THEN("check tags on choices")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->num_knot_tags() == 1);
 				CHECK(_thread->num_tags() == 2);
@@ -245,6 +260,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			REQUIRE(_thread->getline() == "f and content\n");
 			THEN("it has four tags")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(_thread->num_knot_tags() == 1);
 				CHECK(_thread->has_tags());
@@ -270,6 +286,7 @@ SCENARIO("run story with tags", "[tags][story]")
 			CHECK(_thread->getline() == "out\n");
 			THEN("it has one tag")
 			{
+				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
 				CHECK(_thread->num_global_tags() == 1);
 				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
 				REQUIRE(_thread->num_knot_tags() == 1);

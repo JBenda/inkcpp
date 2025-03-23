@@ -135,7 +135,21 @@ void json_compiler::compile_container(
 {
 	// Grab metadata from the last object in this container
 	container_meta meta;
-	bool           is_knot = depth == 1 && name_override != "" && index_in_parent == -1;
+	bool           is_knot = name_override != "" && index_in_parent == -1;
+	if (is_knot) {
+		// it is not a wave or choice
+		if (name_override.starts_with("c-") || name_override.starts_with("g-")) {
+			is_knot = false;
+			for (auto itr = name_override.begin() + 2; itr != name_override.end(); ++itr) {
+				if (*itr > '9' || *itr < '0') {
+					is_knot = true;
+					break;
+				}
+			}
+		} else if (name_override == "s" || name_override == "b" ) { // it is not a shared part of a choice
+			is_knot = false;
+		}
+	}
 	handle_container_metadata(*container.rbegin(), meta, is_knot);
 
 	// tell the emitter we're beginning a new container

@@ -45,6 +45,7 @@ namespace ink::runtime::internal
 		/// Get container flag from container offset (either start or end)
 		CommandFlag container_flag(ip_t offset) const;
 		CommandFlag container_flag(container_t id) const;
+		hash_t container_hash(container_t id) const;
 
 		ip_t find_offset_for(hash_t path) const;
 

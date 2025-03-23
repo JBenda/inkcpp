@@ -114,6 +114,8 @@ public:
 		return get_tag<tags_level::KNOT>(index);
 	};
 
+	virtual hash_t get_current_knot() const override;
+
 	snapshot* create_snapshot() const override;
 
 	size_t               snap(unsigned char* data, snapper&) const;
@@ -205,9 +207,11 @@ private:
 	void clear_tags(tags_clear_level which);
 
 	// Special code for jumping from the current IP to another
-	void jump(ip_t, bool record_visits, bool track_knot_visit);
-	bool _entered_knot   = false; // if we are in the first action after a jump to an snitch/knot
-	bool _entered_global = false; // if we are in the first action after a jump to an snitch/knot
+	void     jump(ip_t, bool record_visits, bool track_knot_visit);
+	uint32_t _current_knot_id        = ~0; // id to detect knot changes from the outside
+	uint32_t _current_knot_id_backup = ~0;
+	uint32_t _entered_knot   = false; // if we are in the first action after a jump to an snitch/knot
+	bool     _entered_global = false; // if we are in the first action after a jump to an snitch/knot
 
 	frame_type execute_return();
 	template<frame_type type>
@@ -343,7 +347,7 @@ private:
 	internal::managed_restorable_stack < ContainerData,
 	    config::limitContainerDepth<0, abs(config::limitContainerDepth)> _container;
 
-	bool                                                                 _is_falling = false;
+	bool _is_falling = false;
 
 	bool _saved = false;
 

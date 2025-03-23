@@ -99,6 +99,17 @@ public:
 	 */
 	void OnLineWritten(const FString& line, const UTagList* tags);
 
+	// Called when a new knot/stitch is entered (tunnels are ignored)
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	/** triggered if a knew knot/stitch is entered (tunneling is ignored).
+	 * Triggers before the first line of a knot/stitch is written
+	 * @param global_tags tags assoziated with global file
+	 * @param knot_tags tags assoziated with the current knot/stitch
+	 *
+	 * @blueprint
+	 */
+	void OnKnotEntered(const UTagList* global_tags, const UTagList* knot_tags);
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
 	/** triggered when a tag is encountered
 	 * @param tag_name the tag found
@@ -227,6 +238,7 @@ private:
 	bool mbInChoice;
 	bool mbKill;
 	bool mbInitialized;
+	ink::hash_t mCurrentKnot;
 
 	UPROPERTY()
 	AInkRuntime* mpRuntime;

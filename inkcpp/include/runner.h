@@ -253,6 +253,13 @@ public:
 	 */
 	virtual const char* get_knot_tag(size_t index) const = 0;
 
+	/**
+	 * Get hash of current knot/stitch name.
+	 * @return hash of current knot/stitch name
+	 * @sa ink::hash_string()
+	 */
+	virtual hash_t get_current_knot() const = 0;
+
 
 protected:
 	/** internal bind implementation. not for calling.

@@ -28,7 +28,7 @@ public:
 		}
 	}
 
-	~managed_array()
+	virtual ~managed_array()
 	{
 		if constexpr (dynamic) {
 			delete[] _dynamic_data;
