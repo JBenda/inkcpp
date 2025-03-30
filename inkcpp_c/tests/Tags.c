@@ -16,8 +16,10 @@ int main()
 	assert(ink_runner_num_tags(runner) == 0);
 	assert(ink_runner_num_knot_tags(runner) == 0);
 	assert(ink_runner_num_global_tags(runner) == 0);
+	assert(ink_runner_current_knot(runner) == 0);
 
 	assert(strcmp(ink_runner_get_line(runner), "First line has global tags only\n") == 0);
+	assert(ink_runner_current_knot(runner) == ink_hash_string("global_tags_only"));
 	assert(ink_runner_num_tags(runner) == 1);
 	assert(strcmp(ink_runner_tag(runner, 0), "global_tag") == 0);
 	assert(ink_runner_num_global_tags(runner) == 1);
@@ -25,6 +27,7 @@ int main()
 	assert(ink_runner_num_knot_tags(runner) == 0);
 
 	assert(strcmp(ink_runner_get_line(runner), "Second line has one tag\n") == 0);
+	assert(ink_runner_current_knot(runner) == ink_hash_string("global_tags_only"));
 	assert(ink_runner_num_tags(runner) == 1);
 	assert(strcmp(ink_runner_tag(runner, 0), "tagged") == 0);
 	assert(ink_runner_num_global_tags(runner) == 1);
@@ -32,6 +35,7 @@ int main()
 	assert(ink_runner_num_knot_tags(runner) == 0);
 
 	assert(strcmp(ink_runner_get_line(runner), "Third line has two tags\n") == 0);
+	assert(ink_runner_current_knot(runner) == ink_hash_string("global_tags_only"));
 	assert(ink_runner_num_tags(runner) == 2);
 	assert(strcmp(ink_runner_tag(runner, 0), "tag next line") == 0);
 	assert(strcmp(ink_runner_tag(runner, 1), "more tags") == 0);
@@ -40,6 +44,7 @@ int main()
 	assert(ink_runner_num_knot_tags(runner) == 0);
 
 	assert(strcmp(ink_runner_get_line(runner), "Fourth line has three tags\n") == 0);
+	assert(ink_runner_current_knot(runner) == ink_hash_string("global_tags_only"));
 	assert(ink_runner_num_tags(runner) == 3);
 	assert(strcmp(ink_runner_tag(runner, 0), "above") == 0);
 	assert(strcmp(ink_runner_tag(runner, 1), "side") == 0);
@@ -49,6 +54,7 @@ int main()
 	assert(ink_runner_num_knot_tags(runner) == 0);
 
 	assert(strcmp(ink_runner_get_line(runner), "Hello\n") == 0);
+	assert(ink_runner_current_knot(runner) == ink_hash_string("start"));
 	assert(ink_runner_num_tags(runner) == 4);
 	assert(strcmp(ink_runner_tag(runner, 0), "knot_tag_start") == 0);
 	assert(strcmp(ink_runner_tag(runner, 1), "second_knot_tag_start") == 0);
@@ -85,6 +91,7 @@ int main()
 	ink_runner_choose(runner, 1);
 	assert(ink_runner_can_continue(runner));
 	assert(strcmp(ink_runner_get_line(runner), "Knot2\n") == 0);
+	assert(ink_runner_current_knot(runner) == ink_hash_string("knot2.sub"));
 	assert(! ink_runner_can_continue(runner));
 	assert(ink_runner_num_tags(runner) == 2);
 	assert(strcmp(ink_runner_tag(runner, 0), "knot_tag_2") == 0);
@@ -125,6 +132,7 @@ int main()
 
 
 	assert(strcmp(ink_runner_get_line(runner), "out\n") == 0);
+	assert(ink_runner_current_knot(runner) == ink_hash_string("knot2.sub"));
 	assert(ink_runner_num_global_tags(runner) == 1);
 	assert(strcmp(ink_runner_global_tag(runner, 0), "global_tag") == 0);
 	assert(ink_runner_num_knot_tags(runner) == 1);

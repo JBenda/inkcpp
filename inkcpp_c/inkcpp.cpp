@@ -187,6 +187,18 @@ extern "C" {
 		return reinterpret_cast<const runner*>(self)->get()->num_knot_tags();
 	}
 
+	ink_hash_t ink_runner_current_knot(const HInkRunner* self)
+	{
+		return reinterpret_cast<const runner*>(self)->get()->get_current_knot();
+	}
+
+	bool ink_runner_move_to(HInkRunner* self, ink_hash_t path)
+	{
+		return reinterpret_cast<runner*>(self)->get()->move_to(path);
+	}
+
+	ink_hash_t ink_hash_string(const char* str) { return ink::hash_string(str); }
+
 	const char* ink_runner_knot_tag(const HInkRunner* self, int tag_id)
 	{
 		return reinterpret_cast<const runner*>(self)->get()->get_knot_tag(tag_id);

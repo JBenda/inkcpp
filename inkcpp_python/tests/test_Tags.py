@@ -44,22 +44,26 @@ class TestTags:
             (
                 "First line has global tags only\n",
                 self.tags({"global": ["global_tag"], "line": ["global_tag"]}),
+                "global_tags_only",
             ),
             (
                 "Second line has one tag\n",
                 self.tags({"global": ["global_tag"], "line": ["tagged"]}),
+                "global_tags_only",
             ),
             (
                 "Third line has two tags\n",
                 self.tags(
                     {"global": ["global_tag"], "line": ["tag next line", "more tags"]}
                 ),
+                "global_tags_only",
             ),
             (
                 "Fourth line has three tags\n",
                 self.tags(
                     {"global": ["global_tag"], "line": ["above", "side", "across"]}
                 ),
+                "global_tags_only",
             ),
             (
                 "Hello\n",
@@ -79,6 +83,7 @@ class TestTags:
                         ],
                     }
                 ),
+                "start",
             ),
             (
                 "Second line has no tags\n",
@@ -92,6 +97,7 @@ class TestTags:
                         ],
                     }
                 ),
+                "start",
             ),
             [("a", []), ("b", ["choice_tag_b", "choice_tag_b_2"]), 1],
             (
@@ -103,6 +109,7 @@ class TestTags:
                         "line": ["knot_tag_2", "output_tag_k"],
                     }
                 ),
+                "knot2.sub",
             ),
             [
                 ("e", []),
@@ -127,6 +134,7 @@ class TestTags:
                         ],
                     }
                 ),
+                "knot2.sub",
             ),
             (
                 "out\n",
@@ -137,13 +145,15 @@ class TestTags:
                         "line": ["close_tag"],
                     }
                 ),
+                "knot2.sub",
             ),
         ]
         for (i, state) in enumerate(expected):
             if isinstance(state, tuple):
-                (line, tags) = state
+                (line, tags, label) = state
                 assert runner.getline() == line, f"step {i}"
                 assert runner.all_tags() == tags, f"step {i}"
+                assert runner.current_knot() == ink.hash_string(label), f"step {i}"
                 self.compare(runner)
             else:
                 choose = state[-1]

@@ -71,7 +71,11 @@ PYBIND11_MODULE(inkcpp_py, m)
 	m.doc()
 	    = "Python bindings for InkCPP https://github.com/JBenda/inkcpp"; // optional module docstring
 
-
+	m.def(
+	    "hash_string", &ink::hash_string,
+	    "Converts string into hash used inside inkcpp as representation.",
+	    py::arg("str").none("false")
+	);
 	py::class_<ilist, std::unique_ptr<ilist, py::nodelete>> py_list(
 	    m, "IList",
 	    "Allows reading and editing inkcpp lists. !Only valid until next choose ore getline a runner "
@@ -337,10 +341,16 @@ To reload:
 	        },
 	        "Get all current assigned tags"
 	    )
-	    .def("has_knot_tags", &runner::has_knot_tags, "Are there tags assoziated with current knot.")
-	    .def("num_knot_tags", &runner::num_knot_tags, "Number of tags assoziated with current knot.")
 	    .def(
-	        "get_knot_tag", &runner::get_knot_tag, "Get knot tag stored at index.",
+	        "has_knot_tags", &runner::has_knot_tags,
+	        "Are there tags assoziated with current knot/stitch."
+	    )
+	    .def(
+	        "num_knot_tags", &runner::num_knot_tags,
+	        "Number of tags assoziated with current knot/stitch."
+	    )
+	    .def(
+	        "get_knot_tag", &runner::get_knot_tag, "Get knot/stitch tag stored at index.",
 	        py::arg("index").none(false), py::return_value_policy::reference_internal
 	    )
 	    .def(
@@ -352,8 +362,9 @@ To reload:
 		        }
 		        return tags;
 	        },
-	        "Get all tags assoziated with current knot."
+	        "Get all tags assoziated with current knot/stitch."
 	    )
+	    .def("current_knot", &runner::get_current_knot, "Get hash of current knot/tag path.")
 	    .def(
 	        "has_global_tags", &runner::has_global_tags,
 	        "Are there tags assoziated with current global."

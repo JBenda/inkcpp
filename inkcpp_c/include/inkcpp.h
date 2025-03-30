@@ -1,6 +1,7 @@
 #ifndef _INKCPP_H
 #define _INKCPP_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -16,6 +17,7 @@ typedef struct HInkRunner   HInkRunner;
 typedef struct HInkGlobals  HInkGlobals;
 typedef struct HInkSTory    HInkStory;
 #endif
+	typedef uint32_t ink_hash_t;
 
 	/** @defgroup clib Clib Interface
 	 * C bindings for inkcpp
@@ -245,6 +247,24 @@ typedef struct HInkSTory    HInkStory;
 	 * @param self
 	 */
 	int               ink_runner_num_knot_tags(const HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::get_current_knot()
+	 * @param self
+	 */
+	ink_hash_t        ink_runner_current_knot(const HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface_move_to()
+	 * @param self
+	 * @sa ink_hash_string()
+	 */
+	bool              ink_runner_move_to(HInkRunner* self, ink_hash_t path);
+	/** Hash a string, this hash is used inside inkcpp instead of the string actual value.
+	 * @sa ink_runner_move_to(), ink_runner_current_knot()
+	 * @ingroup clib
+	 * @param str string to hash
+	 * @return hash of string
+	 */
+	ink_hash_t        ink_hash_string(const char* str);
 	/** @memberof HInkRunner
 	 * @copydoc ink::runtime::runner_interface::knot_tag()
 	 * @param self
