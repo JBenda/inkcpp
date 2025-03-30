@@ -253,13 +253,13 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	ink_hash_t        ink_runner_current_knot(const HInkRunner* self);
 	/** @memberof HInkRunner
-	 * @copydoc ink::runtime::runner_interface_move_to()
+	 * @copydoc ink::runtime::runner_interface::move_to()
 	 * @param self
-	 * @sa ink_hash_string()
+	 * @sa ::HInkSnapshot::ink_hash_string()
 	 */
 	bool              ink_runner_move_to(HInkRunner* self, ink_hash_t path);
 	/** Hash a string, this hash is used inside inkcpp instead of the string actual value.
-	 * @sa ink_runner_move_to(), ink_runner_current_knot()
+	 * @sa ::HInkSnapshot::ink_runner_move_to(), ::HInkSnapshot::ink_runner_current_knot()
 	 * @ingroup clib
 	 * @param str string to hash
 	 * @return hash of string
