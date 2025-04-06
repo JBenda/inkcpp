@@ -99,6 +99,17 @@ public:
 	 */
 	void OnLineWritten(const FString& line, const UTagList* tags);
 
+	// Called when a new knot/stitch is entered (tunnels are ignored)
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	/** triggered if a knew knot/stitch is entered (tunneling is ignored).
+	 * Triggers before the first line of a knot/stitch is written
+	 * @param global_tags tags assoziated with global file
+	 * @param knot_tags tags assoziated with the current knot/stitch
+	 *
+	 * @blueprint
+	 */
+	void OnKnotEntered(const UTagList* global_tags, const UTagList* knot_tags);
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
 	/** triggered when a tag is encountered
 	 * @param tag_name the tag found
@@ -166,6 +177,22 @@ public:
 	    bool lookaheadSafe = false
 	);
 
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** get knots assoziated with current knot.
+	 * knot tags are tags listed behind a knot `== knot name ==` before the first line of content
+	 *
+	 * @blueprint
+	 */
+	const UTagList* GetKnotTags();
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** get global tags.
+	 * global tags are tags listed at the top of the file before the first line of content
+	 *
+	 * @blueprint
+	 */
+	const UTagList* GetGlobalTags();
+
 
 protected:
 	/** @private */
@@ -197,6 +224,8 @@ private:
 private:
 	ink::runtime::runner mpRunner;
 	UTagList*            mpTags;
+	UTagList*            mkTags = nullptr;
+	UTagList*            mgTags = nullptr;
 	TArray<UInkChoice*>  mCurrentChoices; /// @TODO: make accessible?
 
 	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
@@ -209,6 +238,7 @@ private:
 	bool mbInChoice;
 	bool mbKill;
 	bool mbInitialized;
+	ink::hash_t mCurrentKnot;
 
 	UPROPERTY()
 	AInkRuntime* mpRuntime;

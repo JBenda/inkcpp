@@ -20,6 +20,7 @@ UInkThread::UInkThread()
     , mnChoiceToChoose(-1)
     , mnYieldCounter(0)
     , mbKill(false)
+    , mCurrentKnot(~0)
 {
 }
 
@@ -28,6 +29,28 @@ UInkThread::~UInkThread() {}
 void UInkThread::Yield() { mnYieldCounter++; }
 
 bool UInkThread::IsYielding() { return mnYieldCounter > 0; }
+
+const UTagList* UInkThread::GetKnotTags()
+{
+	TArray<FString> tags;
+	for (size_t i = 0; i < mpRunner->num_knot_tags(); ++i) {
+		tags.Add(FString(mpRunner->get_knot_tag(i)));
+	}
+	mkTags->Initialize(tags);
+	return mkTags;
+}
+
+const UTagList* UInkThread::GetGlobalTags()
+{
+	if (mgTags->GetTags().Num() != mpRunner->num_global_tags()) {
+		TArray<FString> tags;
+		for (size_t i = 0; i < mpRunner->num_global_tags(); ++i) {
+			tags.Add(FString(mpRunner->get_global_tag(i)));
+		}
+		mgTags->Initialize(tags);
+	}
+	return mgTags;
+}
 
 void UInkThread::Resume() { mnYieldCounter--; }
 
@@ -62,10 +85,12 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 	mbInitialized = true;
 	mpRunner      = thread;
 	mpTags        = NewObject<UTagList>();
+	mkTags        = NewObject<UTagList>();
+	mgTags        = NewObject<UTagList>();
 	mTagFunctions.Reset();
 	mCurrentChoices.Reset();
 	mnChoiceToChoose = -1;
-	mbHasRun   = false;
+	mbHasRun         = false;
 	mbInChoice       = thread->has_choices();
 
 	OnStartup();
@@ -138,6 +163,10 @@ bool UInkThread::ExecuteInternal()
 			} else {
 				// Forward to handler
 				// Get tags
+				if (mpRunner->get_current_knot() != mCurrentKnot) {
+					mCurrentKnot = mpRunner->get_current_knot();
+					OnKnotEntered(GetGlobalTags(), GetKnotTags());
+				}
 				TArray<FString> tags;
 				for (size_t i = 0; i < mpRunner->num_tags(); ++i) {
 					tags.Add(FString(mpRunner->get_tag(i)));

@@ -19,8 +19,6 @@ namespace ink::runtime::internal
 basic_stream::basic_stream(value* buffer, size_t len)
     : _data(buffer)
     , _max(len)
-    , _size(0)
-    , _save(~0)
 {
 }
 
@@ -40,7 +38,8 @@ void basic_stream::append(const value& in)
 			// ignore additional newlines after newline or glue
 			if (d.type() == value_type::newline || d.type() == value_type::glue) {
 				return;
-			} else if (d.type() == value_type::string && ink::internal::is_whitespace(d.get<value_type::string>())) {
+			} else if (d.type() == value_type::string
+			           && ink::internal::is_whitespace(d.get<value_type::string>())) {
 			} else if (d.type() == value_type::func_start || d.type() == value_type::func_end) {
 			} else {
 				break;
@@ -64,7 +63,7 @@ void basic_stream::append(const value& in)
 	//  This also applies when a function ends to trim trailing whitespace.
 	if ((in.type() == value_type::glue || in.type() == value_type::func_end) && _size > 1) {
 		// Run backwards
-		size_t i = _size - 2;
+		size_t i            = _size - 2;
 		int    func_end_cnt = 0;
 		while (true) {
 			value& d = _data[i];
@@ -75,7 +74,8 @@ void basic_stream::append(const value& in)
 			}
 
 			// Nullify whitespace
-			else if (d.type() == value_type::string && ::ink::internal::is_whitespace(d.get<value_type::string>()))
+			else if (d.type() == value_type::string
+			         && ::ink::internal::is_whitespace(d.get<value_type::string>()))
 				d = value{};
 			else if (d.type() == value_type::func_end) {
 				++func_end_cnt;
@@ -193,7 +193,7 @@ FString basic_stream::get()
 }
 #endif
 
-int basic_stream::queued() const
+size_t basic_stream::queued() const
 {
 	size_t start = find_start();
 	return _size - start;
@@ -207,10 +207,8 @@ const value& basic_stream::peek() const
 
 void basic_stream::discard(size_t length)
 {
-	// discard elements
-	_size -= length;
-	if (_size < 0)
-		_size = 0;
+	// Protect against size underflow
+	_size -= std::min(length, _size);
 }
 
 void basic_stream::get(value* ptr, size_t length)
@@ -241,40 +239,49 @@ void basic_stream::get(value* ptr, size_t length)
 	_size = start;
 }
 
-bool basic_stream::has_marker() const { return entries_since_marker() >= 0; }
-
-int basic_stream::entries_since_marker() const
+size_t basic_stream::find_first_of(value_type type, size_t offset /*= 0*/) const
 {
+	if (_size == 0)
+		return npos;
+
 	// TODO: Cache?
-	for (size_t i = 0; i < _size; i++) {
-		if (_data[i].type() == value_type::marker)
+	for (size_t i = offset; i < _size; ++i) {
+		if (_data[i].type() == type)
 			return i;
 	}
 
-	return -1;
+	return npos;
 }
 
-bool basic_stream::ends_with(value_type type) const
+size_t basic_stream::find_last_of(value_type type, size_t offset /*= 0*/) const
+{
+	if (_size == 0)
+		return -1;
+
+	// Special case to make the reverse loop easier
+	if (_size == 1 && offset == 0)
+		return (_data[0].type() == type) ? 0 : npos;
+
+	for (size_t i = _size - 1; i > offset; --i) {
+		if (_data[i].type() == type)
+			return i;
+	}
+
+	return npos;
+}
+
+bool basic_stream::ends_with(value_type type, size_t offset /*= npos*/) const
 {
 	if (_size == 0)
 		return false;
 
-	return _data[_size - 1].type() == type;
-}
-
-bool basic_stream::saved_ends_with(value_type type) const
-{
-	inkAssert(_save != ~0, "Stream is not saved!");
-
-	if (_save == 0)
-		return false;
-
-	return _data[_save - 1].type() == type;
+	const size_t index = (offset != npos) ? offset - 1 : _size - 1;
+	return (index < _size) ? _data[index].type() == type : false;
 }
 
 void basic_stream::save()
 {
-	inkAssert(_save == ~0, "Can not save over existing save point!");
+	inkAssert(! saved(), "Can not save over existing save point!");
 
 	// Save the current size
 	_save = _size;
@@ -282,19 +289,17 @@ void basic_stream::save()
 
 void basic_stream::restore()
 {
-	inkAssert(_save != ~0, "No save point to restore!");
+	inkAssert(saved(), "No save point to restore!");
 
 	// Restore size to saved position
 	_size = _save;
-	_save = ~0;
+	_save = npos;
 }
 
 void basic_stream::forget()
 {
-	inkAssert(_save != ~0, "No save point to forget!");
-
 	// Just null the save point and continue as normal
-	_save = ~0;
+	_save = npos;
 }
 
 template char* basic_stream::get_alloc<true>(string_table& strings, list_table& lists);
@@ -396,7 +401,7 @@ size_t basic_stream::find_start() const
 	}
 
 	// Make sure we're not violating a save point
-	if (_save != ~0 && start < _save) {
+	if (saved() && start < _save) {
 		// TODO: check if we don't reset save correct
 		// at some point we can modifiy the output even behind save (probally discard?) and push a new
 		// element -> invalid save point
@@ -462,7 +467,7 @@ bool basic_stream::text_past_save() const
 
 void basic_stream::clear()
 {
-	_save = ~0;
+	_save = npos;
 	_size = 0;
 }
 
@@ -525,4 +530,5 @@ const unsigned char* basic_stream::snap_load(const unsigned char* ptr, const loa
 	}
 	return ptr;
 }
+
 } // namespace ink::runtime::internal

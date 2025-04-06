@@ -25,7 +25,10 @@ void inklecate(
 		}
 	}
 	if (inklecateCmd == nullptr) {
-		std::getenv("INKLECATE");
+		inklecateCmd = std::getenv("INKLECATE");
+		if (inklecateCmd == nullptr || *inklecateCmd == 0) {
+			inklecateCmd = nullptr;
+		}
 	}
 	if (inklecateCmd == nullptr)
 		inklecateCmd = "inklecate";
@@ -37,7 +40,8 @@ void inklecate(
 	// Run
 	int result = std::system(cmd.str().c_str());
 	if (result != 0) {
-		std::stringstream msg; msg << "Inklecate failed with exit code " << result;
+		std::stringstream msg;
+		msg << "Inklecate failed with exit code " << result;
 		throw std::runtime_error(msg.str());
 	}
 }
@@ -73,7 +77,7 @@ bool test(const std::string& inkFilename)
 	ink::compiler::run("test.tmp", "test.bin", &results);
 
 	std::vector<std::string> expectations;
-	std::vector<int> choices;
+	std::vector<int>         choices;
 	std::vector<std::string> choiceStrings;
 
 	{
@@ -82,42 +86,35 @@ bool test(const std::string& inkFilename)
 		load_file(inkFilename, inkFile);
 
 		// Check for ignore
-		if (inkFile.find("//IGNORE") == 0)
-		{
+		if (inkFile.find("//IGNORE") == 0) {
 			std::cout << "IGNORED" << std::endl;
 			return true;
 		}
 
 		// Check for compile errors post ignore
-		if (results.errors.size() > 0)
-		{
-			for (auto& error : results.errors)
-			{
+		if (results.errors.size() > 0) {
+			for (auto& error : results.errors) {
 				std::cerr << "ERROR: " << error << std::endl;
 			}
 			return false;
 		}
 
 		// Load expectations
-		auto reg = std::regex("\\/\\*\\*[ \t]*(\\d+(:.+)?)?[ \t]*\n((.|\n)*?)\\*\\*\\/");
+		auto reg  = std::regex("\\/\\*\\*[ \t]*(\\d+(:.+)?)?[ \t]*\n((.|\n)*?)\\*\\*\\/");
 		auto iter = std::sregex_iterator(inkFile.begin(), inkFile.end(), reg);
-		auto end = std::sregex_iterator();
+		auto end  = std::sregex_iterator();
 
 		// Go through them
-		for (; iter != end; ++iter)
-		{
-			if ((*iter)[1].matched)
-			{
+		for (; iter != end; ++iter) {
+			if ((*iter)[1].matched) {
 				expectations.push_back((*iter)[3].str());
 				choices.push_back(atoi((*iter)[1].str().c_str()));
-				
+
 				if ((*iter)[2].matched)
 					choiceStrings.push_back((*iter)[2].str().substr(1));
 				else
 					choiceStrings.push_back("");
-			}
-			else
-			{
+			} else {
 				expectations.push_back((*iter)[3].str());
 			}
 		}
@@ -127,19 +124,16 @@ bool test(const std::string& inkFilename)
 	}
 
 	// Load story
-	auto file = story::from_file("test.bin");
+	auto file   = story::from_file("test.bin");
 	auto runner = file->new_runner();
 
-	while (true)
-	{
+	while (true) {
 		// Run continuously
 		std::string output = runner->getall();
 
 		// Check against expectatins
-		if (expectations.size() == 0)
-		{
-			std::cout << "FAIL: Extra content detected in ink file:\n"
-				<< output;
+		if (expectations.size() == 0) {
+			std::cout << "FAIL: Extra content detected in ink file:\n" << output;
 			return false;
 		}
 
@@ -147,20 +141,15 @@ bool test(const std::string& inkFilename)
 		std::string expect = *expectations.rbegin();
 		expectations.pop_back();
 		bool success = output == expect;
-		if (!success)
-		{
+		if (! success) {
 			std::cout << "FAIL: Mismatch\n";
-			std::cout << "== Expected ==\n"
-				<< expect;
-			std::cout << "\n== Actual ==\n"
-				<< output;
+			std::cout << "== Expected ==\n" << expect;
+			std::cout << "\n== Actual ==\n" << output;
 			return false;
 		}
 
-		if (runner->has_choices())
-		{
-			if (choices.size() == 0)
-			{
+		if (runner->has_choices()) {
+			if (choices.size() == 0) {
 				std::cout << "FAIL: Encountered choice without choice index" << std::endl;
 				return false;
 			}
@@ -172,20 +161,18 @@ bool test(const std::string& inkFilename)
 			// Make sure text matches
 			std::string choiceStr = *choiceStrings.rbegin();
 			choiceStrings.pop_back();
-			if (choiceStr != "" && runner->get_choice(choice)->text() != choiceStr)
-			{
+			if (choiceStr != "" && runner->get_choice(choice)->text() != choiceStr) {
 				std::cout << "FAIL: CHOICE MISMATCH\n";
 
 				std::cout << "== Expected ==\n"
-					<< choiceStr << "\n"
-					<< "== Actual ==\n"
-					<< runner->get_choice(choice)->text() << std::endl;
+				          << choiceStr << "\n"
+				          << "== Actual ==\n"
+				          << runner->get_choice(choice)->text() << std::endl;
 				return false;
 			}
 
 			runner->choose(choice);
-		}
-		else
+		} else
 			break;
 	}
 
@@ -195,12 +182,10 @@ bool test(const std::string& inkFilename)
 
 bool test_directory(const std::string& directory)
 {
-	for (auto p : std::filesystem::directory_iterator(directory))
-	{
-		if (p.path().extension() == ".ink")
-		{
+	for (auto p : std::filesystem::directory_iterator(directory)) {
+		if (p.path().extension() == ".ink") {
 			bool success = test(p.path().string());
-			if (!success)
+			if (! success)
 				return false;
 		}
 	}

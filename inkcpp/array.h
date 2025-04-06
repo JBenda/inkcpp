@@ -10,6 +10,8 @@
 #include "system.h"
 #include "traits.h"
 
+#include <limits>
+
 namespace ink::runtime::internal
 {
 template<typename T, bool dynamic, size_t initialCapacity>
@@ -26,7 +28,7 @@ public:
 		}
 	}
 
-	~managed_array()
+	virtual ~managed_array()
 	{
 		if constexpr (dynamic) {
 			delete[] _dynamic_data;
@@ -78,10 +80,35 @@ public:
 				extend();
 			}
 		} else {
-			inkAssert(_size <= _capacity, "Stack Overflow!");
-			/// FIXME silent fail!!
+			inkAssert(_size <= _capacity, "Try to append to a full array!");
+			// TODO(JBenda): Silent fail?
 		}
 		return data()[_size++];
+	}
+
+	virtual T& insert(size_t position)
+	{
+		inkAssert(
+		    position <= _size,
+		    "Array must be dense, cannot insert value at position larger then array.size."
+		);
+		push();
+		if (_size >= 2) {
+			for (size_t i = _size - 2; i >= position && i < std::numeric_limits<size_t>::max(); --i) {
+				data()[i + 1] = data()[i];
+			}
+		}
+		return data()[position];
+	}
+
+	virtual void remove(size_t begin, size_t end)
+	{
+		inkAssert(end <= _size, "can not delete behind end of array.");
+		inkAssert(begin <= end, "can not remove negative range.");
+		for (size_t i = 0; i < (end - begin) && end + i < _size; ++i) {
+			data()[begin + i] = data()[end + i];
+		}
+		_size -= end - begin;
 	}
 
 	void clear() { _size = 0; }
@@ -154,7 +181,23 @@ public:
 	{
 	}
 
-	void restore() { base::resize(_last_size); }
+	virtual T& insert(size_t position) override
+	{
+		inkAssert(position >= _last_size, "Cannot insert data before last save point.");
+		return base::insert(position);
+	}
+
+	virtual void remove(size_t begin, size_t end) override
+	{
+		inkAssert(begin >= _last_size, "Cannot delete data before last save point.");
+		base::remove(begin, end);
+	}
+
+	void restore()
+	{
+		base::resize(_last_size);
+		_last_size = 0;
+	}
 
 	void save() { _last_size = this->size(); }
 
@@ -286,7 +329,6 @@ private:
 	// null
 	const T _null;
 };
-
 
 template<typename T>
 inline void basic_restorable_array<T>::set(size_t index, const T& value)

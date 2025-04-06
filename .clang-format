@@ -2,11 +2,34 @@
 AccessModifierOffset: -2
 AlignAfterOpenBracket: BlockIndent
 AlignArrayOfStructures: Right
-# readd padOperation if bumped from clang 14
-AlignConsecutiveAssignments: AcrossComments
-AlignConsecutiveBitFields: AcrossComments
-AlignConsecutiveDeclarations: AcrossComments
-AlignConsecutiveMacros: AcrossComments
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: false
+  AlignFunctionPointers: false
+  PadOperators: true
+AlignConsecutiveBitFields:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: false
+  AlignFunctionPointers: false
+  PadOperators: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: false
+  AlignFunctionPointers: false
+  PadOperators: true
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: false
+  AlignFunctionPointers: false
+  PadOperators: true
 AlignEscapedNewlines: Left
 AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
@@ -25,7 +48,6 @@ AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: true
 BinPackParameters: true
 BreakBeforeBraces: Linux
-# BreakAfterAttributes: Always
 BreakBeforeBinaryOperators: All
 UseTab: ForIndentation
 Standard: Latest
@@ -58,9 +80,6 @@ SortUsingDeclarations: false
 SortIncludes: Never
 ShortNamespaceLines: 0
 SeparateDefinitionBlocks: Always
-# RequiresExpressionIndentation: OuterScope
-# BreakBeforeConceptDeclarations: Always
-# BreakBeforeInlineASMColon: Always
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
@@ -77,23 +96,17 @@ IndentCaseLabels: true
 IndentExternBlock: Indent
 IndentGotoLabels: false
 IndentPPDirectives: AfterHash
-# IndentRequiresClause: true
 IndentWidth: 2
 TabWidth: 2
 IndentWrappedFunctionNames: true
-# InsertBraces: true
-# InsertNewlineAtEOF: true
 KeepEmptyLinesAtTheStartOfBlocks: true
 LambdaBodyIndentation: Signature
 Language: Cpp
-# LineEnding: LF
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: Inner
 QualifierAlignment: Left
 ReferenceAlignment: Left
 ReflowComments: true
 RemoveBracesLLVM: false
-# RemoveSemicolon: false
-# RequiresClausePosition: OwnLine
 UseCRLF: false
 DeriveLineEnding: false

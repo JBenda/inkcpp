@@ -112,6 +112,16 @@ public:
  * A minimal example can be found at @ref src_main
  */
 
+/** @defgroup cpp C++
+ * The recommandet way to use InkCPP with C++ is through Cmake, plesae refere @ref cmake "the cmake
+ * example" for that. In detail documentation for the runtime can be found in @ref ink::runtime.
+ */
+
+/** @defgroup python Python bindings
+ * You can install the python library through [pypi](https://pypi.org/project/inkcpp-py/) with `pip
+ * install inkcpp-py` Documentation can be found [here](./inkcpp_py.html) and a short example @ref
+ * py "here".
+ */
 /** @mainpage InkCPP Documentation
  * @tableofcontents
  * Inkle Ink C++ Runtime with INK.JSON -> Binary Compiler.<br/>

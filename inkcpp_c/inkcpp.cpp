@@ -5,6 +5,7 @@
 
 #include <cstring>
 
+#include <memory>
 #include <story.h>
 #include <snapshot.h>
 #include <globals.h>
@@ -171,7 +172,7 @@ extern "C" {
 		return reinterpret_cast<runner*>(self)->get()->getline_alloc();
 	}
 
-	int ink_runner_get_num_tags(const HInkRunner* self)
+	int ink_runner_num_tags(const HInkRunner* self)
 	{
 		return reinterpret_cast<const runner*>(self)->get()->num_tags();
 	}
@@ -179,6 +180,38 @@ extern "C" {
 	const char* ink_runner_tag(const HInkRunner* self, int tag_id)
 	{
 		return reinterpret_cast<const runner*>(self)->get()->get_tag(tag_id);
+	}
+
+	int ink_runner_num_knot_tags(const HInkRunner* self)
+	{
+		return reinterpret_cast<const runner*>(self)->get()->num_knot_tags();
+	}
+
+	ink_hash_t ink_runner_current_knot(const HInkRunner* self)
+	{
+		return reinterpret_cast<const runner*>(self)->get()->get_current_knot();
+	}
+
+	bool ink_runner_move_to(HInkRunner* self, ink_hash_t path)
+	{
+		return reinterpret_cast<runner*>(self)->get()->move_to(path);
+	}
+
+	ink_hash_t ink_hash_string(const char* str) { return ink::hash_string(str); }
+
+	const char* ink_runner_knot_tag(const HInkRunner* self, int tag_id)
+	{
+		return reinterpret_cast<const runner*>(self)->get()->get_knot_tag(tag_id);
+	}
+
+	int ink_runner_num_global_tags(const HInkRunner* self)
+	{
+		return reinterpret_cast<const runner*>(self)->get()->num_global_tags();
+	}
+
+	const char* ink_runner_global_tag(const HInkRunner* self, int tag_id)
+	{
+		return reinterpret_cast<const runner*>(self)->get()->get_global_tag(tag_id);
 	}
 
 	int ink_runner_num_choices(const HInkRunner* self)
@@ -302,11 +335,11 @@ extern "C" {
 	{
 		const ink::runtime::snapshot& snap = *reinterpret_cast<const ink::runtime::snapshot*>(snapshot);
 		runner*                       res  = new runner(
-		                           global_store
-		                               ? reinterpret_cast<story*>(self)->new_runner_from_snapshot(
-		                                   snap, *reinterpret_cast<globals*>(global_store), runner_id
-		                               )
-		                               : reinterpret_cast<story*>(self)->new_runner_from_snapshot(snap, nullptr, runner_id)
+        global_store
+            ? reinterpret_cast<story*>(self)->new_runner_from_snapshot(
+                  snap, *reinterpret_cast<globals*>(global_store), runner_id
+              )
+            : reinterpret_cast<story*>(self)->new_runner_from_snapshot(snap, nullptr, runner_id)
 		);
 		return reinterpret_cast<HInkRunner*>(res);
 	}

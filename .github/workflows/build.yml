@@ -117,9 +117,9 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: |
-        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.5"
+        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.5" -DINKCPP_UNREAL=ON
         cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_5 --component unreal
-        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.4"
+        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.4" -DINKCPP_UNREAL=ON
         cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_4 --component unreal
     - name: Upload UE 5.5
       if: ${{ matrix.unreal }}
@@ -287,12 +287,12 @@ jobs:
           git fetch origin master
       - name: Check clang-format
         run: |
+          git clang-format-18 --extensions c,cpp,h,hpp --style file -q --diff origin/master
           diff=$(git clang-format-18 --extensions c,cpp,h,hpp --style file -q --diff origin/master)
-          echo $diff
+          echo "::error Format diff >$diff<"
           if [ "$diff" != "" ]; then
-            echo run git clang-format --extensions c,cpp,h,hpp --style file master
+            echo run git clang-format-18 --extensions c,cpp,h,hpp --style file master
             echo or upstream/master depending on your setup
-            clang
           fi
 
   reporting:

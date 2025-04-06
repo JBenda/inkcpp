@@ -40,3 +40,16 @@ Function Result
 Tunnel Result
 
 ->->
+
+VAR forceful = 0
+VAR evasive = 0
+
+=== function raise(ref x)
+	~ x = x + 1
+
+== ignore_functions_when_applying_glue
+	"I don't see why," I reply
+	~ raise(forceful)
+	~ raise(evasive)
+	<>.
+	-> DONE

@@ -178,6 +178,30 @@ CommandFlag story_impl::container_flag(container_t id) const
 	return CommandFlag::NO_FLAGS;
 }
 
+hash_t story_impl::container_hash(container_t id) const
+{
+	const uint32_t* iter = nullptr;
+	ip_t            offset;
+	container_t     c_id;
+	bool            hit = false;
+	while (iterate_containers(iter, c_id, offset)) {
+		if (c_id == id) {
+			hit = true;
+			break;
+		}
+	}
+	inkAssert(hit, "Unable to find container for id!");
+	hash_t* h_iter = _container_hash_start;
+	while (iter != _container_hash_end) {
+		if (instructions() + *( offset_t* ) (h_iter + 1) == offset) {
+			return *h_iter;
+		}
+		h_iter += 2;
+	}
+	inkAssert(false, "Did not find hash entry for container!");
+	return 0;
+}
+
 ip_t story_impl::find_offset_for(hash_t path) const
 {
 	hash_t* iter = _container_hash_start;
@@ -204,12 +228,12 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
 	auto*                globs    = new globals_impl(this);
 	auto                 end      = globs->snap_load(
-	                         snapshot.get_globals_snap(),
-	                         snapshot_interface::loader{
+      snapshot.get_globals_snap(),
+      snapshot_interface::loader{
           snapshot.strings(),
           _string_table,
       }
-	                     );
+  );
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
 	return globals(globs, _block);
 }

@@ -36,6 +36,14 @@ class runner_impl
     : public runner_interface
     , public snapshot_interface
 {
+	enum class tags_level : int {
+		GLOBAL,  ///< A tag at the begining of the file
+		KNOT,    ///< A tag inside a knot before any text
+		LINE,    ///< A tags assoziated with last line
+		CHOICE,  ///< A choice tag
+		UNKNOWN, ///< tags currently undecided where there belong
+	};
+
 public:
 	// Creates a new runner at the start of a loaded ink story
 	runner_impl(const story_impl*, globals);
@@ -43,6 +51,11 @@ public:
 
 	// used by the globals object to do garbage collection
 	void mark_used(string_table&, list_table&) const;
+
+	// enable debugging when steppnig through the execution
+#ifdef INK_ENABLE_STL
+	void set_debug_enabled(std::ostream* debug_stream) { _debug_stream = debug_stream; }
+#endif
 
 #pragma region runner Implementation
 
@@ -65,15 +78,48 @@ public:
 	 * executes story until end of next line and discards the result. */
 	void getline_silent();
 
-	virtual bool        has_tags() const override;
-	virtual size_t      num_tags() const override;
-	virtual const char* get_tag(size_t index) const override;
+private:
+	template<tags_level L>
+	bool has_tags() const;
+	template<tags_level L>
+	size_t num_tags() const;
+	template<tags_level L>
+	const char* get_tag(size_t index) const;
+
+public:
+	virtual bool has_tags() const override { return has_tags<tags_level::LINE>(); }
+
+	virtual size_t num_tags() const override { return num_tags<tags_level::LINE>(); }
+
+	virtual const char* get_tag(size_t index) const override
+	{
+		return get_tag<tags_level::LINE>(index);
+	}
+
+	virtual size_t num_global_tags() const override { return num_tags<tags_level::GLOBAL>(); }
+
+	virtual bool has_global_tags() const override { return has_tags<tags_level::GLOBAL>(); }
+
+	virtual const char* get_global_tag(size_t index) const override
+	{
+		return get_tag<tags_level::GLOBAL>(index);
+	};
+
+	virtual size_t num_knot_tags() const override { return num_tags<tags_level::KNOT>(); }
+
+	virtual bool has_knot_tags() const override { return has_tags<tags_level::KNOT>(); }
+
+	virtual const char* get_knot_tag(size_t index) const override
+	{
+		return get_tag<tags_level::KNOT>(index);
+	};
+
+	virtual hash_t get_current_knot() const override;
 
 	snapshot* create_snapshot() const override;
 
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
-
 
 #ifdef INK_ENABLE_CSTD
 	// c-style getline
@@ -83,22 +129,18 @@ public:
 	// move to path
 	virtual bool move_to(hash_t path) override;
 
-#ifdef INK_ENABLE_STL
-	// Gets a single line of output and stores it in a C++ std::string
-	virtual std::string getline() override;
+	// Gets a single line of output
+	virtual line_type getline() override;
 
+	// get all into string
+	virtual line_type getall() override;
+
+#ifdef INK_ENABLE_STL
 	// Reads a line into a std::ostream
 	virtual void getline(std::ostream&) override;
 
-	// get all into string
-	virtual std::string getall() override;
-
 	// get all into stream
 	virtual void getall(std::ostream&) override;
-#endif
-#ifdef INK_ENABLE_UNREAL
-	// Reads a line into an Unreal FString
-	virtual FString getline() override;
 #endif
 #pragma endregion
 
@@ -153,13 +195,23 @@ private:
 	choice& add_choice();
 	void    clear_choices();
 
-	void clear_tags();
+	snap_tag& add_tag(const char* value, tags_level where);
+	// Assigne UNKNOWN tags to level `where`
+	void      assign_tags(std::initializer_list<tags_level> where);
+	void      copy_tags(tags_level src, tags_level dst);
+	enum class tags_clear_level : int {
+		KEEP_NONE,
+		KEEP_GLOBAL_AND_UNKNOWN,
+		KEEP_KNOT, ///< keep knot and global tags
+	};
+	void clear_tags(tags_clear_level which);
 
 	// Special code for jumping from the current IP to another
-	void jump(ip_t, bool record_visits);
-
-	void run_binary_operator(unsigned char cmd);
-	void run_unary_operator(unsigned char cmd);
+	void     jump(ip_t, bool record_visits, bool track_knot_visit);
+	uint32_t _current_knot_id        = ~0; // id to detect knot changes from the outside
+	uint32_t _current_knot_id_backup = ~0;
+	uint32_t _entered_knot   = false; // if we are in the first action after a jump to an snitch/knot
+	bool     _entered_global = false; // if we are in the first action after a jump to an snitch/knot
 
 	frame_type execute_return();
 	template<frame_type type>
@@ -249,9 +301,9 @@ private:
 	// == State ==
 
 	// Instruction pointer
-	ip_t _ptr;
-	ip_t _backup; // backup pointer
-	ip_t _done;   // when we last hit a done
+	ip_t _ptr    = nullptr;
+	ip_t _backup = nullptr; // backup pointer
+	ip_t _done   = nullptr; // when we last hit a done
 
 	// Output stream
 	internal::stream<config::limitOutputSize> _output;
@@ -275,8 +327,9 @@ private:
 
 	// Tag list
 	managed_restorable_array < snap_tag,
-	    config::limitActiveTags<0, abs(config::limitActiveTags)> _tags;
-	int                                                          _choice_tags_begin;
+	    config::limitActiveTags<0, abs(config::limitActiveTags)>                     _tags;
+	// where to the different tags type start
+	internal::fixed_restorable_array<int, static_cast<int>(tags_level::UNKNOWN) + 2> _tags_begin;
 
 	// TODO: Move to story? Both?
 	functions _functions;
@@ -293,11 +346,16 @@ private:
 
 	internal::managed_restorable_stack < ContainerData,
 	    config::limitContainerDepth<0, abs(config::limitContainerDepth)> _container;
-	bool                                                                 _is_falling = false;
+
+	bool _is_falling = false;
 
 	bool _saved = false;
 
 	prng _rng;
+
+#ifdef INK_ENABLE_STL
+	std::ostream* _debug_stream = nullptr;
+#endif
 };
 
 template<bool dynamic, size_t N>
@@ -329,6 +387,30 @@ const unsigned char*
 
 template<>
 inline const char* runner_impl::read();
+
+template<runner_impl::tags_level L>
+bool runner_impl::has_tags() const
+{
+	return num_tags<L>() > 0;
+}
+
+template<runner_impl::tags_level L>
+size_t runner_impl::num_tags() const
+{
+	return _tags_begin[static_cast<int>(L) + 1] - _tags_begin[static_cast<int>(L)];
+}
+
+template<runner_impl::tags_level L>
+const char* runner_impl::get_tag(size_t index) const
+{
+	size_t begin = _tags_begin[static_cast<int>(L)];
+	size_t end   = _tags_begin[static_cast<int>(L) + 1];
+	if (begin + index >= end || begin + index < begin) {
+		return nullptr;
+	}
+	return _tags[begin + index];
+}
+
 
 #ifdef INK_ENABLE_STL
 std::ostream& operator<<(std::ostream&, runner_impl&);
