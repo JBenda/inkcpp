@@ -134,6 +134,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0ed86560d99b34f2f435494894104bbf" id="r_a0ed86560d99b34f2f435494894104bbf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ed86560d99b34f2f435494894104bbf">OnLineWritten</a> (const FString &amp;line, const <a class="el" href="class_u_tag_list.html">UTagList</a> *tags)</td></tr>
 <tr class="memdesc:a0ed86560d99b34f2f435494894104bbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">triggered if a new line of context is available  <br /></td></tr>
 <tr class="separator:a0ed86560d99b34f2f435494894104bbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24e60ef23774f02df43920ac7e22b1a7" id="r_a24e60ef23774f02df43920ac7e22b1a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a24e60ef23774f02df43920ac7e22b1a7">OnKnotEntered</a> (const <a class="el" href="class_u_tag_list.html">UTagList</a> *global_tags, const <a class="el" href="class_u_tag_list.html">UTagList</a> *knot_tags)</td></tr>
+<tr class="memdesc:a24e60ef23774f02df43920ac7e22b1a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">triggered if a knew knot/stitch is entered (tunneling is ignored).  <br /></td></tr>
+<tr class="separator:a24e60ef23774f02df43920ac7e22b1a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3b326b0a949fcca049f1bb0779954f8" id="r_ae3b326b0a949fcca049f1bb0779954f8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae3b326b0a949fcca049f1bb0779954f8">OnTag</a> (const FString &amp;tag_name)</td></tr>
 <tr class="memdesc:ae3b326b0a949fcca049f1bb0779954f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">triggered when a tag is encountered  <br /></td></tr>
 <tr class="separator:ae3b326b0a949fcca049f1bb0779954f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,6 +158,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa0b70456fb3b1e068f96c1945a657f85" id="r_aa0b70456fb3b1e068f96c1945a657f85"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa0b70456fb3b1e068f96c1945a657f85">RegisterExternalEvent</a> (const FString &amp;functionName, const <a class="el" href="_ink_delegates_8h.html#ab7ab7d019530b51bf6a526cf2f4fbdb5">FExternalFunctionVoidDelegate</a> &amp;function, bool lookaheadSafe=false)</td></tr>
 <tr class="memdesc:aa0b70456fb3b1e068f96c1945a657f85"><td class="mdescLeft">&#160;</td><td class="mdescRight">register external event.  <br /></td></tr>
 <tr class="separator:aa0b70456fb3b1e068f96c1945a657f85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a188bfcf8dce77018778e015f33b03892" id="r_a188bfcf8dce77018778e015f33b03892"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_u_tag_list.html">UTagList</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a188bfcf8dce77018778e015f33b03892">GetKnotTags</a> ()</td></tr>
+<tr class="memdesc:a188bfcf8dce77018778e015f33b03892"><td class="mdescLeft">&#160;</td><td class="mdescRight">get knots assoziated with current knot.  <br /></td></tr>
+<tr class="separator:a188bfcf8dce77018778e015f33b03892"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3d06392e295aa283755bea289b32a1a" id="r_af3d06392e295aa283755bea289b32a1a"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_u_tag_list.html">UTagList</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af3d06392e295aa283755bea289b32a1a">GetGlobalTags</a> ()</td></tr>
+<tr class="memdesc:af3d06392e295aa283755bea289b32a1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">get global tags.  <br /></td></tr>
+<tr class="separator:af3d06392e295aa283755bea289b32a1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
@@ -165,6 +174,48 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>AInkRuntime</b></td>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for all ink threads. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="af3d06392e295aa283755bea289b32a1a" name="af3d06392e295aa283755bea289b32a1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3d06392e295aa283755bea289b32a1a">&#9670;&#160;</a></span>GetGlobalTags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_u_tag_list.html">UTagList</a> * UInkThread::GetGlobalTags </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>get global tags. </p>
+<p>global tags are tags listed at the top of the file before the first line of content</p>
+<p> <div class="bue-render"><div class="node " data-id=""  style="position:relative;transform: translate(0px; 0px)"><div class="header node-color function-call gradient "  style=""><div class="icon function-call "  style=""></div><span class="has-icon name "  style="">Get Global Tags</span></div><div class="body "  style=""><div class="left-col "  style=""><div class="pin " data-id=" null"  style=""><div class="div-inside exec "  style=""><div class="clink connector-image exec "  style=""></div><div class="label-text "  style=""></div></div></div><div class="pin " data-id=" null"  style=""><div class="div-inside object "  style=""><div class="clink connector object "  style=""></div><div class="label-text "  style="">Target</div><span class="no-input "  style=""></span></div></div></div><div class="right-col "  style=""><div class="pin no-margin-bottom " data-id=" null"  style=""><div class="div-inside exec "  style=""><div class="label-text "  style=""></div><div class="clink connector-image exec "  style=""></div></div></div><div class="pin " data-id=" null"  style=""><div class="div-inside object "  style=""><div class="label-text "  style="">Return Value</div><div class="clink connector object "  style=""></div></div></div></div></div></div></div>  </p>
+
+</div>
+</div>
+<a id="a188bfcf8dce77018778e015f33b03892" name="a188bfcf8dce77018778e015f33b03892"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a188bfcf8dce77018778e015f33b03892">&#9670;&#160;</a></span>GetKnotTags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_u_tag_list.html">UTagList</a> * UInkThread::GetKnotTags </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>get knots assoziated with current knot. </p>
+<p>knot tags are tags listed behind a knot <code>== knot name ==</code> before the first line of content</p>
+<p> <div class="bue-render"><div class="node " data-id=""  style="position:relative;transform: translate(0px; 0px)"><div class="header node-color function-call gradient "  style=""><div class="icon function-call "  style=""></div><span class="has-icon name "  style="">Get Knot Tags</span></div><div class="body "  style=""><div class="left-col "  style=""><div class="pin " data-id=" null"  style=""><div class="div-inside exec "  style=""><div class="clink connector-image exec "  style=""></div><div class="label-text "  style=""></div></div></div><div class="pin " data-id=" null"  style=""><div class="div-inside object "  style=""><div class="clink connector object "  style=""></div><div class="label-text "  style="">Target</div><span class="no-input "  style=""></span></div></div></div><div class="right-col "  style=""><div class="pin no-margin-bottom " data-id=" null"  style=""><div class="div-inside exec "  style=""><div class="label-text "  style=""></div><div class="clink connector-image exec "  style=""></div></div></div><div class="pin " data-id=" null"  style=""><div class="div-inside object "  style=""><div class="label-text "  style="">Return Value</div><div class="clink connector object "  style=""></div></div></div></div></div></div></div>  </p>
+
+</div>
+</div>
 <a id="a4d442c493705a1d7033390df230b3394" name="a4d442c493705a1d7033390df230b3394"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4d442c493705a1d7033390df230b3394">&#9670;&#160;</a></span>GetRuntime()</h2>
 
@@ -245,6 +296,37 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>AInkRuntime</b></td>
 </dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a707bab003fd9cdec1c07c4f60d9d7145" title="picks a choice to continue with">PickChoice()</a></dd></dl>
 <p> <div class="bue-render"><div class="node " data-id=""  style="position:relative;transform: translate(0px; 0px)"><div class="header node-color event gradient "  style=""><div class="icon event "  style=""></div><span class="has-icon name "  style="">Event OnChoice</span><div class="pin " data-id=" null"  style=""><div class="clink connector delegate "  style=""></div></div></div><div class="body "  style=""><div class="left-col "  style=""></div><div class="right-col "  style=""><div class="pin no-margin-bottom " data-id=" null"  style=""><div class="div-inside exec "  style=""><div class="label-text "  style=""></div><div class="clink connector-image exec "  style=""></div></div></div><div class="pin " data-id=" null"  style=""><div class="div-inside object "  style=""><div class="label-text "  style="">Choices</div><div class="clink connector-array object "  style=""></div></div></div></div></div></div></div>  </p>
+
+</div>
+</div>
+<a id="a24e60ef23774f02df43920ac7e22b1a7" name="a24e60ef23774f02df43920ac7e22b1a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24e60ef23774f02df43920ac7e22b1a7">&#9670;&#160;</a></span>OnKnotEntered()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UInkThread::OnKnotEntered </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_u_tag_list.html">UTagList</a> *</td>          <td class="paramname"><span class="paramname"><em>global_tags</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_u_tag_list.html">UTagList</a> *</td>          <td class="paramname"><span class="paramname"><em>knot_tags</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>triggered if a knew knot/stitch is entered (tunneling is ignored). </p>
+<p>Triggers before the first line of a knot/stitch is written </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">global_tags</td><td>tags assoziated with global file </td></tr>
+    <tr><td class="paramname">knot_tags</td><td>tags assoziated with the current knot/stitch</td></tr>
+  </table>
+  </dd>
+</dl>
+<p> <div class="bue-render"><div class="node " data-id=""  style="position:relative;transform: translate(0px; 0px)"><div class="header node-color event gradient "  style=""><div class="icon event "  style=""></div><span class="has-icon name "  style="">Event OnKnotEntered</span><div class="pin " data-id=" null"  style=""><div class="clink connector delegate "  style=""></div></div></div><div class="body "  style=""><div class="left-col "  style=""></div><div class="right-col "  style=""><div class="pin no-margin-bottom " data-id=" null"  style=""><div class="div-inside exec "  style=""><div class="label-text "  style=""></div><div class="clink connector-image exec "  style=""></div></div></div><div class="pin " data-id=" null"  style=""><div class="div-inside object "  style=""><div class="label-text "  style="">Global tags</div><div class="clink connector object "  style=""></div></div></div><div class="pin " data-id=" null"  style=""><div class="div-inside object "  style=""><div class="label-text "  style="">Knot tags</div><div class="clink connector object "  style=""></div></div></div></div></div></div></div>  </p>
 
 </div>
 </div>

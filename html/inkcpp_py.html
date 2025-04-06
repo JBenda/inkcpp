@@ -24,6 +24,9 @@
             <h2>API Documentation</h2>
                 <ul class="memberlist">
             <li>
+                    <a class="function" href="#hash_string">hash_string</a>
+            </li>
+            <li>
                     <a class="class" href="#IList">IList</a>
                             <ul class="memberlist">
                         <li>
@@ -210,6 +213,36 @@
                                 <a class="function" href="#Runner.tags">tags</a>
                         </li>
                         <li>
+                                <a class="function" href="#Runner.has_knot_tags">has_knot_tags</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.num_knot_tags">num_knot_tags</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.get_knot_tag">get_knot_tag</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.knot_tags">knot_tags</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.current_knot">current_knot</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.has_global_tags">has_global_tags</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.num_global_tags">num_global_tags</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.get_global_tag">get_global_tag</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.global_tags">global_tags</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.all_tags">all_tags</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Runner.has_choices">has_choices</a>
                         </li>
                         <li>
@@ -277,6 +310,21 @@ inkcpp_py    </h1>
                 
                 
             </section>
+                <section id="hash_string">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">hash_string</span><span class="signature pdoc-code condensed">(<span class="param"><span class="nb">str</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="nb">int</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#hash_string"></a>
+    
+            <div class="docstring"><p>Converts string into hash used inside inkcpp as representation.</p>
+</div>
+
+
+                </section>
                 <section id="IList">
                     <div class="attr class">
             
@@ -1036,7 +1084,7 @@ To reload:</p>
     </div>
     <a class="headerlink" href="#Runner.has_tags"></a>
     
-            <div class="docstring"><p>Where there tags since last choice</p>
+            <div class="docstring"><p>Where there tags assoziated with the last line.</p>
 </div>
 
 
@@ -1051,7 +1099,7 @@ To reload:</p>
     </div>
     <a class="headerlink" href="#Runner.num_tags"></a>
     
-            <div class="docstring"><p>Number of tags currently stored</p>
+            <div class="docstring"><p>Number of tags assoziated with last line.</p>
 </div>
 
 
@@ -1082,6 +1130,156 @@ To reload:</p>
     <a class="headerlink" href="#Runner.tags"></a>
     
             <div class="docstring"><p>Get all current assigned tags</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.has_knot_tags" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">has_knot_tags</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">bool</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.has_knot_tags"></a>
+    
+            <div class="docstring"><p>Are there tags assoziated with current knot/stitch.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.num_knot_tags" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">num_knot_tags</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">int</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.num_knot_tags"></a>
+    
+            <div class="docstring"><p>Number of tags assoziated with current knot/stitch.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.get_knot_tag" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">get_knot_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.get_knot_tag"></a>
+    
+            <div class="docstring"><p>Get knot/stitch tag stored at index.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.knot_tags" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">knot_tags</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.knot_tags"></a>
+    
+            <div class="docstring"><p>Get all tags assoziated with current knot/stitch.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.current_knot" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">current_knot</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">int</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.current_knot"></a>
+    
+            <div class="docstring"><p>Get hash of current knot/tag path.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.has_global_tags" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">has_global_tags</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">bool</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.has_global_tags"></a>
+    
+            <div class="docstring"><p>Are there tags assoziated with current global.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.num_global_tags" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">num_global_tags</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">int</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.num_global_tags"></a>
+    
+            <div class="docstring"><p>Number of tags assoziated with current global.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.get_global_tag" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">get_global_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.get_global_tag"></a>
+    
+            <div class="docstring"><p>Get global tag stored at index.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.global_tags" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">global_tags</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.global_tags"></a>
+    
+            <div class="docstring"><p>Get all tags assoziated with current global.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.all_tags" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">all_tags</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.all_tags"></a>
+    
+            <div class="docstring"><p>Get a dictionary with tags for different levels. Be aware that global and knot tags are also part of the next output line after their definition.</p>
 </div>
 
 

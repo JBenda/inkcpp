@@ -110,10 +110,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a8310d2ed521bc132765b5cafbf9ec53b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Choice text.    <br /></td></tr>
 <tr class="separator:a8310d2ed521bc132765b5cafbf9ec53b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1bcde6aaa233fc49f0d690a709150aa5" id="r_a1bcde6aaa233fc49f0d690a709150aa5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1bcde6aaa233fc49f0d690a709150aa5">ink_choice_num_tags</a> (const <a class="el" href="class_h_ink_choice.html">HInkChoice</a> *self)</td></tr>
-<tr class="memdesc:a1bcde6aaa233fc49f0d690a709150aa5"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of tags assoziated with this choice    <br /></td></tr>
+<tr class="memdesc:a1bcde6aaa233fc49f0d690a709150aa5"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of tags associated with this choice    <br /></td></tr>
 <tr class="separator:a1bcde6aaa233fc49f0d690a709150aa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c7901240045c9baddc4fd28c5274cd4" id="r_a2c7901240045c9baddc4fd28c5274cd4"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c7901240045c9baddc4fd28c5274cd4">ink_choice_get_tag</a> (const <a class="el" href="class_h_ink_choice.html">HInkChoice</a> *self, int index)</td></tr>
-<tr class="memdesc:a2c7901240045c9baddc4fd28c5274cd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">access tag.      <br /></td></tr>
+<tr class="memdesc:a2c7901240045c9baddc4fd28c5274cd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access a tag by index.      <br /></td></tr>
 <tr class="separator:a2c7901240045c9baddc4fd28c5274cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -140,10 +140,18 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>access tag.     </p>
+<p>Access a tag by index.     </p>
+<p>Note that this method only allows the retrieval of tags attached to the current line. For tags at the top of the script, use get_global_tag()</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2">num_tags()</a>)     </td></tr>
+    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2">num_tags()</a>)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the tag string memory or nullptr if the index is invalid</dd></dl>
+<dl class="section see"><dt>See also</dt><dd>has_tags num_tags get_global_tag get_knot_tag     </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
     <tr><td class="paramname">self</td><td></td></tr>
   </table>
   </dd>
@@ -166,7 +174,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>number of tags assoziated with this choice   </p>
+<p>number of tags associated with this choice   </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">has_tags()</a>   </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

@@ -121,74 +121,53 @@ $(function(){initNavTree('choice_8h_source.html',''); initResizable(); });
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        <span class="keyword">class </span>runner_impl;</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <span class="keyword">class </span>string_table;</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <span class="keyword">class </span>list_table;</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    } <span class="comment">// namespace internal</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="foldopen" id="foldopen00031" data-start="{" data-end="};">
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html">   31</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classink_1_1runtime_1_1choice.html">choice</a></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    {</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">   42</a></span>        <span class="keywordtype">int</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">index</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _index; }</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#a5e1cf4548e212d606c5e905687660a4a">   51</a></span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#a5e1cf4548e212d606c5e905687660a4a">text</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _text; }</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <a class="code hl_class" href="classink_1_1runtime_1_1choice.html">choice</a>()</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>            : <a class="code hl_class" href="classink_1_1runtime_1_1choice.html">choice</a>(0)</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        {</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        }</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        choice(<span class="keywordtype">int</span>)</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>            : _tags{nullptr}</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>            , _text{nullptr}</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            , _index{~0}</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            , _path{~0u}</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            , _thread{~0u}</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        {</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        }</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">   70</a></span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">has_tags</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _tags != <span class="keyword">nullptr</span>; }</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="foldopen" id="foldopen00075" data-start="{" data-end="}">
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#a4caaba1a0177ad914a0f9bda0cb1c74a">   75</a></span>        <span class="keywordtype">size_t</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#a4caaba1a0177ad914a0f9bda0cb1c74a">num_tags</a>()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="keyword">        </span>{</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            <span class="keywordtype">size_t</span> i = 0;</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">has_tags</a>())</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>                <span class="keywordflow">while</span> (_tags[i] != <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                    ++i;</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                };</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>            <span class="keywordflow">return</span> i;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        }</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        <span class="keyword">class </span>snap_tag;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    } <span class="comment">// namespace internal</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="foldopen" id="foldopen00032" data-start="{" data-end="};">
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html">   32</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classink_1_1runtime_1_1choice.html">choice</a></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">   43</a></span>        <span class="keywordtype">int</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">index</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _index; }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#a5e1cf4548e212d606c5e905687660a4a">   52</a></span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#a5e1cf4548e212d606c5e905687660a4a">text</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _text; }</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">   55</a></span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">has_tags</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _tags_start != _tags_end; }</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#a4caaba1a0177ad914a0f9bda0cb1c74a">   60</a></span>        <span class="keywordtype">size_t</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#a4caaba1a0177ad914a0f9bda0cb1c74a">num_tags</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#abab7ee18657d51fd6417f25734e27e2b">   63</a></span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#abab7ee18657d51fd6417f25734e27e2b">get_tag</a>(<span class="keywordtype">size_t</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">index</a>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keyword">friend</span> <span class="keyword">class </span>internal::runner_impl;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <a class="code hl_typedef" href="namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a> path()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _path; }</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <a class="code hl_class" href="classink_1_1runtime_1_1choice.html">choice</a>&amp; setup(</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>            internal::basic_stream&amp;, internal::string_table&amp; strings, internal::list_table&amp; lists,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <span class="keywordtype">int</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">index</a>, <a class="code hl_typedef" href="namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a> path, <a class="code hl_typedef" href="namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a">thread_t</a> thread, <span class="keyword">const</span> internal::snap_tag* tags_start,</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>            <span class="keyword">const</span> internal::snap_tag* tags_end</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        );</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">int</span>                       _index      = -1;      </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="keyword">const</span> <span class="keywordtype">char</span>*               _text       = <span class="keyword">nullptr</span>; </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <a class="code hl_typedef" href="namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a>                  _path       = ~0;      </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <a class="code hl_typedef" href="namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a">thread_t</a>                  _thread     = ~0;      </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keyword">const</span> internal::snap_tag* _tags_start = <span class="keyword">nullptr</span>; </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keyword">const</span> internal::snap_tag* _tags_end   = <span class="keyword">nullptr</span>; </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    };</div>
 </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classink_1_1runtime_1_1choice.html#abab7ee18657d51fd6417f25734e27e2b">   86</a></span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#abab7ee18657d51fd6417f25734e27e2b">get_tag</a>(<span class="keywordtype">size_t</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">index</a>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _tags[<a class="code hl_function" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">index</a>]; }</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keyword">friend</span> <span class="keyword">class </span>internal::runner_impl;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <a class="code hl_typedef" href="namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a> path()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _path; }</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        choice&amp; setup(</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>            internal::basic_stream&amp;, internal::string_table&amp; strings, internal::list_table&amp; lists,</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            <span class="keywordtype">int</span> <a class="code hl_function" href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">index</a>, <a class="code hl_typedef" href="namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a> path, <a class="code hl_typedef" href="namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a">thread_t</a> thread, <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keyword">const</span>* tags</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        );</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keyword">protected</span>:</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keyword">const</span>* _tags;   </div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        <span class="keyword">const</span> <span class="keywordtype">char</span>*        _text;   </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="keywordtype">int</span>                _index;  </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <a class="code hl_typedef" href="namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a>           _path;   </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <a class="code hl_typedef" href="namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a">thread_t</a>           _thread; </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    };</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>} <span class="comment">// namespace runtime</span></div>
 </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>} <span class="comment">// namespace runtime</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>} <span class="comment">// namespace ink</span></div>
 </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>} <span class="comment">// namespace ink</span></div>
-</div>
-<div class="ttc" id="aclassink_1_1runtime_1_1choice_html"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html">ink::runtime::choice</a></div><div class="ttdoc">An ink choice that is being presented to the user.</div><div class="ttdef"><b>Definition</b> choice.h:32</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_a43ada6038d4f323e42dde255162f2fce"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">ink::runtime::choice::has_tags</a></div><div class="ttdeci">bool has_tags() const</div><div class="ttdoc">does this choice has tags?</div><div class="ttdef"><b>Definition</b> choice.h:70</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_a4caaba1a0177ad914a0f9bda0cb1c74a"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#a4caaba1a0177ad914a0f9bda0cb1c74a">ink::runtime::choice::num_tags</a></div><div class="ttdeci">size_t num_tags() const</div><div class="ttdoc">number of tags assoziated with this choice</div><div class="ttdef"><b>Definition</b> choice.h:75</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_a5e1cf4548e212d606c5e905687660a4a"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#a5e1cf4548e212d606c5e905687660a4a">ink::runtime::choice::text</a></div><div class="ttdeci">const char * text() const</div><div class="ttdoc">Choice text.</div><div class="ttdef"><b>Definition</b> choice.h:51</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_ab3365bacd6948635017c760ecfc9d258"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">ink::runtime::choice::index</a></div><div class="ttdeci">int index() const</div><div class="ttdoc">Choice index.</div><div class="ttdef"><b>Definition</b> choice.h:42</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_abab7ee18657d51fd6417f25734e27e2b"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#abab7ee18657d51fd6417f25734e27e2b">ink::runtime::choice::get_tag</a></div><div class="ttdeci">const char * get_tag(size_t index) const</div><div class="ttdoc">access tag.</div><div class="ttdef"><b>Definition</b> choice.h:86</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1choice_html"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html">ink::runtime::choice</a></div><div class="ttdoc">An ink choice that is being presented to the user.</div><div class="ttdef"><b>Definition</b> choice.h:33</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_a43ada6038d4f323e42dde255162f2fce"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">ink::runtime::choice::has_tags</a></div><div class="ttdeci">bool has_tags() const</div><div class="ttdoc">does this choice has tags?</div><div class="ttdef"><b>Definition</b> choice.h:55</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_a4caaba1a0177ad914a0f9bda0cb1c74a"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#a4caaba1a0177ad914a0f9bda0cb1c74a">ink::runtime::choice::num_tags</a></div><div class="ttdeci">size_t num_tags() const</div><div class="ttdoc">number of tags associated with this choice</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_a5e1cf4548e212d606c5e905687660a4a"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#a5e1cf4548e212d606c5e905687660a4a">ink::runtime::choice::text</a></div><div class="ttdeci">const char * text() const</div><div class="ttdoc">Choice text.</div><div class="ttdef"><b>Definition</b> choice.h:52</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_ab3365bacd6948635017c760ecfc9d258"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#ab3365bacd6948635017c760ecfc9d258">ink::runtime::choice::index</a></div><div class="ttdeci">int index() const</div><div class="ttdoc">Choice index.</div><div class="ttdef"><b>Definition</b> choice.h:43</div></div>
+<div class="ttc" id="aclassink_1_1runtime_1_1choice_html_abab7ee18657d51fd6417f25734e27e2b"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html#abab7ee18657d51fd6417f25734e27e2b">ink::runtime::choice::get_tag</a></div><div class="ttdeci">const char * get_tag(size_t index) const</div><div class="ttdoc">Access a tag by index.</div></div>
 <div class="ttc" id="anamespaceink_html"><div class="ttname"><a href="namespaceink.html">ink</a></div><div class="ttdoc">Namespace contaning all modules and classes from InkCPP.</div><div class="ttdef"><b>Definition</b> choice.h:11</div></div>
 <div class="ttc" id="anamespaceink_html_a0f7783f9d24518b373a9e367eeb6fd67"><div class="ttname"><a href="namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67">ink::uint32_t</a></div><div class="ttdeci">unsigned int uint32_t</div><div class="ttdoc">define basic numeric type</div><div class="ttdef"><b>Definition</b> system.h:47</div></div>
 <div class="ttc" id="anamespaceink_html_abc65bdba9646b6c75e67b50ae4d75f4a"><div class="ttname"><a href="namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a">ink::thread_t</a></div><div class="ttdeci">uint32_t thread_t</div><div class="ttdoc">Used to uniquely identify threads.</div><div class="ttdef"><b>Definition</b> system.h:81</div></div>

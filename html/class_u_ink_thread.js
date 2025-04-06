@@ -1,8 +1,11 @@
 var class_u_ink_thread =
 [
+    [ "GetGlobalTags", "class_u_ink_thread.html#af3d06392e295aa283755bea289b32a1a", null ],
+    [ "GetKnotTags", "class_u_ink_thread.html#a188bfcf8dce77018778e015f33b03892", null ],
     [ "GetRuntime", "class_u_ink_thread.html#a4d442c493705a1d7033390df230b3394", null ],
     [ "IsYielding", "class_u_ink_thread.html#a5ad5f6af61ec09376ade40cd600f13e7", null ],
     [ "OnChoice", "class_u_ink_thread.html#a22281d2560f2544986ae807cf0b2bd75", null ],
+    [ "OnKnotEntered", "class_u_ink_thread.html#a24e60ef23774f02df43920ac7e22b1a7", null ],
     [ "OnLineWritten", "class_u_ink_thread.html#a0ed86560d99b34f2f435494894104bbf", null ],
     [ "OnShutdown", "class_u_ink_thread.html#a00ee1e91e87599f5f263f350c7a02261", null ],
     [ "OnStartup", "class_u_ink_thread.html#aefb7ba83839493187313708cafd52afd", null ],

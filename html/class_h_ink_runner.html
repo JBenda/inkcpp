@@ -130,11 +130,27 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>ink_runner_delete</b>
 <tr class="memdesc:a79f3397373201990fde1c603d2c80013"><td class="mdescLeft">&#160;</td><td class="mdescRight">Continue execution until the next newline, then allocate a c-style string with the output.    <br /></td></tr>
 <tr class="separator:a79f3397373201990fde1c603d2c80013"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5aba5cc9fd0d63b04d2491ad4ca0ca96" id="r_a5aba5cc9fd0d63b04d2491ad4ca0ca96"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5aba5cc9fd0d63b04d2491ad4ca0ca96">ink_runner_num_tags</a> (const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self)</td></tr>
-<tr class="memdesc:a5aba5cc9fd0d63b04d2491ad4ca0ca96"><td class="mdescLeft">&#160;</td><td class="mdescRight">return the number of current.    <br /></td></tr>
+<tr class="memdesc:a5aba5cc9fd0d63b04d2491ad4ca0ca96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of tags on the current line.    <br /></td></tr>
 <tr class="separator:a5aba5cc9fd0d63b04d2491ad4ca0ca96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a665a93019c70b2143dba60cdb4f5acb1" id="r_a665a93019c70b2143dba60cdb4f5acb1"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a665a93019c70b2143dba60cdb4f5acb1">ink_runner_tag</a> (const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self, int index)</td></tr>
-<tr class="memdesc:a665a93019c70b2143dba60cdb4f5acb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">access tag.    <br /></td></tr>
+<tr class="memdesc:a665a93019c70b2143dba60cdb4f5acb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access a tag by index.    <br /></td></tr>
 <tr class="separator:a665a93019c70b2143dba60cdb4f5acb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a894681b0e452d9954671d373cbd75c00" id="r_a894681b0e452d9954671d373cbd75c00"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a894681b0e452d9954671d373cbd75c00">ink_runner_num_knot_tags</a> (const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self)</td></tr>
+<tr class="memdesc:a894681b0e452d9954671d373cbd75c00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Number of knot/stitch tags.    <br /></td></tr>
+<tr class="separator:a894681b0e452d9954671d373cbd75c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fc424fedca356502e2dcc531df5b0b2" id="r_a8fc424fedca356502e2dcc531df5b0b2"><td class="memItemLeft" align="right" valign="top">ink_hash_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8fc424fedca356502e2dcc531df5b0b2">ink_runner_current_knot</a> (const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self)</td></tr>
+<tr class="memdesc:a8fc424fedca356502e2dcc531df5b0b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get hash of current knot/stitch name.    <br /></td></tr>
+<tr class="separator:a8fc424fedca356502e2dcc531df5b0b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95aec922f97034c8c095513848ebbd3b" id="r_a95aec922f97034c8c095513848ebbd3b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a95aec922f97034c8c095513848ebbd3b">ink_runner_move_to</a> (<a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self, ink_hash_t path)</td></tr>
+<tr class="memdesc:a95aec922f97034c8c095513848ebbd3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Moves the runner to the specified path.    <br /></td></tr>
+<tr class="separator:a95aec922f97034c8c095513848ebbd3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f4774bea2aa6eae0705e9b6543f3bbf" id="r_a6f4774bea2aa6eae0705e9b6543f3bbf"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f4774bea2aa6eae0705e9b6543f3bbf">ink_runner_knot_tag</a> (const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self, int index)</td></tr>
+<tr class="separator:a6f4774bea2aa6eae0705e9b6543f3bbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abec19117a876d1f89622145c4698c6ee" id="r_abec19117a876d1f89622145c4698c6ee"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abec19117a876d1f89622145c4698c6ee">ink_runner_num_global_tags</a> (const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self)</td></tr>
+<tr class="memdesc:abec19117a876d1f89622145c4698c6ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Number of global tags.    <br /></td></tr>
+<tr class="separator:abec19117a876d1f89622145c4698c6ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad01f01a233267c8fe08c407ad5c6f351" id="r_ad01f01a233267c8fe08c407ad5c6f351"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad01f01a233267c8fe08c407ad5c6f351">ink_runner_global_tag</a> (const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self, int index)</td></tr>
+<tr class="separator:ad01f01a233267c8fe08c407ad5c6f351"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab845e33e1a0e564c48b6ff13ef3a4b00" id="r_ab845e33e1a0e564c48b6ff13ef3a4b00"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab845e33e1a0e564c48b6ff13ef3a4b00">ink_runner_num_choices</a> (const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *self)</td></tr>
 <tr class="memdesc:ab845e33e1a0e564c48b6ff13ef3a4b00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of choices currently available.    <br /></td></tr>
 <tr class="separator:ab845e33e1a0e564c48b6ff13ef3a4b00"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -365,6 +381,33 @@ has_choices</dd></dl>
 
 </div>
 </div>
+<a id="a8fc424fedca356502e2dcc531df5b0b2" name="a8fc424fedca356502e2dcc531df5b0b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fc424fedca356502e2dcc531df5b0b2">&#9670;&#160;</a></span>ink_runner_current_knot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ink_hash_t ink_runner_current_knot </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *</td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get hash of current knot/stitch name.   </p>
+<dl class="section return"><dt>Returns</dt><dd>hash of current knot/stitch name </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceink.html#add30d4ab28415ba7fdbbc67ed0de9630" title="Simple hash for serialization of strings.">ink::hash_string()</a>   </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">self</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a14d342743ba1b56ad0f5f468693408f0" name="a14d342743ba1b56ad0f5f468693408f0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a14d342743ba1b56ad0f5f468693408f0">&#9670;&#160;</a></span>ink_runner_get_choice()</h2>
 
@@ -419,8 +462,104 @@ has_choices</dd></dl>
 </div><div class="memdoc">
 
 <p>Continue execution until the next newline, then allocate a c-style string with the output.   </p>
-<p>This allocated string is managed by the runtime and will be deleted at the next <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a28aee9166888663eaa334d555e2932a4">choose()</a> or <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a0742b665b6089aeebddf950974eb196f">getline()</a></p>
+<p>This allocated string is managed by the runtime and will be deleted at the next <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a28aee9166888663eaa334d555e2932a4">choose()</a> or <a class="el" href="classink_1_1runtime_1_1runner__interface.html#ab7be672d20aa3c6b57f561c584236c39">getline()</a></p>
 <dl class="section return"><dt>Returns</dt><dd>allocated c-style string with the output of a single line of execution   </dd></dl>
+
+</div>
+</div>
+<a id="ad01f01a233267c8fe08c407ad5c6f351" name="ad01f01a233267c8fe08c407ad5c6f351"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad01f01a233267c8fe08c407ad5c6f351">&#9670;&#160;</a></span>ink_runner_global_tag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * ink_runner_global_tag </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *</td>          <td class="paramname"><span class="paramname"><em>self</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>index</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">self</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6f4774bea2aa6eae0705e9b6543f3bbf" name="a6f4774bea2aa6eae0705e9b6543f3bbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f4774bea2aa6eae0705e9b6543f3bbf">&#9670;&#160;</a></span>ink_runner_knot_tag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * ink_runner_knot_tag </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *</td>          <td class="paramname"><span class="paramname"><em>self</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>index</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">self</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a95aec922f97034c8c095513848ebbd3b" name="a95aec922f97034c8c095513848ebbd3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95aec922f97034c8c095513848ebbd3b">&#9670;&#160;</a></span>ink_runner_move_to()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ink_runner_move_to </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_h_ink_runner.html">HInkRunner</a> *</td>          <td class="paramname"><span class="paramname"><em>self</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ink_hash_t</td>          <td class="paramname"><span class="paramname"><em>path</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Moves the runner to the specified path.   </p>
+<p>Clears any execution context and moves the runner to the content at the specified path.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>path to search and move execution to </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>If the path was found   </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">self</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__clib.html#gae63e421dcc4c2abfbec0e19a8f517e86" title="Hash a string, this hash is used inside inkcpp instead of the string actual value.">ink_hash_string()</a> </dd></dl>
 
 </div>
 </div>
@@ -450,6 +589,60 @@ has_choices</dd></dl>
 
 </div>
 </div>
+<a id="abec19117a876d1f89622145c4698c6ee" name="abec19117a876d1f89622145c4698c6ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abec19117a876d1f89622145c4698c6ee">&#9670;&#160;</a></span>ink_runner_num_global_tags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ink_runner_num_global_tags </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *</td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get Number of global tags.   </p>
+<p>@info global tags are also assoziated to the first line in the knot/stitch </p><dl class="section see"><dt>See also</dt><dd>has_global_tags get_global_tags num_knot_tags num_tags </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of tags at the top of the document.   </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">self</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a894681b0e452d9954671d373cbd75c00" name="a894681b0e452d9954671d373cbd75c00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a894681b0e452d9954671d373cbd75c00">&#9670;&#160;</a></span>ink_runner_num_knot_tags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ink_runner_num_knot_tags </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_h_ink_runner.html">HInkRunner</a> *</td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get Number of knot/stitch tags.   </p>
+<p>@info knot/stitch tags are also assoziated to the first line in the knot/stitch </p><dl class="section return"><dt>Returns</dt><dd>number of tags at the top of a knot/stitch </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>has_knot_tags get_knot_tag num_global_tags num_tags   </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">self</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a5aba5cc9fd0d63b04d2491ad4ca0ca96" name="a5aba5cc9fd0d63b04d2491ad4ca0ca96"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5aba5cc9fd0d63b04d2491ad4ca0ca96">&#9670;&#160;</a></span>ink_runner_num_tags()</h2>
 
@@ -465,8 +658,9 @@ has_choices</dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>return the number of current.   </p>
-<p>The tags will be accumulated since last choice order of tags wont change, and new are added at the end   </p>
+<p>Returns the number of tags on the current line.   </p>
+<p>Excludes global tags.</p>
+<dl class="section see"><dt>See also</dt><dd>get_tag has_tags num_global_tags num_knot_tags   </dd></dl>
 
 </div>
 </div>
@@ -489,10 +683,18 @@ has_choices</dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>access tag.   </p>
+<p>Access a tag by index.   </p>
+<p>Note that this method only allows the retrieval of tags attached to the current line. For tags at the top of the script, use get_global_tag()</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2">num_tags()</a>)   </td></tr>
+    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2">num_tags()</a>)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the tag string memory or nullptr if the index is invalid</dd></dl>
+<dl class="section see"><dt>See also</dt><dd>has_tags num_tags get_global_tag get_knot_tag   </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
     <tr><td class="paramname">self</td><td></td></tr>
   </table>
   </dd>

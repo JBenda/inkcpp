@@ -203,78 +203,79 @@ $(function(){initNavTree('types_8h_source.html',''); initResizable(); });
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
 <div class="foldopen" id="foldopen00102" data-start="{" data-end="}">
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="structink_1_1runtime_1_1value.html#a1e765052e98edf7f890289a425166115">  102</a></span>    <a class="code hl_function" href="structink_1_1runtime_1_1value.html#a1e765052e98edf7f890289a425166115">value</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structink_1_1runtime_1_1value.html">value</a>&amp; v)</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        : <a class="code hl_variable" href="structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403">type</a>{v.<a class="code hl_variable" href="structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403">type</a>}</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    {</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keywordflow">switch</span> (<a class="code hl_variable" href="structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403">type</a>) {</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8ac26f15e86e3de4c398a8273272aba034">Type::Bool</a>: v_bool = v.v_bool; <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a2f3a46e0add3a07937412cbeb8f95727">Type::Uint32</a>: v_uint32 = v.v_uint32; <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8ac06129f6e6e15c09328365e553f1dc31">Type::Int32</a>: v_int32 = v.v_int32; <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a27118326006d3829667a400ad23d5d98">Type::String</a>: v_string = v.v_string; <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a22ae0e2b89e5e3d477f988cc36d3272b">Type::Float</a>: v_float = v.v_float; <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a4ee29ca12c7d126654bd0e5275de6135">Type::List</a>: v_list = v.v_list; <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        }</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    }</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        : v_string{nullptr}</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        , <a class="code hl_variable" href="structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403">type</a>{v.<a class="code hl_variable" href="structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403">type</a>}</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    {</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        <span class="keywordflow">switch</span> (<a class="code hl_variable" href="structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403">type</a>) {</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8ac26f15e86e3de4c398a8273272aba034">Type::Bool</a>: v_bool = v.v_bool; <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a2f3a46e0add3a07937412cbeb8f95727">Type::Uint32</a>: v_uint32 = v.v_uint32; <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8ac06129f6e6e15c09328365e553f1dc31">Type::Int32</a>: v_int32 = v.v_int32; <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a27118326006d3829667a400ad23d5d98">Type::String</a>: v_string = v.v_string; <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a22ae0e2b89e5e3d477f988cc36d3272b">Type::Float</a>: v_float = v.v_float; <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a4ee29ca12c7d126654bd0e5275de6135">Type::List</a>: v_list = v.v_list; <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        }</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    }</div>
 </div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keyword">template</span>&lt;Type Ty&gt;</div>
-<div class="foldopen" id="foldopen00122" data-start="{" data-end="}">
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e">  122</a></span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_function" href="structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e">get</a>()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        <span class="keyword">static_assert</span>(Ty != Ty, <span class="stringliteral">&quot;No value getter for the selected type&quot;</span>);</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    }</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keyword">template</span>&lt;Type Ty&gt;</div>
+<div class="foldopen" id="foldopen00123" data-start="{" data-end="}">
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e">  123</a></span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_function" href="structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e">get</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        <span class="keyword">static_assert</span>(Ty != Ty, <span class="stringliteral">&quot;No value getter for the selected type&quot;</span>);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    }</div>
 </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>};</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>};</div>
 </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="keyword">template</span>&lt;&gt;</div>
-<div class="foldopen" id="foldopen00130" data-start="{" data-end="}">
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#acc21647cb714862434fc51a3b0894f5f">  130</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::Bool&gt;()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordflow">return</span> v_bool;</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>}</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="keyword">template</span>&lt;&gt;</div>
+<div class="foldopen" id="foldopen00131" data-start="{" data-end="}">
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#acc21647cb714862434fc51a3b0894f5f">  131</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::Bool&gt;()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keywordflow">return</span> v_bool;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>}</div>
 </div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="keyword">template</span>&lt;&gt;</div>
-<div class="foldopen" id="foldopen00137" data-start="{" data-end="}">
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#aac0a3e45fe13cdbda4d95a7f10ba102a">  137</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::Uint32&gt;()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="keywordflow">return</span> v_uint32;</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>}</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="keyword">template</span>&lt;&gt;</div>
+<div class="foldopen" id="foldopen00138" data-start="{" data-end="}">
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#aac0a3e45fe13cdbda4d95a7f10ba102a">  138</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::Uint32&gt;()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <span class="keywordflow">return</span> v_uint32;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>}</div>
 </div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="keyword">template</span>&lt;&gt;</div>
-<div class="foldopen" id="foldopen00144" data-start="{" data-end="}">
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#aeacdda632b11cb20347911ee9dd604ee">  144</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::Int32&gt;()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="keywordflow">return</span> v_int32;</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>}</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="keyword">template</span>&lt;&gt;</div>
+<div class="foldopen" id="foldopen00145" data-start="{" data-end="}">
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#aeacdda632b11cb20347911ee9dd604ee">  145</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::Int32&gt;()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="keywordflow">return</span> v_int32;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>}</div>
 </div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="keyword">template</span>&lt;&gt;</div>
-<div class="foldopen" id="foldopen00151" data-start="{" data-end="}">
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#a30355a7a8f068acad091881ad99b0355">  151</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::String&gt;()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordflow">return</span> v_string;</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>}</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="keyword">template</span>&lt;&gt;</div>
+<div class="foldopen" id="foldopen00152" data-start="{" data-end="}">
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#a30355a7a8f068acad091881ad99b0355">  152</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::String&gt;()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keywordflow">return</span> v_string;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>}</div>
 </div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="keyword">template</span>&lt;&gt;</div>
-<div class="foldopen" id="foldopen00158" data-start="{" data-end="}">
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#aadb39541614546023d73580d745dcf65">  158</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::Float&gt;()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <span class="keywordflow">return</span> v_float;</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>}</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="keyword">template</span>&lt;&gt;</div>
+<div class="foldopen" id="foldopen00159" data-start="{" data-end="}">
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#aadb39541614546023d73580d745dcf65">  159</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::Float&gt;()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="keywordflow">return</span> v_float;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>}</div>
 </div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="keyword">template</span>&lt;&gt;</div>
-<div class="foldopen" id="foldopen00165" data-start="{" data-end="}">
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#a8ad49778610648ec27f7f3bd9d256a27">  165</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::List&gt;()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="keywordflow">return</span> v_list;</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>}</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span><span class="keyword">template</span>&lt;&gt;</div>
+<div class="foldopen" id="foldopen00166" data-start="{" data-end="}">
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="namespaceink_1_1runtime.html#a8ad49778610648ec27f7f3bd9d256a27">  166</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">auto</span>&amp; value::get&lt;value::Type::List&gt;()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="keywordflow">return</span> v_list;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>}</div>
 </div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>} <span class="comment">// namespace ink::runtime</span></div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>} <span class="comment">// namespace ink::runtime</span></div>
 <div class="ttc" id="aclassink_1_1runtime_1_1list__interface_html"><div class="ttname"><a href="classink_1_1runtime_1_1list__interface.html">ink::runtime::list_interface</a></div><div class="ttdoc">Interface for accessing a Ink list.</div><div class="ttdef"><b>Definition</b> list.h:43</div></div>
 <div class="ttc" id="aclassink_1_1runtime_1_1story__ptr_html"><div class="ttname"><a href="classink_1_1runtime_1_1story__ptr.html">ink::runtime::story_ptr</a></div><div class="ttdoc">Pointer wrapper to an object whose lifetime is tied to a story object.</div><div class="ttdef"><b>Definition</b> story_ptr.h:85</div></div>
 <div class="ttc" id="anamespaceink_1_1runtime_html"><div class="ttname"><a href="namespaceink_1_1runtime.html">ink::runtime</a></div><div class="ttdoc">Contaning all modules and classes used for the inkles ink runtime.</div><div class="ttdef"><b>Definition</b> choice.h:13</div></div>
@@ -293,7 +294,7 @@ $(function(){initNavTree('types_8h_source.html',''); initResizable(); });
 <div class="ttc" id="astructink_1_1runtime_1_1value_html_a8d6eae7e36845ed0684f775e4e9d10fd"><div class="ttname"><a href="structink_1_1runtime_1_1value.html#a8d6eae7e36845ed0684f775e4e9d10fd">ink::runtime::value::value</a></div><div class="ttdeci">value(list_interface *list)</div><div class="ttdoc">Construct value from corresponding type.</div><div class="ttdef"><b>Definition</b> types.h:96</div></div>
 <div class="ttc" id="astructink_1_1runtime_1_1value_html_a9491ec27049e08da1d118e0630fa9403"><div class="ttname"><a href="structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403">ink::runtime::value::type</a></div><div class="ttdeci">enum ink::runtime::value::Type type</div><div class="ttdoc">Label of type currently contained in value.</div></div>
 <div class="ttc" id="astructink_1_1runtime_1_1value_html_aaf1b471915e632f9e38db634d8f61c02"><div class="ttname"><a href="structink_1_1runtime_1_1value.html#aaf1b471915e632f9e38db634d8f61c02">ink::runtime::value::value</a></div><div class="ttdeci">value(const char *v)</div><div class="ttdoc">Construct value from corresponding type.</div><div class="ttdef"><b>Definition</b> types.h:84</div></div>
-<div class="ttc" id="astructink_1_1runtime_1_1value_html_ab56df01832b43aae8f16a8cd70e3a40e"><div class="ttname"><a href="structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e">ink::runtime::value::get</a></div><div class="ttdeci">const auto &amp; get() const</div><div class="ttdoc">Get value to corresponding type.</div><div class="ttdef"><b>Definition</b> types.h:122</div></div>
+<div class="ttc" id="astructink_1_1runtime_1_1value_html_ab56df01832b43aae8f16a8cd70e3a40e"><div class="ttname"><a href="structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e">ink::runtime::value::get</a></div><div class="ttdeci">const auto &amp; get() const</div><div class="ttdoc">Get value to corresponding type.</div><div class="ttdef"><b>Definition</b> types.h:123</div></div>
 <div class="ttc" id="astructink_1_1runtime_1_1value_html_ab769b64992b7799ea6e13e5a386a94cc"><div class="ttname"><a href="structink_1_1runtime_1_1value.html#ab769b64992b7799ea6e13e5a386a94cc">ink::runtime::value::value</a></div><div class="ttdeci">value(int32_t v)</div><div class="ttdoc">Construct value from corresponding type.</div><div class="ttdef"><b>Definition</b> types.h:78</div></div>
 <div class="ttc" id="astructink_1_1runtime_1_1value_html_afd35f26da56dda24b3f90dca9c768715"><div class="ttname"><a href="structink_1_1runtime_1_1value.html#afd35f26da56dda24b3f90dca9c768715">ink::runtime::value::value</a></div><div class="ttdeci">value(float v)</div><div class="ttdoc">Construct value from corresponding type.</div><div class="ttdef"><b>Definition</b> types.h:90</div></div>
 </div><!-- fragment --></div><!-- contents -->

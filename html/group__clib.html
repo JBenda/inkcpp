@@ -131,6 +131,9 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:gae63e421dcc4c2abfbec0e19a8f517e86" id="r_gae63e421dcc4c2abfbec0e19a8f517e86"><td class="memItemLeft" align="right" valign="top">ink_hash_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae63e421dcc4c2abfbec0e19a8f517e86">ink_hash_string</a> (const char *str)</td></tr>
+<tr class="memdesc:gae63e421dcc4c2abfbec0e19a8f517e86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hash a string, this hash is used inside inkcpp instead of the string actual value.  <br /></td></tr>
+<tr class="separator:gae63e421dcc4c2abfbec0e19a8f517e86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga807cb69b63b8d373b8900fc2136bc041" id="r_ga807cb69b63b8d373b8900fc2136bc041"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga807cb69b63b8d373b8900fc2136bc041">ink_compile_json</a> (const char *input_filename, const char *output_filename, const char **error)</td></tr>
 <tr class="memdesc:ga807cb69b63b8d373b8900fc2136bc041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compiles a .ink.json file to an inkCPP .bin file.  <br /></td></tr>
 <tr class="separator:ga807cb69b63b8d373b8900fc2136bc041"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,8 +209,8 @@ main.c</h2>
 <div class="ttc" id="aclass_h_ink_story_html"><div class="ttname"><a href="class_h_ink_story.html">HInkStory</a></div><div class="ttdoc">Handle for a loaded ink story.</div></div>
 <div class="ttc" id="agroup__clib_html_ga807cb69b63b8d373b8900fc2136bc041"><div class="ttname"><a href="#ga807cb69b63b8d373b8900fc2136bc041">ink_compile_json</a></div><div class="ttdeci">void ink_compile_json(const char *input_filename, const char *output_filename, const char **error)</div><div class="ttdoc">Compiles a .ink.json file to an inkCPP .bin file.</div></div>
 <div class="ttc" id="anamespaceink_1_1runtime_html_ad63cbd82595f3f52ef21543b309ba8b6"><div class="ttname"><a href="namespaceink_1_1runtime.html#ad63cbd82595f3f52ef21543b309ba8b6">ink::runtime::runner</a></div><div class="ttdeci">story_ptr&lt; runner_interface &gt; runner</div><div class="ttdoc">alias for an managed ink::runtime::runner_interface pointer</div><div class="ttdef"><b>Definition</b> types.h:22</div></div>
-<div class="ttc" id="astruct_ink_value_html"><div class="ttname"><a href="struct_ink_value.html">InkValue</a></div><div class="ttdoc">Repserentation of a ink variable.</div><div class="ttdef"><b>Definition</b> inkcpp.h:167</div></div>
-<div class="ttc" id="astruct_ink_value_html_a412bb26a32f9eb10c0a7fdd8cde5ced5"><div class="ttname"><a href="struct_ink_value.html#a412bb26a32f9eb10c0a7fdd8cde5ced5">InkValue::int32_v</a></div><div class="ttdeci">int32_t int32_v</div><div class="ttdoc">contains value if type == ValueTypeInt32</div><div class="ttdef"><b>Definition</b> inkcpp.h:172</div></div>
+<div class="ttc" id="astruct_ink_value_html"><div class="ttname"><a href="struct_ink_value.html">InkValue</a></div><div class="ttdoc">Repserentation of a ink variable.</div><div class="ttdef"><b>Definition</b> inkcpp.h:169</div></div>
+<div class="ttc" id="astruct_ink_value_html_a412bb26a32f9eb10c0a7fdd8cde5ced5"><div class="ttname"><a href="struct_ink_value.html#a412bb26a32f9eb10c0a7fdd8cde5ced5">InkValue::int32_v</a></div><div class="ttdeci">int32_t int32_v</div><div class="ttdoc">contains value if type == ValueTypeInt32</div><div class="ttdef"><b>Definition</b> inkcpp.h:174</div></div>
 </div><!-- fragment --> <h2 class="groupheader">Function Documentation</h2>
 <a id="ga807cb69b63b8d373b8900fc2136bc041" name="ga807cb69b63b8d373b8900fc2136bc041"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga807cb69b63b8d373b8900fc2136bc041">&#9670;&#160;</a></span>ink_compile_json()</h2>
@@ -242,6 +245,33 @@ main.c</h2>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="gae63e421dcc4c2abfbec0e19a8f517e86" name="gae63e421dcc4c2abfbec0e19a8f517e86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae63e421dcc4c2abfbec0e19a8f517e86">&#9670;&#160;</a></span>ink_hash_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ink_hash_t ink_hash_string </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>str</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Hash a string, this hash is used inside inkcpp instead of the string actual value. </p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_h_ink_runner.html#a95aec922f97034c8c095513848ebbd3b" title="Moves the runner to the specified path.">HInkRunner::ink_runner_move_to()</a>, <a class="el" href="class_h_ink_runner.html#a8fc424fedca356502e2dcc531df5b0b2" title="Get hash of current knot/stitch name.">HInkRunner::ink_runner_current_knot()</a></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">str</td><td>string to hash </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>hash of string </dd></dl>
 
 </div>
 </div>

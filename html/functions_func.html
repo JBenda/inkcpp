@@ -148,16 +148,21 @@ $(function(){initNavTree('functions_func.html',''); initResizable(); });
 
 
 <h3><a id="index_g" name="index_g"></a>- g -</h3><ul>
-<li>get()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1globals__interface.html#af1b554735287274f9687d8fdb01c60b1">ink::runtime::globals_interface</a>, <a class="el" href="classink_1_1runtime_1_1story__ptr.html#a0caa472345e48e40ce41877485a8c129">ink::runtime::story_ptr&lt; T &gt;</a>, <a class="el" href="structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e">ink::runtime::value</a></li>
+<li>get()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1globals__interface.html#a5970302d9613e5e26cefe65afeeeab62">ink::runtime::globals_interface</a>, <a class="el" href="classink_1_1runtime_1_1story__ptr.html#a00752db600c583a59df8d9a63dc86eda">ink::runtime::story_ptr&lt; T &gt;</a>, <a class="el" href="structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e">ink::runtime::value</a></li>
 <li>get_choice()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#ab491b834ff52317f4064b192f397c71f">ink::runtime::runner_interface</a></li>
+<li>get_current_knot()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#ae471a8b4293e01a70a5de6d8b89cf51c">ink::runtime::runner_interface</a></li>
 <li>get_data()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1snapshot.html#aec7b9ba65e59556a3187422fb0236c5f">ink::runtime::snapshot</a></li>
 <li>get_data_len()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1snapshot.html#a6f1eb6f110928e49aa548309eec5d80b">ink::runtime::snapshot</a></li>
+<li>get_global_tag()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a45b9fda515985c4e7d24c7890142da06">ink::runtime::runner_interface</a></li>
+<li>get_knot_tag()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a6d02bf97f649e6a500a324dff5e345ea">ink::runtime::runner_interface</a></li>
 <li>get_tag()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1choice.html#abab7ee18657d51fd6417f25734e27e2b">ink::runtime::choice</a>, <a class="el" href="classink_1_1runtime_1_1runner__interface.html#acfaf8cdcf008156d664224e14e6c9d5a">ink::runtime::runner_interface</a></li>
-<li>getall()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a01e03fdf85e97b1940ac1bd2a3991351">ink::runtime::runner_interface</a></li>
+<li>getall()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#aafac9c34ef692e26f4cb069a2892be83">ink::runtime::runner_interface</a></li>
 <li>GetEnum()&#160;:&#160;<a class="el" href="class_u_tag_list.html#a56f245a60b5145cbf37fa992e1ceef5d">UTagList</a></li>
+<li>GetGlobalTags()&#160;:&#160;<a class="el" href="class_u_ink_thread.html#af3d06392e295aa283755bea289b32a1a">UInkThread</a></li>
 <li>GetGlobalVariable()&#160;:&#160;<a class="el" href="class_a_ink_runtime.html#a26dc6ff0aed1892a913dde81b60ab1ec">AInkRuntime</a></li>
 <li>GetIndex()&#160;:&#160;<a class="el" href="class_u_ink_choice.html#ab7617b3eca6eacdc9cf1042d65661c81">UInkChoice</a></li>
-<li>getline()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a0742b665b6089aeebddf950974eb196f">ink::runtime::runner_interface</a></li>
+<li>GetKnotTags()&#160;:&#160;<a class="el" href="class_u_ink_thread.html#a188bfcf8dce77018778e015f33b03892">UInkThread</a></li>
+<li>getline()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#ab7be672d20aa3c6b57f561c584236c39">ink::runtime::runner_interface</a></li>
 <li>getline_alloc()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#aad32614d1ceafa1e62a9c662c2ea4f34">ink::runtime::runner_interface</a></li>
 <li>GetRuntime()&#160;:&#160;<a class="el" href="class_u_ink_thread.html#a4d442c493705a1d7033390df230b3394">UInkThread</a></li>
 <li>GetTags()&#160;:&#160;<a class="el" href="class_u_ink_choice.html#a0a0b2a9b8cec6ab287e878c3277b675b">UInkChoice</a>, <a class="el" href="class_u_tag_list.html#ab2321cf84ed9dfa789916dbaf576749f">UTagList</a></li>
@@ -169,6 +174,8 @@ $(function(){initNavTree('functions_func.html',''); initResizable(); });
 <h3><a id="index_h" name="index_h"></a>- h -</h3><ul>
 <li>Has()&#160;:&#160;<a class="el" href="class_u_tag_list.html#a6d96d78a3f05189b458843058222736b">UTagList</a></li>
 <li>has_choices()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#ac845b66007a113707704e4f1e88b98ed">ink::runtime::runner_interface</a></li>
+<li>has_global_tags()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a2f549b9fc502fdb41445eac6bd5707e7">ink::runtime::runner_interface</a></li>
+<li>has_knot_tags()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a40910043aaa0c6803a75716b8c3be2ff">ink::runtime::runner_interface</a></li>
 <li>has_tags()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce">ink::runtime::choice</a>, <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a0374a4dd14a26929de47e5cf12868dde">ink::runtime::runner_interface</a></li>
 <li>HasEnum()&#160;:&#160;<a class="el" href="class_u_tag_list.html#a7ee9b59f50482718fe1f8eed47f24a3e">UTagList</a></li>
 </ul>
@@ -192,10 +199,16 @@ $(function(){initNavTree('functions_func.html',''); initResizable(); });
 <li>ink_runner_can_continue()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#acfa96a79ca2d4c2cf2e0d9e9287cf9dd">HInkRunner</a></li>
 <li>ink_runner_choose()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a7519820b1ee7b3448d8ec2d8585a0990">HInkRunner</a></li>
 <li>ink_runner_create_snapshot()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a3039bd72b35c7131e74d1ddadb40838c">HInkRunner</a></li>
+<li>ink_runner_current_knot()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a8fc424fedca356502e2dcc531df5b0b2">HInkRunner</a></li>
 <li>ink_runner_delete()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#af51fa336ac81d45210fc70f867fb0250">HInkRunner</a></li>
 <li>ink_runner_get_choice()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a14d342743ba1b56ad0f5f468693408f0">HInkRunner</a></li>
 <li>ink_runner_get_line()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a79f3397373201990fde1c603d2c80013">HInkRunner</a></li>
+<li>ink_runner_global_tag()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#ad01f01a233267c8fe08c407ad5c6f351">HInkRunner</a></li>
+<li>ink_runner_knot_tag()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a6f4774bea2aa6eae0705e9b6543f3bbf">HInkRunner</a></li>
+<li>ink_runner_move_to()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a95aec922f97034c8c095513848ebbd3b">HInkRunner</a></li>
 <li>ink_runner_num_choices()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#ab845e33e1a0e564c48b6ff13ef3a4b00">HInkRunner</a></li>
+<li>ink_runner_num_global_tags()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#abec19117a876d1f89622145c4698c6ee">HInkRunner</a></li>
+<li>ink_runner_num_knot_tags()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a894681b0e452d9954671d373cbd75c00">HInkRunner</a></li>
 <li>ink_runner_num_tags()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a5aba5cc9fd0d63b04d2491ad4ca0ca96">HInkRunner</a></li>
 <li>ink_runner_tag()&#160;:&#160;<a class="el" href="class_h_ink_runner.html#a665a93019c70b2143dba60cdb4f5acb1">HInkRunner</a></li>
 <li>ink_snapshot_from_file()&#160;:&#160;<a class="el" href="class_h_ink_snapshot.html#a432a1ea5b1326db82ce9d87a8e55bb35">HInkSnapshot</a></li>
@@ -229,6 +242,8 @@ $(function(){initNavTree('functions_func.html',''); initResizable(); });
 <li>new_runner()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1story.html#ab0bcc61fba0c879979d334cca8e21f16">ink::runtime::story</a></li>
 <li>new_runner_from_snapshot()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story</a></li>
 <li>num_choices()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#ae86dc739d94d0969b8d4759ac3205272">ink::runtime::runner_interface</a></li>
+<li>num_global_tags()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a55258152885fecbc36eba94ec82ccb67">ink::runtime::runner_interface</a></li>
+<li>num_knot_tags()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a0c5a5ed61326bf14bd1fe04c70f0e398">ink::runtime::runner_interface</a></li>
 <li>num_runners()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1snapshot.html#a9d580a0a4ca50685b595bf368032d8db">ink::runtime::snapshot</a></li>
 <li>num_tags()&#160;:&#160;<a class="el" href="classink_1_1runtime_1_1choice.html#a4caaba1a0177ad914a0f9bda0cb1c74a">ink::runtime::choice</a>, <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2">ink::runtime::runner_interface</a></li>
 </ul>
@@ -240,6 +255,7 @@ $(function(){initNavTree('functions_func.html',''); initResizable(); });
 <li>ObserverVariableChange()&#160;:&#160;<a class="el" href="class_a_ink_runtime.html#aa2d9d975a33604846e6bb4f18676a8b7">AInkRuntime</a></li>
 <li>ObserverVariableEvent()&#160;:&#160;<a class="el" href="class_a_ink_runtime.html#a5b03be048c60644d9c983410654f258b">AInkRuntime</a></li>
 <li>OnChoice()&#160;:&#160;<a class="el" href="class_u_ink_thread.html#a22281d2560f2544986ae807cf0b2bd75">UInkThread</a></li>
+<li>OnKnotEntered()&#160;:&#160;<a class="el" href="class_u_ink_thread.html#a24e60ef23774f02df43920ac7e22b1a7">UInkThread</a></li>
 <li>OnLineWritten()&#160;:&#160;<a class="el" href="class_u_ink_thread.html#a0ed86560d99b34f2f435494894104bbf">UInkThread</a></li>
 <li>OnShutdown()&#160;:&#160;<a class="el" href="class_u_ink_thread.html#a00ee1e91e87599f5f263f350c7a02261">UInkThread</a></li>
 <li>OnStartup()&#160;:&#160;<a class="el" href="class_u_ink_thread.html#aefb7ba83839493187313708cafd52afd">UInkThread</a></li>

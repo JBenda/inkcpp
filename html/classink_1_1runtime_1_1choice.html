@@ -118,10 +118,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_tags</b> () const
 <tr class="memdesc:a43ada6038d4f323e42dde255162f2fce"><td class="mdescLeft">&#160;</td><td class="mdescRight">does this choice has tags? <br /></td></tr>
 <tr class="separator:a43ada6038d4f323e42dde255162f2fce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4caaba1a0177ad914a0f9bda0cb1c74a" id="r_a4caaba1a0177ad914a0f9bda0cb1c74a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4caaba1a0177ad914a0f9bda0cb1c74a">num_tags</a> () const</td></tr>
-<tr class="memdesc:a4caaba1a0177ad914a0f9bda0cb1c74a"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of tags assoziated with this choice  <br /></td></tr>
+<tr class="memdesc:a4caaba1a0177ad914a0f9bda0cb1c74a"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of tags associated with this choice  <br /></td></tr>
 <tr class="separator:a4caaba1a0177ad914a0f9bda0cb1c74a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abab7ee18657d51fd6417f25734e27e2b" id="r_abab7ee18657d51fd6417f25734e27e2b"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abab7ee18657d51fd6417f25734e27e2b">get_tag</a> (<a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a> <a class="el" href="#ab3365bacd6948635017c760ecfc9d258">index</a>) const</td></tr>
-<tr class="memdesc:abab7ee18657d51fd6417f25734e27e2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">access tag.    <br /></td></tr>
+<tr class="memdesc:abab7ee18657d51fd6417f25734e27e2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access a tag by index.    <br /></td></tr>
 <tr class="separator:abab7ee18657d51fd6417f25734e27e2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
@@ -140,9 +140,6 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>internal::runner_imp
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">const char * ink::runtime::choice::get_tag </td>
@@ -151,20 +148,18 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>internal::runner_imp
           <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>access tag.   </p>
+<p>Access a tag by index.   </p>
+<p>Note that this method only allows the retrieval of tags attached to the current line. For tags at the top of the script, use get_global_tag()</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2">num_tags()</a>)   </td></tr>
+    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2">num_tags()</a>)</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the tag string memory or nullptr if the index is invalid</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a43ada6038d4f323e42dde255162f2fce" title="does this choice has tags?">has_tags</a> <a class="el" href="#a4caaba1a0177ad914a0f9bda0cb1c74a" title="number of tags associated with this choice">num_tags</a> get_global_tag get_knot_tag   </dd></dl>
 
 </div>
 </div>
@@ -202,9 +197,6 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>internal::runner_imp
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a> ink::runtime::choice::num_tags </td>
@@ -213,14 +205,9 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>internal::runner_imp
           <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>number of tags assoziated with this choice </p>
+<p>number of tags associated with this choice </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a43ada6038d4f323e42dde255162f2fce">has_tags()</a> </dd></dl>
 
 </div>

@@ -93,6 +93,7 @@ $(function(){initNavTree('classink_1_1runtime_1_1runner__interface.html',''); in
 
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classink_1_1runtime_1_1runner__interface-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">ink::runtime::runner_interface Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
@@ -104,6 +105,12 @@ $(function(){initNavTree('classink_1_1runtime_1_1runner__interface.html',''); in
 
 <p><code>#include &lt;<a class="el" href="runner_8h_source.html">runner.h</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a2bfe0479270bfa9347fb61a703f6ae63" id="r_a2bfe0479270bfa9347fb61a703f6ae63"><td class="memItemLeft" align="right" valign="top"><a id="a2bfe0479270bfa9347fb61a703f6ae63" name="a2bfe0479270bfa9347fb61a703f6ae63"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>line_type</b> = std::string</td></tr>
+<tr class="separator:a2bfe0479270bfa9347fb61a703f6ae63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a03a5787865d7708227ebff27a2518f1c" id="r_a03a5787865d7708227ebff27a2518f1c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03a5787865d7708227ebff27a2518f1c">set_rng_seed</a> (<a class="el" href="namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a> seed)=0</td></tr>
@@ -121,21 +128,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a38aa102610dbd4764133b50d2474db6c" id="r_a38aa102610dbd4764133b50d2474db6c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classink_1_1runtime_1_1snapshot.html">snapshot</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a38aa102610dbd4764133b50d2474db6c">create_snapshot</a> () const =0</td></tr>
 <tr class="memdesc:a38aa102610dbd4764133b50d2474db6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a snapshot containing the runner, globals and all other runners connected to the globals.  <br /></td></tr>
 <tr class="separator:a38aa102610dbd4764133b50d2474db6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0742b665b6089aeebddf950974eb196f" id="r_a0742b665b6089aeebddf950974eb196f"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0742b665b6089aeebddf950974eb196f">getline</a> ()=0</td></tr>
-<tr class="memdesc:a0742b665b6089aeebddf950974eb196f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the next line of output using C++ STL string.  <br /></td></tr>
-<tr class="separator:a0742b665b6089aeebddf950974eb196f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7be672d20aa3c6b57f561c584236c39" id="r_ab7be672d20aa3c6b57f561c584236c39"><td class="memItemLeft" align="right" valign="top">virtual line_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab7be672d20aa3c6b57f561c584236c39">getline</a> ()=0</td></tr>
+<tr class="memdesc:ab7be672d20aa3c6b57f561c584236c39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the next line of the script.  <br /></td></tr>
+<tr class="separator:ab7be672d20aa3c6b57f561c584236c39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafac9c34ef692e26f4cb069a2892be83" id="r_aafac9c34ef692e26f4cb069a2892be83"><td class="memItemLeft" align="right" valign="top">virtual line_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aafac9c34ef692e26f4cb069a2892be83">getall</a> ()=0</td></tr>
+<tr class="memdesc:aafac9c34ef692e26f4cb069a2892be83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the script until the next choice or the end of the script.  <br /></td></tr>
+<tr class="separator:aafac9c34ef692e26f4cb069a2892be83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac565b3841e5c5dbe57d46b732d5716e" id="r_aac565b3841e5c5dbe57d46b732d5716e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aac565b3841e5c5dbe57d46b732d5716e">getline</a> (std::ostream &amp;)=0</td></tr>
 <tr class="memdesc:aac565b3841e5c5dbe57d46b732d5716e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the next line of output using C++ STL string.  <br /></td></tr>
 <tr class="separator:aac565b3841e5c5dbe57d46b732d5716e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01e03fdf85e97b1940ac1bd2a3991351" id="r_a01e03fdf85e97b1940ac1bd2a3991351"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01e03fdf85e97b1940ac1bd2a3991351">getall</a> ()=0</td></tr>
-<tr class="memdesc:a01e03fdf85e97b1940ac1bd2a3991351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets all the text until the next choice or end.  <br /></td></tr>
-<tr class="separator:a01e03fdf85e97b1940ac1bd2a3991351"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a0b9cdf2a96c80edfdad82f7722a11b" id="r_a4a0b9cdf2a96c80edfdad82f7722a11b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a0b9cdf2a96c80edfdad82f7722a11b">getall</a> (std::ostream &amp;)=0</td></tr>
 <tr class="memdesc:a4a0b9cdf2a96c80edfdad82f7722a11b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets all the text until the next choice or end.  <br /></td></tr>
 <tr class="separator:a4a0b9cdf2a96c80edfdad82f7722a11b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae6216d96ca2ce6b4b9d1dee85688ec93" id="r_ae6216d96ca2ce6b4b9d1dee85688ec93"><td class="memItemLeft" align="right" valign="top">virtual FString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae6216d96ca2ce6b4b9d1dee85688ec93">getline</a> ()=0</td></tr>
-<tr class="memdesc:ae6216d96ca2ce6b4b9d1dee85688ec93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the next line of output using unreal string allocation.  <br /></td></tr>
-<tr class="separator:ae6216d96ca2ce6b4b9d1dee85688ec93"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0372a6e0dc9f3c8c2d8a428efedc78da" id="r_a0372a6e0dc9f3c8c2d8a428efedc78da"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classink_1_1runtime_1_1choice.html">choice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0372a6e0dc9f3c8c2d8a428efedc78da">begin</a> () const =0</td></tr>
 <tr class="memdesc:a0372a6e0dc9f3c8c2d8a428efedc78da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Choice iterator.  <br /></td></tr>
 <tr class="separator:a0372a6e0dc9f3c8c2d8a428efedc78da"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,16 +149,36 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a28aee9166888663eaa334d555e2932a4" id="r_a28aee9166888663eaa334d555e2932a4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a28aee9166888663eaa334d555e2932a4">choose</a> (<a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a> index)=0</td></tr>
 <tr class="memdesc:a28aee9166888663eaa334d555e2932a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a choice.  <br /></td></tr>
 <tr class="separator:a28aee9166888663eaa334d555e2932a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0374a4dd14a26929de47e5cf12868dde" id="r_a0374a4dd14a26929de47e5cf12868dde"><td class="memItemLeft" align="right" valign="top"><a id="a0374a4dd14a26929de47e5cf12868dde" name="a0374a4dd14a26929de47e5cf12868dde"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_tags</b> () const =0</td></tr>
-<tr class="memdesc:a0374a4dd14a26929de47e5cf12868dde"><td class="mdescLeft">&#160;</td><td class="mdescRight">check if since last choice selection tags have been added <br /></td></tr>
+<tr class="memitem:a0374a4dd14a26929de47e5cf12868dde" id="r_a0374a4dd14a26929de47e5cf12868dde"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0374a4dd14a26929de47e5cf12868dde">has_tags</a> () const =0</td></tr>
+<tr class="memdesc:a0374a4dd14a26929de47e5cf12868dde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the current line has any tags.  <br /></td></tr>
 <tr class="separator:a0374a4dd14a26929de47e5cf12868dde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55e73bec8b70c4004136bab9c6c963c2" id="r_a55e73bec8b70c4004136bab9c6c963c2"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55e73bec8b70c4004136bab9c6c963c2">num_tags</a> () const =0</td></tr>
-<tr class="memdesc:a55e73bec8b70c4004136bab9c6c963c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">return the number of current.  <br /></td></tr>
+<tr class="memdesc:a55e73bec8b70c4004136bab9c6c963c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of tags on the current line.  <br /></td></tr>
 <tr class="separator:a55e73bec8b70c4004136bab9c6c963c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acfaf8cdcf008156d664224e14e6c9d5a" id="r_acfaf8cdcf008156d664224e14e6c9d5a"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acfaf8cdcf008156d664224e14e6c9d5a">get_tag</a> (<a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a> index) const =0</td></tr>
-<tr class="memdesc:acfaf8cdcf008156d664224e14e6c9d5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">access tag.  <br /></td></tr>
+<tr class="memdesc:acfaf8cdcf008156d664224e14e6c9d5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access a tag by index.  <br /></td></tr>
 <tr class="separator:acfaf8cdcf008156d664224e14e6c9d5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f549b9fc502fdb41445eac6bd5707e7" id="r_a2f549b9fc502fdb41445eac6bd5707e7"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f549b9fc502fdb41445eac6bd5707e7">has_global_tags</a> () const =0</td></tr>
+<tr class="memdesc:a2f549b9fc502fdb41445eac6bd5707e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the there are global tags.  <br /></td></tr>
+<tr class="separator:a2f549b9fc502fdb41445eac6bd5707e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55258152885fecbc36eba94ec82ccb67" id="r_a55258152885fecbc36eba94ec82ccb67"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55258152885fecbc36eba94ec82ccb67">num_global_tags</a> () const =0</td></tr>
+<tr class="memdesc:a55258152885fecbc36eba94ec82ccb67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Number of global tags.  <br /></td></tr>
+<tr class="separator:a55258152885fecbc36eba94ec82ccb67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45b9fda515985c4e7d24c7890142da06" id="r_a45b9fda515985c4e7d24c7890142da06"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45b9fda515985c4e7d24c7890142da06">get_global_tag</a> (<a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a> index) const =0</td></tr>
+<tr class="memdesc:a45b9fda515985c4e7d24c7890142da06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access a global tag by index.  <br /></td></tr>
+<tr class="separator:a45b9fda515985c4e7d24c7890142da06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40910043aaa0c6803a75716b8c3be2ff" id="r_a40910043aaa0c6803a75716b8c3be2ff"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a40910043aaa0c6803a75716b8c3be2ff">has_knot_tags</a> () const =0</td></tr>
+<tr class="memdesc:a40910043aaa0c6803a75716b8c3be2ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if there are knot/stitch tags.  <br /></td></tr>
+<tr class="separator:a40910043aaa0c6803a75716b8c3be2ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c5a5ed61326bf14bd1fe04c70f0e398" id="r_a0c5a5ed61326bf14bd1fe04c70f0e398"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0c5a5ed61326bf14bd1fe04c70f0e398">num_knot_tags</a> () const =0</td></tr>
+<tr class="memdesc:a0c5a5ed61326bf14bd1fe04c70f0e398"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Number of knot/stitch tags.  <br /></td></tr>
+<tr class="separator:a0c5a5ed61326bf14bd1fe04c70f0e398"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d02bf97f649e6a500a324dff5e345ea" id="r_a6d02bf97f649e6a500a324dff5e345ea"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d02bf97f649e6a500a324dff5e345ea">get_knot_tag</a> (<a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a> index) const =0</td></tr>
+<tr class="memdesc:a6d02bf97f649e6a500a324dff5e345ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access a knot/stitch tag by index.  <br /></td></tr>
+<tr class="separator:a6d02bf97f649e6a500a324dff5e345ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae471a8b4293e01a70a5de6d8b89cf51c" id="r_ae471a8b4293e01a70a5de6d8b89cf51c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceink.html#aed82cdcf558062e527831ad78f23e5ab">hash_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae471a8b4293e01a70a5de6d8b89cf51c">get_current_knot</a> () const =0</td></tr>
+<tr class="memdesc:ae471a8b4293e01a70a5de6d8b89cf51c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get hash of current knot/stitch name.  <br /></td></tr>
+<tr class="separator:ae471a8b4293e01a70a5de6d8b89cf51c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a104b364f7813bb85b2970a4f718d4e24" id="r_a104b364f7813bb85b2970a4f718d4e24"><td class="memTemplParams" colspan="2">template&lt;typename F &gt; </td></tr>
 <tr class="memitem:a104b364f7813bb85b2970a4f718d4e24"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a104b364f7813bb85b2970a4f718d4e24">bind</a> (<a class="el" href="namespaceink.html#aed82cdcf558062e527831ad78f23e5ab">hash_t</a> name, F function, bool lookaheadSafe=false)</td></tr>
 <tr class="memdesc:a104b364f7813bb85b2970a4f718d4e24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Binds an external callable to the runtime.  <br /></td></tr>
@@ -514,6 +538,106 @@ template&lt;typename D &gt; </div>
 
 </div>
 </div>
+<a id="ae471a8b4293e01a70a5de6d8b89cf51c" name="ae471a8b4293e01a70a5de6d8b89cf51c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae471a8b4293e01a70a5de6d8b89cf51c">&#9670;&#160;</a></span>get_current_knot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespaceink.html#aed82cdcf558062e527831ad78f23e5ab">hash_t</a> ink::runtime::runner_interface::get_current_knot </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get hash of current knot/stitch name. </p>
+<dl class="section return"><dt>Returns</dt><dd>hash of current knot/stitch name </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceink.html#add30d4ab28415ba7fdbbc67ed0de9630" title="Simple hash for serialization of strings.">ink::hash_string()</a> </dd></dl>
+
+</div>
+</div>
+<a id="a45b9fda515985c4e7d24c7890142da06" name="a45b9fda515985c4e7d24c7890142da06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45b9fda515985c4e7d24c7890142da06">&#9670;&#160;</a></span>get_global_tag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const char * ink::runtime::runner_interface::get_global_tag </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a></td>          <td class="paramname"><span class="paramname"><em>index</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Access a global tag by index. </p>
+<p>Global tags are placed at the top of the script instead of above or next to the current line. For tags related to the current line, use </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="#acfaf8cdcf008156d664224e14e6c9d5a" title="Access a tag by index.">get_tag</a></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="#a55258152885fecbc36eba94ec82ccb67">num_global_tags()</a>)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the tag string memory or nullptr if the index is invalid </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2f549b9fc502fdb41445eac6bd5707e7" title="Check if the there are global tags.">has_global_tags</a> <a class="el" href="#a55258152885fecbc36eba94ec82ccb67" title="Get Number of global tags.">num_global_tags</a> <a class="el" href="#acfaf8cdcf008156d664224e14e6c9d5a" title="Access a tag by index.">get_tag</a> <a class="el" href="#a6d02bf97f649e6a500a324dff5e345ea" title="Access a knot/stitch tag by index.">get_knot_tag</a> </dd></dl>
+
+</div>
+</div>
+<a id="a6d02bf97f649e6a500a324dff5e345ea" name="a6d02bf97f649e6a500a324dff5e345ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d02bf97f649e6a500a324dff5e345ea">&#9670;&#160;</a></span>get_knot_tag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const char * ink::runtime::runner_interface::get_knot_tag </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a></td>          <td class="paramname"><span class="paramname"><em>index</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Access a knot/stitch tag by index. </p>
+<p>Knot stitch tags are placed at the top of a knot/stitch. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="#a0c5a5ed61326bf14bd1fe04c70f0e398">num_knot_tags()</a>) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>pointor to tag string memory or nullptr if the index is invalid </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>has_knot_tag <a class="el" href="#a0c5a5ed61326bf14bd1fe04c70f0e398" title="Get Number of knot/stitch tags.">num_knot_tags</a> <a class="el" href="#a45b9fda515985c4e7d24c7890142da06" title="Access a global tag by index.">get_global_tag</a> <a class="el" href="#acfaf8cdcf008156d664224e14e6c9d5a" title="Access a tag by index.">get_tag</a> </dd></dl>
+
+</div>
+</div>
 <a id="acfaf8cdcf008156d664224e14e6c9d5a" name="acfaf8cdcf008156d664224e14e6c9d5a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acfaf8cdcf008156d664224e14e6c9d5a">&#9670;&#160;</a></span>get_tag()</h2>
 
@@ -537,18 +661,21 @@ template&lt;typename D &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>access tag. </p>
+<p>Access a tag by index. </p>
+<p>Note that this method only allows the retrieval of tags attached to the current line. For tags at the top of the script, use <a class="el" href="#a45b9fda515985c4e7d24c7890142da06" title="Access a global tag by index.">get_global_tag()</a></p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="#a55e73bec8b70c4004136bab9c6c963c2">num_tags()</a>) </td></tr>
+    <tr><td class="paramname">index</td><td>tag id to fetch [0;<a class="el" href="#a55e73bec8b70c4004136bab9c6c963c2">num_tags()</a>)</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the tag string memory or nullptr if the index is invalid</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a0374a4dd14a26929de47e5cf12868dde" title="Check if the current line has any tags.">has_tags</a> <a class="el" href="#a55e73bec8b70c4004136bab9c6c963c2" title="Returns the number of tags on the current line.">num_tags</a> <a class="el" href="#a45b9fda515985c4e7d24c7890142da06" title="Access a global tag by index.">get_global_tag</a> <a class="el" href="#a6d02bf97f649e6a500a324dff5e345ea" title="Access a knot/stitch tag by index.">get_knot_tag</a> </dd></dl>
 
 </div>
 </div>
-<a id="a01e03fdf85e97b1940ac1bd2a3991351" name="a01e03fdf85e97b1940ac1bd2a3991351"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a01e03fdf85e97b1940ac1bd2a3991351">&#9670;&#160;</a></span>getall() <span class="overload">[1/2]</span></h2>
+<a id="aafac9c34ef692e26f4cb069a2892be83" name="aafac9c34ef692e26f4cb069a2892be83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aafac9c34ef692e26f4cb069a2892be83">&#9670;&#160;</a></span>getall() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -557,7 +684,7 @@ template&lt;typename D &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::string ink::runtime::runner_interface::getall </td>
+          <td class="memname">virtual line_type ink::runtime::runner_interface::getall </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -570,9 +697,9 @@ template&lt;typename D &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Gets all the text until the next choice or end. </p>
-<p>Continue execution until the next choice or the story ends, then return the output as an STL C++ std::string. Requires INK_ENABLE_STL</p>
-<dl class="section return"><dt>Returns</dt><dd>std::string with the next line of output </dd></dl>
+<p>Execute the script until the next choice or the end of the script. </p>
+<p>Continue execution until the next choice or the story ends, then returns the output as an STL C++ <code>std::string</code> or Unreal's <code>FString</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>string with the next line of output </dd></dl>
 
 </div>
 </div>
@@ -604,8 +731,8 @@ template&lt;typename D &gt; </div>
 
 </div>
 </div>
-<a id="a0742b665b6089aeebddf950974eb196f" name="a0742b665b6089aeebddf950974eb196f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0742b665b6089aeebddf950974eb196f">&#9670;&#160;</a></span>getline() <span class="overload">[1/3]</span></h2>
+<a id="ab7be672d20aa3c6b57f561c584236c39" name="ab7be672d20aa3c6b57f561c584236c39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7be672d20aa3c6b57f561c584236c39">&#9670;&#160;</a></span>getline() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -614,7 +741,7 @@ template&lt;typename D &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::string ink::runtime::runner_interface::getline </td>
+          <td class="memname">virtual line_type ink::runtime::runner_interface::getline </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -627,43 +754,14 @@ template&lt;typename D &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Gets the next line of output using C++ STL string. </p>
-<p>Continue execution until the next newline, then return the output as an STL C++ std::string. Requires INK_ENABLE_STL</p>
-<dl class="section return"><dt>Returns</dt><dd>std::string with the next line of output </dd></dl>
-
-</div>
-</div>
-<a id="ae6216d96ca2ce6b4b9d1dee85688ec93" name="ae6216d96ca2ce6b4b9d1dee85688ec93"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6216d96ca2ce6b4b9d1dee85688ec93">&#9670;&#160;</a></span>getline() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual FString ink::runtime::runner_interface::getline </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Gets the next line of output using unreal string allocation. </p>
-<p>Continue execution until the next newline, then return the output as an Unreal FString. Requires INK_ENABLE_UNREAL</p>
-<dl class="section return"><dt>Returns</dt><dd>FString with the next line of output </dd></dl>
+<p>Execute the next line of the script. </p>
+<p>Continue execution until the next newline, then returns the output as an STL C++ <code>std::string</code> or Unreal's <code>FString</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>string with the next line of output </dd></dl>
 
 </div>
 </div>
 <a id="aac565b3841e5c5dbe57d46b732d5716e" name="aac565b3841e5c5dbe57d46b732d5716e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aac565b3841e5c5dbe57d46b732d5716e">&#9670;&#160;</a></span>getline() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aac565b3841e5c5dbe57d46b732d5716e">&#9670;&#160;</a></span>getline() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -714,7 +812,7 @@ template&lt;typename D &gt; </div>
 </div><div class="memdoc">
 
 <p>Continue execution until the next newline, then allocate a c-style string with the output. </p>
-<p>This allocated string is managed by the runtime and will be deleted at the next <a class="el" href="#a28aee9166888663eaa334d555e2932a4">choose()</a> or <a class="el" href="#a0742b665b6089aeebddf950974eb196f">getline()</a></p>
+<p>This allocated string is managed by the runtime and will be deleted at the next <a class="el" href="#a28aee9166888663eaa334d555e2932a4">choose()</a> or <a class="el" href="#ab7be672d20aa3c6b57f561c584236c39">getline()</a></p>
 <dl class="section return"><dt>Returns</dt><dd>allocated c-style string with the output of a single line of execution </dd></dl>
 
 </div>
@@ -744,6 +842,94 @@ template&lt;typename D &gt; </div>
 
 <p>Checks if we're currently facing any choices. </p>
 <dl class="section return"><dt>Returns</dt><dd>are there any choices available </dd></dl>
+
+</div>
+</div>
+<a id="a2f549b9fc502fdb41445eac6bd5707e7" name="a2f549b9fc502fdb41445eac6bd5707e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f549b9fc502fdb41445eac6bd5707e7">&#9670;&#160;</a></span>has_global_tags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool ink::runtime::runner_interface::has_global_tags </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if the there are global tags. </p>
+<dl class="section return"><dt>Returns</dt><dd>ture if there are global tags. @info global tags are also assoziated to the first line in the knot/stitch </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a55258152885fecbc36eba94ec82ccb67" title="Get Number of global tags.">num_global_tags</a> get_global_tags <a class="el" href="#a0374a4dd14a26929de47e5cf12868dde" title="Check if the current line has any tags.">has_tags</a> <a class="el" href="#a40910043aaa0c6803a75716b8c3be2ff" title="Check if there are knot/stitch tags.">has_knot_tags</a> </dd></dl>
+
+</div>
+</div>
+<a id="a40910043aaa0c6803a75716b8c3be2ff" name="a40910043aaa0c6803a75716b8c3be2ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40910043aaa0c6803a75716b8c3be2ff">&#9670;&#160;</a></span>has_knot_tags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool ink::runtime::runner_interface::has_knot_tags </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if there are knot/stitch tags. </p>
+<p>@info knot/stitch tags are also assoziated to the first line in the knot/stitch </p><dl class="section return"><dt>Returns</dt><dd>true if there are knot/stitch tags. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a0c5a5ed61326bf14bd1fe04c70f0e398" title="Get Number of knot/stitch tags.">num_knot_tags</a> <a class="el" href="#a6d02bf97f649e6a500a324dff5e345ea" title="Access a knot/stitch tag by index.">get_knot_tag</a> <a class="el" href="#a2f549b9fc502fdb41445eac6bd5707e7" title="Check if the there are global tags.">has_global_tags</a> <a class="el" href="#a0374a4dd14a26929de47e5cf12868dde" title="Check if the current line has any tags.">has_tags</a> </dd></dl>
+
+</div>
+</div>
+<a id="a0374a4dd14a26929de47e5cf12868dde" name="a0374a4dd14a26929de47e5cf12868dde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0374a4dd14a26929de47e5cf12868dde">&#9670;&#160;</a></span>has_tags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool ink::runtime::runner_interface::has_tags </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if the current line has any tags. </p>
+<p>Excludes global tags.</p>
+<dl class="section return"><dt>Returns</dt><dd>true if the line has tags, false if not</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a55e73bec8b70c4004136bab9c6c963c2" title="Returns the number of tags on the current line.">num_tags</a> <a class="el" href="#acfaf8cdcf008156d664224e14e6c9d5a" title="Access a tag by index.">get_tag</a> <a class="el" href="#a2f549b9fc502fdb41445eac6bd5707e7" title="Check if the there are global tags.">has_global_tags</a> <a class="el" href="#a40910043aaa0c6803a75716b8c3be2ff" title="Check if there are knot/stitch tags.">has_knot_tags</a> </dd></dl>
 
 </div>
 </div>
@@ -802,6 +988,64 @@ template&lt;typename D &gt; </div>
 
 </div>
 </div>
+<a id="a55258152885fecbc36eba94ec82ccb67" name="a55258152885fecbc36eba94ec82ccb67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55258152885fecbc36eba94ec82ccb67">&#9670;&#160;</a></span>num_global_tags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a> ink::runtime::runner_interface::num_global_tags </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get Number of global tags. </p>
+<p>@info global tags are also assoziated to the first line in the knot/stitch </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2f549b9fc502fdb41445eac6bd5707e7" title="Check if the there are global tags.">has_global_tags</a> get_global_tags <a class="el" href="#a0c5a5ed61326bf14bd1fe04c70f0e398" title="Get Number of knot/stitch tags.">num_knot_tags</a> <a class="el" href="#a55e73bec8b70c4004136bab9c6c963c2" title="Returns the number of tags on the current line.">num_tags</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of tags at the top of the document. </dd></dl>
+
+</div>
+</div>
+<a id="a0c5a5ed61326bf14bd1fe04c70f0e398" name="a0c5a5ed61326bf14bd1fe04c70f0e398"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c5a5ed61326bf14bd1fe04c70f0e398">&#9670;&#160;</a></span>num_knot_tags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a> ink::runtime::runner_interface::num_knot_tags </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get Number of knot/stitch tags. </p>
+<p>@info knot/stitch tags are also assoziated to the first line in the knot/stitch </p><dl class="section return"><dt>Returns</dt><dd>number of tags at the top of a knot/stitch </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a40910043aaa0c6803a75716b8c3be2ff" title="Check if there are knot/stitch tags.">has_knot_tags</a> <a class="el" href="#a6d02bf97f649e6a500a324dff5e345ea" title="Access a knot/stitch tag by index.">get_knot_tag</a> <a class="el" href="#a55258152885fecbc36eba94ec82ccb67" title="Get Number of global tags.">num_global_tags</a> <a class="el" href="#a55e73bec8b70c4004136bab9c6c963c2" title="Returns the number of tags on the current line.">num_tags</a> </dd></dl>
+
+</div>
+</div>
 <a id="a55e73bec8b70c4004136bab9c6c963c2" name="a55e73bec8b70c4004136bab9c6c963c2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a55e73bec8b70c4004136bab9c6c963c2">&#9670;&#160;</a></span>num_tags()</h2>
 
@@ -825,8 +1069,9 @@ template&lt;typename D &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>return the number of current. </p>
-<p>The tags will be accumulated since last choice order of tags wont change, and new are added at the end </p>
+<p>Returns the number of tags on the current line. </p>
+<p>Excludes global tags.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#acfaf8cdcf008156d664224e14e6c9d5a" title="Access a tag by index.">get_tag</a> <a class="el" href="#a0374a4dd14a26929de47e5cf12868dde" title="Check if the current line has any tags.">has_tags</a> <a class="el" href="#a55258152885fecbc36eba94ec82ccb67" title="Get Number of global tags.">num_global_tags</a> <a class="el" href="#a0c5a5ed61326bf14bd1fe04c70f0e398" title="Get Number of knot/stitch tags.">num_knot_tags</a> </dd></dl>
 
 </div>
 </div>
