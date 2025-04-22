@@ -42,7 +42,7 @@ enable_testing()
 
 # Project setup
 project(inkcpp VERSION 0.1.8)
-SET(CMAKE_CXX_STANDARD 20)
+SET(CMAKE_CXX_STANDARD 17) # Make sure this project and all dependencies use the C++17 standard
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
@@ -59,7 +59,7 @@ set_property(CACHE INKCPP_INKLECATE PROPERTY STRINGS "NONE" "OS" "ALL")
 string(TOUPPER "${INKCPP_INKLECATE}" inkcpp_inklecate_upper)
 if (inkcpp_inklecate_upper STREQUAL "ALL")
 	FetchContent_MakeAvailable(inklecate_windows inklecate_mac inklecate_linux)
-elseif(inkcpp_inklecate_upper STREQUAL "OS")	
+elseif(inkcpp_inklecate_upper STREQUAL "OS")
 	if(UNIX AND NOT APPLE)
 		FetchContent_MakeAvailable(inklecate_linux)
 	elseif(APPLE)
@@ -153,7 +153,7 @@ if (DOXYGEN_FOUND)
 	if (INKCPP_DOC_BlueprintUE AND NOT "${NODEJS_PATH}" STREQUAL "NODEJS-NOTFOUND")
 		# TODO: make as dependecy
 		file(COPY "${PROJECT_SOURCE_DIR}/unreal/blueprint_filter.js" DESTINATION ${PROJECT_BINARY_DIR})
-		# file(DOWNLOAD 
+		# file(DOWNLOAD
 		# 	"https://raw.githubusercontent.com/blueprintue/blueprintue-self-hosted-edition/main/www/bue-render/render.css"
 		# 	"${PROJECT_BINARY_DIR}/render.css"
 		# 	EXPECTED_HASH SHA256=875364e36f8aa5d6c1d41d58043f13b48a499b5c969e8daef35bd29bbf7c6e8d)
@@ -195,7 +195,7 @@ if (DOXYGEN_FOUND)
 			COMMAND ${CMAKE_COMMAND} -E copy "./inkcpp_py.html" ${PY_HTML}
 			DEPENDS inkcpp_py
 			WORKING_DIRECTORY $<TARGET_FILE_DIR:inkcpp_py>
-			COMMENT "Generates simple python documentation") 
+			COMMENT "Generates simple python documentation")
 		add_dependencies(doc inkcpp_py_doc)
 	else()
 			message(WARNING "The python target is disabled, therfore no python documentation will be build. Set INKCPP_PY to change this")

@@ -1,10 +1,10 @@
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-list(APPEND SOURCES 
+list(APPEND SOURCES
     array.h
     choice.cpp
     functional.cpp
-    functions.h functions.cpp    
+    functions.h functions.cpp
     globals_impl.h globals_impl.cpp
     output.h output.cpp
     platform.h
@@ -33,7 +33,7 @@ list(APPEND SOURCES
 	random.h
 )
 list(APPEND COLLECTION_SOURCES
-    collections/restorable.h 
+    collections/restorable.h
     collections/restorable.cpp
 )
 FILE(GLOB PUBLIC_HEADERS "include/*")
@@ -51,11 +51,9 @@ target_include_directories(inkcpp PUBLIC
 )
 set_target_properties(inkcpp PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
-# Make sure the include directory is included 
+# Make sure the include directory is included
 target_link_libraries(inkcpp_o PRIVATE inkcpp_shared)
 target_link_libraries(inkcpp PRIVATE inkcpp_shared)
-# Make sure this project and all dependencies use the C++17 standard
-target_compile_features(inkcpp PUBLIC cxx_std_17)
 
 
 # Unreal installation
