@@ -699,9 +699,7 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 		int list_begin = list.list_id == 0 ? 0 : _list_end[list.list_id - 1];
 		for (int i = list_begin; i != _list_end[list.list_id]; ++i) {
 			if (str_equal(flag_name, _flag_names[i])) {
-				return {
-				    list_flag{.list_id = list.list_id, .flag = static_cast<int16_t>(i - list_begin)}
-        };
+				return list_flag{list.list_id, static_cast<int16_t>(i - list_begin)};
 			}
 		}
 	} else {
@@ -717,10 +715,7 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 					}
 					begin = *list_itr;
 				}
-				return {
-				    list_flag{
-				              .list_id = static_cast<int16_t>(lid), .flag = static_cast<int16_t>(fid - begin)}
-        };
+				return list_flag{static_cast<int16_t>(lid), static_cast<int16_t>(fid - begin)};
 			}
 		}
 	}
