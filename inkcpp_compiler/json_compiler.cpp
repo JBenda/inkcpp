@@ -138,7 +138,8 @@ void json_compiler::compile_container(
 	bool           is_knot = name_override != "" && index_in_parent == -1;
 	if (is_knot) {
 		// it is not a wave or choice
-		if (name_override.starts_with("c-") || name_override.starts_with("g-")) {
+		if (::ink::internal::starts_with(name_override.c_str(), "c-")
+		    || ::ink::internal::starts_with(name_override.c_str(), "g-")) {
 			is_knot = false;
 			for (auto itr = name_override.begin() + 2; itr != name_override.end(); ++itr) {
 				if (*itr > '9' || *itr < '0') {
