@@ -97,6 +97,19 @@ constexpr list_flag empty_flag{-1, 0};
 
 namespace internal
 {
+	/** Checks if a string starts with a given prefix*/
+	static bool starts_with(const char* string, const char* prefix)
+	{
+		while (*prefix) {
+			if (*string != *prefix) {
+				return false;
+			}
+			string++;
+			prefix++;
+		}
+		return true;
+	}
+
 	/** Checks if a string is only whitespace*/
 	static bool is_whitespace(const char* string, bool includeNewline = true)
 	{
