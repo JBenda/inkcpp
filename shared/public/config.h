@@ -28,6 +28,7 @@ static constexpr int limitGlobalVariableObservers = -10;
 static constexpr int limitThreadDepth             = -10;
 static constexpr int limitEvalStackDepth          = -20;
 static constexpr int limitContainerDepth          = -20;
+static constexpr int limitStringTableSize         = 100; // Non-dynamic.
 /** number of lists which can be accessed with get_var
  *  before the story must continue
  * @attention list vars are only valid until the story continous!
