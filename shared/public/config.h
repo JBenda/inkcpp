@@ -18,6 +18,10 @@
 // Only turn on if you have json.hpp and you want to use it with the compiler
 // #define INK_EXPOSE_JSON
 
+#ifndef INK_STRING_TABLE_SIZE
+#	define INK_STRING_TABLE_SIZE 100
+#endif
+
 namespace ink::config
 {
 /// set limitations which are required to minimize heap allocations.
@@ -28,7 +32,7 @@ static constexpr int limitGlobalVariableObservers = -10;
 static constexpr int limitThreadDepth             = -10;
 static constexpr int limitEvalStackDepth          = -20;
 static constexpr int limitContainerDepth          = -20;
-static constexpr int limitStringTableSize         = 100; // Non-dynamic.
+static constexpr int limitStringTableSize         = INK_STRING_TABLE_SIZE; // Non-dynamic.
 /** number of lists which can be accessed with get_var
  *  before the story must continue
  * @attention list vars are only valid until the story continous!
