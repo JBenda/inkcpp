@@ -55,8 +55,8 @@ static constexpr int maxArrayCallArity            = 10;
 namespace statistics
 {
 	struct container {
-		size_t capacity;
-		size_t size;
+		int capacity;
+		int size;
 	};
 
 	struct list_table {
