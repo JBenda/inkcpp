@@ -51,4 +51,24 @@ static constexpr int maxFlags                     = -200;
 // number of max initelized lists
 static constexpr int maxLists                     = -50;
 static constexpr int maxArrayCallArity            = 10;
+
+ namespace statistics {
+  struct container {
+   size_t capacity;
+   size_t size;
+  };
+  struct list_table {};
+  struct string_table {};
+  struct global {
+   container variables;
+   container _variables_observers;
+   list_table lists;
+   string_table strings;
+  };
+  struct runner {
+   container threads;
+   container evaluation_stack;
+   container container_stack;
+  };
+ }
 } // namespace ink::config

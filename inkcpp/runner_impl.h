@@ -319,7 +319,7 @@ private:
 	bool _saved_evaluation_mode = false;
 
 	// Keeps track of what threads we're inside
-	threads < config::limitContainerDepth<0, abs(config::limitThreadDepth)> _threads;
+	threads < config::limitThreadDepth<0, abs(config::limitThreadDepth)> _threads;
 
 	// Choice list
 	managed_restorable_array < snap_choice, config::maxChoices<0, abs(config::maxChoices)> _choices;
