@@ -54,7 +54,7 @@
  * \param Size Container size
  * \param Fast If true every node stores an extra parent index. This increases memory but speed up insert/erase by factor 10
  */
-template<typename Key, typename T, typename size_type, const size_type Size, const bool Fast = true>
+template<typename Key, typename T, typename size_type, bool dynamic, size_type Size, const bool Fast = true>
 class avl_array
 {
   // child index pointer class
@@ -64,16 +64,17 @@ class avl_array
   } child_type;
 
   // node storage, due to possible structure packing effects, single arrays are used instead of a 'node' structure 
-  Key         key_[Size];                 // node key
-  T           val_[Size];                 // node value
-  std::int8_t balance_[Size];             // subtree balance
-  child_type  child_[Size];               // node childs
+  ink::runtime::internal::if_t<dynamic, Key*, Key[Size]> key_;
+  ink::runtime::internal::if_t<dynamic, T*, T[Size]> val_;
+  ink::runtime::internal::if_t<dynamic, std::int8_t*, std::int8_t[Size]> balance_;
+  ink::runtime::internal::if_t<dynamic, child_type*, child_type[Size]> child_;
   size_type   size_;                      // actual size
+  size_t      _capacity;
   size_type   root_;                      // root node
-  size_type   parent_[Fast ? Size : 1];   // node parent, use one element if not needed (zero sized array is not allowed)
+  ink::runtime::internal::if_t<dynamic, size_type*, size_type[Fast?Size:1]> parent_;
  
   // invalid index (like 'nullptr' in a pointer implementation)
-  static const size_type INVALID_IDX = Size;
+  static const size_type INVALID_IDX = ~static_cast<size_type>(0);
 
   // iterator class
   template<bool Const>
@@ -135,7 +136,7 @@ class avl_array
     tag_avl_array_iterator& operator++()
     {
       // end reached?
-      if (idx_ >= Size) {
+      if (idx_ >= INVALID_IDX) {
         return *this;
       }
       // take left most child of right child, if not existent, take parent
@@ -189,8 +190,28 @@ public:
   // ctor
   avl_array()
     : size_(0U)
-    , root_(Size)
-  { }
+    , root_(INVALID_IDX)
+    , _capacity(Size)
+  {
+    if constexpr (dynamic) {
+      key_ = new Key[Size];
+      val_ = new T[Size];
+      balance_ = new std::int8_t[Size];
+      child_ = new child_type[Size];
+			if constexpr (Fast) {
+				parent_ = new size_type[Size];
+			}
+    }
+  }
+
+  ~avl_array() {
+  	if constexpr (dynamic) {
+  		delete[] key_;
+  		delete[] val_;
+  		delete[] balance_;
+  		delete[] child_;
+  	}
+  }
 
 
   // iterators
@@ -226,7 +247,13 @@ public:
   { return size_ == static_cast<size_type>(0); }
 
   inline size_type max_size() const
-  { return Size; }
+  {
+    if constexpr (dynamic) {
+      return _capacity;
+    } else {
+      return Size;
+    }
+  }
 
 
   /**
@@ -236,6 +263,52 @@ public:
   {
     size_ = 0U;
     root_ = INVALID_IDX;
+  }
+
+  void extend() {
+    size_t new_size = _capacity * 1.5;
+    if (new_size < 5) { new_size = 5; }
+      {
+        Key* new_data = new Key[new_size];
+        for (size_type i = 0; i < _capacity; ++i) {
+          new_data[i] = key_[i];
+        }
+        delete[] key_;
+        key_ = new_data;
+      }
+      {
+        T* new_data = new T[new_size];
+        for(size_type i = 0; i < _capacity; ++i) {
+          new_data[i] = val_[i];
+        }
+        delete[] val_;
+        val_ = new_data;
+      }
+      {
+        std::int8_t* new_data = new std::int8_t[new_size];
+        for (size_type i = 0; i < _capacity; ++i) {
+          new_data[i] = balance_[i];
+        }
+        delete[] balance_;
+        balance_ = new_data;
+      }
+      {
+        child_type* new_data = new child_type[new_size];
+        for(size_type i = 0; i < _capacity; ++i) {
+          new_data[i] = child_[i];
+        }
+        delete[] child_;
+        child_ = new_data;
+      }
+      if constexpr(Fast) {
+        size_type* new_data = new size_type[new_size];
+        for(size_type i = 0; i < _capacity; ++i) {
+          new_data[i] = parent_[i];
+        }
+        delete[] parent_;
+        parent_ = new_data;
+      }
+      _capacity = new_size;
   }
 
 
@@ -262,7 +335,11 @@ public:
         if (child_[i].left == INVALID_IDX) {
           if (size_ >= max_size()) {
             // container is full
-            return false;
+            if constexpr (dynamic) {
+              extend();
+            } else {
+              return false;
+            }
           }
           key_[size_]     = key;
           val_[size_]     = val;
@@ -283,7 +360,11 @@ public:
         if (child_[i].right == INVALID_IDX) {
           if (size_ >= max_size()) {
             // container is full
-            return false;
+            if constexpr (dynamic) {
+              extend();
+            } else {
+              return false;
+            }
           }
           key_[size_]     = key;
           val_[size_]     = val;
@@ -414,7 +495,11 @@ public:
       }
       else {
         const size_type parent = get_parent(node);
-        child_[parent].left == node ? child_[parent].left = right : child_[parent].right = right;
+				if (parent != INVALID_IDX) {
+					child_[parent].left == node ? child_[parent].left = right : child_[parent].right = right;
+				} else {
+					root_ = right;
+				}
 
         set_parent(right, parent);
 
@@ -423,7 +508,11 @@ public:
     }
     else if (right == INVALID_IDX) {
       const size_type parent = get_parent(node);
-      child_[parent].left == node ? child_[parent].left = left : child_[parent].right = left;
+			if (parent != INVALID_IDX) {
+				child_[parent].left == node ? child_[parent].left = left : child_[parent].right = left;
+			} else {
+				root_ = left;
+			}
 
       set_parent(left, parent);
 
