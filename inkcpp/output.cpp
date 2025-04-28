@@ -21,6 +21,18 @@ basic_stream::basic_stream(value* buffer, size_t len)
     , _max(len)
 {
 }
+void basic_stream::initelize_data(value* buffer, size_t size) {
+		inkAssert(
+		    _data == nullptr && _max == 0,
+		    "Try to double initialize a basic_stream."
+		    "To extend the size use overflow()"
+		);
+		_data = buffer;
+		_max   = size;
+}
+void basic_stream::overflow(value*& buffer, size_t& size, size_t target) {
+	 inkFail("Stack overflow!"); 
+}
 
 void basic_stream::append(const value& in)
 {
@@ -56,7 +68,9 @@ void basic_stream::append(const value& in)
 		return;
 
 	// Add to data stream
-	inkAssert(_size < _max, "Output stream overflow");
+	if (_size >= _max) {
+	  overflow(_data, _max);
+	}
 	_data[_size++] = in;
 
 	// Special: Incoming glue. Trim whitespace/newlines prior
@@ -524,6 +538,9 @@ const unsigned char* basic_stream::snap_load(const unsigned char* ptr, const loa
 	ptr = snap_read(ptr, _last_char);
 	ptr = snap_read(ptr, _size);
 	ptr = snap_read(ptr, _save);
+	if (_size >= _max) {
+	  overflow(_data, _max, _size);
+	}
 	inkAssert(_max >= _size, "output is to small to hold stored data");
 	for (auto itr = _data; itr != _data + _size; ++itr) {
 		ptr = itr->snap_load(ptr, loader);

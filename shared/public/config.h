@@ -40,8 +40,7 @@ static constexpr int limitRuntimeStack            = -20;
 // references  and callstack
 static constexpr int limitReferenceStack          = -20;
 // max number of elements in one output (a string is one element)
-// no dynamic support now! (FIXME)
-static constexpr int limitOutputSize              = 200;
+static constexpr int limitOutputSize              = -100;
 // max number of choices per choice
 static constexpr int maxChoices                   = -10;
 // max number of list types, and there total amount of flags

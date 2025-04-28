@@ -19,7 +19,7 @@ using ink::runtime::internal::value_type;
 using ink::runtime::internal::string_table;
 using ink::runtime::internal::list_table;
 using ink::runtime::internal::prng;
-using stream = ink::runtime::internal::stream<128>;
+using stream = ink::runtime::internal::stream<128, false>;
 using ink::runtime::internal::executer;
 using eval_stack = ink::runtime::internal::eval_stack<28, false>;
 using ink::Command;
