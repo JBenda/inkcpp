@@ -78,6 +78,7 @@ namespace ink
 
 			"!",
 			"~",
+			"_",
 			"LIST_COUNT",
 			"LIST_MIN",
 			"LIST_MAX",
