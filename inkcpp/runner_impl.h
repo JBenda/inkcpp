@@ -306,7 +306,7 @@ private:
 	ip_t _done   = nullptr; // when we last hit a done
 
 	// Output stream
-	internal::stream<abs(config::limitOutputSize), config::limitOutputSize<0> _output;
+	internal::stream < abs(config::limitOutputSize), config::limitOutputSize<0> _output;
 
 	// Runtime stack. Used to store temporary variables and callstack
 	internal::stack < abs(config::limitRuntimeStack), config::limitRuntimeStack<0> _stack;

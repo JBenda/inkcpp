@@ -41,7 +41,8 @@ public:
 	void gc();
 
 private:
-	avl_array < const char*, bool, ink::size_t, config::limitStringTable < 0, abs(config::limitStringTable) > _table;
-	static constexpr const char*                   EMPTY_STRING = "\x03";
+	avl_array < const char*, bool, ink::size_t,
+	    config::limitStringTable<0, abs(config::limitStringTable)> _table;
+	static constexpr const char*                                   EMPTY_STRING = "\x03";
 };
 } // namespace ink::runtime::internal

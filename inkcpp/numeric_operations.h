@@ -96,8 +96,8 @@ namespace casting
 	}
 
 	template<>
-	inline typename value::ret<value_type::int32>::type numeric_cast<value_type::int32>(const value& v
-	)
+	inline typename value::ret<value_type::int32>::type
+	    numeric_cast<value_type::int32>(const value& v)
 	{
 		switch (v.type()) {
 			case value_type::int32: return v.get<value_type::int32>();
@@ -170,9 +170,11 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    vals[0].get<value_type::divert>() == vals[1].get<value_type::divert>()
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        vals[0].get<value_type::divert>() == vals[1].get<value_type::divert>()
+		    )
+		);
 	}
 };
 
@@ -184,9 +186,11 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    vals[0].get<value_type::divert>() != vals[1].get<value_type::divert>()
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        vals[0].get<value_type::divert>() != vals[1].get<value_type::divert>()
+		    )
+		);
 	}
 };
 
@@ -342,9 +346,11 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    casting::numeric_cast<ty>(vals[0]) == casting::numeric_cast<ty>(vals[1])
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        casting::numeric_cast<ty>(vals[0]) == casting::numeric_cast<ty>(vals[1])
+		    )
+		);
 	}
 };
 
@@ -356,9 +362,11 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    casting::numeric_cast<ty>(vals[0]) > casting::numeric_cast<ty>(vals[1])
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        casting::numeric_cast<ty>(vals[0]) > casting::numeric_cast<ty>(vals[1])
+		    )
+		);
 	}
 };
 
@@ -370,9 +378,11 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    casting::numeric_cast<ty>(vals[0]) < casting::numeric_cast<ty>(vals[1])
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        casting::numeric_cast<ty>(vals[0]) < casting::numeric_cast<ty>(vals[1])
+		    )
+		);
 	}
 };
 
@@ -384,9 +394,11 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    casting::numeric_cast<ty>(vals[0]) >= casting::numeric_cast<ty>(vals[1])
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        casting::numeric_cast<ty>(vals[0]) >= casting::numeric_cast<ty>(vals[1])
+		    )
+		);
 	}
 };
 
@@ -398,9 +410,11 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    casting::numeric_cast<ty>(vals[0]) <= casting::numeric_cast<ty>(vals[1])
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        casting::numeric_cast<ty>(vals[0]) <= casting::numeric_cast<ty>(vals[1])
+		    )
+		);
 	}
 };
 
@@ -412,9 +426,11 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    casting::numeric_cast<ty>(vals[0]) != casting::numeric_cast<ty>(vals[1])
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        casting::numeric_cast<ty>(vals[0]) != casting::numeric_cast<ty>(vals[1])
+		    )
+		);
 	}
 };
 
@@ -426,10 +442,12 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    casting::numeric_cast<value_type::boolean>(vals[0])
-		    && casting::numeric_cast<value_type::boolean>(vals[1])
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        casting::numeric_cast<value_type::boolean>(vals[0])
+		        && casting::numeric_cast<value_type::boolean>(vals[1])
+		    )
+		);
 	}
 };
 
@@ -441,10 +459,12 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::boolean>(
-		    casting::numeric_cast<value_type::boolean>(vals[0])
-		    || casting::numeric_cast<value_type::boolean>(vals[1])
-		));
+		stack.push(
+		    value{}.set<value_type::boolean>(
+		        casting::numeric_cast<value_type::boolean>(vals[0])
+		        || casting::numeric_cast<value_type::boolean>(vals[1])
+		    )
+		);
 	}
 };
 
@@ -508,7 +528,9 @@ public:
 
 	void operator()(basic_eval_stack& stack, value* vals)
 	{
-		stack.push(value{}.set<value_type::int32>(- static_cast<int32_t>(vals[0].get<value_type::boolean>())));
+		stack.push(
+		    value{}.set<value_type::int32>(-static_cast<int32_t>(vals[0].get<value_type::boolean>()))
+		);
 	}
 };
 
@@ -522,7 +544,8 @@ public:
 	{
 		int min = casting::numeric_cast<value_type::int32>(vals[0]);
 		int max = casting::numeric_cast<value_type::int32>(vals[1]);
-		stack.push(value{}.set<value_type::int32>(static_cast<int32_t>(_prng.rand(max - min + 1) + min))
+		stack.push(
+		    value{}.set<value_type::int32>(static_cast<int32_t>(_prng.rand(max - min + 1) + min))
 		);
 	}
 };
