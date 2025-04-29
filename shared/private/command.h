@@ -98,6 +98,7 @@ enum class Command : uint8_t {
 	// == Unary operators
 	UNARY_OPERATORS_START,
 	NOT = UNARY_OPERATORS_START,
+	INVERT,
 	NEGATE,
 	LIST_COUNT,
 	LIST_MIN,

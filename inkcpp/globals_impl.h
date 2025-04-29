@@ -95,6 +95,8 @@ public:
 	void restore();
 	void forget();
 
+	config::statistics::global statistics() const override;
+
 private:
 	// Store the number of containers. This is the length of most of our lists
 	const uint32_t _num_containers;

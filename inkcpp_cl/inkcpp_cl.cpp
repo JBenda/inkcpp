@@ -12,7 +12,66 @@
 #include <globals.h>
 #include <snapshot.h>
 
+#include "config.h"
 #include "test.h"
+#include "types.h"
+
+size_t depth = 0;
+
+std::ostream& operator<<(std::ostream& os, const ink::config::statistics::container& c)
+{
+	os << "(" << c.size << "/" << c.capacity << ")";
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const ink::config::statistics::list_table& lt)
+{
+	os << "\n";
+	depth += 1;
+	os << std::string(depth, '\t') << "editable_lists" << lt.editable_lists << "\n";
+	os << std::string(depth, '\t') << "list_types" << lt.list_types << "\n";
+	os << std::string(depth, '\t') << "flags" << lt.flags << "\n";
+	os << std::string(depth, '\t') << "lists" << lt.lists << "\n";
+	depth -= 1;
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const ink::config::statistics::string_table& st)
+{
+	os << "\n";
+	depth += 1;
+	os << std::string(depth, '\t') << "string_refs" << st.string_refs << "\n";
+	depth -= 1;
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const ink::config::statistics::runner& r)
+{
+	os << "\n";
+	depth += 1;
+	os << std::string(depth, '\t') << "threads" << r.threads << "\n";
+	os << std::string(depth, '\t') << "evaluation_stack" << r.evaluation_stack << "\n";
+	os << std::string(depth, '\t') << "container_stack" << r.container_stack << "\n";
+	os << std::string(depth, '\t') << "active_tags" << r.active_tags << "\n";
+	os << std::string(depth, '\t') << "runtime_stack" << r.runtime_stack << "\n";
+	os << std::string(depth, '\t') << "runtime_ref_stack" << r.runtime_ref_stack << "\n";
+	os << std::string(depth, '\t') << "output" << r.output << "\n";
+	os << std::string(depth, '\t') << "choices" << r.choices << "\n";
+	depth -= 1;
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const ink::config::statistics::global& g)
+{
+	os << "\n";
+	depth += 1;
+	os << std::string(depth, '\t') << "variables" << g.variables << "\n";
+	os << std::string(depth, '\t') << "variables_observers" << g.variables_observers << "\n";
+	os << std::string(depth, '\t') << "lists" << g.lists;
+	os << std::string(depth, '\t') << "strings" << g.strings;
+	depth -= 1;
+	return os;
+}
 
 void usage()
 {
@@ -24,6 +83,7 @@ void usage()
 	     << "\t--ommit-choice-tags:\tdo not print tags after choices, primarly used to be compatible "
 	        "with inkclecat output"
 	     << "\t--inklecate <path-to-inklecate>:\toverwrites INKLECATE enviroment variable\n"
+	     << "\t--statistics:\tprints memory statistics before each choice\n"
 	     << endl;
 }
 
@@ -39,6 +99,7 @@ int main(int argc, const char** argv)
 	std::string outputFilename;
 	bool        playMode = false, testMode = false, testDirectory = false, ommit_choice_tags = false;
 	std::string snapshotFile;
+	bool        show_statistics    = false;
 	const char* inklecateOverwrite = nullptr;
 	for (int i = 1; i < argc - 1; i++) {
 		std::string option = argv[i];
@@ -63,6 +124,8 @@ int main(int argc, const char** argv)
 				++i;
 				inklecateOverwrite = argv[i];
 			}
+		} else if (option == "--statistics") {
+			show_statistics = true;
 		} else {
 			std::cerr << "Unrecognized option: '" << option << "'\n";
 		}
@@ -150,13 +213,15 @@ int main(int argc, const char** argv)
 		std::unique_ptr<story> myInk{story::from_file(outputFilename.c_str())};
 
 		// Start runner
-		runner thread;
+		runner  thread;
+		globals variables;
 		if (snapshotFile.size()) {
 			auto snap_ptr = snapshot::from_file(snapshotFile.c_str());
 			thread        = myInk->new_runner_from_snapshot(*snap_ptr);
 			delete snap_ptr;
 		} else {
-			thread = myInk->new_runner();
+			variables = myInk->new_globals();
+			thread    = myInk->new_runner(variables);
 		}
 
 		while (true) {
@@ -187,6 +252,11 @@ int main(int argc, const char** argv)
 						}
 					}
 					std::cout << std::endl;
+				}
+
+				if (show_statistics) {
+					std::cout << "runner:" << thread->statistics() << "globals:" << variables->statistics()
+					          << std::endl;
 				}
 
 				int c = 0;

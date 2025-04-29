@@ -7,6 +7,7 @@
 #pragma once
 
 #include "avl_array.h"
+#include "config.h"
 #include "system.h"
 #include "snapshot_impl.h"
 
@@ -40,8 +41,12 @@ public:
 	// deletes all unused strings
 	void gc();
 
+	/** Get usage statistics for the string_table. */
+	config::statistics::string_table statistics() const;
+
 private:
-	avl_array<const char*, bool, ink::size_t, 100> _table;
-	static constexpr const char*                   EMPTY_STRING = "\x03";
+	avl_array < const char*, bool, ink::size_t,
+	    config::limitStringTable<0, abs(config::limitStringTable)> _table;
+	static constexpr const char*                                   EMPTY_STRING = "\x03";
 };
 } // namespace ink::runtime::internal

@@ -40,7 +40,7 @@ void list_impl::next(const char*& flag_name, const char*& list_name, int& i, boo
 		return;
 	}
 
-	list_flag flag{.list_id = static_cast<int16_t>(i >> 16), .flag = static_cast<int16_t>(i & 0xFF)};
+	list_flag flag{static_cast<int16_t>(i >> 16), static_cast<int16_t>(i & 0xFF)};
 	if (flag_name != nullptr) {
 		++flag.flag;
 	}

@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "config.h"
 #include "system.h"
 #include "array.h"
 #include "snapshot_impl.h"
@@ -54,6 +55,9 @@ public:
 
 		int lid; ///< id of list to handle
 	};
+
+	/** Get usage statistics for the list_table. */
+	config::statistics::list_table statistics() const;
 
 	/// creates an empty list
 	list create();
