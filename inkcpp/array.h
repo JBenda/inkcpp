@@ -29,7 +29,10 @@ public:
 		}
 	}
 
-	config::statistics::container statistics() const { return {static_cast<int>(_capacity), static_cast<int>(_size)}; }
+	config::statistics::container statistics() const
+	{
+		return {static_cast<int>(_capacity), static_cast<int>(_size)};
+	}
 
 	virtual ~managed_array()
 	{

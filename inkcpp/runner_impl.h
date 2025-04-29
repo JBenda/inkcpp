@@ -48,7 +48,7 @@ public:
 	// Creates a new runner at the start of a loaded ink story
 	runner_impl(const story_impl*, globals);
 	virtual ~runner_impl();
-	
+
 	config::statistics::runner statistics() const override;
 
 	// used by the globals object to do garbage collection

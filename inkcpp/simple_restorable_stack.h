@@ -28,7 +28,8 @@ public:
 
 	virtual ~simple_restorable_stack() = default;
 
-	config::statistics::container statistics() const {
+	config::statistics::container statistics() const
+	{
 		return {static_cast<int>(_size), static_cast<int>(_pos)};
 	}
 
