@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "config.h"
 #include "system.h"
 #include "array.h"
 #include "snapshot_impl.h"
@@ -27,6 +28,9 @@ public:
 
 	virtual ~simple_restorable_stack() = default;
 
+	config::statistics::container statistics() const {
+		return {_size, _pos};
+	}
 
 	void     push(const T& value);
 	T        pop();

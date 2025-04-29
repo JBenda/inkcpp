@@ -36,7 +36,7 @@ class choice;
 class runner_interface
 {
 public:
-	virtual ~runner_interface(){};
+	virtual ~runner_interface() {};
 
 	// String type to simplify interfaces working with strings
 #ifdef INK_ENABLE_STL
@@ -260,6 +260,8 @@ public:
 	 */
 	virtual hash_t get_current_knot() const = 0;
 
+	/** Get usage statistics for the runner. */
+	virtual config::statistics::runner statistics() const;
 
 protected:
 	/** internal bind implementation. not for calling.

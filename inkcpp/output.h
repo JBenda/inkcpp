@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "config.h"
 #include "platform.h"
 #include "snapshot_impl.h"
 #include "value.h"
@@ -167,6 +168,8 @@ namespace runtime
 			{
 				base::initelize_data(_buffer.data(), N);
 			}
+
+			config::statistics::container statistics() const { return _buffer.statistics(); }
 
 			virtual void overflow(value*& buffer, size_t& size, size_t target = 0) override
 			{

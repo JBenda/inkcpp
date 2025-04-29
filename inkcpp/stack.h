@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "config.h"
 #include "value.h"
 #include "collections/restorable.h"
 #include "array.h"
@@ -39,6 +40,8 @@ namespace runtime
 			using base = restorable<entry>;
 
 		public:
+			inline config::statistics::container statistics() const { return base::statistics(); }
+
 			virtual ~basic_stack() = default;
 
 			// Sets existing value, or creates a new one at this callstack entry
@@ -166,6 +169,8 @@ namespace runtime
 
 		public:
 			virtual ~basic_eval_stack() = default;
+
+			config::statistics::container statistics() const { return base::statistics(); }
 
 			// Push value onto the stack
 			void push(const value&);

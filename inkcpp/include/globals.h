@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "config.h"
 #include "types.h"
 #include "functional.h"
 
@@ -64,6 +65,9 @@ public:
 	{
 		internal_observe(hash_string(name), new internal::callback(callback));
 	}
+
+	/** Get usage statistics for global. */
+	virtual config::statistics::global statistics() const;
 
 	/** create a snapshot of the current runtime state.
 	 * (inclusive all runners assoziated with this globals)

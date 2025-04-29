@@ -7,6 +7,7 @@
 #pragma once
 
 #include "avl_array.h"
+#include "config.h"
 #include "system.h"
 #include "snapshot_impl.h"
 
@@ -39,6 +40,9 @@ public:
 
 	// deletes all unused strings
 	void gc();
+
+	/** Get usage statistics for the string_table. */
+	config::statistics::string_table statistics() const;
 
 private:
 	avl_array < const char*, bool, ink::size_t,

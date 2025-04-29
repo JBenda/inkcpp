@@ -286,4 +286,12 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	ptr = _variables.snap_load(ptr, loader);
 	return ptr;
 }
+
+config::statistics::global globals_impl::statistics() const
+{
+	return {
+	    _variables.statistics(), _callbacks.statistics(), _lists.statistics(), _strings.statistics()
+	};
+}
+
 } // namespace ink::runtime::internal
