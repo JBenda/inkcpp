@@ -25,10 +25,6 @@ set_target_properties(inkcpp_compiler PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS
 target_link_libraries(inkcpp_compiler PRIVATE inkcpp_shared)
 target_link_libraries(inkcpp_compiler_o PRIVATE inkcpp_shared)
 
-# Make sure this project and all dependencies use the C++17 standard
-target_compile_features(inkcpp_compiler PUBLIC cxx_std_17)
-target_compile_features(inkcpp_compiler PUBLIC cxx_std_17)
-
 # Unreal installation
 list(REMOVE_ITEM SOURCES "json.hpp")
 configure_file("json.hpp" "${CMAKE_BINARY_DIR}/unreal/inkcpp/Source/ThirdParty/Private/json.hpp" COPYONLY)

@@ -354,7 +354,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			break;
 		}
 		if (_container.empty() || _container.top().id != id) {
-			_container.push({.id = id, .offset = offset});
+			_container.push({id, offset});
 		} else {
 			_container.pop();
 			if (_container.size() < comm_end) {
@@ -373,7 +373,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			_entered_knot    = true;
 		}
 		_ptr += 6;
-		_container.push({.id = id, .offset = offset});
+		_container.push({id, offset});
 		if (reversed && comm_end == _container.size() - 1) {
 			++comm_end;
 		}
@@ -1397,7 +1397,7 @@ void runner_impl::step()
 					// Keep track of current container
 					auto index = read<uint32_t>();
 					// offset points to command, command has size 6
-					_container.push({.id = index, .offset = _ptr - 6});
+					_container.push({index, _ptr - 6});
 
 					// Increment visit count
 					if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS
