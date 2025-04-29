@@ -67,7 +67,7 @@ public:
 	}
 
 	/** Get usage statistics for global. */
-	virtual config::statistics::global statistics() const;
+	virtual config::statistics::global statistics() const = 0;
 
 	/** create a snapshot of the current runtime state.
 	 * (inclusive all runners assoziated with this globals)

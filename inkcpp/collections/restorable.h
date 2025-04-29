@@ -86,7 +86,7 @@ namespace ink::runtime::internal
 		restorable(ElementType* buffer, size_t size)
 			: _buffer(buffer), _size(size), _pos(0), _jump(~0), _save(~0)
 		{ }
-		config::statistics::container statistics() const { return {_size, _pos}; }
+		config::statistics::container statistics() const { return {static_cast<int>(_size), static_cast<int>(_pos)}; }
 
 		// Checks if we have a save state
 		bool is_saved() const { return _save != ~0; }

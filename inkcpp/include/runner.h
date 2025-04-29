@@ -261,7 +261,7 @@ public:
 	virtual hash_t get_current_knot() const = 0;
 
 	/** Get usage statistics for the runner. */
-	virtual config::statistics::runner statistics() const;
+	virtual config::statistics::runner statistics() const = 0;
 
 protected:
 	/** internal bind implementation. not for calling.
