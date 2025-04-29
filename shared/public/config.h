@@ -50,6 +50,7 @@ static constexpr int maxListTypes                 = -20;
 static constexpr int maxFlags                     = -200;
 // number of max initelized lists
 static constexpr int maxLists                     = -50;
+// max number of arguments for external functions (dynamic not possible)
 static constexpr int maxArrayCallArity            = 10;
 
 namespace statistics
@@ -60,14 +61,19 @@ namespace statistics
 	};
 
 	struct list_table {
+		container editable_lists;
+		container list_types;
+		container flags;
+		container lists;
 	};
 
 	struct string_table {
+		container string_refs;
 	};
 
 	struct global {
 		container    variables;
-		container    _variables_observers;
+		container    variables_observers;
 		list_table   lists;
 		string_table strings;
 	};
@@ -76,6 +82,11 @@ namespace statistics
 		container threads;
 		container evaluation_stack;
 		container container_stack;
+		container active_tags;
+		container runtime_stack;
+		container runtime_ref_stack;
+		container output;
+		container choices;
 	};
 } // namespace statistics
 } // namespace ink::config

@@ -110,3 +110,4 @@ ReflowComments: true
 RemoveBracesLLVM: false
 UseCRLF: false
 DeriveLineEnding: false
+LineEnding: LF
