@@ -25,6 +25,7 @@
 #include "choice.h"
 
 #include "executioner.h"
+#include <cstddef>
 
 namespace ink::runtime::internal
 {
@@ -339,7 +340,7 @@ private:
 	// Container set
 	struct ContainerData {
 		container_t id     = ~0u;
-		ip_t        offset = 0;
+		ptrdiff_t   offset = 0;
 
 		bool operator==(const ContainerData& oth) const { return oth.id == id && oth.offset == offset; }
 
