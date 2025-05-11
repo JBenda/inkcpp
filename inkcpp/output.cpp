@@ -203,10 +203,8 @@ FString basic_stream::get()
 {
 	UE_LOG(
 	    InkCpp, Warning,
-	    TEXT(
-	        "Basic stream::get is not implemented correctly and should not be used implemented "
-	        "correctly!"
-	    )
+	    TEXT("Basic stream::get is not implemented correctly and should not be used implemented "
+	         "correctly!")
 	);
 	FString str;
 	return str;

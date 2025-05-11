@@ -343,11 +343,11 @@ extern "C" {
 
 	HInkGlobals* ink_story_new_globals_from_snapshot(HInkStory* self, const HInkSnapshot* snap)
 	{
-		return reinterpret_cast<HInkGlobals*>(new globals(
-		    reinterpret_cast<story*>(self)->new_globals_from_snapshot(
+		return reinterpret_cast<HInkGlobals*>(
+		    new globals(reinterpret_cast<story*>(self)->new_globals_from_snapshot(
 		        *reinterpret_cast<const snapshot*>(snap)
-		    )
-		));
+		    ))
+		);
 	}
 
 	void ink_compile_json(const char* input_filename, const char* output_filename, const char** error)
