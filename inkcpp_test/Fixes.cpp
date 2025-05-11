@@ -82,3 +82,43 @@ second boolvar
 		}
 	}
 }
+
+SCENARIO("snapshot failed inside execution _ #111", "[fixes]")
+{
+	GIVEN("story with multiline output")
+	{
+		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "111_valid.bin");
+		runner thread = ink->new_runner();
+		WHEN("run store and reload")
+		{
+			auto line = thread->getline();
+			THEN("outputs first line") {
+				REQUIRE(line == "First line of text\n");
+			}
+			auto snapshot = thread->create_snapshot();
+			runner thread2 = ink->new_runner_from_snapshot(*snapshot);
+			line = thread->getline();
+			THEN("outputs second line") {
+				REQUIRE(line == "Second line of test\n");
+			}
+		}
+	}
+	GIVEN("story with multiline output with a knot")
+	{
+		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin");
+		runner thread = ink->new_runner();
+		WHEN("run store and reload")
+		{
+			auto line = thread->getline();
+			THEN("outputs first line") {
+				REQUIRE(line == "First line of text\n");
+			}
+			auto snapshot = thread->create_snapshot();
+			runner thread2 = ink->new_runner_from_snapshot(*snapshot);
+			line = thread->getline();
+			THEN("outputs second line") {
+				REQUIRE(line == "Second line of test\n");
+			}
+		}
+	}
+}
