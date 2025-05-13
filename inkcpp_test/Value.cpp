@@ -19,7 +19,7 @@ using ink::runtime::internal::value_type;
 using ink::runtime::internal::string_table;
 using ink::runtime::internal::list_table;
 using ink::runtime::internal::prng;
-using stream = ink::runtime::internal::stream<128>;
+using stream = ink::runtime::internal::stream<128, false>;
 using ink::runtime::internal::executer;
 using eval_stack = ink::runtime::internal::eval_stack<28, false>;
 using ink::Command;
@@ -29,28 +29,31 @@ using ink::runtime::internal::globals_impl;
 using ink::runtime::globals;
 using ink::runtime::runner;
 
-void cp_str(char* dst, const char* src) {
-	while(*src) { *dst++ = *src++; }
+void cp_str(char* dst, const char* src)
+{
+	while (*src) {
+		*dst++ = *src++;
+	}
 	*dst = 0;
 }
 
 SCENARIO("compare concatenated values")
 {
-	string_table str_table;
-	list_table lst_table{};
-	prng rng;
-	eval_stack stack;
+	string_table  str_table;
+	list_table    lst_table{};
+	prng          rng;
+	eval_stack    stack;
 	story_impl    story(INK_TEST_RESOURCE_DIR "ListStory.bin");
-	globals globs_ptr = story.new_globals();
-	runner run = story.new_runner(globs_ptr);
-	globals_impl& globs = *globs_ptr.cast<globals_impl>();
-	executer ops(rng, story, globs, globs.strings(), globs.lists(), *run);
-		
+	globals       globs_ptr = story.new_globals();
+	runner        run       = story.new_runner(globs_ptr);
+	globals_impl& globs     = *globs_ptr.cast<globals_impl>();
+	executer      ops(rng, story, globs, globs.strings(), globs.lists(), *run);
+
 	GIVEN("just single strings")
 	{
-		const char str_1[] = "Hello World!";
+		const char str_1[]       = "Hello World!";
 		const char str_1_again[] = "Hello World!";
-		const char str_2[] = "Bye World!";
+		const char str_2[]       = "Bye World!";
 		WHEN("equal")
 		{
 			stack.push(value{}.set<value_type::string>(str_1));
@@ -79,17 +82,19 @@ SCENARIO("compare concatenated values")
 	GIVEN("string and numbers")
 	{
 		stream out{};
-		char* str_hello = str_table.create(6);
+		char*  str_hello = str_table.create(6);
 		cp_str(str_hello, "hello");
 		char* str_5hello = str_table.create(7);
 		cp_str(str_5hello, "5hello");
 		char* str_4 = str_table.create(2);
 		cp_str(str_4, "4");
 		char* str_32_4 = str_table.create(33);
-		for (int i = 0; i < 32; ++i) { str_32_4[i] = '4'; }
+		for (int i = 0; i < 32; ++i) {
+			str_32_4[i] = '4';
+		}
 		str_32_4[32] = 0;
 
-		int int_4 = 4;
+		int int_4  = 4;
 		int int_45 = 45;
 		WHEN("concatenated string representation matches (2 fields)")
 		{
@@ -142,8 +147,8 @@ SCENARIO("compare concatenated values")
 	}
 	GIVEN("numbers")
 	{
-		int i5 = 5;
-		int i8 = 8;
+		int   i5 = 5;
+		int   i8 = 8;
 		float f5 = 5.f;
 		WHEN("numbers are same")
 		{

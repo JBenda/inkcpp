@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "config.h"
 #include "snapshot_interface.h"
 #include "system.h"
 #include "traits.h"
@@ -26,6 +27,11 @@ public:
 		if constexpr (dynamic) {
 			_dynamic_data = new T[initialCapacity];
 		}
+	}
+
+	config::statistics::container statistics() const
+	{
+		return {static_cast<int>(_capacity), static_cast<int>(_size)};
 	}
 
 	virtual ~managed_array()

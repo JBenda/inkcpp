@@ -6,9 +6,10 @@
  */
 #pragma once
 
-#include "value.h"
+#include "config.h"
 #include "platform.h"
 #include "snapshot_impl.h"
+#include "value.h"
 
 namespace ink
 {
@@ -23,6 +24,8 @@ namespace runtime
 		{
 		protected:
 			basic_stream(value*, size_t);
+			void         initelize_data(value*, size_t);
+			virtual void overflow(value*& buffer, size_t& size, size_t target = 0);
 
 		public:
 			// Constant to identify an invalid position in the stream
@@ -154,17 +157,35 @@ namespace runtime
 		basic_stream& operator>>(basic_stream&, std::string&);
 #endif
 
-		template<size_t N>
+		template<size_t N, bool dynamic>
 		class stream : public basic_stream
 		{
+			using base = basic_stream;
+
 		public:
 			stream()
-			    : basic_stream(&_buffer[0], N)
+			    : basic_stream(nullptr, 0)
 			{
+				base::initelize_data(_buffer.data(), N);
+			}
+
+			config::statistics::container statistics() const { return _buffer.statistics(); }
+
+			virtual void overflow(value*& buffer, size_t& size, size_t target = 0) override
+			{
+				if constexpr (dynamic) {
+					if (buffer) {
+						_buffer.extend(target);
+					}
+					buffer = _buffer.data();
+					size   = _buffer.capacity();
+				} else {
+					base::overflow(buffer, size);
+				}
 			}
 
 		private:
-			value _buffer[N];
+			managed_array<value, dynamic, N> _buffer;
 		};
 	} // namespace internal
 } // namespace runtime

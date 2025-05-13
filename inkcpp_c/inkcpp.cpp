@@ -17,37 +17,32 @@ using namespace ink::runtime;
 
 InkValue inkvar_to_c(value& val)
 {
+	InkValue value{};
 	switch (val.type) {
 		case value::Type::Bool:
-			return InkValue{
-			    .bool_v = val.get<value::Type::Bool>(),
-			    .type   = InkValue::ValueTypeBool,
-			};
+			value.bool_v = val.get<value::Type::Bool>();
+			value.type   = InkValue::ValueTypeBool;
+			return value;
 		case value::Type::Uint32:
-			return InkValue{
-			    .uint32_v = val.get<value::Type::Uint32>(),
-			    .type     = InkValue::ValueTypeUint32,
-			};
+			value.uint32_v = val.get<value::Type::Uint32>();
+			value.type     = InkValue::ValueTypeUint32;
+			return value;
 		case value::Type::Int32:
-			return InkValue{
-			    .int32_v = val.get<value::Type::Int32>(),
-			    .type    = InkValue::ValueTypeInt32,
-			};
+			value.int32_v = val.get<value::Type::Int32>();
+			value.type    = InkValue::ValueTypeInt32;
+			return value;
 		case value::Type::String:
-			return InkValue{
-			    .string_v = val.get<value::Type::String>(),
-			    .type     = InkValue::ValueTypeString,
-			};
+			value.string_v = val.get<value::Type::String>();
+			value.type     = InkValue::ValueTypeString;
+			return value;
 		case value::Type::Float:
-			return InkValue{
-			    .float_v = val.get<value::Type::Float>(),
-			    .type    = InkValue::ValueTypeFloat,
-			};
+			value.float_v = val.get<value::Type::Float>();
+			value.type    = InkValue::ValueTypeFloat;
+			return value;
 		case value::Type::List:
-			return InkValue{
-			    .list_v = reinterpret_cast<HInkList*>(val.get<value::Type::List>()),
-			    .type   = InkValue::ValueTypeList,
-			};
+			value.list_v = reinterpret_cast<HInkList*>(val.get<value::Type::List>());
+			value.type   = InkValue::ValueTypeList;
+			return value;
 	}
 	inkFail("Undefined value type can not be translated");
 	return InkValue{};
@@ -118,11 +113,7 @@ extern "C" {
 	{
 		list_interface::iterator itr = reinterpret_cast<const list_interface*>(self)->begin();
 		*iter                        = InkListIter{
-		                           ._data        = &itr._list,
-		                           ._i           = itr._i,
-		                           ._single_list = itr._one_list_iterator,
-		                           .flag_name    = itr._flag_name,
-		                           .list_name    = itr._list_name,
+        &itr._list, itr._i, itr._one_list_iterator, itr._flag_name, itr._list_name,
     };
 		return itr != reinterpret_cast<const list_interface*>(self)->end();
 	}
@@ -131,11 +122,7 @@ extern "C" {
 	{
 		list_interface::iterator itr = reinterpret_cast<const list_interface*>(self)->begin(list_name);
 		*iter                        = InkListIter{
-		                           ._data        = &itr._list,
-		                           ._i           = itr._i,
-		                           ._single_list = itr._one_list_iterator,
-		                           .flag_name    = itr._flag_name,
-		                           .list_name    = itr._list_name,
+        &itr._list, itr._i, itr._one_list_iterator, itr._flag_name, itr._list_name,
     };
 		return itr != reinterpret_cast<const list_interface*>(self)->end();
 	}
@@ -280,15 +267,21 @@ extern "C" {
 		);
 	}
 
+	constexpr InkValue ink_value_none()
+	{
+		InkValue value{};
+		value.type = InkValue::Type::ValueTypeNone;
+		return value;
+	}
+
 	void ink_globals_observe(HInkGlobals* self, const char* variable_name, InkObserver observer)
 	{
 		reinterpret_cast<globals*>(self)->get()->observe(
 		    variable_name,
 		    [observer](value new_value, ink::optional<value> old_value) {
 			    observer(
-			        inkvar_to_c(new_value), old_value.has_value()
-			                                    ? inkvar_to_c(old_value.value())
-			                                    : InkValue{.type = InkValue::Type::ValueTypeNone}
+			        inkvar_to_c(new_value),
+			        old_value.has_value() ? inkvar_to_c(old_value.value()) : ink_value_none()
 			    );
 		    }
 		);
@@ -299,9 +292,7 @@ extern "C" {
 		ink::optional<value> o_val
 		    = reinterpret_cast<const globals*>(self)->get()->get<value>(variable_name);
 		if (! o_val.has_value()) {
-			return InkValue{
-			    .type = InkValue::ValueTypeNone,
-			};
+			return ink_value_none();
 		} else {
 			return inkvar_to_c(o_val.value());
 		}

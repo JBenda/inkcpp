@@ -5,6 +5,7 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "string_table.h"
+#include "config.h"
 
 namespace ink::runtime::internal
 {
@@ -146,4 +147,13 @@ size_t string_table::get_id(const char* string) const
 	inkAssert(iter != _table.end(), "Try to fetch not contained string!");
 	return iter.temp_identifier();
 }
+
+config::statistics::string_table string_table::statistics() const
+{
+	return config::statistics::string_table{
+	    {static_cast<int>(_table.max_size()), static_cast<int>(_table.size())},
+	};
+}
+
+
 } // namespace ink::runtime::internal

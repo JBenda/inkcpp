@@ -354,7 +354,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			break;
 		}
 		if (_container.empty() || _container.top().id != id) {
-			_container.push({.id = id, .offset = offset});
+			_container.push({id, offset - _story->instructions()});
 		} else {
 			_container.pop();
 			if (_container.size() < comm_end) {
@@ -373,7 +373,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			_entered_knot    = true;
 		}
 		_ptr += 6;
-		_container.push({.id = id, .offset = offset});
+		_container.push({id, offset - _story->instructions()});
 		if (reversed && comm_end == _container.size() - 1) {
 			++comm_end;
 		}
@@ -385,11 +385,11 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (record_visits) {
 		const ContainerData* iData = nullptr;
 		size_t               level = _container.size();
-		while (_container.iter(iData)
-		       && (level > comm_end
-		           || _story->container_flag(iData->offset) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)
-		) {
-			auto parrent_offset = iData->offset;
+		if (_container.iter(iData)
+		    && (level > comm_end
+		        || _story->container_flag(iData->offset + _story->instructions())
+		               & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
+			auto parrent_offset = _story->instructions() + iData->offset;
 			inkAssert(child_position >= parrent_offset, "Container stack order is broken");
 			// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed
 			// subcontainers first child check if child_positino is the first child of current container
@@ -1394,7 +1394,7 @@ void runner_impl::step()
 					// Keep track of current container
 					auto index = read<uint32_t>();
 					// offset points to command, command has size 6
-					_container.push({.id = index, .offset = _ptr - 6});
+					_container.push({index, _ptr - _story->instructions() - 6});
 
 					// Increment visit count
 					if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS
@@ -1658,5 +1658,12 @@ std::ostream& operator<<(std::ostream& out, runner_impl& in)
 	return out;
 }
 #endif
+
+config::statistics::runner runner_impl::statistics() const
+{
+	return {_threads.statistics(), _eval.statistics(),   _container.statistics(),
+	        _tags.statistics(),    _stack.statistics(),  _ref_stack.statistics(),
+	        _output.statistics(),  _choices.statistics()};
+}
 
 } // namespace ink::runtime::internal

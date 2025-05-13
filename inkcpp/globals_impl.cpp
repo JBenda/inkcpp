@@ -188,7 +188,7 @@ bool globals_impl::set_var(hash_t name, const ink::runtime::value& val)
 
 void globals_impl::internal_observe(hash_t name, callback_base* callback)
 {
-	_callbacks.push() = Callback{.name = name, .operation = callback};
+	_callbacks.push() = Callback{name, callback};
 	if (_globals_initialized) {
 		value* p_var = _variables.get(name);
 		inkAssert(
@@ -286,4 +286,12 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	ptr = _variables.snap_load(ptr, loader);
 	return ptr;
 }
+
+config::statistics::global globals_impl::statistics() const
+{
+	return {
+	    _variables.statistics(), _callbacks.statistics(), _lists.statistics(), _strings.statistics()
+	};
+}
+
 } // namespace ink::runtime::internal

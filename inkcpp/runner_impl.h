@@ -25,6 +25,7 @@
 #include "choice.h"
 
 #include "executioner.h"
+#include <cstddef>
 
 namespace ink::runtime::internal
 {
@@ -48,6 +49,8 @@ public:
 	// Creates a new runner at the start of a loaded ink story
 	runner_impl(const story_impl*, globals);
 	virtual ~runner_impl();
+
+	config::statistics::runner statistics() const override;
 
 	// used by the globals object to do garbage collection
 	void mark_used(string_table&, list_table&) const;
@@ -306,7 +309,7 @@ private:
 	ip_t _done   = nullptr; // when we last hit a done
 
 	// Output stream
-	internal::stream<config::limitOutputSize> _output;
+	internal::stream < abs(config::limitOutputSize), config::limitOutputSize<0> _output;
 
 	// Runtime stack. Used to store temporary variables and callstack
 	internal::stack < abs(config::limitRuntimeStack), config::limitRuntimeStack<0> _stack;
@@ -319,7 +322,7 @@ private:
 	bool _saved_evaluation_mode = false;
 
 	// Keeps track of what threads we're inside
-	threads < config::limitContainerDepth<0, abs(config::limitThreadDepth)> _threads;
+	threads < config::limitThreadDepth<0, abs(config::limitThreadDepth)> _threads;
 
 	// Choice list
 	managed_restorable_array < snap_choice, config::maxChoices<0, abs(config::maxChoices)> _choices;
@@ -337,7 +340,7 @@ private:
 	// Container set
 	struct ContainerData {
 		container_t id     = ~0u;
-		ip_t        offset = 0;
+		ptrdiff_t   offset = 0;
 
 		bool operator==(const ContainerData& oth) const { return oth.id == id && oth.offset == offset; }
 

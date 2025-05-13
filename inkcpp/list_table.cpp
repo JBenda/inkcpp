@@ -5,6 +5,7 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "list_table.h"
+#include "config.h"
 #include "system.h"
 #include "traits.h"
 #include "header.h"
@@ -51,7 +52,7 @@ list_table::list_table(const char* data, const ink::internal::header& header)
 			}
 			++ptr; // skip string
 		}
-		_flag_names.push() = ptr;
+		_flag_names.push()  = ptr;
 		_flag_values.push() = flag.flag;
 		++_list_end.back();
 		while (*ptr) {
@@ -152,13 +153,13 @@ char* list_table::toString(char* out, const list& l) const
 {
 	char* itr = out;
 
-	const data_t* entry        = getPtr(l.lid);
-	int           last_value   = 0;
-	int           last_list    = -1;
-	bool          first        = true;
-	int           min_value    = 0;
-	int           min_id       = -1;
-	int           min_list     = -1;
+	const data_t* entry      = getPtr(l.lid);
+	int           last_value = 0;
+	int           last_list  = -1;
+	bool          first      = true;
+	int           min_value  = 0;
+	int           min_id     = -1;
+	int           min_list   = -1;
 
 	while (1) {
 		bool change = false;
@@ -463,6 +464,7 @@ int list_table::count(list_flag lf) const
 	}
 	return 1;
 }
+
 int list_table::count(list l) const
 {
 	int           count = 0;
@@ -661,7 +663,8 @@ list_flag list_table::lrnd(list lh, prng& rng) const
 					if (count++ == n) {
 						return list_flag{
 						    static_cast<decltype(list_flag::list_id)>(i),
-						    static_cast<decltype(list_flag::flag)>(j - listBegin(i))};
+						    static_cast<decltype(list_flag::flag)>(j - listBegin(i))
+						};
 					}
 				}
 			}
@@ -700,8 +703,8 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 		for (int i = list_begin; i != _list_end[list.list_id]; ++i) {
 			if (str_equal(flag_name, _flag_names[i])) {
 				return {
-				    list_flag{.list_id = list.list_id, .flag = static_cast<int16_t>(i - list_begin)}
-        };
+				    list_flag{list.list_id, static_cast<int16_t>(i - list_begin)}
+				};
 			}
 		}
 	} else {
@@ -718,9 +721,8 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 					begin = *list_itr;
 				}
 				return {
-				    list_flag{
-				              .list_id = static_cast<int16_t>(lid), .flag = static_cast<int16_t>(fid - begin)}
-        };
+				    list_flag{static_cast<int16_t>(lid), static_cast<int16_t>(fid - begin)}
+				};
 			}
 		}
 	}
@@ -778,13 +780,13 @@ list_interface* list_table::handout_list(list l)
 /// @sa list_table::toString(char*,const list&)
 std::ostream& list_table::write(std::ostream& os, list l) const
 {
-	const data_t* entry        = getPtr(l.lid);
-	int           last_value   = 0;
-	int           last_list    = -1;
-	bool          first        = true;
-	int           min_value    = 0;
-	int           min_id       = -1;
-	int           min_list     = -1;
+	const data_t* entry      = getPtr(l.lid);
+	int           last_value = 0;
+	int           last_list  = -1;
+	bool          first      = true;
+	int           min_value  = 0;
+	int           min_id     = -1;
+	int           min_list   = -1;
 
 	while (1) {
 		bool change = false;
@@ -836,6 +838,16 @@ const unsigned char* list_table::snap_load(const unsigned char* ptr, const loade
 	ptr = _data.snap_load(ptr, loader);
 	ptr = _entry_state.snap_load(ptr, loader);
 	return ptr;
+}
+
+config::statistics::list_table list_table::statistics() const
+{
+	return {
+	    _list_handouts.statistics(),
+	    _list_end.statistics(),
+	    _flag_names.statistics(),
+	    _entry_state.statistics(),
+	};
 }
 
 } // namespace ink::runtime::internal

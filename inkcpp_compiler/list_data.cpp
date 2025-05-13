@@ -30,8 +30,9 @@ void list_data::new_flag(const std::string& flag_name, int value)
 	_flags.emplace_back(
 	    &flag_name,
 	    list_flag{
-	        .list_id = static_cast<decltype(list_flag::list_id)>(_list_name.size() - 1),
-	        .flag    = static_cast<decltype(list_flag::flag)>(value)}
+	        static_cast<decltype(list_flag::list_id)>(_list_name.size() - 1),
+	        static_cast<decltype(list_flag::flag)>(value)
+	    }
 	);
 }
 
