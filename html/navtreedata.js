@@ -65,7 +65,8 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_ink_asset_8h_source.html",
-"classink_1_1runtime_1_1snapshot.html#a7540b9363d1e5e6276f14f1161f6e70c"
+"classink_1_1runtime_1_1snapshot.html",
+"structink_1_1runtime_1_1value.html#aaf1b471915e632f9e38db634d8f61c02"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

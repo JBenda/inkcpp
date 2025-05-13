@@ -20,6 +20,7 @@ var searchData=
   ['gettags_17',['GetTags',['../class_u_ink_choice.html#a0a0b2a9b8cec6ab287e878c3277b675b',1,'UInkChoice::GetTags()'],['../class_u_tag_list.html#ab2321cf84ed9dfa789916dbaf576749f',1,'UTagList::GetTags()']]],
   ['gettext_18',['GetText',['../class_u_ink_choice.html#af50b22d1fec8727fadaaffd3d7e5af9a',1,'UInkChoice']]],
   ['getvalue_19',['GetValue',['../class_u_tag_list.html#a11abd35e7601d0955e888f3c076d28e5',1,'UTagList']]],
-  ['globals_20',['globals',['../namespaceink_1_1runtime.html#a224e2e5f47e5ce0a2f88a91d16054e93',1,'ink::runtime']]],
-  ['globals_5finterface_21',['globals_interface',['../classink_1_1runtime_1_1globals__interface.html',1,'ink::runtime']]]
+  ['global_20',['global',['../structink_1_1config_1_1statistics_1_1global.html',1,'ink::config::statistics']]],
+  ['globals_21',['globals',['../namespaceink_1_1runtime.html#a224e2e5f47e5ce0a2f88a91d16054e93',1,'ink::runtime']]],
+  ['globals_5finterface_22',['globals_interface',['../classink_1_1runtime_1_1globals__interface.html',1,'ink::runtime']]]
 ];

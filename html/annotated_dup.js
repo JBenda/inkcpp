@@ -4,6 +4,15 @@ var annotated_dup =
       [ "compiler", "namespaceink_1_1compiler.html", [
         [ "compilation_results", "structink_1_1compiler_1_1compilation__results.html", "structink_1_1compiler_1_1compilation__results" ]
       ] ],
+      [ "config", null, [
+        [ "statistics", null, [
+          [ "container", "structink_1_1config_1_1statistics_1_1container.html", null ],
+          [ "global", "structink_1_1config_1_1statistics_1_1global.html", "structink_1_1config_1_1statistics_1_1global" ],
+          [ "list_table", "structink_1_1config_1_1statistics_1_1list__table.html", "structink_1_1config_1_1statistics_1_1list__table" ],
+          [ "runner", "structink_1_1config_1_1statistics_1_1runner.html", "structink_1_1config_1_1statistics_1_1runner" ],
+          [ "string_table", "structink_1_1config_1_1statistics_1_1string__table.html", null ]
+        ] ]
+      ] ],
       [ "runtime", "namespaceink_1_1runtime.html", [
         [ "choice", "classink_1_1runtime_1_1choice.html", "classink_1_1runtime_1_1choice" ],
         [ "globals_interface", "classink_1_1runtime_1_1globals__interface.html", "classink_1_1runtime_1_1globals__interface" ],

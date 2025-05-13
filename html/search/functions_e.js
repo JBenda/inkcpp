@@ -6,6 +6,7 @@ var searchData=
   ['snapshot_3',['Snapshot',['../class_a_ink_runtime.html#a8182a1e9708c54e4b249765f83843191',1,'AInkRuntime']]],
   ['start_4',['Start',['../class_a_ink_runtime.html#a2ccd1df155f725cbebc53860b4c205ab',1,'AInkRuntime']]],
   ['startexisting_5',['StartExisting',['../class_a_ink_runtime.html#a796f99ab9af09e766bd9f5c0649bf19d',1,'AInkRuntime']]],
-  ['stop_6',['Stop',['../class_u_ink_thread.html#ac1653cff2a8952717c944f6ef3371029',1,'UInkThread']]],
-  ['story_5fptr_7',['story_ptr',['../classink_1_1runtime_1_1story__ptr.html#a6a5f70370286adbaa8ac61dfc28f0662',1,'ink::runtime::story_ptr::story_ptr(T *ptr)'],['../classink_1_1runtime_1_1story__ptr.html#a85f1ffa8c78b6559170c8d5edb52dff0',1,'ink::runtime::story_ptr::story_ptr(const story_ptr&lt; T &gt; &amp;oth)']]]
+  ['statistics_6',['statistics',['../classink_1_1runtime_1_1globals__interface.html#ad32c8409bd61b265cc5a60440bc9d64d',1,'ink::runtime::globals_interface::statistics()'],['../classink_1_1runtime_1_1runner__interface.html#a47ed0eb990c0cafe27c63b73782bf94b',1,'ink::runtime::runner_interface::statistics()']]],
+  ['stop_7',['Stop',['../class_u_ink_thread.html#ac1653cff2a8952717c944f6ef3371029',1,'UInkThread']]],
+  ['story_5fptr_8',['story_ptr',['../classink_1_1runtime_1_1story__ptr.html#a6a5f70370286adbaa8ac61dfc28f0662',1,'ink::runtime::story_ptr::story_ptr(T *ptr)'],['../classink_1_1runtime_1_1story__ptr.html#a85f1ffa8c78b6559170c8d5edb52dff0',1,'ink::runtime::story_ptr::story_ptr(const story_ptr&lt; T &gt; &amp;oth)']]]
 ];

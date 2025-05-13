@@ -9,6 +9,6 @@ var searchData=
   ['thread_5ft_6',['thread_t',['../namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a',1,'ink']]],
   ['todo_20list_7',['Todo List',['../todo.html',1,'']]],
   ['txt_8',['CMakeLists.txt',['../index.html#src_cmake',1,'']]],
-  ['type_9',['type',['../structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403',1,'ink::runtime::value::type'],['../struct_ink_value.html#a56a96d76fc3e4a67d498879da0175ef5',1,'InkValue::type']]],
-  ['type_10',['Type',['../structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8',1,'ink::runtime::value::Type'],['../struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206',1,'InkValue::Type']]]
+  ['type_9',['Type',['../structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8',1,'ink::runtime::value::Type'],['../struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206',1,'InkValue::Type']]],
+  ['type_10',['type',['../structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403',1,'ink::runtime::value::type'],['../struct_ink_value.html#a56a96d76fc3e4a67d498879da0175ef5',1,'InkValue::type']]]
 ];

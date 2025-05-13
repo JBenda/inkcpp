@@ -29,5 +29,6 @@ var classink_1_1runtime_1_1runner__interface =
     [ "num_tags", "classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2", null ],
     [ "operator bool", "classink_1_1runtime_1_1runner__interface.html#ae9d0aaad2022e67f6bf0aacbd0a829a7", null ],
     [ "operator[]", "classink_1_1runtime_1_1runner__interface.html#ae616e2f291c7cd279b3b67ea5d1a974d", null ],
-    [ "set_rng_seed", "classink_1_1runtime_1_1runner__interface.html#a03a5787865d7708227ebff27a2518f1c", null ]
+    [ "set_rng_seed", "classink_1_1runtime_1_1runner__interface.html#a03a5787865d7708227ebff27a2518f1c", null ],
+    [ "statistics", "classink_1_1runtime_1_1runner__interface.html#a47ed0eb990c0cafe27c63b73782bf94b", null ]
 ];

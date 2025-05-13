@@ -9,9 +9,11 @@ var searchData=
   ['snapshot_6',['Snapshot',['../class_a_ink_runtime.html#a8182a1e9708c54e4b249765f83843191',1,'AInkRuntime']]],
   ['start_7',['Start',['../class_a_ink_runtime.html#a2ccd1df155f725cbebc53860b4c205ab',1,'AInkRuntime']]],
   ['startexisting_8',['StartExisting',['../class_a_ink_runtime.html#a796f99ab9af09e766bd9f5c0649bf19d',1,'AInkRuntime']]],
-  ['stop_9',['Stop',['../class_u_ink_thread.html#ac1653cff2a8952717c944f6ef3371029',1,'UInkThread']]],
-  ['story_10',['story',['../classink_1_1runtime_1_1story.html',1,'ink::runtime']]],
-  ['story_5fptr_11',['story_ptr',['../classink_1_1runtime_1_1story__ptr.html',1,'ink::runtime::story_ptr&lt; T &gt;'],['../classink_1_1runtime_1_1story__ptr.html#a6a5f70370286adbaa8ac61dfc28f0662',1,'ink::runtime::story_ptr::story_ptr(T *ptr)'],['../classink_1_1runtime_1_1story__ptr.html#a85f1ffa8c78b6559170c8d5edb52dff0',1,'ink::runtime::story_ptr::story_ptr(const story_ptr&lt; T &gt; &amp;oth)']]],
-  ['string_12',['String',['../structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a27118326006d3829667a400ad23d5d98',1,'ink::runtime::value::String'],['../group__unreal.html#gga4dce7f8c806a47a9718b817d09998e2fa27118326006d3829667a400ad23d5d98',1,'String:&#160;InkVar.h']]],
-  ['string_5fv_13',['string_v',['../struct_ink_value.html#a52d185fc6b2df75ad8bd0f96913dca17',1,'InkValue']]]
+  ['statistics_9',['statistics',['../classink_1_1runtime_1_1globals__interface.html#ad32c8409bd61b265cc5a60440bc9d64d',1,'ink::runtime::globals_interface::statistics()'],['../classink_1_1runtime_1_1runner__interface.html#a47ed0eb990c0cafe27c63b73782bf94b',1,'ink::runtime::runner_interface::statistics()']]],
+  ['stop_10',['Stop',['../class_u_ink_thread.html#ac1653cff2a8952717c944f6ef3371029',1,'UInkThread']]],
+  ['story_11',['story',['../classink_1_1runtime_1_1story.html',1,'ink::runtime']]],
+  ['story_5fptr_12',['story_ptr',['../classink_1_1runtime_1_1story__ptr.html',1,'ink::runtime::story_ptr&lt; T &gt;'],['../classink_1_1runtime_1_1story__ptr.html#a6a5f70370286adbaa8ac61dfc28f0662',1,'ink::runtime::story_ptr::story_ptr(T *ptr)'],['../classink_1_1runtime_1_1story__ptr.html#a85f1ffa8c78b6559170c8d5edb52dff0',1,'ink::runtime::story_ptr::story_ptr(const story_ptr&lt; T &gt; &amp;oth)']]],
+  ['string_13',['String',['../structink_1_1runtime_1_1value.html#a63d705bbd381f9179728542341b614a8a27118326006d3829667a400ad23d5d98',1,'ink::runtime::value::String'],['../group__unreal.html#gga4dce7f8c806a47a9718b817d09998e2fa27118326006d3829667a400ad23d5d98',1,'String:&#160;InkVar.h']]],
+  ['string_5ftable_14',['string_table',['../structink_1_1config_1_1statistics_1_1string__table.html',1,'ink::config::statistics']]],
+  ['string_5fv_15',['string_v',['../struct_ink_value.html#a52d185fc6b2df75ad8bd0f96913dca17',1,'InkValue']]]
 ];

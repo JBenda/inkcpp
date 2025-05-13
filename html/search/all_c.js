@@ -20,5 +20,6 @@ var searchData=
   ['operator_3d_17',['operator=',['../classink_1_1runtime_1_1story__ptr.html#adb4e3777b540d94025ebcf9de4d9dc4e',1,'ink::runtime::story_ptr']]],
   ['operator_3d_3d_18',['operator==',['../classink_1_1runtime_1_1list__interface_1_1iterator.html#ab208e39c02eef320875843eaca0d5bca',1,'ink::runtime::list_interface::iterator::operator==()'],['../classink_1_1runtime_1_1story__ptr.html#a110f9466d2b3789463df069659a71f90',1,'ink::runtime::story_ptr::operator==()']]],
   ['operator_5b_5d_19',['operator[]',['../classink_1_1runtime_1_1runner__interface.html#ae616e2f291c7cd279b3b67ea5d1a974d',1,'ink::runtime::runner_interface']]],
-  ['optional_20',['optional',['../namespaceink.html#a1afe1efe367158356d47c906abbab8fc',1,'ink']]]
+  ['optional_20',['optional',['../namespaceink.html#a1afe1efe367158356d47c906abbab8fc',1,'ink']]],
+  ['output_21',['output',['../structink_1_1config_1_1statistics_1_1runner.html#aa29bd29a50c15a582189d574f93e2365',1,'ink::config::statistics::runner']]]
 ];

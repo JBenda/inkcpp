@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['warnings_0',['warnings',['../structink_1_1compiler_1_1compilation__results.html#a52e9f6cd22e165d6fdbe27e9c635dec8',1,'ink::compiler::compilation_results']]]
+  ['runtime_5fref_5fstack_0',['runtime_ref_stack',['../structink_1_1config_1_1statistics_1_1runner.html#a2c92086d5eb242834e4adfa7911c84fd',1,'ink::config::statistics::runner']]],
+  ['runtime_5fstack_1',['runtime_stack',['../structink_1_1config_1_1statistics_1_1runner.html#a770e94f50ec0ae75b21b5e7678d6d7eb',1,'ink::config::statistics::runner']]]
 ];

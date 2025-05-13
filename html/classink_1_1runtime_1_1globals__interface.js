@@ -17,5 +17,6 @@ var classink_1_1runtime_1_1globals__interface =
     [ "set", "classink_1_1runtime_1_1globals__interface.html#ac5b0f6c0869e24e21757f5fe8b1df2ce", null ],
     [ "set", "classink_1_1runtime_1_1globals__interface.html#a840bafebcf05f3ae0f4ff5f15a3a41ff", null ],
     [ "set", "classink_1_1runtime_1_1globals__interface.html#aaeb06800da97d4f1dd5f0a0d9ab63e75", null ],
-    [ "set", "classink_1_1runtime_1_1globals__interface.html#a0277b08550382cdedf1aa3e43aef0291", null ]
+    [ "set", "classink_1_1runtime_1_1globals__interface.html#a0277b08550382cdedf1aa3e43aef0291", null ],
+    [ "statistics", "classink_1_1runtime_1_1globals__interface.html#ad32c8409bd61b265cc5a60440bc9d64d", null ]
 ];
