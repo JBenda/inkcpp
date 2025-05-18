@@ -44,6 +44,8 @@ public:
 	virtual size_t               get_data_len() const = 0;
 	/** number of runners which are stored inside this snapshot */
 	virtual size_t               num_runners() const  = 0;
+	/** hash of story to check for story changes on load. */
+	virtual hash_t get_story_hash() const = 0;
 
 #ifdef INK_ENABLE_STL
 	/** deserialize snapshot from file.

@@ -60,6 +60,8 @@ public:
 
 	const ink::internal::header& get_header() const { return _header; }
 
+	const hash_t get_hash() const { return hash_data(_file, _length); }
+
 private:
 	void setup_pointers();
 

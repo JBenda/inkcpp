@@ -12,17 +12,14 @@
 #	include "Misc/AssertionMacros.h"
 #	include "Misc/CString.h"
 #	include "HAL/UnrealMemory.h"
-#	include "Hash/CityHash.h"
 
 #endif
 #ifdef INK_ENABLE_STL
-#	include <exception>
 #	include <stdexcept>
 #	include <optional>
 #	include <cctype>
 #	include <cstdint>
 #	include <cstdio>
-#	include <cstdarg>
 #endif
 
 // Platform specific defines //
@@ -52,15 +49,8 @@ typedef uint32_t hash_t;
 /** Invalid hash value */
 const hash_t InvalidHash = 0;
 
-#ifdef INK_ENABLE_UNREAL
-/** Simple hash for serialization of strings */
-inline hash_t hash_string(const char* string)
-{
-	return CityHash32(string, FCStringAnsi::Strlen(string));
-}
-#else
 hash_t hash_string(const char* string);
-#endif
+hash_t hash_data(const unsigned char* data, size_t length);
 
 /** Byte type */
 typedef unsigned char byte_t;

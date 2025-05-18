@@ -54,6 +54,10 @@ static constexpr int maxLists            = -50;
 // max number of arguments for external functions (dynamic not possible)
 static constexpr int maxArrayCallArity   = 10;
 
+static constexpr char version[3]
+    = {@CMAKE_PROJECT_VERSION_MAJOR@, @CMAKE_PROJECT_VERSION_MINOR@,
+       @CMAKE_PROJECT_VERSION_PATCH@};
+
 namespace statistics
 {
 	struct container {

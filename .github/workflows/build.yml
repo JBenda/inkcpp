@@ -112,6 +112,14 @@ jobs:
         name: ${{matrix.artifact}}-clib
         path: build/comp_clib
 
+    - name: Test CMake Example C++
+      working-directory: ${{github.workspace}}/cmake_cpp
+      shell: bash
+
+    - name: Test CMake Example C
+      working-directory: ${{github.workspace}}/cmake_c
+
+
     - name: Install UE
       if: ${{ matrix.unreal }}
       working-directory: ${{github.workspace}}/build
@@ -267,6 +275,8 @@ jobs:
       run: |
         python3 -m pip install dist/*.whl --user
         python3 -m pytest inkcpp_python/tests
+    - name: Test python demo
+
     - name: Remove wheel
       run: |
         rm dist/*.whl

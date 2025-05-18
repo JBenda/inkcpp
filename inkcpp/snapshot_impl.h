@@ -75,7 +75,7 @@ public:
 		if (_managed) {
 			delete[] _file;
 		}
-	};
+	}
 
 	managed_array<const char*, true, 5>& strings() const { return string_table; }
 
@@ -95,6 +95,8 @@ public:
 
 	size_t num_runners() const override { return _header.num_runners; }
 
+	hash_t get_story_hash() const override { return _header.story_hash; }
+
 private:
 	// file information
 	// only populated when loading snapshots
@@ -105,9 +107,11 @@ private:
 	static size_t                               file_size(size_t, size_t);
 
 	struct header {
-		size_t num_runners;
-		size_t length;
-
+		const char* magic_sequence = "INKCPP_SNAP";
+		const char  version[3]     = {config::version[0], config::version[1], config::version[2]};
+		hash_t      story_hash;
+		size_t      num_runners;
+		size_t      length;
 	} _header;
 
 	size_t get_offset(size_t idx) const

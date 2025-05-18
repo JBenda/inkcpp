@@ -37,6 +37,7 @@ if (INKCPP_UNREAL)
 	configure_file(
 		"${CMAKE_CURRENT_SOURCE_DIR}/inkcpp/Source/inkcpp_editor/Private/inklecate_cmd.cpp.in"
 		"${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/inkcpp_editor/Private/inklecate_cmd.cpp"
+		@ONLY
 	)	
 	file(GLOB_RECURSE SOURCE_FILES LIST_DIRECTORIES TRUE RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/inkcpp/*")
 	list(FILTER SOURCE_FILES EXCLUDE REGEX ".*\.in$")

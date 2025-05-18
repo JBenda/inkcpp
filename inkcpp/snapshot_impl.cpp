@@ -9,6 +9,8 @@
 #include "story_impl.h"
 #include "globals_impl.h"
 #include "runner_impl.h"
+#include "string_utils.h"
+#include "system.h"
 
 #include <cstring>
 #ifdef INK_ENABLE_STL
@@ -71,8 +73,12 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 		_length += node->object->snap(nullptr, snapper);
 		++runner_cnt;
 	}
-
+	inkAssert(
+	    runner_cnt > 0,
+	    "No runner assoziated with global you want to snap. This will just store the initial state."
+	);
 	_length             = file_size(_length, runner_cnt);
+	_header.story_hash  = globals._runners_start->object->_story->get_hash();
 	_header.length      = _length;
 	_header.num_runners = runner_cnt;
 	unsigned char* data = new unsigned char[_length];
@@ -107,7 +113,23 @@ snapshot_impl::snapshot_impl(const unsigned char* data, size_t length, bool mana
 {
 	const unsigned char* ptr = data;
 	memcpy(&_header, ptr, sizeof(_header));
-	inkAssert(_header.length == _length, "Corrupted file length");
+	decltype(_header) ref_header{};
+	inkAssert(
+	    str_equal(_header.magic_sequence, ref_header.magic_sequence),
+	    "Magic string of snapshot file does not match."
+	);
+	inkAssert(
+	    _header.version[0] == ref_header.version[0], "Major version missmatch got: %d, expected %d.",
+	    _header.version[0], _header.version[1]
+	);
+	inkAssert(
+	    _header.version[1] <= ref_header.version[1],
+	    "Try to load a newer snapshot file: your version: %d.%d, snapshot version: %d.%d.",
+	    ref_header.version[0], ref_header.version[1], _header.version[0], _header.version[1]
+	);
+	// TODO: warning on different patch?
+	if (_header.magic_sequence)
+		inkAssert(_header.length == _length, "Corrupted file length");
 }
 
 size_t snap_choice::snap(unsigned char* data, const snapper& snapper) const

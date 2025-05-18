@@ -37,6 +37,7 @@ class runner_impl
     : public runner_interface
     , public snapshot_interface
 {
+	friend snapshot_impl;
 	enum class tags_level : int {
 		GLOBAL,  ///< A tag at the begining of the file
 		KNOT,    ///< A tag inside a knot before any text

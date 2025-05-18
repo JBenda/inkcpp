@@ -2,14 +2,12 @@
 
 import os
 import re
-import sys
 import subprocess
-import glob
-import json
+import sys
 from pathlib import Path
+
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
-
 
 # echo "[\n$(find shared/** inkcpp/** inkcpp_compiler/** inkcpp_python/** -not -path '*/.*' | tr '\n' ' ' | sed -e 's/[^ ]\+/"\0"/g' -e 's/[[:blank:]]*$//' -e 's/ /,\n/g')\n]"
 # + "CMakeLists.txt"
@@ -22,11 +20,12 @@ PLAT_TO_CMAKE = {
     "win-arm64": "ARM64",
 }
 
+
 def src_files(dir):
     dir = os.fsencode(dir)
     files = []
     for file in os.listdir(dir):
-        if file[0] == '.':
+        if file[0] == ".":
             continue
         file = os.path.join(dir, file)
         if os.path.isdir(file):
@@ -35,13 +34,14 @@ def src_files(dir):
             files.append(file.decode("utf-8"))
     return files
 
+
 def glob_src_files():
     files = []
-    dirs = ['./inkcpp', './inkcpp_compiler', './inkcpp_python', './shared']
+    dirs = ["./inkcpp", "./inkcpp_compiler", "./inkcpp_python", "./shared"]
     for dir in dirs:
         files += src_files(dir)
     return files
-        
+
 
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "") -> None:
@@ -50,9 +50,10 @@ class CMakeExtension(Extension):
         src_files += ["CMakeLists.txt", "Config.cmake.in"]
         super().__init__(name, sources=src_files)
         self.sourcedir = os.fspath(Path(sourcedir).resolve())
-    
+
+
 class CMakeBuild(build_ext):
- def build_extension(self, ext: CMakeExtension) -> None:
+    def build_extension(self, ext: CMakeExtension) -> None:
         # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
         ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
         extdir = ext_fullpath.parent.resolve()
@@ -74,11 +75,11 @@ class CMakeBuild(build_ext):
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
-            f"-DINKCPP_PY=ON",
-            f"-DWHEEL_BUILD=ON",
+            "-DINKCPP_PY=ON",
+            "-DWHEEL_BUILD=ON",
         ]
         build_args = [
-            f"--target=inkcpp_py",
+            "--target=inkcpp_py",
         ]
         # Adding CMake arguments set as environment variable
         # (needed e.g. to build for ARM OSx on conda-forge)
@@ -143,17 +144,18 @@ class CMakeBuild(build_ext):
             build_temp.mkdir(parents=True)
 
         print([f for f in os.listdir(ext.sourcedir)])
-        print("'{}'".format(ext.sourcedir), cmake_args)
+        print(f"'{ext.sourcedir}'", cmake_args)
         subprocess.run(
             ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
         )
         subprocess.run(
             ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
-        )            
+        )
+
 
 setup(
     name="inkcpp-py",
-    version="0.1.9",
+    version="2.0.0",
     author="Julian Benda",
     author_email="julian.benda@ovgu.de",
     description="Python bindings for InkCPP a Inkle runtime written in C++",
