@@ -14,7 +14,7 @@
 #include <map>
 #include <fstream>
 
-#ifndef WIN32
+#ifndef _MSC_VER
 #	include <cstring>
 #endif
 
@@ -26,7 +26,7 @@ using std::string;
 
 char* strtok_s(char* s, const char* sep, char** context)
 {
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef _MSC_VER
 	return ::strtok_s(s, sep, context);
 #else
 	if (context == nullptr || sep == nullptr || (s == nullptr && *context == nullptr)) {

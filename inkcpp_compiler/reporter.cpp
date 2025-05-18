@@ -68,7 +68,7 @@ namespace ink::compiler::internal
 		_list = list;
 
 		// Make sure our buffer is empty
-#ifdef WIN32
+#ifdef _MSC_VER
 		_Tidy();
 #endif
 	}
@@ -90,7 +90,7 @@ namespace ink::compiler::internal
 
 		// Clear our state
 		_list = nullptr;
-#ifdef WIN32
+#ifdef _MSC_VER
 		_Tidy();
 #endif
 
