@@ -50,7 +50,7 @@ typedef uint32_t hash_t;
 const hash_t InvalidHash = 0;
 
 hash_t hash_string(const char* string);
-hash_t hash_data(const unsigned char* data, size_t length);
+hash_t hash_data(const char* data, unsigned long length);
 
 /** Byte type */
 typedef unsigned char byte_t;

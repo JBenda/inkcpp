@@ -15,7 +15,7 @@ namespace ink
 #	define C      86969 /* yet another prime */
 #	define FIRSTH 37    /* also prime */
 
-hash_t hash_data(const unsigned char* data, size_t length)
+hash_t hash_data(const char* data, unsigned long length)
 {
 	hash_t h = FIRSTH;
 	for (size_t i = 0; i < length; ++i) {
