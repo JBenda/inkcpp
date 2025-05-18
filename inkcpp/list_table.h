@@ -179,8 +179,8 @@ public:
 
 	bool not_bool(list_flag lf) const { return ! to_bool(lf); }
 
-	int count(list l) const;
-	int count(list_flag f) const;
+	int32_t count(list l) const;
+	int32_t count(list_flag f) const;
 
 	list_flag min(list l) const;
 
