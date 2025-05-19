@@ -19,6 +19,7 @@ namespace ink::runtime::internal
 // Ink story. Constant once constructed. Can be shared safely between multiple runner instances
 class story_impl : public story
 {
+	friend snapshot_impl;
 public:
 #ifdef INK_ENABLE_STL
 	story_impl(const char* filename);
@@ -83,7 +84,7 @@ private:
 	uint32_t  _container_list_size;
 	uint32_t  _num_containers;
 
-	// container hashes
+	// container hashes (hash,offset)
 	hash_t* _container_hash_start;
 	hash_t* _container_hash_end;
 

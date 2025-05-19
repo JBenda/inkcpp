@@ -104,20 +104,22 @@ private:
 	const unsigned char*                        _file;
 	size_t                                      _length;
 	bool                                        _managed;
-	static size_t                               file_size(size_t, size_t);
+	static size_t                               file_size(size_t, size_t, size_t);
 
 	struct header {
 		const char* magic_sequence = "INKCPP_SNAP";
 		const char  version[3]     = {config::version[0], config::version[1], config::version[2]};
 		hash_t      story_hash;
-		size_t      num_runners;
-		size_t      length;
+		uint32_t      num_runners;
+		uint32_t      num_container;
+		uint32_t      length;
 	} _header;
 
 	size_t get_offset(size_t idx) const
 	{
+		// 0 - container hashes, 1 - globals, 2 + runner
 		inkAssert(idx <= _header.num_runners, "Out of Bound access for runner in snapshot.");
-		return reinterpret_cast<const size_t*>(_file + sizeof(header))[idx];
+		return reinterpret_cast<const uint32_t*>(_file + sizeof(header))[idx + 1];
 	}
 };
 } // namespace ink::runtime::internal

@@ -12,11 +12,6 @@
 
 #include <vector>
 #include <map>
-#include <fstream>
-
-#ifndef WIN32
-#	include <cstring>
-#endif
 
 namespace ink::compiler::internal
 {

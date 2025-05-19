@@ -54,9 +54,11 @@ void snapshot::write_to_file(const char* filename) const
 
 namespace ink::runtime::internal
 {
-size_t snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt)
+size_t
+    snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt, size_t num_container)
 {
-	return serialization_length + sizeof(header) + (runner_cnt + 1) * sizeof(size_t);
+	return serialization_length + sizeof(header) + (runner_cnt + 1 + 1) * sizeof(uint32_t)
+	     + num_container * sizeof(uint32_t) * 3;
 }
 
 const unsigned char* snapshot_impl::get_data() const { return _file; }
@@ -67,7 +69,8 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
     : _managed{true}
 {
 	snapshot_interface::snapper snapper{globals.strings(), globals._owner->string(0)};
-	_length           = globals.snap(nullptr, snapper);
+	_length = 0;
+	_length += globals.snap(nullptr, snapper);
 	size_t runner_cnt = 0;
 	for (auto node = globals._runners_start; node; node = node->next) {
 		_length += node->object->snap(nullptr, snapper);
@@ -77,19 +80,24 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 	    runner_cnt > 0,
 	    "No runner assoziated with global you want to snap. This will just store the initial state."
 	);
-	_length             = file_size(_length, runner_cnt);
-	_header.story_hash  = globals._runners_start->object->_story->get_hash();
-	_header.length      = _length;
-	_header.num_runners = runner_cnt;
-	unsigned char* data = new unsigned char[_length];
-	_file               = data;
-	unsigned char* ptr  = data;
+	const story_impl* story = globals._runners_start->object->_story;
+	_header.num_container   = (story->_container_hash_end - story->_container_hash_start) / 2;
+	_length                 = file_size(_length, runner_cnt, _header.num_container);
+	_header.story_hash      = story->get_hash();
+	_header.length          = _length;
+	_header.num_runners     = runner_cnt;
+	unsigned char* data     = new unsigned char[_length];
+	_file                   = data;
+	unsigned char* ptr      = data;
 	// write header
 	memcpy(ptr, &_header, sizeof(_header));
 	// write lookup table
 	ptr += sizeof(header);
 	{
-		size_t offset = (ptr - data) + (_header.num_runners + 1) * sizeof(size_t);
+		uint32_t offset = (ptr - data) + (_header.num_runners + 1 + 1) * sizeof(uint32_t);
+		memcpy(ptr, &offset, sizeof(offset));
+		ptr += sizeof(offset);
+		offset += _header.num_container * sizeof(uint32_t) * 3;
 		memcpy(ptr, &offset, sizeof(offset));
 		ptr += sizeof(offset);
 		offset += globals.snap(nullptr, snapper);
@@ -98,6 +106,21 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 			ptr += sizeof(offset);
 			offset += node->object->snap(nullptr, snapper);
 		}
+	}
+
+	uint32_t container_value;
+	for (size_t i = 0; i < _header.num_container; ++i) {
+		container_value = story->_container_hash_start[i * 2];
+		memcpy(ptr, &container_value, sizeof(container_value));
+		ptr += sizeof(container_value);
+		container_value = story->_container_hash_start[i * 2 + 1];
+		memcpy(ptr, &container_value, sizeof(container_value));
+		ptr += sizeof(container_value);
+		if (!story->get_container_id(story->_container_hash_start[i * 2 + 1] + story->instructions(), container_value)) {
+			container_value = ~0;
+		}
+		memcpy(ptr, &container_value, sizeof(container_value));
+		ptr += sizeof(container_value);
 	}
 
 	ptr += globals.snap(ptr, snapper);
