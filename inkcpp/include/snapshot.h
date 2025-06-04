@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "system.h"
 #include "types.h"
 
 namespace ink::runtime
@@ -39,14 +40,13 @@ public:
 	static snapshot* from_binary(const unsigned char* data, size_t length, bool freeOnDestroy = true);
 
 	/** access blob inside snapshot */
-	virtual const unsigned char* get_data() const       = 0;
+	virtual const unsigned char* get_data() const                         = 0;
 	/** size of blob inside snapshot */
-	virtual size_t               get_data_len() const   = 0;
+	virtual size_t               get_data_len() const                     = 0;
 	/** number of runners which are stored inside this snapshot */
-	virtual size_t               num_runners() const    = 0;
+	virtual size_t               num_runners() const                      = 0;
 	/** hash of story to check for story changes on load. */
-	virtual hash_t               get_story_hash() const = 0;
-
+	virtual hash_t               get_story_hash() const                   = 0;
 #ifdef INK_ENABLE_STL
 	/** deserialize snapshot from file.
 	 * @param filename of input file

@@ -122,6 +122,7 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 		memcpy(ptr, &container_value, sizeof(container_value));
 		ptr += sizeof(container_value);
 	}
+	/* TODO: list_table meta data*/
 
 	ptr += globals.snap(ptr, snapper);
 	for (auto node = globals._runners_start; node; node = node->next) {

@@ -227,9 +227,6 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 {
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
 	auto*                globs    = new globals_impl(this);
-	if (get_hash() != data.get_story_hash()) {
-		// TODO: migration logic + warning
-	}
 	auto end = globs->snap_load(
 	    snapshot.get_globals_snap(),
 	    snapshot_interface::loader{
@@ -237,6 +234,12 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 	        _string_table,
 	    }
 	);
+	if (get_hash() != data.get_story_hash()) {
+		auto* ref_globals = new globals_impl(this);
+		auto* ref_runner = new runner_impl(this, ref_globals);
+		ref_globals->initialize_globals(ref_runner);
+		globs->migrate(snapshot, *this, *ref_globals);
+	}
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
 	return globals(globs, _block);
 }
@@ -262,7 +265,16 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	// use
 	idx = (data.num_runners() - idx - 1);
 	if (get_hash() != data.get_story_hash()) {
-		// TODO: migartion logic + warning
+		auto* ref_globals = new_globals_impl(this);
+		auto* ref_runner = new_runner_impl(this, ref_globals);
+		ref_globals->initialize_globals(ref_runner);
+		// ref_runner->move_to(current_knot);
+		// ref_runner->get_line() for ?
+		// migrate: _ptr, _backup, _done
+		// migrate: _stack, _ref_stack
+		// migrate: take new choices/fallback_choice
+		// migrate: take new tags
+		// migrate: take new _container
 	}
 	auto end = run->snap_load(snapshot.get_runner_snap(idx), loader);
 	inkAssert(

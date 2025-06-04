@@ -29,6 +29,15 @@ public:
 		}
 	}
 
+	template<bool cD, size_t cC>
+	managed_array& operator=(const managed_array<T, cD, cC>& oth)
+	{
+		resize(oth.size);
+		for (size_t i = 0; i < _size; ++i) {
+			data()[i] = oth.data()[i];
+		}
+	}
+
 	config::statistics::container statistics() const
 	{
 		return {static_cast<int>(_capacity), static_cast<int>(_size)};
@@ -36,7 +45,7 @@ public:
 
 	virtual ~managed_array()
 	{
-		if constexpr (dynamic) {
+		if constexpr (dynamic && dynamic != nullptr) {
 			delete[] _dynamic_data;
 		}
 	}

@@ -37,7 +37,7 @@ constexpr int segmentsFromBits(int bits, int size)
 /// managed all list entries and list metadata
 class list_table : public snapshot_interface
 {
-	using data_t = int;
+	using data_t = int32_t;
 	enum class state : char {
 		unused,
 		used,
@@ -108,6 +108,8 @@ public:
 
 	// parse binary list meta data
 	list_table(const char* data, const ink::internal::header&);
+	// probpally needs old list definitions?
+	void migrate();
 
 	explicit list_table()
 	    : _entrySize{0}

@@ -294,4 +294,23 @@ config::statistics::global globals_impl::statistics() const
 	};
 }
 
+void globals_impl::migrate(const snapshot_impl& snapshot, const story_impl& story, const globals_impl& new_globals) {
+	// migrate visit counts for still existing container
+	for (const auto& container : snapshot) {
+		if (container.id.has_value()) {
+			ip_t new_position = story.find_offset_for(container.hash);
+			container_t new_id;
+			if (new_position != nullptr && story.get_container_id(new_position, new_id)) {
+				new_globals._visit_counts[new_id] = _visit_counts[container.id.value];
+				new_globals._visit_counts_backup[new_id] = _visit_counts_backup[container.id.value];
+			}
+		}
+	}
+	_visit_counts = new_globals._visit_counts;
+	_visit_counts_backup = new_globals._visit_counts_backup;
+
+	_lists.migrate(snapshot);
+	_variables.migrate(new_globals._variables);
+}
+
 } // namespace ink::runtime::internal

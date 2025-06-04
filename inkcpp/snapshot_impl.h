@@ -10,6 +10,8 @@
 #include "snapshot_interface.h"
 #include "array.h"
 #include "choice.h"
+#include "system.h"
+#include <winnt.h>
 
 namespace ink::runtime::internal
 {
@@ -97,6 +99,23 @@ public:
 
 	hash_t get_story_hash() const override { return _header.story_hash; }
 
+	hash_t      get_container_hash(container_t id) const;
+	container_t get_container_id(hash_t hash) const;
+
+	struct container_iterator {
+		struct entry {
+			optional<container_t> id;
+			hash_t                hash;
+			offset_t              offset;
+		};
+		entry operator*() const;
+		int operator++() const;
+		bool operator!=(const container_iterator& rh);
+	};
+
+	container_iterator begin() const;
+	container_iterator end() const;
+
 private:
 	// file information
 	// only populated when loading snapshots
@@ -110,9 +129,9 @@ private:
 		const char* magic_sequence = "INKCPP_SNAP";
 		const char  version[3]     = {config::version[0], config::version[1], config::version[2]};
 		hash_t      story_hash;
-		uint32_t      num_runners;
-		uint32_t      num_container;
-		uint32_t      length;
+		uint32_t    num_runners;
+		uint32_t    num_container;
+		uint32_t    length;
 	} _header;
 
 	size_t get_offset(size_t idx) const

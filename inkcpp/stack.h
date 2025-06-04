@@ -94,6 +94,7 @@ namespace runtime
 			// snapshot interface
 			size_t               snap(unsigned char* data, const snapper&) const;
 			const unsigned char* snap_load(const unsigned char* data, const loader&);
+			void migrate(const basic_stack& new_self);
 
 		private:
 			entry&       add(hash_t name, const value& val);

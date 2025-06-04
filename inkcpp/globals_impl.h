@@ -39,6 +39,9 @@ public:
 	virtual ~globals_impl() {}
 
 	snapshot* create_snapshot() const override;
+	// delte visit_counts/global variables which are no longer exists
+	// add visit_counts/global variables which are new
+	void      migrate(const snapshot_impl& snapshot, const story_impl& story, const globals_impl& new_globals);
 
 protected:
 	optional<ink::runtime::value> get_var(hash_t name) const override;
@@ -99,7 +102,7 @@ public:
 
 private:
 	// Store the number of containers. This is the length of most of our lists
-	const uint32_t _num_containers;
+	uint32_t _num_containers;
 
 	uint32_t _turn_cnt = 0;
 
