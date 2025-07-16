@@ -117,10 +117,18 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: |
+        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.6" -DINKCPP_UNREAL=ON
+        cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_6 --component unreal
         cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.5" -DINKCPP_UNREAL=ON
         cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_5 --component unreal
         cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.4" -DINKCPP_UNREAL=ON
         cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_4 --component unreal
+    - name: Upload UE 5.6
+      if: ${{ matrix.unreal }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: unreal_5_6
+        path: build/comp_unreal_5_6/
     - name: Upload UE 5.5
       if: ${{ matrix.unreal }}
       uses: actions/upload-artifact@v4

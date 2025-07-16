@@ -57,7 +57,7 @@ mkdir build
 cd build
 mkdir plugin
 mkdir plugin-build
-cmake -DINKCPP_UNREAL_TARGET_VERSION="5.5" .
+cmake -DINKCPP_UNREAL_TARGET_VERSION="5.5" ..
 cmake --install . --component unreal --prefix .\plugin  # create source files for plugin
 \PATH\TO\UNREAL_ENGINE\Build\BatchFiles\RunUAT.bat BuildPlugin -plugin=GIT_REPO\build\plugin\inkcpp\inkcpp.uplugin -package=GIT_REPO\build\plugin-build\inkcpp -TargetPlatforms=Win64 # compile plugin
 move plugin-build\inkcpp UE_ENGINE\Engine\Plugins\inkcpp

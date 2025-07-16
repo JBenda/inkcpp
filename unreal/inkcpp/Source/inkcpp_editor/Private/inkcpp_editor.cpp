@@ -40,6 +40,8 @@ public:
 		}
 	}
 
+	bool ShouldFindEditorForAsset() const override { return false; }
+
 	// Inherited via IAssetTypeActions
 	void OpenAssetEditor(
 	    const TArray<UObject*>& InObjects, TSharedPtr<IToolkitHost> EditWithinLevelEditor
