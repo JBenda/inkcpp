@@ -24,6 +24,7 @@ namespace runtime
 		{
 		protected:
 			basic_stream(value*, size_t);
+			virtual ~basic_stream() = default;
 			void         initelize_data(value*, size_t);
 			virtual void overflow(value*& buffer, size_t& size, size_t target = 0);
 

@@ -1,4 +1,4 @@
-set(INKCPP_UNREAL_TARGET_VERSION "5.5" CACHE STRING "Unreal engine version the plugin should target (e.g: 5.5)")
+set(INKCPP_UNREAL_TARGET_VERSION "5.6" CACHE STRING "Unreal engine version the plugin should target (e.g: 5.6)")
 set(INKCPP_UNREAL_RunUAT_PATH CACHE FILEPATH "Path to Unreal engine installation RunUAT file. Used to automatcally build the plugin.")
 option(INKCPP_UNREAL "Prepare sourcefiles for a UE Plugin (this will download " OFF)
 	option(INKCPP_DOC_BlueprintUE "Building doxygen documentation with BlueprintUE visualisation for unreal blueprints. (Requires node js)" ON)

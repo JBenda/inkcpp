@@ -187,8 +187,8 @@ public:
 	// ctor
 	avl_array()
 	    : size_(0U)
-	    , root_(INVALID_IDX)
 	    , _capacity(Size)
+	    , root_(INVALID_IDX)
 	{
 		if constexpr (dynamic) {
 			key_     = new Key[Size];
