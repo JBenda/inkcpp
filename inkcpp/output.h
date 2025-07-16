@@ -29,7 +29,6 @@ namespace runtime
 			virtual void overflow(value*& buffer, size_t& size, size_t target = 0);
 
 		public:
-
 			// Constant to identify an invalid position in the stream
 			static constexpr size_t npos = ~0;
 
