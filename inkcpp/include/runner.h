@@ -95,6 +95,7 @@ public:
 	 */
 	virtual snapshot* create_snapshot() const = 0;
 
+#ifndef INK_ENABLE_CSTD
 	/**
 	 * Execute the next line of the script.
 	 *
@@ -114,6 +115,7 @@ public:
 	 * @return string with the next line of output
 	 */
 	virtual line_type getall() = 0;
+#endif
 
 #ifdef INK_ENABLE_STL
 	/**

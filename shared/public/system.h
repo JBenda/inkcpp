@@ -13,7 +13,6 @@
 #	include "Misc/CString.h"
 #	include "HAL/UnrealMemory.h"
 #	include "Hash/CityHash.h"
-
 #endif
 #ifdef INK_ENABLE_STL
 #	include <exception>
@@ -23,6 +22,9 @@
 #	include <cstdint>
 #	include <cstdio>
 #	include <cstdarg>
+#endif
+#ifdef INK_ENABLE_CSTD
+#	include <ctype.h>
 #endif
 
 // Platform specific defines //
@@ -45,6 +47,20 @@ namespace ink
  * @todo use a less missleading name
  */
 typedef unsigned int uint32_t;
+
+#ifndef INK_ENABLE_STL
+
+/** Additional signed integer types */
+typedef int int32_t;
+typedef short int16_t;
+
+/** Additional unsigned integer types */
+typedef unsigned long long uint64_t;
+typedef unsigned short uint16_t;
+typedef long long ptrdiff_t;
+#else
+typedef std::ptrdiff_t ptrdiff_t;
+#endif // ndef INK_ENABLE_STL
 
 /** Name hash (used for temporary variables) */
 typedef uint32_t hash_t;
