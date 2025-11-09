@@ -69,7 +69,7 @@ namespace ink::compiler::internal
 
 		// Make sure our buffer is empty
 #ifdef _MSC_VER
-		_Tidy();
+	  _Tidy();
 #endif
 	}
 
@@ -91,7 +91,7 @@ namespace ink::compiler::internal
 		// Clear our state
 		_list = nullptr;
 #ifdef _MSC_VER
-		_Tidy();
+	  _Tidy();
 #endif
 
 		// Should we throw?
