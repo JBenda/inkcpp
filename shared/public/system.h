@@ -269,13 +269,13 @@ public:
 	{
 	}
 
-	const T& operator*() const { return _value; }
+	const T& operator*() const { return value(); }
 
-	T& operator*() { return _value; }
+	T& operator*() { return value(); }
 
-	const T* operator->() const { return &_value; }
+	const T* operator->() const { return &value(); }
 
-	T* operator->() { return &_value; }
+	T* operator->() { return &value(); }
 
 	constexpr bool has_value() const { return _has_value; }
 
@@ -302,8 +302,12 @@ public:
 	template<typename... Args>
 	T& emplace(Args... args)
 	{
-		_value.~T();
-		return *(new (&_value) T(args...));
+		if (_has_value)
+			_value.~T();
+
+		new (&_value) T(args...);
+		_has_value = true;
+		return _value;
 	}
 
 private:
