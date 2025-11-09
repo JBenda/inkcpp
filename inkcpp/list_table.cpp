@@ -454,7 +454,7 @@ list_table::list list_table::sub(list arg, int n)
 
 list_flag list_table::sub(list_flag arg, int i) { return add(arg, -i); }
 
-int list_table::count(list_flag lf) const
+int32_t list_table::count(list_flag lf) const
 {
 	if (lf == empty_flag || lf == null_flag || lf.flag == -1) {
 		return 0;
@@ -465,7 +465,7 @@ int list_table::count(list_flag lf) const
 	return 1;
 }
 
-int list_table::count(list l) const
+int32_t list_table::count(list l) const
 {
 	int           count = 0;
 	const data_t* data  = getPtr(l.lid);
