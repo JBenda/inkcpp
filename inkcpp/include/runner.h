@@ -76,6 +76,13 @@ public:
 	 */
 	virtual bool can_continue() const = 0;
 
+	/**
+	 * @brief creates a snapshot containing the runner, globals and all other runners connected to the
+	 * globals.
+	 * @sa story::new_runner_from_snapshot, story::new_globals_from_snapshot
+	 */
+	virtual snapshot* create_snapshot() const = 0;
+
 #ifdef INK_ENABLE_CSTD
 	/**
 	 * Continue execution until the next newline, then allocate a c-style
@@ -86,16 +93,7 @@ public:
 	 * @return allocated c-style string with the output of a single line of execution
 	 */
 	virtual const char* getline_alloc() = 0;
-#endif
-
-	/**
-	 * @brief creates a snapshot containing the runner, globals and all other runners connected to the
-	 * globals.
-	 * @sa story::new_runner_from_snapshot, story::new_globals_from_snapshot
-	 */
-	virtual snapshot* create_snapshot() const = 0;
-
-#ifndef INK_ENABLE_CSTD
+#else
 	/**
 	 * Execute the next line of the script.
 	 *
