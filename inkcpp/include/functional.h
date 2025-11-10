@@ -26,6 +26,7 @@ class callback_base
 {
 public:
 	virtual void call(ink::runtime::value, ink::optional<ink::runtime::value>) = 0;
+	virtual ~callback_base()                                                   = default;
 };
 
 template<typename F>
@@ -313,8 +314,8 @@ public:
 				char*       ptr    = buffer;
 				while (*src != '\0')
 					*(ptr++) = *(src++);
-				*ptr            = 0;
-				result          = ink::runtime::value(buffer);
+				*ptr   = 0;
+				result = ink::runtime::value(buffer);
 			}
 			push(stack, result);
 		}
