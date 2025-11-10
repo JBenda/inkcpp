@@ -505,6 +505,8 @@ runner_impl::~runner_impl()
 	}
 }
 
+#ifndef INK_ENABLE_CSTD
+
 runner_impl::line_type runner_impl::getline()
 {
 	// Advance interpreter one line and write to output
@@ -544,6 +546,8 @@ runner_impl::line_type runner_impl::getall()
 
 	return result;
 }
+
+#endif
 
 #ifdef INK_ENABLE_STL
 void runner_impl::getline(std::ostream& out) { out << getline(); }
@@ -864,7 +868,7 @@ bool runner_impl::line_step()
 
 void runner_impl::step()
 {
-#ifndef INK_ENABLE_UNREAL
+#ifdef INK_ENABLE_EH
 	try
 #endif
 	{
@@ -1496,7 +1500,7 @@ void runner_impl::step()
 		}
 #endif
 	}
-#ifndef INK_ENABLE_UNREAL
+#ifdef INK_ENABLE_EH
 	catch (...) {
 		// Reset our whole state as it's probably corrupt
 		reset();

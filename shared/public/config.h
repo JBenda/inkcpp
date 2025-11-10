@@ -7,12 +7,26 @@
 #pragma once
 
 #ifdef INKCPP_API
+#ifndef INKCPP_NO_UNREAL
 #	define INK_ENABLE_UNREAL
+#	define INKCPP_NO_EH
+#	define INKCPP_NO_RTTI
+#else
+#	define INK_ENABLE_CSTD
+#endif
 #elif INKCPP_BUILD_CLIB
 #	define INK_ENABLE_CSTD
 #else
 #	define INK_ENABLE_STL
 #	define INK_ENABLE_CSTD
+#endif
+
+#ifndef INKCPP_NO_EH
+#define INK_ENABLE_EH
+#endif
+
+#ifndef INKCPP_NO_RTTI
+#define INK_ENABLE_RTTI
 #endif
 
 // Only turn on if you have json.hpp and you want to use it with the compiler
