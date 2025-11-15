@@ -105,6 +105,42 @@ story_impl::~story_impl()
 
 const char* story_impl::string(uint32_t index) const { return _string_table + index; }
 
+bool story_impl::iterate_containers(
+    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse
+) const
+{
+	if (iterator == nullptr) {
+		// Empty check
+		if (_container_list_size == 0) {
+			return false;
+		}
+		// Start
+		iterator = reverse ? _container_list + (_container_list_size - 1) * 2 : _container_list;
+	} else {
+		// Range check
+		inkAssert(
+		    iterator >= _container_list && iterator <= _container_list + _container_list_size * 2,
+		    "Container fail"
+		);
+
+		// Advance
+		iterator += reverse ? -2 : 2;
+
+		// End?
+		if (iterator >= _container_list + _container_list_size * 2 || iterator < _container_list) {
+			iterator = nullptr;
+			index    = 0;
+			offset   = nullptr;
+			return false;
+		}
+	}
+
+	// Get metadata
+	index  = *(iterator + 1);
+	offset = *iterator + instructions();
+	return true;
+}
+
 bool story_impl::find_container_id(uint32_t offset, container_t& container_id) const
 {
 	// Find inmost container.
@@ -138,23 +174,21 @@ static const uint32_t *upper_bound(const uint32_t *sorted, uint32_t count, uint3
 
 container_t story_impl::find_container_for(uint32_t offset) const
 {
-	SIL_PROFILE("ink_find_container_before");
-
 	// Container map contains offsets in even slots, container ids in odd.
 	const uint32_t *iter = upper_bound(_container_list, _container_list_size, offset);
 
-	for (int c = _container_list_size-1; c >= 0; --c)
+	// If we're not inside the container, walk out to find the actual parent. 
+	container_t id = iter[1];
+	while (id)
 	{
-		if (_container_list[c * 2 + 0] <= offset)
-		{
-			SIL_ASSERT(iter == _container_list + c * 2);
-			break;
-		}
+		const Container& c = container(id);
+		if (c._start_offset <= offset && c._end_offset >= offset)
+			return id;
+
+		id = c._parent;
 	}
 
-	// SIL: Do we need a test? Is there always an outermost container?
-	inkAssert(iter[0] <= offset);
-	return iter[1];
+	return id;
 }
 
 CommandFlag story_impl::container_flag(ip_t offset) const
@@ -169,8 +203,6 @@ CommandFlag story_impl::container_flag(ip_t offset) const
 
 ip_t story_impl::find_offset_for(hash_t path) const
 {
-	SIL_PROFILE("ink_find_offset_for");
-
 	// Hash map contains hashes in even slots, offsets in odd.
 	const uint32_t count = (_container_hash_end - _container_hash_start) / 2;
 	const uint32_t *iter = upper_bound(_container_hash_start, count, path);

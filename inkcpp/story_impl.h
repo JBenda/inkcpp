@@ -40,6 +40,10 @@ public:
 
 	const char* list_meta() const { return _list_meta; }
 
+	bool iterate_containers(
+	    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false
+	) const;
+
 	// Find the innermost container containing offset. If offset is the start of a container, return that container.
 	container_t find_container_for(uint32_t offset) const;
 

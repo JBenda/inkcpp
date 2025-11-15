@@ -48,7 +48,7 @@ globals_impl::globals_impl(const story_impl* story)
 
 void globals_impl::visit(uint32_t container_id, bool entering_at_start)
 {
-	if ((! (_owner->container_flag(container_id) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST))
+	if ((! (_owner->container(container_id)._flags & CommandFlag::CONTAINER_MARKER_ONLY_FIRST))
 	    || entering_at_start) {
 		_visit_counts[container_id].visits += 1;
 		_visit_counts[container_id].turns = 0;

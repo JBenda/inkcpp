@@ -297,8 +297,128 @@ void runner_impl::clear_tags(tags_clear_level which)
 
 void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 {
-	SIL_PROFILE("ink_jump");
+//#define OLD_VERSION
+#ifdef OLD_VERSION
+	// Optimization: if we are _is_falling, then we can
+	//  _should be_ able to safely assume that there is nothing to do here. A falling
+	//  divert should only be taking us from a container to that same container's end point
+	//  without entering any other containers
+	// OR IF if target is same position do nothing
+	// could happend if jumping to and of an unnamed container
+	if (dest == _ptr) {
+		_ptr = dest;
+		return;
+	}
 
+	const uint32_t* iter = nullptr;
+	container_t     id;
+	ip_t            offset = nullptr;
+	size_t          comm_end;
+	bool            reversed = _ptr > dest;
+
+	if (reversed) {
+		comm_end                            = 0;
+		iter                                = nullptr;
+		const container_t	* old_iter       = nullptr;
+		const uint32_t*      last_comm_iter = nullptr;
+		_container.rev_iter(old_iter);
+
+		// find commen part of old and new stack
+		while (_story->iterate_containers(iter, id, offset)) {
+			if (old_iter == nullptr || offset >= dest) {
+				break;
+			}
+			if (old_iter != nullptr && id == *old_iter) {
+				last_comm_iter = iter;
+				_container.rev_iter(old_iter);
+				++comm_end;
+			}
+		}
+
+		// clear old part from stack
+		while (_container.size() > comm_end) {
+			_container.pop();
+		}
+		iter = last_comm_iter;
+
+	} else {
+		iter     = nullptr;
+		comm_end = _container.size();
+		// go to current possition in container list
+		while (_story->iterate_containers(iter, id, offset)) {
+			if (offset >= _ptr) {
+				break;
+			}
+		}
+		_story->iterate_containers(iter, id, offset, true);
+	}
+
+	// move to destination and update container stack on the go
+	while (_story->iterate_containers(iter, id, offset)) {
+		if (offset >= dest) {
+			break;
+		}
+		if (_container.empty() || _container.top() != id) {
+			_container.push(id);
+		} else {
+			_container.pop();
+			if (_container.size() < comm_end) {
+				comm_end = _container.size();
+			}
+		}
+
+
+
+
+
+	}
+
+
+	_ptr = dest;
+
+
+
+
+
+
+
+	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
+	// it will get visited in the next step
+	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
+		if (track_knot_visit
+		    && static_cast<CommandFlag>(offset[1]) & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
+			_current_knot_id = id;
+			_entered_knot    = true;
+		}
+		_ptr += 6;
+		_container.push(id);
+		if (reversed && comm_end == _container.size() - 1) {
+			++comm_end;
+		}
+	}
+
+	// iff all container (until now) are entered at first position
+	bool allEnteredAtStart = true;
+	ip_t child_position    = dest;
+	if (record_visits) {
+		const container_t* iData = nullptr;
+		size_t               level = _container.size();
+		if (_container.iter(iData)
+		    && (level > comm_end
+		        || _story->container_flag(_story->container(*iData)._start_offset + _story->instructions())
+		               & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
+			auto parrent_offset = _story->instructions() + _story->container(*iData)._start_offset;
+			inkAssert(child_position >= parrent_offset, "Container stack order is broken");
+			// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed
+			// subcontainers first child check if child_positino is the first child of current container
+			allEnteredAtStart = allEnteredAtStart && ((child_position - parrent_offset) <= 6);
+			child_position    = parrent_offset;
+			_globals->visit(*iData, allEnteredAtStart);
+		}
+	}
+
+	return;
+#else
 	// Optimization: if we are _is_falling, then we can
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
 	//  divert should only be taking us from a container to that same container's end point
@@ -318,7 +438,6 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	// Find the container at or before dest, which will become the top of the stack.
 	const uint32_t dest_offset = dest - _story->instructions();
 	const container_t id = _story->find_container_for(dest_offset);
-	const story_impl::Container& c = _story->container(id);
 
 	// Walk back from current parent container, generating the new stack in the wrong order.
 	for (container_t p = id; p != 0; p = _story->container(p)._parent)
@@ -343,39 +462,39 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	// Do jump
 	_ptr = dest;
 
-	// Find position on top of stack
-//	SIL_ASSERT(&c == &_story->container(id));
-//	uint32_t p_offset = _ptr - _story->instructions();
-//	SIL_ASSERT(c._start_offset <= p_offset);
-//	SIL_ASSERT(c._end_offset >= p_offset);
+	if (!_container.empty())
+	{
+		// Find position on top of stack
+		const story_impl::Container& c = _story->container(id);
+		SIL_ASSERT(c._start_offset <= dest_offset);
+		SIL_ASSERT(c._end_offset >= dest_offset);
 
-	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
-	if (dest_offset == c._start_offset) {
-		if (track_knot_visit && (c._flags & CommandFlag::CONTAINER_MARKER_IS_KNOT)) {
-			_current_knot_id = id;
-			_entered_knot    = true;
+		// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
+		if (dest_offset == c._start_offset) {
+			if (track_knot_visit && (c._flags & CommandFlag::CONTAINER_MARKER_IS_KNOT)) {
+				_current_knot_id = id;
+				_entered_knot    = true;
+			}
+			_ptr += 6;
 		}
-		_ptr += 6;
-	}
 
-	// iff all container (until now) are entered at first position
-	if (record_visits && !_container.empty()) {
-		inkAssert(id == _container.top());
-		if (_container.size() > old_stack_depth || (c._flags & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
-			inkAssert(dest_offset >= c._start_offset, "Container stack order is broken");
-			// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed
-			// subcontainers first child check if child_positino is the first child of current container
-			bool all_entered_at_start = dest_offset - c._start_offset <= 6;
-			_globals->visit(id, all_entered_at_start);
+		// iff all container (until now) are entered at first position
+		if (record_visits ) {
+			if (_container.size() > old_stack_depth || (c._flags & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
+				inkAssert(dest_offset >= c._start_offset, "Container stack order is broken");
+				// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed
+				// subcontainers first child check if child_positino is the first child of current container
+				bool all_entered_at_start = dest_offset - c._start_offset <= 6;
+				_globals->visit(id, all_entered_at_start);
+			}
 		}
 	}
+#endif
 }
 
 template<frame_type type>
 void runner_impl::start_frame(uint32_t target)
 {
-	SIL_PROFILE("ink_start_frame");
-
 	if constexpr (type == frame_type::function) {
 		// add a function start marker
 		_output << values::func_start;
@@ -395,8 +514,6 @@ void runner_impl::start_frame(uint32_t target)
 
 frame_type runner_impl::execute_return()
 {
-	SIL_PROFILE("ink_return");
-
 	// Pop the callstack
 	_ref_stack.fetch_values(_stack);
 	frame_type type;
@@ -564,8 +681,6 @@ bool runner_impl::can_continue() const { return _ptr != nullptr && ! has_choices
 
 void runner_impl::choose(size_t index)
 {
-	SIL_PROFILE("ink_choose");
-
 	if (has_choices()) {
 		inkAssert(index < _choices.size(), "Choice index out of range");
 	} else if (! _fallback_choice) {
@@ -616,8 +731,6 @@ snapshot* runner_impl::create_snapshot() const { return _globals->create_snapsho
 
 size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
-	SIL_PROFILE("ink_snap");
-
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
@@ -654,8 +767,6 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 
 const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& loader)
 {
-	SIL_PROFILE("ink_snap_load");
-
 	auto           ptr = data;
 	std::uintptr_t offset;
 	ptr     = snap_read(ptr, offset);
@@ -732,8 +843,6 @@ void runner_impl::internal_bind(hash_t name, internal::function_base* function)
 
 runner_impl::change_type runner_impl::detect_change() const
 {
-	SIL_PROFILE("ink_detect_change");
-
 	inkAssert(_output.saved(), "Cannot detect changes in non-saved stream.");
 
 	// Check if the old newline is still present (hasn't been glu'd) and
@@ -1571,8 +1680,6 @@ void runner_impl::mark_used(string_table& strings, list_table& lists) const
 
 void runner_impl::save()
 {
-	SIL_PROFILE("ink_save");
-
 	inkAssert(! _saved, "Runner state already saved");
 
 	_saved = true;
@@ -1596,8 +1703,6 @@ void runner_impl::save()
 
 void runner_impl::restore()
 {
-	SIL_PROFILE("ink_restore");
-
 	inkAssert(_saved, "Can't restore. No runner state saved.");
 	// the output can be restored without the rest
 	if (_output.saved()) {
