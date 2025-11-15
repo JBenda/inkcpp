@@ -40,14 +40,37 @@ public:
 
 	const char* list_meta() const { return _list_meta; }
 
-	bool iterate_containers(
-	    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false
-	) const;
-	bool        get_container_id(ip_t offset, container_t& container_id) const;
-	/// Get container flag from container offset (either start or end)
+	// Find the innermost container containing offset. If offset is the start of a container, return that container.
+	container_t find_container_for(uint32_t offset) const;
+
+	// Find the container which starts exactly at offset. Return false if this isn't the start of a container.
+	bool find_container_id(uint32_t offset, container_t& container_id) const;
+
+	// Container description.
+	struct Container
+	{
+		/// Container flags (saves looking up via instruction data)
+		CommandFlag _flags : 4;
+
+		/// Instruction offset to the start of this container.
+		uint32_t _start_offset : 28;
+		uint32_t _end_offset;
+
+		/// Parent container, or ~0 if this is the root.
+		container_t _parent;
+
+		/// Container hash.
+		uint32_t _hash;
+	};
+
+	// Look up the details of the given container
+	const Container& container(container_t id) const { inkAssert(id < _num_containers); return _containers[id]; }
+
+	// Look up the instruction pointer for the start of the given container
+	ip_t container_offset(container_t id) const { return _instruction_data + container(id)._start_offset; }
+
+	// Get container flag from container offset (either start or end)
 	CommandFlag container_flag(ip_t offset) const;
-	CommandFlag container_flag(container_t id) const;
-	hash_t      container_hash(container_t id) const;
 
 	ip_t find_offset_for(hash_t path) const;
 
@@ -80,6 +103,8 @@ private:
 	uint32_t* _container_list;
 	uint32_t  _container_list_size;
 	uint32_t  _num_containers;
+
+	Container *_containers;
 
 	// container hashes
 	hash_t* _container_hash_start;

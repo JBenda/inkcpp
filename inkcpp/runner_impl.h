@@ -339,17 +339,8 @@ private:
 	// TODO: Move to story? Both?
 	functions _functions;
 
-	// Container set
-	struct ContainerData {
-		container_t id     = ~0u;
-		ptrdiff_t   offset = 0;
-
-		bool operator==(const ContainerData& oth) const { return oth.id == id && oth.offset == offset; }
-
-		bool operator!=(const ContainerData& oth) const { return ! (*this == oth); }
-	};
-
-	internal::managed_restorable_stack < ContainerData,
+	// Container stack
+	internal::managed_restorable_stack <container_t,
 	    config::limitContainerDepth<0, abs(config::limitContainerDepth)> _container;
 
 	bool _is_falling = false;

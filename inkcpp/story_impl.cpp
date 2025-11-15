@@ -13,6 +13,10 @@
 #include "snapshot_interface.h"
 #include "version.h"
 
+#include "..\..\..\sil\sil\main.h"
+#include "..\..\..\sil\sil\profile.h"
+
+
 namespace ink::runtime
 {
 #ifdef INK_ENABLE_STL
@@ -101,53 +105,56 @@ story_impl::~story_impl()
 
 const char* story_impl::string(uint32_t index) const { return _string_table + index; }
 
-bool story_impl::iterate_containers(
-    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse
-) const
+bool story_impl::find_container_id(uint32_t offset, container_t& container_id) const
 {
-	if (iterator == nullptr) {
-		// Empty check
-		if (_container_list_size == 0) {
-			return false;
-		}
+	// Find inmost container.
+	container_id = find_container_for(offset);
 
-		// Start
-		iterator = reverse ? _container_list + (_container_list_size - 1) * 2 : _container_list;
-	} else {
-		// Range check
-		inkAssert(
-		    iterator >= _container_list && iterator <= _container_list + _container_list_size * 2,
-		    "Container fail"
-		);
-
-		// Advance
-		iterator += reverse ? -2 : 2;
-
-		// End?
-		if (iterator >= _container_list + _container_list_size * 2 || iterator < _container_list) {
-			iterator = nullptr;
-			index    = 0;
-			offset   = nullptr;
-			return false;
-		}
-	}
-
-	// Get metadata
-	index  = *(iterator + 1);
-	offset = *iterator + instructions();
-	return true;
+	// Exact match?
+	return container(container_id)._start_offset == offset;
 }
 
-bool story_impl::get_container_id(ip_t offset, container_t& container_id) const
+// Search sorted looking for the target or the largest value smaller than target.
+// Assumes 2*count u32s, with the sorted values in the even slots. The odd slots can have any payload.
+static const uint32_t *upper_bound(const uint32_t *sorted, uint32_t count, uint32_t target)
 {
-	const uint32_t* iter        = nullptr;
-	ip_t            iter_offset = nullptr;
-	while (iterate_containers(iter, container_id, iter_offset)) {
-		if (iter_offset == offset)
-			return true;
+	uint32_t begin	= 0;
+	uint32_t end	= count;
+
+	while (begin < end)	{
+		const uint32_t mid = begin + (end - begin + 1) / 2;
+		const uint32_t mid_offset = sorted[mid * 2 + 0];
+
+		if (mid_offset > target)
+			// Look below
+			end = mid - 1;
+		else
+			// Look above
+			begin = mid;
 	}
 
-	return false;
+	return sorted + begin * 2;
+}
+
+container_t story_impl::find_container_for(uint32_t offset) const
+{
+	SIL_PROFILE("ink_find_container_before");
+
+	// Container map contains offsets in even slots, container ids in odd.
+	const uint32_t *iter = upper_bound(_container_list, _container_list_size, offset);
+
+	for (int c = _container_list_size-1; c >= 0; --c)
+	{
+		if (_container_list[c * 2 + 0] <= offset)
+		{
+			SIL_ASSERT(iter == _container_list + c * 2);
+			break;
+		}
+	}
+
+	// SIL: Do we need a test? Is there always an outermost container?
+	inkAssert(iter[0] <= offset);
+	return iter[1];
 }
 
 CommandFlag story_impl::container_flag(ip_t offset) const
@@ -160,61 +167,15 @@ CommandFlag story_impl::container_flag(ip_t offset) const
 	return static_cast<CommandFlag>(offset[1]);
 }
 
-CommandFlag story_impl::container_flag(container_t id) const
-{
-	const uint32_t* iter = nullptr;
-	ip_t            offset;
-	container_t     c_id;
-	while (iterate_containers(iter, c_id, offset)) {
-		if (c_id == id) {
-			inkAssert(
-			    static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER,
-			    "Container list pointer is invalid!"
-			);
-			return static_cast<CommandFlag>(offset[1]);
-		}
-	}
-	inkFail("Container not found -> can't fetch flag");
-	return CommandFlag::NO_FLAGS;
-}
-
-hash_t story_impl::container_hash(container_t id) const
-{
-	const uint32_t* iter = nullptr;
-	ip_t            offset;
-	container_t     c_id;
-	bool            hit = false;
-	while (iterate_containers(iter, c_id, offset)) {
-		if (c_id == id) {
-			hit = true;
-			break;
-		}
-	}
-	inkAssert(hit, "Unable to find container for id!");
-	hash_t* h_iter = _container_hash_start;
-	while (iter != _container_hash_end) {
-		if (instructions() + *( offset_t* ) (h_iter + 1) == offset) {
-			return *h_iter;
-		}
-		h_iter += 2;
-	}
-	inkAssert(false, "Did not find hash entry for container!");
-	return 0;
-}
-
 ip_t story_impl::find_offset_for(hash_t path) const
 {
-	hash_t* iter = _container_hash_start;
+	SIL_PROFILE("ink_find_offset_for");
 
-	while (iter != _container_hash_end) {
-		if (*iter == path) {
-			return instructions() + *( offset_t* ) (iter + 1);
-		}
+	// Hash map contains hashes in even slots, offsets in odd.
+	const uint32_t count = (_container_hash_end - _container_hash_start) / 2;
+	const uint32_t *iter = upper_bound(_container_hash_start, count, path);
 
-		iter += 2;
-	}
-
-	return nullptr;
+	return iter[0] == path ? _instruction_data + iter[1] : nullptr;
 }
 
 globals story_impl::new_globals()
@@ -371,6 +332,63 @@ void story_impl::setup_pointers()
 
 	// After strings comes instruction data
 	_instruction_data = ( ip_t ) ptr;
+
+
+	container_t *stack = new container_t[_num_containers];
+	uint32_t depth = 0;
+	stack[depth] = 0;
+
+	// Build acceleration structure for containers.
+	_containers = new Container[_num_containers];
+	for (uint32_t c = 0; c < _container_list_size; ++c)
+	{
+		const uint32_t *iter = _container_list + 2 * c;
+		const container_t id = iter[1];
+		const uint32_t offset = iter[0];
+
+		const Command command = Command(_instruction_data[offset]);
+
+		inkAssert(command == Command::START_CONTAINER_MARKER || command == Command::END_CONTAINER_MARKER);
+
+		if (command == Command::START_CONTAINER_MARKER)
+		{
+			_containers[id]._start_offset = offset;
+			_containers[id]._flags = CommandFlag(_instruction_data[offset+1]);
+			_containers[id]._parent = stack[depth];
+
+			stack[++depth] = id;
+		}
+		else
+		{
+			_containers[stack[depth]]._end_offset = offset;
+			--depth;
+		}
+
+		for (uint32_t *h = _container_hash_start; h < _container_hash_end; h += 2)
+		{
+			if (h[1] == offset)
+			{
+				_containers[id]._hash = h[0];
+				break;
+			}
+		}
+	}
+
+	delete[] stack;
+
+	// Sort container hash so we can use a binary search.
+	struct Hash
+	{
+		hash_t _hash;
+		hash_t _offset;
+
+		static int __cdecl compare(const void* lhs, const void *rhs)
+		{
+			return static_cast<const Hash*>(lhs)->_hash - static_cast<const Hash*>(rhs)->_hash;
+		}
+	};
+
+	qsort(reinterpret_cast<Hash*>(_container_hash_start), (_container_hash_end-_container_hash_start)/2, sizeof(Hash), &Hash::compare);
 
 	// Debugging info
 	/*{
