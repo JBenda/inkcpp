@@ -52,8 +52,7 @@ protected:
 
 public:
 	// Records a visit to a container
-	/// @param start_cmd iff the visit was initiatet through a MARKER_START_CONTAINER
-	void visit(uint32_t container_id, bool entering_at_start);
+	void visit(uint32_t container_id);
 
 	// Checks the number of visits to a container
 	uint32_t visits(uint32_t container_id) const;

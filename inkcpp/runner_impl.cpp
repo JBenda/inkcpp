@@ -297,128 +297,8 @@ void runner_impl::clear_tags(tags_clear_level which)
 
 void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 {
-//#define OLD_VERSION
-#ifdef OLD_VERSION
-	// Optimization: if we are _is_falling, then we can
-	//  _should be_ able to safely assume that there is nothing to do here. A falling
-	//  divert should only be taking us from a container to that same container's end point
-	//  without entering any other containers
-	// OR IF if target is same position do nothing
-	// could happend if jumping to and of an unnamed container
-	if (dest == _ptr) {
-		_ptr = dest;
-		return;
-	}
+	SIL_PROFILE("ink::jump");
 
-	const uint32_t* iter = nullptr;
-	container_t     id;
-	ip_t            offset = nullptr;
-	size_t          comm_end;
-	bool            reversed = _ptr > dest;
-
-	if (reversed) {
-		comm_end                            = 0;
-		iter                                = nullptr;
-		const container_t	* old_iter       = nullptr;
-		const uint32_t*      last_comm_iter = nullptr;
-		_container.rev_iter(old_iter);
-
-		// find commen part of old and new stack
-		while (_story->iterate_containers(iter, id, offset)) {
-			if (old_iter == nullptr || offset >= dest) {
-				break;
-			}
-			if (old_iter != nullptr && id == *old_iter) {
-				last_comm_iter = iter;
-				_container.rev_iter(old_iter);
-				++comm_end;
-			}
-		}
-
-		// clear old part from stack
-		while (_container.size() > comm_end) {
-			_container.pop();
-		}
-		iter = last_comm_iter;
-
-	} else {
-		iter     = nullptr;
-		comm_end = _container.size();
-		// go to current possition in container list
-		while (_story->iterate_containers(iter, id, offset)) {
-			if (offset >= _ptr) {
-				break;
-			}
-		}
-		_story->iterate_containers(iter, id, offset, true);
-	}
-
-	// move to destination and update container stack on the go
-	while (_story->iterate_containers(iter, id, offset)) {
-		if (offset >= dest) {
-			break;
-		}
-		if (_container.empty() || _container.top() != id) {
-			_container.push(id);
-		} else {
-			_container.pop();
-			if (_container.size() < comm_end) {
-				comm_end = _container.size();
-			}
-		}
-
-
-
-
-
-	}
-
-
-	_ptr = dest;
-
-
-
-
-
-
-
-	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
-	// it will get visited in the next step
-	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
-		if (track_knot_visit
-		    && static_cast<CommandFlag>(offset[1]) & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
-			_current_knot_id = id;
-			_entered_knot    = true;
-		}
-		_ptr += 6;
-		_container.push(id);
-		if (reversed && comm_end == _container.size() - 1) {
-			++comm_end;
-		}
-	}
-
-	// iff all container (until now) are entered at first position
-	bool allEnteredAtStart = true;
-	ip_t child_position    = dest;
-	if (record_visits) {
-		const container_t* iData = nullptr;
-		size_t               level = _container.size();
-		if (_container.iter(iData)
-		    && (level > comm_end
-		        || _story->container_flag(_story->container(*iData)._start_offset + _story->instructions())
-		               & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
-			auto parrent_offset = _story->instructions() + _story->container(*iData)._start_offset;
-			inkAssert(child_position >= parrent_offset, "Container stack order is broken");
-			// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed
-			// subcontainers first child check if child_positino is the first child of current container
-			allEnteredAtStart = allEnteredAtStart && ((child_position - parrent_offset) <= 6);
-			child_position    = parrent_offset;
-			_globals->visit(*iData, allEnteredAtStart);
-		}
-	}
-
-	return;
-#else
 	// Optimization: if we are _is_falling, then we can
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
 	//  divert should only be taking us from a container to that same container's end point
@@ -428,68 +308,55 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (dest == _ptr)
 		return;
 
-	// Assume we are going forwards, in which case we'll only add to the stack.
-	const size_t old_stack_depth = _container.size();
+	// Where are we now?
+	const uint32_t current_offset = _ptr - _story->instructions();
 
-	// Empty stack, preserving saved data if any (i.e. don't use clear)
+	// Find the container at or before dest, which will become the top of the post-jump stack.
+	const uint32_t dest_offset = dest - _story->instructions();
+	const container_t dest_id = _story->find_container_for(dest_offset);
+	const story_impl::Container& dest_container = _story->container(dest_id);
+
+	// Count stack depth and assemble stack in reverse order by traversing container tree.
+	container_t stack[64];
+	uint32_t depth = 0;
+	for (container_t id = dest_id; id != 0; id = _story->container(id)._parent) {
+		inkAssert(depth < 64);
+		stack[depth++] = id;
+	}
+
+	// Discard existing stack, preserving save region.
 	while (!_container.empty())
 		_container.pop();
 
-	// Find the container at or before dest, which will become the top of the stack.
-	const uint32_t dest_offset = dest - _story->instructions();
-	const container_t id = _story->find_container_for(dest_offset);
+	// Are we entering the new container at its start?
+	const bool jump_to_start = dest_offset == dest_container._start_offset;
 
-	// Walk back from current parent container, generating the new stack in the wrong order.
-	for (container_t p = id; p != 0; p = _story->container(p)._parent)
-		_container.push(p);
-
-	// Then reverse that order to reassemble the stack.
-	const container_t* fwd = nullptr;
-	const container_t* rev = nullptr;
-	_container.iter(fwd);
-	_container.rev_iter(rev);
-
-	// This would be nicer as a method on simple_restorable_stack. Doing it like this to avoid allocating a second stack.
-	while (fwd && rev && fwd > rev)
+	// Update visit counts for new containers on the stack. If we jump directly to the start of a container,
+	// don't update it (last on the stack) as the normal instruction flow will process the start marker next.
+	for (uint32_t d = 0; d < depth - jump_to_start; ++d)
 	{
-		container_t temp = *fwd;
-		*const_cast<container_t*>(fwd) = *rev;
-		*const_cast<container_t*>(rev) = temp;
-		_container.iter(fwd);
-		_container.iter(rev);
+		// Read temporary stack in forward order.
+		const container_t id = stack[depth-1-d];
+
+		// Push container onto stack.
+		_container.push(id);
+
+		// Named knots/stitches need special handling - their visit counts are updated wherever the story enters them,
+		// and we always need to know which knot we're in for tagging.
+		const story_impl::Container& container = _story->container(id);
+		if (container._flags & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
+			// If the previous IP wasn't in this container, record the new visit.
+			if (track_knot_visit && !container.contains(current_offset))
+				_globals->visit(id);
+
+			// Update current knot, the knot closest to the top of the stack will end up current.
+			_current_knot_id = id;
+			_entered_knot = true;
+		}
 	}
 
-	// Do jump
+	// Finally, do the jump
 	_ptr = dest;
-
-	if (!_container.empty())
-	{
-		// Find position on top of stack
-		const story_impl::Container& c = _story->container(id);
-		SIL_ASSERT(c._start_offset <= dest_offset);
-		SIL_ASSERT(c._end_offset >= dest_offset);
-
-		// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
-		if (dest_offset == c._start_offset) {
-			if (track_knot_visit && (c._flags & CommandFlag::CONTAINER_MARKER_IS_KNOT)) {
-				_current_knot_id = id;
-				_entered_knot    = true;
-			}
-			_ptr += 6;
-		}
-
-		// iff all container (until now) are entered at first position
-		if (record_visits ) {
-			if (_container.size() > old_stack_depth || (c._flags & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
-				inkAssert(dest_offset >= c._start_offset, "Container stack order is broken");
-				// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed
-				// subcontainers first child check if child_positino is the first child of current container
-				bool all_entered_at_start = dest_offset - c._start_offset <= 6;
-				_globals->visit(id, all_entered_at_start);
-			}
-		}
-	}
-#endif
 }
 
 template<frame_type type>
@@ -1493,9 +1360,8 @@ void runner_impl::step()
 					_container.push(index);
 
 					// Increment visit count
-					if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS
-					    || flag & CommandFlag::CONTAINER_MARKER_TRACK_TURNS) {
-						_globals->visit(index, true);
+					if (uint8_t(flag) & (uint8_t(CommandFlag::CONTAINER_MARKER_TRACK_VISITS)|uint8_t(CommandFlag::CONTAINER_MARKER_TRACK_TURNS))) {
+						_globals->visit(index);
 					}
 					if (flag & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
 						_current_knot_id = index;
@@ -1505,10 +1371,6 @@ void runner_impl::step()
 				} break;
 				case Command::END_CONTAINER_MARKER: {
 					container_t index = read<container_t>();
-
-					if (index != _container.top())
-						_container.push(index);
-
 					inkAssert(_container.top() == index, "Leaving container we are not in!");
 
 					// Move up out of the current container

@@ -105,41 +105,6 @@ story_impl::~story_impl()
 
 const char* story_impl::string(uint32_t index) const { return _string_table + index; }
 
-bool story_impl::iterate_containers(
-    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse
-) const
-{
-	if (iterator == nullptr) {
-		// Empty check
-		if (_container_list_size == 0) {
-			return false;
-		}
-		// Start
-		iterator = reverse ? _container_list + (_container_list_size - 1) * 2 : _container_list;
-	} else {
-		// Range check
-		inkAssert(
-		    iterator >= _container_list && iterator <= _container_list + _container_list_size * 2,
-		    "Container fail"
-		);
-
-		// Advance
-		iterator += reverse ? -2 : 2;
-
-		// End?
-		if (iterator >= _container_list + _container_list_size * 2 || iterator < _container_list) {
-			iterator = nullptr;
-			index    = 0;
-			offset   = nullptr;
-			return false;
-		}
-	}
-
-	// Get metadata
-	index  = *(iterator + 1);
-	offset = *iterator + instructions();
-	return true;
-}
 
 bool story_impl::find_container_id(uint32_t offset, container_t& container_id) const
 {
@@ -177,7 +142,13 @@ container_t story_impl::find_container_for(uint32_t offset) const
 	// Container map contains offsets in even slots, container ids in odd.
 	const uint32_t *iter = upper_bound(_container_list, _container_list_size, offset);
 
-	// If we're not inside the container, walk out to find the actual parent. 
+	// The last container command before the offset could be either the start of a container
+	// (in which case the offset is contained within) or the end of a container, in which case
+	// the offset is inside that container's parent.
+
+	// If we're not inside the container, walk out to find the actual parent. Normally we'd 
+	// know that the parent contained the child, but the containers are sparse so we might 
+	// not have anything.
 	container_t id = iter[1];
 	while (id)
 	{
@@ -202,10 +173,10 @@ CommandFlag story_impl::container_flag(ip_t offset) const
 }
 
 ip_t story_impl::find_offset_for(hash_t path) const
-{
+{	
 	// Hash map contains hashes in even slots, offsets in odd.
 	const uint32_t count = (_container_hash_end - _container_hash_start) / 2;
-	const uint32_t *iter = upper_bound(_container_hash_start, count, path);
+	const hash_t *iter = upper_bound(_container_hash_start, count, path);
 
 	return iter[0] == path ? _instruction_data + iter[1] : nullptr;
 }
@@ -387,6 +358,8 @@ void story_impl::setup_pointers()
 			_containers[id]._start_offset = offset;
 			_containers[id]._flags = CommandFlag(_instruction_data[offset+1]);
 			_containers[id]._parent = stack[depth];
+
+			inkAssert(_containers[id]._flags != CommandFlag(0));
 
 			stack[++depth] = id;
 		}

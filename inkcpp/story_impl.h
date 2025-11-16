@@ -40,10 +40,6 @@ public:
 
 	const char* list_meta() const { return _list_meta; }
 
-	bool iterate_containers(
-	    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false
-	) const;
-
 	// Find the innermost container containing offset. If offset is the start of a container, return that container.
 	container_t find_container_for(uint32_t offset) const;
 
@@ -65,6 +61,9 @@ public:
 
 		/// Container hash.
 		uint32_t _hash;
+
+		/// Does this container contain a given instruction offset?
+		bool contains(uint32_t offset) const { return _start_offset <= offset && _end_offset >= offset; }
 	};
 
 	// Look up the details of the given container
