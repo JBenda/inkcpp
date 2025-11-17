@@ -391,27 +391,26 @@ void binary_emitter::write_container_map(
 	out.write(reinterpret_cast<const char*>(&num), sizeof(container_t));
 
 	// Write out entries
-	for (const auto& pair : map) {
-		out.write(( const char* ) &pair.first, sizeof(uint32_t));
-		out.write(( const char* ) &pair.second, sizeof(uint32_t));
+	for (const auto& entry : map) {
+		out.write(reinterpret_cast<const char *>(&entry), sizeof(entry));
 	}
 }
 
 void binary_emitter::write_container_hash_map(std::ostream& out)
 {
-	std::vector<container_hash_t> hash;
-	hash.reserve(256);
-	build_container_hash_map(hash, "", _root);
+	std::vector<container_hash_t> hash_map;
+	hash_map.reserve(256);
+	build_container_hash_map(hash_map, "", _root);
 
 	// Sort map on ascending hash code.
-	std::sort(hash.begin(), hash.end());
+	std::sort(hash_map.begin(), hash_map.end());
 
 	// Write
-	out.write(reinterpret_cast<const char *>(&*hash.begin()), hash.size() * sizeof(container_hash_t));
+	out.write(reinterpret_cast<const char *>(&*hash_map.begin()), hash_map.size() * sizeof(container_hash_t));
 }
 
 void binary_emitter::build_container_hash_map(
-    std::vector<container_hash_t>& hash, const std::string& name, const container_data* context
+    std::vector<container_hash_t>& hash_map, const std::string& name, const container_data* context
 )
 {
 	for (auto child : context->named_children) {
@@ -420,14 +419,14 @@ void binary_emitter::build_container_hash_map(
 		hash_t      name_hash  = hash_string(child_name.c_str());
 
 		// Append the name hash and offset
-		hash.push_back( {name_hash, child.second->offset} );
+		hash_map.push_back( {name_hash, child.second->offset} );
 
 		// Recurse
-		build_container_hash_map(hash, child_name, child.second);
+		build_container_hash_map(hash_map, child_name, child.second);
 	}
 
 	for (auto child : context->indexed_children) {
-		build_container_hash_map(hash, name, child.second);
+		build_container_hash_map(hash_map, name, child.second);
 	}
 }
 

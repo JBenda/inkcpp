@@ -9,6 +9,7 @@
 #include "command.h"
 #include "system.h"
 #include "reporter.h"
+#include "header.h"
 #include <string>
 #include <vector>
 
@@ -92,7 +93,8 @@ namespace ink::compiler::internal
 		virtual void setContainerIndex(container_t index) = 0;
 
 	protected:
-		typedef std::vector<std::pair<uint32_t, container_t>> container_map;
+		using container_map_t = ink::internal::container_map_t;
+		typedef std::vector<container_map_t> container_map;
 
 		// container map
 		container_map _container_map;

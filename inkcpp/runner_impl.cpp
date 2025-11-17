@@ -45,7 +45,7 @@ namespace ink::runtime::internal
 
 hash_t runner_impl::get_current_knot() const
 {
-	return _current_knot_id == ~0 ? 0 : _story->container(_current_knot_id)._hash;
+	return _current_knot_id == ~0 ? 0 : _story->container_data(_current_knot_id)._hash;
 }
 
 template<>
@@ -323,7 +323,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	// Count stack depth and assemble stack in reverse order by traversing container tree.
 	container_t stack[64];
 	uint32_t depth = 0;
-	for (container_t id = dest_id; id != ~0; id = _story->container(id)._parent) {
+	for (container_t id = dest_id; id != ~0; id = _story->container_data(id)._parent) {
 		inkAssert(depth < 64);
 		stack[depth++] = id;
 	}
@@ -333,7 +333,8 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 		_container.pop();
 
 	// Are we entering the new container at its start?
-	const story_impl::Container& dest_container = _story->container(dest_id);
+	using container_data_t = ink::internal::container_data_t;
+	const container_data_t& dest_container = _story->container_data(dest_id);
 	const bool jump_to_start = dest_offset == dest_container._start_offset;
 
 	// Update visit counts for new containers on the stack. If we jump directly to the start of a container,
@@ -348,7 +349,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 
 		// Named knots/stitches need special handling - their visit counts are updated wherever the story enters them,
 		// and we always need to know which knot we're in for tagging.
-		const story_impl::Container& container = _story->container(id);
+		const container_data_t& container = _story->container_data(id);
 		if (container._flags & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
 			// If the previous IP wasn't in this container, record the new visit.
 			if (track_knot_visit && !container.contains(current_offset))

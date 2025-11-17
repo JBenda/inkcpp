@@ -7,6 +7,7 @@
 #pragma once
 
 #include "system.h"
+#include "command.h"
 
 namespace ink::internal {
 
@@ -42,5 +43,54 @@ namespace ink::internal {
 										   ///   because padding of struct may
 										   ///   differ between platforms
 				sizeof(uint16_t) + 2 * sizeof(uint32_t);
+		};
+
+		// One entry in the container hash. Used to translate paths into story locations.
+		struct container_hash_t
+		{
+			// Hash of the container's path string.
+			hash_t _hash;
+
+			// Offset to the start of this container.
+			uint32_t _offset;
+
+			uint32_t key() const { return _hash; }
+			bool operator<(const container_hash_t& other) const { return _hash < other._hash; }
+		};
+
+		// One entry in the container map. Used to work out which container a story location is in.
+		struct container_map_t
+		{
+			// Offset to the start of this container's instructions.
+			uint32_t _offset;
+
+			// Container index.
+			container_t _id;
+
+			uint32_t key() const { return _offset; }
+			bool operator<(const container_map_t& other) const { return _offset < other._offset; }
+		};
+
+		// One entry in the container data. Describes containers.
+		struct container_data_t
+		{
+			/// Parent container, or ~0 if this is the root.
+			// TODO: Pack into 28 with explicit invalid container_t, since we expect fewer containers than instructions.
+			container_t _parent;
+
+			/// Container flags (saves looking up via instruction data)
+			CommandFlag _flags : 4;
+
+			/// Instruction offset to the start instruction (enter marker) of this container.
+			uint32_t _start_offset : 28;
+
+			/// Instruction offset to the end instruction (leave marker) of this container
+			uint32_t _end_offset;
+
+			/// Container hash.
+			uint32_t _hash;
+
+			/// Check to see if the instruction offset is part of the instructions for this container. Note that this is inclusive not exclusive.
+			bool contains(uint32_t offset) const { return offset >= _start_offset && offset <= _end_offset; }
 		};
 }

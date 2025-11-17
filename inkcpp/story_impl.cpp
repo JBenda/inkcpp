@@ -112,12 +112,12 @@ bool story_impl::find_container_id(uint32_t offset, container_t& container_id) c
 	container_id = find_container_for(offset);
 
 	// Exact match?
-	return container(container_id)._start_offset == offset;
+	return container_data(container_id)._start_offset == offset;
 }
 
 // Search sorted looking for the target or the largest value smaller than target.
-// Assumes 2*count u32s, with the sorted values in the even slots. The odd slots can have any payload.
-static const uint32_t *upper_bound(const uint32_t *sorted, uint32_t count, uint32_t target)
+template <typename entry>
+static const entry* upper_bound(const entry *sorted, uint32_t count, uint32_t key)
 {
 	if (count == 0)
 		return nullptr;
@@ -127,9 +127,9 @@ static const uint32_t *upper_bound(const uint32_t *sorted, uint32_t count, uint3
 
 	while (begin < end)	{
 		const uint32_t mid = begin + (end - begin + 1) / 2;
-		const uint32_t mid_offset = sorted[mid * 2 + 0];
+		const uint32_t mid_key = sorted[mid].key();
 
-		if (mid_offset > target)
+		if (mid_key > key)
 			// Look below
 			end = mid - 1;
 		else
@@ -137,13 +137,13 @@ static const uint32_t *upper_bound(const uint32_t *sorted, uint32_t count, uint3
 			begin = mid;
 	}
 
-	return sorted + begin * 2;
+	return sorted + begin;
 }
 
 container_t story_impl::find_container_for(uint32_t offset) const
 {
 	// Container map contains offsets in even slots, container ids in odd.
-	const uint32_t *iter = upper_bound(_container_list, _container_list_size, offset);
+	const container_map_t* entry = upper_bound(_container_map, _container_map_size, offset);
 
 	// The last container command before the offset could be either the start of a container
 	// (in which case the offset is contained within) or the end of a container, in which case
@@ -152,14 +152,14 @@ container_t story_impl::find_container_for(uint32_t offset) const
 	// If we're not inside the container, walk out to find the actual parent. Normally we'd 
 	// know that the parent contained the child, but the containers are sparse so we might 
 	// not have anything.
-	container_t id = iter ? iter[1] : ~0;
+	container_t id = entry ? entry->_id : ~0;
 	while (id != ~0)
 	{
-		const Container& c = container(id);
-		if (c._start_offset <= offset && c._end_offset >= offset)
+		const container_data_t& data = container_data(id);
+		if (data._start_offset <= offset && data._end_offset >= offset)
 			return id;
 
-		id = c._parent;
+		id = data._parent;
 	}
 
 	return id;
@@ -178,10 +178,9 @@ CommandFlag story_impl::container_flag(ip_t offset) const
 ip_t story_impl::find_offset_for(hash_t path) const
 {	
 	// Hash map contains hashes in even slots, offsets in odd.
-	const uint32_t count = (_container_hash_end - _container_hash_start) / 2;
-	const hash_t *iter = upper_bound(_container_hash_start, count, path);
+	const container_hash_t* entry = upper_bound(_container_hash, _container_hash_size, path);
 
-	return iter[0] == path ? _instruction_data + iter[1] : nullptr;
+	return entry && entry->_hash == path ? _instruction_data + entry->_offset : nullptr;
 }
 
 globals story_impl::new_globals()
@@ -310,30 +309,30 @@ void story_impl::setup_pointers()
 	ptr += sizeof(uint32_t);
 
 	// Pass over the container data
-	_container_list_size = 0;
-	_container_list      = ( uint32_t* ) (ptr);
+	_container_map_size = 0;
+	_container_map = reinterpret_cast<const container_map_t*>(ptr);
 	while (true) {
 		uint32_t val = *( uint32_t* ) ptr;
 		if (val == ~0) {
+			_container_map_size = reinterpret_cast<const container_map_t*>(ptr) - _container_map;
 			ptr += sizeof(uint32_t);
 			break;
-		} else {
-			ptr += sizeof(uint32_t) * 2;
-			_container_list_size++;
 		}
+
+		ptr += sizeof(container_map_t);
 	}
 
 	// Next is the container hash map
-	_container_hash_start = ( hash_t* ) (ptr);
+	_container_hash = reinterpret_cast<const container_hash_t*>(ptr);
 	while (true) {
 		uint32_t val = *( uint32_t* ) ptr;
 		if (val == ~0) {
-			_container_hash_end = ( hash_t* ) (ptr);
+			_container_hash_size = reinterpret_cast<const container_hash_t*>(ptr) - _container_hash;
 			ptr += sizeof(uint32_t);
 			break;
 		}
 
-		ptr += sizeof(uint32_t) * 2;
+		ptr += sizeof(container_hash_t);
 	}
 
 	// After strings comes instruction data
@@ -345,12 +344,12 @@ void story_impl::setup_pointers()
 		stack[depth] = ~0;
 
 		// Build acceleration structure for containers.
-		_containers = new Container[_num_containers];
-		for (uint32_t c = 0; c < _container_list_size; ++c)
+		_container_data = new container_data_t[_num_containers];
+		for (uint32_t c = 0; c < _container_map_size; ++c)
 		{
-			const uint32_t *iter = _container_list + 2 * c;
-			const container_t id = iter[1];
-			const uint32_t offset = iter[0];
+			const container_map_t& entry = _container_map[c];
+			const container_t id = entry._id;
+			const uint32_t offset = entry._offset;
 
 			const Command command = Command(_instruction_data[offset]);
 
@@ -358,25 +357,27 @@ void story_impl::setup_pointers()
 
 			if (command == Command::START_CONTAINER_MARKER)
 			{
-				_containers[id]._start_offset = offset;
-				_containers[id]._flags = CommandFlag(_instruction_data[offset+1]);
-				_containers[id]._parent = stack[depth];
+				container_data_t& data = const_cast<container_data_t&>(_container_data[id]);
+				data._start_offset = offset;
+				data._flags = CommandFlag(_instruction_data[offset+1]);
+				data._parent = stack[depth];
 
-				inkAssert(_containers[id]._flags != CommandFlag(0));
+				inkAssert(_container_data[id]._flags != CommandFlag(0));
 
 				stack[++depth] = id;
 			}
 			else
 			{
-				_containers[stack[depth]]._end_offset = offset;
+				const_cast<container_data_t&>(_container_data[stack[depth]])._end_offset = offset;
 				--depth;
 			}
 
-			for (uint32_t *h = _container_hash_start; h < _container_hash_end; h += 2)
+			for (uint32_t h = 0; h < _container_hash_size; ++h)
 			{
-				if (h[1] == offset)
+				const container_hash_t& entry = _container_hash[h];
+				if (entry._offset == offset)
 				{
-					_containers[id]._hash = h[0];
+					const_cast<container_data_t&>(_container_data[id])._hash = entry._hash;
 					break;
 				}
 			}

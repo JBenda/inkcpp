@@ -35,14 +35,14 @@ namespace ink::compiler::internal
 	{
 		if (_container_map.rbegin() != _container_map.rend())
 		{
-			if (_container_map.rbegin()->first > offset)
+			if (_container_map.rbegin()->_offset > offset)
 			{
 				warn() << "Container map written out of order. Wrote container at offset "
-					<< offset << " after container with offset " << _container_map.rbegin()->first << std::flush;
+					<< offset << " after container with offset " << _container_map.rbegin()->_offset << std::flush;
 			}
 		}
 
-		_container_map.push_back(std::make_pair(offset, index));
+		_container_map.push_back( {offset, index} );
 		setContainerIndex(index);
 	}
 
@@ -50,13 +50,13 @@ namespace ink::compiler::internal
 	{
 		if (_container_map.rbegin() != _container_map.rend())
 		{
-			if (_container_map.rbegin()->first > offset)
+			if (_container_map.rbegin()->_offset > offset)
 			{
 				warn() << "Container map written out of order. Wrote container at offset "
-					<< offset << " after container with offset " << _container_map.rbegin()->first << std::flush;
+					<< offset << " after container with offset " << _container_map.rbegin()->_offset << std::flush;
 			}
 		}
 
-		_container_map.push_back(std::make_pair(offset, index));
+		_container_map.push_back( {offset, index} );
 	}
 }

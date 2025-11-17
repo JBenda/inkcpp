@@ -46,31 +46,15 @@ public:
 	// Find the container which starts exactly at offset. Return false if this isn't the start of a container.
 	bool find_container_id(uint32_t offset, container_t& container_id) const;
 
-	// Container description.
-	struct Container
-	{
-		/// Container flags (saves looking up via instruction data)
-		CommandFlag _flags : 4;
-
-		/// Instruction offset to the start of this container.
-		uint32_t _start_offset : 28;
-		uint32_t _end_offset;
-
-		/// Parent container, or ~0 if this is the root.
-		container_t _parent;
-
-		/// Container hash.
-		uint32_t _hash;
-
-		/// Does this container contain a given instruction offset?
-		bool contains(uint32_t offset) const { return _start_offset <= offset && _end_offset >= offset; }
-	};
+	using container_data_t = ink::internal::container_data_t;
+	using container_hash_t = ink::internal::container_hash_t;
+	using container_map_t = ink::internal::container_map_t;
 
 	// Look up the details of the given container
-	const Container& container(container_t id) const { inkAssert(id < _num_containers); return _containers[id]; }
+	const container_data_t& container_data(container_t id) const { inkAssert(id < _num_containers); return _container_data[id]; }
 
 	// Look up the instruction pointer for the start of the given container
-	ip_t container_offset(container_t id) const { return _instruction_data + container(id)._start_offset; }
+	ip_t container_offset(container_t id) const { return _instruction_data + container_data(id)._start_offset; }
 
 	// Get container flag from container offset (either start or end)
 	CommandFlag container_flag(ip_t offset) const;
@@ -102,16 +86,17 @@ private:
 	const char*      _list_meta;
 	const list_flag* _lists;
 
-	// container info
-	uint32_t* _container_list;
-	uint32_t  _container_list_size;
+	// Information about containers.
+	const container_data_t* _container_data;
 	uint32_t  _num_containers;
 
-	Container *_containers;
+	// How to find containers from instruction offsets.
+	const container_map_t* _container_map;
+	uint32_t  _container_map_size;
 
-	// container hashes
-	hash_t* _container_hash_start;
-	hash_t* _container_hash_end;
+	// How to find containers from string hashes.
+	const container_hash_t *_container_hash;
+	uint32_t _container_hash_size;
 
 	// instruction info
 	ip_t _instruction_data;
