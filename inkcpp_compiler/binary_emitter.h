@@ -48,7 +48,16 @@ namespace ink::compiler::internal
 		void process_paths();
 		void write_container_map(std::ostream&, const container_map&, container_t);
 		void write_container_hash_map(std::ostream&);
-		void write_container_hash_map(std::ostream&, const std::string&, const container_data*);
+
+		struct container_hash_t
+		{
+			uint32_t _hash;
+			uint32_t _offset;
+
+			bool operator<(const container_hash_t& other) const { return _hash < other._hash; }
+		};
+
+		void build_container_hash_map(std::vector<container_hash_t>& hash, const std::string&, const container_data*);
 
 	private:
 		container_data* _root;

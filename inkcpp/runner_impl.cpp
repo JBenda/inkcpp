@@ -308,18 +308,22 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (dest == _ptr)
 		return;
 
-	// Where are we now?
+	// Record location and jump.
 	const uint32_t current_offset = _ptr - _story->instructions();
+	_ptr = dest;
 
 	// Find the container at or before dest, which will become the top of the post-jump stack.
 	const uint32_t dest_offset = dest - _story->instructions();
 	const container_t dest_id = _story->find_container_for(dest_offset);
-	const story_impl::Container& dest_container = _story->container(dest_id);
+
+	// If there's no destination container, stop.
+	if (dest_id == ~0)
+		return;
 
 	// Count stack depth and assemble stack in reverse order by traversing container tree.
 	container_t stack[64];
 	uint32_t depth = 0;
-	for (container_t id = dest_id; id != 0; id = _story->container(id)._parent) {
+	for (container_t id = dest_id; id != ~0; id = _story->container(id)._parent) {
 		inkAssert(depth < 64);
 		stack[depth++] = id;
 	}
@@ -329,6 +333,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 		_container.pop();
 
 	// Are we entering the new container at its start?
+	const story_impl::Container& dest_container = _story->container(dest_id);
 	const bool jump_to_start = dest_offset == dest_container._start_offset;
 
 	// Update visit counts for new containers on the stack. If we jump directly to the start of a container,
@@ -354,9 +359,6 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			_entered_knot = true;
 		}
 	}
-
-	// Finally, do the jump
-	_ptr = dest;
 }
 
 template<frame_type type>

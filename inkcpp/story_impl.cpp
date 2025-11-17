@@ -119,6 +119,9 @@ bool story_impl::find_container_id(uint32_t offset, container_t& container_id) c
 // Assumes 2*count u32s, with the sorted values in the even slots. The odd slots can have any payload.
 static const uint32_t *upper_bound(const uint32_t *sorted, uint32_t count, uint32_t target)
 {
+	if (count == 0)
+		return nullptr;
+
 	uint32_t begin	= 0;
 	uint32_t end	= count;
 
@@ -149,8 +152,8 @@ container_t story_impl::find_container_for(uint32_t offset) const
 	// If we're not inside the container, walk out to find the actual parent. Normally we'd 
 	// know that the parent contained the child, but the containers are sparse so we might 
 	// not have anything.
-	container_t id = iter[1];
-	while (id)
+	container_t id = iter ? iter[1] : ~0;
+	while (id != ~0)
 	{
 		const Container& c = container(id);
 		if (c._start_offset <= offset && c._end_offset >= offset)
@@ -336,64 +339,51 @@ void story_impl::setup_pointers()
 	// After strings comes instruction data
 	_instruction_data = ( ip_t ) ptr;
 
+	if (_num_containers) {
+		container_t *stack = new container_t[_num_containers];
+		uint32_t depth = 0;
+		stack[depth] = ~0;
 
-	container_t *stack = new container_t[_num_containers];
-	uint32_t depth = 0;
-	stack[depth] = 0;
-
-	// Build acceleration structure for containers.
-	_containers = new Container[_num_containers];
-	for (uint32_t c = 0; c < _container_list_size; ++c)
-	{
-		const uint32_t *iter = _container_list + 2 * c;
-		const container_t id = iter[1];
-		const uint32_t offset = iter[0];
-
-		const Command command = Command(_instruction_data[offset]);
-
-		inkAssert(command == Command::START_CONTAINER_MARKER || command == Command::END_CONTAINER_MARKER);
-
-		if (command == Command::START_CONTAINER_MARKER)
+		// Build acceleration structure for containers.
+		_containers = new Container[_num_containers];
+		for (uint32_t c = 0; c < _container_list_size; ++c)
 		{
-			_containers[id]._start_offset = offset;
-			_containers[id]._flags = CommandFlag(_instruction_data[offset+1]);
-			_containers[id]._parent = stack[depth];
+			const uint32_t *iter = _container_list + 2 * c;
+			const container_t id = iter[1];
+			const uint32_t offset = iter[0];
 
-			inkAssert(_containers[id]._flags != CommandFlag(0));
+			const Command command = Command(_instruction_data[offset]);
 
-			stack[++depth] = id;
-		}
-		else
-		{
-			_containers[stack[depth]]._end_offset = offset;
-			--depth;
-		}
+			inkAssert(command == Command::START_CONTAINER_MARKER || command == Command::END_CONTAINER_MARKER);
 
-		for (uint32_t *h = _container_hash_start; h < _container_hash_end; h += 2)
-		{
-			if (h[1] == offset)
+			if (command == Command::START_CONTAINER_MARKER)
 			{
-				_containers[id]._hash = h[0];
-				break;
+				_containers[id]._start_offset = offset;
+				_containers[id]._flags = CommandFlag(_instruction_data[offset+1]);
+				_containers[id]._parent = stack[depth];
+
+				inkAssert(_containers[id]._flags != CommandFlag(0));
+
+				stack[++depth] = id;
+			}
+			else
+			{
+				_containers[stack[depth]]._end_offset = offset;
+				--depth;
+			}
+
+			for (uint32_t *h = _container_hash_start; h < _container_hash_end; h += 2)
+			{
+				if (h[1] == offset)
+				{
+					_containers[id]._hash = h[0];
+					break;
+				}
 			}
 		}
+
+		delete[] stack;
 	}
-
-	delete[] stack;
-
-	// Sort container hash so we can use a binary search.
-	struct Hash
-	{
-		hash_t _hash;
-		hash_t _offset;
-
-		static int __cdecl compare(const void* lhs, const void *rhs)
-		{
-			return static_cast<const Hash*>(lhs)->_hash - static_cast<const Hash*>(rhs)->_hash;
-		}
-	};
-
-	qsort(reinterpret_cast<Hash*>(_container_hash_start), (_container_hash_end-_container_hash_start)/2, sizeof(Hash), &Hash::compare);
 
 	// Debugging info
 	/*{

@@ -13,6 +13,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <algorithm>
 
 #ifndef _MSC_VER
 #	include <cstring>
@@ -398,27 +399,35 @@ void binary_emitter::write_container_map(
 
 void binary_emitter::write_container_hash_map(std::ostream& out)
 {
-	write_container_hash_map(out, "", _root);
+	std::vector<container_hash_t> hash;
+	hash.reserve(256);
+	build_container_hash_map(hash, "", _root);
+
+	// Sort map on ascending hash code.
+	std::sort(hash.begin(), hash.end());
+
+	// Write
+	out.write(reinterpret_cast<const char *>(&*hash.begin()), hash.size() * sizeof(container_hash_t));
 }
 
-void binary_emitter::write_container_hash_map(
-    std::ostream& out, const std::string& name, const container_data* context
+void binary_emitter::build_container_hash_map(
+    std::vector<container_hash_t>& hash, const std::string& name, const container_data* context
 )
 {
 	for (auto child : context->named_children) {
 		// Get the child's name in the hierarchy
 		std::string child_name = name.empty() ? child.first : (name + "." + child.first);
 		hash_t      name_hash  = hash_string(child_name.c_str());
-		// Write out name hash and offset
-		out.write(( const char* ) &name_hash, sizeof(hash_t));
-		out.write(( const char* ) &child.second->offset, sizeof(uint32_t));
+
+		// Append the name hash and offset
+		hash.push_back( {name_hash, child.second->offset} );
 
 		// Recurse
-		write_container_hash_map(out, child_name, child.second);
+		build_container_hash_map(hash, child_name, child.second);
 	}
 
 	for (auto child : context->indexed_children) {
-		write_container_hash_map(out, name, child.second);
+		build_container_hash_map(hash, name, child.second);
 	}
 }
 
