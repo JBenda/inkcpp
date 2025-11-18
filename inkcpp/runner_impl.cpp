@@ -173,9 +173,6 @@ inline T runner_impl::read()
 
 	// Read memory
 	T val = *( const T* ) _ptr;
-	if (_story->get_header().endien == header::endian_types::differ) {
-		val = header::swap_bytes(val);
-	}
 
 	// Advance ip
 	_ptr += sizeof(T);

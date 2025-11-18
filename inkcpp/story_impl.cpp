@@ -236,155 +236,65 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 void story_impl::setup_pointers()
 {
 	using header = ink::internal::header;
-	_header      = header::parse_header(reinterpret_cast<char*>(_file));
+	_header					= *reinterpret_cast<const header*>(_file);
+	if (!_header.verify())
+		return;
 
-	// String table is after the header
-	_string_table = ( char* ) _file + header::Size;
+	// Locate sections
+	if (_header._strings._bytes)
+		_string_table = reinterpret_cast<char *>(_file + _header._strings._start);
 
-	// Pass over strings
-	const char* ptr = _string_table;
-	if (*ptr == 0) // SPECIAL: No strings
+	if (_header._lists._bytes)
 	{
-		ptr++;
-	} else
-		while (true) {
-			// Read until null terminator
-			while (*ptr != 0)
-				ptr++;
+		_list_meta = reinterpret_cast<const char*>(_file + _header._lists._start);
 
-			// Check next character
-			ptr++;
-
-			// Second null. Strings are done.
-			if (*ptr == 0) {
-				ptr++;
-				break;
-			}
-		}
-
-	// check if lists are defined
-	_list_meta = ptr;
-	if (list_flag flag = _header.read_list_flag(ptr); flag != null_flag) {
-		// skip list definitions
-		auto list_id = flag.list_id;
-		while (*ptr != 0) {
-			++ptr;
-		}
-		++ptr; // skip list name
-		do {
-			if (flag.list_id != list_id) {
-				list_id = flag.list_id;
-				while (*ptr != 0) {
-					++ptr;
-				}
-				++ptr; // skip list name
-			}
+		const char *ptr = _list_meta;
+		if (list_flag flag = _header.read_list_flag(ptr); flag != null_flag) {
+			// skip list definitions
+			auto list_id = flag.list_id;
 			while (*ptr != 0) {
 				++ptr;
 			}
-			++ptr; // skip flag name
-		} while ((flag = _header.read_list_flag(ptr)) != null_flag);
-
-		_lists = reinterpret_cast<const list_flag*>(ptr);
-		// skip predefined lists
-		while (_header.read_list_flag(ptr) != null_flag) {
-			while (_header.read_list_flag(ptr) != null_flag)
-				;
-		}
-	} else {
-		_list_meta = nullptr;
-		_lists     = nullptr;
-	}
-	inkAssert(
-	    _header.ink_bin_version_number == ink::InkBinVersion,
-	    "invalid InkBinVerison! currently: %i you used %i", ink::InkBinVersion,
-	    _header.ink_bin_version_number
-	);
-	inkAssert(
-	    _header.endien == header::endian_types::same, "different endien support not yet implemented"
-	);
-
-
-	_num_containers = *( uint32_t* ) (ptr);
-	ptr += sizeof(uint32_t);
-
-	// Pass over the container data
-	_container_map_size = 0;
-	_container_map = reinterpret_cast<const container_map_t*>(ptr);
-	while (true) {
-		uint32_t val = *( uint32_t* ) ptr;
-		if (val == ~0) {
-			_container_map_size = reinterpret_cast<const container_map_t*>(ptr) - _container_map;
-			ptr += sizeof(uint32_t);
-			break;
-		}
-
-		ptr += sizeof(container_map_t);
-	}
-
-	// Next is the container hash map
-	_container_hash = reinterpret_cast<const container_hash_t*>(ptr);
-	while (true) {
-		uint32_t val = *( uint32_t* ) ptr;
-		if (val == ~0) {
-			_container_hash_size = reinterpret_cast<const container_hash_t*>(ptr) - _container_hash;
-			ptr += sizeof(uint32_t);
-			break;
-		}
-
-		ptr += sizeof(container_hash_t);
-	}
-
-	// After strings comes instruction data
-	_instruction_data = ( ip_t ) ptr;
-
-	if (_num_containers) {
-		container_t *stack = new container_t[_num_containers];
-		uint32_t depth = 0;
-		stack[depth] = ~0;
-
-		// Build acceleration structure for containers.
-		_container_data = new container_data_t[_num_containers];
-		for (uint32_t c = 0; c < _container_map_size; ++c)
-		{
-			const container_map_t& entry = _container_map[c];
-			const container_t id = entry._id;
-			const uint32_t offset = entry._offset;
-
-			const Command command = Command(_instruction_data[offset]);
-
-			inkAssert(command == Command::START_CONTAINER_MARKER || command == Command::END_CONTAINER_MARKER);
-
-			if (command == Command::START_CONTAINER_MARKER)
-			{
-				container_data_t& data = const_cast<container_data_t&>(_container_data[id]);
-				data._start_offset = offset;
-				data._flags = CommandFlag(_instruction_data[offset+1]);
-				data._parent = stack[depth];
-
-				inkAssert(_container_data[id]._flags != CommandFlag(0));
-
-				stack[++depth] = id;
-			}
-			else
-			{
-				const_cast<container_data_t&>(_container_data[stack[depth]])._end_offset = offset;
-				--depth;
-			}
-
-			for (uint32_t h = 0; h < _container_hash_size; ++h)
-			{
-				const container_hash_t& entry = _container_hash[h];
-				if (entry._offset == offset)
-				{
-					const_cast<container_data_t&>(_container_data[id])._hash = entry._hash;
-					break;
+			++ptr; // skip list name
+			do {
+				if (flag.list_id != list_id) {
+					list_id = flag.list_id;
+					while (*ptr != 0) {
+						++ptr;
+					}
+					++ptr; // skip list name
 				}
-			}
-		}
+				while (*ptr != 0) {
+					++ptr;
+				}
+				++ptr; // skip flag name
+			} while ((flag = _header.read_list_flag(ptr)) != null_flag);
 
-		delete[] stack;
+			_lists = reinterpret_cast<const list_flag*>(ptr);
+			inkAssert(ptr - _list_meta <= _header._lists._bytes);
+		}
 	}
+
+	if (_header._containers._bytes)
+	{
+		_num_containers = _header._containers._bytes / sizeof(container_data_t);
+		_container_data = reinterpret_cast<const container_data_t*>(_file + _header._containers._start);
+	}
+
+	if (_header._container_map._bytes)
+	{
+		_container_map_size = _header._container_map._bytes / sizeof(container_map_t);
+		_container_map = reinterpret_cast<const container_map_t*>(_file + _header._container_map._start);
+	}
+
+	if (_header._container_hash._bytes)
+	{
+		_container_hash_size = _header._container_hash._bytes / sizeof(container_hash_t);
+		_container_hash = reinterpret_cast<const container_hash_t*>(_file + _header._container_hash._start);
+	}
+
+	if (_header._instructions._bytes)
+		_instruction_data = _file + _header._instructions._start;
 
 	// Debugging info
 	/*{

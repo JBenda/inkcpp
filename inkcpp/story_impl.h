@@ -75,31 +75,31 @@ private:
 
 private:
 	// file information
-	unsigned char* _file;
+	uint8_t*		_file;
 	size_t         _length;
 
 	ink::internal::header _header;
 
 	// string table
-	const char* _string_table;
+	const char* _string_table = nullptr;
 
-	const char*      _list_meta;
-	const list_flag* _lists;
+	const char*      _list_meta = nullptr;
+	const list_flag* _lists = nullptr;
 
 	// Information about containers.
-	const container_data_t* _container_data;
-	uint32_t  _num_containers;
+	const container_data_t* _container_data = nullptr;
+	uint32_t  _num_containers = 0;
 
 	// How to find containers from instruction offsets.
-	const container_map_t* _container_map;
-	uint32_t  _container_map_size;
+	const container_map_t* _container_map = nullptr;
+	uint32_t  _container_map_size = 0;
 
 	// How to find containers from string hashes.
-	const container_hash_t *_container_hash;
-	uint32_t _container_hash_size;
+	const container_hash_t *_container_hash = nullptr;
+	uint32_t _container_hash_size = 0;
 
 	// instruction info
-	ip_t _instruction_data;
+	ip_t _instruction_data = nullptr;
 
 	// story block used to creat various weak pointers
 	ref_block* _block;

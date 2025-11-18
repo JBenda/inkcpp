@@ -47,11 +47,19 @@ namespace ink::compiler::internal
 
 	private:
 		void process_paths();
-		void write_container_map(std::ostream&, const container_map&, container_t);
-		void write_container_hash_map(std::ostream&);
 
+		template <typename type>
+		void emit_section(std::ostream& out, const std::vector<type>& data) const;
+		void emit_section(std::ostream& out, const binary_stream& stream) const;
+		void close_section(std::ostream& out) const;
+
+		using container_data_t = ink::internal::container_data_t;
+		using container_map_t = ink::internal::container_map_t;
 		using container_hash_t = ink::internal::container_hash_t;
-		void build_container_hash_map(std::vector<container_hash_t>& hash, const std::string&, const container_data*);
+
+		void build_container_data(std::vector<container_data_t>& data, container_t parent, const container_data* context) const;
+
+		void build_container_hash_map(std::vector<container_hash_t>& hash, std::vector<container_data_t>& data, const std::string&, const container_data* context) const;
 
 	private:
 		container_data* _root;
@@ -61,7 +69,7 @@ namespace ink::compiler::internal
 		binary_stream _strings;
 		uint32_t _list_count = 0;
 		binary_stream _lists;
-		binary_stream _containers;
+		binary_stream _instructions;
 
 		// positon to write address
 		// path as string

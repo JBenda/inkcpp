@@ -12,38 +12,61 @@
 namespace ink::internal {
 
 		struct header {
-			static header parse_header(const char* data);
 
-			template<typename T>
-			static T swap_bytes(const T& value) {
-				char data[sizeof(T)];
-				for (int i = 0; i < sizeof(T); ++i) {
-					data[i] = reinterpret_cast<const char*>(&value)[sizeof(T)-1-i];
+			static constexpr uint32_t InkBinMagic = ('I' << 24) | ('N' << 16) | ('K' << 8) | 'B';
+			static constexpr uint32_t InkBinMagic_Differ = ('B' << 24) | ('K' << 16) | ('N' << 8) | 'I';
+			static constexpr uint32_t Alignment = 16;
+
+			uint32_t ink_bin_magic = InkBinMagic;
+			uint16_t ink_version_number = 0;
+			uint16_t ink_bin_version_number = 0;
+
+			enum class endian_types : uint8_t {
+				none,
+				same, 
+				differ
+			};
+
+			constexpr endian_types endian() const
+			{
+				switch (ink_bin_magic)
+				{
+				case InkBinMagic : return endian_types::same;
+				case InkBinMagic_Differ: return endian_types::differ;
+				default: return endian_types::none;
 				}
-				return *reinterpret_cast<const T*>(data);
 			}
+
+			bool verify();
+
+			
 			list_flag read_list_flag(const char*& ptr) const {
 				list_flag result = *reinterpret_cast<const list_flag*>(ptr);
 				ptr += sizeof(list_flag);
-				if (endien == ink::internal::header::endian_types::differ) {
-					result.flag = swap_bytes(result.flag);
-					result.list_id = swap_bytes(result.list_id);
-				}
 				return result;
 			}
 
-			enum class  endian_types: uint16_t {
-				none = 0,
-				same = 0x0001,
-				differ = 0x0100
-			} endien = endian_types::none;
-			uint32_t ink_version_number = 0;
-			uint32_t ink_bin_version_number = 0;
-			static constexpr size_t Size = ///< actual data size of Header,
-										   ///   because padding of struct may
-										   ///   differ between platforms
-				sizeof(uint16_t) + 2 * sizeof(uint32_t);
-		};
+			struct section_t
+			{
+				uint32_t _start = 0;
+				uint32_t _bytes = 0;
+
+				void setup(uint32_t& offset, uint32_t bytes)
+				{
+					_start = (offset + Alignment - 1) & ~(Alignment-1);
+					_bytes = bytes;
+					offset = _start + _bytes;
+				}
+			};
+
+			// File section sizes. Each section is aligned to Alignment
+			section_t _strings;
+			section_t _lists;
+			section_t _containers;
+			section_t _container_map;
+			section_t _container_hash;
+			section_t _instructions;
+	 	};
 
 		// One entry in the container hash. Used to translate paths into story locations.
 		struct container_hash_t
