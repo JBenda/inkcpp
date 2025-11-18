@@ -392,15 +392,10 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 	_size = start;
 
 	// Return processed string
-	end  = clean_string<true, false>(buffer, buffer + c_str_len(buffer));
+	end  = clean_string<RemoveTail, RemoveTail>(buffer, buffer + c_str_len(buffer));
 	*end = 0;
 	if (end != buffer) {
 		_last_char = end[-1];
-		if constexpr (RemoveTail) {
-			if (_last_char == ' ') {
-				end[-1] = 0;
-			}
-		}
 	} else {
 		_last_char = 'e';
 	}
