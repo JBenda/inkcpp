@@ -9,7 +9,7 @@
 
 namespace ink::internal {
 
-	bool header::verify()
+	bool header::verify() const
 	{
 		if (endian() == endian_types::none) {
 			inkFail("Header magic number was wrong!");

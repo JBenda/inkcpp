@@ -32,7 +32,7 @@ void list_table::copy_lists(const data_t* src, data_t* dst)
 	}
 }
 
-list_table::list_table(const char* data, const ink::internal::header& header)
+list_table::list_table(const char* data)
     : _valid{false}
 {
 	if (data == nullptr) {
@@ -41,7 +41,7 @@ list_table::list_table(const char* data, const ink::internal::header& header)
 	list_flag   flag;
 	const char* ptr   = data;
 	int         start = 0;
-	while ((flag = header.read_list_flag(ptr)) != null_flag) {
+	while ((flag = read_list_flag(ptr)) != null_flag) {
 		// start of new list
 		if (_list_end.size() == flag.list_id) {
 			start              = _list_end.size() == 0 ? 0 : _list_end.back();

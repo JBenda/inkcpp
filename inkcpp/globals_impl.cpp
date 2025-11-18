@@ -20,7 +20,7 @@ globals_impl::globals_impl(const story_impl* story)
     , _visit_counts_backup()
     , _owner(story)
     , _runners_start(nullptr)
-    , _lists(story->list_meta(), story->get_header())
+    , _lists(story->list_meta())
     , _globals_initialized(false)
 {
 	_visit_counts.resize(_num_containers);

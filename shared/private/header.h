@@ -37,15 +37,9 @@ namespace ink::internal {
 				}
 			}
 
-			bool verify();
+			bool verify() const;
 
 			
-			list_flag read_list_flag(const char*& ptr) const {
-				list_flag result = *reinterpret_cast<const list_flag*>(ptr);
-				ptr += sizeof(list_flag);
-				return result;
-			}
-
 			struct section_t
 			{
 				uint32_t _start = 0;

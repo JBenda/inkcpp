@@ -115,6 +115,12 @@ struct list_flag {
 	bool operator!=(const list_flag& o) const { return ! (*this == o); }
 };
 
+inline list_flag read_list_flag(const char*& ptr) {
+	list_flag result = *reinterpret_cast<const list_flag*>(ptr);
+	ptr += sizeof(list_flag);
+	return result;
+}
+
 /** value of an unset list_flag */
 constexpr list_flag null_flag{-1, -1};
 /** value representing an empty list */

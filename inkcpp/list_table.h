@@ -107,7 +107,7 @@ public:
 	list& add_inplace(list& lh, list_flag rh);
 
 	// parse binary list meta data
-	list_table(const char* data, const ink::internal::header&);
+	list_table(const char* data);
 
 	explicit list_table()
 	    : _entrySize{0}

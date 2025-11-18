@@ -68,8 +68,6 @@ public:
 	virtual runner
 	    new_runner_from_snapshot(const snapshot&, globals store = nullptr, unsigned idx = 0) override;
 
-	const ink::internal::header& get_header() const { return _header; }
-
 private:
 	void setup_pointers();
 
@@ -77,8 +75,6 @@ private:
 	// file information
 	uint8_t*		_file;
 	size_t         _length;
-
-	ink::internal::header _header;
 
 	// string table
 	const char* _string_table = nullptr;

@@ -235,21 +235,21 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 
 void story_impl::setup_pointers()
 {
-	using header = ink::internal::header;
-	_header					= *reinterpret_cast<const header*>(_file);
-	if (!_header.verify())
+	const ink::internal::header& header = *reinterpret_cast<const ink::internal::header*>(_file);
+	if (!header.verify())
 		return;
 
 	// Locate sections
-	if (_header._strings._bytes)
-		_string_table = reinterpret_cast<char *>(_file + _header._strings._start);
+	if (header._strings._bytes)
+		_string_table = reinterpret_cast<char *>(_file + header._strings._start);
 
-	if (_header._lists._bytes)
+	if (header._lists._bytes)
 	{
-		_list_meta = reinterpret_cast<const char*>(_file + _header._lists._start);
+		_list_meta = reinterpret_cast<const char*>(_file + header._lists._start);
 
+		// SIL: TODO: Remove this, since it has to get parsed in _lists/_globals. Just needs an interior offset or a separate section from the compiler.
 		const char *ptr = _list_meta;
-		if (list_flag flag = _header.read_list_flag(ptr); flag != null_flag) {
+		if (list_flag flag = read_list_flag(ptr); flag != null_flag) {
 			// skip list definitions
 			auto list_id = flag.list_id;
 			while (*ptr != 0) {
@@ -268,33 +268,33 @@ void story_impl::setup_pointers()
 					++ptr;
 				}
 				++ptr; // skip flag name
-			} while ((flag = _header.read_list_flag(ptr)) != null_flag);
+			} while ((flag = read_list_flag(ptr)) != null_flag);
 
 			_lists = reinterpret_cast<const list_flag*>(ptr);
-			inkAssert(ptr - _list_meta <= _header._lists._bytes);
+			inkAssert(ptr - _list_meta <= header._lists._bytes);
 		}
 	}
 
-	if (_header._containers._bytes)
+	if (header._containers._bytes)
 	{
-		_num_containers = _header._containers._bytes / sizeof(container_data_t);
-		_container_data = reinterpret_cast<const container_data_t*>(_file + _header._containers._start);
+		_num_containers = header._containers._bytes / sizeof(container_data_t);
+		_container_data = reinterpret_cast<const container_data_t*>(_file + header._containers._start);
 	}
 
-	if (_header._container_map._bytes)
+	if (header._container_map._bytes)
 	{
-		_container_map_size = _header._container_map._bytes / sizeof(container_map_t);
-		_container_map = reinterpret_cast<const container_map_t*>(_file + _header._container_map._start);
+		_container_map_size = header._container_map._bytes / sizeof(container_map_t);
+		_container_map = reinterpret_cast<const container_map_t*>(_file + header._container_map._start);
 	}
 
-	if (_header._container_hash._bytes)
+	if (header._container_hash._bytes)
 	{
-		_container_hash_size = _header._container_hash._bytes / sizeof(container_hash_t);
-		_container_hash = reinterpret_cast<const container_hash_t*>(_file + _header._container_hash._start);
+		_container_hash_size = header._container_hash._bytes / sizeof(container_hash_t);
+		_container_hash = reinterpret_cast<const container_hash_t*>(_file + header._container_hash._start);
 	}
 
-	if (_header._instructions._bytes)
-		_instruction_data = _file + _header._instructions._start;
+	if (header._instructions._bytes)
+		_instruction_data = _file + header._instructions._start;
 
 	// Debugging info
 	/*{
