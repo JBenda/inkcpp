@@ -219,7 +219,7 @@ void binary_emitter::handle_nop(int index_in_parent)
 template <typename type>
 void binary_emitter::emit_section(std::ostream& stream, const std::vector<type>& data) const
 {
-	stream.write(reinterpret_cast<const char *>(&*data.begin()), data.size() * sizeof(type));
+	stream.write(reinterpret_cast<const char *>(data.data()), data.size() * sizeof(type));
 	close_section(stream);
 }
 
