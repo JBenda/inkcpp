@@ -132,7 +132,7 @@ public:
 	// move to path
 	virtual bool move_to(hash_t path) override;
 
-#ifndef INK_ENABLE_CSTD
+#if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 	// Gets a single line of output
 	virtual line_type getline() override;
 
