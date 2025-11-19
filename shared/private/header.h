@@ -96,7 +96,7 @@ namespace ink::internal {
 			container_t _parent;
 
 			/// Container flags (saves looking up via instruction data)
-			CommandFlag _flags : 4;
+			uint32_t _flags : 4;
 
 			/// Instruction offset to the start instruction (enter marker) of this container.
 			uint32_t _start_offset : 28;

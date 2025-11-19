@@ -429,7 +429,9 @@ void binary_emitter::build_container_data(std::vector<container_data_t>& data, c
 		d._parent			= parent;
 		d._start_offset		= context->offset;
 		d._end_offset		= context->end_offset;
-		d._flags			= CommandFlag(_instructions.get(context->offset + 1));
+		const uint8_t flags = _instructions.get(context->offset + 1);
+		inkAssert(flags < 16);
+		d._flags			= flags;
 
 		// Since we might be skipping tree levels, we need to be explicit about the parent.
 		parent				= context->counter_index;

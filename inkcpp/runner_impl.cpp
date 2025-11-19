@@ -347,7 +347,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 		// Named knots/stitches need special handling - their visit counts are updated wherever the story enters them,
 		// and we always need to know which knot we're in for tagging.
 		const container_data_t& container = _story->container_data(id);
-		if (container._flags & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
+		if (container._flags & uint8_t(CommandFlag::CONTAINER_MARKER_IS_KNOT)) {
 			// If the previous IP wasn't in this container, record the new visit.
 			if (track_knot_visit && !container.contains(current_offset))
 				_globals->visit(id);
