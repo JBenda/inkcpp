@@ -120,7 +120,7 @@ struct remove_reference<T&&>
 template<class T>
 struct remove_cvref 
 {
-	typedef remove_cv<remove_reference<T>>::type;
+	typedef typename remove_cv<typename remove_reference<T>::type>::type type;
 };
 
 // == string testing (from me) ==

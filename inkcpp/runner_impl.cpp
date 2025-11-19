@@ -464,7 +464,7 @@ runner_impl::~runner_impl()
 	}
 }
 
-#ifndef INK_ENABLE_CSTD
+#if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 
 runner_impl::line_type runner_impl::getline()
 {

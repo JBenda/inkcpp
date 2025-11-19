@@ -93,7 +93,9 @@ public:
 	 * @return allocated c-style string with the output of a single line of execution
 	 */
 	virtual const char* getline_alloc() = 0;
-#else
+#endif
+
+#if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 	/**
 	 * Execute the next line of the script.
 	 *
