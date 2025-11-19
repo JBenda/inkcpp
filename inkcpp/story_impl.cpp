@@ -13,10 +13,6 @@
 #include "snapshot_interface.h"
 #include "version.h"
 
-#include "..\..\..\sil\sil\main.h"
-#include "..\..\..\sil\sil\profile.h"
-
-
 namespace ink::runtime
 {
 #ifdef INK_ENABLE_STL

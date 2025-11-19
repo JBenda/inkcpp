@@ -15,9 +15,6 @@
 #include "system.h"
 #include "value.h"
 
-#include "..\..\..\sil\sil\main.h"
-#include "..\..\..\sil\sil\profile.h"
-
 #include <iomanip>
 
 namespace ink::runtime
@@ -294,8 +291,6 @@ void runner_impl::clear_tags(tags_clear_level which)
 
 void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 {
-	SIL_PROFILE("ink::jump");
-
 	// Optimization: if we are _is_falling, then we can
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
 	//  divert should only be taking us from a container to that same container's end point
