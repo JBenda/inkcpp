@@ -329,8 +329,8 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	const container_data_t& dest_container = _story->container_data(dest_id);
 	const bool jump_to_start = dest_offset == dest_container._start_offset;
 
-	// Update visit counts for new containers on the stack. If we jump directly to the start of a container,
-	// don't update it (last on the stack) as the normal instruction flow will process the start marker next.
+	// Build stack and record any new knots we enter.
+	// If we jump directly to the start of a container, don't update it (last on the stack) and process it below.
 	for (uint32_t d = 0; d < depth - jump_to_start; ++d)
 	{
 		// Read temporary stack in forward order.
@@ -340,17 +340,40 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 		_container.push(id);
 
 		// Named knots/stitches need special handling - their visit counts are updated wherever the story enters them,
-		// and we always need to know which knot we're in for tagging.
-		const container_data_t& container = _story->container_data(id);
-		if (container._flags & uint8_t(CommandFlag::CONTAINER_MARKER_IS_KNOT)) {
-			// If the previous IP wasn't in this container, record the new visit.
-			if (track_knot_visit && !container.contains(current_offset))
-				_globals->visit(id);
+		// and we generally need to know which knot we're in, for tagging, unless we're jumping to a tunnel or similar
+		// which suppresses knot tracking.
+		if (track_knot_visit) {
+			// If this is a knot that we previously weren't in, record the new visit.
+			const container_data_t& container = _story->container_data(id);
+			if (container.knot() && !container.contains(current_offset)) {
+				// Record visit count
+				if (record_visits)
+					_globals->visit(id);
 
-			// Update current knot, the knot closest to the top of the stack will end up current.
-			_current_knot_id = id;
+				// Update current knot, the knot closest to the top of the stack will end up current.
+				_current_knot_id = id;
+				_entered_knot = true;
+			}
+		}
+	}
+
+	// Finally, if we're jumping to the start of a container, enter it while we have the context to do so.
+	if (jump_to_start) {
+		// Add to top of stack
+		_container.push(dest_id);
+
+		// Record visit
+		if (record_visits)
+			_globals->visit(dest_id);
+
+		// Record knot, if
+		if (track_knot_visit && dest_container.knot()) {
+			_current_knot_id = dest_id;
 			_entered_knot = true;
 		}
+
+		// Consume instruction so we don't process it again during normal flow.
+		_ptr += 6;
 	}
 }
 

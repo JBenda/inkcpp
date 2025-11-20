@@ -109,5 +109,8 @@ namespace ink::internal {
 
 			/// Check to see if the instruction offset is part of the instructions for this container. Note that this is inclusive not exclusive.
 			bool contains(uint32_t offset) const { return offset >= _start_offset && offset <= _end_offset; }
+
+			/// Check to see if this is a knot container.
+			bool knot() const { return _flags & uint8_t(CommandFlag::CONTAINER_MARKER_IS_KNOT); }
 		};
 }
