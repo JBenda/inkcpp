@@ -269,6 +269,8 @@ void story_impl::setup_pointers()
 			_lists = reinterpret_cast<const list_flag*>(ptr);
 			inkAssert(ptr - _list_meta <= header._lists._bytes);
 		}
+		else
+			_list_meta = nullptr;
 	}
 
 	if (header._containers._bytes)
@@ -291,6 +293,9 @@ void story_impl::setup_pointers()
 
 	if (header._instructions._bytes)
 		_instruction_data = _file + header._instructions._start;
+
+	inkAssert(end() >= _instruction_data + header._instructions._bytes);
+	_length = _instruction_data + header._instructions._bytes - _file;
 
 	// Debugging info
 	/*{

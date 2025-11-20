@@ -252,6 +252,10 @@ void binary_emitter::output(std::ostream& out)
 	// Sort map on ascending hash code.
 	std::sort(container_hash.begin(), container_hash.end());
 
+	// If there are any lists, terminate the data correctly. Otherwise leave an empty section.
+	if (_lists.pos() > 0)
+		_lists.write(null_flag);
+
 	// Fill in header 
 	ink::internal::header header;
 	header.ink_version_number		= _ink_version;
@@ -446,29 +450,31 @@ void binary_emitter::build_container_hash_map(
     std::vector<container_hash_t>& hash_map, std::vector<container_data_t>& data, const std::string& name, const container_data* context
 ) const
 {
-	// If there's a non-empty name, hash it.
-	if (!name.empty())
-	{
-		// Hash name. We only do this at the named child level. In theory we could support indexed children as well. 
-		// The root is anonymous so the fact that it's skipped is not an issue.
-		const hash_t name_hash  = hash_string(name.c_str());
-
-		// Store hash in the data.
-		if (context->counter_index != ~0) {
-			data[context->counter_index]._hash = name_hash;
-		}
-
-		// Append the name hash and offset
-		hash_map.push_back( {name_hash, context->offset} );	
-	}
-
-	// Search named children only.
+	// Search named children first.
 	for (auto child : context->named_children) {
 		// Get the child's name in the hierarchy
 		std::string child_name = name.empty() ? child.first : (name + "." + child.first);
 
+		// Hash name. We only do this at the named child level. In theory we could support indexed children as well. 
+		// The root is anonymous so the fact that it's skipped is not an issue.
+		const hash_t child_name_hash  = hash_string(child_name.c_str());
+
+		// Store hash in the data.
+		if (child.second->counter_index != ~0) {
+			data[child.second->counter_index]._hash = child_name_hash;
+		}
+
+		// Append the name hash and offset
+		hash_map.push_back( {child_name_hash, child.second->offset} );	
+
 		// Recurse
 		build_container_hash_map(hash_map, data, child_name, child.second);
+	}
+
+	// Search indexed children (which duplicates named childen...)
+	// TODO: Merge duplicate child arrays, very error-prone.
+	for (auto child : context->indexed_children) {
+		build_container_hash_map(hash_map, data, name, child.second);
 	}
 }
 
@@ -491,9 +497,6 @@ void binary_emitter::set_list_meta(const list_data& list_defs)
 		}
 		_lists.write(reinterpret_cast<const byte_t*>(flag.name->c_str()), flag.name->size() + 1);
 	}
-	_lists.write(null_flag);
-
-	// Extra terminator since we don't write them between sections.
 	_lists.write(null_flag);
 }
 } // namespace ink::compiler::internal
