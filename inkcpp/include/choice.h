@@ -74,12 +74,16 @@ namespace runtime
 		);
 
 	protected:
-		int                       _index      = -1;      ///< @private
 		const char*               _text       = nullptr; ///< @private
-		uint32_t                  _path       = ~0;      ///< @private
-		thread_t                  _thread     = ~0;      ///< @private
 		const internal::snap_tag* _tags_start = nullptr; ///< @private
 		const internal::snap_tag* _tags_end   = nullptr; ///< @private
+		uint32_t                  _path       = ~0U;     ///< @private
+		thread_t                  _thread     = ~0U;     ///< @private
+		int                       _index      = -1;      ///< @private
+#pragma warning(push)
+#pragma warning(disable : 4820, justification : "4 byte aligment free on 64-bit systems")
 	};
+
+#pragma warning(pop)
 } // namespace runtime
 } // namespace ink

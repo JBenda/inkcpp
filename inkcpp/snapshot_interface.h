@@ -53,14 +53,20 @@ public:
 		const string_table& strings;
 		const char*         story_string_table;
 		const snap_tag*     runner_tags = nullptr;
+		snapper()                       = delete;
+		snapper& operator=(const snapper&)     = delete;
 	};
 
 	struct loader {
 		managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 		const char*                          story_string_table;
 		const snap_tag*                      runner_tags = nullptr;
+		loader()                                         = delete;
+		loader& operator=(const loader&)                 = delete;
 	};
 
+#pragma warning(push)
+#pragma warning(disable : 4100, justification : "non functional prototypes do not need the argument." )
 	size_t snap(unsigned char* data, snapper&) const
 	{
 		inkFail("Snap function not implemented");
@@ -72,5 +78,6 @@ public:
 		inkFail("Snap function not implemented");
 		return nullptr;
 	};
+#pragma warning(pop)
 };
 } // namespace ink::runtime::internal

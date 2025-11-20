@@ -75,9 +75,9 @@ public:
 
 	T& back() { return end()[-1]; }
 
-	const size_t size() const { return _size; }
+	size_t size() const { return _size; }
 
-	const size_t capacity() const { return _capacity; }
+	size_t capacity() const { return _capacity; }
 
 	T& push()
 	{
@@ -170,10 +170,10 @@ public:
 	}
 
 private:
-	if_t<dynamic, char, T> _static_data[dynamic ? 1 : initialCapacity];
 	T*                     _dynamic_data = nullptr;
 	size_t                 _capacity;
 	size_t                 _size;
+	if_t<dynamic, char, T> _static_data[dynamic ? 1 : initialCapacity];
 };
 
 template<typename T, bool dynamic, size_t initialCapacity>

@@ -46,7 +46,11 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
-
+if (MSVC)
+    add_compile_options(/Wall /wd4820)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 # Add subdirectories
 include(CMakeDependentOption)
 option(INKCPP_PY "Build python bindings" OFF)

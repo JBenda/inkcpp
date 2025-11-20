@@ -28,16 +28,16 @@ class prng;
 // memory segments
 // @param bits size in bits
 // @param size segment size in bytes
-constexpr int segmentsFromBits(int bits, int size)
+constexpr size_t segmentsFromBits(size_t bits, size_t size)
 {
-	size *= 8;
-	return bits / size + (bits % size ? 1 : 0);
+	size *= 8U;
+	return bits / size + (bits % size ? 1U : 0);
 }
 
 /// managed all list entries and list metadata
 class list_table : public snapshot_interface
 {
-	using data_t = int;
+	using data_t = unsigned;
 	enum class state : char {
 		unused,
 		used,
@@ -77,9 +77,9 @@ public:
 			flag.flag    = -1;
 			return flag;
 		}
-		for (int i = listBegin(flag.list_id); i < _list_end[flag.list_id]; ++i) {
-			if (_flag_values[i] == flag.flag) {
-				flag.flag = i - listBegin(flag.list_id);
+		for (int i = listBegin(flag.list_id); i < _list_end[static_cast<size_t>(flag.list_id)]; ++i) {
+			if (_flag_values[static_cast<size_t>(i)] == flag.flag) {
+				flag.flag = static_cast<int16_t>(i - listBegin(flag.list_id));
 				return flag;
 			}
 		}
@@ -89,7 +89,7 @@ public:
 
 	int get_flag_value(list_flag flag) const
 	{
-		return _flag_values[listBegin(flag.list_id) + flag.flag];
+		return _flag_values[static_cast<size_t>(listBegin(flag.list_id) + flag.flag)];
 	}
 
 	/// zeros all usage values
@@ -257,9 +257,9 @@ public:
 
 private:
 	void                 copy_lists(const data_t* src, data_t* dst);
-	static constexpr int bits_per_data = sizeof(data_t) * 8;
+	static constexpr size_t bits_per_data = sizeof(data_t) * 8U;
 
-	int listBegin(int lid) const { return lid == 0 ? 0 : _list_end[lid - 1]; }
+	size_t listBegin(int lid) const { return lid == 0 ? 0 : _list_end[static_cast<size_t>(lid - 1)]; }
 
 	const data_t* getPtr(int eid) const
 	{
@@ -273,13 +273,13 @@ private:
 		     + static_cast<std::ptrdiff_t>(_entrySize) * static_cast<std::ptrdiff_t>(eid);
 	}
 
-	int numFlags() const
+	size_t numFlags() const
 	{
 		return _flag_names.size();
 		// return _list_end.end()[-1]; TODO:
 	}
 
-	int numLists() const { return _list_end.size(); }
+	size_t numLists() const { return _list_end.size(); }
 
 	bool getBit(const data_t* data, int id) const
 	{
@@ -314,12 +314,12 @@ private:
 		}
 	}
 
-	int toFid(list_flag e) const;
+	size_t toFid(list_flag e) const;
 
 	auto flagStartMask() const
 	{
 		struct {
-			int    segment;
+			size_t    segment;
 			data_t mask;
 		} res{numLists() / bits_per_data, ~static_cast<data_t>(0) >> (numLists() % bits_per_data)};
 
@@ -330,10 +330,10 @@ private:
 	using managed_array = managed_array < T,
 	      config<0, abs(config)>;
 
-	static constexpr int maxMemorySize
+	static constexpr long maxMemorySize
 	    = (config::maxListTypes < 0 || config::maxFlags < 0 || config::maxLists < 0 ? -1 : 1)
-	    * segmentsFromBits(abs(config::maxListTypes) + abs(config::maxFlags), sizeof(data_t))
-	    * static_cast<int>(abs(config::maxLists));
+	    * static_cast<long>(segmentsFromBits(abs(config::maxListTypes) + abs(config::maxFlags), sizeof(data_t))
+	    * static_cast<int>(abs(config::maxLists)));
 
 	int                                    _entrySize; ///< entry size in data_t
 	// entries (created lists)
@@ -341,7 +341,7 @@ private:
 	managed_array<state, config::maxLists> _entry_state;
 
 	// defined list (meta data)
-	managed_array<int, config::maxListTypes>                  _list_end;
+	managed_array<size_t, config::maxListTypes>               _list_end;
 	managed_array<const char*, config::maxFlags>              _flag_names;
 	managed_array<int, config::maxFlags>                      _flag_values;
 	managed_array<const char*, config::maxListTypes>          _list_names;
@@ -351,7 +351,7 @@ private:
 	bool _valid;
 
 public:
-	friend class name_flag_itr;
+	friend class named_flag_itr;
 	friend class list_impl;
 
 	class named_flag_itr
@@ -364,10 +364,14 @@ public:
 			const char* name;
 		} _pos;
 
+		/** carry list change.
+		 * if the iterator incremented to the next flag, also increment the list if necessary
+		 * @pre _pos.flag.list_id >= 0
+		 */
 		void carry()
 		{
 			if (_pos.flag.flag
-			    == _list._list_end[_pos.flag.list_id] - _list.listBegin(_pos.flag.list_id)) {
+			    == _list._list_end[static_cast<size_t>(_pos.flag.list_id)] - _list.listBegin(static_cast<size_t>(_pos.flag.list_id))) {
 				_pos.flag.flag = 0;
 				++_pos.flag.list_id;
 			}
@@ -401,6 +405,12 @@ public:
 		}
 
 	public:
+		named_flag_itr(const named_flag_itr& o)
+		    : _list{o._list}
+		    , _data{o._data}
+		    , _pos{o._pos}
+		{}
+		named_flag_itr& operator=(const named_flag_itr&) = delete;
 		bool operator!=(const named_flag_itr& o) const { return _pos.flag != o._pos.flag; }
 
 		named_flag_itr(const list_table& list, const data_t* filter)
