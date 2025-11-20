@@ -11,7 +11,7 @@
 #	define INK_ENABLE_UNREAL
 #	define INKCPP_NO_RTTI
 #	define INKCPP_NO_EXCEPTIONS
-#elif INKCPP_BUILD_CLIB
+#elif defined(INKCPP_BUILD_CLIB)
 #	define INK_ENABLE_CSTD
 #else
 #	define INK_ENABLE_STL

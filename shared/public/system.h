@@ -239,7 +239,7 @@ template<typename... Args>
 
 namespace runtime::internal
 {
-	constexpr unsigned abs(int i) { return i < 0 ? -i : i; }
+	constexpr unsigned abs(int i) { return static_cast<unsigned>(i < 0 ? -i : i); }
 
 	template<typename T>
 	struct always_false {

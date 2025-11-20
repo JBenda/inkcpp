@@ -112,7 +112,7 @@ void list_table::gc()
 	_list_handouts.clear();
 }
 
-int list_table::toFid(list_flag e) const { return listBegin(e.list_id) + e.flag; }
+size_t list_table::toFid(list_flag e) const { return listBegin(e.list_id) + e.flag; }
 
 size_t list_table::stringLen(const list_flag& e) const { return c_str_len(toString(e)); }
 
