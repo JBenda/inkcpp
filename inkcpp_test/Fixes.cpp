@@ -101,3 +101,28 @@ SCENARIO("snapshot failed inside execution _ #111", "[fixes]")
 		}
 	}
 }
+
+SCENARIO("missing leading whitespace inside choice-only text and glued text _ #130 #131", "[fixes]")
+{
+	GIVEN("story with problematic text")
+	{
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "130_131_missing_whitespace.bin");
+		runner thread = ink->new_runner();
+		WHEN("run story")
+		{
+			auto line = thread->getline();
+			THEN("expect spaces in glued text") { REQUIRE(line == "Glue with no gaps.\n"); }
+			THEN("choice contains space")
+			{
+				REQUIRE(thread->num_choices() == 1);
+				REQUIRE(std::string(thread->get_choice(0)->text()) == "Look around");
+			}
+			thread->choose(0);
+			line = thread->getall();
+			THEN("no space in post choice text")
+			{
+				REQUIRE(line == "Looking around the saloon, you don't find much.");
+			}
+		}
+	}
+}
