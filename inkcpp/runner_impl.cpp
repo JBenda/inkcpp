@@ -329,6 +329,9 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 		_ptr += 6;
 	}
 
+	// If we're tracking knots, we only want the first one.
+	bool first_knot = track_knot_visit;
+
 	// Assemble temp stack in reverse order by traversing container tree.
 	container_t stack[abs(config::limitContainerDepth)];
 	uint32_t depth = 0;
@@ -345,15 +348,18 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			// Named knots/stitches need special handling - their visit counts are updated wherever the story enters them,
 			//	and we generally need to know which knot we're in, for tagging, unless we're jumping to a tunnel or similar
 			// which suppresses knot tracking.
-			if (record_visits) {
+			//
+			// Ink has a rule about incrementing visit counts when you jump to the top of a knot, which seems to need to 
+			// override inkcpp's knot_visit flag.
+			if (track_knot_visit || container._start_offset == dest_offset) {
 				_globals->visit(id);
 			}
 
 			// If tracking, update with the first knot we encounter, which is the one closest to the top of the new stack.
-			if (track_knot_visit) {
+			if (first_knot) {
 				_current_knot_id = id;
 				_entered_knot = true;
-				track_knot_visit = false;
+				first_knot = false;
 			}
 		}
 
