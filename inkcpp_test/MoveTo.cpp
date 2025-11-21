@@ -12,10 +12,10 @@ SCENARIO("run a story, but jump around manually", "[move_to]")
 {
 	GIVEN("a story with side talking points")
 	{
-		auto    ink       = story::from_file(INK_TEST_RESOURCE_DIR "MoveTo.bin");
-		globals globStore = ink->new_globals();
-		runner  main      = ink->new_runner(globStore);
-		runner  side      = ink->new_runner(globStore);
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "MoveTo.bin")};
+		globals                globStore = ink->new_globals();
+		runner                 main      = ink->new_runner(globStore);
+		runner                 side      = ink->new_runner(globStore);
 
 		WHEN("just run main story")
 		{

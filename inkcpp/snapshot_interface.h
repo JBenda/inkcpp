@@ -6,13 +6,12 @@
  */
 #pragma once
 
-#include "snapshot.h"
 #include <cstring>
 
 namespace ink::runtime::internal
 {
 class globals_impl;
-template<typename, bool, size_t>
+template<typename, bool, size_t, bool = false>
 class managed_array;
 class snap_tag;
 class string_table;
@@ -52,9 +51,9 @@ public:
 	struct snapper {
 		const string_table& strings;
 		const char*         story_string_table;
-		const snap_tag*     runner_tags = nullptr;
-		snapper()                       = delete;
-		snapper& operator=(const snapper&)     = delete;
+		const snap_tag*     runner_tags    = nullptr;
+		snapper()                          = delete;
+		snapper& operator=(const snapper&) = delete;
 	};
 
 	struct loader {
@@ -66,7 +65,10 @@ public:
 	};
 
 #pragma warning(push)
-#pragma warning(disable : 4100, justification : "non functional prototypes do not need the argument." )
+#pragma warning(                                                                          \
+    disable : 4100, justification : "non functional prototypes do not need the argument." \
+)
+
 	size_t snap(unsigned char* data, snapper&) const
 	{
 		inkFail("Snap function not implemented");
@@ -78,6 +80,7 @@ public:
 		inkFail("Snap function not implemented");
 		return nullptr;
 	};
+
 #pragma warning(pop)
 };
 } // namespace ink::runtime::internal

@@ -11,8 +11,8 @@ SCENARIO("a story with bracketed choices and spaces can choose correctly", "[cho
 {
 	GIVEN("a story with line breaks")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "ChoiceBracketStory.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "ChoiceBracketStory.bin")};
+		runner                 thread = ink->new_runner();
 		thread->getall();
 		WHEN("start thread")
 		{
@@ -35,10 +35,7 @@ SCENARIO("a story with bracketed choices and spaces can choose correctly", "[cho
 			{
 				thread->choose(1);
 				thread->getall();
-				THEN("still has choices")
-				{
-					REQUIRE(thread->has_choices());
-				}
+				THEN("still has choices") { REQUIRE(thread->has_choices()); }
 			}
 		}
 	}

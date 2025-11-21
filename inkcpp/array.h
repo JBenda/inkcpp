@@ -15,7 +15,15 @@
 
 namespace ink::runtime::internal
 {
-template<typename T, bool dynamic, size_t initialCapacity>
+/** Managed array of objects.
+ *
+ * @tparam simple if the object has a trivial destructor, so delete[](char*) can be used instead of
+ * calling the constructor.
+ * @tparam dynamic if the memory should be allocated on the heap and grow if needed
+ * @tparam initialCapacitiy number of elements to allocate at construction, if !dynamic, this is
+ * allocated in place and can not be changed.
+ */
+template<typename T, bool dynamic, size_t initialCapacity, bool simple>
 class managed_array : public snapshot_interface
 {
 public:
@@ -25,7 +33,11 @@ public:
 	    , _size{0}
 	{
 		if constexpr (dynamic) {
-			_dynamic_data = new T[initialCapacity];
+			if constexpr (simple) {
+				_dynamic_data = reinterpret_cast<T*>(new char[sizeof(T) * initialCapacity]);
+			} else {
+				_dynamic_data = new T[initialCapacity];
+			}
 		}
 	}
 
@@ -37,7 +49,11 @@ public:
 	virtual ~managed_array()
 	{
 		if constexpr (dynamic) {
-			delete[] _dynamic_data;
+			if constexpr (simple) {
+				delete[] reinterpret_cast<char*>(_dynamic_data);
+			} else {
+				delete[] _dynamic_data;
+			}
 		}
 	}
 
@@ -233,21 +249,30 @@ private:
 	size_t _last_size = 0;
 };
 
-template<typename T, bool dynamic, size_t initialCapacity>
-void managed_array<T, dynamic, initialCapacity>::extend(size_t capacity)
+template<typename T, bool dynamic, size_t initialCapacity, bool simple>
+void managed_array<T, dynamic, initialCapacity, simple>::extend(size_t capacity)
 {
 	static_assert(dynamic, "Can only extend if array is dynamic!");
 	size_t new_capacity = capacity > _capacity ? capacity : 1.5f * _capacity;
 	if (new_capacity < 5) {
 		new_capacity = 5;
 	}
-	T* new_data = new T[new_capacity];
+	T* new_data = nullptr;
+	if constexpr (simple) {
+		new_data = reinterpret_cast<T*>(new char[sizeof(T) * new_capacity]);
+	} else {
+		new_data = new T[new_capacity];
+	}
 
 	for (size_t i = 0; i < _capacity; ++i) {
 		new_data[i] = _dynamic_data[i];
 	}
 
-	delete[] _dynamic_data;
+	if constexpr (simple) {
+		delete[] reinterpret_cast<char*>(_dynamic_data);
+	} else {
+		delete[] _dynamic_data;
+	}
 	_dynamic_data = new_data;
 	_capacity     = new_capacity;
 }
@@ -459,15 +484,15 @@ public:
 		T*     new_buffer   = new T[new_capacity];
 		if (_buffer) {
 			for (size_t i = 0; i < base::capacity(); ++i) {
-				new_buffer[i]                    = _buffer[i];
+				new_buffer[i]     = _buffer[i];
 				// copy temp
-				new_buffer[i + base::capacity()] = _buffer[i + base::capacity()];
+				new_buffer[i + n] = _buffer[i + base::capacity()];
 			}
 			delete[] _buffer;
 		}
-		for (size_t i = base::capacity(); i < new_capacity / 2; ++i) {
-			new_buffer[i]                    = _initialValue;
-			new_buffer[i + base::capacity()] = _nullValue;
+		for (size_t i = base::capacity(); i < n; ++i) {
+			new_buffer[i]     = _initialValue;
+			new_buffer[i + n] = _nullValue;
 		}
 
 		_buffer = new_buffer;

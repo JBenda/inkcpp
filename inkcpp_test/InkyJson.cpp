@@ -19,8 +19,8 @@ SCENARIO("run inklecate 1.1.1 story")
 	{
 		auto input_file = std::string(INK_TEST_RESOURCE_DIR "simple-1.1.1-") + compiler + ".json";
 		ink::compiler::run(input_file.c_str(), "simple.bin");
-		auto   ink    = story::from_file("simple.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file("simple.bin")};
+		runner                 thread = ink->new_runner();
 
 		THEN("Expect normal output")
 		{
