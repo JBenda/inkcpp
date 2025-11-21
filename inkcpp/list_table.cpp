@@ -112,7 +112,7 @@ void list_table::gc()
 	_list_handouts.clear();
 }
 
-int list_table::toFid(list_flag e) const { return listBegin(e.list_id) + e.flag; }
+size_t list_table::toFid(list_flag e) const { return listBegin(e.list_id) + e.flag; }
 
 size_t list_table::stringLen(const list_flag& e) const { return c_str_len(toString(e)); }
 
@@ -431,7 +431,7 @@ list_table::list list_table::sub(list arg, int n)
 			for (int j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(l, j)) {
 					int value = _flag_values[j] - n;
-					for (int k = j - 1; k >= listBegin(i); --k) {
+					for (size_t k = j - 1; k >= listBegin(i) && k != ~0U; --k) {
 						if (_flag_values[k] == value) {
 							setFlag(o, k);
 							has_flag = true;

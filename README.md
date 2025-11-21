@@ -49,7 +49,7 @@ Alternativly is the latest version of the UE plugin can be downloaded from the [
 Place the content of this file at your plugin folder of your UE project and at the next start up it will be intigrated.
 
 
-A example project can be found [here](https://jbenda.github.io/inkcpp/unreal/InkCPP_DEMO.zip). And here the [Documentation](https://jbenda.github.io/inkcpp/html/group__unreal.html). 
+A example project can be found [here](https://jbenda.github.io/inkcpp/unreal/InkCPP_DEMO.zip). And here the [Documentation](https://jbenda.github.io/inkcpp/html/group__unreal.html).
 
 Code for the Unreal plugin is located in the `unreal` directory. In order to install it, run
 ```sh
@@ -104,6 +104,7 @@ Instructions:
 #include <ink/story.h>
 #include <ink/runner.h>
 #include <ink/choice.h>
+#include <memory.h>
 
 using namespace ink::runtime;
 
@@ -112,7 +113,7 @@ int MyInkFunction(int a, int b) { return a + b; }
 ...
 
 // Load ink binary story, generated from the inkCPP compiler
-story* myInk = story::from_file("test.bin");
+std::unique_ptr<story> myInk{story::from_file("test.bin")};
 
 // Create a new thread
 runner thread = myInk->new_runner();
@@ -208,6 +209,6 @@ The python bindnigs are defined in `inkcpp_python` subfolder.
 ## Dependencies
 The compiler depends on Nlohmann's JSON library and the C++ STL.
 
-The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators and `std::string` support. If `INK_ENABLE_UNREAL`, then FStrings, Delegates and other Unreal classes will be supported. 
+The runtime does not depend on either. If `INK_ENABLE_STL` is defined then STL extensions are added such as stream operators and `std::string` support. If `INK_ENABLE_UNREAL`, then FStrings, Delegates and other Unreal classes will be supported.
 
 NOTE: There is still some lingering C standard library calls in the runtime. I will be guarding them with an `INK_ENABLE_CSTD` or something soon.

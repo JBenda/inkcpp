@@ -12,7 +12,7 @@ SCENARIO("a story with external functions and glue", "[external]")
 {
 	GIVEN("the story")
 	{
-		auto ink = story::from_file(INK_TEST_RESOURCE_DIR "LookaheadSafe.bin");
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "LookaheadSafe.bin")};
 
 		int  cnt = 0;
 		auto foo = [&cnt]() {

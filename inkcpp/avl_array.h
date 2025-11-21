@@ -208,6 +208,9 @@ public:
 			delete[] val_;
 			delete[] balance_;
 			delete[] child_;
+			if (parent_) {
+				delete[] parent_;
+			}
 		}
 	}
 
