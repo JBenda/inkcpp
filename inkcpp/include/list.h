@@ -48,6 +48,7 @@ public:
 	{
 	}
 
+	virtual list_interface& operator=(const list_interface&) = default;
 	virtual ~list_interface() {}
 
 	/** iterater for flags in a list
@@ -120,8 +121,6 @@ public:
 
 		iterator& operator=(const iterator&) = delete;
 	};
-
-#pragma warning(pop)
 
 
 #pragma warning(push)
@@ -197,9 +196,8 @@ protected:
 	/** @private */
 	internal::list_table* _list_table;
 	int                   _list;
-#pragma warning(push)
-#pragma warning(disable : 4820, justification : "4 byte aligment free on 64-bit systems")
 };
 
-#pragma warning(pop)
 } // namespace ink::runtime
+
+#pragma warning(pop)

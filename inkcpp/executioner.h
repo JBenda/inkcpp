@@ -82,7 +82,7 @@ namespace ink::runtime::internal {
 	public:
 		static constexpr bool enabled = false;
 		template<typename T>
-		typed_executer(const T& t) {}
+		typed_executer(const T&) {}
 
 		void operator()(value_type, basic_eval_stack&, value*) {
 			inkFail("Operation for value not supported!");
@@ -144,7 +144,7 @@ namespace ink::runtime::internal {
 	class executer_imp<Command::OP_END> {
 	public:
 		template<typename T>
-		executer_imp(const T& t) {}
+		executer_imp(const T&) {}
 		void operator()(Command, basic_eval_stack&) {
 			inkFail("requested command was not found!");
 		}

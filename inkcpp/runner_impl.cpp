@@ -35,7 +35,7 @@ const choice* runner_interface::get_choice(size_t index) const
 	return begin() + index;
 }
 
-size_t runner_interface::num_choices() const { return end() - begin(); }
+size_t runner_interface::num_choices() const { return static_cast<size_t>(end() - begin()); }
 } // namespace ink::runtime
 
 namespace ink::runtime::internal
@@ -404,7 +404,7 @@ void runner_impl::start_frame(uint32_t target)
 	}
 	// Push next address onto the callstack
 	{
-		size_t address = _ptr - _story->instructions();
+		offset_t address = static_cast<offset_t>(_ptr - _story->instructions());
 		_stack.push_frame<type>(address, _evaluation_mode);
 		_ref_stack.push_frame<type>(address, _evaluation_mode);
 	}
@@ -472,7 +472,7 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _choices()
     , _tags_begin(0, ~0)
     , _container(ContainerData{})
-    , _rng(time(NULL))
+    , _rng(static_cast<uint32_t>(time(NULL)))
 {
 
 
@@ -517,7 +517,7 @@ runner_impl::line_type runner_impl::getline()
 
 	// Fall through the fallback choice, if available
 	if (! has_choices() && _fallback_choice) {
-		choose(~0);
+		choose(~0U);
 	}
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 
@@ -665,7 +665,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 		ptr += _fallback_choice.value().snap(data ? ptr : nullptr, snapper);
 	}
 	ptr += _choices.snap(data ? ptr : nullptr, snapper);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& loader)
@@ -715,7 +715,7 @@ const char* runner_impl::getline_alloc()
 	advance_line();
 	const char* res = _output.get_alloc(_globals->strings(), _globals->lists());
 	if (! has_choices() && _fallback_choice) {
-		choose(~0);
+		choose(~0U);
 	}
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	return res;
@@ -778,7 +778,7 @@ bool runner_impl::line_step()
 
 		// Step the interpreter until we've parsed all tags for the line
 		_entered_global  = true;
-		_current_knot_id = ~0;
+		_current_knot_id = ~0U;
 		_entered_knot    = false;
 	}
 	// Step the interpreter
@@ -1158,10 +1158,10 @@ void runner_impl::step()
 					// TODO We push ahead of a single divert. Is that correct in all cases....?????
 					auto returnTo = _ptr + CommandSize<uint32_t>;
 					_stack.push_frame<frame_type::thread>(
-					    returnTo - _story->instructions(), _evaluation_mode
+					    static_cast<offset_t>(returnTo - _story->instructions()), _evaluation_mode
 					);
 					_ref_stack.push_frame<frame_type::thread>(
-					    returnTo - _story->instructions(), _evaluation_mode
+					    static_cast<offset_t>(returnTo - _story->instructions()), _evaluation_mode
 					);
 
 					// Fork a new thread on the callstack
@@ -1329,7 +1329,7 @@ void runner_impl::step()
 					//  been visited
 					if (flag & CommandFlag::CHOICE_IS_ONCE_ONLY) {
 						// Need to convert offset to container index
-						container_t destination = -1;
+						container_t destination = ~0U;
 						if (_story->get_container_id(_story->instructions() + path, destination)) {
 							// Ignore the choice if we've visited the destination before
 							if (_globals->visits(destination) > 0) {
@@ -1456,7 +1456,9 @@ void runner_impl::step()
 					//  iteration loop. I don't feel like replicating that right now.
 					// So, let's just return a random number and *shrug*
 					int sequenceLength = _eval.pop().get<value_type::int32>();
-					int index          = _eval.pop().get<value_type::int32>();
+					/* shuffel index */
+					_eval.pop();
+					
 
 					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
 					);
@@ -1620,7 +1622,7 @@ void runner_impl::restore()
 	_tags_begin.restore();
 	_evaluation_mode        = _saved_evaluation_mode;
 	_current_knot_id        = _current_knot_id_backup;
-	_current_knot_id_backup = ~0;
+	_current_knot_id_backup = ~0U;
 	// Not doing this anymore. There can be lingering stack entries from function returns
 	// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
 
@@ -1644,7 +1646,7 @@ void runner_impl::forget()
 	_choices.forgett();
 	_tags.forgett();
 	_tags_begin.forget();
-	_current_knot_id_backup = ~0;
+	_current_knot_id_backup = ~0U;
 	// Nothing to do for eval stack. It should just stay as it is
 
 	_saved = false;

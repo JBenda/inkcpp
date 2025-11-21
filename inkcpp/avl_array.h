@@ -44,8 +44,6 @@
 
 #include "system.h"
 
-#include <cstdint>
-
 /**
  * \param Key The key type. The type (class) must provide a 'less than' and 'equal to' operator
  * \param T The Data type
@@ -72,7 +70,7 @@ class avl_array
 	ink::runtime::internal::if_t<dynamic, std::int8_t*, std::int8_t[Size]> balance_;
 	ink::runtime::internal::if_t<dynamic, child_type*, child_type[Size]>   child_;
 	size_type                                                              size_; // actual size
-	size_t                                                                 _capacity;
+	size_type                                                              _capacity;
 	size_type                                                              root_; // root node
 	ink::runtime::internal::if_t<dynamic, size_type*, size_type[Fast ? Size : 1]> parent_;
 
@@ -130,7 +128,7 @@ class avl_array
 		// returns unique number for each entry
 		// the numbers are unique as long no operation are executed
 		// on the avl
-		inline size_t temp_identifier() const { return instance_->size() - idx_ - 1; }
+		inline size_type temp_identifier() const { return instance_->size() - idx_ - 1; }
 
 		// preincrement
 		tag_avl_array_iterator& operator++()
@@ -260,7 +258,7 @@ public:
 
 	void extend()
 	{
-		size_t new_size = _capacity * 1.5;
+		size_type new_size = _capacity + _capacity / 2;
 		if (new_size < 5) {
 			new_size = 5;
 		}

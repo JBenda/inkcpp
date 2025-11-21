@@ -33,7 +33,7 @@ void basic_stream::initelize_data(value* buffer, size_t size)
 	_max  = size;
 }
 
-void basic_stream::overflow(value*& buffer, size_t& size, size_t target)
+void basic_stream::overflow(value*&, size_t&, size_t)
 {
 	inkFail("Stack overflow!");
 }
@@ -146,7 +146,6 @@ inline bool get_next(const value* list, size_t i, size_t size, const value** nex
 {
 	while (i + 1 < size) {
 		*next           = &list[i + 1];
-		value_type type = (*next)->type();
 		if ((*next)->printable()) {
 			return true;
 		}
@@ -157,7 +156,7 @@ inline bool get_next(const value* list, size_t i, size_t size, const value** nex
 }
 
 template<typename T>
-void basic_stream::copy_string(const char* str, size_t& dataIter, T& output)
+void basic_stream::copy_string(const char* str, size_t&, T& output)
 {
 	while (*str != 0) {
 		write_char(output, *str++);
@@ -274,7 +273,7 @@ size_t basic_stream::find_first_of(value_type type, size_t offset /*= 0*/) const
 size_t basic_stream::find_last_of(value_type type, size_t offset /*= 0*/) const
 {
 	if (_size == 0)
-		return -1;
+		return ~0U;
 
 	// Special case to make the reverse loop easier
 	if (_size == 1 && offset == 0)
@@ -364,7 +363,7 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			case value_type::uint32:
 			case value_type::boolean:
 				// Convert to string and advance
-				toStr(ptr, end - ptr, _data[i]);
+				toStr(ptr, static_cast<size_t>(end - ptr), _data[i]);
 				while (*ptr != 0)
 					ptr++;
 
@@ -530,7 +529,7 @@ size_t basic_stream::snap(unsigned char* data, const snapper& snapper) const
 	for (auto itr = _data; itr != _data + _size; ++itr) {
 		ptr += itr->snap(data ? ptr : nullptr, snapper);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* basic_stream::snap_load(const unsigned char* ptr, const loader& loader)

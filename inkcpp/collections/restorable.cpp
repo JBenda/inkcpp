@@ -51,7 +51,7 @@ size_t restorable<entry>::snap(unsigned char* data, const snapper& snapper) cons
 		ptr = snap_write(ptr, _buffer[i].name, data != nullptr);
 		ptr += _buffer[i].data.snap(data ? ptr : nullptr, snapper);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 template<>
@@ -63,7 +63,7 @@ size_t restorable<value>::snap(unsigned char* data, const snapper& snapper) cons
 	for (size_t i = 0; i < max; ++i) {
 		ptr += _buffer[i].snap(data ? ptr : nullptr, snapper);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 template<>
@@ -75,7 +75,7 @@ size_t restorable<int>::snap(unsigned char* data, const snapper&) const
 	for (size_t i = 0; i < max; ++i) {
 		ptr = snap_write(ptr, _buffer[i], data != nullptr);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 template<>
@@ -108,7 +108,7 @@ const unsigned char* restorable<value>::snap_load(const unsigned char* ptr, cons
 }
 
 template<>
-const unsigned char* restorable<int>::snap_load(const unsigned char* ptr, const loader& loader)
+const unsigned char* restorable<int>::snap_load(const unsigned char* ptr, const loader&)
 {
 	size_t max;
 	ptr = snap_load_base(ptr, _pos, _jump, _save, max);

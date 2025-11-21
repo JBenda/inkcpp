@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include "system.h"
+
 #include <cstring>
 
 namespace ink::runtime::internal

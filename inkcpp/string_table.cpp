@@ -107,7 +107,7 @@ size_t string_table::snap(unsigned char* data, const snapper&) const
 	for (size_t i = 0; i < _table.size(); ++i) {
 		for (auto itr = _table.begin(); itr != _table.end(); ++itr) {
 			if (itr.temp_identifier() == i) {
-				size_t length = strlen(itr.key()) + 1;
+				size_t length = static_cast<size_t>(strlen(itr.key())) + 1;
 				if (length == 1) {
 					ptr = snap_write(ptr, EMPTY_STRING, 2, should_write);
 				} else {
@@ -118,13 +118,12 @@ size_t string_table::snap(unsigned char* data, const snapper&) const
 		}
 	}
 	ptr = snap_write(ptr, "\0", 1, should_write);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* string_table::snap_load(const unsigned char* data, const loader& loader)
 {
 	auto* ptr = data;
-	int   i   = 0;
 	while (*ptr) {
 		size_t len = 0;
 		for (; ptr[len]; ++len)

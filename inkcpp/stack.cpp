@@ -47,7 +47,7 @@ namespace ink::runtime::internal
 			if (skip != ~0) {
 				// Stop if we get to the start of the thread block
 				if (e.data.type() == value_type::thread_start && skip == e.data.get<value_type::thread_start>().jump) {
-					skip = ~0;
+					skip = ~0U;
 				}
 
 				// Don't return anything in the hidden thread block
@@ -77,7 +77,7 @@ namespace ink::runtime::internal
 		}
 	private:
 		hash_t _name;
-		thread_t _skip = ~0;
+		thread_t _skip = ~0U;
 		uint32_t _jumping = 0;
 	};
 	class reverse_find_from_frame_predicat_operator {
@@ -96,7 +96,7 @@ namespace ink::runtime::internal
 		int _ci;
 		int _current_frame = 0;
 		hash_t _name;
-		thread_t _skip = ~0;
+		thread_t _skip = ~0U;
 		uint32_t _jumping = 0;
 	};
 
@@ -270,7 +270,7 @@ namespace ink::runtime::internal
 				if (frame->data.type() == value_type::thread_end)
 				{
 					// Push a new jump marker after the thread end
-					entry& jump = push({ InvalidHash, value{}.set<value_type::jump_marker>(0u,0u) });
+					push({ InvalidHash, value{}.set<value_type::jump_marker>(0u,0u) });
 
 					// Do a pop back
 					returnedFrame = do_thread_jump_pop(base::begin());
@@ -326,7 +326,7 @@ namespace ink::runtime::internal
 			return false;
 
 		uint32_t jumping = 0;
-		uint32_t thread = ~0;
+		uint32_t thread = ~0U;
 		// Search in reverse for a stack frame
 		const entry* frame = base::reverse_find([&jumping, &thread](const entry& elem) {
 			// If we're jumping over data, just keep returning false until we're done
@@ -340,9 +340,9 @@ namespace ink::runtime::internal
 				return false;
 
 			// If we're skipping over a thread, wait until we hit its start before checking
-			if (thread != ~0) {
+			if (thread != ~0U) {
 				if (elem.data.type() == value_type::thread_start && elem.data.get<value_type::thread_start>().jump == thread)
-					thread = ~0;
+					thread = ~0U;
 
 				return false;
 			}
@@ -393,7 +393,7 @@ namespace ink::runtime::internal
 		thread_t new_thread = _next_thread++;
 
 		// Push a thread start marker here
-		entry& thread_entry = add(InvalidHash, value{}.set<value_type::thread_start>(new_thread, 0u));
+		add(InvalidHash, value{}.set<value_type::thread_start>(new_thread, 0u));
 
 		// Set stack jump counter for thread to 0. This number is used if the thread ever
 		//  tries to pop past its origin. It keeps track of how much of the preceeding stack it's popped back
@@ -427,7 +427,7 @@ namespace ink::runtime::internal
 		}
 
 		// Now, start iterating backwards
-		thread_t nulling = ~0;
+		thread_t nulling = ~0U;
 		uint32_t jumping = 0;
 		base::reverse_for_each([&nulling, &jumping](entry& elem) {
 			if (jumping > 0) {
@@ -445,10 +445,10 @@ namespace ink::runtime::internal
 			}
 
 			// If we're deleting a useless thread block
-			if (nulling != ~0) {
+			if (nulling != ~0U) {
 				// If this is the start of the block, stop deleting
 				if (elem.name == InvalidHash && elem.data.type() == value_type::thread_start && elem.data.get<value_type::thread_start>().jump == nulling) {
-					nulling = ~0;
+					nulling = ~0U;
 				}
 
 				// delete data
@@ -496,7 +496,7 @@ namespace ink::runtime::internal
 
 	void basic_stack::forget()
 	{
-		base::forget([](entry& elem) { elem.name = ~0; });
+		base::forget([](entry& elem) { elem.name = ~0U; });
 	}
 
 	entry& basic_stack::add(hash_t name, const value& val)
@@ -522,7 +522,7 @@ namespace ink::runtime::internal
 
 	const value& basic_eval_stack::top() const
 	{
-		return base::top([](const value& v){ return false; });
+		return base::top([](const value&){ return false; });
 	}
 
 	const value& basic_eval_stack::top_value() const 
@@ -605,7 +605,7 @@ namespace ink::runtime::internal
 		ptr = snap_write(ptr, _next_thread, should_write );
 		ptr = snap_write(ptr, _backup_next_thread, should_write );
 		ptr += base::snap(data ? ptr : nullptr, snapper);
-		return ptr - data;
+		return static_cast<size_t>(ptr - data);
 	}
 
 	const unsigned char* basic_stack::snap_load(const unsigned char* ptr, const loader& loader)
