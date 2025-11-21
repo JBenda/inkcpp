@@ -132,11 +132,13 @@ public:
 	// move to path
 	virtual bool move_to(hash_t path) override;
 
+#if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 	// Gets a single line of output
 	virtual line_type getline() override;
 
 	// get all into string
 	virtual line_type getall() override;
+#endif
 
 #ifdef INK_ENABLE_STL
 	// Reads a line into a std::ostream

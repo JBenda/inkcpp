@@ -143,11 +143,10 @@ public:
 	story_ptr<U> cast()
 	{
 		// if cast fails, return null
-#ifdef INK_ENABLE_UNREAL
-		// Unreal disables RTTI
-		U* casted = reinterpret_cast<U*>(_ptr);
-#else
+#ifdef INK_ENABLE_RTTI
 		U* casted = dynamic_cast<U*>(_ptr);
+#else
+		U* casted = reinterpret_cast<U*>(_ptr);
 #endif
 		if (casted == nullptr)
 			return nullptr;
