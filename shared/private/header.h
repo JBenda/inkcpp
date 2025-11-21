@@ -112,5 +112,8 @@ namespace ink::internal {
 
 			/// Check to see if this is a knot container.
 			bool knot() const { return _flags & uint8_t(CommandFlag::CONTAINER_MARKER_IS_KNOT); }
+
+			/// Check to see if this is a container which tracks visits.
+			bool visit() const { return _flags & uint8_t(CommandFlag::CONTAINER_MARKER_TRACK_VISITS); }
 		};
 }

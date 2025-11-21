@@ -300,6 +300,10 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (dest == _ptr)
 		return;
 
+	// Discard old stack, preserving save region.
+	while (!_container.empty())
+		_container.pop();
+
 	// Record location and jump.
 	const uint32_t current_offset = _ptr - _story->instructions();
 	_ptr = dest;
@@ -312,68 +316,54 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (dest_id == ~0)
 		return;
 
-	// Count stack depth and assemble stack in reverse order by traversing container tree.
-	container_t stack[64];
-	uint32_t depth = 0;
-	for (container_t id = dest_id; id != ~0; id = _story->container_data(id)._parent) {
-		inkAssert(depth < 64);
-		stack[depth++] = id;
-	}
-
-	// Discard existing stack, preserving save region.
-	while (!_container.empty())
-		_container.pop();
-
 	// Are we entering the new container at its start?
 	using container_data_t = ink::internal::container_data_t;
 	const container_data_t& dest_container = _story->container_data(dest_id);
-	const bool jump_to_start = dest_offset == dest_container._start_offset;
-
-	// Build stack and record any new knots we enter.
-	// If we jump directly to the start of a container, don't update it (last on the stack) and process it below.
-	for (uint32_t d = 0; d < depth - jump_to_start; ++d)
-	{
-		// Read temporary stack in forward order.
-		const container_t id = stack[depth-1-d];
-
-		// Push container onto stack.
-		_container.push(id);
-
-		// Named knots/stitches need special handling - their visit counts are updated wherever the story enters them,
-		// and we generally need to know which knot we're in, for tagging, unless we're jumping to a tunnel or similar
-		// which suppresses knot tracking.
-		if (track_knot_visit) {
-			// If this is a knot that we previously weren't in, record the new visit.
-			const container_data_t& container = _story->container_data(id);
-			if (container.knot() && !container.contains(current_offset)) {
-				// Record visit count
-				if (record_visits)
-					_globals->visit(id);
-
-				// Update current knot, the knot closest to the top of the stack will end up current.
-				_current_knot_id = id;
-				_entered_knot = true;
-			}
+	if (dest_offset == dest_container._start_offset) {
+		// Record direct jump to non-knot if requested. (Knots handled below.)
+		if (record_visits && !dest_container.knot()) {
+			_globals->visit(dest_id);
 		}
+
+		// Consume instruction so we don't process it again during normal flow. (We need to do this here to know if it should be tracked or not.)
+		_ptr += 6;
 	}
 
-	// Finally, if we're jumping to the start of a container, enter it while we have the context to do so.
-	if (jump_to_start) {
-		// Add to top of stack
-		_container.push(dest_id);
+	// Assemble temp stack in reverse order by traversing container tree.
+	container_t stack[abs(config::limitContainerDepth)];
+	uint32_t depth = 0;
+	for (container_t id = dest_id; id != ~0; /* advance in body */) {
+		// Append to stack.
+		inkAssert(depth < abs(config::limitContainerDepth));
+		stack[depth++] = id;
 
-		// Record visit
-		if (record_visits)
-			_globals->visit(dest_id);
+		// Find container for this ID.
+		const container_data_t& container = _story->container_data(id);
 
-		// Record knot, if
-		if (track_knot_visit && dest_container.knot()) {
-			_current_knot_id = dest_id;
-			_entered_knot = true;
+		// Is this a new knot?
+		if (container.knot() && !container.contains(current_offset)) {
+			// Named knots/stitches need special handling - their visit counts are updated wherever the story enters them,
+			//	and we generally need to know which knot we're in, for tagging, unless we're jumping to a tunnel or similar
+			// which suppresses knot tracking.
+			if (record_visits) {
+				_globals->visit(id);
+			}
+
+			// If tracking, update with the first knot we encounter, which is the one closest to the top of the new stack.
+			if (track_knot_visit) {
+				_current_knot_id = id;
+				_entered_knot = true;
+				track_knot_visit = false;
+			}
 		}
 
-		// Consume instruction so we don't process it again during normal flow.
-		_ptr += 6;
+		// Next one.
+		id = container._parent;
+	}
+
+	// Reverse order onto final stack.
+	for (uint32_t d = 0; d < depth; ++d) {
+		_container.push(stack[depth-1-d]);
 	}
 }
 
