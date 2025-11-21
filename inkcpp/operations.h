@@ -88,8 +88,11 @@ ink::runtime::internal::value
 {
 	if (type() != oth.type()) {
 
-		const value vs[] = { *this, oth };
-		inkAssert(casting::common_base<2>(vs) != value_type::none, "try to redefine value of other type with no cast available");
+		const value vs[] = {*this, oth};
+		inkAssert(
+			casting::common_base<2>(vs) != value_type::none, 
+			"try to redefine value of other type with no cast available"
+		);
 
 		// There's a valid conversion, so redefine as input value.
 		return oth;
