@@ -83,7 +83,7 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 	// write lookup table
 	ptr += sizeof(header);
 	{
-		size_t offset = (ptr - data) + (_header.num_runners + 1) * sizeof(size_t);
+		size_t offset = static_cast<size_t>((ptr - data) + (_header.num_runners + 1) * sizeof(size_t));
 		memcpy(ptr, &offset, sizeof(offset));
 		ptr += sizeof(offset);
 		offset += globals.snap(nullptr, snapper);
@@ -128,7 +128,7 @@ size_t snap_choice::snap(unsigned char* data, const snapper& snapper) const
 		ptr                         = snap_write(ptr, offset_end, should_write);
 	}
 	ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* snap_choice::snap_load(const unsigned char* data, const loader& loader)
@@ -167,7 +167,7 @@ size_t snap_tag::snap(unsigned char* data, const snapper& snapper) const
 		ptr       = snap_write(ptr, true, should_write);
 		ptr       = snap_write(ptr, id, should_write);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* snap_tag::snap_load(const unsigned char* data, const loader& loader)

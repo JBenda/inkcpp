@@ -47,7 +47,10 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_INSTALL_LIBRARY_DIR lib)
 SET(CMAKE_INSTALL_INCLUDE_DIR include)
 if (MSVC)
-    add_compile_options(/Wall /wd4820)
+		# disable:
+		#  aligment problems
+		#  non explicit switch case
+    add_compile_options(/W4 /wd4820 /wd4061)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()

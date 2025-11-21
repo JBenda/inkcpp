@@ -77,9 +77,10 @@ public:
 			flag.flag    = -1;
 			return flag;
 		}
-		for (int i = listBegin(flag.list_id); i < _list_end[static_cast<size_t>(flag.list_id)]; ++i) {
-			if (_flag_values[static_cast<size_t>(i)] == flag.flag) {
-				flag.flag = static_cast<int16_t>(i - listBegin(flag.list_id));
+		inkAssert(flag.list_id >= 0);
+		for (size_t i = listBegin(static_cast<size_t>(flag.list_id)); i < _list_end[static_cast<size_t>(flag.list_id)]; ++i) {
+			if (_flag_values[i] == flag.flag) {
+				flag.flag = static_cast<int16_t>(i - listBegin(static_cast<size_t>(flag.list_id)));
 				return flag;
 			}
 		}
@@ -89,7 +90,8 @@ public:
 
 	int get_flag_value(list_flag flag) const
 	{
-		return _flag_values[static_cast<size_t>(listBegin(flag.list_id) + flag.flag)];
+		inkAssert(flag.list_id >= 0 && flag.flag >= 0);
+		return _flag_values[listBegin(static_cast<size_t>(flag.list_id)) + static_cast<size_t>(flag.flag)];
 	}
 
 	/// zeros all usage values
@@ -259,7 +261,7 @@ private:
 	void                    copy_lists(const data_t* src, data_t* dst);
 	static constexpr size_t bits_per_data = sizeof(data_t) * 8U;
 
-	size_t listBegin(int lid) const { return lid == 0 ? 0 : _list_end[static_cast<size_t>(lid - 1)]; }
+	size_t listBegin(size_t lid) const { return lid == 0 ? 0 : _list_end[static_cast<size_t>(lid - 1)]; }
 
 	const data_t* getPtr(int eid) const
 	{
@@ -281,14 +283,14 @@ private:
 
 	size_t numLists() const { return _list_end.size(); }
 
-	bool getBit(const data_t* data, int id) const
+	bool getBit(const data_t* data, size_t id) const
 	{
 		return data[id / bits_per_data] & (0x01 << (bits_per_data - 1 - (id % bits_per_data)));
 	}
 
-	void setBit(data_t* data, int id, bool value = true)
+	void setBit(data_t* data, size_t id, bool value = true)
 	{
-		data_t mask = 0x01 << (bits_per_data - 1 - (id % bits_per_data));
+		data_t mask = 0x01U << (bits_per_data - 1U - (id % bits_per_data));
 		if (value) {
 			data[id / bits_per_data] |= mask;
 		} else {
@@ -296,21 +298,30 @@ private:
 		}
 	}
 
-	bool hasList(const data_t* data, int lid) const { return getBit(data, lid); }
+	bool hasList(const data_t* data, int lid) const { 
+		if (lid < 0) {
+			return false;
+		 }
+		return getBit(data, static_cast<size_t>(lid)); 
+	}
 
 	void setList(data_t* data, int lid, bool value = true)
 	{
 		if (lid >= 0) {
-			setBit(data, lid, value);
+			setBit(data, static_cast<size_t>(lid), value);
 		}
 	}
 
-	bool hasFlag(const data_t* data, int fid) const { return getBit(data, fid + numLists()); }
+	bool hasFlag(const data_t* data, int fid) const { 
+		if (fid < 0) {
+			return false;
+		 }
+		return getBit(data, static_cast<size_t>(fid) + numLists()); }
 
 	void setFlag(data_t* data, int fid, bool value = true)
 	{
 		if (fid >= 0) {
-			setBit(data, fid + numLists(), value);
+			setBit(data, static_cast<size_t>(fid) + numLists(), value);
 		}
 	}
 
@@ -372,13 +383,14 @@ public:
 		 */
 		void carry()
 		{
-			if (_pos.flag.flag
+			if (_pos.flag.flag < 0 || _pos.flag.list_id < 0) { return; }
+			if (static_cast<size_t>(_pos.flag.flag)
 			    == _list._list_end[static_cast<size_t>(_pos.flag.list_id)]
 			           - _list.listBegin(static_cast<size_t>(_pos.flag.list_id))) {
 				_pos.flag.flag = 0;
 				++_pos.flag.list_id;
 			}
-			if (_pos.flag.list_id == _list.numLists()) {
+			if (static_cast<size_t>(_pos.flag.list_id) == _list.numLists()) {
 				_pos.flag = null_flag;
 			} else {
 				_pos.name = _list._flag_names[_list.toFid(_pos.flag)];
@@ -390,7 +402,7 @@ public:
 			bool valid;
 			do {
 				valid   = true;
-				int fid = _list.toFid(_pos.flag);
+				size_t fid = _list.toFid(_pos.flag);
 				if (_data == nullptr) {
 					if (_list._flag_names[fid] == nullptr) {
 						valid = false;
@@ -399,7 +411,7 @@ public:
 				} else if (! _list.hasList(_data, _pos.flag.list_id)) {
 					valid = false;
 					++_pos.flag.list_id;
-				} else if (! _list.hasFlag(_data, fid) || _list._flag_names[fid] == nullptr) {
+				} else if (! _list.hasFlag(_data, static_cast<int>(fid)) || _list._flag_names[fid] == nullptr) {
 					valid = false;
 					++_pos.flag.flag;
 				}

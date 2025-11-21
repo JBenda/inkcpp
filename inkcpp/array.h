@@ -28,9 +28,9 @@ class managed_array : public snapshot_interface
 {
 public:
 	managed_array()
-	    : _static_data{}
-	    , _capacity{initialCapacity}
+	    : _capacity{initialCapacity}
 	    , _size{0}
+	    , _static_data{}
 	{
 		if constexpr (dynamic) {
 			if constexpr (simple) {
@@ -162,7 +162,7 @@ public:
 				ptr = snap_write(ptr, e, should_write);
 			}
 		}
-		return ptr - data;
+		return static_cast<size_t>(ptr - data);
 	}
 
 	const unsigned char* snap_load(const unsigned char* ptr, const loader& loader)
@@ -235,7 +235,7 @@ public:
 		bool           should_write = data != nullptr;
 		ptr += base::snap(ptr, snapper);
 		ptr = base::snap_write(ptr, _last_size, should_write);
-		return ptr - data;
+		return static_cast<size_t>(ptr - data);
 	}
 
 	const unsigned char* snap_load(const unsigned char* ptr, const snapshot_interface::loader& loader)
@@ -253,7 +253,7 @@ template<typename T, bool dynamic, size_t initialCapacity, bool simple>
 void managed_array<T, dynamic, initialCapacity, simple>::extend(size_t capacity)
 {
 	static_assert(dynamic, "Can only extend if array is dynamic!");
-	size_t new_capacity = capacity > _capacity ? capacity : 1.5f * _capacity;
+	size_t new_capacity = capacity > _capacity ? capacity : _capacity + _capacity / 2U;
 	if (new_capacity < 5) {
 		new_capacity = 5;
 	}
@@ -514,7 +514,7 @@ private:
 };
 
 template<typename T>
-inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper& snapper) const
+inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper&) const
 {
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
@@ -525,12 +525,12 @@ inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper
 		ptr = snap_write(ptr, _array[i], should_write);
 		ptr = snap_write(ptr, _temp[i], should_write);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 template<typename T>
 inline const unsigned char*
-    basic_restorable_array<T>::snap_load(const unsigned char* data, const loader& loader)
+    basic_restorable_array<T>::snap_load(const unsigned char* data, const loader&)
 {
 	auto ptr = data;
 	ptr      = snap_read(ptr, _saved);

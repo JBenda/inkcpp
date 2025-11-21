@@ -20,7 +20,7 @@ namespace ink
 				constexpr byte_t ZERO = 0;
 				size_t len;
 				if(value.length()) {
-					len = write((const byte_t*)value.c_str(), value.length());
+					len = write(reinterpret_cast<const byte_t*>(value.c_str()), static_cast<size_t>(value.length()));
 				} else {
 					len = write(' ');
 				}
@@ -48,7 +48,7 @@ namespace ink
 				}
 
 				// Check how much space we have left
-				size_t slab_remaining = _currentSlab + DATA_SIZE - _ptr;
+				size_t slab_remaining = static_cast<size_t>(_currentSlab + DATA_SIZE - _ptr);
 
 				// If we're out of space...
 				if (slab_remaining < len)
@@ -93,7 +93,7 @@ namespace ink
 					return 0;
 
 				// Each slabs is size DATA_SIZE then add the position in the current slab
-				return _slabs.size() * DATA_SIZE + (_ptr - _currentSlab);
+				return static_cast<size_t>(_slabs.size() * DATA_SIZE + (_ptr - _currentSlab));
 			}
 
 			void binary_stream::set(size_t offset, const byte_t* data, size_t len)

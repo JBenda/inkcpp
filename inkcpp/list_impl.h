@@ -21,7 +21,8 @@ public:
 	{
 	}
 
-	~list_impl() {}
+	list_impl& operator=(const list_impl&) = default;
+	~list_impl() override {}
 
 	int get_lid() const { return _list; }
 

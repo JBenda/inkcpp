@@ -16,7 +16,7 @@ namespace ink
 namespace runtime
 {
 
-	size_t choice::num_tags() const { return std::distance(_tags_start, _tags_end); }
+	size_t choice::num_tags() const { return static_cast<size_t>(std::distance(_tags_start, _tags_end)); }
 
 	const char* choice::get_tag(size_t index) const
 	{

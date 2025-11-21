@@ -91,8 +91,8 @@ public:
 	    : _buffer(buffer)
 	    , _size(size)
 	    , _pos(0)
-	    , _jump(~0)
-	    , _save(~0)
+	    , _jump(~0U)
+	    , _save(~0U)
 	{
 	}
 
@@ -130,7 +130,7 @@ public:
 		_pos = _save;
 
 		// Clear save point
-		_save = _jump = ~0;
+		_save = _jump = ~0U;
 	}
 
 	// Forget the save point and continue with the current data
@@ -150,7 +150,7 @@ public:
 		}
 
 		// Reset save position
-		_save = _jump = ~0;
+		_save = _jump = ~0U;
 	}
 
 	using iterator       = restorable_iter<ElementType>;
@@ -223,7 +223,7 @@ public:
 	void clear()
 	{
 		_pos  = 0;
-		_save = _jump = ~0;
+		_save = _jump = ~0U;
 	}
 
 	// Forward iterate
@@ -358,7 +358,7 @@ public:
 
 protected:
 	// Called when we run out of space in buffer.
-	virtual void overflow(ElementType*& buffer, size_t& size)
+	virtual void overflow(ElementType*&, size_t&)
 	{
 		inkFail("Restorable run out of memory!");
 	}

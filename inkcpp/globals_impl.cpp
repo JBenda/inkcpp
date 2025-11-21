@@ -267,7 +267,7 @@ size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
 	ptr += _strings.snap(data ? ptr : nullptr, snapper);
 	ptr += _lists.snap(data ? ptr : nullptr, snapper);
 	ptr += _variables.snap(data ? ptr : nullptr, snapper);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loader& loader)

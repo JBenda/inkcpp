@@ -152,7 +152,7 @@ int main(int argc, const char** argv)
 	}
 
 	// If input filename is an .ink file
-	int  val                   = inputFilename.find(".ink");
+	size_t  val                   = inputFilename.find(".ink");
 	bool json_file_is_tmp_file = false;
 	if (val == inputFilename.length() - 4) {
 		// Create temporary filename
@@ -229,7 +229,7 @@ int main(int argc, const char** argv)
 				std::cout << thread->getline();
 				if (thread->has_tags()) {
 					std::cout << "# tags: ";
-					for (int i = 0; i < thread->num_tags(); ++i) {
+					for (ink::size_t i = 0; i < thread->num_tags(); ++i) {
 						if (i != 0) {
 							std::cout << ", ";
 						}
@@ -247,7 +247,7 @@ int main(int argc, const char** argv)
 					std::cout << index++ << ": " << c.text();
 					if (! ommit_choice_tags && c.has_tags()) {
 						std::cout << "\n\t";
-						for (size_t i = 0; i < c.num_tags(); ++i) {
+						for (ink::size_t i = 0; i < c.num_tags(); ++i) {
 							std::cout << "# " << c.get_tag(i) << " ";
 						}
 					}

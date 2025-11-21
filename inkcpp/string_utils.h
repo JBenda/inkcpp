@@ -23,7 +23,7 @@ namespace ink::runtime::internal
 inline int toStr(char* buffer, size_t size, uint32_t value)
 {
 #ifdef WIN32
-	return _itoa_s(value, buffer, size, 10);
+	return _itoa_s(static_cast<int>(value), buffer, size, 10);
 #else
 	if (buffer == nullptr || size < 1) {
 		return EINVAL;
@@ -143,7 +143,7 @@ inline constexpr size_t value_length(const value& v)
 		case value_type::float32: return decimal_digits(v.get<value_type::float32>());
 		case value_type::string: return c_str_len(v.get<value_type::string>());
 		case value_type::newline: return 1;
-		default: inkFail("Can't determine length of this value type"); return -1;
+		default: inkFail("Can't determine length of this value type"); return ~0U;
 	}
 }
 
@@ -188,15 +188,22 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 	auto dst = begin;
 	for (auto src = begin; src != end; ++src) {
 		if (dst == begin) {
-			if (LEADING_SPACES && isspace(static_cast<unsigned char>(src[0]))) {
-				continue;
+			if constexpr (LEADING_SPACES) {
+				if (isspace(static_cast<unsigned char>(src[0]))) {
+					continue;
+				}
 			}
 		} else if (src[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
 			continue;
-		} else if ((isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n')
-		           && ((src + 1 == end && TAILING_SPACES)
-		               || ((src + 1 != end) && isspace(static_cast<unsigned char>(src[1]))))) {
-			continue;
+		} else if (isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n') {
+			if constexpr (TAILING_SPACES) {
+				if (src + 1 == end) {
+					continue;
+				}
+			}
+			if (src + 1 != end && isspace(static_cast<unsigned char>(src[1]))) {
+				continue;
+			}
 		} else if (src[0] == '\n' && dst != begin && dst[-1] == '\n') {
 			continue;
 		}
