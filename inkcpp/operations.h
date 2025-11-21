@@ -86,15 +86,13 @@ template<typename... T>
 ink::runtime::internal::value
     ink::runtime::internal::value::redefine(const value& oth, T&... env) const
 {
-	if (type() != oth.type() && (type() == value_type::list_flag || type() == value_type::list)
-	    && (oth.type() == value_type::list_flag || oth.type() == value_type::list)) {
-		/// @todo could break origin
-		if (oth.type() == value_type::list) {
-			return value{}.set<value_type::list>(oth.get<value_type::list>());
-		} else {
-			return value{}.set<value_type::list_flag>(oth.get<value_type::list_flag>());
-		}
+	if (type() != oth.type()) {
+
+		const value vs[] = { *this, oth };
+		inkAssert(casting::common_base<2>(vs) != value_type::none, "try to redefine value of other type with no cast available");
+
+		// There's a valid conversion, so redefine as input value.
+		return oth;
 	}
-	inkAssert(type() == oth.type(), "try to redefine value of other type");
 	return redefine<value_type::OP_BEGIN, T...>(oth, {&env...});
 }
