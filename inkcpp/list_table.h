@@ -256,7 +256,7 @@ public:
 	list_interface* handout_list(list);
 
 private:
-	void                 copy_lists(const data_t* src, data_t* dst);
+	void                    copy_lists(const data_t* src, data_t* dst);
 	static constexpr size_t bits_per_data = sizeof(data_t) * 8U;
 
 	size_t listBegin(int lid) const { return lid == 0 ? 0 : _list_end[static_cast<size_t>(lid - 1)]; }
@@ -317,21 +317,23 @@ private:
 	auto flagStartMask() const
 	{
 		struct {
-			size_t    segment;
+			size_t segment;
 			data_t mask;
 		} res{numLists() / bits_per_data, ~static_cast<data_t>(0) >> (numLists() % bits_per_data)};
 
 		return res;
 	}
 
-	template<typename T, int config>
+	template<typename T, int config, bool simple = false>
 	using managed_array = managed_array < T,
-	      config<0, abs(config)>;
+	      config<0, abs(config), simple>;
 
 	static constexpr long maxMemorySize
 	    = (config::maxListTypes < 0 || config::maxFlags < 0 || config::maxLists < 0 ? -1 : 1)
-	    * static_cast<long>(segmentsFromBits(abs(config::maxListTypes) + abs(config::maxFlags), sizeof(data_t))
-	    * static_cast<int>(abs(config::maxLists)));
+	    * static_cast<long>(
+	          segmentsFromBits(abs(config::maxListTypes) + abs(config::maxFlags), sizeof(data_t))
+	          * static_cast<int>(abs(config::maxLists))
+	    );
 
 	int                                    _entrySize; ///< entry size in data_t
 	// entries (created lists)
@@ -339,12 +341,12 @@ private:
 	managed_array<state, config::maxLists> _entry_state;
 
 	// defined list (meta data)
-	managed_array<size_t, config::maxListTypes>               _list_end;
-	managed_array<const char*, config::maxFlags>              _flag_names;
-	managed_array<int, config::maxFlags>                      _flag_values;
-	managed_array<const char*, config::maxListTypes>          _list_names;
+	managed_array<size_t, config::maxListTypes>                     _list_end;
+	managed_array<const char*, config::maxFlags>                    _flag_names;
+	managed_array<int, config::maxFlags>                            _flag_values;
+	managed_array<const char*, config::maxListTypes>                _list_names;
 	/// keep track over lists accessed with get_var, and clear then at gc time
-	managed_array<list_interface, config::limitEditableLists> _list_handouts;
+	managed_array<list_interface, config::limitEditableLists, true> _list_handouts;
 
 	bool _valid;
 
@@ -369,7 +371,8 @@ public:
 		void carry()
 		{
 			if (_pos.flag.flag
-			    == _list._list_end[static_cast<size_t>(_pos.flag.list_id)] - _list.listBegin(static_cast<size_t>(_pos.flag.list_id))) {
+			    == _list._list_end[static_cast<size_t>(_pos.flag.list_id)]
+			           - _list.listBegin(static_cast<size_t>(_pos.flag.list_id))) {
 				_pos.flag.flag = 0;
 				++_pos.flag.list_id;
 			}
@@ -407,8 +410,11 @@ public:
 		    : _list{o._list}
 		    , _data{o._data}
 		    , _pos{o._pos}
-		{}
+		{
+		}
+
 		named_flag_itr& operator=(const named_flag_itr&) = delete;
+
 		bool operator!=(const named_flag_itr& o) const { return _pos.flag != o._pos.flag; }
 
 		named_flag_itr(const list_table& list, const data_t* filter)

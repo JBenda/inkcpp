@@ -48,6 +48,8 @@ public:
 	{
 	}
 
+	virtual ~list_interface() {}
+
 	/** iterater for flags in a list
 	 * @todo implement `operator->`
 	 */
@@ -69,9 +71,7 @@ public:
 
 	protected:
 		/** @private */
-		iterator(
-		    const char* flag_name, const list_interface& list, int i, bool one_list_only = false
-		)
+		iterator(const char* flag_name, const list_interface& list, int i, bool one_list_only = false)
 		    : _flag_name(flag_name)
 		    , _list_name(nullptr)
 		    , _list(list)
@@ -99,7 +99,7 @@ public:
 		};
 
 		/** access value the iterator is pointing to */
-		Flag operator*() const { return Flag{ _flag_name, _list_name }; };
+		Flag operator*() const { return Flag{_flag_name, _list_name}; };
 
 		/** continue iterator to next value */
 		iterator& operator++()
@@ -123,10 +123,12 @@ public:
 
 #pragma warning(pop)
 
-	virtual ~list_interface() {}
 
 #pragma warning(push)
-#pragma warning(disable : 4100, justification : "non functional prototypes do not need the argument.")
+#pragma warning(                                                                          \
+    disable : 4100, justification : "non functional prototypes do not need the argument." \
+)
+
 	/** checks if a flag is contained in the list */
 	virtual bool contains(const char* flag) const
 	{

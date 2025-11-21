@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include "snapshot.h"
 #include "system.h"
 
 #include <story.h>
@@ -15,9 +16,9 @@ SCENARIO("string_table fill up #97", "[fixes]")
 {
 	GIVEN("story murder_scene")
 	{
-		auto    ink       = story::from_file(INK_TEST_RESOURCE_DIR "murder_scene.bin");
-		globals globStore = ink->new_globals();
-		runner  main      = ink->new_runner(globStore);
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "murder_scene.bin")};
+		globals                globStore = ink->new_globals();
+		runner                 main      = ink->new_runner(globStore);
 
 		WHEN("Run first choice 50 times")
 		{
@@ -62,10 +63,10 @@ SCENARIO("unknown command _ #109", "[fixes]")
 			for (size_t i = 0; i < out_str.size(); ++i) {
 				data[i] = out_str[i];
 			}
-			auto        ink       = story::from_binary(data, out_str.size());
-			globals     globStore = ink->new_globals();
-			runner      main      = ink->new_runner(globStore);
-			std::string story     = main->getall();
+			std::unique_ptr<story> ink{story::from_binary(data, out_str.size())};
+			globals                globStore = ink->new_globals();
+			runner                 main      = ink->new_runner(globStore);
+			std::string            story     = main->getall();
 			THEN("expect correct output")
 			{
 				REQUIRE(res.warnings.size() == 0);
@@ -87,16 +88,16 @@ SCENARIO("snapshot failed inside execution _ #111", "[fixes]")
 {
 	GIVEN("story with multiline output with a knot")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin");
-		auto   ink2   = story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin")};
+		std::unique_ptr<story> ink2{story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin")};
+		runner                 thread = ink->new_runner();
 		WHEN("run store and reload")
 		{
 			auto line = thread->getline();
 			THEN("outputs first line") { REQUIRE(line == "First line of text\n"); }
-			auto   snapshot = thread->create_snapshot();
-			runner thread2  = ink2->new_runner_from_snapshot(*snapshot);
-			line            = thread->getline();
+			std::unique_ptr<ink::runtime::snapshot> snapshot{thread->create_snapshot()};
+			runner                                  thread2 = ink2->new_runner_from_snapshot(*snapshot);
+			line                                            = thread->getline();
 			THEN("outputs second line") { REQUIRE(line == "Second line of test\n"); }
 		}
 	}
@@ -106,8 +107,9 @@ SCENARIO("missing leading whitespace inside choice-only text and glued text _ #1
 {
 	GIVEN("story with problematic text")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "130_131_missing_whitespace.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR
+		                                            "130_131_missing_whitespace.bin")};
+		runner                 thread = ink->new_runner();
 		WHEN("run story")
 		{
 			auto line = thread->getline();

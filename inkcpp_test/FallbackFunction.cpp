@@ -14,8 +14,8 @@ SCENARIO("run a story with external function and fallback function", "[external 
 {
 	GIVEN("story with two external functions, one with fallback")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "FallBack.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "FallBack.bin")};
+		runner                 thread = ink->new_runner();
 
 		WHEN("bind both external functions")
 		{
