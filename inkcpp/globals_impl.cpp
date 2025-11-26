@@ -10,6 +10,7 @@
 #include "snapshot_impl.h"
 #include "system.h"
 #include "types.h"
+#include "value.h"
 
 namespace ink::runtime::internal
 {

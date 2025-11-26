@@ -42,7 +42,7 @@ namespace ink::runtime::internal
 
 hash_t runner_impl::get_current_knot() const
 {
-	return _current_knot_id == ~0 ? 0 : _story->container_hash(_current_knot_id);
+	return _current_knot_id == ~0U ? 0 : _story->container_hash(_current_knot_id);
 }
 
 template<>
@@ -599,7 +599,7 @@ void runner_impl::choose(size_t index)
 
 	// Figure out where our previous pointer was for that thread
 	ip_t prev = nullptr;
-	if (choiceThread == ~0) {
+	if (choiceThread == ~0U) {
 		prev = _done;
 	} else {
 		prev = _threads.get(choiceThread);
@@ -1543,7 +1543,7 @@ void runner_impl::on_done(bool setDone)
 void runner_impl::set_done_ptr(ip_t ptr)
 {
 	thread_t curr = current_thread();
-	if (curr == ~0) {
+	if (curr == ~0U) {
 		_done = ptr;
 	} else {
 		_threads.set(curr, ptr);

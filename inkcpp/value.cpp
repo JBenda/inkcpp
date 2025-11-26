@@ -197,8 +197,9 @@ value::value(const ink::runtime::value& val)
 		case types::String: set<value_type::string>(val.get<types::String>()); break;
 		case types::Float: set<value_type::float32>(val.get<types::Float>()); break;
 		case types::List:
-			set<value_type::list>(list_table::list{
-			    static_cast<list_impl*>(val.get<types::List>())->get_lid()});
+			set<value_type::list>(
+			    list_table::list{static_cast<list_impl*>(val.get<types::List>())->get_lid()}
+			);
 	}
 }
 
@@ -269,9 +270,11 @@ const unsigned char* value::snap_load(const unsigned char* ptr, const loader& lo
 	ptr = snap_read(ptr, &bool_value, max_value_size);
 	if (_type == value_type::string) {
 		if (string_value.allocated) {
-			string_value.str = loader.string_table[static_cast<size_t>(reinterpret_cast<uintptr_t>(string_value.str))];
+			string_value.str
+			    = loader.string_table[static_cast<size_t>(reinterpret_cast<uintptr_t>(string_value.str))];
 		} else {
-			string_value.str = loader.story_string_table + static_cast<size_t>(reinterpret_cast<uintptr_t>(string_value.str));
+			string_value.str = loader.story_string_table
+			                 + static_cast<size_t>(reinterpret_cast<uintptr_t>(string_value.str));
 		}
 	}
 	return ptr;

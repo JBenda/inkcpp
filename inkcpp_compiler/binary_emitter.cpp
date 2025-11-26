@@ -12,7 +12,6 @@
 
 #include <vector>
 #include <map>
-#include <fstream>
 
 #ifndef _MSC_VER
 #	include <cstring>
@@ -361,13 +360,13 @@ void binary_emitter::process_paths()
 			token = ink::compiler::internal::strtok_s(nullptr, ".", &_context);
 		}
 
-		if (noop_offset != ~0) {
+		if (noop_offset != ~0U) {
 			inkAssert(! useCountIndex, "Can't count visits to a noop!");
 			_containers.set(position, noop_offset);
 		} else {
 			// If we want the count index, write that out
 			if (useCountIndex) {
-				inkAssert(container->counter_index != ~0, "No count index available for this container!");
+				inkAssert(container->counter_index != ~0U, "No count index available for this container!");
 				_containers.set(position, container->counter_index);
 			} else {
 				// Otherwise, write container address
@@ -435,11 +434,17 @@ void binary_emitter::set_list_meta(const list_data& list_defs)
 		_lists.write(flag.flag);
 		if (flag.flag.list_id != list_id) {
 			list_id = flag.flag.list_id;
-			_lists.write(reinterpret_cast<const byte_t*>(list_names->data()), static_cast<size_t>(list_names->size()));
+			_lists.write(
+			    reinterpret_cast<const byte_t*>(list_names->data()),
+			    static_cast<size_t>(list_names->size())
+			);
 			++list_names;
 			_lists.write('\0');
 		}
-		_lists.write(reinterpret_cast<const byte_t*>(flag.name->c_str()), static_cast<size_t>(flag.name->size()) + 1);
+		_lists.write(
+		    reinterpret_cast<const byte_t*>(flag.name->c_str()),
+		    static_cast<size_t>(flag.name->size()) + 1
+		);
 	}
 	_lists.write(null_flag);
 }

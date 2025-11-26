@@ -33,10 +33,7 @@ void basic_stream::initelize_data(value* buffer, size_t size)
 	_max  = size;
 }
 
-void basic_stream::overflow(value*&, size_t&, size_t)
-{
-	inkFail("Stack overflow!");
-}
+void basic_stream::overflow(value*&, size_t&, size_t) { inkFail("Stack overflow!"); }
 
 void basic_stream::append(const value& in)
 {
@@ -145,7 +142,7 @@ inline void write_char(std::stringstream& output, char c)
 inline bool get_next(const value* list, size_t i, size_t size, const value** next)
 {
 	while (i + 1 < size) {
-		*next           = &list[i + 1];
+		*next = &list[i + 1];
 		if ((*next)->printable()) {
 			return true;
 		}

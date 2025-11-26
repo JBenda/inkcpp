@@ -78,7 +78,8 @@ public:
 			return flag;
 		}
 		inkAssert(flag.list_id >= 0);
-		for (size_t i = listBegin(static_cast<size_t>(flag.list_id)); i < _list_end[static_cast<size_t>(flag.list_id)]; ++i) {
+		for (size_t i = listBegin(static_cast<size_t>(flag.list_id));
+		     i < _list_end[static_cast<size_t>(flag.list_id)]; ++i) {
 			if (_flag_values[i] == flag.flag) {
 				flag.flag = static_cast<int16_t>(i - listBegin(static_cast<size_t>(flag.list_id)));
 				return flag;
@@ -91,7 +92,8 @@ public:
 	int get_flag_value(list_flag flag) const
 	{
 		inkAssert(flag.list_id >= 0 && flag.flag >= 0);
-		return _flag_values[listBegin(static_cast<size_t>(flag.list_id)) + static_cast<size_t>(flag.flag)];
+		return _flag_values
+		    [listBegin(static_cast<size_t>(flag.list_id)) + static_cast<size_t>(flag.flag)];
 	}
 
 	/// zeros all usage values
@@ -261,7 +263,10 @@ private:
 	void                    copy_lists(const data_t* src, data_t* dst);
 	static constexpr size_t bits_per_data = sizeof(data_t) * 8U;
 
-	size_t listBegin(size_t lid) const { return lid == 0 ? 0 : _list_end[static_cast<size_t>(lid - 1)]; }
+	size_t listBegin(size_t lid) const
+	{
+		return lid == 0 ? 0 : _list_end[static_cast<size_t>(lid - 1)];
+	}
 
 	const data_t* getPtr(int eid) const
 	{
@@ -298,11 +303,12 @@ private:
 		}
 	}
 
-	bool hasList(const data_t* data, int lid) const { 
+	bool hasList(const data_t* data, int lid) const
+	{
 		if (lid < 0) {
 			return false;
-		 }
-		return getBit(data, static_cast<size_t>(lid)); 
+		}
+		return getBit(data, static_cast<size_t>(lid));
 	}
 
 	void setList(data_t* data, int lid, bool value = true)
@@ -312,11 +318,13 @@ private:
 		}
 	}
 
-	bool hasFlag(const data_t* data, int fid) const { 
+	bool hasFlag(const data_t* data, int fid) const
+	{
 		if (fid < 0) {
 			return false;
-		 }
-		return getBit(data, static_cast<size_t>(fid) + numLists()); }
+		}
+		return getBit(data, static_cast<size_t>(fid) + numLists());
+	}
 
 	void setFlag(data_t* data, int fid, bool value = true)
 	{
@@ -383,7 +391,9 @@ public:
 		 */
 		void carry()
 		{
-			if (_pos.flag.flag < 0 || _pos.flag.list_id < 0) { return; }
+			if (_pos.flag.flag < 0 || _pos.flag.list_id < 0) {
+				return;
+			}
 			if (static_cast<size_t>(_pos.flag.flag)
 			    == _list._list_end[static_cast<size_t>(_pos.flag.list_id)]
 			           - _list.listBegin(static_cast<size_t>(_pos.flag.list_id))) {
@@ -401,7 +411,7 @@ public:
 		{
 			bool valid;
 			do {
-				valid   = true;
+				valid      = true;
 				size_t fid = _list.toFid(_pos.flag);
 				if (_data == nullptr) {
 					if (_list._flag_names[fid] == nullptr) {
@@ -411,7 +421,8 @@ public:
 				} else if (! _list.hasList(_data, _pos.flag.list_id)) {
 					valid = false;
 					++_pos.flag.list_id;
-				} else if (! _list.hasFlag(_data, static_cast<int>(fid)) || _list._flag_names[fid] == nullptr) {
+				} else if (! _list.hasFlag(_data, static_cast<int>(fid))
+				           || _list._flag_names[fid] == nullptr) {
 					valid = false;
 					++_pos.flag.flag;
 				}

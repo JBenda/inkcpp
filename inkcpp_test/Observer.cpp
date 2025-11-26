@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "system.h"
+#include "../runner_impl.h"
 
-#include <../runner_impl.h>
 #include <choice.h>
 #include <compiler.h>
 #include <globals.h>
@@ -30,19 +30,19 @@ SCENARIO("Observer", "[variables][observer]")
 			int  var1_cnt = 0;
 			auto var1     = [&var1_cnt](int32_t i) {
         if (var1_cnt++ == 0) {
-          CHECK(i == 1);
-        } else {
-          CHECK(i == 5);
-        }
+					CHECK(i == 1);
+				} else {
+					CHECK(i == 5);
+				}
 			};
 			int  var2_cnt = 0;
 			auto var2     = [&var2_cnt](const char* s) {
         std::string str(s);
         if (var2_cnt++ == 0) {
-          CHECK(str == "hello");
-        } else {
-          CHECK(str == "test");
-        }
+					CHECK(str == "hello");
+				} else {
+					CHECK(str == "test");
+				}
 			};
 
 			globals->observe("var1", var1);
@@ -88,10 +88,10 @@ SCENARIO("Observer", "[variables][observer]")
 			int  var1_cnt = 0;
 			auto var1     = [&var1_cnt](int32_t i) {
         if (var1_cnt++ < 2) {
-          CHECK(i == 1);
-        } else {
-          CHECK(i == 5);
-        }
+					CHECK(i == 1);
+				} else {
+					CHECK(i == 5);
+				}
 			};
 			globals->observe("var1", var1);
 			globals->observe("var1", var1);
@@ -102,7 +102,7 @@ SCENARIO("Observer", "[variables][observer]")
 		}
 		WHEN("Run with missmatching type")
 		{
-			auto var1 = [](uint32_t i) {
+			auto var1 = [](uint32_t) {
 			};
 			CHECK_THROWS_AS(globals->observe("var1", var1), ink::ink_exception);
 		}
@@ -123,13 +123,13 @@ SCENARIO("Observer", "[variables][observer]")
 			int  var1_cnt = 0;
 			auto var1     = [&var1_cnt](int32_t i, ink::optional<int32_t> o_i) {
         if (var1_cnt++ == 0) {
-          CHECK(i == 1);
-          CHECK_FALSE(o_i.has_value());
-        } else {
-          CHECK(i == 5);
-          CHECK(o_i.has_value());
-          CHECK(o_i.value() == 1);
-        }
+					CHECK(i == 1);
+					CHECK_FALSE(o_i.has_value());
+				} else {
+					CHECK(i == 5);
+					CHECK(o_i.has_value());
+					CHECK(o_i.value() == 1);
+				}
 			};
 
 			int  var2_cnt = 0;
@@ -162,13 +162,13 @@ SCENARIO("Observer", "[variables][observer]")
 			auto var1     = [&var1_cnt, &globals](int32_t i) {
         ++var1_cnt;
         if (var1_cnt == 1) {
-          CHECK(i == 1);
-        } else if (var1_cnt == 2) {
-          CHECK(i == 5);
-          globals->set<int32_t>("var1", 8);
-        } else if (var1_cnt == 3) {
-          CHECK(i == 8);
-        }
+					CHECK(i == 1);
+				} else if (var1_cnt == 2) {
+					CHECK(i == 5);
+					globals->set<int32_t>("var1", 8);
+				} else if (var1_cnt == 3) {
+					CHECK(i == 8);
+				}
 			};
 			globals->observe("var1", var1);
 			std::string out = thread->getall();
@@ -183,13 +183,13 @@ SCENARIO("Observer", "[variables][observer]")
 			auto var1     = [&var1_cnt, &globals](int32_t i) {
         ++var1_cnt;
         if (var1_cnt == 1) {
-          CHECK(i == 1);
-          globals->set<int32_t>("var1", 8);
-        } else if (var1_cnt == 2) {
-          CHECK(i == 8);
-        } else if (var1_cnt == 3) {
-          CHECK(i == 5);
-        }
+					CHECK(i == 1);
+					globals->set<int32_t>("var1", 8);
+				} else if (var1_cnt == 2) {
+					CHECK(i == 8);
+				} else if (var1_cnt == 3) {
+					CHECK(i == 5);
+				}
 			};
 			globals->observe("var1", var1);
 			std::string out = thread->getall();
@@ -204,16 +204,16 @@ SCENARIO("Observer", "[variables][observer]")
 			auto var1     = [&var1_cnt, &globals](int32_t i) {
         ++var1_cnt;
         if (var1_cnt == 1) {
-          CHECK(i == 1);
-          globals->set<int32_t>("var1", 8);
-        } else if (var1_cnt == 2) {
-          CHECK(i == 8);
-          globals->set<int32_t>("var1", 10);
-        } else if (var1_cnt == 3) {
-          CHECK(i == 10);
-        } else if (var1_cnt == 4) {
-          CHECK(i == 5);
-        }
+					CHECK(i == 1);
+					globals->set<int32_t>("var1", 8);
+				} else if (var1_cnt == 2) {
+					CHECK(i == 8);
+					globals->set<int32_t>("var1", 10);
+				} else if (var1_cnt == 3) {
+					CHECK(i == 10);
+				} else if (var1_cnt == 4) {
+					CHECK(i == 5);
+				}
 			};
 			globals->observe("var1", var1);
 			std::string out = thread->getall();
@@ -227,11 +227,11 @@ SCENARIO("Observer", "[variables][observer]")
 			int  var1_cnt = 0;
 			auto var1     = [&var1_cnt, &globals](int32_t i) {
         if (var1_cnt++ == 0) {
-          CHECK(i == 1);
-        } else {
-          CHECK(i == 5);
-          globals->set<const char*>("var2", "didum");
-        }
+					CHECK(i == 1);
+				} else {
+					CHECK(i == 5);
+					globals->set<const char*>("var2", "didum");
+				}
 			};
 			int  var2_cnt = 0;
 			auto var2     = [&var2_cnt]() {

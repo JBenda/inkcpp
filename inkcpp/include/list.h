@@ -49,6 +49,7 @@ public:
 	}
 
 	virtual list_interface& operator=(const list_interface&) = default;
+
 	virtual ~list_interface() {}
 
 	/** iterater for flags in a list
@@ -61,8 +62,6 @@ public:
 		const list_interface& _list;
 		int                   _i;
 		bool                  _one_list_iterator; ///< iterates only though values of one list
-#pragma warning(push)
-#pragma warning(disable : 4820, justification : "3 byte aligment free on 64-bit systems")
 		friend list_interface;
 #ifdef INK_BUILD_CLIB
 		friend int ::ink_list_flags(const HInkList*, InkListIter*);
@@ -123,10 +122,15 @@ public:
 	};
 
 
-#pragma warning(push)
-#pragma warning(                                                                          \
-    disable : 4100, justification : "non functional prototypes do not need the argument." \
-)
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                          \
+	    disable : 4100, justification : "non functional prototypes do not need the argument." \
+	)
+#endif
 
 	/** checks if a flag is contained in the list */
 	virtual bool contains(const char* flag) const
@@ -177,7 +181,11 @@ private:
 		inkAssert(false, "Not implemented funciton from interface is called!");
 	};
 
-#pragma warning(pop)
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#else
+#	pragma warning(pop)
+#endif
 
 protected:
 	/** @private */
@@ -199,5 +207,3 @@ protected:
 };
 
 } // namespace ink::runtime
-
-#pragma warning(pop)

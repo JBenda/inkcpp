@@ -29,7 +29,7 @@ inline int toStr(char* buffer, size_t size, uint32_t value)
 		return EINVAL;
 	}
 	int res = snprintf(buffer, size, "%d", value);
-	if (res > 0 && res < size) {
+	if (res > 0 && static_cast<size_t>(res) < size) {
 		return 0;
 	}
 	return EINVAL;
@@ -47,7 +47,7 @@ inline int toStr(char* buffer, size_t size, int32_t value)
 		return EINVAL;
 	}
 	int res = snprintf(buffer, size, "%d", value);
-	if (res > 0 && res < size) {
+	if (res > 0 && static_cast<size_t>(res) < size) {
 		return 0;
 	}
 	return EINVAL;
@@ -69,7 +69,7 @@ inline int toStr(char* buffer, size_t size, float value)
 		return EINVAL;
 	}
 	int res = snprintf(buffer, size, "%.7f", value);
-	if (res < 0 || res >= size) {
+	if (res < 0 || static_cast<size_t>(res) >= size) {
 		return EINVAL;
 	}
 	// trunc cat zeros B007

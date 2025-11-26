@@ -66,10 +66,15 @@ public:
 		loader& operator=(const loader&)                 = delete;
 	};
 
-#pragma warning(push)
-#pragma warning(                                                                          \
-    disable : 4100, justification : "non functional prototypes do not need the argument." \
-)
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                          \
+	    disable : 4100, justification : "non functional prototypes do not need the argument." \
+	)
+#endif
 
 	size_t snap(unsigned char* data, snapper&) const
 	{
@@ -83,6 +88,10 @@ public:
 		return nullptr;
 	};
 
-#pragma warning(pop)
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#else
+#	pragma warning(pop)
+#endif
 };
 } // namespace ink::runtime::internal

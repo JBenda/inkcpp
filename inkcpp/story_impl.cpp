@@ -227,13 +227,14 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 {
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
 	auto*                globs    = new globals_impl(this);
-	auto                 end      = globs->snap_load(
-      snapshot.get_globals_snap(),
-      snapshot_interface::loader{
-          snapshot.strings(),
-          _string_table,
-      }
-  );
+	snapshot.strings().clear();
+	auto end = globs->snap_load(
+	    snapshot.get_globals_snap(),
+	    snapshot_interface::loader{
+	        snapshot.strings(),
+	        _string_table,
+	    }
+	);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
 	return globals(globs, _block);
 }
@@ -347,7 +348,7 @@ void story_impl::setup_pointers()
 	_container_list      = ( uint32_t* ) (ptr);
 	while (true) {
 		uint32_t val = *( uint32_t* ) ptr;
-		if (val == ~0) {
+		if (val == ~0U) {
 			ptr += sizeof(uint32_t);
 			break;
 		} else {
@@ -360,7 +361,7 @@ void story_impl::setup_pointers()
 	_container_hash_start = ( hash_t* ) (ptr);
 	while (true) {
 		uint32_t val = *( uint32_t* ) ptr;
-		if (val == ~0) {
+		if (val == ~0U) {
 			_container_hash_end = ( hash_t* ) (ptr);
 			ptr += sizeof(uint32_t);
 			break;

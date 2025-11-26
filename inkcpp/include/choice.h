@@ -80,10 +80,7 @@ namespace runtime
 		uint32_t                  _path       = ~0U;     ///< @private
 		thread_t                  _thread     = ~0U;     ///< @private
 		int                       _index      = -1;      ///< @private
-#pragma warning(push)
-#pragma warning(disable : 4820, justification : "4 byte aligment free on 64-bit systems")
 	};
 
-#pragma warning(pop)
 } // namespace runtime
 } // namespace ink

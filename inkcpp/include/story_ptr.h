@@ -19,15 +19,12 @@ namespace internal
 		    , valid(true)
 		{
 		}
+
 		static void remove_reference(ref_block*&);
 
 		size_t references;
 		bool   valid;
-#pragma warning(push)
-#pragma warning(disable : 4820, justification : "3 byte aligment free on 64-bit systems")
 	};
-
-#pragma warning(pop)
 
 	/** @private */
 	class story_ptr_base

@@ -97,8 +97,14 @@ constexpr list_flag empty_flag{-1, 0};
 
 namespace internal
 {
-#pragma warning(push)
-#pragma warning(disable : 4514, justification : "functions are defined in header file, they do not need to be used.")
+#ifdef __GNUC__
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                         \
+	    disable : 4514,                                                                      \
+	    justification : "functions are defined in header file, they do not need to be used." \
+	)
+#endif
 	/** Checks if a string starts with a given prefix*/
 	static inline constexpr bool starts_with(const char* string, const char* prefix)
 	{
@@ -122,6 +128,7 @@ namespace internal
 				case '\n':
 					if (! includeNewline)
 						return false;
+					[[fallthrough]];
 				case '\t': [[fallthrough]];
 				case ' ': continue;
 				default: return false;
@@ -132,7 +139,10 @@ namespace internal
 	/** check if character can be only part of a word, when two part of word characters put together
 	 * the will be a space inserted I049
 	 */
-	static inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
+	static inline bool is_part_of_word(char character)
+	{
+		return isalpha(character) || isdigit(character);
+	}
 
 	static inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{
@@ -149,6 +159,10 @@ namespace internal
 #ifndef INK_ENABLE_UNREAL
 	/** populate memory with Zero */
 	void zero_memory(void* buffer, size_t length);
+#endif
+#ifdef __GNUC__
+#else
+#	pragma warning(pop)
 #endif
 } // namespace internal
 
