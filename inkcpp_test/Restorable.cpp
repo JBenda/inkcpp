@@ -10,11 +10,13 @@ SCENARIO("a restorable collection can operate like a stack", "[restorable]")
 	{
 		// Create the collection
 		constexpr size_t size = 128;
-		int buffer[size];
-		auto collection = restorable(buffer, size);
+		int              buffer[size];
+		auto             collection = restorable(buffer, size);
 
 		// Lambdas
-		auto isNull = [](const int&) { return false; };
+		auto isNull = [](const int&) {
+			return false;
+		};
 
 		THEN("it should have zero size") REQUIRE(collection.size(isNull) == 0);
 
@@ -56,29 +58,37 @@ void VerifyStack(restorable<int>& stack, const std::vector<int>& expected)
 {
 	THEN("it should match the expected array in both directions")
 	{
-		auto isNull = [](const int& e) { return e == -1; };
+		auto isNull = [](const int& e) {
+			return e == -1;
+		};
 
 		// Check
 		REQUIRE(stack.size(isNull) == expected.size());
 
 		// Iterate and make sure each element matches
 		int counter = 0;
-		stack.for_each([&counter, expected](const int& elem) {
-			REQUIRE(counter < expected.size());
-			REQUIRE(counter >= 0);
-			REQUIRE(expected[counter] == elem);
-			counter++;
-		}, isNull);
+		stack.for_each(
+		    [&counter, expected](const int& elem) {
+			    REQUIRE(counter < static_cast<int>(expected.size()));
+			    REQUIRE(counter >= 0);
+			    REQUIRE(expected[counter] == elem);
+			    counter++;
+		    },
+		    isNull
+		);
 
 		// Make sure we hit every element in the expected vector
-		REQUIRE(counter == expected.size());
+		REQUIRE(counter == static_cast<int>(expected.size()));
 
 		// Try the other direction
-		stack.reverse_for_each([&counter, expected](const int& elem) {
-			counter--;
-			REQUIRE(counter >= 0);
-			REQUIRE(expected[counter] == elem);
-		}, isNull);
+		stack.reverse_for_each(
+		    [&counter, expected](const int& elem) {
+			    counter--;
+			    REQUIRE(counter >= 0);
+			    REQUIRE(expected[counter] == elem);
+		    },
+		    isNull
+		);
 		REQUIRE(counter == 0);
 	}
 }
@@ -96,7 +106,10 @@ void RestoreAndVerifyStack(restorable<ElementType>& stack, const std::vector<Ele
 }
 
 template<typename ElementType, typename NullifyCallback>
-void ForgetAndVerifyStack(restorable<ElementType>& stack, const std::vector<ElementType>& expected, NullifyCallback nullify)
+void ForgetAndVerifyStack(
+    restorable<ElementType>& stack, const std::vector<ElementType>& expected,
+    NullifyCallback nullify
+)
 {
 	WHEN("the save state is forgotten")
 	{
@@ -111,19 +124,19 @@ SCENARIO("a collection can be restored no matter how many times you push or pop"
 {
 	// Create the collection
 	constexpr size_t size = 128;
-	int buffer[size];
-	auto collection = restorable(buffer, size);
+	int              buffer[size];
+	auto             collection = restorable(buffer, size);
 
 	// Lambdas (we'll use negative one for null)
-	auto isNull = [](const int& elem) { return elem == -1; };
-	auto nullify = [](int& elem) { elem = -1; };
+	auto isNull = [](const int& elem) {
+		return elem == -1;
+	};
 
 	GIVEN("a stack with five items that has been saved")
 	{
 		// Create five elements
 		std::vector<int> expected;
-		for (int i = 0; i < 5; i++)
-		{
+		for (int i = 0; i < 5; i++) {
 			collection.push(i);
 			expected.push_back(i);
 		}
@@ -140,7 +153,7 @@ SCENARIO("a collection can be restored no matter how many times you push or pop"
 
 		WHEN("elements are popped")
 		{
-			collection.pop(isNull); 
+			collection.pop(isNull);
 			collection.pop(isNull);
 			RestoreAndVerifyStack(collection, expected);
 		}
@@ -165,8 +178,9 @@ SCENARIO("a collection can be restored no matter how many times you push or pop"
 
 			THEN("More are pushed")
 			{
-				collection.push(100); collection.push(200);
-				VerifyStack(collection, { 100, 200 });
+				collection.push(100);
+				collection.push(200);
+				VerifyStack(collection, {100, 200});
 			}
 		}
 	}
@@ -176,19 +190,19 @@ SCENARIO("saving does not disrupt iteration", "[restorable]")
 {
 	// Create the collection
 	constexpr size_t size = 128;
-	int buffer[size];
-	auto collection = restorable(buffer, size);
+	int              buffer[size];
+	auto             collection = restorable(buffer, size);
 
 	// Lambdas (we'll use negative one for null)
-	auto isNull = [](const int& elem) { return elem == -1; };
-	auto nullify = [](int& elem) { elem = -1; };
+	auto isNull = [](const int& elem) {
+		return elem == -1;
+	};
 
 	GIVEN("a stack with five items that has been saved")
 	{
 		// Create five elements
 		std::vector<int> expected;
-		for (int i = 0; i < 5; i++)
-		{
+		for (int i = 0; i < 5; i++) {
 			collection.push(i);
 			expected.push_back(i);
 		}
@@ -198,24 +212,32 @@ SCENARIO("saving does not disrupt iteration", "[restorable]")
 
 		WHEN("elements are pushed")
 		{
-			collection.push(10); expected.push_back(10);
-			collection.push(20); expected.push_back(20);
+			collection.push(10);
+			expected.push_back(10);
+			collection.push(20);
+			expected.push_back(20);
 			VerifyStack(collection, expected);
 		}
 
 		WHEN("elements are popped")
 		{
-			collection.pop(isNull); expected.pop_back();
-			collection.pop(isNull); expected.pop_back();
+			collection.pop(isNull);
+			expected.pop_back();
+			collection.pop(isNull);
+			expected.pop_back();
 			VerifyStack(collection, expected);
 		}
 
 		WHEN("elements are popped and pushed")
 		{
-			collection.pop(isNull); expected.pop_back();
-			collection.pop(isNull); expected.pop_back();
-			collection.push(10); expected.push_back(10);
-			collection.push(20); expected.push_back(20);
+			collection.pop(isNull);
+			expected.pop_back();
+			collection.pop(isNull);
+			expected.pop_back();
+			collection.push(10);
+			expected.push_back(10);
+			collection.push(20);
+			expected.push_back(20);
 			VerifyStack(collection, expected);
 		}
 	}
@@ -227,17 +249,23 @@ SCENARIO("saving does not disrupt iteration", "[restorable]")
 
 		WHEN("elements are pushed")
 		{
-			collection.push(10); expected.push_back(10);
-			collection.push(20); expected.push_back(20);
+			collection.push(10);
+			expected.push_back(10);
+			collection.push(20);
+			expected.push_back(20);
 			VerifyStack(collection, expected);
 		}
 
 		WHEN("elements are pushed then popped")
 		{
-			collection.push(10); expected.push_back(10);
-			collection.push(20); expected.push_back(20);
-			collection.pop(isNull); expected.pop_back();
-			collection.pop(isNull); expected.pop_back();
+			collection.push(10);
+			expected.push_back(10);
+			collection.push(20);
+			expected.push_back(20);
+			collection.pop(isNull);
+			expected.pop_back();
+			collection.pop(isNull);
+			expected.pop_back();
 			VerifyStack(collection, expected);
 		}
 	}
@@ -247,19 +275,22 @@ SCENARIO("save points can be forgotten", "[restorable]")
 {
 	// Create the collection
 	constexpr size_t size = 128;
-	int buffer[size];
-	auto collection = restorable(buffer, size);
+	int              buffer[size];
+	auto             collection = restorable(buffer, size);
 
 	// Lambdas (we'll use negative one for null)
-	auto isNull = [](const int& elem) { return elem == -1; };
-	auto nullify = [](int& elem) { elem = -1; };
+	auto isNull = [](const int& elem) {
+		return elem == -1;
+	};
+	auto nullify = [](int& elem) {
+		elem = -1;
+	};
 
 	GIVEN("a stack with five items that has been saved")
 	{
 		// Create five elements
 		std::vector<int> expected;
-		for (int i = 0; i < 5; i++)
-		{
+		for (int i = 0; i < 5; i++) {
 			collection.push(i);
 			expected.push_back(i);
 		}
@@ -269,25 +300,34 @@ SCENARIO("save points can be forgotten", "[restorable]")
 
 		WHEN("elements are pushed")
 		{
-			collection.push(10); expected.push_back(10);
-			collection.push(20); expected.push_back(20);
+			collection.push(10);
+			expected.push_back(10);
+			collection.push(20);
+			expected.push_back(20);
 			ForgetAndVerifyStack(collection, expected, nullify);
 		}
 
 		WHEN("elements are popped")
 		{
-			collection.pop(isNull); expected.pop_back();
-			collection.pop(isNull); expected.pop_back();
+			collection.pop(isNull);
+			expected.pop_back();
+			collection.pop(isNull);
+			expected.pop_back();
 			ForgetAndVerifyStack(collection, expected, nullify);
 		}
 
 		WHEN("elements are popped and pushed")
 		{
-			collection.pop(isNull); expected.pop_back();
-			collection.pop(isNull); expected.pop_back();
-			collection.push(10); expected.push_back(10);
-			collection.push(20); expected.push_back(20);
-			collection.push(30); expected.push_back(30);
+			collection.pop(isNull);
+			expected.pop_back();
+			collection.pop(isNull);
+			expected.pop_back();
+			collection.push(10);
+			expected.push_back(10);
+			collection.push(20);
+			expected.push_back(20);
+			collection.push(30);
+			expected.push_back(30);
 			ForgetAndVerifyStack(collection, expected, nullify);
 		}
 	}

@@ -135,7 +135,6 @@ const unsigned char* string_table::snap_load(const unsigned char* data, const lo
 		if (len == 2 && str[0] == EMPTY_STRING[0]) {
 			str[0] = 0;
 		}
-		mark_used(str);
 	}
 	return ptr + 1;
 }

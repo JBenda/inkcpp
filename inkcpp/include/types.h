@@ -54,8 +54,6 @@ public:
 		Float,  ///< containing a float
 		List    ///< containing a @ref list_interface
 	} type;   ///< Label of type currently contained in @ref value
-#pragma warning(push)
-#pragma warning(disable : 4820, justification : "4 byte aligment free on 64-bit systems")
 
 	value()
 	    : v_int32{0}
@@ -127,8 +125,6 @@ public:
 		static_assert(Ty != Ty, "No value getter for the selected type");
 	}
 };
-
-#pragma warning(pop)
 
 /** access #value::Type::Bool value */
 template<>

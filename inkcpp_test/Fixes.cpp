@@ -1,6 +1,6 @@
 #include "catch.hpp"
 #include "snapshot.h"
-#include "system.h"
+#include "../snapshot_impl.h"
 
 #include <story.h>
 #include <globals.h>
@@ -144,14 +144,27 @@ SCENARIO(
 			REQUIRE(thread->num_choices() == 1);
 			REQUIRE(thread->get_choice(0)->num_tags() == 1);
 			REQUIRE(thread->get_choice(0)->get_tag(0) == std::string("Type:Idle"));
-			auto* snapshot = thread->create_snapshot();
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
 			THEN("snapshot loaded works")
 			{
-				runner loaded = ink->new_runner_from_snapshot(*snapshot);
+				runner loaded = ink->new_runner_from_snapshot(*snap);
 				loaded->getall();
 				REQUIRE(loaded->num_choices() == 1);
 				REQUIRE(loaded->get_choice(0)->num_tags() == 1);
 				REQUIRE(loaded->get_choice(0)->get_tag(0) == std::string("Type:Idle"));
+			}
+		}
+		WHEN("loading a snipshot multiple times")
+		{
+			thread->getall();
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			runner                    thread = ink->new_runner_from_snapshot(*snap);
+			const size_t s = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
+			THEN("loading it again will not change the string_table size")
+			{
+				runner       thread2 = ink->new_runner_from_snapshot(*snap);
+				const size_t s2 = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
+				REQUIRE(s == s2);
 			}
 		}
 	}

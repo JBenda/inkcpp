@@ -16,10 +16,10 @@ unsigned char*
 	ptr = snapshot_interface::snap_write(ptr, jump, write);
 	ptr = snapshot_interface::snap_write(ptr, save, write);
 	max = pos;
-	if (jump != ~0 && jump > max) {
+	if (jump != ~0U && jump > max) {
 		max = jump;
 	}
-	if (save != ~0 && save > max) {
+	if (save != ~0U && save > max) {
 		max = save;
 	}
 	return ptr;
@@ -32,10 +32,10 @@ const unsigned char*
 	ptr = snapshot_interface::snap_read(ptr, jump);
 	ptr = snapshot_interface::snap_read(ptr, save);
 	max = pos;
-	if (jump != ~0 && jump > max) {
+	if (jump != ~0U && jump > max) {
 		max = jump;
 	}
-	if (save != ~0 && save > max) {
+	if (save != ~0U && save > max) {
 		max = save;
 	}
 	return ptr;

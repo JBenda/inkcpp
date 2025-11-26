@@ -170,10 +170,11 @@ char* list_table::toString(char* out, const list& l) const
 						continue;
 					}
 					int value = _flag_values[j];
-					// the cast is ok, since if we are in the 
+					// the cast is ok, since if we are in the
 					// first round, `first` is true and we do not evaluate
 					// second round, `last_list` is >= 0
-					if (first || value > last_value || (value == last_value && i > static_cast<size_t>(last_list))) {
+					if (first || value > last_value
+					    || (value == last_value && i > static_cast<size_t>(last_list))) {
 						if (min_id == -1 || value < min_value) {
 							change    = true;
 							min_list  = i;
@@ -715,7 +716,7 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 			if (str_equal(*flag_itr, flag_name)) {
 				size_t fid   = static_cast<size_t>(flag_itr - _flag_names.begin());
 				size_t lid   = 0;
-				int begin = 0;
+				int    begin = 0;
 				for (auto* list_itr = _list_end.begin(); list_itr != _list_end.end(); ++list_itr) {
 					if (*list_itr > fid) {
 						lid = static_cast<size_t>(list_itr - _list_end.begin());
@@ -803,7 +804,8 @@ std::ostream& list_table::write(std::ostream& os, list l) const
 					// the cast is ok, since if we are in the
 					// first round, `first` is true and we do not evaluate
 					// second round, `last_list` is >= 0
-					if (first || value > last_value || (value == last_value && i > static_cast<size_t>(last_list))) {
+					if (first || value > last_value
+					    || (value == last_value && i > static_cast<size_t>(last_list))) {
 						if (min_id == -1 || value < min_value) {
 							min_value = value;
 							min_id    = j;

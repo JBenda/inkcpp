@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include "../snapshot_impl.h"
+#include "../snapshot_interface.h"
 
 #include <system.h>
 #include <traits.h>
@@ -102,15 +102,15 @@ public:
 	}
 
 	// Checks if we have a save state
-	bool is_saved() const { return _save != ~0; }
+	bool is_saved() const { return _save != ~0U; }
 
 	// Creates a save point which can later be restored to or forgotten
 	void save()
 	{
 		inkAssert(
-		    _save == ~0, "Collection is already saved. You should never call save twice. Ignoring."
+		    _save == ~0U, "Collection is already saved. You should never call save twice. Ignoring."
 		);
-		if (_save != ~0) {
+		if (_save != ~0U) {
 			return;
 		}
 
@@ -121,8 +121,8 @@ public:
 	// Restore to the last save point
 	void restore()
 	{
-		inkAssert(_save != ~0, "Collection can't be restored because it's not saved. Ignoring.");
-		if (_save == ~0) {
+		inkAssert(_save != ~0U, "Collection can't be restored because it's not saved. Ignoring.");
+		if (_save == ~0U) {
 			return;
 		}
 
@@ -137,8 +137,8 @@ public:
 	template<typename NullifyMethod>
 	void forget(NullifyMethod nullify)
 	{
-		inkAssert(_save != ~0, "Can't forget save point because there is none. Ignoring.");
-		if (_save == ~0) {
+		inkAssert(_save != ~0U, "Can't forget save point because there is none. Ignoring.");
+		if (_save == ~0U) {
 			return;
 		}
 
@@ -170,7 +170,7 @@ public:
 	ElementType& push(const ElementType& elem)
 	{
 		// Don't destroy saved data. Jump over it
-		if (_pos < _save && _save != ~0) {
+		if (_pos < _save && _save != ~0U) {
 			_jump = _pos;
 			_pos  = _save;
 		}
@@ -279,7 +279,7 @@ public:
 	void for_each_all(CallbackMethod callback) const
 	{
 		// no matter if we're saved or not, we iterate everything
-		int len = (_save == ~0 || _pos > _save) ? _pos : _save;
+		int len = (_save == ~0U || _pos > _save) ? _pos : _save;
 
 		// Iterate
 		for (int i = 0; i < len; i++)
@@ -358,10 +358,7 @@ public:
 
 protected:
 	// Called when we run out of space in buffer.
-	virtual void overflow(ElementType*&, size_t&)
-	{
-		inkFail("Restorable run out of memory!");
-	}
+	virtual void overflow(ElementType*&, size_t&) { inkFail("Restorable run out of memory!"); }
 
 private:
 	template<typename Predicate>

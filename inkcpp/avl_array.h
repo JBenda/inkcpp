@@ -70,7 +70,7 @@ class avl_array
 	ink::runtime::internal::if_t<dynamic, std::int8_t*, std::int8_t[Size]> balance_;
 	ink::runtime::internal::if_t<dynamic, child_type*, child_type[Size]>   child_;
 	size_type                                                              size_; // actual size
-	size_type                                                              _capacity;
+	size_type                                                                     _capacity;
 	size_type                                                              root_; // root node
 	ink::runtime::internal::if_t<dynamic, size_type*, size_type[Fast ? Size : 1]> parent_;
 
@@ -110,6 +110,12 @@ class avl_array
 			instance_ = other.instance_;
 			idx_      = other.idx_;
 			return *this;
+		}
+
+		tag_avl_array_iterator(const tag_avl_array_iterator& other)
+		    : instance_{other.instance_}
+		    , idx_{other.idx_}
+		{
 		}
 
 		inline bool operator==(const tag_avl_array_iterator& rhs) const { return idx_ == rhs.idx_; }

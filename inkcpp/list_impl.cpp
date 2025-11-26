@@ -61,7 +61,8 @@ next_list:
 	}
 	while (! _list_table->has(list_table::list{_list}, flag)) {
 		++flag.flag;
-		if (static_cast<size_t>(flag.flag) >= _list_table->_list_end[flag.list_id] - _list_table->listBegin(flag.list_id)) {
+		if (static_cast<size_t>(flag.flag)
+		    >= _list_table->_list_end[flag.list_id] - _list_table->listBegin(flag.list_id)) {
 			goto next_list;
 		}
 	}

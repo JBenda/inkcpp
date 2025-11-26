@@ -313,8 +313,7 @@ size_t simple_restorable_stack<T>::snap(unsigned char* data, const snapper&) con
 }
 
 template<typename T>
-const unsigned char*
-    simple_restorable_stack<T>::snap_load(const unsigned char* ptr, const loader&)
+const unsigned char* simple_restorable_stack<T>::snap_load(const unsigned char* ptr, const loader&)
 {
 	T null;
 	ptr = snap_read(ptr, null);

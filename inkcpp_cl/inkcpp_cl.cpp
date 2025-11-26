@@ -97,7 +97,7 @@ int main(int argc, const char** argv)
 
 	// Parse options
 	std::string outputFilename;
-	bool        playMode = false, testMode = false, testDirectory = false, ommit_choice_tags = false;
+	bool        playMode = false, ommit_choice_tags = false;
 	std::string snapshotFile;
 	bool        show_statistics    = false;
 	const char* inklecateOverwrite = nullptr;
@@ -114,11 +114,6 @@ int main(int argc, const char** argv)
 			}
 		} else if (option == "--ommit-choice-tags") {
 			ommit_choice_tags = true;
-		} else if (option == "-t") {
-			testMode = true;
-		} else if (option == "-td") {
-			testMode      = true;
-			testDirectory = true;
 		} else if (option == "--inklecate") {
 			if (i + 1 < argc - 1 && argv[i + 1][0] != '-') {
 				++i;
@@ -134,26 +129,14 @@ int main(int argc, const char** argv)
 	// Get input filename
 	std::string inputFilename = argv[argc - 1];
 
-	// Test mode
-	// if (testMode) {
-	// 	bool result;
-	// 	if (testDirectory) {
-	// 		result = test_directory(inputFilename);
-	// 	} else {
-	// 		result = test(inputFilename);
-	// 	}
-
-	// 	return result ? 0 : -1;
-	// }
-
 	// If output filename not specified, use input filename as guideline
 	if (outputFilename.empty()) {
 		outputFilename = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".bin");
 	}
 
 	// If input filename is an .ink file
-	size_t  val                   = inputFilename.find(".ink");
-	bool json_file_is_tmp_file = false;
+	size_t val                   = inputFilename.find(".ink");
+	bool   json_file_is_tmp_file = false;
 	if (val == inputFilename.length() - 4) {
 		// Create temporary filename
 		std::string jsonFile = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".tmp");
