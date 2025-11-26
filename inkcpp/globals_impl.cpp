@@ -204,6 +204,7 @@ void globals_impl::initialize_globals(runner_impl* run)
 {
 	// If no way to move there, then there are no globals.
 	if (! run->move_to(hash_string("global decl"))) {
+		_globals_initialized = true;
 		return;
 	}
 

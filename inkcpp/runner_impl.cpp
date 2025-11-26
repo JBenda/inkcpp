@@ -654,10 +654,11 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr += _eval.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags_begin.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags.snap(data ? ptr : nullptr, snapper);
-	ptr = snap_write(ptr, _entered_global, should_write);
-	ptr = snap_write(ptr, _entered_knot, should_write);
-	ptr = snap_write(ptr, _current_knot_id, should_write);
-	ptr = snap_write(ptr, _current_knot_id_backup, should_write);
+	snapper.runner_tags = _tags.data();
+	ptr                 = snap_write(ptr, _entered_global, should_write);
+	ptr                 = snap_write(ptr, _entered_knot, should_write);
+	ptr                 = snap_write(ptr, _current_knot_id, should_write);
+	ptr                 = snap_write(ptr, _current_knot_id_backup, should_write);
 	ptr += _container.snap(data ? ptr : nullptr, snapper);
 	ptr += _threads.snap(data ? ptr : nullptr, snapper);
 	ptr = snap_write(ptr, _fallback_choice.has_value(), should_write);
@@ -681,23 +682,24 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
-	ptr = snap_read(ptr, _evaluation_mode);
-	ptr = snap_read(ptr, _string_mode);
-	ptr = snap_read(ptr, _saved_evaluation_mode);
-	ptr = snap_read(ptr, _saved);
-	ptr = snap_read(ptr, _is_falling);
-	ptr = _output.snap_load(ptr, loader);
-	ptr = _stack.snap_load(ptr, loader);
-	ptr = _ref_stack.snap_load(ptr, loader);
-	ptr = _eval.snap_load(ptr, loader);
-	ptr = _tags_begin.snap_load(ptr, loader);
-	ptr = _tags.snap_load(ptr, loader);
-	ptr = snap_read(ptr, _entered_global);
-	ptr = snap_read(ptr, _entered_knot);
-	ptr = snap_read(ptr, _current_knot_id);
-	ptr = snap_read(ptr, _current_knot_id_backup);
-	ptr = _container.snap_load(ptr, loader);
-	ptr = _threads.snap_load(ptr, loader);
+	ptr                = snap_read(ptr, _evaluation_mode);
+	ptr                = snap_read(ptr, _string_mode);
+	ptr                = snap_read(ptr, _saved_evaluation_mode);
+	ptr                = snap_read(ptr, _saved);
+	ptr                = snap_read(ptr, _is_falling);
+	ptr                = _output.snap_load(ptr, loader);
+	ptr                = _stack.snap_load(ptr, loader);
+	ptr                = _ref_stack.snap_load(ptr, loader);
+	ptr                = _eval.snap_load(ptr, loader);
+	ptr                = _tags_begin.snap_load(ptr, loader);
+	ptr                = _tags.snap_load(ptr, loader);
+	loader.runner_tags = _tags.data();
+	ptr                = snap_read(ptr, _entered_global);
+	ptr                = snap_read(ptr, _entered_knot);
+	ptr                = snap_read(ptr, _current_knot_id);
+	ptr                = snap_read(ptr, _current_knot_id_backup);
+	ptr                = _container.snap_load(ptr, loader);
+	ptr                = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
 	ptr              = snap_read(ptr, has_fallback_choice);
 	_fallback_choice = nullopt;
@@ -1458,7 +1460,7 @@ void runner_impl::step()
 					int sequenceLength = _eval.pop().get<value_type::int32>();
 					/* shuffel index */
 					_eval.pop();
-					
+
 
 					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
 					);

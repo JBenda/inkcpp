@@ -122,9 +122,9 @@ size_t snap_choice::snap(unsigned char* data, const snapper& snapper) const
 		ptr = snap_write(ptr, false, should_write);
 	} else {
 		ptr                         = snap_write(ptr, true, should_write);
-		std::uintptr_t offset_start = _tags_start != nullptr ? _tags_start - snapper.runner_tags : 0;
+		std::uintptr_t offset_start = _tags_start - snapper.runner_tags;
 		ptr                         = snap_write(ptr, offset_start, should_write);
-		std::uintptr_t offset_end   = _tags_end != nullptr ? _tags_end - snapper.runner_tags : 0;
+		std::uintptr_t offset_end   = _tags_end - snapper.runner_tags;
 		ptr                         = snap_write(ptr, offset_end, should_write);
 	}
 	ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);

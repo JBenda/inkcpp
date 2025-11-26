@@ -1,3 +1,4 @@
+# date:2025.03.22
 LIST Potions = TalkWithAnimals, Invisibility
 LIST Clues = Skull, Feather
 VAR Inventory = (Skull, TalkWithAnimals)
@@ -51,28 +52,31 @@ You startk walking to {to}.
     -> END
 
 === Faint
+# background:Unconscious
 You collapse, the next thing you can remember is how you are given to the ambulance.
 No further action for today ...
 -> DONE
 
 === Mansion
 = Car
+# background:Car
 You step outside your car. Its a wired feeling beehing here again.
 -> Car_cycle
 = Car_cycle
-+ (look_around)[look around]
-    It is a strange day. Despite it beeing spring, the sky is one massive gray soup.
++ (look_around)[look around # Type:Idle]
+    It is a strange day. Despite it beeing spring, the sky is one massive gray soup. # style:Gray
     -> Car_cycle
 + [go to the mension]
     ~ walking("Mansion.Entrance")
     -> Entrance
 
 = Entrance
+# background:Mansion
 {not Mansion.look_around: Just in time you are able to see the door, someone with with a yellow summer dress enters it.}
 You climbing the 56 steps up to the door, high water is a dump thing.
 -> Entrance_cycle
 = Entrance_cycle
-+ (look_around) [look around]
++ (look_around) [look around # Type:Idle ]
   While watching around you, <>
     {Inventory hasnt Invisibility:
         see a small bottle in the Pot next to the door. 
@@ -82,10 +86,10 @@ You climbing the 56 steps up to the door, high water is a dump thing.
   -> Entrance_cycle
 * {look_around} [Pick up the bottle]
   ~ Inventory += Invisibility
-  You pick up the bottle and inspect it more. It is labeld "Invisible", just this one word written with and edding.
+  You pick up the bottle and inspect it more. It is labeld "<Blue>Invisible</>, just this one word written with and edding.
   -> Entrance_cycle
-+ [Knock]
-    "Ahh", you cry while reaching for the door bell. Saying it was charched would be an understatement.
++ (knock)[Knock {knock: again?} # {knock: Type:Danger} ]
+    "<Red>Ahh</>", you cry while reaching for the door bell. Saying it was charched would be an understatement.
     ~ Health -= 20
     { Health <= 0: -> Faint}
     -> Entrance_cycle
