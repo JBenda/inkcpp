@@ -128,3 +128,31 @@ SCENARIO("missing leading whitespace inside choice-only text and glued text _ #1
 		}
 	}
 }
+
+SCENARIO(
+    "choice tag references are not correctly stored (as pointer instead of index) _ #116", "[fixes]"
+)
+{
+	GIVEN("story with choice tag")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR
+		                                            "116_story_with_choice_tags.bin")};
+		runner                 thread = ink->new_runner();
+		WHEN("run story, store, and reload")
+		{
+			thread->getall();
+			REQUIRE(thread->num_choices() == 1);
+			REQUIRE(thread->get_choice(0)->num_tags() == 1);
+			REQUIRE(thread->get_choice(0)->get_tag(0) == std::string("Type:Idle"));
+			auto* snapshot = thread->create_snapshot();
+			THEN("snapshot loaded works")
+			{
+				runner loaded = ink->new_runner_from_snapshot(*snapshot);
+				loaded->getall();
+				REQUIRE(loaded->num_choices() == 1);
+				REQUIRE(loaded->get_choice(0)->num_tags() == 1);
+				REQUIRE(loaded->get_choice(0)->get_tag(0) == std::string("Type:Idle"));
+			}
+		}
+	}
+}
