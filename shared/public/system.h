@@ -13,7 +13,6 @@
 #	include "Misc/CString.h"
 #	include "HAL/UnrealMemory.h"
 #	include "Hash/CityHash.h"
-
 #endif
 #ifdef INK_ENABLE_STL
 #	include <exception>
@@ -23,6 +22,9 @@
 #	include <cstdint>
 #	include <cstdio>
 #	include <cstdarg>
+#endif
+#ifdef INK_ENABLE_CSTD
+#	include <ctype.h>
 #endif
 
 // Platform specific defines //
@@ -46,6 +48,17 @@ namespace ink
  */
 typedef unsigned int uint32_t;
 
+#ifndef INK_ENABLE_STL
+
+/** Additional signed integer types */
+typedef int   int32_t;
+typedef short int16_t;
+
+/** Additional unsigned integer types */
+typedef unsigned long long uint64_t;
+typedef unsigned short     uint16_t;
+#endif // ndef INK_ENABLE_STL
+
 /** Name hash (used for temporary variables) */
 typedef uint32_t hash_t;
 
@@ -64,6 +77,18 @@ hash_t hash_string(const char* string);
 
 /** Byte type */
 typedef unsigned char byte_t;
+
+/** Ptr difference type */
+typedef decltype(static_cast<int*>(nullptr) - static_cast<int*>(nullptr)) ptrdiff_t;
+
+/** Verify sizes */
+static_assert(sizeof(byte_t) == 1);
+static_assert(sizeof(uint16_t) == 2);
+static_assert(sizeof(int16_t) == 2);
+static_assert(sizeof(uint32_t) == 4);
+static_assert(sizeof(int32_t) == 4);
+static_assert(sizeof(uint64_t) == 8);
+static_assert(sizeof(ptrdiff_t) == sizeof(void*));
 
 /** Used to identify an offset in a data table (like a string in the string table) */
 typedef uint32_t offset_t;

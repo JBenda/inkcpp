@@ -3,7 +3,10 @@ root = true
 [*]
 guidelines = 100
 indent_style = tab
-indent_size = 4
+indent_size = 2
 # Unix-style newlines
 end_of_line = lf
 insert_final_newline = true
+
+[CMakeLists.txt]
+max_line_length = 100
