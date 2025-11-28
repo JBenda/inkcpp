@@ -69,6 +69,12 @@ public:
 	  virtual runner new_runner_from_snapshot(
 	      const snapshot& obj, globals store = nullptr, unsigned runner_id = 0
 	  ) = 0;
+
+	  /**
+	  * @brief hash of binary/story.
+	  * used to check for story changes.
+	  */
+	  virtual hash_t hash() const = 0;
 #pragma endregion
 
 #pragma region Factory Methods

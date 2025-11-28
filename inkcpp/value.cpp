@@ -237,6 +237,14 @@ ink::runtime::value value::to_interface_value(list_table& table) const
 	return val();
 }
 
+bool value::can_be_migrated() const
+{
+	if (_type == value_type::string && ! string_value.allocated) {
+		return false;
+	}
+	return true;
+}
+
 size_t value::snap(unsigned char* data, const snapper& snapper) const
 {
 	unsigned char* ptr          = data;

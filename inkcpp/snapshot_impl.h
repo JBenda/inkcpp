@@ -11,6 +11,11 @@
 #include "array.h"
 #include "choice.h"
 
+namespace ink::runtime
+{
+class story;
+} // namespace ink::runtime
+
 namespace ink::runtime::internal
 {
 class snap_choice
@@ -67,7 +72,7 @@ private:
 
 static_assert(sizeof(snap_tag) == sizeof(const char*));
 
-class snapshot_impl : public snapshot
+class snapshot_impl final : public snapshot
 {
 public:
 	~snapshot_impl() override
@@ -95,6 +100,13 @@ public:
 
 	size_t num_runners() const override { return _header.num_runners; }
 
+	bool can_be_migrated() const override { return _header.migratable; }
+
+	bool can_be_migrated(const story&) const;
+
+	hash_t hash() const { return _header.hash; }
+
+
 private:
 	// file information
 	// only populated when loading snapshots
@@ -107,7 +119,9 @@ private:
 	struct header {
 		size_t num_runners;
 		size_t length;
-
+		hash_t hash;
+		bool   migratable;
+		size_t version = 1;
 	} _header;
 
 	size_t get_offset(size_t idx) const

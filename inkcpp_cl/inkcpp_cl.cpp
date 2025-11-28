@@ -246,10 +246,19 @@ int main(int argc, const char** argv)
 				std::cout << "?> ";
 				std::cin >> c;
 				if (c == -1) {
+					std::cout << "To create a migratable snapshot please enter a choice in addition, or `-1` "
+					             "to snap right now:\nsnap after\n?>";
+					std::cin >> c;
+					if (c != -1) {
+						thread->choose(c - 1);
+					}
 					snapshot* snap = thread->create_snapshot();
 					snap->write_to_file(
 					    std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".snap").c_str()
 					);
+					if (snap->can_be_migrated()) {
+						std::cout << "Migratable snapshot." << std::endl;
+					}
 					delete snap;
 					break;
 				}

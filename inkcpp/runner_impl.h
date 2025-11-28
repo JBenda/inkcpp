@@ -123,6 +123,7 @@ public:
 
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
+	bool                 can_be_migrated() const;
 
 #ifdef INK_ENABLE_CSTD
 	// c-style getline
@@ -131,6 +132,9 @@ public:
 
 	// move to path
 	virtual bool move_to(hash_t path) override;
+
+	// move to path but keep as much state as possible
+	bool migrate_to(hash_t path);
 
 	// Gets a single line of output
 	virtual line_type getline() override;
@@ -193,7 +197,7 @@ private:
 
 private:
 	template<typename T>
-	inline T read();
+	inline T read(optional<ip_t> pos = nullopt);
 
 	choice& add_choice();
 	void    clear_choices();
@@ -208,6 +212,8 @@ private:
 		KEEP_KNOT, ///< keep knot and global tags
 	};
 	void clear_tags(tags_clear_level which);
+	// Fetch string only tags at Tag/Global level
+	void fetch_tags(ip_t begin);
 
 	// Special code for jumping from the current IP to another
 	void     jump(ip_t, bool record_visits, bool track_knot_visit);
@@ -389,7 +395,7 @@ const unsigned char*
 }
 
 template<>
-inline const char* runner_impl::read();
+inline const char* runner_impl::read(optional<ip_t>);
 
 template<runner_impl::tags_level L>
 bool runner_impl::has_tags() const

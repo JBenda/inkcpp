@@ -515,6 +515,18 @@ basic_stream& operator>>(basic_stream& in, FString& out)
 	return in;
 }
 #endif
+bool basic_stream::can_be_migrated() const
+{
+	if (saved()) {
+		return false;
+	}
+	for (size_t i = 0; i < _size; ++i) {
+		if (! _data[i].can_be_migrated()) {
+			return false;
+		}
+	}
+	return true;
+}
 
 size_t basic_stream::snap(unsigned char* data, const snapper& snapper) const
 {

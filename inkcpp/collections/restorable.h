@@ -356,6 +356,8 @@ public:
 	virtual size_t       snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
+	bool can_be_migrated() const { return ! is_saved(); }
+
 protected:
 	// Called when we run out of space in buffer.
 	virtual void overflow(ElementType*&, size_t&) { inkFail("Restorable run out of memory!"); }

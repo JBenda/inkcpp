@@ -157,6 +157,8 @@ public:
 
 	void extend(size_t capacity = 0);
 
+	bool can_be_migrated() const { return true; }
+
 	size_t snap(unsigned char* data, const snapper& snapper) const
 	{
 		inkAssert(! is_pointer<T>{}(), "here is a special case oversight");
@@ -229,6 +231,8 @@ public:
 		_last_size = 0;
 	}
 
+	bool is_saved() const { return _last_size != 0; }
+
 	void save() { _last_size = this->size(); }
 
 	void forgett() { _last_size = 0; }
@@ -236,6 +240,8 @@ public:
 	bool has_changed() const { return base::size() != _last_size; }
 
 	size_t last_size() const { return _last_size; }
+
+	bool can_be_migrated() const { return ! is_saved(); }
 
 	size_t snap(unsigned char* data, const snapshot_interface::snapper& snapper) const
 	{
@@ -315,6 +321,7 @@ public:
 
 	// get value by index
 	const T& get(size_t index) const;
+	const T& get_old(size_t index) const;
 
 	// size of the array
 	inline size_t capacity() const { return _capacity; }
@@ -331,6 +338,7 @@ public:
 	void clear(const T& value);
 
 	// snapshot interface
+	virtual bool                 can_be_migrated() const;
 	virtual size_t               snap(unsigned char* data, const snapper&) const;
 	virtual const unsigned char* snap_load(const unsigned char* data, const loader&);
 
@@ -395,6 +403,15 @@ inline const T& basic_restorable_array<T>::get(size_t index) const
 	}
 
 	// Otherwise, fall back on the real array
+	return _array[index];
+}
+
+template<typename T>
+inline const T& basic_restorable_array<T>::get_old(size_t index) const
+{
+	check_index(index);
+	inkAssert(_saved, "Use old only on saved arrays.");
+
 	return _array[index];
 }
 
@@ -464,7 +481,7 @@ private:
 };
 
 template<typename T>
-class allocated_restorable_array final : public basic_restorable_array<T>
+class allocated_restorable_array : public basic_restorable_array<T>
 {
 	using base = basic_restorable_array<T>;
 
@@ -520,6 +537,12 @@ private:
 	T  _nullValue;
 	T* _buffer;
 };
+
+template<typename T>
+inline bool basic_restorable_array<T>::can_be_migrated() const
+{
+	return ! _saved;
+}
 
 template<typename T>
 inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper&) const

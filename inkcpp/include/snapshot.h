@@ -26,7 +26,7 @@ namespace ink::runtime
 class snapshot
 {
 public:
-	virtual ~snapshot(){};
+	virtual ~snapshot() {};
 
 	/** Construct snapshot from blob.
 	 * Memory must be kept valid until the snapshot is deconstructed.
@@ -39,11 +39,13 @@ public:
 	static snapshot* from_binary(const unsigned char* data, size_t length, bool freeOnDestroy = true);
 
 	/** access blob inside snapshot */
-	virtual const unsigned char* get_data() const     = 0;
+	virtual const unsigned char* get_data() const        = 0;
 	/** size of blob inside snapshot */
-	virtual size_t               get_data_len() const = 0;
+	virtual size_t               get_data_len() const    = 0;
 	/** number of runners which are stored inside this snapshot */
-	virtual size_t               num_runners() const  = 0;
+	virtual size_t               num_runners() const     = 0;
+	/** if this snapshot can be migrated, if the story file changes (slightly). */
+	virtual bool                 can_be_migrated() const = 0;
 
 #ifdef INK_ENABLE_STL
 	/** deserialize snapshot from file.

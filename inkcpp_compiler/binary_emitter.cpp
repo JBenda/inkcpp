@@ -156,8 +156,12 @@ void binary_emitter::write_raw(
 {
 	_containers.write(command);
 	_containers.write(flag);
+	constexpr size_t MAX_PAYLOAD_SIZE = 4;
+	ink_assert(payload_size <= MAX_PAYLOAD_SIZE, "enforce constant instruction size");
 	if (payload_size > 0)
 		_containers.write(( const byte_t* ) payload, payload_size);
+	constexpr const byte_t empty[MAX_PAYLOAD_SIZE] = {};
+	_containers.write(empty, MAX_PAYLOAD_SIZE - payload_size);
 }
 
 void binary_emitter::write_path(

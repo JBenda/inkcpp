@@ -133,6 +133,7 @@ void runner_impl::set_var<runner_impl::Scope::LOCAL>(
 	} else {
 		if (is_redef) {
 			value* src = _stack.get(variableName);
+			inkAssert(src != nullptr, "Tried to redefine a non existing local variable.");
 			if (src->type() == value_type::value_pointer) {
 				auto [name, ci] = src->get<value_type::value_pointer>();
 				inkAssert(ci == 0, "Only global pointer are allowed on _stack!");
@@ -162,29 +163,32 @@ void runner_impl::set_var<runner_impl::Scope::NONE>(
 }
 
 template<typename T>
-inline T runner_impl::read()
+inline T runner_impl::read(optional<ip_t> pos)
 {
 	using header = ink::internal::header;
+	ip_t ptr     = pos.value_or(_ptr);
 	// Sanity
-	inkAssert(_ptr + sizeof(T) <= _story->end(), "Unexpected EOF in Ink execution");
+	inkAssert(ptr + sizeof(T) <= _story->end(), "Unexpected EOF in Ink execution");
 
 	// Read memory
-	T val = *( const T* ) _ptr;
+	T val = *( const T* ) ptr;
 	if (_story->get_header().endien == header::endian_types::differ) {
 		val = header::swap_bytes(val);
 	}
 
 	// Advance ip
-	_ptr += sizeof(T);
+	if (! pos.has_value()) {
+		_ptr += sizeof(T);
+	}
 
 	// Return
 	return val;
 }
 
 template<>
-inline const char* runner_impl::read()
+inline const char* runner_impl::read(optional<ip_t> pos)
 {
-	offset_t str = read<offset_t>();
+	offset_t str = read<offset_t>(pos);
 	return _story->string(str);
 }
 
@@ -292,6 +296,26 @@ void runner_impl::clear_tags(tags_clear_level which)
 	}
 }
 
+void runner_impl::fetch_tags(ip_t begin)
+{
+	ip_t iter = begin;
+	if (read<Command>(iter) == Command::START_CONTAINER_MARKER) {
+		iter += 6;
+	}
+	while (read<Command>(iter) == Command::START_TAG) {
+		// skip non-trivial tags (constant string only)
+		if (read<Command>(iter + 6) != Command::STR || read<Command>(iter + 12) != Command::END_TAG) {
+			while (read<Command>(iter) != Command::END_TAG) {
+				iter += 6;
+			}
+			iter += 6;
+			continue;
+		}
+		add_tag(read<const char*>(iter + 6 + 2), tags_level::UNKNOWN);
+		iter += 18;
+	}
+}
+
 void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 {
 	// Optimization: if we are _is_falling, then we can
@@ -386,7 +410,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 		const ContainerData* iData = nullptr;
 		size_t               level = _container.size();
 		if (_container.iter(iData)
-		    && (level > comm_end
+		    && (level >= comm_end
 		        || _story->container_flag(iData->offset + _story->instructions())
 		               & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
 			auto parrent_offset = _story->instructions() + iData->offset;
@@ -633,11 +657,30 @@ void runner_impl::getline_silent()
 
 snapshot* runner_impl::create_snapshot() const { return _globals->create_snapshot(); }
 
+bool runner_impl::can_be_migrated() const
+{
+	if (_choices.size()) {
+		return false;
+	}
+	if (_entered_knot) {
+		return false;
+	}
+	// TODO(JBe): next store _ptr as path
+	hash_t c_hash = _story->container_hash(_ptr - 6);
+	if (c_hash == 0) {
+		return false;
+	}
+	return _output.can_be_migrated() && _stack.can_be_migrated() && _ref_stack.can_be_migrated()
+	    && _eval.can_be_migrated() && _tags_begin.can_be_migrated() && _tags.can_be_migrated()
+	    && _container.can_be_migrated() && _threads.can_be_migrated() && _choices.can_be_migrated();
+}
+
 size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
+	ptr                         = snap_write(ptr, _story->container_hash(_ptr - 6), should_write);
 	ptr                         = snap_write(ptr, offset, should_write);
 	offset                      = _backup - _story->instructions();
 	ptr                         = snap_write(ptr, offset, should_write);
@@ -658,8 +701,13 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	snapper.runner_tags = _tags.data();
 	ptr                 = snap_write(ptr, _entered_global, should_write);
 	ptr                 = snap_write(ptr, _entered_knot, should_write);
-	ptr                 = snap_write(ptr, _current_knot_id, should_write);
-	ptr                 = snap_write(ptr, _current_knot_id_backup, should_write);
+	ptr                 = snap_write(ptr, get_current_knot(), should_write);
+	if (_current_knot_id_backup != ~0U) {
+		ptr = snap_write(ptr, _story->container_hash(_current_knot_id_backup), should_write);
+	} else {
+		hash_t none = 0;
+		ptr         = snap_write(ptr, none, should_write);
+	}
 	ptr += _container.snap(data ? ptr : nullptr, snapper);
 	ptr += _threads.snap(data ? ptr : nullptr, snapper);
 	ptr = snap_write(ptr, _fallback_choice.has_value(), should_write);
@@ -674,6 +722,8 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 {
 	auto           ptr = data;
 	std::uintptr_t offset;
+	hash_t         current_knot_name;
+	ptr     = snap_read(ptr, current_knot_name);
 	ptr     = snap_read(ptr, offset);
 	_ptr    = offset == 0 ? nullptr : _story->instructions() + offset;
 	ptr     = snap_read(ptr, offset);
@@ -697,10 +747,23 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	loader.runner_tags = _tags.data();
 	ptr                = snap_read(ptr, _entered_global);
 	ptr                = snap_read(ptr, _entered_knot);
-	ptr                = snap_read(ptr, _current_knot_id);
-	ptr                = snap_read(ptr, _current_knot_id_backup);
-	ptr                = _container.snap_load(ptr, loader);
-	ptr                = _threads.snap_load(ptr, loader);
+	_current_knot_id   = ~0U;
+	ptr                = snap_read(ptr, current_knot_name);
+	if (current_knot_name) {
+		bool found
+		    = _story->get_container_id(_story->find_offset_for(current_knot_name), _current_knot_id);
+		inkAssert(found, "Unable to find current knot in migrated story.");
+	}
+	_current_knot_id_backup = ~0U;
+	ptr                     = snap_read(ptr, current_knot_name);
+	if (current_knot_name) {
+		bool found = _story->get_container_id(
+		    _story->find_offset_for(current_knot_name), _current_knot_id_backup
+		);
+		inkAssert(found, "Unable to find current knot backup in migration %u", current_knot_name);
+	}
+	ptr = _container.snap_load(ptr, loader);
+	ptr = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
 	ptr              = snap_read(ptr, has_fallback_choice);
 	_fallback_choice = nullopt;
@@ -737,8 +800,47 @@ bool runner_impl::move_to(hash_t path)
 	// Clear state and move to destination
 	reset();
 	_ptr = _story->instructions();
-	jump(destination, false, true);
+	jump(destination, false, false);
 
+	return true;
+}
+
+bool runner_impl::migrate_to(hash_t path)
+{
+	ip_t destination = _story->find_offset_for(path);
+	if (destination == nullptr) {
+		return false;
+	}
+	clear_tags(tags_clear_level::KEEP_NONE);
+	fetch_tags(_story->instructions());
+	assign_tags({tags_level::GLOBAL});
+	if (_current_knot_id != ~0U) {
+		ip_t start_of_knot = _story->find_offset_for(_story->container_hash(_current_knot_id));
+		fetch_tags(start_of_knot);
+		assign_tags({tags_level::KNOT});
+		if (start_of_knot != destination) {
+			for (ip_t iter = start_of_knot; iter != destination; iter += 6) {
+				if (read<Command>(iter) == Command::DEFINE_TEMP) {
+					hash_t temp_name = read<hash_t>(iter + 2);
+					if (get_var<runner_impl::Scope::LOCAL>(temp_name) == nullptr) {
+						ip_t eval_start = iter - 6;
+						inkAssert(
+						    read<Command>(eval_start) == Command::END_EVAL,
+						    "expected an evaluation segment before defininng a temporary variable"
+						);
+						while (read<Command>(eval_start) != Command::START_EVAL) {
+							eval_start -= 6;
+						}
+						jump(eval_start, false, false);
+						while (_ptr != iter + 6) {
+							step();
+						}
+					}
+				}
+			}
+		}
+	}
+	jump(destination, false, true);
 	return true;
 }
 
@@ -892,6 +994,7 @@ void runner_impl::step()
 			set_done_ptr(nullptr);
 		}
 		if (cmd >= Command::OP_BEGIN && cmd < Command::OP_END) {
+			read<uint32_t>();
 			_operations(cmd, _eval);
 		} else {
 			switch (cmd) {
@@ -995,6 +1098,7 @@ void runner_impl::step()
 					_eval.push(value{}.set<value_type::divert>(target));
 				} break;
 				case Command::NEWLINE: {
+					read<uint32_t>();
 					if (_evaluation_mode) {
 						_eval.push(values::newline);
 					} else {
@@ -1004,6 +1108,7 @@ void runner_impl::step()
 					}
 				} break;
 				case Command::GLUE: {
+					read<uint32_t>();
 					if (_evaluation_mode) {
 						_eval.push(values::glue);
 					} else {
@@ -1011,6 +1116,7 @@ void runner_impl::step()
 					}
 				} break;
 				case Command::VOID: {
+					read<uint32_t>();
 					if (_evaluation_mode) {
 						_eval.push(values::null); // TODO: void type?
 					}
@@ -1094,9 +1200,15 @@ void runner_impl::step()
 				} break;
 
 				// == Terminal commands
-				case Command::DONE: on_done(true); break;
+				case Command::DONE:
+					read<uint32_t>();
+					on_done(true);
+					break;
 
-				case Command::END: _ptr = nullptr; break;
+				case Command::END:
+					read<uint32_t>();
+					_ptr = nullptr;
+					break;
 
 				// == Tunneling
 				case Command::TUNNEL: {
@@ -1153,10 +1265,12 @@ void runner_impl::step()
 				} break;
 				case Command::TUNNEL_RETURN:
 				case Command::FUNCTION_RETURN: {
+					read<uint32_t>();
 					execute_return();
 				} break;
 
 				case Command::THREAD: {
+					read<uint32_t>();
 					// Push a thread frame so we can return easily
 					// TODO We push ahead of a single divert. Is that correct in all cases....?????
 					auto returnTo = _ptr + CommandSize<uint32_t>;
@@ -1258,18 +1372,29 @@ void runner_impl::step()
 				} break;
 
 				// == Evaluation stack
-				case Command::START_EVAL: _evaluation_mode = true; break;
+				case Command::START_EVAL:
+					read<uint32_t>();
+					_evaluation_mode = true;
+					break;
 				case Command::END_EVAL:
+					read<uint32_t>();
 					_evaluation_mode = false;
 
 					// Assert stack is empty? Is that necessary?
 					break;
 				case Command::OUTPUT: {
+					read<uint32_t>();
 					value v = _eval.pop();
 					_output << v;
 				} break;
-				case Command::POP: _eval.pop(); break;
-				case Command::DUPLICATE: _eval.push(_eval.top_value()); break;
+				case Command::POP:
+					read<uint32_t>();
+					_eval.pop();
+					break;
+				case Command::DUPLICATE:
+					read<uint32_t>();
+					_eval.push(_eval.top_value());
+					break;
 				case Command::PUSH_VARIABLE_VALUE: {
 					// Try to find in local stack
 					hash_t       variableName = read<hash_t>();
@@ -1288,12 +1413,14 @@ void runner_impl::step()
 					break;
 				}
 				case Command::START_STR: {
+					read<uint32_t>();
 					inkAssert(_evaluation_mode, "Can not enter string mode while not in evaluation mode!");
 					_string_mode     = true;
 					_evaluation_mode = false;
 					_output << values::marker;
 				} break;
 				case Command::END_STR: {
+					read<uint32_t>();
 					// TODO: Assert we really had a marker on there?
 					inkAssert(! _evaluation_mode, "Must be in evaluation mode");
 					_string_mode     = false;
@@ -1308,11 +1435,13 @@ void runner_impl::step()
 
 				// == Tag commands
 				case Command::START_TAG: {
+					read<uint32_t>();
 					_output << values::marker;
 				} break;
 
 
 				case Command::END_TAG: {
+					read<uint32_t>();
 					auto tag = _output.get_alloc<true>(_globals->strings(), _globals->lists());
 					add_tag(tag, tags_level::UNKNOWN);
 				} break;
@@ -1444,6 +1573,7 @@ void runner_impl::step()
 					}
 				} break;
 				case Command::VISIT: {
+					read<uint32_t>();
 					// Push the visit count for the current container to the top
 					//  is 0-indexed for some reason. idk why but this is what ink expects
 					_eval.push(value{}.set<value_type::int32>(
@@ -1451,9 +1581,11 @@ void runner_impl::step()
 					));
 				} break;
 				case Command::TURN: {
+					read<uint32_t>();
 					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_globals->turns())));
 				} break;
 				case Command::SEQUENCE: {
+					read<uint32_t>();
 					// TODO: The C# ink runtime does a bunch of fancy logic
 					//  to make sure each element is picked at least once in every
 					//  iteration loop. I don't feel like replicating that right now.
@@ -1467,6 +1599,7 @@ void runner_impl::step()
 					);
 				} break;
 				case Command::SEED: {
+					read<uint32_t>();
 					int32_t seed = _eval.pop().get<value_type::int32>();
 					_rng.srand(seed);
 
@@ -1488,6 +1621,7 @@ void runner_impl::step()
 					)));
 				} break;
 				case Command::TAG: {
+					read<uint32_t>();
 					add_tag(read<const char*>(), tags_level::UNKNOWN);
 				} break;
 				default: inkAssert(false, "Unrecognized command!"); break;

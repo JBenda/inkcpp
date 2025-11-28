@@ -86,6 +86,9 @@ namespace runtime
 			void restore();
 			void forget();
 
+			// copy new elements from _new, and delete elements now longer existing
+			bool migrate(basic_stack& _new);
+
 			// replace all pointer in current frame with values from _stack
 			void fetch_values(basic_stack& _stack);
 			// push all values to other _stack
@@ -94,6 +97,7 @@ namespace runtime
 			// snapshot interface
 			size_t               snap(unsigned char* data, const snapper&) const;
 			const unsigned char* snap_load(const unsigned char* data, const loader&);
+			bool                 can_be_migrated() const;
 
 		private:
 			entry&       add(hash_t name, const value& val);
@@ -208,6 +212,8 @@ namespace runtime
 			{
 				return base::snap_load(data, loader);
 			}
+
+			bool can_be_migrated() const { return base::can_be_migrated(); }
 		};
 
 		template<size_t N, bool dynamic = false>
