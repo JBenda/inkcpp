@@ -225,7 +225,7 @@ private:
 };
 
 template<value_type ty, typename T, typename ENV>
-value redefine<ty, T, ENV>::operator()(const T& lh, const T& rh)
+value redefine<ty, T, ENV>::operator()(const T&, const T& rh)
 {
 	return value{}.set<ty>(rh);
 }

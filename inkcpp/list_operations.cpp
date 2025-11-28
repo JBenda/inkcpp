@@ -199,7 +199,7 @@ void operation<Command::LIST_INT, value_type::string, void>::operator()(
 	    "list_flag construction needs the flag numeric value as second argument!"
 	);
 	list_flag entry = _list_table.get_list_id(vals[0].get<value_type::string>());
-	entry.flag      = vals[1].get<value_type::int32>();
+	entry.flag      = static_cast<int16_t>(vals[1].get<value_type::int32>());
 	entry           = _list_table.external_fvalue_to_internal(entry);
 	stack.push(value{}.set<value_type::list_flag>(entry));
 }

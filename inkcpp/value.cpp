@@ -20,7 +20,7 @@ template<value_type = value_type::OP_BEGIN>
 bool truthy_impl(const value& v, const list_table& lists);
 
 template<>
-bool truthy_impl<value_type::OP_END>(const value& v, const list_table& lists)
+bool truthy_impl<value_type::OP_END>(const value&, const list_table&)
 {
 	inkFail("Type was not found in operational types or it has no conversion to boolean");
 	return false;
@@ -197,8 +197,9 @@ value::value(const ink::runtime::value& val)
 		case types::String: set<value_type::string>(val.get<types::String>()); break;
 		case types::Float: set<value_type::float32>(val.get<types::Float>()); break;
 		case types::List:
-			set<value_type::list>(list_table::list{
-			    static_cast<list_impl*>(val.get<types::List>())->get_lid()});
+			set<value_type::list>(
+			    list_table::list{static_cast<list_impl*>(val.get<types::List>())->get_lid()}
+			);
 	}
 }
 
@@ -260,7 +261,7 @@ size_t value::snap(unsigned char* data, const snapper& snapper) const
 		// TODO more space efficent?
 		ptr = snap_write(ptr, &bool_value, max_value_size, should_write);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* value::snap_load(const unsigned char* ptr, const loader& loader)
@@ -269,9 +270,11 @@ const unsigned char* value::snap_load(const unsigned char* ptr, const loader& lo
 	ptr = snap_read(ptr, &bool_value, max_value_size);
 	if (_type == value_type::string) {
 		if (string_value.allocated) {
-			string_value.str = loader.string_table[(std::uintptr_t)(string_value.str)];
+			string_value.str
+			    = loader.string_table[static_cast<size_t>(reinterpret_cast<uintptr_t>(string_value.str))];
 		} else {
-			string_value.str = loader.story_string_table + (std::uintptr_t)(string_value.str);
+			string_value.str = loader.story_string_table
+			                 + static_cast<size_t>(reinterpret_cast<uintptr_t>(string_value.str));
 		}
 	}
 	return ptr;

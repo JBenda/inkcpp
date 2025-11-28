@@ -30,9 +30,9 @@ public:
 
 	const char* string(uint32_t index) const;
 
-	inline const ip_t instructions() const { return _instruction_data; }
+	inline ip_t instructions() const { return _instruction_data; }
 
-	inline const ip_t end() const { return _file + _length; }
+	inline ip_t end() const { return _file + _length; }
 
 	inline uint32_t num_containers() const { return _num_containers; }
 
@@ -88,7 +88,7 @@ private:
 	// instruction info
 	ip_t _instruction_data;
 
-	// story block used to creat various weak pointers
+	// story block used to create various weak pointers
 	ref_block* _block;
 
 	// whether we need to delete our binary data after we destruct

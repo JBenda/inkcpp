@@ -12,7 +12,8 @@ const hash_t X = ink::hash_string("X");
 const hash_t Y = ink::hash_string("Y");
 const hash_t Z = ink::hash_string("Z");
 
-value operator "" _v(unsigned long long i) {
+value operator""_v(unsigned long long i)
+{
 	return value{}.set<value_type::int32>(static_cast<int32_t>(i));
 }
 
@@ -157,10 +158,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 			stack.push_frame<frame_type::tunnel>(555, false);
 			stack.complete_thread(thread);
 
-			THEN("there should be no frames on the stack")
-			{
-				REQUIRE(stack.has_frame() == false);
-			}
+			THEN("there should be no frames on the stack") { REQUIRE(stack.has_frame() == false); }
 		}
 	}
 
@@ -189,8 +187,8 @@ SCENARIO("threading with the callstack", "[callstack]")
 			WHEN("that thread does a tunnel return")
 			{
 				frame_type type;
-				auto offset = stack.pop_frame(&type, eval_mode);
-				
+				auto       offset = stack.pop_frame(&type, eval_mode);
+
 				THEN("that thread should be outside the tunnel")
 				{
 					REQUIRE(type == frame_type::tunnel);
@@ -228,7 +226,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 					WHEN("we do a tunnel return")
 					{
 						frame_type type;
-						auto offset = stack.pop_frame(&type, eval_mode);
+						auto       offset = stack.pop_frame(&type, eval_mode);
 
 						THEN("we should be back outside")
 						{
@@ -247,7 +245,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 			{
 				stack.complete_thread(thread);
 				frame_type type;
-				auto offset = stack.pop_frame(&type, eval_mode);
+				stack.pop_frame(&type, eval_mode);
 
 				THEN("we should be outside the tunnel")
 				{
@@ -274,7 +272,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 	{
 		// Create the stack
 		auto stack = ink::runtime::internal::stack<50>();
-		
+
 		// Create the thread
 		thread_t thread = stack.fork_thread();
 
@@ -365,7 +363,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 			WHEN("we then try to pop both frames")
 			{
 				frame_type _ignore;
-				bool eval_mode;
+				bool       eval_mode;
 				stack.pop_frame(&_ignore, eval_mode);
 				stack.pop_frame(&_ignore, eval_mode);
 

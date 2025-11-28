@@ -7,8 +7,8 @@
 
 using namespace ink::runtime;
 
-auto   lines_ink    = story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin");
-runner lines_thread = lines_ink->new_runner();
+std::unique_ptr<story> lines_ink{story::from_file(INK_TEST_RESOURCE_DIR "LinesStory.bin")};
+runner                 lines_thread = lines_ink->new_runner();
 
 SCENARIO("a story has the proper line breaks", "[lines]")
 {
@@ -52,8 +52,8 @@ SCENARIO("a story has the proper line breaks", "[lines]")
 	}
 	GIVEN("a complex story")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "TheIntercept.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "TheIntercept.bin")};
+		runner                 thread = ink->new_runner();
 		// based on issue #82
 		WHEN("run sequence 1 3 3 3 2 3")
 		{

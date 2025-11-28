@@ -30,7 +30,7 @@ namespace runtime
 
 		public:
 			// Constant to identify an invalid position in the stream
-			static constexpr size_t npos = ~0;
+			static constexpr size_t npos = ~0U;
 
 			// Append data to stream
 			void append(const value&);

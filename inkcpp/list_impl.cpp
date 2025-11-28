@@ -44,7 +44,7 @@ void list_impl::next(const char*& flag_name, const char*& list_name, int& i, boo
 	if (flag_name != nullptr) {
 		++flag.flag;
 	}
-	if (flag.flag >= _list_table->_list_end[flag.list_id]) {
+	if (static_cast<size_t>(flag.flag) >= _list_table->_list_end[flag.list_id]) {
 next_list:
 		if (one_list_only) {
 			i = -1;
@@ -61,7 +61,8 @@ next_list:
 	}
 	while (! _list_table->has(list_table::list{_list}, flag)) {
 		++flag.flag;
-		if (flag.flag >= _list_table->_list_end[flag.list_id] - _list_table->listBegin(flag.list_id)) {
+		if (static_cast<size_t>(flag.flag)
+		    >= _list_table->_list_end[flag.list_id] - _list_table->listBegin(flag.list_id)) {
 			goto next_list;
 		}
 	}

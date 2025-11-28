@@ -12,8 +12,8 @@ SCENARIO("a story with a white space infront of an conditional Divert", "[Output
 	// based on https://github.com/JBenda/inkcpp/issues/71
 	GIVEN("A story")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "EmptyStringForDivert.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "EmptyStringForDivert.bin")};
+		runner                 thread = ink->new_runner();
 
 		WHEN("run")
 		{

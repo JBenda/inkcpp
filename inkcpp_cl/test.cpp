@@ -124,8 +124,8 @@ bool test(const std::string& inkFilename)
 	}
 
 	// Load story
-	auto file   = story::from_file("test.bin");
-	auto runner = file->new_runner();
+	std::unique_ptr<story> file{story::from_file("test.bin")};
+	auto                   runner = file->new_runner();
 
 	while (true) {
 		// Run continuously

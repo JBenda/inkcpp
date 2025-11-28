@@ -7,8 +7,8 @@
 
 using namespace ink::runtime;
 
-auto tg_ink    = story::from_file(INK_TEST_RESOURCE_DIR "NoEarlyTags.bin");
-auto tg_thread = tg_ink->new_runner();
+std::unique_ptr<story> tg_ink{story::from_file(INK_TEST_RESOURCE_DIR "NoEarlyTags.bin")};
+auto                   tg_thread = tg_ink->new_runner();
 
 SCENARIO("Story with tags and glues", "[tags][glue]")
 {
