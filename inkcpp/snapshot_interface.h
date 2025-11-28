@@ -22,7 +22,7 @@ class value;
 class snapshot_interface
 {
 public:
-	constexpr snapshot_interface(){};
+	constexpr snapshot_interface() {};
 
 	static unsigned char* snap_write(unsigned char* ptr, const void* data, size_t length, bool write)
 	{
@@ -61,6 +61,7 @@ public:
 	struct loader {
 		managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 		const char*                          story_string_table;
+		const bool                           migratable;
 		const snap_tag*                      runner_tags = nullptr;
 		loader()                                         = delete;
 		loader& operator=(const loader&)                 = delete;
@@ -86,6 +87,16 @@ public:
 	{
 		inkFail("Snap function not implemented");
 		return nullptr;
+	};
+
+	/** Check if the snappable component is in a state which could be migrated to a/new different
+	 * story.
+	 * @attention a migration can still fail, even if @c can_be_migrated() was true.
+	 */
+	bool can_be_migrated() const
+	{
+		inkFail("Snap function not implementd");
+		return false;
 	};
 
 #ifdef __GNUC__

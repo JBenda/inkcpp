@@ -36,7 +36,7 @@ class choice;
 class runner_interface
 {
 public:
-	virtual ~runner_interface(){};
+	virtual ~runner_interface() {};
 
 	// String type to simplify interfaces working with strings
 #ifdef INK_ENABLE_STL

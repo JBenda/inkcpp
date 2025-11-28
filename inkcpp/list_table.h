@@ -144,6 +144,8 @@ public:
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
+	bool can_be_migrated() const { return true; }
+
 	/** special traitment when a list get assignet again
 	 * when a list get assigned and would have no origin, it gets the origin of the base with origin
 	 * eg. I072
@@ -448,7 +450,11 @@ public:
 		    , _pos{null_flag, nullptr} {};
 
 		named_flag_itr(const list_table& list, const data_t* filter, int)
-				: _list{list}, _data{filter}, _pos{{0,0},list._flag_names[0]}
+		    : _list{
+		          list
+    }
+		    , _data{filter}
+		    , _pos{{0, 0}, list._flag_names[0]}
 		{
 			goToValid();
 		}

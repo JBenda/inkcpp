@@ -34,6 +34,8 @@ public:
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
+	bool can_be_migrated() const { return true; }
+
 	// get position of string when iterate through data
 	// used to enable storing a string table references
 	size_t get_id(const char* string) const;

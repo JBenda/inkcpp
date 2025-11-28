@@ -48,6 +48,7 @@ public:
 	CommandFlag container_flag(ip_t offset) const;
 	CommandFlag container_flag(container_t id) const;
 	hash_t      container_hash(container_t id) const;
+	hash_t      container_hash(ip_t offset) const;
 
 	ip_t find_offset_for(hash_t path) const;
 
@@ -59,6 +60,8 @@ public:
 	    new_runner_from_snapshot(const snapshot&, globals store = nullptr, unsigned idx = 0) override;
 
 	const ink::internal::header& get_header() const { return _header; }
+
+	hash_t hash() const override { return hash_data(_file, _length); }
 
 private:
 	void setup_pointers();

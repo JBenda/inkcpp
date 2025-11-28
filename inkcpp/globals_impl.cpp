@@ -17,15 +17,13 @@ namespace ink::runtime::internal
 globals_impl::globals_impl(const story_impl* story)
     : _num_containers(story->num_containers())
     , _turn_cnt{0}
-    , _visit_counts()
-    , _visit_counts_backup()
+    , _visit_counts(visit_count(), visit_count_null_value)
     , _owner(story)
     , _runners_start(nullptr)
     , _lists(story->list_meta(), story->get_header())
     , _globals_initialized(false)
 {
 	_visit_counts.resize(_num_containers);
-	_visit_counts_backup.resize(_num_containers);
 	if (_lists) {
 		// initialize static lists
 		const list_flag* flags = story->lists();
@@ -51,8 +49,7 @@ void globals_impl::visit(uint32_t container_id, bool entering_at_start)
 {
 	if ((! (_owner->container_flag(container_id) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST))
 	    || entering_at_start) {
-		_visit_counts[container_id].visits += 1;
-		_visit_counts[container_id].turns = 0;
+		_visit_counts.set(container_id, {_visit_counts[container_id].visits + 1, 0});
 	}
 }
 
@@ -66,9 +63,11 @@ uint32_t globals_impl::turns() const { return _turn_cnt; }
 void globals_impl::turn()
 {
 	++_turn_cnt;
-	for (size_t i = 0; i < _visit_counts.size(); ++i) {
-		if (_visit_counts[i].turns != -1) {
-			_visit_counts[i].turns += 1;
+	for (size_t i = 0; i < _visit_counts.capacity(); ++i) {
+		visit_count visits = _visit_counts[i];
+		if (visits.turns != -1) {
+			visits.turns += 1;
+			_visit_counts.set(i, visits);
 		}
 	}
 }
@@ -237,35 +236,43 @@ void globals_impl::gc()
 
 void globals_impl::save()
 {
-	for (uint32_t i = 0; i < _num_containers; ++i) {
-		_visit_counts_backup[i] = _visit_counts[i];
-	}
+	_visit_counts.save();
 	_variables.save();
 }
 
 void globals_impl::restore()
 {
-	for (uint32_t i = 0; i < _num_containers; ++i) {
-		_visit_counts[i] = _visit_counts_backup[i];
-	}
+	_visit_counts.restore();
 	_variables.restore();
 }
 
-void globals_impl::forget() { _variables.forget(); }
+void globals_impl::forget()
+{
+	_visit_counts.forget();
+	_variables.forget();
+}
 
 snapshot* globals_impl::create_snapshot() const { return new snapshot_impl(*this); }
+
+bool globals_impl::can_be_migrated() const
+{
+	return _visit_counts.can_be_migrated() && _strings.can_be_migrated() && _lists.can_be_migrated()
+	    && _variables.can_be_migrated();
+}
 
 size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
 {
 	unsigned char* ptr = data;
-	inkAssert(_num_containers == _visit_counts.size(), "Should be equal!");
+	inkAssert(_num_containers == _visit_counts.capacity(), "Should be equal!");
 	inkAssert(
 	    _globals_initialized,
 	    "Only support snapshot of globals with runner! or you don't need a snapshot for this state"
 	);
 	ptr = snap_write(ptr, _turn_cnt, data != nullptr);
 	ptr += _visit_counts.snap(data ? ptr : nullptr, snapper);
-	ptr += _visit_counts_backup.snap(data ? ptr : nullptr, snapper);
+	for (unsigned i = 0; i < _visit_counts.capacity(); ++i) {
+		ptr = snap_write(ptr, _owner->container_hash(i), data != nullptr);
+	}
 	ptr += _strings.snap(data ? ptr : nullptr, snapper);
 	ptr += _lists.snap(data ? ptr : nullptr, snapper);
 	ptr += _variables.snap(data ? ptr : nullptr, snapper);
@@ -277,16 +284,43 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	_globals_initialized = true;
 	ptr                  = snap_read(ptr, _turn_cnt);
 	ptr                  = _visit_counts.snap_load(ptr, loader);
-	ptr                  = _visit_counts_backup.snap_load(ptr, loader);
-	inkAssert(_visit_counts.size() == _visit_counts_backup.size(), "Data inconsitency");
+	size_t old_capacity  = _visit_counts.capacity();
+	// shuffle values if needed
+	if (loader.migratable) {
+		_visit_counts.resize(_owner->num_containers());
+		_visit_counts.save();
+	}
+	inkAssert(old_capacity == _visit_counts.capacity(), "Missmatching number of tracked containers.");
+	for (size_t i = 0; i < old_capacity; ++i) {
+		hash_t path;
+		ptr = snap_read(ptr, path);
+		container_t c_id;
+		bool        found = _owner->get_container_id(_owner->find_offset_for(path), c_id);
+		if (! loader.migratable) {
+			inkAssert(found, "Invalid container id reference.");
+			inkAssert(c_id == i, "tracked containere are not allowed to move, expect we migrate");
+		} else {
+			if (found) {
+				_visit_counts.set(c_id, _visit_counts.get_old(i));
+			}
+		}
+	}
+	if (loader.migratable) {
+		_visit_counts.forget();
+	}
 	inkAssert(
-	    _num_containers == _visit_counts.size(),
+	    _num_containers == _visit_counts.capacity(),
 	    "errer when loading visit counts, story file dont match snapshot!"
 	);
 	ptr = _strings.snap_load(ptr, loader);
 	ptr = _lists.snap_load(ptr, loader);
 	ptr = _variables.snap_load(ptr, loader);
 	return ptr;
+}
+
+bool globals_impl::migrate_new_globals(globals_impl& new_globals)
+{
+	return _variables.migrate(new_globals._variables);
 }
 
 config::statistics::global globals_impl::statistics() const

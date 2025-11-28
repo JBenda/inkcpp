@@ -282,12 +282,11 @@ offset_t basic_stack::pop_frame(frame_type* type, bool& eval)
 		// We now have a frame marker. Check if it's a thread
 		// Thread handling
 		if (
-			// FIXME: is_tghead_marker, is_jump_marker
-					frame->data.type() == value_type::thread_start
-				|| 	frame->data.type() == value_type::thread_end
-				||  frame->data.type() == value_type::jump_marker
-				)
-			{
+		    // FIXME: is_tghead_marker, is_jump_marker
+		    frame->data.type() == value_type::thread_start
+		    || frame->data.type() == value_type::thread_end
+		    || frame->data.type() == value_type::jump_marker
+		) {
 			// End of thread marker, we need to create a jump marker
 			if (frame->data.type() == value_type::thread_end) {
 				// Push a new jump marker after the thread end
@@ -577,6 +576,33 @@ void basic_eval_stack::forget()
 	x.set<value_type::none>();
 	value none = value(x);
 	base::forget([&none](value& elem) { elem = none; });
+}
+
+bool basic_stack::can_be_migrated() const
+{
+	bool values_migratable = true;
+	for_each_all([&values_migratable](const entry& e) {
+		if (! e.data.can_be_migrated()) {
+			values_migratable = false;
+		}
+	});
+	return base::can_be_migrated() && _next_thread == 0 && values_migratable;
+}
+
+bool basic_stack::migrate(basic_stack& new_stack)
+{
+	inkAssert(can_be_migrated() && new_stack.can_be_migrated());
+	// move existing values to new_stack, iff there the variable is also in the new stack
+	for_each_all([&new_stack](const entry& e) {
+		const value* oth = new_stack.get(e.name);
+		if (oth) {
+			new_stack.set(e.name, e.data);
+		}
+	});
+	// set stack to correct new values
+	clear();
+	new_stack.for_each_all([this](const entry& e) { set(e.name, e.data); });
+	return true;
 }
 
 void basic_stack::fetch_values(basic_stack& stack)

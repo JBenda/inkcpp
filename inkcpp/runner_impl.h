@@ -123,6 +123,7 @@ public:
 
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
+	bool                 can_be_migrated() const;
 
 #ifdef INK_ENABLE_CSTD
 	// c-style getline
@@ -131,6 +132,9 @@ public:
 
 	// move to path
 	virtual bool move_to(hash_t path) override;
+
+	// move to path but keep as much state as possible
+	bool migrate_to(hash_t path);
 
 	// Gets a single line of output
 	virtual line_type getline() override;

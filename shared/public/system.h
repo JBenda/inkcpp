@@ -52,15 +52,6 @@ typedef uint32_t hash_t;
 /** Invalid hash value */
 const hash_t InvalidHash = 0;
 
-#ifdef INK_ENABLE_UNREAL
-/** Simple hash for serialization of strings */
-inline hash_t hash_string(const char* string)
-{
-	return CityHash32(string, FCStringAnsi::Strlen(string));
-}
-#else
-hash_t hash_string(const char* string);
-#endif
 
 /** Byte type */
 typedef unsigned char byte_t;
@@ -94,6 +85,17 @@ struct list_flag {
 constexpr list_flag null_flag{-1, -1};
 /** value representing an empty list */
 constexpr list_flag empty_flag{-1, 0};
+
+#ifdef INK_ENABLE_UNREAL
+/** Simple hash for serialization of strings */
+inline hash_t hash_string(const char* string)
+{
+	return CityHash32(string, FCStringAnsi::Strlen(string));
+}
+#else
+hash_t hash_string(const char* string);
+hash_t hash_data(const unsigned char* data, size_t len);
+#endif
 
 namespace internal
 {

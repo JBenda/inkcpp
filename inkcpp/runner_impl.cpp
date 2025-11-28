@@ -386,7 +386,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 		const ContainerData* iData = nullptr;
 		size_t               level = _container.size();
 		if (_container.iter(iData)
-		    && (level > comm_end
+		    && (level >= comm_end
 		        || _story->container_flag(iData->offset + _story->instructions())
 		               & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
 			auto parrent_offset = _story->instructions() + iData->offset;
@@ -633,11 +633,30 @@ void runner_impl::getline_silent()
 
 snapshot* runner_impl::create_snapshot() const { return _globals->create_snapshot(); }
 
+bool runner_impl::can_be_migrated() const
+{
+	if (_choices.size()) {
+		return false;
+	}
+	if (_entered_knot) {
+		return false;
+	}
+	// TODO(JBe): next store _ptr as path
+	hash_t c_hash = _story->container_hash(_ptr - 6);
+	if (c_hash == 0) {
+		return false;
+	}
+	return _output.can_be_migrated() && _stack.can_be_migrated() && _ref_stack.can_be_migrated()
+	    && _eval.can_be_migrated() && _tags_begin.can_be_migrated() && _tags.can_be_migrated()
+	    && _container.can_be_migrated() && _threads.can_be_migrated() && _choices.can_be_migrated();
+}
+
 size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 {
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
+	ptr                         = snap_write(ptr, _story->container_hash(_ptr - 6), should_write);
 	ptr                         = snap_write(ptr, offset, should_write);
 	offset                      = _backup - _story->instructions();
 	ptr                         = snap_write(ptr, offset, should_write);
@@ -674,6 +693,8 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 {
 	auto           ptr = data;
 	std::uintptr_t offset;
+	hash_t         current_knot_name;
+	ptr     = snap_read(ptr, current_knot_name);
 	ptr     = snap_read(ptr, offset);
 	_ptr    = offset == 0 ? nullptr : _story->instructions() + offset;
 	ptr     = snap_read(ptr, offset);
@@ -737,8 +758,19 @@ bool runner_impl::move_to(hash_t path)
 	// Clear state and move to destination
 	reset();
 	_ptr = _story->instructions();
-	jump(destination, false, true);
+	jump(destination, false, false);
 
+	return true;
+}
+
+bool runner_impl::migrate_to(hash_t path)
+{
+	ip_t destination = _story->find_offset_for(path);
+	if (destination == nullptr) {
+		return false;
+	}
+	_ptr = _story->instructions();
+	jump(destination, false, true);
 	return true;
 }
 
