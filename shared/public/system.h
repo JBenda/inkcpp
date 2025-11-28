@@ -60,6 +60,7 @@ inline hash_t hash_string(const char* string)
 }
 #else
 hash_t hash_string(const char* string);
+hash_t hash_data(const unsigned char* data, size_t len);
 #endif
 
 /** Byte type */

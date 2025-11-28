@@ -86,6 +86,9 @@ namespace runtime
 			void restore();
 			void forget();
 
+			// copy new elements from _new, and delete elements now longer existing
+			bool migrate(const basic_stack& _new);
+
 			// replace all pointer in current frame with values from _stack
 			void fetch_values(basic_stack& _stack);
 			// push all values to other _stack

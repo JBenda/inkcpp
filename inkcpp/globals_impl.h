@@ -33,6 +33,14 @@ class globals_impl final
 public:
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
+	bool migratable() const;
+	/** Merges a global snapshot with new global definition.
+	 * new global variables are taken from new_global.
+	 * already existing ones are ignored
+	 * no longer existing ones are deleted.
+	 * @retval true on success
+	 */
+	bool migrate_new_globals(const globals_impl& new_globals);
 	// Initializes a new global store from the given story
 	globals_impl(const story_impl*);
 

@@ -95,27 +95,21 @@ public:
 	virtual size_t num_tags() const override { return num_tags<tags_level::LINE>(); }
 
 	virtual const char* get_tag(size_t index) const override
-	{
-		return get_tag<tags_level::LINE>(index);
-	}
+	{ return get_tag<tags_level::LINE>(index); }
 
 	virtual size_t num_global_tags() const override { return num_tags<tags_level::GLOBAL>(); }
 
 	virtual bool has_global_tags() const override { return has_tags<tags_level::GLOBAL>(); }
 
 	virtual const char* get_global_tag(size_t index) const override
-	{
-		return get_tag<tags_level::GLOBAL>(index);
-	};
+	{ return get_tag<tags_level::GLOBAL>(index); };
 
 	virtual size_t num_knot_tags() const override { return num_tags<tags_level::KNOT>(); }
 
 	virtual bool has_knot_tags() const override { return has_tags<tags_level::KNOT>(); }
 
 	virtual const char* get_knot_tag(size_t index) const override
-	{
-		return get_tag<tags_level::KNOT>(index);
-	};
+	{ return get_tag<tags_level::KNOT>(index); };
 
 	virtual hash_t get_current_knot() const override;
 
@@ -123,6 +117,7 @@ public:
 
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
+	bool                 migratable() const;
 
 #ifdef INK_ENABLE_CSTD
 	// c-style getline
@@ -236,9 +231,7 @@ public:
 		threads()
 		    : base(~0U)
 		    , _threadDone(nullptr, reinterpret_cast<ip_t>(~0))
-		{
-			static_assert(sizeof...(D) == 0, "Don't use explicit template arguments!");
-		}
+		{ static_assert(sizeof...(D) == 0, "Don't use explicit template arguments!"); }
 
 		template<bool... D, bool con = dynamic, enable_if_t<! con, bool> = true>
 		threads()
@@ -393,15 +386,11 @@ inline const char* runner_impl::read();
 
 template<runner_impl::tags_level L>
 bool runner_impl::has_tags() const
-{
-	return num_tags<L>() > 0;
-}
+{ return num_tags<L>() > 0; }
 
 template<runner_impl::tags_level L>
 size_t runner_impl::num_tags() const
-{
-	return _tags_begin[static_cast<int>(L) + 1] - _tags_begin[static_cast<int>(L)];
-}
+{ return _tags_begin[static_cast<int>(L) + 1] - _tags_begin[static_cast<int>(L)]; }
 
 template<runner_impl::tags_level L>
 const char* runner_impl::get_tag(size_t index) const

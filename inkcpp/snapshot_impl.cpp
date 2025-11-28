@@ -18,9 +18,7 @@
 namespace ink::runtime
 {
 snapshot* snapshot::from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
-{
-	return new internal::snapshot_impl(data, length, freeOnDestroy);
-}
+{ return new internal::snapshot_impl(data, length, freeOnDestroy); }
 
 #ifdef INK_ENABLE_STL
 snapshot* snapshot::from_file(const char* filename)
@@ -53,9 +51,10 @@ void snapshot::write_to_file(const char* filename) const
 namespace ink::runtime::internal
 {
 size_t snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt)
-{
-	return serialization_length + sizeof(header) + (runner_cnt + 1) * sizeof(size_t);
-}
+{ return serialization_length + sizeof(header) + (runner_cnt + 1) * sizeof(size_t); }
+
+bool snapshot_impl::can_be_migrated(const story& story)
+{ return can_be_migrated() || (story.hash() == _header.hash); }
 
 const unsigned char* snapshot_impl::get_data() const { return _file; }
 
@@ -65,16 +64,21 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
     : _managed{true}
 {
 	snapshot_interface::snapper snapper{globals.strings(), globals._owner->string(0)};
-	_length           = globals.snap(nullptr, snapper);
-	size_t runner_cnt = 0;
+	bool                        migratable = globals.migratable();
+	size_t                      runner_cnt = 0;
+
+	_length = globals.snap(nullptr, snapper);
 	for (auto node = globals._runners_start; node; node = node->next) {
 		_length += node->object->snap(nullptr, snapper);
+		migratable = migratable && node->object->migratable();
 		++runner_cnt;
 	}
 
 	_length             = file_size(_length, runner_cnt);
 	_header.length      = _length;
 	_header.num_runners = runner_cnt;
+	_header.hash        = globals._owner->hash();
+	_header.migratable  = migratable;
 	unsigned char* data = new unsigned char[_length];
 	_file               = data;
 	unsigned char* ptr  = data;
@@ -108,6 +112,7 @@ snapshot_impl::snapshot_impl(const unsigned char* data, size_t length, bool mana
 	const unsigned char* ptr = data;
 	memcpy(&_header, ptr, sizeof(_header));
 	inkAssert(_header.length == _length, "Corrupted file length");
+	inkAssert(_header.version == decltype(_header){}.version, "Snapshot version missmatch");
 }
 
 size_t snap_choice::snap(unsigned char* data, const snapper& snapper) const

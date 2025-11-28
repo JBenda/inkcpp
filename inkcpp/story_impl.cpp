@@ -20,9 +20,7 @@ story* story::from_file(const char* filename) { return new internal::story_impl(
 #endif
 
 story* story::from_binary(unsigned char* data, size_t length, bool freeOnDestroy)
-{
-	return new internal::story_impl(data, length, freeOnDestroy);
-}
+{ return new internal::story_impl(data, length, freeOnDestroy); }
 } // namespace ink::runtime
 
 namespace ink::runtime::internal
@@ -226,16 +224,26 @@ globals story_impl::new_globals()
 globals story_impl::new_globals_from_snapshot(const snapshot& data)
 {
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
-	auto*                globs    = new globals_impl(this);
+	if (! snapshot.can_load(*this)) {
+		return globals();
+	}
+	auto* globs = new globals_impl(this);
 	snapshot.strings().clear();
 	auto end = globs->snap_load(
-	    snapshot.get_globals_snap(),
-	    snapshot_interface::loader{
-	        snapshot.strings(),
-	        _string_table,
-	    }
+	    snapshot.get_globals_snap(), snapshot_interface::loader{
+	                                     snapshot.strings(),
+	                                     _string_table,
+	                                 }
 	);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
+	if (hash() != snapshot.hash()) {
+		globals new_globs  = new_globals();
+		runner  thread = new_runner(new_globs);
+		if (! globs->migrate_new_globals(*new_globs.cast<globals_impl>().get())) {
+			delete globs;
+			return globals();
+		}
+	}
 	return globals(globs, _block);
 }
 
@@ -253,9 +261,9 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 		store = new_globals_from_snapshot(snapshot);
 	auto* run    = new runner_impl(this, store);
 	auto  loader = snapshot_interface::loader{
-      snapshot.strings(),
-      _string_table,
-  };
+	    snapshot.strings(),
+	    _string_table,
+	};
 	// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to
 	// use
 	idx      = (data.num_runners() - idx - 1);

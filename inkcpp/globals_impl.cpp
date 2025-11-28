@@ -289,6 +289,10 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	return ptr;
 }
 
+bool globals_impl::migrate_new_globals(const globals_impl& new_globals) {
+	return _variables.migrate(new_globals._variables);
+}
+
 config::statistics::global globals_impl::statistics() const
 {
 	return {
