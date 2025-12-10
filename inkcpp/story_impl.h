@@ -25,14 +25,14 @@ public:
 #endif
 	// Create story from allocated binary data in memory. If manage is true, this class will delete
 	//  the pointers on destruction
-	story_impl(unsigned char* binary, size_t len, bool manage = true);
+	story_impl(const unsigned char* binary, size_t len, bool manage = true);
 	virtual ~story_impl();
 
 	const char* string(uint32_t index) const;
 
-	inline const ip_t instructions() const { return _instruction_data; }
+	inline ip_t instructions() const { return _instruction_data; }
 
-	inline const ip_t end() const { return _file + _length; }
+	inline ip_t end() const { return _file + _length; }
 
 	inline uint32_t num_containers() const { return _num_containers; }
 
@@ -65,8 +65,8 @@ private:
 
 private:
 	// file information
-	unsigned char* _file;
-	size_t         _length;
+	const unsigned char* _file;
+	size_t               _length;
 
 	ink::internal::header _header;
 

@@ -15,18 +15,15 @@
 #	include "Hash/CityHash.h"
 #endif
 #ifdef INK_ENABLE_STL
-#	ifdef INK_ENABLE_EXCEPTIONS
-#		include <exception>
-#	endif
 #	include <stdexcept>
 #	include <optional>
 #	include <cctype>
 #	include <cstdint>
-#	include <cstdio>
-#	include <cstdarg>
 #endif
 #ifdef INK_ENABLE_CSTD
+#	include <cstdio>
 #	include <ctype.h>
+#	include <cassert>
 #endif
 
 // Platform specific defines //
@@ -45,7 +42,9 @@
 #else
 #	define inkAssert    ink::ink_assert
 #	define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
+
 #endif
+
 
 namespace ink
 {
@@ -148,20 +147,18 @@ namespace internal
 		while (true) {
 			switch (*(string++)) {
 				case 0: return true;
+				case '\f': [[fallthrough]];
+				case '\r': [[fallthrough]];
 				case '\n':
 					if (! includeNewline)
 						return false;
 				case '\t': [[fallthrough]];
+				case '\v': [[fallthrough]];
 				case ' ': continue;
 				default: return false;
 			}
 		}
 	}
-
-	/** check if character can be only part of a word, when two part of word characters put together
-	 * the will be a space inserted I049
-	 */
-	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
 
 	inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{
@@ -181,7 +178,7 @@ namespace internal
 #endif
 } // namespace internal
 
-#ifdef INK_ENABLE_EXCEPTIONS
+#ifdef INK_ENABLE_STL
 /** exception type thrown if something goes wrong */
 using ink_exception = std::runtime_error;
 #else
@@ -202,7 +199,6 @@ private:
 #endif
 
 // assert
-#ifndef INK_ENABLE_UNREAL
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 {
@@ -211,23 +207,28 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 		msg = EMPTY;
 	}
 	if (! condition) {
+#if defined(INKCPP_ENABLE_STL) || defined(INKCPP_ENABLE_CSTD)
 		if constexpr (sizeof...(args) > 0) {
 			size_t size    = snprintf(nullptr, 0, msg, args...) + 1;
 			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
-#	ifdef INK_ENABLE_EXCEPTIONS
+#	ifdef INK_ENABLE_EH
 			throw ink_exception(message);
 #	else
 			fprintf(stderr, "Ink Assert: %s\n", message);
 			abort();
 #	endif
-		} else {
-#	ifdef INK_ENABLE_EXCEPTIONS
+		} else
+#endif
+		{
+#ifdef INK_ENABLE_EH
 			throw ink_exception(msg);
-#	else
+#else
 			fprintf(stderr, "Ink Assert: %s\n", msg);
+#	if defined(INKCPP_ENABL_STL) || defined(INKCPP_ENABLE_CSTD)
 			abort();
 #	endif
+#endif
 		}
 	}
 }
@@ -238,7 +239,6 @@ template<typename... Args>
 	ink_assert(false, msg, args...);
 	exit(EXIT_FAILURE);
 }
-#endif
 
 namespace runtime::internal
 {

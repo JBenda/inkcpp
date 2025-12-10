@@ -62,8 +62,8 @@ set(INKCPP_INKLECATE
 set_property(CACHE INKCPP_INKLECATE PROPERTY STRINGS "NONE" "OS" "ALL")
 option(INKCPP_NO_RTTI
 			 "Disable real time type information depended code. Used to build without RTTI." OFF)
-option(INKCPP_NO_EXCEPTIONS "Used to build without support for exceptions, disables try/catch blocks and throws" OFF)
-
+option(INKCPP_NO_STL
+			 "Disable bindings to standard library to avoid crossplatform linking problemb." OFF)
 if(INKCPP_NO_RTTI)
 	add_definitions(-DINKCPP_NO_RTTI)
 endif()

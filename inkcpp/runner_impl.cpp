@@ -15,10 +15,13 @@
 #include "system.h"
 #include "value.h"
 
-#include <iomanip>
+#ifdef INK_ENABLE_STL
+#	include <iomanip>
+#endif
 
 namespace ink::runtime
 {
+#ifdef INK_ENABLE_STL
 static void write_hash(std::ostream& out, ink::hash_t value)
 {
 	using namespace std;
@@ -27,6 +30,7 @@ static void write_hash(std::ostream& out, ink::hash_t value)
 	out << "0x" << hex << setfill('0') << setw(8) << static_cast<uint32_t>(value);
 	out.flags(state);
 }
+#endif
 
 const choice* runner_interface::get_choice(size_t index) const
 {
@@ -477,7 +481,11 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _choices()
     , _tags_begin(0, ~0)
     , _container(ContainerData{})
+#ifdef INK_ENABLE_CSTD
     , _rng(time(NULL))
+#else
+    , _rng()
+#endif
 {
 
 
@@ -512,13 +520,13 @@ runner_impl::line_type runner_impl::getline()
 	// Advance interpreter one line and write to output
 	advance_line();
 
-#ifdef INK_ENABLE_STL
+#	ifdef INK_ENABLE_STL
 	line_type result{_output.get()};
-#elif defined(INK_ENABLE_UNREAL)
+#	elif defined(INK_ENABLE_UNREAL)
 	line_type result{ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists()))};
-#else
-#	error unsupported constraints for getline
-#endif
+#	else
+#		error unsupported constraints for getline
+#	endif
 
 	// Fall through the fallback choice, if available
 	if (! has_choices() && _fallback_choice) {
@@ -531,11 +539,11 @@ runner_impl::line_type runner_impl::getline()
 
 runner_impl::line_type runner_impl::getall()
 {
-#ifdef INK_ENABLE_STL
+#	ifdef INK_ENABLE_STL
 	if (_debug_stream != nullptr) {
 		_debug_stream->clear();
 	}
-#endif
+#	endif
 
 	line_type result{};
 
@@ -714,7 +722,6 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	return ptr;
 }
 
-#ifdef INK_ENABLE_CSTD
 const char* runner_impl::getline_alloc()
 {
 	advance_line();
@@ -725,7 +732,6 @@ const char* runner_impl::getline_alloc()
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	return res;
 }
-#endif
 
 bool runner_impl::move_to(hash_t path)
 {
