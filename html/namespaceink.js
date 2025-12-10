@@ -9,6 +9,7 @@ var namespaceink =
     [ "ip_t", "namespaceink.html#aeb84d1f0903ffa9349291028a32f41c7", null ],
     [ "offset_t", "namespaceink.html#aa0e843a037fef7431b63a23208a1685c", null ],
     [ "optional", "namespaceink.html#a1afe1efe367158356d47c906abbab8fc", null ],
+    [ "ptrdiff_t", "namespaceink.html#ac3183317a076dc1d286440722d735276", null ],
     [ "size_t", "namespaceink.html#a959b2e4aede55770f9235406e91dc689", null ],
     [ "thread_t", "namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a", null ],
     [ "uint32_t", "namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67", null ],

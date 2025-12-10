@@ -134,9 +134,12 @@ typedef <a class="el" href="#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a>&#16
 typedef unsigned char&#160;</td><td class="memItemRight" valign="bottom"><b>byte_t</b></td></tr>
 <tr class="memdesc:a5f188f340dc3f2b54a7ba0a8bdd2141e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Byte type. <br /></td></tr>
 <tr class="separator:a5f188f340dc3f2b54a7ba0a8bdd2141e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0e843a037fef7431b63a23208a1685c" id="r_aa0e843a037fef7431b63a23208a1685c"><td class="memItemLeft" align="right" valign="top"><a id="aa0e843a037fef7431b63a23208a1685c" name="aa0e843a037fef7431b63a23208a1685c"></a>
-typedef <a class="el" href="#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>offset_t</b></td></tr>
-<tr class="memdesc:aa0e843a037fef7431b63a23208a1685c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to identify an offset in a data table (like a string in the string table) <br /></td></tr>
+<tr class="memitem:ac3183317a076dc1d286440722d735276" id="r_ac3183317a076dc1d286440722d735276"><td class="memItemLeft" align="right" valign="top"><a id="ac3183317a076dc1d286440722d735276" name="ac3183317a076dc1d286440722d735276"></a>
+typedef decltype(static_cast&lt; int * &gt;(nullptr) - static_cast&lt; int * &gt;(nullptr))&#160;</td><td class="memItemRight" valign="bottom"><b>ptrdiff_t</b></td></tr>
+<tr class="memdesc:ac3183317a076dc1d286440722d735276"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ptr difference type. <br /></td></tr>
+<tr class="separator:ac3183317a076dc1d286440722d735276"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0e843a037fef7431b63a23208a1685c" id="r_aa0e843a037fef7431b63a23208a1685c"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa0e843a037fef7431b63a23208a1685c">offset_t</a></td></tr>
+<tr class="memdesc:aa0e843a037fef7431b63a23208a1685c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify sizes.  <br /></td></tr>
 <tr class="separator:aa0e843a037fef7431b63a23208a1685c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb84d1f0903ffa9349291028a32f41c7" id="r_aeb84d1f0903ffa9349291028a32f41c7"><td class="memItemLeft" align="right" valign="top"><a id="aeb84d1f0903ffa9349291028a32f41c7" name="aeb84d1f0903ffa9349291028a32f41c7"></a>
 typedef const unsigned char *&#160;</td><td class="memItemRight" valign="bottom"><b>ip_t</b></td></tr>
@@ -201,6 +204,23 @@ constexpr <a class="el" href="#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a>&#
 <div class="textblock"><p>Namespace contaning all modules and classes from InkCPP. </p>
 <p>(Unreal Blueprint Classes Excluded, but there will not be there in a normal build) </p>
 </div><h2 class="groupheader">Typedef Documentation</h2>
+<a id="aa0e843a037fef7431b63a23208a1685c" name="aa0e843a037fef7431b63a23208a1685c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0e843a037fef7431b63a23208a1685c">&#9670;&#160;</a></span>offset_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="#a0f7783f9d24518b373a9e367eeb6fd67">uint32_t</a> <a class="el" href="#aa0e843a037fef7431b63a23208a1685c">ink::offset_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Verify sizes. </p>
+<p>Used to identify an offset in a data table (like a string in the string table) </p>
+
+</div>
+</div>
 <a id="a1afe1efe367158356d47c906abbab8fc" name="a1afe1efe367158356d47c906abbab8fc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1afe1efe367158356d47c906abbab8fc">&#9670;&#160;</a></span>optional</h2>
 
