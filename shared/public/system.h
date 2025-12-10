@@ -22,11 +22,11 @@
 #	include <optional>
 #	include <cctype>
 #	include <cstdint>
-#	include <cstdio>
-#	include <cstdarg>
 #endif
 #ifdef INK_ENABLE_CSTD
+#	include <cstdio>
 #	include <ctype.h>
+#	include <cassert>
 #endif
 
 // Platform specific defines //
@@ -45,7 +45,9 @@
 #else
 #	define inkAssert    ink::ink_assert
 #	define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
+
 #endif
+
 
 namespace ink
 {
@@ -156,21 +158,20 @@ namespace internal
 		while (true) {
 			switch (*(string++)) {
 				case 0: return true;
+				case '\f': [[fallthrough]];
+				case '\r': [[fallthrough]];
 				case '\n':
 					if (! includeNewline)
 						return false;
 					[[fallthrough]];
 				case '\t': [[fallthrough]];
+				case '\v': [[fallthrough]];
 				case ' ': continue;
 				default: return false;
 			}
 		}
 	}
-
-	/** check if character can be only part of a word, when two part of word characters put together
-	 * the will be a space inserted I049
-	 */
-	static inline bool is_part_of_word(char character)
+	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
 	{
 		return isalpha(character) || isdigit(character);
 	}
@@ -197,7 +198,7 @@ namespace internal
 #endif
 } // namespace internal
 
-#ifdef INK_ENABLE_EXCEPTIONS
+#ifdef INK_ENABLE_STL
 /** exception type thrown if something goes wrong */
 using ink_exception = std::runtime_error;
 #else
@@ -218,7 +219,6 @@ private:
 #endif
 
 // assert
-#ifndef INK_ENABLE_UNREAL
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 {
@@ -227,21 +227,22 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 		msg = EMPTY;
 	}
 	if (! condition) {
+#if defined(INKCPP_ENABLE_STL) || defined(INKCPP_ENABLE_CSTD)
 		if constexpr (sizeof...(args) > 0) {
 			size_t size    = snprintf(nullptr, 0, msg, args...) + 1;
 			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
 			msg = message;
-		}
-#ifdef INK_ENABLE_EXCEPTIONS
-		throw ink_exception(msg);
-#else
-		fprintf(stderr, "Ink Assert: %s\n", msg);
-		abort();
-#	endif
+		} else 
+#endif
+		{
+#	ifdef INK_ENABLE_EXCEPTIONS
+			throw ink_exception(msg);
 #	else
-#		error "This path needs a way to warn and then terminate, otherwise it'll silently fail"
+			fprintf(stderr, "Ink Assert: %s\n", msg);
+			abort();
 #	endif
+		}
 	}
 }
 
@@ -251,7 +252,6 @@ template<typename... Args>
 	ink_assert(false, msg, args...);
 	exit(EXIT_FAILURE);
 }
-#endif
 
 namespace runtime::internal
 {

@@ -12,7 +12,7 @@
 #	include <ostream>
 #endif
 
-#ifdef INK_BUILD_CLIB
+#ifdef INKCPP_BUILD_CLIB
 struct InkListIter;
 struct HInkList;
 int ink_list_flags(const HInkList*, InkListIter*);
@@ -61,7 +61,7 @@ public:
 		int                   _i;
 		bool                  _one_list_iterator; ///< iterates only though values of one list
 		friend list_interface;
-#ifdef INK_BUILD_CLIB
+#ifdef INKCPP_BUILD_CLIB
 		friend int ::ink_list_flags(const HInkList*, InkListIter*);
 		friend int ::ink_list_flags_from(const HInkList*, const char*, InkListIter*);
 		friend int ::ink_list_iter_next(InkListIter* self);

@@ -411,9 +411,7 @@ void json_compiler::compile_complex_command(const nlohmann::json& command)
 
 	else if (get(command, "#", val)) {
 		if (_ink_version > 20) {
-			throw ink_exception(
-			    "with inkVerison 21 the tag system chages, and the '#: <tag>' is deprecated now"
-			);
+			inkFail("with inkVerison 21 the tag system chages, and the '#: <tag>' is deprecated now");
 		}
 		_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);
 	}
