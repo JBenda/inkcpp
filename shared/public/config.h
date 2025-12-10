@@ -11,11 +11,13 @@
 #	define INK_ENABLE_UNREAL
 #	define INKCPP_NO_EH
 #	define INKCPP_NO_RTTI
-#elif INKCPP_BUILD_CLIB
-#	define INK_ENABLE_CSTD
-#else
-#	define INK_ENABLE_STL
-#	define INK_ENABLE_CSTD
+#elif ! defined(INKCPP_NO_STL)
+#	ifdef INKCPP_BUILD_CLIB
+#		define INK_ENABLE_CSTD
+#	else
+#		define INK_ENABLE_STL
+#		define INK_ENABLE_CSTD
+#	endif
 #endif
 
 #ifndef INKCPP_NO_EH

@@ -63,6 +63,8 @@ set_property(CACHE INKCPP_INKLECATE PROPERTY STRINGS "NONE" "OS" "ALL")
 option(INKCPP_NO_EH "Disable try/catch in runtime. Used to build without error handling." OFF)
 option(INKCPP_NO_RTTI
 			 "Disable real time type information depended code. Used to build without RTTI." OFF)
+option(INKCPP_NO_STL
+			 "Disable bindings to standard library to avoid crossplatform linking problemb." OFF)
 
 if(INKCPP_NO_EH)
 	add_definitions(-DINKCPP_NO_EH)

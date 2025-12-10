@@ -15,16 +15,15 @@
 #	include "Hash/CityHash.h"
 #endif
 #ifdef INK_ENABLE_STL
-#	include <exception>
 #	include <stdexcept>
 #	include <optional>
 #	include <cctype>
 #	include <cstdint>
 #	include <cstdio>
-#	include <cstdarg>
 #endif
 #ifdef INK_ENABLE_CSTD
 #	include <ctype.h>
+#	include <cassert>
 #endif
 
 // Platform specific defines //
@@ -34,11 +33,19 @@
 #	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
 #	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
 #	define FORMAT_STRING_STR               "%hs"
-#else
+#elif ! defined(INKCPP_NO_EH) && defined(INK_ENABLE_STL)
 #	define inkZeroMemory     ink::internal::zero_memory
 #	define inkAssert         ink::ink_assert
 #	define inkFail(...)      ink::ink_assert(false, __VA_ARGS__)
 #	define FORMAT_STRING_STR "%s"
+#elif defined(INK_ENABLE_CSTD)
+#	define inkZeroMemory     ink::internal::zero_memory
+#	define inkAssert(X, ...) assert(X)
+#	define inkFail(...)      assert(1 != 0)
+#else
+#	define inkZeroMemory ink::internal::zero_memory
+#	define inkAssert(...)
+#	define inkFail(...)
 #endif
 
 namespace ink
@@ -142,20 +149,18 @@ namespace internal
 		while (true) {
 			switch (*(string++)) {
 				case 0: return true;
+				case '\f': [[fallthrough]];
+				case '\r': [[fallthrough]];
 				case '\n':
 					if (! includeNewline)
 						return false;
 				case '\t': [[fallthrough]];
+				case '\v': [[fallthrough]];
 				case ' ': continue;
 				default: return false;
 			}
 		}
 	}
-
-	/** check if character can be only part of a word, when two part of word characters put together
-	 * the will be a space inserted I049
-	 */
-	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
 
 	inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{
@@ -196,7 +201,7 @@ private:
 #endif
 
 // assert
-#ifndef INK_ENABLE_UNREAL
+#if ! defined(INKCPP_NO_EH) && defined(INK_ENABLE_STL)
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 {

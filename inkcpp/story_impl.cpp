@@ -5,7 +5,6 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "story_impl.h"
-#include "platform.h"
 #include "runner_impl.h"
 #include "globals_impl.h"
 #include "snapshot.h"
@@ -19,7 +18,7 @@ namespace ink::runtime
 story* story::from_file(const char* filename) { return new internal::story_impl(filename); }
 #endif
 
-story* story::from_binary(unsigned char* data, size_t length, bool freeOnDestroy)
+story* story::from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
 {
 	return new internal::story_impl(data, length, freeOnDestroy);
 }
@@ -35,9 +34,7 @@ unsigned char* read_file_into_memory(const char* filename, size_t* read)
 
 	ifstream ifs(filename, ios::binary | ios::ate);
 
-	if (! ifs.is_open()) {
-		throw ink_exception("Failed to open file: " + std::string(filename));
-	}
+	inkAssert(ifs.is_open(), "Failed to open file: " FORMAT_STRING_STR, filename);
 
 	ifstream::pos_type pos    = ifs.tellg();
 	size_t             length = ( size_t ) pos;
@@ -69,7 +66,7 @@ story_impl::story_impl(const char* filename)
 }
 #endif
 
-story_impl::story_impl(unsigned char* binary, size_t len, bool manage /*= true*/)
+story_impl::story_impl(const unsigned char* binary, size_t len, bool manage /*= true*/)
     : _file(binary)
     , _length(len)
     , _managed(manage)
@@ -270,7 +267,7 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 void story_impl::setup_pointers()
 {
 	using header = ink::internal::header;
-	_header      = header::parse_header(reinterpret_cast<char*>(_file));
+	_header      = header::parse_header(reinterpret_cast<const char*>(_file));
 
 	// String table is after the header
 	_string_table = ( char* ) _file + header::Size;
@@ -347,7 +344,7 @@ void story_impl::setup_pointers()
 	_container_list      = ( uint32_t* ) (ptr);
 	while (true) {
 		uint32_t val = *( uint32_t* ) ptr;
-		if (val == ~0) {
+		if (val == ~0U) {
 			ptr += sizeof(uint32_t);
 			break;
 		} else {
@@ -360,7 +357,7 @@ void story_impl::setup_pointers()
 	_container_hash_start = ( hash_t* ) (ptr);
 	while (true) {
 		uint32_t val = *( uint32_t* ) ptr;
-		if (val == ~0) {
+		if (val == ~0U) {
 			_container_hash_end = ( hash_t* ) (ptr);
 			ptr += sizeof(uint32_t);
 			break;

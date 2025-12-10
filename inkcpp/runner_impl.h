@@ -124,10 +124,8 @@ public:
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
 
-#ifdef INK_ENABLE_CSTD
 	// c-style getline
 	virtual const char* getline_alloc() override;
-#endif
 
 	// move to path
 	virtual bool move_to(hash_t path) override;
