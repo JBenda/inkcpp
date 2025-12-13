@@ -36,7 +36,7 @@ unsigned char* read_file_into_memory(const char* filename, size_t* read)
 	ifstream ifs(filename, ios::binary | ios::ate);
 
 	if (! ifs.is_open()) {
-		throw ink_exception("Failed to open file: " + std::string(filename));
+		ink_assert(false, "Failed to open file: %s", filename);
 	}
 
 	ifstream::pos_type pos    = ifs.tellg();

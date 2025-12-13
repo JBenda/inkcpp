@@ -27,7 +27,7 @@ snapshot* snapshot::from_file(const char* filename)
 {
 	std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
 	if (! ifs.is_open()) {
-		throw ink_exception("Failed to open snapshot file: " + std::string(filename));
+		ink_assert(false, "Failed to open snapshot file: %s", filename);
 	}
 
 	size_t         length = static_cast<size_t>(ifs.tellg());
@@ -43,7 +43,7 @@ void snapshot::write_to_file(const char* filename) const
 {
 	std::ofstream ofs(filename, std::ios::binary);
 	if (! ofs.is_open()) {
-		throw ink_exception("Failed to open file to write snapshot: " + std::string(filename));
+		ink_assert(false, "Failed to open file to write snapshot: %s", filename);
 	}
 	ofs.write(reinterpret_cast<const char*>(get_data()), get_data_len());
 }
