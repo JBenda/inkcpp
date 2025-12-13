@@ -15,7 +15,9 @@
 #	include "Hash/CityHash.h"
 #endif
 #ifdef INK_ENABLE_STL
+#ifdef INK_ENABLE_EXCEPTIONS
 #	include <exception>
+#endif
 #	include <stdexcept>
 #	include <optional>
 #	include <cctype>
@@ -31,14 +33,18 @@
 
 #ifdef INK_ENABLE_UNREAL
 #	define inkZeroMemory(buff, len)        FMemory::Memset(buff, 0, len)
-#	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
-#	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
 #	define FORMAT_STRING_STR               "%hs"
 #else
 #	define inkZeroMemory     ink::internal::zero_memory
+#	define FORMAT_STRING_STR "%s"
+#endif
+
+#ifdef INK_ENABLE_UNREAL
+#	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
+#	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
+#else
 #	define inkAssert         ink::ink_assert
 #	define inkFail(...)      ink::ink_assert(false, __VA_ARGS__)
-#	define FORMAT_STRING_STR "%s"
 #endif
 
 namespace ink
@@ -175,7 +181,7 @@ namespace internal
 #endif
 } // namespace internal
 
-#ifdef INK_ENABLE_STL
+#ifdef INK_ENABLE_EXCEPTIONS
 /** exception type thrown if something goes wrong */
 using ink_exception = std::runtime_error;
 #else
@@ -209,9 +215,19 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 			size_t size    = snprintf(nullptr, 0, msg, args...) + 1;
 			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
+#ifdef INK_ENABLE_EXCEPTIONS
 			throw ink_exception(message);
+#else
+			fprintf(stderr, "Ink Assert: %s\n", message);
+			abort();
+#endif
 		} else {
+#ifdef INK_ENABLE_EXCEPTIONS
 			throw ink_exception(msg);
+#else
+			fprintf(stderr, "Ink Assert: %s\n", msg);
+			abort();
+#endif
 		}
 	}
 }
