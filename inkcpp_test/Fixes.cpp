@@ -145,14 +145,15 @@ SCENARIO("Casting during redefinition is too strict _ #134", "[fixes]")
 			THEN("expect assigned") { REQUIRE(line == "1.5 1.5 1.5 text0.5 B\n"); }
 		}
 
-		// Six cases that should fail. We can't pollute lookahead with these so they need to be separated out.
+		// Six cases that should fail. We can't pollute lookahead with these so they need to be 
+		// separated out.
 		for (int i = 0; i < 6; ++i) {
 			WHEN("Jump to failing case")
 			{
 				const std::string name = "Fail" + std::to_string(i);
 				REQUIRE_NOTHROW(thread->move_to(ink::hash_string(name.c_str())));
 				std::string line;
-				REQUIRE_THROWS_AS((line = thread->getline(), std::cerr<<line), ink::ink_exception);
+				REQUIRE_THROWS_AS(line = thread->getline(), ink::ink_exception);
 			}
 		}
 	}
