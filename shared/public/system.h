@@ -51,12 +51,12 @@ typedef unsigned int uint32_t;
 #ifndef INK_ENABLE_STL
 
 /** Additional signed integer types */
-typedef int int32_t;
+typedef int   int32_t;
 typedef short int16_t;
 
 /** Additional unsigned integer types */
 typedef unsigned long long uint64_t;
-typedef unsigned short uint16_t;
+typedef unsigned short     uint16_t;
 #endif // ndef INK_ENABLE_STL
 
 /** Name hash (used for temporary variables) */

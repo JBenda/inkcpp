@@ -118,8 +118,7 @@ struct remove_reference<T&&>
 };
 
 template<class T>
-struct remove_cvref 
-{
+struct remove_cvref {
 	typedef typename remove_cv<typename remove_reference<T>::type>::type type;
 };
 
@@ -157,21 +156,21 @@ template<typename T>
 struct string_handler<T&> : string_handler<T> {
 };
 
-#define MARK_AS_STRING(TYPE, LEN, SRC)                                            \
-	template<>                                                                    \
-	struct is_string<TYPE> : constant<bool, true> {                               \
-	};                                                                            \
-	template<>                                                                    \
-	struct string_handler<TYPE> {                                                 \
-		static size_t length(const TYPE& x) { return static_cast<size_t>(LEN); }  \
-		static void   src_copy(const TYPE& x, char* output)                       \
-		{                                                                         \
-			[&output](const char* src) {                                          \
-				while (*src != '\0')                                              \
-					*(output++) = *(src++);                                       \
-				*output = 0;                                                      \
-			}(SRC);                                                               \
-		}                                                                         \
+#define MARK_AS_STRING(TYPE, LEN, SRC)                                       \
+	template<>                                                                 \
+	struct is_string<TYPE> : constant<bool, true> {                            \
+	};                                                                         \
+	template<>                                                                 \
+	struct string_handler<TYPE> {                                              \
+		static size_t length(const TYPE& x) { return static_cast<size_t>(LEN); } \
+		static void   src_copy(const TYPE& x, char* output)                      \
+		{                                                                        \
+			[&output](const char* src) {                                           \
+				while (*src != '\0')                                                 \
+					*(output++) = *(src++);                                            \
+				*output = 0;                                                         \
+			}(SRC);                                                                \
+		}                                                                        \
 	}
 
 inline size_t c_str_len(const char* c)

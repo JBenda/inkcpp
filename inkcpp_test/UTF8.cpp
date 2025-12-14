@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <story.h>
+#include <globals.h>
 #include <runner.h>
 #include <globals.h>
 #include <compiler.h>

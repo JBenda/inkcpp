@@ -23,6 +23,9 @@ namespace ink::runtime::internal {
 		struct cast<value_type::uint32, value_type::string>
 		{ static constexpr value_type value = value_type::string; };
 		template<>
+		struct cast<value_type::boolean, value_type::string>
+		{ static constexpr value_type value = value_type::string; };
+		template<>
 		struct cast<value_type::string, value_type::newline>
 		{ static constexpr value_type value = value_type::string; };
 	}
