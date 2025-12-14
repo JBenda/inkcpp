@@ -100,12 +100,18 @@ inline int toStr(char* buffer, size_t size, const char* c)
 	return 0;
 }
 
+inline int toStr(char* buffer, size_t size, bool b)
+{
+	return toStr(buffer, size, b ? "true" : "false");
+}
+
 inline int toStr(char* buffer, size_t size, const value& v)
 {
 	switch (v.type()) {
 		case value_type::int32: return toStr(buffer, size, v.get<value_type::int32>());
 		case value_type::uint32: return toStr(buffer, size, v.get<value_type::uint32>());
 		case value_type::float32: return toStr(buffer, size, v.get<value_type::float32>());
+		case value_type::boolean: return toStr(buffer, size, v.get<value_type::boolean>());
 		case value_type::newline: return toStr(buffer, size, "\n");
 		default: inkFail("only support toStr for numeric types"); return -1;
 	}
