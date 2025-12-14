@@ -263,14 +263,12 @@ private:
 
 	const data_t* getPtr(int eid) const
 	{
-		return _data.begin()
-		     + static_cast<std::ptrdiff_t>(_entrySize) * static_cast<std::ptrdiff_t>(eid);
+		return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid);
 	}
 
 	data_t* getPtr(int eid)
 	{
-		return _data.begin()
-		     + static_cast<std::ptrdiff_t>(_entrySize) * static_cast<std::ptrdiff_t>(eid);
+		return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid);
 	}
 
 	int numFlags() const
