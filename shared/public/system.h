@@ -223,8 +223,8 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 #	elif defined(INK_ENABLE_CSTD)
 		fprintf(stderr, "Ink Assert: %s\n", msg);
 		abort();
-#else
-	#error "This path needs a way to warn and then terminate, otherwise it'll silently fail"
+#	else
+#		error "This path needs a way to warn and then terminate, otherwise it'll silently fail"
 #	endif
 	}
 }
