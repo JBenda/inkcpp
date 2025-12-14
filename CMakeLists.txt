@@ -60,15 +60,10 @@ set(INKCPP_INKLECATE
 		CACHE STRING "If inklecate should be downloaded automatically from the official release page. \
 			NONE -> No, OS -> Yes, but only for the current OS, ALL -> Yes, for all availible OSs")
 set_property(CACHE INKCPP_INKLECATE PROPERTY STRINGS "NONE" "OS" "ALL")
-option(INKCPP_NO_EH "Disable try/catch in runtime. Used to build without error handling." OFF)
 option(INKCPP_NO_RTTI
 			 "Disable real time type information depended code. Used to build without RTTI." OFF)
-option(INKCPP_NO_EXCEPTIONS
-		"Used to build without support for exceptions." OFF)
+option(INKCPP_NO_EXCEPTIONS "Used to build without support for exceptions, disables try/catch blocks and throws" OFF)
 
-if(INKCPP_NO_EH)
-	add_definitions(-DINKCPP_NO_EH)
-endif()
 if(INKCPP_NO_RTTI)
 	add_definitions(-DINKCPP_NO_RTTI)
 endif()
