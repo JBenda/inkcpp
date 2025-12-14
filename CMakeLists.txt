@@ -67,10 +67,8 @@ set(INKCPP_INKLECATE
 set_property(CACHE INKCPP_INKLECATE PROPERTY STRINGS "NONE" "OS" "ALL")
 option(INKCPP_NO_RTTI
 			 "Disable real time type information depended code. Used to build without RTTI." OFF)
-option(INKCPP_NO_EXCEPTIONS
-		"Used to build without support for exceptions." OFF)
-option(INKCPP_NO_EXCEPTIONS
-			 "Used to build without support for exceptions, disables try/catch blocks and throws" OFF)
+option(INKCPP_NO_EXCEPTIONS "Used to build without support for exceptions, disables try/catch blocks and throws" OFF)
+
 option(INKCPP_NO_STD "Disables the use of C(++) std libs." OFF)
 
 if(INKCPP_NO_RTTI)

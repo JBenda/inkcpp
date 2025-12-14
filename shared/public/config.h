@@ -19,7 +19,7 @@
 #	ifndef INKCPP_NO_STD
 #		define INK_ENABLE_STL
 #		define INK_ENABLE_CSTD
-#	endif
+#endif
 #endif
 
 #ifndef INKCPP_NO_RTTI
