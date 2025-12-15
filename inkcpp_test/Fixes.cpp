@@ -145,7 +145,7 @@ SCENARIO("Casting during redefinition is too strict _ #134", "[fixes]")
 			THEN("expect assigned") { REQUIRE(line == "1.5 1.5 1.5 text0.5 B\n"); }
 		}
 
-		// Six cases that should fail. We can't pollute lookahead with these so they need to be 
+		// Six cases that should fail. We can't pollute lookahead with these so they need to be
 		// separated out.
 		for (int i = 0; i < 6; ++i) {
 			WHEN("Jump to failing case")
