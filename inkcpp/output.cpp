@@ -362,6 +362,7 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			case value_type::int32:
 			case value_type::float32:
 			case value_type::uint32:
+			case value_type::boolean:
 				// Convert to string and advance
 				toStr(ptr, end - ptr, _data[i]);
 				while (*ptr != 0)

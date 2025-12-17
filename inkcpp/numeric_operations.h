@@ -88,6 +88,7 @@ namespace casting
 	    numeric_cast<value_type::uint32>(const value& v)
 	{
 		switch (v.type()) {
+			case value_type::int32: return v.get<value_type::int32>();
 			case value_type::uint32: return v.get<value_type::uint32>();
 			/// bool value can cast to uint32
 			case value_type::boolean: return static_cast<uint32_t>(v.get<value_type::boolean>());
