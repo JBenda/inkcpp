@@ -126,3 +126,35 @@ SCENARIO("missing leading whitespace inside choice-only text and glued text _ #1
 		}
 	}
 }
+
+SCENARIO("Casting during redefinition is too strict _ #134", "[fixes]")
+{
+	GIVEN("story with problematic text")
+	{
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "134_restrictive_casts.bin");
+		runner thread = ink->new_runner();
+
+		WHEN("run story")
+		{
+			// Initial casts/assignments are allowed.
+			auto line = thread->getline();
+			THEN("expect initial values") { REQUIRE(line == "true 1 1 text A\n"); }
+			line = thread->getline();
+			THEN("expect evaluated") { REQUIRE(line == "1.5 1.5 1.5 text0.5 B\n"); }
+			line = thread->getline();
+			THEN("expect assigned") { REQUIRE(line == "1.5 1.5 1.5 text0.5 B\n"); }
+		}
+
+		// Six cases that should fail. We can't pollute lookahead with these so they need to be
+		// separated out.
+		for (int i = 0; i < 6; ++i) {
+			WHEN("Jump to failing case")
+			{
+				const std::string name = "Fail" + std::to_string(i);
+				REQUIRE_NOTHROW(thread->move_to(ink::hash_string(name.c_str())));
+				std::string line;
+				REQUIRE_THROWS_AS(line = thread->getline(), ink::ink_exception);
+			}
+		}
+	}
+}
