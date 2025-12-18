@@ -38,7 +38,7 @@ SCENARIO("a story with external functions support types", "[story]")
 
 		WHEN("run thread")
 		{
-			THEN("thread has correct line counts")
+			THEN("output shows values from ink")
 			{
 				auto line = thread->getline();
 				REQUIRE(line == "true 1.5 -5 17 foo\n");
