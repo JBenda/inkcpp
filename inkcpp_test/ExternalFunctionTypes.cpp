@@ -18,30 +18,30 @@ SCENARIO("a story with external functions support types", "[story]")
 		std::stringstream debug;
 		thread->set_debug_enabled(&debug);
 
-		bool b = false;
-		int i = 0;
+		bool         b = false;
+		int          i = 0;
 		unsigned int u = 0;
-		float f = 0;
-		std::string s;
+		float        f = 0;
+		std::string  s;
 
-		thread->bind("SET_BOOL",	[&b](bool o)					{ b = o; });
-		thread->bind("SET_INT",		[&i](int o)						{ i = o; });
-		thread->bind("SET_UINT",	[&u](unsigned int o)	{ u = o; });
-		thread->bind("SET_FLOAT", [&f](float o)					{ f = o; });
-		thread->bind("SET_STRING",[&s](std::string o)		{ s = o; });
+		thread->bind("SET_BOOL", [&b](bool o) { b = o; });
+		thread->bind("SET_INT", [&i](int o) { i = o; });
+		thread->bind("SET_UINT", [&u](unsigned int o) { u = o; });
+		thread->bind("SET_FLOAT", [&f](float o) { f = o; });
+		thread->bind("SET_STRING", [&s](std::string o) { s = o; });
 
-		thread->bind("GET_BOOL",	[&b]()							{ return b; });
-		thread->bind("GET_INT",		[&i]()							{ return i; });
-		thread->bind("GET_UINT",	[&u]()							{ return u; });
-		thread->bind("GET_FLOAT", [&f]()							{ return f; });
-		thread->bind("GET_STRING",[&s]()							{ return s; });
+		thread->bind("GET_BOOL", [&b]() { return b; });
+		thread->bind("GET_INT", [&i]() { return i; });
+		thread->bind("GET_UINT", [&u]() { return u; });
+		thread->bind("GET_FLOAT", [&f]() { return f; });
+		thread->bind("GET_STRING", [&s]() { return s; });
 
 		WHEN("run thread")
 		{
 			THEN("thread has correct line counts")
 			{
-					auto line = thread->getline();
-					REQUIRE(line == "true 1.5 -5 17 foo\n");
+				auto line = thread->getline();
+				REQUIRE(line == "true 1.5 -5 17 foo\n");
 			}
 		}
 	}

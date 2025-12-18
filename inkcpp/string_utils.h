@@ -148,7 +148,8 @@ inline constexpr size_t value_length(const value& v)
 		case value_type::uint32: return decimal_digits(v.get<value_type::uint32>());
 		case value_type::float32: return decimal_digits(v.get<value_type::float32>());
 		case value_type::string: return c_str_len(v.get<value_type::string>());
-		case value_type::boolean: return v.get<value_type::boolean>() ? c_str_len("true") : c_str_len("false");
+		case value_type::boolean:
+			return v.get<value_type::boolean>() ? c_str_len("true") : c_str_len("false");
 		case value_type::newline: return 1;
 		default: inkFail("Can't determine length of this value type"); return -1;
 	}
