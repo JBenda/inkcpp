@@ -101,20 +101,19 @@ struct remove_cv<const volatile T> {
 	typedef T type;
 };
 
-template <class T>
+template<class T>
 struct remove_reference {
 	typedef T type;
 };
 
-template <class T>
+template<class T>
 struct remove_reference<T&> {
-    typedef T type;
+	typedef T type;
 };
 
-template <class T>
-struct remove_reference<T&&> 
-{
-    typedef T type;
+template<class T>
+struct remove_reference<T&&> {
+	typedef T type;
 };
 
 template<class T>

@@ -17,6 +17,7 @@ add_executable(inkcpp_test catch.hpp Main.cpp
   ThirdTierChoiceAfterBrackets.cpp
   NoEarlyTags.cpp
   ExternalFunctionsExecuteProperly.cpp
+  ExternalFunctionTypes.cpp
   LookaheadSafe.cpp
   EmptyStringForDivert.cpp
   MoveTo.cpp
