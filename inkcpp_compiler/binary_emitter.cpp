@@ -252,9 +252,15 @@ void binary_emitter::output(std::ostream& out)
 	// Sort map on ascending hash code.
 	std::sort(container_hash.begin(), container_hash.end());
 
-	// If there are any lists, terminate the data correctly. Otherwise leave an empty section.
-	if (_lists.pos() > 0)
-		_lists.write(null_flag);
+	// If there's list meta data...
+	if (_list_meta.pos() > 0) {
+		// If there are any lists, terminate the data correctly. Otherwise leave an empty section.
+		if (_lists.pos() > 0)
+			_lists.write(null_flag);
+	}
+	else
+		// No meta data -> no lists.
+		_lists.reset();
 
 	// Fill in header 
 	ink::internal::header header;
@@ -264,6 +270,7 @@ void binary_emitter::output(std::ostream& out)
 	// Fill in sections
 	uint32_t offset = sizeof(header);
 	header._strings.setup(offset, _strings.pos());
+	header._list_meta.setup(offset, _list_meta.pos());
 	header._lists.setup(offset, _lists.pos());
 	header._containers.setup(offset, container_data.size() * sizeof(container_data_t));
 	header._container_map.setup(offset, _container_map.size() * sizeof(container_map_t));
@@ -276,6 +283,9 @@ void binary_emitter::output(std::ostream& out)
 
 	// Write the string table
 	emit_section(out, _strings);
+
+	// Write lists meta data and defined lists
+	emit_section(out, _list_meta);
 
 	// Write lists meta data and defined lists
 	emit_section(out, _lists);
@@ -301,6 +311,7 @@ void binary_emitter::initialize()
 	// Reset binary data stores
 	_strings.reset();
 	_list_count = 0;
+	_list_meta.reset();
 	_lists.reset();
 	_instructions.reset();
 
@@ -488,15 +499,15 @@ void binary_emitter::set_list_meta(const list_data& list_defs)
 	auto list_names = list_defs.get_list_names().begin();
 	int  list_id    = -1;
 	for (const auto& flag : flags) {
-		_lists.write(flag.flag);
+		_list_meta.write(flag.flag);
 		if (flag.flag.list_id != list_id) {
 			list_id = flag.flag.list_id;
-			_lists.write(reinterpret_cast<const byte_t*>(list_names->data()), list_names->size());
+			_list_meta.write(reinterpret_cast<const byte_t*>(list_names->data()), list_names->size());
 			++list_names;
-			_lists.write('\0');
+			_list_meta.write('\0');
 		}
-		_lists.write(reinterpret_cast<const byte_t*>(flag.name->c_str()), flag.name->size() + 1);
+		_list_meta.write(reinterpret_cast<const byte_t*>(flag.name->c_str()), flag.name->size() + 1);
 	}
-	_lists.write(null_flag);
+	_list_meta.write(null_flag);
 }
 } // namespace ink::compiler::internal

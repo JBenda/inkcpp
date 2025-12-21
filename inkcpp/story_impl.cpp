@@ -239,61 +239,42 @@ void story_impl::setup_pointers()
 	if (header._strings._bytes)
 		_string_table = reinterpret_cast<char *>(_file + header._strings._start);
 
-	if (header._lists._bytes)
+	// Address list sections if they exist
+	if (header._list_meta._bytes)
 	{
-		_list_meta = reinterpret_cast<const char*>(_file + header._lists._start);
+		_list_meta = reinterpret_cast<const char*>(_file + header._list_meta._start);
 
-		// SIL: TODO: Remove this, since it has to get parsed in _lists/_globals. Just needs an interior offset or a separate section from the compiler.
-		const char *ptr = _list_meta;
-		if (list_flag flag = read_list_flag(ptr); flag != null_flag) {
-			// skip list definitions
-			auto list_id = flag.list_id;
-			while (*ptr != 0) {
-				++ptr;
-			}
-			++ptr; // skip list name
-			do {
-				if (flag.list_id != list_id) {
-					list_id = flag.list_id;
-					while (*ptr != 0) {
-						++ptr;
-					}
-					++ptr; // skip list name
-				}
-				while (*ptr != 0) {
-					++ptr;
-				}
-				++ptr; // skip flag name
-			} while ((flag = read_list_flag(ptr)) != null_flag);
-
-			_lists = reinterpret_cast<const list_flag*>(ptr);
-			inkAssert(ptr - _list_meta <= header._lists._bytes);
-		}
-		else
-			_list_meta = nullptr;
+		// Lists require metadata
+		if (header._lists._bytes)
+			_lists = reinterpret_cast<const list_flag*>(_file + header._lists._start);
 	}
 
+	// Address containers section if it exists
 	if (header._containers._bytes)
 	{
 		_num_containers = header._containers._bytes / sizeof(container_data_t);
 		_container_data = reinterpret_cast<const container_data_t*>(_file + header._containers._start);
 	}
 
+	// Address container map if it exists
 	if (header._container_map._bytes)
 	{
 		_container_map_size = header._container_map._bytes / sizeof(container_map_t);
 		_container_map = reinterpret_cast<const container_map_t*>(_file + header._container_map._start);
 	}
 
+	// Address container hash if it exists
 	if (header._container_hash._bytes)
 	{
 		_container_hash_size = header._container_hash._bytes / sizeof(container_hash_t);
 		_container_hash = reinterpret_cast<const container_hash_t*>(_file + header._container_hash._start);
 	}
 
+	// Address instructions, which we hope exist!
 	if (header._instructions._bytes)
 		_instruction_data = _file + header._instructions._start;
 
+	// Shrink file length to fit exact length of instructions section.
 	inkAssert(end() >= _instruction_data + header._instructions._bytes);
 	_length = _instruction_data + header._instructions._bytes - _file;
 

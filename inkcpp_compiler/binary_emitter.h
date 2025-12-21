@@ -68,6 +68,7 @@ namespace ink::compiler::internal
 
 		binary_stream _strings;
 		uint32_t _list_count = 0;
+		binary_stream _list_meta;
 		binary_stream _lists;
 		binary_stream _instructions;
 

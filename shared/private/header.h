@@ -55,6 +55,7 @@ namespace ink::internal {
 
 			// File section sizes. Each section is aligned to Alignment
 			section_t _strings;
+			section_t _list_meta;
 			section_t _lists;
 			section_t _containers;
 			section_t _container_map;
