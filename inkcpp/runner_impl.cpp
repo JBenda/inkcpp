@@ -349,7 +349,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			// Named knots/stitches need special handling - their visit counts are updated wherever the
 			// story enters them,
 			//	and we generally need to know which knot we're in, for tagging, unless we're jumping to a
-			//tunnel or similar
+			// tunnel or similar
 			// which suppresses knot tracking.
 			//
 			// Ink has a rule about incrementing visit counts when you jump to the top of a knot, which
