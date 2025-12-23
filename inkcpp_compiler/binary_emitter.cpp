@@ -216,16 +216,16 @@ void binary_emitter::handle_nop(int index_in_parent)
 	_current->noop_offsets.insert({index_in_parent, _instructions.pos()});
 }
 
-template <typename type>
+template<typename type>
 void binary_emitter::emit_section(std::ostream& stream, const std::vector<type>& data) const
 {
-	stream.write(reinterpret_cast<const char *>(data.data()), data.size() * sizeof(type));
+	stream.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(type));
 	close_section(stream);
 }
 
 void binary_emitter::emit_section(std::ostream& stream, const binary_stream& data) const
 {
-	inkAssert((stream.tellp() & (ink::internal::header::Alignment-1)) == 0);
+	inkAssert((stream.tellp() & (ink::internal::header::Alignment - 1)) == 0);
 	data.write_to(stream);
 	close_section(stream);
 }
@@ -233,14 +233,14 @@ void binary_emitter::emit_section(std::ostream& stream, const binary_stream& dat
 void binary_emitter::close_section(std::ostream& stream) const
 {
 	// Write zeroes until aligned.
-	while (!stream.fail() && (stream.tellp() % ink::internal::header::Alignment))
+	while (! stream.fail() && (stream.tellp() % ink::internal::header::Alignment))
 		stream.put('\0');
 }
 
 void binary_emitter::output(std::ostream& out)
 {
 	// Create container data
-	std::vector<container_data_t> container_data;	
+	std::vector<container_data_t> container_data;
 	container_data.resize(_max_container_index);
 	build_container_data(container_data, ~0, _root);
 
@@ -257,15 +257,14 @@ void binary_emitter::output(std::ostream& out)
 		// If there are any lists, terminate the data correctly. Otherwise leave an empty section.
 		if (_lists.pos() > 0)
 			_lists.write(null_flag);
-	}
-	else
+	} else
 		// No meta data -> no lists.
 		_lists.reset();
 
-	// Fill in header 
+	// Fill in header
 	ink::internal::header header;
-	header.ink_version_number		= _ink_version;
-	header.ink_bin_version_number	= ink::InkBinVersion;
+	header.ink_version_number     = _ink_version;
+	header.ink_bin_version_number = ink::InkBinVersion;
 
 	// Fill in sections
 	uint32_t offset = sizeof(header);
@@ -278,7 +277,7 @@ void binary_emitter::output(std::ostream& out)
 	header._instructions.setup(offset, _instructions.pos());
 
 	// Write the header
-	out.write(reinterpret_cast<const char *>(&header), sizeof(header));
+	out.write(reinterpret_cast<const char*>(&header), sizeof(header));
 	close_section(out);
 
 	// Write the string table
@@ -295,7 +294,7 @@ void binary_emitter::output(std::ostream& out)
 
 	// Write out container map
 	emit_section(out, _container_map);
-	
+
 	// Write container hash list
 	emit_section(out, container_hash);
 
@@ -435,21 +434,22 @@ void binary_emitter::process_paths()
 	}
 }
 
-void binary_emitter::build_container_data(std::vector<container_data_t>& data, container_t parent, const container_data *context) const
+void binary_emitter::build_container_data(
+    std::vector<container_data_t>& data, container_t parent, const container_data* context
+) const
 {
 	// Build data for this container
-	if (context->counter_index != ~0)
-	{
+	if (context->counter_index != ~0) {
 		container_data_t& d = data[context->counter_index];
-		d._parent			= parent;
-		d._start_offset		= context->offset;
-		d._end_offset		= context->end_offset;
+		d._parent           = parent;
+		d._start_offset     = context->offset;
+		d._end_offset       = context->end_offset;
 		const uint8_t flags = _instructions.get(context->offset + 1);
 		inkAssert(flags < 16);
-		d._flags			= flags;
+		d._flags = flags;
 
 		// Since we might be skipping tree levels, we need to be explicit about the parent.
-		parent				= context->counter_index;
+		parent = context->counter_index;
 	}
 
 	// Recurse
@@ -458,7 +458,8 @@ void binary_emitter::build_container_data(std::vector<container_data_t>& data, c
 }
 
 void binary_emitter::build_container_hash_map(
-    std::vector<container_hash_t>& hash_map, std::vector<container_data_t>& data, const std::string& name, const container_data* context
+    std::vector<container_hash_t>& hash_map, std::vector<container_data_t>& data,
+    const std::string& name, const container_data* context
 ) const
 {
 	// Search named children first.
@@ -466,9 +467,9 @@ void binary_emitter::build_container_hash_map(
 		// Get the child's name in the hierarchy
 		std::string child_name = name.empty() ? child.first : (name + "." + child.first);
 
-		// Hash name. We only do this at the named child level. In theory we could support indexed children as well. 
-		// The root is anonymous so the fact that it's skipped is not an issue.
-		const hash_t child_name_hash  = hash_string(child_name.c_str());
+		// Hash name. We only do this at the named child level. In theory we could support indexed
+		// children as well. The root is anonymous so the fact that it's skipped is not an issue.
+		const hash_t child_name_hash = hash_string(child_name.c_str());
 
 		// Store hash in the data.
 		if (child.second->counter_index != ~0) {
@@ -476,7 +477,7 @@ void binary_emitter::build_container_hash_map(
 		}
 
 		// Append the name hash and offset
-		hash_map.push_back( {child_name_hash, child.second->offset} );	
+		hash_map.push_back({child_name_hash, child.second->offset});
 
 		// Recurse
 		build_container_hash_map(hash_map, data, child_name, child.second);

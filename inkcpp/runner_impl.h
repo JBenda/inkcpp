@@ -340,7 +340,7 @@ private:
 	functions _functions;
 
 	// Container stack
-	internal::managed_restorable_stack <container_t,
+	internal::managed_restorable_stack < container_t,
 	    config::limitContainerDepth<0, abs(config::limitContainerDepth)> _container;
 
 	bool _is_falling = false;

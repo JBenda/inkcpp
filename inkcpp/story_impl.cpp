@@ -101,7 +101,6 @@ story_impl::~story_impl()
 
 const char* story_impl::string(uint32_t index) const { return _string_table + index; }
 
-
 bool story_impl::find_container_id(uint32_t offset, container_t& container_id) const
 {
 	// Find inmost container.
@@ -112,17 +111,17 @@ bool story_impl::find_container_id(uint32_t offset, container_t& container_id) c
 }
 
 // Search sorted looking for the target or the largest value smaller than target.
-template <typename entry>
-static const entry* upper_bound(const entry *sorted, uint32_t count, uint32_t key)
+template<typename entry>
+static const entry* upper_bound(const entry* sorted, uint32_t count, uint32_t key)
 {
 	if (count == 0)
 		return nullptr;
 
-	uint32_t begin	= 0;
-	uint32_t end	= count;
+	uint32_t begin = 0;
+	uint32_t end   = count;
 
-	while (begin < end)	{
-		const uint32_t mid = begin + (end - begin + 1) / 2;
+	while (begin < end) {
+		const uint32_t mid     = begin + (end - begin + 1) / 2;
 		const uint32_t mid_key = sorted[mid].key();
 
 		if (mid_key > key)
@@ -145,12 +144,11 @@ container_t story_impl::find_container_for(uint32_t offset) const
 	// (in which case the offset is contained within) or the end of a container, in which case
 	// the offset is inside that container's parent.
 
-	// If we're not inside the container, walk out to find the actual parent. Normally we'd 
-	// know that the parent contained the child, but the containers are sparse so we might 
+	// If we're not inside the container, walk out to find the actual parent. Normally we'd
+	// know that the parent contained the child, but the containers are sparse so we might
 	// not have anything.
 	container_t id = entry ? entry->_id : ~0;
-	while (id != ~0)
-	{
+	while (id != ~0) {
 		const container_data_t& data = container_data(id);
 		if (data._start_offset <= offset && data._end_offset >= offset)
 			return id;
@@ -172,7 +170,7 @@ CommandFlag story_impl::container_flag(ip_t offset) const
 }
 
 ip_t story_impl::find_offset_for(hash_t path) const
-{	
+{
 	// Hash map contains hashes in even slots, offsets in odd.
 	const container_hash_t* entry = upper_bound(_container_hash, _container_hash_size, path);
 
@@ -232,16 +230,15 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 void story_impl::setup_pointers()
 {
 	const ink::internal::header& header = *reinterpret_cast<const ink::internal::header*>(_file);
-	if (!header.verify())
+	if (! header.verify())
 		return;
 
 	// Locate sections
 	if (header._strings._bytes)
-		_string_table = reinterpret_cast<char *>(_file + header._strings._start);
+		_string_table = reinterpret_cast<char*>(_file + header._strings._start);
 
 	// Address list sections if they exist
-	if (header._list_meta._bytes)
-	{
+	if (header._list_meta._bytes) {
 		_list_meta = reinterpret_cast<const char*>(_file + header._list_meta._start);
 
 		// Lists require metadata
@@ -250,24 +247,22 @@ void story_impl::setup_pointers()
 	}
 
 	// Address containers section if it exists
-	if (header._containers._bytes)
-	{
+	if (header._containers._bytes) {
 		_num_containers = header._containers._bytes / sizeof(container_data_t);
 		_container_data = reinterpret_cast<const container_data_t*>(_file + header._containers._start);
 	}
 
 	// Address container map if it exists
-	if (header._container_map._bytes)
-	{
+	if (header._container_map._bytes) {
 		_container_map_size = header._container_map._bytes / sizeof(container_map_t);
 		_container_map = reinterpret_cast<const container_map_t*>(_file + header._container_map._start);
 	}
 
 	// Address container hash if it exists
-	if (header._container_hash._bytes)
-	{
+	if (header._container_hash._bytes) {
 		_container_hash_size = header._container_hash._bytes / sizeof(container_hash_t);
-		_container_hash = reinterpret_cast<const container_hash_t*>(_file + header._container_hash._start);
+		_container_hash
+		    = reinterpret_cast<const container_hash_t*>(_file + header._container_hash._start);
 	}
 
 	// Address instructions, which we hope exist!

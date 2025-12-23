@@ -12,71 +12,82 @@
 
 namespace ink::compiler::internal
 {
-	struct container_data;
-	class list_data;
+struct container_data;
+class list_data;
 
-	// binary emitter
-	class binary_emitter : public emitter
-	{
-	public:
-		binary_emitter();
-		virtual ~binary_emitter();
+// binary emitter
+class binary_emitter : public emitter
+{
+public:
+	binary_emitter();
+	virtual ~binary_emitter();
 
-		// Begin emitter
-		virtual uint32_t start_container(int index_in_parent, const std::string& name) override;
-		virtual uint32_t end_container() override;
-		virtual int function_container_arguments(const std::string& name) override;
-		virtual void write_raw(Command command, CommandFlag flag = CommandFlag::NO_FLAGS, const char* payload = nullptr, ink::size_t payload_size = 0) override;
-		virtual void write_path(Command command, CommandFlag flag, const std::string& path, bool useCountIndex = false) override;
-		virtual void write_variable(Command command, CommandFlag flag, const std::string& name) override;
-		virtual void write_string(Command command, CommandFlag flag, const std::string& string) override;
-		virtual void handle_nop(int index_in_parent) override;
-		virtual uint32_t fallthrough_divert() override;
-		virtual void patch_fallthroughs(uint32_t position) override;
-		virtual void set_list_meta(const list_data& list_defs) override;
-		virtual void write_list(Command command, CommandFlag flag, const std::vector<list_flag>& entries) override;
-		// End emitter
+	// Begin emitter
+	virtual uint32_t start_container(int index_in_parent, const std::string& name) override;
+	virtual uint32_t end_container() override;
+	virtual int      function_container_arguments(const std::string& name) override;
+	virtual void     write_raw(
+	        Command command, CommandFlag flag = CommandFlag::NO_FLAGS, const char* payload = nullptr,
+	        ink::size_t payload_size = 0
+	    ) override;
+	virtual void write_path(
+	    Command command, CommandFlag flag, const std::string& path, bool useCountIndex = false
+	) override;
+	virtual void write_variable(Command command, CommandFlag flag, const std::string& name) override;
+	virtual void write_string(Command command, CommandFlag flag, const std::string& string) override;
+	virtual void handle_nop(int index_in_parent) override;
+	virtual uint32_t fallthrough_divert() override;
+	virtual void     patch_fallthroughs(uint32_t position) override;
+	virtual void     set_list_meta(const list_data& list_defs) override;
+	virtual void
+	    write_list(Command command, CommandFlag flag, const std::vector<list_flag>& entries) override;
+	// End emitter
 
-		// write out the emitters data
-		virtual void output(std::ostream&);
+	// write out the emitters data
+	virtual void output(std::ostream&);
 
-	protected:
-		virtual void initialize() override;
-		virtual void finalize() override;
-		virtual void setContainerIndex(container_t index) override;
+protected:
+	virtual void initialize() override;
+	virtual void finalize() override;
+	virtual void setContainerIndex(container_t index) override;
 
-	private:
-		void process_paths();
+private:
+	void process_paths();
 
-		template <typename type>
-		void emit_section(std::ostream& out, const std::vector<type>& data) const;
-		void emit_section(std::ostream& out, const binary_stream& stream) const;
-		void close_section(std::ostream& out) const;
+	template<typename type>
+	void emit_section(std::ostream& out, const std::vector<type>& data) const;
+	void emit_section(std::ostream& out, const binary_stream& stream) const;
+	void close_section(std::ostream& out) const;
 
-		using container_data_t = ink::internal::container_data_t;
-		using container_map_t = ink::internal::container_map_t;
-		using container_hash_t = ink::internal::container_hash_t;
+	using container_data_t = ink::internal::container_data_t;
+	using container_map_t  = ink::internal::container_map_t;
+	using container_hash_t = ink::internal::container_hash_t;
 
-		void build_container_data(std::vector<container_data_t>& data, container_t parent, const container_data* context) const;
+	void build_container_data(
+	    std::vector<container_data_t>& data, container_t parent, const container_data* context
+	) const;
 
-		void build_container_hash_map(std::vector<container_hash_t>& hash, std::vector<container_data_t>& data, const std::string&, const container_data* context) const;
+	void build_container_hash_map(
+	    std::vector<container_hash_t>& hash, std::vector<container_data_t>& data, const std::string&,
+	    const container_data* context
+	) const;
 
-	private:
-		container_data* _root;
-		container_data* _current;
-		compilation_results* _results;
+private:
+	container_data*      _root;
+	container_data*      _current;
+	compilation_results* _results;
 
-		binary_stream _strings;
-		uint32_t _list_count = 0;
-		binary_stream _list_meta;
-		binary_stream _lists;
-		binary_stream _instructions;
+	binary_stream _strings;
+	uint32_t      _list_count = 0;
+	binary_stream _list_meta;
+	binary_stream _lists;
+	binary_stream _instructions;
 
-		// positon to write address
-		// path as string
-		// if path may not exists (used for function fallbackes)
-		// container data
-		// use count index?
-		std::vector<std::tuple<size_t, std::string, bool, container_data*, bool>> _paths;
-	};
-}
+	// positon to write address
+	// path as string
+	// if path may not exists (used for function fallbackes)
+	// container data
+	// use count index?
+	std::vector<std::tuple<size_t, std::string, bool, container_data*, bool>> _paths;
+};
+} // namespace ink::compiler::internal

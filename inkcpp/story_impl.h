@@ -40,21 +40,30 @@ public:
 
 	const char* list_meta() const { return _list_meta; }
 
-	// Find the innermost container containing offset. If offset is the start of a container, return that container.
+	// Find the innermost container containing offset. If offset is the start of a container, return
+	// that container.
 	container_t find_container_for(uint32_t offset) const;
 
-	// Find the container which starts exactly at offset. Return false if this isn't the start of a container.
+	// Find the container which starts exactly at offset. Return false if this isn't the start of a
+	// container.
 	bool find_container_id(uint32_t offset, container_t& container_id) const;
 
 	using container_data_t = ink::internal::container_data_t;
 	using container_hash_t = ink::internal::container_hash_t;
-	using container_map_t = ink::internal::container_map_t;
+	using container_map_t  = ink::internal::container_map_t;
 
 	// Look up the details of the given container
-	const container_data_t& container_data(container_t id) const { inkAssert(id < _num_containers); return _container_data[id]; }
+	const container_data_t& container_data(container_t id) const
+	{
+		inkAssert(id < _num_containers);
+		return _container_data[id];
+	}
 
 	// Look up the instruction pointer for the start of the given container
-	ip_t container_offset(container_t id) const { return _instruction_data + container_data(id)._start_offset; }
+	ip_t container_offset(container_t id) const
+	{
+		return _instruction_data + container_data(id)._start_offset;
+	}
 
 	// Get container flag from container offset (either start or end)
 	CommandFlag container_flag(ip_t offset) const;
@@ -73,26 +82,26 @@ private:
 
 private:
 	// file information
-	uint8_t*		_file;
-	size_t         _length;
+	uint8_t* _file;
+	size_t   _length;
 
 	// string table
 	const char* _string_table = nullptr;
 
 	const char*      _list_meta = nullptr;
-	const list_flag* _lists = nullptr;
+	const list_flag* _lists     = nullptr;
 
 	// Information about containers.
 	const container_data_t* _container_data = nullptr;
-	uint32_t  _num_containers = 0;
+	uint32_t                _num_containers = 0;
 
 	// How to find containers from instruction offsets.
-	const container_map_t* _container_map = nullptr;
-	uint32_t  _container_map_size = 0;
+	const container_map_t* _container_map      = nullptr;
+	uint32_t               _container_map_size = 0;
 
 	// How to find containers from string hashes.
-	const container_hash_t *_container_hash = nullptr;
-	uint32_t _container_hash_size = 0;
+	const container_hash_t* _container_hash      = nullptr;
+	uint32_t                _container_hash_size = 0;
 
 	// instruction info
 	ip_t _instruction_data = nullptr;
