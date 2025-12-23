@@ -233,7 +233,7 @@ void binary_emitter::emit_section(std::ostream& stream, const binary_stream& dat
 void binary_emitter::close_section(std::ostream& stream) const
 {
 	// Write zeroes until aligned.
-	while (stream.tellp() % ink::internal::header::Alignment)
+	while (!stream.fail() && (stream.tellp() % ink::internal::header::Alignment))
 		stream.put('\0');
 }
 
