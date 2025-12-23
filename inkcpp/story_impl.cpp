@@ -101,53 +101,62 @@ story_impl::~story_impl()
 
 const char* story_impl::string(uint32_t index) const { return _string_table + index; }
 
-bool story_impl::iterate_containers(
-    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse
-) const
+bool story_impl::find_container_id(uint32_t offset, container_t& container_id) const
 {
-	if (iterator == nullptr) {
-		// Empty check
-		if (_container_list_size == 0) {
-			return false;
-		}
+	// Find inmost container.
+	container_id = find_container_for(offset);
 
-		// Start
-		iterator = reverse ? _container_list + (_container_list_size - 1) * 2 : _container_list;
-	} else {
-		// Range check
-		inkAssert(
-		    iterator >= _container_list && iterator <= _container_list + _container_list_size * 2,
-		    "Container fail"
-		);
-
-		// Advance
-		iterator += reverse ? -2 : 2;
-
-		// End?
-		if (iterator >= _container_list + _container_list_size * 2 || iterator < _container_list) {
-			iterator = nullptr;
-			index    = 0;
-			offset   = nullptr;
-			return false;
-		}
-	}
-
-	// Get metadata
-	index  = *(iterator + 1);
-	offset = *iterator + instructions();
-	return true;
+	// Exact match?
+	return container_data(container_id)._start_offset == offset;
 }
 
-bool story_impl::get_container_id(ip_t offset, container_t& container_id) const
+// Search sorted looking for the target or the largest value smaller than target.
+template<typename entry>
+static const entry* upper_bound(const entry* sorted, uint32_t count, uint32_t key)
 {
-	const uint32_t* iter        = nullptr;
-	ip_t            iter_offset = nullptr;
-	while (iterate_containers(iter, container_id, iter_offset)) {
-		if (iter_offset == offset)
-			return true;
+	if (count == 0)
+		return nullptr;
+
+	uint32_t begin = 0;
+	uint32_t end   = count;
+
+	while (begin < end) {
+		const uint32_t mid     = begin + (end - begin + 1) / 2;
+		const uint32_t mid_key = sorted[mid].key();
+
+		if (mid_key > key)
+			// Look below
+			end = mid - 1;
+		else
+			// Look above
+			begin = mid;
 	}
 
-	return false;
+	return sorted + begin;
+}
+
+container_t story_impl::find_container_for(uint32_t offset) const
+{
+	// Container map contains offsets in even slots, container ids in odd.
+	const container_map_t* entry = upper_bound(_container_map, _container_map_size, offset);
+
+	// The last container command before the offset could be either the start of a container
+	// (in which case the offset is contained within) or the end of a container, in which case
+	// the offset is inside that container's parent.
+
+	// If we're not inside the container, walk out to find the actual parent. Normally we'd
+	// know that the parent contained the child, but the containers are sparse so we might
+	// not have anything.
+	container_t id = entry ? entry->_id : ~0;
+	while (id != ~0) {
+		const container_data_t& data = container_data(id);
+		if (data._start_offset <= offset && data._end_offset >= offset)
+			return id;
+
+		id = data._parent;
+	}
+
+	return id;
 }
 
 CommandFlag story_impl::container_flag(ip_t offset) const
@@ -160,61 +169,12 @@ CommandFlag story_impl::container_flag(ip_t offset) const
 	return static_cast<CommandFlag>(offset[1]);
 }
 
-CommandFlag story_impl::container_flag(container_t id) const
-{
-	const uint32_t* iter = nullptr;
-	ip_t            offset;
-	container_t     c_id;
-	while (iterate_containers(iter, c_id, offset)) {
-		if (c_id == id) {
-			inkAssert(
-			    static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER,
-			    "Container list pointer is invalid!"
-			);
-			return static_cast<CommandFlag>(offset[1]);
-		}
-	}
-	inkFail("Container not found -> can't fetch flag");
-	return CommandFlag::NO_FLAGS;
-}
-
-hash_t story_impl::container_hash(container_t id) const
-{
-	const uint32_t* iter = nullptr;
-	ip_t            offset;
-	container_t     c_id;
-	bool            hit = false;
-	while (iterate_containers(iter, c_id, offset)) {
-		if (c_id == id) {
-			hit = true;
-			break;
-		}
-	}
-	inkAssert(hit, "Unable to find container for id!");
-	hash_t* h_iter = _container_hash_start;
-	while (iter != _container_hash_end) {
-		if (instructions() + *( offset_t* ) (h_iter + 1) == offset) {
-			return *h_iter;
-		}
-		h_iter += 2;
-	}
-	inkAssert(false, "Did not find hash entry for container!");
-	return 0;
-}
-
 ip_t story_impl::find_offset_for(hash_t path) const
 {
-	hash_t* iter = _container_hash_start;
+	// Hash map contains hashes in even slots, offsets in odd.
+	const container_hash_t* entry = upper_bound(_container_hash, _container_hash_size, path);
 
-	while (iter != _container_hash_end) {
-		if (*iter == path) {
-			return instructions() + *( offset_t* ) (iter + 1);
-		}
-
-		iter += 2;
-	}
-
-	return nullptr;
+	return entry && entry->_hash == path ? _instruction_data + entry->_offset : nullptr;
 }
 
 globals story_impl::new_globals()
@@ -269,108 +229,49 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 
 void story_impl::setup_pointers()
 {
-	using header = ink::internal::header;
-	_header      = header::parse_header(reinterpret_cast<char*>(_file));
+	const ink::internal::header& header = *reinterpret_cast<const ink::internal::header*>(_file);
+	if (! header.verify())
+		return;
 
-	// String table is after the header
-	_string_table = ( char* ) _file + header::Size;
+	// Locate sections
+	if (header._strings._bytes)
+		_string_table = reinterpret_cast<char*>(_file + header._strings._start);
 
-	// Pass over strings
-	const char* ptr = _string_table;
-	if (*ptr == 0) // SPECIAL: No strings
-	{
-		ptr++;
-	} else
-		while (true) {
-			// Read until null terminator
-			while (*ptr != 0)
-				ptr++;
+	// Address list sections if they exist
+	if (header._list_meta._bytes) {
+		_list_meta = reinterpret_cast<const char*>(_file + header._list_meta._start);
 
-			// Check next character
-			ptr++;
-
-			// Second null. Strings are done.
-			if (*ptr == 0) {
-				ptr++;
-				break;
-			}
-		}
-
-	// check if lists are defined
-	_list_meta = ptr;
-	if (list_flag flag = _header.read_list_flag(ptr); flag != null_flag) {
-		// skip list definitions
-		auto list_id = flag.list_id;
-		while (*ptr != 0) {
-			++ptr;
-		}
-		++ptr; // skip list name
-		do {
-			if (flag.list_id != list_id) {
-				list_id = flag.list_id;
-				while (*ptr != 0) {
-					++ptr;
-				}
-				++ptr; // skip list name
-			}
-			while (*ptr != 0) {
-				++ptr;
-			}
-			++ptr; // skip flag name
-		} while ((flag = _header.read_list_flag(ptr)) != null_flag);
-
-		_lists = reinterpret_cast<const list_flag*>(ptr);
-		// skip predefined lists
-		while (_header.read_list_flag(ptr) != null_flag) {
-			while (_header.read_list_flag(ptr) != null_flag)
-				;
-		}
-	} else {
-		_list_meta = nullptr;
-		_lists     = nullptr;
-	}
-	inkAssert(
-	    _header.ink_bin_version_number == ink::InkBinVersion,
-	    "invalid InkBinVerison! currently: %i you used %i", ink::InkBinVersion,
-	    _header.ink_bin_version_number
-	);
-	inkAssert(
-	    _header.endien == header::endian_types::same, "different endien support not yet implemented"
-	);
-
-
-	_num_containers = *( uint32_t* ) (ptr);
-	ptr += sizeof(uint32_t);
-
-	// Pass over the container data
-	_container_list_size = 0;
-	_container_list      = ( uint32_t* ) (ptr);
-	while (true) {
-		uint32_t val = *( uint32_t* ) ptr;
-		if (val == ~0) {
-			ptr += sizeof(uint32_t);
-			break;
-		} else {
-			ptr += sizeof(uint32_t) * 2;
-			_container_list_size++;
-		}
+		// Lists require metadata
+		if (header._lists._bytes)
+			_lists = reinterpret_cast<const list_flag*>(_file + header._lists._start);
 	}
 
-	// Next is the container hash map
-	_container_hash_start = ( hash_t* ) (ptr);
-	while (true) {
-		uint32_t val = *( uint32_t* ) ptr;
-		if (val == ~0) {
-			_container_hash_end = ( hash_t* ) (ptr);
-			ptr += sizeof(uint32_t);
-			break;
-		}
-
-		ptr += sizeof(uint32_t) * 2;
+	// Address containers section if it exists
+	if (header._containers._bytes) {
+		_num_containers = header._containers._bytes / sizeof(container_data_t);
+		_container_data = reinterpret_cast<const container_data_t*>(_file + header._containers._start);
 	}
 
-	// After strings comes instruction data
-	_instruction_data = ( ip_t ) ptr;
+	// Address container map if it exists
+	if (header._container_map._bytes) {
+		_container_map_size = header._container_map._bytes / sizeof(container_map_t);
+		_container_map = reinterpret_cast<const container_map_t*>(_file + header._container_map._start);
+	}
+
+	// Address container hash if it exists
+	if (header._container_hash._bytes) {
+		_container_hash_size = header._container_hash._bytes / sizeof(container_hash_t);
+		_container_hash
+		    = reinterpret_cast<const container_hash_t*>(_file + header._container_hash._start);
+	}
+
+	// Address instructions, which we hope exist!
+	if (header._instructions._bytes)
+		_instruction_data = _file + header._instructions._start;
+
+	// Shrink file length to fit exact length of instructions section.
+	inkAssert(end() >= _instruction_data + header._instructions._bytes);
+	_length = _instruction_data + header._instructions._bytes - _file;
 
 	// Debugging info
 	/*{

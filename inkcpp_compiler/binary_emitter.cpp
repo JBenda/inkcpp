@@ -13,6 +13,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <algorithm>
 
 #ifndef _MSC_VER
 #	include <cstring>
@@ -101,7 +102,7 @@ uint32_t binary_emitter::start_container(int index_in_parent, const std::string&
 	container->parent = _current;
 
 	// Set offset to the current position
-	container->offset = _containers.pos();
+	container->offset = _instructions.pos();
 
 	// Add to parents lists
 	if (_current != nullptr) {
@@ -117,17 +118,17 @@ uint32_t binary_emitter::start_container(int index_in_parent, const std::string&
 	_current = container;
 
 	// Return current position
-	return _containers.pos();
+	return _instructions.pos();
 }
 
 uint32_t binary_emitter::end_container()
 {
 	// Move up the chain
-	_current->end_offset = _containers.pos();
+	_current->end_offset = _instructions.pos();
 	_current             = _current->parent;
 
 	// Return offset
-	return _containers.pos();
+	return _instructions.pos();
 }
 
 int binary_emitter::function_container_arguments(const std::string& name)
@@ -141,11 +142,11 @@ int binary_emitter::function_container_arguments(const std::string& name)
 	}
 
 	size_t offset = fn->second->offset;
-	byte_t cmd    = _containers.get(offset);
+	byte_t cmd    = _instructions.get(offset);
 	int    arity  = 0;
 	while (static_cast<Command>(cmd) == Command::DEFINE_TEMP) {
 		offset += 6; // command(1) + flag(1) + variable_name_hash(4)
-		cmd = _containers.get(offset);
+		cmd = _instructions.get(offset);
 		++arity;
 	}
 	return arity;
@@ -155,10 +156,10 @@ void binary_emitter::write_raw(
     Command command, CommandFlag flag, const char* payload, ink::size_t payload_size
 )
 {
-	_containers.write(command);
-	_containers.write(flag);
+	_instructions.write(command);
+	_instructions.write(flag);
 	if (payload_size > 0)
-		_containers.write(( const byte_t* ) payload, payload_size);
+		_instructions.write(( const byte_t* ) payload, payload_size);
 }
 
 void binary_emitter::write_path(
@@ -169,7 +170,7 @@ void binary_emitter::write_path(
 	write(command, ( uint32_t ) 0, flag);
 
 	// Note the position of this later so we can resolve the paths at the end
-	size_t param_position = _containers.pos() - sizeof(uint32_t);
+	size_t param_position = _instructions.pos() - sizeof(uint32_t);
 	bool   op             = flag & CommandFlag::FALLBACK_FUNCTION;
 	_paths.push_back(std::make_tuple(param_position, path, op, _current, useCountIndex));
 }
@@ -212,43 +213,93 @@ void binary_emitter::write_list(
 
 void binary_emitter::handle_nop(int index_in_parent)
 {
-	_current->noop_offsets.insert({index_in_parent, _containers.pos()});
+	_current->noop_offsets.insert({index_in_parent, _instructions.pos()});
+}
+
+template<typename type>
+void binary_emitter::emit_section(std::ostream& stream, const std::vector<type>& data) const
+{
+	stream.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(type));
+	close_section(stream);
+}
+
+void binary_emitter::emit_section(std::ostream& stream, const binary_stream& data) const
+{
+	inkAssert((stream.tellp() & (ink::internal::header::Alignment - 1)) == 0);
+	data.write_to(stream);
+	close_section(stream);
+}
+
+void binary_emitter::close_section(std::ostream& stream) const
+{
+	// Write zeroes until aligned.
+	while (! stream.fail() && (stream.tellp() % ink::internal::header::Alignment))
+		stream.put('\0');
 }
 
 void binary_emitter::output(std::ostream& out)
 {
-	// Write the ink version
-	// TODO: define this order in header?
-	using header              = ink::internal::header;
-	header::endian_types same = header::endian_types::same;
-	out.write(( const char* ) &same, sizeof(decltype(same)));
-	out.write(( const char* ) &_ink_version, sizeof(decltype(_ink_version)));
-	out.write(( const char* ) &ink::InkBinVersion, sizeof(decltype(ink::InkBinVersion)));
+	// Create container data
+	std::vector<container_data_t> container_data;
+	container_data.resize(_max_container_index);
+	build_container_data(container_data, ~0, _root);
+
+	// Create container hash (and write the hashes into the data as well)
+	std::vector<container_hash_t> container_hash;
+	container_hash.reserve(_max_container_index);
+	build_container_hash_map(container_hash, container_data, "", _root);
+
+	// Sort map on ascending hash code.
+	std::sort(container_hash.begin(), container_hash.end());
+
+	// If there's list meta data...
+	if (_list_meta.pos() > 0) {
+		// If there are any lists, terminate the data correctly. Otherwise leave an empty section.
+		if (_lists.pos() > 0)
+			_lists.write(null_flag);
+	} else
+		// No meta data -> no lists.
+		_lists.reset();
+
+	// Fill in header
+	ink::internal::header header;
+	header.ink_version_number     = _ink_version;
+	header.ink_bin_version_number = ink::InkBinVersion;
+
+	// Fill in sections
+	uint32_t offset = sizeof(header);
+	header._strings.setup(offset, _strings.pos());
+	header._list_meta.setup(offset, _list_meta.pos());
+	header._lists.setup(offset, _lists.pos());
+	header._containers.setup(offset, container_data.size() * sizeof(container_data_t));
+	header._container_map.setup(offset, _container_map.size() * sizeof(container_map_t));
+	header._container_hash.setup(offset, container_hash.size() * sizeof(container_hash_t));
+	header._instructions.setup(offset, _instructions.pos());
+
+	// Write the header
+	out.write(reinterpret_cast<const char*>(&header), sizeof(header));
+	close_section(out);
 
 	// Write the string table
-	_strings.write_to(out);
-
-	// Write a separator
-	out << ( char ) 0;
+	emit_section(out, _strings);
 
 	// Write lists meta data and defined lists
-	_lists.write_to(out);
-	// Write a seperator
-	out.write(reinterpret_cast<const char*>(&null_flag), sizeof(null_flag));
+	emit_section(out, _list_meta);
+
+	// Write lists meta data and defined lists
+	emit_section(out, _lists);
+
+	// Write out container information
+	emit_section(out, container_data);
 
 	// Write out container map
-	write_container_map(out, _container_map, _max_container_index);
-
-	// Write a separator
-	uint32_t END_MARKER = ~0;
-	out.write(( const char* ) &END_MARKER, sizeof(uint32_t));
+	emit_section(out, _container_map);
 
 	// Write container hash list
-	write_container_hash_map(out);
-	out.write(( const char* ) &END_MARKER, sizeof(uint32_t));
+	emit_section(out, container_hash);
 
-	// Write the container data
-	_containers.write_to(out);
+	// Write the container contents (instruction stream)
+	emit_section(out, _instructions);
 
 	// Flush the file
 	out.flush();
@@ -259,8 +310,9 @@ void binary_emitter::initialize()
 	// Reset binary data stores
 	_strings.reset();
 	_list_count = 0;
+	_list_meta.reset();
 	_lists.reset();
-	_containers.reset();
+	_instructions.reset();
 
 	// clear other data
 	_paths.clear();
@@ -286,13 +338,13 @@ uint32_t binary_emitter::fallthrough_divert()
 	write<uint32_t>(Command::DIVERT, ( uint32_t ) 0, CommandFlag::DIVERT_IS_FALLTHROUGH);
 
 	// Return the location of the divert offset
-	return _containers.pos() - sizeof(uint32_t);
+	return _instructions.pos() - sizeof(uint32_t);
 }
 
 void binary_emitter::patch_fallthroughs(uint32_t position)
 {
 	// Patch
-	_containers.set(position, _containers.pos());
+	_instructions.set(position, _instructions.pos());
 }
 
 void binary_emitter::process_paths()
@@ -363,62 +415,78 @@ void binary_emitter::process_paths()
 
 		if (noop_offset != ~0) {
 			inkAssert(! useCountIndex, "Can't count visits to a noop!");
-			_containers.set(position, noop_offset);
+			_instructions.set(position, noop_offset);
 		} else {
 			// If we want the count index, write that out
 			if (useCountIndex) {
 				inkAssert(container->counter_index != ~0, "No count index available for this container!");
-				_containers.set(position, container->counter_index);
+				_instructions.set(position, container->counter_index);
 			} else {
 				// Otherwise, write container address
 				if (container == nullptr) {
-					_containers.set(position, 0);
+					_instructions.set(position, 0);
 					inkAssert(optional, "Was not able to resolve a not optional path! '%hs'", path.c_str());
 				} else {
-					_containers.set(position, container->offset);
+					_instructions.set(position, container->offset);
 				}
 			}
 		}
 	}
 }
 
-void binary_emitter::write_container_map(
-    std::ostream& out, const container_map& map, container_t num
-)
+void binary_emitter::build_container_data(
+    std::vector<container_data_t>& data, container_t parent, const container_data* context
+) const
 {
-	// Write out container count
-	out.write(reinterpret_cast<const char*>(&num), sizeof(container_t));
+	// Build data for this container
+	if (context->counter_index != ~0) {
+		container_data_t& d = data[context->counter_index];
+		d._parent           = parent;
+		d._start_offset     = context->offset;
+		d._end_offset       = context->end_offset;
+		const uint8_t flags = _instructions.get(context->offset + 1);
+		inkAssert(flags < 16);
+		d._flags = flags;
 
-	// Write out entries
-	for (const auto& pair : map) {
-		out.write(( const char* ) &pair.first, sizeof(uint32_t));
-		out.write(( const char* ) &pair.second, sizeof(uint32_t));
+		// Since we might be skipping tree levels, we need to be explicit about the parent.
+		parent = context->counter_index;
 	}
+
+	// Recurse
+	for (auto child : context->children)
+		build_container_data(data, parent, child);
 }
 
-void binary_emitter::write_container_hash_map(std::ostream& out)
+void binary_emitter::build_container_hash_map(
+    std::vector<container_hash_t>& hash_map, std::vector<container_data_t>& data,
+    const std::string& name, const container_data* context
+) const
 {
-	write_container_hash_map(out, "", _root);
-}
-
-void binary_emitter::write_container_hash_map(
-    std::ostream& out, const std::string& name, const container_data* context
-)
-{
+	// Search named children first.
 	for (auto child : context->named_children) {
 		// Get the child's name in the hierarchy
 		std::string child_name = name.empty() ? child.first : (name + "." + child.first);
-		hash_t      name_hash  = hash_string(child_name.c_str());
-		// Write out name hash and offset
-		out.write(( const char* ) &name_hash, sizeof(hash_t));
-		out.write(( const char* ) &child.second->offset, sizeof(uint32_t));
+
+		// Hash name. We only do this at the named child level. In theory we could support indexed
+		// children as well. The root is anonymous so the fact that it's skipped is not an issue.
+		const hash_t child_name_hash = hash_string(child_name.c_str());
+
+		// Store hash in the data.
+		if (child.second->counter_index != ~0) {
+			data[child.second->counter_index]._hash = child_name_hash;
+		}
+
+		// Append the name hash and offset
+		hash_map.push_back({child_name_hash, child.second->offset});
 
 		// Recurse
-		write_container_hash_map(out, child_name, child.second);
+		build_container_hash_map(hash_map, data, child_name, child.second);
 	}
 
+	// Search indexed children (which duplicates named childen...)
+	// TODO: Merge duplicate child arrays, very error-prone.
 	for (auto child : context->indexed_children) {
-		write_container_hash_map(out, name, child.second);
+		build_container_hash_map(hash_map, data, name, child.second);
 	}
 }
 
@@ -432,15 +500,15 @@ void binary_emitter::set_list_meta(const list_data& list_defs)
 	auto list_names = list_defs.get_list_names().begin();
 	int  list_id    = -1;
 	for (const auto& flag : flags) {
-		_lists.write(flag.flag);
+		_list_meta.write(flag.flag);
 		if (flag.flag.list_id != list_id) {
 			list_id = flag.flag.list_id;
-			_lists.write(reinterpret_cast<const byte_t*>(list_names->data()), list_names->size());
+			_list_meta.write(reinterpret_cast<const byte_t*>(list_names->data()), list_names->size());
 			++list_names;
-			_lists.write('\0');
+			_list_meta.write('\0');
 		}
-		_lists.write(reinterpret_cast<const byte_t*>(flag.name->c_str()), flag.name->size() + 1);
+		_list_meta.write(reinterpret_cast<const byte_t*>(flag.name->c_str()), flag.name->size() + 1);
 	}
-	_lists.write(null_flag);
+	_list_meta.write(null_flag);
 }
 } // namespace ink::compiler::internal

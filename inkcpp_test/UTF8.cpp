@@ -3,6 +3,7 @@
 #include <story.h>
 #include <globals.h>
 #include <runner.h>
+#include <globals.h>
 #include <compiler.h>
 
 #include <sstream>
@@ -18,7 +19,7 @@ SCENARIO("a story supports UTF-8", "[utf-8]")
 		auto ink = story::from_file("UTF8Story.bin");
 		runner thread = ink->new_runner();
 
-		std::ifstream demoFile("ink/UTF-8-demo.txt");
+		std::ifstream demoFile(INK_TEST_RESOURCE_DIR "UTF-8-demo.txt");
 		if (!demoFile.is_open()) {
 			throw std::runtime_error("cannot open UTF-8 demo file");
 		}
