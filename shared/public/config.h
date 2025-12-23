@@ -9,8 +9,8 @@
 // The UE build process will define INKCPP_API
 #ifdef INKCPP_API
 #	define INK_ENABLE_UNREAL
-#	define INKCPP_NO_EH
 #	define INKCPP_NO_RTTI
+#	define INKCPP_NO_EXCEPTIONS
 #elif INKCPP_BUILD_CLIB
 #	define INK_ENABLE_CSTD
 #else
@@ -18,12 +18,12 @@
 #	define INK_ENABLE_CSTD
 #endif
 
-#ifndef INKCPP_NO_EH
-#	define INK_ENABLE_EH
-#endif
-
 #ifndef INKCPP_NO_RTTI
 #	define INK_ENABLE_RTTI
+#endif
+
+#ifndef INKCPP_NO_EXCEPTIONS
+#	define INK_ENABLE_EXCEPTIONS
 #endif
 
 // Only turn on if you have json.hpp and you want to use it with the compiler

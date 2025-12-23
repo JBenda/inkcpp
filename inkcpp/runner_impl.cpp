@@ -868,7 +868,7 @@ bool runner_impl::line_step()
 
 void runner_impl::step()
 {
-#ifdef INK_ENABLE_EH
+#ifdef INK_ENABLE_EXCEPTIONS
 	try
 #endif
 	{
@@ -1500,7 +1500,7 @@ void runner_impl::step()
 		}
 #endif
 	}
-#ifdef INK_ENABLE_EH
+#ifdef INK_ENABLE_EXCEPTIONS
 	catch (...) {
 		// Reset our whole state as it's probably corrupt
 		reset();
