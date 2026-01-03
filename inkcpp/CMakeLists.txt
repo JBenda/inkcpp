@@ -52,8 +52,8 @@ target_include_directories(inkcpp PUBLIC
 set_target_properties(inkcpp PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 # Make sure the include directory is included 
-target_link_libraries(inkcpp_o PRIVATE inkcpp_shared)
-target_link_libraries(inkcpp PRIVATE inkcpp_shared)
+target_link_libraries(inkcpp_o PUBLIC inkcpp_shared)
+target_link_libraries(inkcpp PUBLIC inkcpp_shared)
 # Make sure this project and all dependencies use the C++17 standard
 target_compile_features(inkcpp PUBLIC cxx_std_17)
 
