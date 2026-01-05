@@ -58,7 +58,7 @@ void json_compiler::compile(
 
 struct container_meta {
 	std::string         name;
-	container_t         indexToReturn        = ~0;
+	container_t         indexToReturn        = ~0U;
 	bool                recordInContainerMap = false;
 	vector<defer_entry> deferred;
 	CommandFlag         cmd_flags = CommandFlag::NO_FLAGS;
@@ -247,7 +247,7 @@ void json_compiler::compile_container(
 
 	// Write end container marker, End pointer should point to End command (form symetry with START
 	// command)
-	if (meta.indexToReturn != ~0)
+	if (meta.indexToReturn != ~0U)
 		_emitter->write(Command::END_CONTAINER_MARKER, meta.indexToReturn, meta.cmd_flags);
 
 	// Record end position in map
@@ -411,7 +411,8 @@ void json_compiler::compile_complex_command(const nlohmann::json& command)
 
 	else if (get(command, "#", val)) {
 		if (_ink_version > 20) {
-			ink_exception("with inkVerison 21 the tag system chages, and the '#: <tag>' is deprecated now"
+			throw ink_exception(
+			    "with inkVerison 21 the tag system chages, and the '#: <tag>' is deprecated now"
 			);
 		}
 		_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);

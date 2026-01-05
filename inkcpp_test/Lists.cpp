@@ -14,8 +14,8 @@ SCENARIO("List logic operations", "[lists]")
 {
 	GIVEN("a demo story")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "ListLogicStory.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "ListLogicStory.bin")};
+		runner                 thread = ink->new_runner();
 		WHEN("just run")
 		{
 			std::string out = thread->getall();
@@ -45,17 +45,18 @@ Hey
 		}
 	}
 }
+
 SCENARIO("run a story with lists", "[lists]")
 {
 	GIVEN("a story with multi lists")
 	{
-		auto    ink     = story::from_file(INK_TEST_RESOURCE_DIR "ListStory.bin");
-		globals globals = ink->new_globals();
-		runner thread = ink->new_runner(globals);
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "ListStory.bin")};
+		globals                globals = ink->new_globals();
+		runner                 thread  = ink->new_runner(globals);
 
 		WHEN("just run")
 		{
-			std::string out = thread->getall();
+			std::string out     = thread->getall();
 			std::string choice1 = thread->get_choice(0)->text();
 			thread->choose(0);
 			std::string out2 = thread->getall();
@@ -72,8 +73,8 @@ SCENARIO("run a story with lists", "[lists]")
 			std::string out     = thread->getall();
 			std::string choice1 = thread->get_choice(0)->text();
 			thread->choose(0);
-
-			list l1 = *globals->get<list>("list");
+			auto x  = globals->get<list>("list");
+			list l1 = x.value();
 			l1->add("animals.dog");
 			l1->remove("colors.red");
 			REQUIRE(globals->set<list>("list", l1));
@@ -88,7 +89,7 @@ SCENARIO("run a story with lists", "[lists]")
 
 		WHEN("modify")
 		{
-			std::string out = thread->getall();
+			std::string out     = thread->getall();
 			std::string choice1 = thread->get_choice(0)->text();
 			thread->choose(0);
 
@@ -130,13 +131,14 @@ SCENARIO("run a story with lists", "[lists]")
 			THEN("should iterate all contained flags")
 			{
 				l1 = *globals->get<list>("list");
-				for(auto flag : *l1) {
+				for (auto flag : *l1) {
 					INFO(flag);
-					REQUIRE((strcmp(flag.list_name, "colors")==0 || strcmp(flag.list_name, "animals") == 0));
-					REQUIRE((strcmp(flag.flag_name, "bird") == 0
-						|| strcmp(flag.flag_name, "dog") == 0
-						|| strcmp(flag.flag_name, "yellow") == 0
-					));
+					REQUIRE((strcmp(flag.list_name, "colors") == 0 || strcmp(flag.list_name, "animals") == 0)
+					);
+					REQUIRE(
+					    (strcmp(flag.flag_name, "bird") == 0 || strcmp(flag.flag_name, "dog") == 0
+					     || strcmp(flag.flag_name, "yellow") == 0)
+					);
 				}
 			}
 		}

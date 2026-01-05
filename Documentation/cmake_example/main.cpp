@@ -4,6 +4,7 @@
 #include <ink/story.h>
 #include <ink/compiler.h>
 
+#include <memory.h>
 #include <iostream>
 
 using namespace ink::runtime;
@@ -14,7 +15,7 @@ int main()
 {
 	ink::compiler::run("test.ink.json", "test.bin");
 	// Load ink binary story, generated from the inkCPP compiler
-	story* myInk = story::from_file("test.bin");
+	std::unique_ptr<story> myInk{story::from_file("test.bin")};
 
 	// Create a new thread
 	runner thread = myInk->new_runner();

@@ -48,6 +48,8 @@ public:
 	{
 	}
 
+	virtual ~list_interface() {}
+
 	/** iterater for flags in a list
 	 * @todo implement `operator->`
 	 */
@@ -67,9 +69,7 @@ public:
 
 	protected:
 		/** @private */
-		iterator(
-		    const char* flag_name, const list_interface& list, size_t i, bool one_list_only = false
-		)
+		iterator(const char* flag_name, const list_interface& list, int i, bool one_list_only = false)
 		    : _flag_name(flag_name)
 		    , _list_name(nullptr)
 		    , _list(list)
@@ -97,7 +97,7 @@ public:
 		};
 
 		/** access value the iterator is pointing to */
-		Flag operator*() const { return Flag{ _flag_name, _list_name }; };
+		Flag operator*() const { return Flag{_flag_name, _list_name}; };
 
 		/** continue iterator to next value */
 		iterator& operator++()
@@ -115,7 +115,20 @@ public:
 		 * @param itr other iterator
 		 */
 		bool operator==(const iterator& itr) const { return itr._i == _i; }
+
+		iterator& operator=(const iterator&) = delete;
 	};
+
+
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                          \
+	    disable : 4100, justification : "non functional prototypes do not need the argument." \
+	)
+#endif
 
 	/** checks if a flag is contained in the list */
 	virtual bool contains(const char* flag) const
@@ -166,6 +179,12 @@ private:
 		inkAssert(false, "Not implemented funciton from interface is called!");
 	};
 
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#else
+#	pragma warning(pop)
+#endif
+
 protected:
 	/** @private */
 	iterator new_iterator(const char* flag_name, int i, bool one_list_only = false) const
@@ -182,7 +201,7 @@ protected:
 
 	/** @private */
 	internal::list_table* _list_table;
-	/** @private */
 	int                   _list;
 };
+
 } // namespace ink::runtime

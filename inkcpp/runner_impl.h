@@ -213,8 +213,8 @@ private:
 
 	// Special code for jumping from the current IP to another
 	void     jump(ip_t, bool record_visits, bool track_knot_visit);
-	uint32_t _current_knot_id        = ~0; // id to detect knot changes from the outside
-	uint32_t _current_knot_id_backup = ~0;
+	uint32_t _current_knot_id        = ~0U; // id to detect knot changes from the outside
+	uint32_t _current_knot_id_backup = ~0U;
 	uint32_t _entered_knot   = false; // if we are in the first action after a jump to an snitch/knot
 	bool     _entered_global = false; // if we are in the first action after a jump to an snitch/knot
 
@@ -236,7 +236,7 @@ public:
 	public:
 		template<bool... D, bool con = dynamic, enable_if_t<con, bool> = true>
 		threads()
-		    : base(~0)
+		    : base(~0U)
 		    , _threadDone(nullptr, reinterpret_cast<ip_t>(~0))
 		{
 			static_assert(sizeof...(D) == 0, "Don't use explicit template arguments!");
@@ -378,7 +378,7 @@ size_t runner_impl::threads<dynamic, N>::snap(unsigned char* data, const snapper
 	unsigned char* ptr = data;
 	ptr += base::snap(data ? ptr : nullptr, snapper);
 	ptr += _threadDone.snap(data ? ptr : nullptr, snapper);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 template<bool dynamic, size_t N>

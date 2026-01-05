@@ -35,7 +35,7 @@ const choice* runner_interface::get_choice(size_t index) const
 	return begin() + index;
 }
 
-size_t runner_interface::num_choices() const { return end() - begin(); }
+size_t runner_interface::num_choices() const { return static_cast<size_t>(end() - begin()); }
 } // namespace ink::runtime
 
 namespace ink::runtime::internal
@@ -404,7 +404,7 @@ void runner_impl::start_frame(uint32_t target)
 	}
 	// Push next address onto the callstack
 	{
-		size_t address = _ptr - _story->instructions();
+		offset_t address = static_cast<offset_t>(_ptr - _story->instructions());
 		_stack.push_frame<type>(address, _evaluation_mode);
 		_ref_stack.push_frame<type>(address, _evaluation_mode);
 	}
@@ -472,7 +472,7 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _choices()
     , _tags_begin(0, ~0)
     , _container(ContainerData{})
-    , _rng(time(NULL))
+    , _rng(static_cast<uint32_t>(time(NULL)))
 {
 
 
@@ -517,7 +517,7 @@ runner_impl::line_type runner_impl::getline()
 
 	// Fall through the fallback choice, if available
 	if (! has_choices() && _fallback_choice) {
-		choose(~0);
+		choose(~0U);
 	}
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 
@@ -598,7 +598,7 @@ void runner_impl::choose(size_t index)
 
 	// Figure out where our previous pointer was for that thread
 	ip_t prev = nullptr;
-	if (choiceThread == ~0) {
+	if (choiceThread == ~0U) {
 		prev = _done;
 	} else {
 		prev = _threads.get(choiceThread);
@@ -654,10 +654,11 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr += _eval.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags_begin.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags.snap(data ? ptr : nullptr, snapper);
-	ptr = snap_write(ptr, _entered_global, should_write);
-	ptr = snap_write(ptr, _entered_knot, should_write);
-	ptr = snap_write(ptr, _current_knot_id, should_write);
-	ptr = snap_write(ptr, _current_knot_id_backup, should_write);
+	snapper.runner_tags = _tags.data();
+	ptr                 = snap_write(ptr, _entered_global, should_write);
+	ptr                 = snap_write(ptr, _entered_knot, should_write);
+	ptr                 = snap_write(ptr, _current_knot_id, should_write);
+	ptr                 = snap_write(ptr, _current_knot_id_backup, should_write);
 	ptr += _container.snap(data ? ptr : nullptr, snapper);
 	ptr += _threads.snap(data ? ptr : nullptr, snapper);
 	ptr = snap_write(ptr, _fallback_choice.has_value(), should_write);
@@ -665,7 +666,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 		ptr += _fallback_choice.value().snap(data ? ptr : nullptr, snapper);
 	}
 	ptr += _choices.snap(data ? ptr : nullptr, snapper);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& loader)
@@ -681,23 +682,24 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
-	ptr = snap_read(ptr, _evaluation_mode);
-	ptr = snap_read(ptr, _string_mode);
-	ptr = snap_read(ptr, _saved_evaluation_mode);
-	ptr = snap_read(ptr, _saved);
-	ptr = snap_read(ptr, _is_falling);
-	ptr = _output.snap_load(ptr, loader);
-	ptr = _stack.snap_load(ptr, loader);
-	ptr = _ref_stack.snap_load(ptr, loader);
-	ptr = _eval.snap_load(ptr, loader);
-	ptr = _tags_begin.snap_load(ptr, loader);
-	ptr = _tags.snap_load(ptr, loader);
-	ptr = snap_read(ptr, _entered_global);
-	ptr = snap_read(ptr, _entered_knot);
-	ptr = snap_read(ptr, _current_knot_id);
-	ptr = snap_read(ptr, _current_knot_id_backup);
-	ptr = _container.snap_load(ptr, loader);
-	ptr = _threads.snap_load(ptr, loader);
+	ptr                = snap_read(ptr, _evaluation_mode);
+	ptr                = snap_read(ptr, _string_mode);
+	ptr                = snap_read(ptr, _saved_evaluation_mode);
+	ptr                = snap_read(ptr, _saved);
+	ptr                = snap_read(ptr, _is_falling);
+	ptr                = _output.snap_load(ptr, loader);
+	ptr                = _stack.snap_load(ptr, loader);
+	ptr                = _ref_stack.snap_load(ptr, loader);
+	ptr                = _eval.snap_load(ptr, loader);
+	ptr                = _tags_begin.snap_load(ptr, loader);
+	ptr                = _tags.snap_load(ptr, loader);
+	loader.runner_tags = _tags.data();
+	ptr                = snap_read(ptr, _entered_global);
+	ptr                = snap_read(ptr, _entered_knot);
+	ptr                = snap_read(ptr, _current_knot_id);
+	ptr                = snap_read(ptr, _current_knot_id_backup);
+	ptr                = _container.snap_load(ptr, loader);
+	ptr                = _threads.snap_load(ptr, loader);
 	bool has_fallback_choice;
 	ptr              = snap_read(ptr, has_fallback_choice);
 	_fallback_choice = nullopt;
@@ -715,7 +717,7 @@ const char* runner_impl::getline_alloc()
 	advance_line();
 	const char* res = _output.get_alloc(_globals->strings(), _globals->lists());
 	if (! has_choices() && _fallback_choice) {
-		choose(~0);
+		choose(~0U);
 	}
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	return res;
@@ -778,7 +780,7 @@ bool runner_impl::line_step()
 
 		// Step the interpreter until we've parsed all tags for the line
 		_entered_global  = true;
-		_current_knot_id = ~0;
+		_current_knot_id = ~0U;
 		_entered_knot    = false;
 	}
 	// Step the interpreter
@@ -1158,10 +1160,10 @@ void runner_impl::step()
 					// TODO We push ahead of a single divert. Is that correct in all cases....?????
 					auto returnTo = _ptr + CommandSize<uint32_t>;
 					_stack.push_frame<frame_type::thread>(
-					    returnTo - _story->instructions(), _evaluation_mode
+					    static_cast<offset_t>(returnTo - _story->instructions()), _evaluation_mode
 					);
 					_ref_stack.push_frame<frame_type::thread>(
-					    returnTo - _story->instructions(), _evaluation_mode
+					    static_cast<offset_t>(returnTo - _story->instructions()), _evaluation_mode
 					);
 
 					// Fork a new thread on the callstack
@@ -1329,7 +1331,7 @@ void runner_impl::step()
 					//  been visited
 					if (flag & CommandFlag::CHOICE_IS_ONCE_ONLY) {
 						// Need to convert offset to container index
-						container_t destination = -1;
+						container_t destination = ~0U;
 						if (_story->get_container_id(_story->instructions() + path, destination)) {
 							// Ignore the choice if we've visited the destination before
 							if (_globals->visits(destination) > 0) {
@@ -1456,7 +1458,9 @@ void runner_impl::step()
 					//  iteration loop. I don't feel like replicating that right now.
 					// So, let's just return a random number and *shrug*
 					int sequenceLength = _eval.pop().get<value_type::int32>();
-					int index          = _eval.pop().get<value_type::int32>();
+					/* shuffel index */
+					_eval.pop();
+
 
 					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
 					);
@@ -1538,7 +1542,7 @@ void runner_impl::on_done(bool setDone)
 void runner_impl::set_done_ptr(ip_t ptr)
 {
 	thread_t curr = current_thread();
-	if (curr == ~0) {
+	if (curr == ~0U) {
 		_done = ptr;
 	} else {
 		_threads.set(curr, ptr);
@@ -1620,7 +1624,7 @@ void runner_impl::restore()
 	_tags_begin.restore();
 	_evaluation_mode        = _saved_evaluation_mode;
 	_current_knot_id        = _current_knot_id_backup;
-	_current_knot_id_backup = ~0;
+	_current_knot_id_backup = ~0U;
 	// Not doing this anymore. There can be lingering stack entries from function returns
 	// inkAssert(_eval.is_empty(), "Can not save interpreter state while eval stack is not empty");
 
@@ -1644,7 +1648,7 @@ void runner_impl::forget()
 	_choices.forgett();
 	_tags.forgett();
 	_tags_begin.forget();
-	_current_knot_id_backup = ~0;
+	_current_knot_id_backup = ~0U;
 	// Nothing to do for eval stack. It should just stay as it is
 
 	_saved = false;

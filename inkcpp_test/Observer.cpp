@@ -1,6 +1,7 @@
 #include "catch.hpp"
+#include "system.h"
+#include "../runner_impl.h"
 
-#include <../runner_impl.h>
 #include <choice.h>
 #include <compiler.h>
 #include <globals.h>
@@ -13,9 +14,9 @@ SCENARIO("Observer", "[variables][observer]")
 {
 	GIVEN("a story which changes variables")
 	{
-		auto ink     = story::from_file(INK_TEST_RESOURCE_DIR "ObserverStory.bin");
-		auto globals = ink->new_globals();
-		auto thread  = ink->new_runner(globals).cast<internal::runner_impl>();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "ObserverStory.bin")};
+		auto                   globals = ink->new_globals();
+		auto                   thread  = ink->new_runner(globals).cast<internal::runner_impl>();
 
 		std::stringstream debug;
 		thread->set_debug_enabled(&debug);
@@ -101,9 +102,9 @@ SCENARIO("Observer", "[variables][observer]")
 		}
 		WHEN("Run with missmatching type")
 		{
-			auto var1 = [](uint32_t i) {
+			auto var1 = [](uint32_t) {
 			};
-			CHECK_THROWS(globals->observe("var1", var1));
+			CHECK_THROWS_AS(globals->observe("var1", var1), ink::ink_exception);
 		}
 		WHEN("Just get pinged")
 		{

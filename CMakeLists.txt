@@ -41,12 +41,17 @@ mark_as_advanced(PYBIND11_USE_CROSSCOMPILING)
 enable_testing()
 
 # Project setup
-project(inkcpp VERSION 0.1.9)
+project(inkcpp VERSION 0.1.10)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INSTALL_LIBRARY_DIR lib)
 set(CMAKE_INSTALL_INCLUDE_DIR include)
-
+if(MSVC)
+	# disable: aligment problems non explicit switch case
+	add_compile_options(/W4 /wd4820 /wd4061)
+else()
+	add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 # Add subdirectories
 include(CMakeDependentOption)
 option(INKCPP_PY "Build python bindings" OFF)
@@ -62,13 +67,18 @@ set(INKCPP_INKLECATE
 set_property(CACHE INKCPP_INKLECATE PROPERTY STRINGS "NONE" "OS" "ALL")
 option(INKCPP_NO_RTTI
 			 "Disable real time type information depended code. Used to build without RTTI." OFF)
-option(INKCPP_NO_EXCEPTIONS "Used to build without support for exceptions, disables try/catch blocks and throws" OFF)
+option(INKCPP_NO_EXCEPTIONS
+			 "Used to build without support for exceptions, disables try/catch blocks and throws" OFF)
+option(INKCPP_NO_STD "Disables the use of C(++) std libs." OFF)
 
 if(INKCPP_NO_RTTI)
 	add_definitions(-DINKCPP_NO_RTTI)
 endif()
 if(INKCPP_NO_EXCEPTIONS)
 	add_definitions(-DINKCPP_NO_EXCEPTIONS)
+endif()
+if(INKCPP_NO_STD)
+	add_definitions(-DINKCPP_NO_STD)
 endif()
 string(TOUPPER "${INKCPP_INKLECATE}" inkcpp_inklecate_upper)
 if(inkcpp_inklecate_upper STREQUAL "ALL")

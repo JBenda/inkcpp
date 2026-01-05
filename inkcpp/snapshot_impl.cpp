@@ -64,7 +64,7 @@ size_t snapshot_impl::get_data_len() const { return _length; }
 snapshot_impl::snapshot_impl(const globals_impl& globals)
     : _managed{true}
 {
-	snapshot_interface::snapper snapper{globals.strings(), globals._owner->string(0)};
+	snapshot_interface::snapper snapper(globals.strings(), globals._owner->string(0));
 	_length           = globals.snap(nullptr, snapper);
 	size_t runner_cnt = 0;
 	for (auto node = globals._runners_start; node; node = node->next) {
@@ -83,7 +83,7 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 	// write lookup table
 	ptr += sizeof(header);
 	{
-		size_t offset = (ptr - data) + (_header.num_runners + 1) * sizeof(size_t);
+		size_t offset = static_cast<size_t>((ptr - data) + (_header.num_runners + 1) * sizeof(size_t));
 		memcpy(ptr, &offset, sizeof(offset));
 		ptr += sizeof(offset);
 		offset += globals.snap(nullptr, snapper);
@@ -122,13 +122,13 @@ size_t snap_choice::snap(unsigned char* data, const snapper& snapper) const
 		ptr = snap_write(ptr, false, should_write);
 	} else {
 		ptr                         = snap_write(ptr, true, should_write);
-		std::uintptr_t offset_start = _tags_start != nullptr ? _tags_start - snapper.runner_tags : 0;
+		std::uintptr_t offset_start = _tags_start - snapper.runner_tags;
 		ptr                         = snap_write(ptr, offset_start, should_write);
-		std::uintptr_t offset_end   = _tags_end != nullptr ? _tags_end - snapper.runner_tags : 0;
+		std::uintptr_t offset_end   = _tags_end - snapper.runner_tags;
 		ptr                         = snap_write(ptr, offset_end, should_write);
 	}
 	ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* snap_choice::snap_load(const unsigned char* data, const loader& loader)
@@ -167,7 +167,7 @@ size_t snap_tag::snap(unsigned char* data, const snapper& snapper) const
 		ptr       = snap_write(ptr, true, should_write);
 		ptr       = snap_write(ptr, id, should_write);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* snap_tag::snap_load(const unsigned char* data, const loader& loader)

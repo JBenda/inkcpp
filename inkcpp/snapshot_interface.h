@@ -6,13 +6,14 @@
  */
 #pragma once
 
-#include "snapshot.h"
+#include "system.h"
+
 #include <cstring>
 
 namespace ink::runtime::internal
 {
 class globals_impl;
-template<typename, bool, size_t>
+template<typename, bool, size_t, bool = false>
 class managed_array;
 class snap_tag;
 class string_table;
@@ -53,13 +54,41 @@ public:
 		const string_table& strings;
 		const char*         story_string_table;
 		const snap_tag*     runner_tags = nullptr;
+
+		snapper(const string_table& strings, const char* story_string_table)
+		    : strings{strings}
+		    , story_string_table{story_string_table}
+		{
+		}
+
+		snapper()                          = delete;
+		snapper& operator=(const snapper&) = delete;
 	};
 
 	struct loader {
 		managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 		const char*                          story_string_table;
 		const snap_tag*                      runner_tags = nullptr;
+
+		loader(managed_array<const char*, true, 5>& string_table, const char* story_sting_table)
+		    : string_table{string_table}
+		    , story_string_table{story_string_table}
+		{
+		}
+
+		loader()                         = delete;
+		loader& operator=(const loader&) = delete;
 	};
+
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                          \
+	    disable : 4100, justification : "non functional prototypes do not need the argument." \
+	)
+#endif
 
 	size_t snap(unsigned char* data, snapper&) const
 	{
@@ -72,5 +101,11 @@ public:
 		inkFail("Snap function not implemented");
 		return nullptr;
 	};
+
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#else
+#	pragma warning(pop)
+#endif
 };
 } // namespace ink::runtime::internal

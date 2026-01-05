@@ -10,6 +10,7 @@
 #include "snapshot_impl.h"
 #include "system.h"
 #include "types.h"
+#include "value.h"
 
 namespace ink::runtime::internal
 {
@@ -204,6 +205,7 @@ void globals_impl::initialize_globals(runner_impl* run)
 {
 	// If no way to move there, then there are no globals.
 	if (! run->move_to(hash_string("global decl"))) {
+		_globals_initialized = true;
 		return;
 	}
 
@@ -267,7 +269,7 @@ size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
 	ptr += _strings.snap(data ? ptr : nullptr, snapper);
 	ptr += _lists.snap(data ? ptr : nullptr, snapper);
 	ptr += _variables.snap(data ? ptr : nullptr, snapper);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loader& loader)

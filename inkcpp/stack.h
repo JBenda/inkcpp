@@ -105,7 +105,7 @@ namespace runtime
 			thread_t _next_thread        = 0;
 			thread_t _backup_next_thread = 0;
 
-			static const hash_t NulledHashId = ~0;
+			static const hash_t NulledHashId = ~0U;
 		};
 
 		template<>

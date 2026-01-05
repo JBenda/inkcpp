@@ -28,16 +28,16 @@ class prng;
 // memory segments
 // @param bits size in bits
 // @param size segment size in bytes
-constexpr int segmentsFromBits(int bits, int size)
+constexpr size_t segmentsFromBits(size_t bits, size_t size)
 {
-	size *= 8;
-	return bits / size + (bits % size ? 1 : 0);
+	size *= 8U;
+	return bits / size + (bits % size ? 1U : 0);
 }
 
 /// managed all list entries and list metadata
 class list_table : public snapshot_interface
 {
-	using data_t = int;
+	using data_t = unsigned;
 	enum class state : char {
 		unused,
 		used,
@@ -77,9 +77,11 @@ public:
 			flag.flag    = -1;
 			return flag;
 		}
-		for (int i = listBegin(flag.list_id); i < _list_end[flag.list_id]; ++i) {
+		inkAssert(flag.list_id >= 0, "expected flag to have a base list.");
+		for (size_t i = listBegin(static_cast<size_t>(flag.list_id));
+		     i < _list_end[static_cast<size_t>(flag.list_id)]; ++i) {
 			if (_flag_values[i] == flag.flag) {
-				flag.flag = i - listBegin(flag.list_id);
+				flag.flag = static_cast<int16_t>(i - listBegin(static_cast<size_t>(flag.list_id)));
 				return flag;
 			}
 		}
@@ -89,7 +91,12 @@ public:
 
 	int get_flag_value(list_flag flag) const
 	{
-		return _flag_values[listBegin(flag.list_id) + flag.flag];
+		inkAssert(
+		    flag.list_id >= 0 && flag.flag >= 0,
+		    "flag is not an valid flag (expeted list and flag in list)"
+		);
+		return _flag_values
+		    [listBegin(static_cast<size_t>(flag.list_id)) + static_cast<size_t>(flag.flag)];
 	}
 
 	/// zeros all usage values
@@ -256,10 +263,13 @@ public:
 	list_interface* handout_list(list);
 
 private:
-	void                 copy_lists(const data_t* src, data_t* dst);
-	static constexpr int bits_per_data = sizeof(data_t) * 8;
+	void                    copy_lists(const data_t* src, data_t* dst);
+	static constexpr size_t bits_per_data = sizeof(data_t) * 8U;
 
-	int listBegin(int lid) const { return lid == 0 ? 0 : _list_end[lid - 1]; }
+	size_t listBegin(size_t lid) const
+	{
+		return lid == 0 ? 0 : _list_end[static_cast<size_t>(lid - 1)];
+	}
 
 	const data_t* getPtr(int eid) const
 	{
@@ -271,22 +281,22 @@ private:
 		return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid);
 	}
 
-	int numFlags() const
+	size_t numFlags() const
 	{
 		return _flag_names.size();
 		// return _list_end.end()[-1]; TODO:
 	}
 
-	int numLists() const { return _list_end.size(); }
+	size_t numLists() const { return _list_end.size(); }
 
-	bool getBit(const data_t* data, int id) const
+	bool getBit(const data_t* data, size_t id) const
 	{
 		return data[id / bits_per_data] & (0x01 << (bits_per_data - 1 - (id % bits_per_data)));
 	}
 
-	void setBit(data_t* data, int id, bool value = true)
+	void setBit(data_t* data, size_t id, bool value = true)
 	{
-		data_t mask = 0x01 << (bits_per_data - 1 - (id % bits_per_data));
+		data_t mask = 0x01U << (bits_per_data - 1U - (id % bits_per_data));
 		if (value) {
 			data[id / bits_per_data] |= mask;
 		} else {
@@ -294,44 +304,58 @@ private:
 		}
 	}
 
-	bool hasList(const data_t* data, int lid) const { return getBit(data, lid); }
+	bool hasList(const data_t* data, int lid) const
+	{
+		if (lid < 0) {
+			return false;
+		}
+		return getBit(data, static_cast<size_t>(lid));
+	}
 
 	void setList(data_t* data, int lid, bool value = true)
 	{
 		if (lid >= 0) {
-			setBit(data, lid, value);
+			setBit(data, static_cast<size_t>(lid), value);
 		}
 	}
 
-	bool hasFlag(const data_t* data, int fid) const { return getBit(data, fid + numLists()); }
+	bool hasFlag(const data_t* data, int fid) const
+	{
+		if (fid < 0) {
+			return false;
+		}
+		return getBit(data, static_cast<size_t>(fid) + numLists());
+	}
 
 	void setFlag(data_t* data, int fid, bool value = true)
 	{
 		if (fid >= 0) {
-			setBit(data, fid + numLists(), value);
+			setBit(data, static_cast<size_t>(fid) + numLists(), value);
 		}
 	}
 
-	int toFid(list_flag e) const;
+	size_t toFid(list_flag e) const;
 
 	auto flagStartMask() const
 	{
 		struct {
-			int    segment;
+			size_t segment;
 			data_t mask;
 		} res{numLists() / bits_per_data, ~static_cast<data_t>(0) >> (numLists() % bits_per_data)};
 
 		return res;
 	}
 
-	template<typename T, int config>
+	template<typename T, int config, bool simple = false>
 	using managed_array = managed_array < T,
-	      config<0, abs(config)>;
+	      config<0, abs(config), simple>;
 
-	static constexpr int maxMemorySize
+	static constexpr long maxMemorySize
 	    = (config::maxListTypes < 0 || config::maxFlags < 0 || config::maxLists < 0 ? -1 : 1)
-	    * segmentsFromBits(abs(config::maxListTypes) + abs(config::maxFlags), sizeof(data_t))
-	    * static_cast<int>(abs(config::maxLists));
+	    * static_cast<long>(
+	          segmentsFromBits(abs(config::maxListTypes) + abs(config::maxFlags), sizeof(data_t))
+	          * static_cast<int>(abs(config::maxLists))
+	    );
 
 	int                                    _entrySize; ///< entry size in data_t
 	// entries (created lists)
@@ -339,17 +363,17 @@ private:
 	managed_array<state, config::maxLists> _entry_state;
 
 	// defined list (meta data)
-	managed_array<int, config::maxListTypes>                  _list_end;
-	managed_array<const char*, config::maxFlags>              _flag_names;
-	managed_array<int, config::maxFlags>                      _flag_values;
-	managed_array<const char*, config::maxListTypes>          _list_names;
+	managed_array<size_t, config::maxListTypes>                     _list_end;
+	managed_array<const char*, config::maxFlags>                    _flag_names;
+	managed_array<int, config::maxFlags>                            _flag_values;
+	managed_array<const char*, config::maxListTypes>                _list_names;
 	/// keep track over lists accessed with get_var, and clear then at gc time
-	managed_array<list_interface, config::limitEditableLists> _list_handouts;
+	managed_array<list_interface, config::limitEditableLists, true> _list_handouts;
 
 	bool _valid;
 
 public:
-	friend class name_flag_itr;
+	friend class named_flag_itr;
 	friend class list_impl;
 
 	class named_flag_itr
@@ -362,14 +386,22 @@ public:
 			const char* name;
 		} _pos;
 
+		/** carry list change.
+		 * if the iterator incremented to the next flag, also increment the list if necessary
+		 * @pre _pos.flag.list_id >= 0
+		 */
 		void carry()
 		{
-			if (_pos.flag.flag
-			    == _list._list_end[_pos.flag.list_id] - _list.listBegin(_pos.flag.list_id)) {
+			if (_pos.flag.flag < 0 || _pos.flag.list_id < 0) {
+				return;
+			}
+			if (static_cast<size_t>(_pos.flag.flag)
+			    == _list._list_end[static_cast<size_t>(_pos.flag.list_id)]
+			           - _list.listBegin(static_cast<size_t>(_pos.flag.list_id))) {
 				_pos.flag.flag = 0;
 				++_pos.flag.list_id;
 			}
-			if (_pos.flag.list_id == _list.numLists()) {
+			if (static_cast<size_t>(_pos.flag.list_id) == _list.numLists()) {
 				_pos.flag = null_flag;
 			} else {
 				_pos.name = _list._flag_names[_list.toFid(_pos.flag)];
@@ -380,8 +412,8 @@ public:
 		{
 			bool valid;
 			do {
-				valid   = true;
-				int fid = _list.toFid(_pos.flag);
+				valid      = true;
+				size_t fid = _list.toFid(_pos.flag);
 				if (_data == nullptr) {
 					if (_list._flag_names[fid] == nullptr) {
 						valid = false;
@@ -390,7 +422,8 @@ public:
 				} else if (! _list.hasList(_data, _pos.flag.list_id)) {
 					valid = false;
 					++_pos.flag.list_id;
-				} else if (! _list.hasFlag(_data, fid) || _list._flag_names[fid] == nullptr) {
+				} else if (! _list.hasFlag(_data, static_cast<int>(fid))
+				           || _list._flag_names[fid] == nullptr) {
 					valid = false;
 					++_pos.flag.flag;
 				}
@@ -399,6 +432,15 @@ public:
 		}
 
 	public:
+		named_flag_itr(const named_flag_itr& o)
+		    : _list{o._list}
+		    , _data{o._data}
+		    , _pos{o._pos}
+		{
+		}
+
+		named_flag_itr& operator=(const named_flag_itr&) = delete;
+
 		bool operator!=(const named_flag_itr& o) const { return _pos.flag != o._pos.flag; }
 
 		named_flag_itr(const list_table& list, const data_t* filter)
