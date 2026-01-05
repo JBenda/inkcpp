@@ -139,17 +139,17 @@ void json_compiler::compile_container(
 	if (is_knot) {
 		// it is not a wave or choice
 		if (::ink::internal::starts_with(name_override.c_str(), "c-")
-		    || ::ink::internal::starts_with(name_override.c_str(), "g-")) {
+		    || ::ink::internal::starts_with(name_override.c_str(), "g-")
+		    || ::ink::internal::starts_with(name_override.c_str(), "s")
+		    || ::ink::internal::starts_with(name_override.c_str(), "b")) {
 			is_knot = false;
-			for (auto itr = name_override.begin() + 2; itr != name_override.end(); ++itr) {
+			for (auto itr = name_override.begin() + (name_override[1] == '-' ? 2 : 1);
+			     itr != name_override.end(); ++itr) {
 				if (*itr > '9' || *itr < '0') {
 					is_knot = true;
 					break;
 				}
 			}
-		} else if (name_override == "s"
-		           || name_override == "b") { // it is not a shared part of a choice
-			is_knot = false;
 		}
 	}
 	handle_container_metadata(*container.rbegin(), meta, is_knot);
@@ -355,7 +355,6 @@ void json_compiler::compile_complex_command(const nlohmann::json& command)
 
 	// Read count
 	else if (get(command, "CNT?", val)) {
-		// TODO: Why is this true again?
 		_emitter->write_path(Command::READ_COUNT, CommandFlag::NO_FLAGS, val, true);
 	}
 
