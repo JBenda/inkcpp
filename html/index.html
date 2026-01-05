@@ -158,6 +158,7 @@ main.cpp</h2>
 <div class="line"><span class="preprocessor">#include &lt;ink/story.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;ink/compiler.h&gt;</span></div>
 <div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &lt;memory.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceink_1_1runtime.html">ink::runtime</a>;</div>
@@ -168,10 +169,10 @@ main.cpp</h2>
 <div class="line">{</div>
 <div class="line">    <a class="code hl_function" href="namespaceink_1_1compiler.html#ab0a1ff058570028c6bbde5ca96133e75">ink::compiler::run</a>(<span class="stringliteral">&quot;test.ink.json&quot;</span>, <span class="stringliteral">&quot;test.bin&quot;</span>);</div>
 <div class="line">    <span class="comment">// Load ink binary story, generated from the inkCPP compiler</span></div>
-<div class="line">    <a class="code hl_class" href="classink_1_1runtime_1_1story.html">story</a>* myInk = story::from_file(<span class="stringliteral">&quot;test.bin&quot;</span>);</div>
+<div class="line">    std::unique_ptr&lt;story&gt; myInk{story::from_file(<span class="stringliteral">&quot;test.bin&quot;</span>)};</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Create a new thread</span></div>
-<div class="line">    <a class="code hl_class" href="classink_1_1runtime_1_1story__ptr.html">runner</a> thread = myInk-&gt;<a class="code hl_function" href="classink_1_1runtime_1_1story.html#ab0bcc61fba0c879979d334cca8e21f16">new_runner</a>();</div>
+<div class="line">    <a class="code hl_class" href="classink_1_1runtime_1_1story__ptr.html">runner</a> thread = myInk-&gt;new_runner();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Register external functions (glue automatically generated via templates)</span></div>
 <div class="line">    thread-&gt;bind(<span class="stringliteral">&quot;my_ink_function&quot;</span>, &amp;MyInkFunction);</div>
@@ -194,8 +195,6 @@ main.cpp</h2>
 <div class="line">}</div>
 <div class="ttc" id="aclassink_1_1runtime_1_1choice_html"><div class="ttname"><a href="classink_1_1runtime_1_1choice.html">ink::runtime::choice</a></div><div class="ttdoc">An ink choice that is being presented to the user.</div><div class="ttdef"><b>Definition</b> choice.h:33</div></div>
 <div class="ttc" id="aclassink_1_1runtime_1_1story__ptr_html"><div class="ttname"><a href="classink_1_1runtime_1_1story__ptr.html">ink::runtime::story_ptr</a></div><div class="ttdoc">Pointer wrapper to an object whose lifetime is tied to a story object.</div><div class="ttdef"><b>Definition</b> story_ptr.h:85</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1story_html"><div class="ttname"><a href="classink_1_1runtime_1_1story.html">ink::runtime::story</a></div><div class="ttdoc">A loaded ink story.</div><div class="ttdef"><b>Definition</b> story.h:26</div></div>
-<div class="ttc" id="aclassink_1_1runtime_1_1story_html_ab0bcc61fba0c879979d334cca8e21f16"><div class="ttname"><a href="classink_1_1runtime_1_1story.html#ab0bcc61fba0c879979d334cca8e21f16">ink::runtime::story::new_runner</a></div><div class="ttdeci">virtual runner new_runner(globals store=nullptr)=0</div><div class="ttdoc">Creates a new runner.</div></div>
 <div class="ttc" id="anamespaceink_1_1compiler_html_ab0a1ff058570028c6bbde5ca96133e75"><div class="ttname"><a href="namespaceink_1_1compiler.html#ab0a1ff058570028c6bbde5ca96133e75">ink::compiler::run</a></div><div class="ttdeci">void run(const char *filenameIn, const char *filenameOut, compilation_results *results=nullptr)</div><div class="ttdoc">file -&gt; file</div></div>
 <div class="ttc" id="anamespaceink_1_1runtime_html"><div class="ttname"><a href="namespaceink_1_1runtime.html">ink::runtime</a></div><div class="ttdoc">Contaning all modules and classes used for the inkles ink runtime.</div><div class="ttdef"><b>Definition</b> choice.h:13</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="src_cmake"></a>
