@@ -64,7 +64,7 @@ size_t snapshot_impl::get_data_len() const { return _length; }
 snapshot_impl::snapshot_impl(const globals_impl& globals)
     : _managed{true}
 {
-	snapshot_interface::snapper snapper{globals.strings(), globals._owner->string(0)};
+	snapshot_interface::snapper snapper(globals.strings(), globals._owner->string(0));
 	_length           = globals.snap(nullptr, snapper);
 	size_t runner_cnt = 0;
 	for (auto node = globals._runners_start; node; node = node->next) {

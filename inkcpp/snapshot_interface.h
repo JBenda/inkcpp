@@ -53,7 +53,14 @@ public:
 	struct snapper {
 		const string_table& strings;
 		const char*         story_string_table;
-		const snap_tag*     runner_tags    = nullptr;
+		const snap_tag*     runner_tags = nullptr;
+
+		snapper(const string_table& strings, const char* story_string_table)
+		    : strings{strings}
+		    , story_string_table{story_string_table}
+		{
+		}
+
 		snapper()                          = delete;
 		snapper& operator=(const snapper&) = delete;
 	};
@@ -62,8 +69,15 @@ public:
 		managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 		const char*                          story_string_table;
 		const snap_tag*                      runner_tags = nullptr;
-		loader()                                         = delete;
-		loader& operator=(const loader&)                 = delete;
+
+		loader(managed_array<const char*, true, 5>& string_table, const char* story_sting_table)
+		    : string_table{string_table}
+		    , story_string_table{story_string_table}
+		{
+		}
+
+		loader()                         = delete;
+		loader& operator=(const loader&) = delete;
 	};
 
 #ifdef __GNUC__

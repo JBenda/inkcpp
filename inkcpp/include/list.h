@@ -48,8 +48,6 @@ public:
 	{
 	}
 
-	virtual list_interface& operator=(const list_interface&) = default;
-
 	virtual ~list_interface() {}
 
 	/** iterater for flags in a list

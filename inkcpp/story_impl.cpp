@@ -226,15 +226,13 @@ globals story_impl::new_globals()
 globals story_impl::new_globals_from_snapshot(const snapshot& data)
 {
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
-	auto*                globs    = new globals_impl(this);
+	globals_impl*        globs    = new globals_impl(this);
 	snapshot.strings().clear();
-	auto end = globs->snap_load(
-	    snapshot.get_globals_snap(),
-	    snapshot_interface::loader{
-	        snapshot.strings(),
-	        _string_table,
-	    }
-	);
+	snapshot_interface::loader loader{
+	    snapshot.strings(),
+	    _string_table,
+	};
+	const unsigned char* end = globs->snap_load(snapshot.get_globals_snap(), loader);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
 	return globals(globs, _block);
 }
@@ -252,10 +250,10 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	if (store == nullptr)
 		store = new_globals_from_snapshot(snapshot);
 	auto* run    = new runner_impl(this, store);
-	auto  loader = snapshot_interface::loader{
-      snapshot.strings(),
-      _string_table,
-  };
+	snapshot_interface::loader loader{
+	    snapshot.strings(),
+	    _string_table,
+	};
 	// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to
 	// use
 	idx      = (data.num_runners() - idx - 1);

@@ -77,7 +77,7 @@ public:
 			flag.flag    = -1;
 			return flag;
 		}
-		inkAssert(flag.list_id >= 0);
+		inkAssert(flag.list_id >= 0, "expected flag to have a base list.");
 		for (size_t i = listBegin(static_cast<size_t>(flag.list_id));
 		     i < _list_end[static_cast<size_t>(flag.list_id)]; ++i) {
 			if (_flag_values[i] == flag.flag) {
@@ -91,7 +91,10 @@ public:
 
 	int get_flag_value(list_flag flag) const
 	{
-		inkAssert(flag.list_id >= 0 && flag.flag >= 0);
+		inkAssert(
+		    flag.list_id >= 0 && flag.flag >= 0,
+		    "flag is not an valid flag (expeted list and flag in list)"
+		);
 		return _flag_values
 		    [listBegin(static_cast<size_t>(flag.list_id)) + static_cast<size_t>(flag.flag)];
 	}
