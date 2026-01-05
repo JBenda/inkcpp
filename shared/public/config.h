@@ -12,10 +12,14 @@
 #	define INKCPP_NO_RTTI
 #	define INKCPP_NO_EXCEPTIONS
 #elif defined(INKCPP_BUILD_CLIB)
-#	define INK_ENABLE_CSTD
+#	ifndef INKCPP_NO_STD
+#		define INK_ENABLE_CSTD
+#	endif
 #else
-#	define INK_ENABLE_STL
-#	define INK_ENABLE_CSTD
+#	ifndef INKCPP_NO_STD
+#		define INK_ENABLE_STL
+#		define INK_ENABLE_CSTD
+#	endif
 #endif
 
 #ifndef INKCPP_NO_RTTI
