@@ -361,7 +361,7 @@ void binary_emitter::process_paths()
 			token = ink::compiler::internal::strtok_s(nullptr, ".", &_context);
 		}
 
-		if (noop_offset != ~0) {
+		if (noop_offset != ~0U) {
 			inkAssert(! useCountIndex, "Can't count visits to a noop!");
 			_containers.set(position, noop_offset);
 		} else {
