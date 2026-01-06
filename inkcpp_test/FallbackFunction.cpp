@@ -20,7 +20,7 @@ SCENARIO("run a story with external function and fallback function", "[external 
 		WHEN("bind both external functions")
 		{
 			int  cnt_sqrt = 0;
-			auto fn_sqrt  = [&cnt_sqrt](int x) -> int {
+			auto fn_sqrt  = [&cnt_sqrt](double x) -> double {
         ++cnt_sqrt;
         return sqrt(x);
 			};
@@ -49,7 +49,7 @@ SCENARIO("run a story with external function and fallback function", "[external 
 		WHEN("only bind function without fallback")
 		{
 			int  cnt_sqrt = 0;
-			auto fn_sqrt  = [&cnt_sqrt](int x) -> int {
+			auto fn_sqrt  = [&cnt_sqrt](double x) -> double {
         ++cnt_sqrt;
         return sqrt(x);
 			};

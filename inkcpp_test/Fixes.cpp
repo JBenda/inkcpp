@@ -63,7 +63,8 @@ SCENARIO("unknown command _ #109", "[fixes]")
 			for (size_t i = 0; i < out_str.size(); ++i) {
 				data[i] = out_str[i];
 			}
-			std::unique_ptr<story> ink{story::from_binary(data, out_str.size())};
+			std::unique_ptr<story> ink{story::from_binary(data, static_cast<ink::size_t>(out_str.size()))
+			};
 			globals                globStore = ink->new_globals();
 			runner                 main      = ink->new_runner(globStore);
 			std::string            story     = main->getall();
@@ -158,13 +159,94 @@ SCENARIO(
 		{
 			thread->getall();
 			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
-			runner                    thread = ink->new_runner_from_snapshot(*snap);
+			runner                    thread_2 = ink->new_runner_from_snapshot(*snap);
 			const size_t s = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
 			THEN("loading it again will not change the string_table size")
 			{
 				runner       thread2 = ink->new_runner_from_snapshot(*snap);
 				const size_t s2 = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
 				REQUIRE(s == s2);
+			}
+		}
+	}
+}
+
+SCENARIO("Casting during redefinition is too strict _ #134", "[fixes]")
+{
+	GIVEN("story with problematic text")
+	{
+		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "134_restrictive_casts.bin");
+		runner thread = ink->new_runner();
+
+		WHEN("run story")
+		{
+			// Initial casts/assignments are allowed.
+			auto line = thread->getline();
+			THEN("expect initial values") { REQUIRE(line == "true 1 1 text A\n"); }
+			line = thread->getline();
+			THEN("expect evaluated") { REQUIRE(line == "1.5 1.5 1.5 text0.5 B\n"); }
+			line = thread->getline();
+			THEN("expect assigned") { REQUIRE(line == "1.5 1.5 1.5 text0.5 B\n"); }
+		}
+
+		// Six cases that should fail. We can't pollute lookahead with these so they need to be
+		// separated out.
+		for (int i = 0; i < 6; ++i) {
+			WHEN("Jump to failing case")
+			{
+				const std::string name = "Fail" + std::to_string(i);
+				REQUIRE_NOTHROW(thread->move_to(ink::hash_string(name.c_str())));
+				std::string line;
+				REQUIRE_THROWS_AS(line = thread->getline(), ink::ink_exception);
+			}
+		}
+	}
+}
+
+SCENARIO("Using knot visit count as condition _ #139", "[fixes]")
+{
+	GIVEN("story with conditional choice.")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "139_conditional_choice.bin")
+		};
+		runner                 thread = ink->new_runner();
+		WHEN("visit knot 'one' an going back to choice")
+		{
+			std::string content = thread->getall();
+			REQUIRE_FALSE(thread->can_continue());
+			REQUIRE(thread->num_choices() == 2);
+			thread->choose(1);
+			content += thread->getall();
+			REQUIRE(content == "Check\nFirst time at one\n");
+			THEN("conditinal choice is displayed")
+			{
+				REQUIRE(thread->num_choices() == 3);
+				CHECK(thread->get_choice(0)->text() == std::string("DEFAULT"));
+				CHECK(thread->get_choice(1)->text() == std::string("Check"));
+				CHECK(thread->get_choice(2)->text() == std::string("Test"));
+
+				WHEN("go to 'one' twice")
+				{
+					thread->choose(1);
+					std::string content_2 = thread->getall();
+					REQUIRE(thread->num_choices() == 3);
+					THEN("get both one strings") { REQUIRE(content_2 == "Check\nBeen here before\n"); }
+				}
+			}
+		}
+		WHEN("loop back to choice")
+		{
+			std::string content = thread->getall();
+			REQUIRE_FALSE(thread->can_continue());
+			REQUIRE(thread->num_choices() == 2);
+			thread->choose(0);
+			content += thread->getall();
+			REQUIRE(content == "DEFAULT\nLoopback");
+			THEN("conditinal choice is not displayed")
+			{
+				REQUIRE(thread->num_choices() == 2);
+				CHECK(thread->get_choice(0)->text() == std::string("DEFAULT"));
+				CHECK(thread->get_choice(1)->text() == std::string("Check"));
 			}
 		}
 	}

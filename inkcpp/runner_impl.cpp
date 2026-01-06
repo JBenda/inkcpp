@@ -15,10 +15,13 @@
 #include "system.h"
 #include "value.h"
 
-#include <iomanip>
+#ifdef INK_ENABLE_STL
+#	include <iomanip>
+#endif
 
 namespace ink::runtime
 {
+#ifdef INK_ENABLE_STL
 static void write_hash(std::ostream& out, ink::hash_t value)
 {
 	using namespace std;
@@ -27,6 +30,7 @@ static void write_hash(std::ostream& out, ink::hash_t value)
 	out << "0x" << hex << setfill('0') << setw(8) << static_cast<uint32_t>(value);
 	out.flags(state);
 }
+#endif
 
 const choice* runner_interface::get_choice(size_t index) const
 {
@@ -322,8 +326,8 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
 	//  divert should only be taking us from a container to that same container's end point
 	//  without entering any other containers
-	// OR IF if target is same position do nothing
-	// could happend if jumping to and of an unnamed container
+	// OR IF is target is same position do nothing
+	// could happened if jumping to and of an unnamed container
 	if (dest == _ptr) {
 		_ptr = dest;
 		return;
@@ -331,77 +335,65 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 
 	const uint32_t* iter = nullptr;
 	container_t     id;
-	ip_t            offset = nullptr;
-	size_t          comm_end;
+	ip_t            offset   = nullptr;
 	bool            reversed = _ptr > dest;
+	// number of container which were already on the stack at current position
+	size_t          comm_end = _container.size();
 
-	if (reversed) {
-		comm_end                            = 0;
-		iter                                = nullptr;
-		const ContainerData* old_iter       = nullptr;
-		const uint32_t*      last_comm_iter = nullptr;
-		_container.rev_iter(old_iter);
-
-		// find commen part of old and new stack
-		while (_story->iterate_containers(iter, id, offset)) {
-			if (old_iter == nullptr || offset >= dest) {
-				break;
-			}
-			if (old_iter != nullptr && id == old_iter->id) {
-				last_comm_iter = iter;
-				_container.rev_iter(old_iter);
-				++comm_end;
-			}
+	iter = nullptr;
+	while (_story->iterate_containers(iter, id, offset)) {
+		if (offset >= _ptr) {
+			break;
 		}
-
-		// clear old part from stack
-		while (_container.size() > comm_end) {
-			_container.pop();
-		}
-		iter = last_comm_iter;
-
-	} else {
-		iter     = nullptr;
-		comm_end = _container.size();
-		// go to current possition in container list
-		while (_story->iterate_containers(iter, id, offset)) {
-			if (offset >= _ptr) {
-				break;
-			}
-		}
+	}
+	if (! reversed) {
 		_story->iterate_containers(iter, id, offset, true);
 	}
-
-	// move to destination and update container stack on the go
+	optional<ContainerData> last_pop = nullopt;
+	while (_story->iterate_containers(iter, id, offset, reversed)) {
+		if ((! reversed && offset >= dest) || (reversed && offset < dest)) {
+			break;
+		}
+		if (_container.empty() || _container.top().id != id) {
+			const uint32_t* iter2 = nullptr;
+			container_t     id2;
+			ip_t            offset2;
+			while (_story->iterate_containers(iter2, id2, offset2) && id2 != id) {}
+			_container.push({id, offset2 - _story->instructions()});
+		} else {
+			if (_container.size() == comm_end) {
+				last_pop = _container.pop();
+				comm_end -= 1;
+			} else {
+				_container.pop();
+			}
+		}
+	}
+	iter = nullptr;
 	while (_story->iterate_containers(iter, id, offset)) {
 		if (offset >= dest) {
 			break;
 		}
-		if (_container.empty() || _container.top().id != id) {
-			_container.push({id, offset - _story->instructions()});
-		} else {
-			_container.pop();
-			if (_container.size() < comm_end) {
-				comm_end = _container.size();
-			}
-		}
 	}
-	_ptr = dest;
 
-	// if we jump directly to a named container start, go inside, if its a ONLY_FIRST container
+	// if we jump directly to a named container start, go inside, if it's a ONLY_FIRST container
 	// it will get visited in the next step
+	// todo: check if a while is needed
 	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
 		if (track_knot_visit
 		    && static_cast<CommandFlag>(offset[1]) & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
 			_current_knot_id = id;
 			_entered_knot    = true;
 		}
-		_ptr += 6;
+		dest += 6;
 		_container.push({id, offset - _story->instructions()});
-		if (reversed && comm_end == _container.size() - 1) {
-			++comm_end;
+		// if we entered a knot we just left, do not recount enter
+		if (reversed && comm_end == _container.size() - 1 && last_pop.has_value()
+		    && last_pop.value().id == id) {
+			comm_end += 1;
 		}
 	}
+	_ptr = dest;
 
 	// iff all container (until now) are entered at first position
 	bool allEnteredAtStart = true;
@@ -409,17 +401,20 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (record_visits) {
 		const ContainerData* iData = nullptr;
 		size_t               level = _container.size();
-		if (_container.iter(iData)
-		    && (level >= comm_end
-		        || _story->container_flag(iData->offset + _story->instructions())
-		               & CommandFlag::CONTAINER_MARKER_ONLY_FIRST)) {
-			auto parrent_offset = _story->instructions() + iData->offset;
-			inkAssert(child_position >= parrent_offset, "Container stack order is broken");
-			// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a unnnamed
-			// subcontainers first child check if child_positino is the first child of current container
-			allEnteredAtStart = allEnteredAtStart && ((child_position - parrent_offset) <= 6);
-			child_position    = parrent_offset;
-			_globals->visit(iData->id, allEnteredAtStart);
+		while (_container.iter(iData)) {
+			if (level > comm_end
+			    || _story->container_flag(iData->offset + _story->instructions())
+			           & CommandFlag::CONTAINER_MARKER_ONLY_FIRST) {
+				auto parrent_offset = _story->instructions() + iData->offset;
+				inkAssert(child_position >= parrent_offset, "Container stack order is broken");
+				// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a
+				// unnnamed subcontainers first child check if child_positino is the first child of
+				// current container
+				allEnteredAtStart = allEnteredAtStart && ((child_position - parrent_offset) <= 6);
+				child_position    = parrent_offset;
+				_globals->visit(iData->id, allEnteredAtStart);
+			}
+			level -= 1;
 		}
 	}
 }
@@ -501,7 +496,11 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _choices()
     , _tags_begin(0, ~0)
     , _container(ContainerData{})
+#ifdef INK_ENABLE_CSTD
     , _rng(static_cast<uint32_t>(time(NULL)))
+#else
+    , _rng(time(NULL))
+#endif
 {
 
 
@@ -529,18 +528,20 @@ runner_impl::~runner_impl()
 	}
 }
 
+#if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
+
 runner_impl::line_type runner_impl::getline()
 {
 	// Advance interpreter one line and write to output
 	advance_line();
 
-#ifdef INK_ENABLE_STL
+#	ifdef INK_ENABLE_STL
 	line_type result{_output.get()};
-#elif defined(INK_ENABLE_UNREAL)
+#	elif defined(INK_ENABLE_UNREAL)
 	line_type result{ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists()))};
-#else
-#	error unsupported constraints for getline
-#endif
+#	else
+#		error unsupported constraints for getline
+#	endif
 
 	// Fall through the fallback choice, if available
 	if (! has_choices() && _fallback_choice) {
@@ -553,11 +554,11 @@ runner_impl::line_type runner_impl::getline()
 
 runner_impl::line_type runner_impl::getall()
 {
-#ifdef INK_ENABLE_STL
+#	ifdef INK_ENABLE_STL
 	if (_debug_stream != nullptr) {
 		_debug_stream->clear();
 	}
-#endif
+#	endif
 
 	line_type result{};
 
@@ -568,6 +569,8 @@ runner_impl::line_type runner_impl::getall()
 
 	return result;
 }
+
+#endif
 
 #ifdef INK_ENABLE_STL
 void runner_impl::getline(std::ostream& out) { out << getline(); }
@@ -775,7 +778,6 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	return ptr;
 }
 
-#ifdef INK_ENABLE_CSTD
 const char* runner_impl::getline_alloc()
 {
 	advance_line();
@@ -786,7 +788,6 @@ const char* runner_impl::getline_alloc()
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	return res;
 }
-#endif
 
 bool runner_impl::move_to(hash_t path)
 {
@@ -968,7 +969,7 @@ bool runner_impl::line_step()
 
 void runner_impl::step()
 {
-#ifndef INK_ENABLE_UNREAL
+#ifdef INK_ENABLE_EXCEPTIONS
 	try
 #endif
 	{
@@ -1512,7 +1513,7 @@ void runner_impl::step()
 						current_choice = &add_choice();
 					}
 					current_choice->setup(
-					    _output, _globals->strings(), _globals->lists(), _choices.size(), path,
+					    _output, _globals->strings(), _globals->lists(), _choices.size() - 1, path,
 					    current_thread(), tags_start, tags_end
 					);
 					// save stack at last choice
@@ -1634,7 +1635,7 @@ void runner_impl::step()
 		}
 #endif
 	}
-#ifndef INK_ENABLE_UNREAL
+#ifdef INK_ENABLE_EXCEPTIONS
 	catch (...) {
 		// Reset our whole state as it's probably corrupt
 		reset();

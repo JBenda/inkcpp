@@ -9,6 +9,7 @@
 #include "value.h"
 #include "stack.h"
 #include "string_table.h"
+#include "operations.h"
 
 #ifdef INK_ENABLE_UNREAL
 #	include "InkVar.h"
@@ -28,8 +29,35 @@ template<>
 int32_t function_base::pop<int32_t>(basic_eval_stack* stack, list_table&)
 {
 	value val = stack->pop();
-	inkAssert(val.type() == value_type::int32, "Type mismatch!");
-	return val.get<value_type::int32>();
+	return casting::numeric_cast<value_type::int32>(val);
+}
+
+template<>
+uint32_t function_base::pop<uint32_t>(basic_eval_stack* stack, list_table&)
+{
+	value val = stack->pop();
+	return casting::numeric_cast<value_type::uint32>(val);
+}
+
+template<>
+bool function_base::pop<bool>(basic_eval_stack* stack, list_table&)
+{
+	value val = stack->pop();
+	return casting::numeric_cast<value_type::int32>(val) != 0;
+}
+
+template<>
+float function_base::pop<float>(basic_eval_stack* stack, list_table&)
+{
+	value val = stack->pop();
+	return casting::numeric_cast<value_type::float32>(val);
+}
+
+template<>
+double function_base::pop<double>(basic_eval_stack* stack, list_table&)
+{
+	value val = stack->pop();
+	return casting::numeric_cast<value_type::float32>(val);
 }
 
 template<>
@@ -44,6 +72,30 @@ template<>
 void function_base::push<int32_t>(basic_eval_stack* stack, const int32_t& v)
 {
 	stack->push(value{}.set<value_type::int32>(v));
+}
+
+template<>
+void function_base::push<uint32_t>(basic_eval_stack* stack, const uint32_t& v)
+{
+	stack->push(value{}.set<value_type::uint32>(v));
+}
+
+template<>
+void function_base::push<float>(basic_eval_stack* stack, const float& v)
+{
+	stack->push(value{}.set<value_type::float32>(v));
+}
+
+template<>
+void function_base::push<double>(basic_eval_stack* stack, const double& v)
+{
+	stack->push(value{}.set<value_type::float32>(static_cast<float>(v)));
+}
+
+template<>
+void function_base::push<bool>(basic_eval_stack* stack, const bool& v)
+{
+	stack->push(value{}.set<value_type::boolean>(v));
 }
 
 void function_base::push_void(basic_eval_stack* stack) { stack->push(values::null); }

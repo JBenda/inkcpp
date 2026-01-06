@@ -13,31 +13,42 @@
 #	include "Misc/CString.h"
 #	include "HAL/UnrealMemory.h"
 #	include "Hash/CityHash.h"
-
 #endif
 #ifdef INK_ENABLE_STL
-#	include <exception>
+#	ifdef INK_ENABLE_EXCEPTIONS
+#		include <exception>
+#	endif
 #	include <stdexcept>
 #	include <optional>
 #	include <cctype>
 #	include <cstdint>
+#endif
+#ifdef INK_ENABLE_CSTD
 #	include <cstdio>
-#	include <cstdarg>
+#	include <cstdlib>
+#	include <ctype.h>
+#	include <cassert>
 #endif
 
 // Platform specific defines //
 
 #ifdef INK_ENABLE_UNREAL
-#	define inkZeroMemory(buff, len)        FMemory::Memset(buff, 0, len)
-#	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
-#	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
-#	define FORMAT_STRING_STR               "%hs"
+#	define inkZeroMemory(buff, len) FMemory::Memset(buff, 0, len)
+#	define FORMAT_STRING_STR        "%hs"
 #else
 #	define inkZeroMemory     ink::internal::zero_memory
-#	define inkAssert         ink::ink_assert
-#	define inkFail(...)      ink::ink_assert(false, __VA_ARGS__)
 #	define FORMAT_STRING_STR "%s"
 #endif
+
+#ifdef INK_ENABLE_UNREAL
+#	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
+#	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
+#else
+#	define inkAssert    ink::ink_assert
+#	define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
+
+#endif
+
 
 namespace ink
 {
@@ -45,6 +56,17 @@ namespace ink
  * @todo use a less missleading name
  */
 typedef unsigned int uint32_t;
+
+#ifndef INK_ENABLE_STL
+
+/** Additional signed integer types */
+typedef int   int32_t;
+typedef short int16_t;
+
+/** Additional unsigned integer types */
+typedef unsigned long long uint64_t;
+typedef unsigned short     uint16_t;
+#endif // ndef INK_ENABLE_STL
 
 /** Name hash (used for temporary variables) */
 typedef uint32_t hash_t;
@@ -55,6 +77,18 @@ const hash_t InvalidHash = 0;
 
 /** Byte type */
 typedef unsigned char byte_t;
+
+/** Ptr difference type */
+typedef decltype(static_cast<int*>(nullptr) - static_cast<int*>(nullptr)) ptrdiff_t;
+
+/** Verify sizes */
+static_assert(sizeof(byte_t) == 1);
+static_assert(sizeof(uint16_t) == 2);
+static_assert(sizeof(int16_t) == 2);
+static_assert(sizeof(uint32_t) == 4);
+static_assert(sizeof(int32_t) == 4);
+static_assert(sizeof(uint64_t) == 8);
+static_assert(sizeof(ptrdiff_t) == sizeof(void*));
 
 /** Used to identify an offset in a data table (like a string in the string table) */
 typedef uint32_t offset_t;
@@ -127,20 +161,20 @@ namespace internal
 		while (true) {
 			switch (*(string++)) {
 				case 0: return true;
+				case '\f': [[fallthrough]];
+				case '\r': [[fallthrough]];
 				case '\n':
 					if (! includeNewline)
 						return false;
 					[[fallthrough]];
 				case '\t': [[fallthrough]];
+				case '\v': [[fallthrough]];
 				case ' ': continue;
 				default: return false;
 			}
 		}
 	}
 
-	/** check if character can be only part of a word, when two part of word characters put together
-	 * the will be a space inserted I049
-	 */
 	static inline bool is_part_of_word(char character)
 	{
 		return isalpha(character) || isdigit(character);
@@ -188,8 +222,17 @@ private:
 };
 #endif
 
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                                \
+	    disable : 4100,                                                                             \
+	    justification : "dependend on rtti, exception and stl support not all arguments are needed" \
+	)
+#endif
 // assert
-#ifndef INK_ENABLE_UNREAL
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 {
@@ -198,24 +241,40 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 		msg = EMPTY;
 	}
 	if (! condition) {
+#if defined(INKCPP_ENABLE_STL) || defined(INKCPP_ENABLE_CSTD)
 		if constexpr (sizeof...(args) > 0) {
 			size_t size    = snprintf(nullptr, 0, msg, args...) + 1;
 			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
-			throw ink_exception(message);
-		} else {
+			msg = message;
+		} else
+#endif
+		{
+#ifdef INK_ENABLE_EXCEPTIONS
 			throw ink_exception(msg);
+#elif defined(INK_ENABLE_CSTD)
+			fprintf(stderr, "Ink Assert: %s\n", msg);
+			abort();
+#else
+#	warning no assertion handling this could lead to invalid code paths
+#endif
 		}
 	}
 }
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#else
+#	pragma warning(pop)
+#endif
 
 template<typename... Args>
 [[noreturn]] inline void ink_assert(const char* msg = nullptr, Args... args)
 {
 	ink_assert(false, msg, args...);
+#ifdef INK_ENABLE_CSTD
 	exit(EXIT_FAILURE);
-}
 #endif
+}
 
 namespace runtime::internal
 {

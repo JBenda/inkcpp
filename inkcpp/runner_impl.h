@@ -125,10 +125,8 @@ public:
 	const unsigned char* snap_load(const unsigned char* data, loader&);
 	bool                 can_be_migrated() const;
 
-#ifdef INK_ENABLE_CSTD
 	// c-style getline
 	virtual const char* getline_alloc() override;
-#endif
 
 	// move to path
 	virtual bool move_to(hash_t path) override;
@@ -136,11 +134,13 @@ public:
 	// move to path but keep as much state as possible
 	bool migrate_to(hash_t path);
 
+#if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 	// Gets a single line of output
 	virtual line_type getline() override;
 
 	// get all into string
 	virtual line_type getall() override;
+#endif
 
 #ifdef INK_ENABLE_STL
 	// Reads a line into a std::ostream

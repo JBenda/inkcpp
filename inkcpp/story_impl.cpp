@@ -19,7 +19,7 @@ namespace ink::runtime
 story* story::from_file(const char* filename) { return new internal::story_impl(filename); }
 #endif
 
-story* story::from_binary(unsigned char* data, size_t length, bool freeOnDestroy)
+story* story::from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
 {
 	return new internal::story_impl(data, length, freeOnDestroy);
 }
@@ -35,9 +35,7 @@ unsigned char* read_file_into_memory(const char* filename, size_t* read)
 
 	ifstream ifs(filename, ios::binary | ios::ate);
 
-	if (! ifs.is_open()) {
-		throw ink_exception("Failed to open file: " + std::string(filename));
-	}
+	inkAssert(ifs.is_open(), "Failed to open file: " FORMAT_STRING_STR, filename);
 
 	ifstream::pos_type pos    = ifs.tellg();
 	size_t             length = ( size_t ) pos;
@@ -69,7 +67,7 @@ story_impl::story_impl(const char* filename)
 }
 #endif
 
-story_impl::story_impl(unsigned char* binary, size_t len, bool manage /*= true*/)
+story_impl::story_impl(const unsigned char* binary, size_t len, bool manage /*= true*/)
     : _file(binary)
     , _length(len)
     , _managed(manage)
@@ -192,7 +190,7 @@ hash_t story_impl::container_hash(container_t id) const
 	}
 	inkAssert(hit, "Unable to find container for id!");
 	hash_t hash = container_hash(offset);
-	inkAssert(hash, "Did not find hash entry for container!");
+	inkAssert(hash, "Did not find hash entry for container! (1)");
 	return hash;
 }
 
@@ -237,10 +235,8 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 	}
 	auto* globs = new globals_impl(this);
 	snapshot.strings().clear();
-	auto end = globs->snap_load(
-	    snapshot.get_globals_snap(),
-	    snapshot_interface::loader{snapshot.strings(), _string_table, snapshot.can_be_migrated()}
-	);
+	snapshot_interface::loader loader(snapshot.strings(), _string_table, snapshot.can_be_migrated());
+	auto                       end = globs->snap_load(snapshot.get_globals_snap(), loader);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
 	if (hash() != snapshot.hash()) {
 		globals new_globs = new_globals();
@@ -265,11 +261,11 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
 	if (store == nullptr)
 		store = new_globals_from_snapshot(snapshot);
-	auto* run   = new runner_impl(this, store);
+	auto* run = new runner_impl(this, store);
 	// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to
 	// use
-	idx         = (data.num_runners() - idx - 1);
-	auto loader = snapshot_interface::loader{
+	idx       = (data.num_runners() - idx - 1);
+	snapshot_interface::loader loader{
 	    snapshot.strings(),
 	    _string_table,
 	    snapshot.can_be_migrated(),
@@ -291,7 +287,7 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 void story_impl::setup_pointers()
 {
 	using header = ink::internal::header;
-	_header      = header::parse_header(reinterpret_cast<char*>(_file));
+	_header      = header::parse_header(reinterpret_cast<const char*>(_file));
 
 	// String table is after the header
 	_string_table = ( char* ) _file + header::Size;

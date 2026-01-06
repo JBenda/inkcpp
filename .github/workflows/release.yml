@@ -17,7 +17,7 @@ jobs:
       url: https://pypi.org/p/inkcpp-py
     permissions:
       id-token: write
-      contents: write 
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Download artifacts
@@ -25,7 +25,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir artifacts
-          ID=$(gh run list -b master --limit 1 --json databaseId | jq '.[0].databaseId')
+          ID=$(gh run list --branch master --workflow build --limit 1 --json databaseId | jq '.[0].databaseId')
           gh run download $ID -D artifacts -n linux-cl -n linux-lib -n linux-clib -n unreal_5_7 -n unreal_5_6 -n unreal_5_5 -n unreal_5_4 -n macos-cl -n macos-lib -n macos-clib -n macos-arm-cl -n macos-arm-lib -n macos-arm-clib -n win64-cl -n win64-lib -n win64-clib -n python-package-distribution
           mv artifacts/python-package-distribution dist
       - name: Zip
@@ -46,4 +46,3 @@ jobs:
               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
               --generate-notes \
               "$tag" "linux-cl.zip" "linux-lib.zip" "linux-clib.zip" "unreal_5_7.zip" "unreal_5_6.zip" "unreal_5_5.zip" "unreal_5_4.zip" "macos-cl.zip" "macos-lib.zip" "macos-clib.zip" "win64-cl.zip" "macos-arm-cl.zip" "macos-arm-lib.zip" "macos-arm-clib.zip" "win64-lib.zip" "win64-clib.zip"
-
