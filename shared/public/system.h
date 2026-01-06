@@ -25,6 +25,7 @@
 #endif
 #ifdef INK_ENABLE_CSTD
 #	include <cstdio>
+#	include <cstdlib>
 #	include <ctype.h>
 #	include <cassert>
 #endif
@@ -171,10 +172,8 @@ namespace internal
 			}
 		}
 	}
+
 	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
-	{
-		return isalpha(character) || isdigit(character);
-	}
 
 	static inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{
@@ -218,6 +217,16 @@ private:
 };
 #endif
 
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                                \
+	    disable : 4100,                                                                             \
+	    justification : "dependend on rtti, exception and stl support not all arguments are needed" \
+	)
+#endif
 // assert
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
@@ -233,24 +242,33 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
 			msg = message;
-		} else 
+		} else
 #endif
 		{
-#	ifdef INK_ENABLE_EXCEPTIONS
+#ifdef INK_ENABLE_EXCEPTIONS
 			throw ink_exception(msg);
-#	else
+#elif defined(INK_ENABLE_CSTD)
 			fprintf(stderr, "Ink Assert: %s\n", msg);
 			abort();
-#	endif
+#else
+#	warning no assertion handling this could lead to invalid code paths
+#endif
 		}
 	}
 }
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#else
+#	pragma warning(pop)
+#endif
 
 template<typename... Args>
 [[noreturn]] inline void ink_assert(const char* msg = nullptr, Args... args)
 {
 	ink_assert(false, msg, args...);
+#ifdef INK_ENABLE_CSTD
 	exit(EXIT_FAILURE);
+#endif
 }
 
 namespace runtime::internal

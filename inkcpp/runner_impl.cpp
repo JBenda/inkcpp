@@ -17,6 +17,7 @@
 
 #ifdef INK_ENABLE_STL
 #	include <iomanip>
+#endif
 
 namespace ink::runtime
 {
@@ -312,11 +313,8 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	container_t     id;
 	ip_t            offset   = nullptr;
 	bool            reversed = _ptr > dest;
-
-	// move to destination and update container stack on the go
-	const ContainerData* c_iter   = nullptr;
 	// number of container which were already on the stack at current position
-	size_t               comm_end = _container.size();
+	size_t          comm_end = _container.size();
 
 	iter = nullptr;
 	while (_story->iterate_containers(iter, id, offset)) {
