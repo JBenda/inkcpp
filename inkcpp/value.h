@@ -14,7 +14,6 @@
 #include "system.h"
 #include "command.h"
 #include "list_table.h"
-#include "snapshot_impl.h"
 #include "tuple.hpp"
 #include "types.h"
 

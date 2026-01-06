@@ -10,8 +10,6 @@
 #include "traits.h"
 #include "value.h"
 
-#include <cstdio>
-
 #ifndef EINVAL
 #	define EINVAL -1
 #endif
@@ -58,13 +56,6 @@ inline int toStr(char* buffer, size_t size, int32_t value)
 // https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/gcvt-s?view=msvc-160
 inline int toStr(char* buffer, size_t size, float value)
 {
-#ifdef WIN32
-	int digits = 7;
-	for (float f = value; f > 1.f; f /= 10.f) {
-		++digits;
-	}
-	int ec = _gcvt_s(buffer, size, value, digits); // number of significant digits
-#else
 	if (buffer == nullptr || size < 1) {
 		return EINVAL;
 	}
@@ -73,8 +64,7 @@ inline int toStr(char* buffer, size_t size, float value)
 		return EINVAL;
 	}
 	// trunc cat zeros B007
-	int ec = 0;
-#endif
+	int   ec  = 0;
 	char* itr = buffer + strlen(buffer) - 1;
 	while (*itr == '0') {
 		*itr-- = 0;
@@ -85,19 +75,24 @@ inline int toStr(char* buffer, size_t size, float value)
 	return ec;
 }
 
-inline int toStr(char* buffer, size_t size, const char* c)
+inline int toStr(char* buffer, size_t size, const char* str)
 {
 	char*  ptr = buffer;
 	size_t i   = 0;
-	while (*c && i < size) {
-		*ptr++ = *c;
+	while (i < size && str[i]) {
+		ptr[i] = str[i];
 		++i;
 	}
 	if (i >= size) {
 		return EINVAL;
 	}
-	*ptr = 0;
+	ptr[i] = 0;
 	return 0;
+}
+
+inline int toStr(char* buffer, size_t size, bool b)
+{
+	return toStr(buffer, size, b ? "true" : "false");
 }
 
 inline int toStr(char* buffer, size_t size, const value& v)
@@ -106,8 +101,9 @@ inline int toStr(char* buffer, size_t size, const value& v)
 		case value_type::int32: return toStr(buffer, size, v.get<value_type::int32>());
 		case value_type::uint32: return toStr(buffer, size, v.get<value_type::uint32>());
 		case value_type::float32: return toStr(buffer, size, v.get<value_type::float32>());
+		case value_type::boolean: return toStr(buffer, size, v.get<value_type::boolean>());
 		case value_type::newline: return toStr(buffer, size, "\n");
-		default: inkFail("only support toStr for numeric types"); return -1;
+		default: inkFail("No toStr implementation for this type"); return -1;
 	}
 }
 
@@ -142,6 +138,8 @@ inline constexpr size_t value_length(const value& v)
 		case value_type::uint32: return decimal_digits(v.get<value_type::uint32>());
 		case value_type::float32: return decimal_digits(v.get<value_type::float32>());
 		case value_type::string: return c_str_len(v.get<value_type::string>());
+		case value_type::boolean:
+			return v.get<value_type::boolean>() ? c_str_len("true") : c_str_len("false");
 		case value_type::newline: return 1;
 		default: inkFail("Can't determine length of this value type"); return ~0U;
 	}
@@ -175,6 +173,11 @@ inline constexpr const char* str_find(const char* str, char c)
 		return str;
 	}
 	return nullptr;
+}
+
+inline constexpr bool isspace(int c)
+{
+	return c == ' ' || c == '\t' || c == '\v' || c == '\n' || c == '\f' || c == '\r';
 }
 
 /** removes leading & tailing spaces as wide spaces

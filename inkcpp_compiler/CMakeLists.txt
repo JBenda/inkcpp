@@ -22,8 +22,8 @@ target_include_directories(inkcpp_compiler PUBLIC
 FILE(GLOB PUBLIC_HEADERS "include/*")
 set_target_properties(inkcpp_compiler PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
-target_link_libraries(inkcpp_compiler PRIVATE inkcpp_shared)
-target_link_libraries(inkcpp_compiler_o PRIVATE inkcpp_shared)
+target_link_libraries(inkcpp_compiler PUBLIC inkcpp_shared)
+target_link_libraries(inkcpp_compiler_o PUBLIC inkcpp_shared)
 
 # Unreal installation
 list(REMOVE_ITEM SOURCES "json.hpp")

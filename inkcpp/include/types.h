@@ -113,6 +113,20 @@ public:
 		}
 	}
 
+	constexpr value& operator=(const value& v)
+	{
+		type = v.type;
+		switch (type) {
+			case Type::Bool: v_bool = v.v_bool; break;
+			case Type::Uint32: v_uint32 = v.v_uint32; break;
+			case Type::Int32: v_int32 = v.v_int32; break;
+			case Type::String: v_string = v.v_string; break;
+			case Type::Float: v_float = v.v_float; break;
+			case Type::List: v_list = v.v_list; break;
+		}
+		return *this;
+	}
+
 	/// @}
 
 	/** Get value to corresponding type

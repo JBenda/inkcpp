@@ -153,7 +153,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name="inkcpp-py",
-    version="0.1.9",
+    version="0.1.10",
     author="Julian Benda",
     author_email="julian.benda@ovgu.de",
     description="Python bindings for InkCPP a Inkle runtime written in C++",

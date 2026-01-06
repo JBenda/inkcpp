@@ -65,13 +65,13 @@ class avl_array
 
 	// node storage, due to possible structure packing effects, single arrays are used instead of a
 	// 'node' structure
-	ink::runtime::internal::if_t<dynamic, Key*, Key[Size]>                 key_;
-	ink::runtime::internal::if_t<dynamic, T*, T[Size]>                     val_;
-	ink::runtime::internal::if_t<dynamic, std::int8_t*, std::int8_t[Size]> balance_;
-	ink::runtime::internal::if_t<dynamic, child_type*, child_type[Size]>   child_;
-	size_type                                                              size_; // actual size
-	size_type                                                                     _capacity;
-	size_type                                                              root_; // root node
+	ink::runtime::internal::if_t<dynamic, Key*, Key[Size]>               key_;
+	ink::runtime::internal::if_t<dynamic, T*, T[Size]>                   val_;
+	ink::runtime::internal::if_t<dynamic, char*, char[Size]>             balance_;
+	ink::runtime::internal::if_t<dynamic, child_type*, child_type[Size]> child_;
+	size_type                                                            size_; // actual size
+	size_type                                                            _capacity;
+	size_type                                                            root_; // root node
 	ink::runtime::internal::if_t<dynamic, size_type*, size_type[Fast ? Size : 1]> parent_;
 
 	// invalid index (like 'nullptr' in a pointer implementation)
@@ -197,7 +197,7 @@ public:
 		if constexpr (dynamic) {
 			key_     = new Key[Size];
 			val_     = new T[Size];
-			balance_ = new std::int8_t[Size];
+			balance_ = new char[Size];
 			child_   = new child_type[Size];
 			if constexpr (Fast) {
 				parent_ = new size_type[Size];
@@ -285,7 +285,7 @@ public:
 			val_ = new_data;
 		}
 		{
-			std::int8_t* new_data = new std::int8_t[new_size];
+			char* new_data = new char[new_size];
 			for (size_type i = 0; i < _capacity; ++i) {
 				new_data[i] = balance_[i];
 			}
@@ -660,7 +660,7 @@ private:
 		set_parent(target, get_parent(source));
 	}
 
-	void insert_balance(size_type node, std::int8_t balance)
+	void insert_balance(size_type node, char balance)
 	{
 		while (node != INVALID_IDX) {
 			balance = (balance_[node] += balance);
@@ -691,7 +691,7 @@ private:
 		}
 	}
 
-	void delete_balance(size_type node, std::int8_t balance)
+	void delete_balance(size_type node, char balance)
 	{
 		while (node != INVALID_IDX) {
 			balance = (balance_[node] += balance);
