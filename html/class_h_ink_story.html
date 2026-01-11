@@ -109,6 +109,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acbabb5e84b0d3ff46aa095c0732c33b3" id="r_acbabb5e84b0d3ff46aa095c0732c33b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h_ink_story.html">HInkStory</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acbabb5e84b0d3ff46aa095c0732c33b3">ink_story_from_file</a> (const char *filename)</td></tr>
 <tr class="memdesc:acbabb5e84b0d3ff46aa095c0732c33b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new story object from a file.    <br /></td></tr>
 <tr class="separator:acbabb5e84b0d3ff46aa095c0732c33b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a167849d8b3533176ee538e2a25d1c6f8" id="r_a167849d8b3533176ee538e2a25d1c6f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h_ink_story.html">HInkStory</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a167849d8b3533176ee538e2a25d1c6f8">ink_story_from_binary</a> (const unsigned char *data, size_t length, bool freeOnDestroy)</td></tr>
+<tr class="memdesc:a167849d8b3533176ee538e2a25d1c6f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new story object from binary buffer.    <br /></td></tr>
+<tr class="separator:a167849d8b3533176ee538e2a25d1c6f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11b781788a630a5638a0228182a61fdc" id="r_a11b781788a630a5638a0228182a61fdc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11b781788a630a5638a0228182a61fdc">ink_story_delete</a> (<a class="el" href="class_h_ink_story.html">HInkStory</a> *self)</td></tr>
 <tr class="memdesc:a11b781788a630a5638a0228182a61fdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">deletes a story and all assoziated resources  <br /></td></tr>
 <tr class="separator:a11b781788a630a5638a0228182a61fdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,6 +164,44 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a167849d8b3533176ee538e2a25d1c6f8" name="a167849d8b3533176ee538e2a25d1c6f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a167849d8b3533176ee538e2a25d1c6f8">&#9670;&#160;</a></span>ink_story_from_binary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_h_ink_story.html">HInkStory</a> * ink_story_from_binary </td>
+          <td>(</td>
+          <td class="paramtype">const unsigned char *</td>          <td class="paramname"><span class="paramname"><em>data</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>length</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>freeOnDestroy</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a new story object from binary buffer.   </p>
+<p>No extensions required. Creates the story from binary data already loaded into memory. By default, the story will free this buffer when it is destroyed.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>binary data </td></tr>
+    <tr><td class="paramname">length</td><td>of the binary data in bytes </td></tr>
+    <tr><td class="paramname">freeOnDestroy</td><td>if true, free this buffer once the story is destroyed </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>new story object   </dd></dl>
+
+</div>
+</div>
 <a id="acbabb5e84b0d3ff46aa095c0732c33b3" name="acbabb5e84b0d3ff46aa095c0732c33b3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acbabb5e84b0d3ff46aa095c0732c33b3">&#9670;&#160;</a></span>ink_story_from_file()</h2>
 
@@ -185,6 +226,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>new story object   </dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>only supported if build with STL libraries. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a167849d8b3533176ee538e2a25d1c6f8" title="Create a new story object from binary buffer.">ink_story_from_binary()</a> </dd></dl>
 
 </div>
 </div>

@@ -16,5 +16,6 @@ var structink_1_1runtime_1_1value =
     [ "value", "structink_1_1runtime_1_1value.html#a8d6eae7e36845ed0684f775e4e9d10fd", null ],
     [ "value", "structink_1_1runtime_1_1value.html#a1e765052e98edf7f890289a425166115", null ],
     [ "get", "structink_1_1runtime_1_1value.html#ab56df01832b43aae8f16a8cd70e3a40e", null ],
+    [ "operator=", "structink_1_1runtime_1_1value.html#af68846e48e0b5eb0c3c0bfc2a71db2cc", null ],
     [ "type", "structink_1_1runtime_1_1value.html#a9491ec27049e08da1d118e0630fa9403", null ]
 ];

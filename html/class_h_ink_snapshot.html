@@ -109,18 +109,60 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a432a1ea5b1326db82ce9d87a8e55bb35" id="r_a432a1ea5b1326db82ce9d87a8e55bb35"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a432a1ea5b1326db82ce9d87a8e55bb35">ink_snapshot_from_file</a> (const char *filename)</td></tr>
 <tr class="memdesc:a432a1ea5b1326db82ce9d87a8e55bb35"><td class="mdescLeft">&#160;</td><td class="mdescRight">deserialize snapshot from file.    <br /></td></tr>
 <tr class="separator:a432a1ea5b1326db82ce9d87a8e55bb35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f127c75f55d4645435f71c102fc1f75" id="r_a2f127c75f55d4645435f71c102fc1f75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f127c75f55d4645435f71c102fc1f75">ink_snapshot_from_binary</a> (const unsigned char *data, size_t length, bool freeOnDestroy)</td></tr>
+<tr class="memdesc:a2f127c75f55d4645435f71c102fc1f75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct snapshot from blob.    <br /></td></tr>
+<tr class="separator:a2f127c75f55d4645435f71c102fc1f75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ebe60443f4fece2c53e052f3a2b784b" id="r_a3ebe60443f4fece2c53e052f3a2b784b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ebe60443f4fece2c53e052f3a2b784b">ink_snapshot_num_runners</a> (const <a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *self)</td></tr>
 <tr class="memdesc:a3ebe60443f4fece2c53e052f3a2b784b"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of runners which are stored inside this snapshot    <br /></td></tr>
 <tr class="separator:a3ebe60443f4fece2c53e052f3a2b784b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62c8e3323f8dd47b39f897460bbcead0" id="r_a62c8e3323f8dd47b39f897460bbcead0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62c8e3323f8dd47b39f897460bbcead0">ink_snapshot_write_to_file</a> (const <a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *self, const char *filename)</td></tr>
 <tr class="memdesc:a62c8e3323f8dd47b39f897460bbcead0"><td class="mdescLeft">&#160;</td><td class="mdescRight">serialize snapshot to file    <br /></td></tr>
 <tr class="separator:a62c8e3323f8dd47b39f897460bbcead0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae8ef49f0e8742efe05cd5116b3ddfaf" id="r_aae8ef49f0e8742efe05cd5116b3ddfaf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae8ef49f0e8742efe05cd5116b3ddfaf">ink_snapshot_get_binary</a> (const <a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *self, const unsigned char **data, size_t *data_length)</td></tr>
+<tr class="separator:aae8ef49f0e8742efe05cd5116b3ddfaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Handler for a <a class="el" href="classink_1_1runtime_1_1snapshot.html">ink snapshot</a>. </p>
 <p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all associated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and runner_interface::create_snapshot() . If the runner is associated to the globals the snapshot will be identical. If multiple runners are associated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a></p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo</a></b></dt><dd>Currently the id is equal to the creation order, a way to name the single runner/threads is WIP </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a2f127c75f55d4645435f71c102fc1f75" name="a2f127c75f55d4645435f71c102fc1f75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f127c75f55d4645435f71c102fc1f75">&#9670;&#160;</a></span>ink_snapshot_from_binary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> * ink_snapshot_from_binary </td>
+          <td>(</td>
+          <td class="paramtype">const unsigned char *</td>          <td class="paramname"><span class="paramname"><em>data</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>length</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>freeOnDestroy</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Construct snapshot from blob.   </p>
+<p>Memory must be kept valid until the snapshot is deconstructed. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>pointer to blob </td></tr>
+    <tr><td class="paramname">length</td><td>number of bytes in blob </td></tr>
+    <tr><td class="paramname">freeOnDestroy</td><td>if the memory should be freed (delete[]) when the snapshot is deconstructed </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>newly created snapshot   </dd></dl>
+
+</div>
+</div>
 <a id="a432a1ea5b1326db82ce9d87a8e55bb35" name="a432a1ea5b1326db82ce9d87a8e55bb35"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a432a1ea5b1326db82ce9d87a8e55bb35">&#9670;&#160;</a></span>ink_snapshot_from_file()</h2>
 
@@ -146,6 +188,42 @@ Public Member Functions</h2></td></tr>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
     <tr><td class="paramname">ink_exception</td><td>if it fails to open the file   </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section attention"><dt>Attention</dt><dd>only supported if build with STL libraries. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2f127c75f55d4645435f71c102fc1f75" title="Construct snapshot from blob.">ink_snapshot_from_binary()</a> </dd></dl>
+
+</div>
+</div>
+<a id="aae8ef49f0e8742efe05cd5116b3ddfaf" name="aae8ef49f0e8742efe05cd5116b3ddfaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae8ef49f0e8742efe05cd5116b3ddfaf">&#9670;&#160;</a></span>ink_snapshot_get_binary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ink_snapshot_get_binary </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *</td>          <td class="paramname"><span class="paramname"><em>self</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const unsigned char **</td>          <td class="paramname"><span class="paramname"><em>data</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>data_length</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">self</td><td></td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">data</td><td>pointer to snapshot data </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">data_length</td><td>length of snapshot data </td></tr>
   </table>
   </dd>
 </dl>
@@ -215,6 +293,8 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section attention"><dt>Attention</dt><dd>only supported if build with STL libraries. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#aae8ef49f0e8742efe05cd5116b3ddfaf">ink_snapshot_get_binary()</a> </dd></dl>
 
 </div>
 </div>

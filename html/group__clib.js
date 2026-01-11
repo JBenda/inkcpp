@@ -24,7 +24,9 @@ var group__clib =
       [ "uint32_v", "struct_ink_value.html#aecb02464953c87f26ec35b76b4f8ba96", null ]
     ] ],
     [ "HInkSnapshot", "class_h_ink_snapshot.html", [
+      [ "ink_snapshot_from_binary", "class_h_ink_snapshot.html#a2f127c75f55d4645435f71c102fc1f75", null ],
       [ "ink_snapshot_from_file", "class_h_ink_snapshot.html#a432a1ea5b1326db82ce9d87a8e55bb35", null ],
+      [ "ink_snapshot_get_binary", "class_h_ink_snapshot.html#aae8ef49f0e8742efe05cd5116b3ddfaf", null ],
       [ "ink_snapshot_num_runners", "class_h_ink_snapshot.html#a3ebe60443f4fece2c53e052f3a2b784b", null ],
       [ "ink_snapshot_write_to_file", "class_h_ink_snapshot.html#a62c8e3323f8dd47b39f897460bbcead0", null ]
     ] ],
@@ -68,6 +70,7 @@ var group__clib =
     ] ],
     [ "HInkStory", "class_h_ink_story.html", [
       [ "ink_story_delete", "class_h_ink_story.html#a11b781788a630a5638a0228182a61fdc", null ],
+      [ "ink_story_from_binary", "class_h_ink_story.html#a167849d8b3533176ee538e2a25d1c6f8", null ],
       [ "ink_story_from_file", "class_h_ink_story.html#acbabb5e84b0d3ff46aa095c0732c33b3", null ],
       [ "ink_story_new_globals", "class_h_ink_story.html#a5c0e45fba64a72031b755b9ad51afb7e", null ],
       [ "ink_story_new_globals_from_snapshot", "class_h_ink_story.html#a02d1d4361771ac6b8c4dc22a575e7440", null ],
