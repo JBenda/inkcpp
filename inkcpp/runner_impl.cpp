@@ -15,11 +15,13 @@
 #include "system.h"
 #include "value.h"
 
-#include <iomanip>
-#include <vector>
+#ifdef INK_ENABLE_STL
+#	include <iomanip>
+#endif
 
 namespace ink::runtime
 {
+#ifdef INK_ENABLE_STL
 static void write_hash(std::ostream& out, ink::hash_t value)
 {
 	using namespace std;
@@ -28,6 +30,7 @@ static void write_hash(std::ostream& out, ink::hash_t value)
 	out << "0x" << hex << setfill('0') << setw(8) << static_cast<uint32_t>(value);
 	out.flags(state);
 }
+#endif
 
 const choice* runner_interface::get_choice(size_t index) const
 {
@@ -310,11 +313,8 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	container_t     id;
 	ip_t            offset   = nullptr;
 	bool            reversed = _ptr > dest;
-
-	// move to destination and update container stack on the go
-	const ContainerData* c_iter   = nullptr;
 	// number of container which were already on the stack at current position
-	size_t               comm_end = _container.size();
+	size_t          comm_end = _container.size();
 
 	iter = nullptr;
 	while (_story->iterate_containers(iter, id, offset)) {
@@ -472,7 +472,11 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _choices()
     , _tags_begin(0, ~0)
     , _container(ContainerData{})
+#ifdef INK_ENABLE_CSTD
     , _rng(static_cast<uint32_t>(time(NULL)))
+#else
+    , _rng()
+#endif
 {
 
 
@@ -711,7 +715,6 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	return ptr;
 }
 
-#ifdef INK_ENABLE_CSTD
 const char* runner_impl::getline_alloc()
 {
 	advance_line();
@@ -722,7 +725,6 @@ const char* runner_impl::getline_alloc()
 	inkAssert(_output.is_empty(), "Output should be empty after getline!");
 	return res;
 }
-#endif
 
 bool runner_impl::move_to(hash_t path)
 {

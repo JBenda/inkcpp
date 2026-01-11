@@ -1,17 +1,21 @@
 #include "inkcpp.h"
+#include "include/inkcpp.h"
 #include "list.h"
 #include "system.h"
 #include "types.h"
 
-#include <cstring>
+#ifdef INK_ENABLE_CSTD
+#	include <string.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#endif
 
-#include <memory>
+
 #include <story.h>
 #include <snapshot.h>
 #include <globals.h>
 #include <runner.h>
 #include <choice.h>
-#include <compiler.h>
 
 using namespace ink::runtime;
 
@@ -64,19 +68,78 @@ value inkvar_from_c(InkValue& val)
 }
 
 extern "C" {
+#ifdef INK_ENABLE_CSTD
+	HInkStory* ink_story_from_file(const char* filename)
+	{
+		FILE* file = fopen(filename, "rb");
+		fseek(file, 0, SEEK_END);
+		long file_length = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		unsigned char* data = static_cast<unsigned char*>(malloc(file_length));
+		inkAssert(data, "Malloc of size %u failed", file_length);
+		unsigned length = fread(data, sizeof(unsigned char), file_length, file);
+		inkAssert(
+		    file_length == length, "Expected to read file of size %u, but only read %u", file_length,
+		    length
+		);
+		fclose(file);
+		return reinterpret_cast<HInkStory*>(story::from_binary(data, file_length));
+	}
+
 	HInkSnapshot* ink_snapshot_from_file(const char* filename)
 	{
-		return reinterpret_cast<HInkSnapshot*>(snapshot::from_file(filename));
+		FILE* file = fopen(filename, "rb");
+		fseek(file, 0, SEEK_END);
+		long file_length = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		unsigned char* data = static_cast<unsigned char*>(malloc(file_length));
+		inkAssert(data, "Malloc of size %u failed", file_length);
+		unsigned length = fread(data, sizeof(unsigned char), file_length, file);
+		inkAssert(
+		    file_length == length, "Expected to read file of size %u, but only read %u", file_length,
+		    length
+		);
+		fclose(file);
+		return reinterpret_cast<HInkSnapshot*>(snapshot::from_binary(data, file_length));
+	}
+
+	void ink_snapshot_write_to_file(const HInkSnapshot* self, const char* filename)
+	{
+		FILE*           file = fopen(filename, "wb");
+		const snapshot& snap = *reinterpret_cast<const snapshot*>(self);
+		unsigned length = fwrite(snap.get_data(), sizeof(unsigned char), snap.get_data_len(), file);
+		inkAssert(
+		    length == snap.get_data_len(),
+		    "Snapshot write failed, snapshot of size %u, but only %u bytes where written.",
+		    snap.get_data_len(), length
+		);
+		fclose(file);
+	}
+#endif
+
+	HInkStory* ink_story_from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
+	{
+		return reinterpret_cast<HInkStory*>(story::from_binary(data, length, freeOnDestroy));
+	}
+
+	HInkSnapshot*
+	    ink_snapshot_from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
+	{
+		return reinterpret_cast<HInkSnapshot*>(snapshot::from_binary(data, length, freeOnDestroy));
+	}
+
+	void ink_snapshot_get_binary(
+	    const HInkSnapshot* self, const unsigned char** data, size_t* data_length
+	)
+	{
+		const snapshot& snap = *reinterpret_cast<const snapshot*>(self);
+		*data                = snap.get_data();
+		*data_length         = snap.get_data_len();
 	}
 
 	int ink_snapshot_num_runners(const HInkSnapshot* self)
 	{
 		return reinterpret_cast<const snapshot*>(self)->num_runners();
-	}
-
-	void ink_snapshot_write_to_file(const HInkSnapshot* self, const char* filename)
-	{
-		reinterpret_cast<const snapshot*>(self)->write_to_file(filename);
 	}
 
 	const char* ink_choice_text(const HInkChoice* self)
@@ -303,11 +366,6 @@ extern "C" {
 		return reinterpret_cast<globals*>(self)->get()->set(variable_name, inkvar_from_c(val));
 	}
 
-	HInkStory* ink_story_from_file(const char* filename)
-	{
-		return reinterpret_cast<HInkStory*>(story::from_file(filename));
-	}
-
 	void ink_story_delete(HInkStory* self) { delete reinterpret_cast<story*>(self); }
 
 	HInkRunner* ink_story_new_runner(HInkStory* self, HInkGlobals* global_store)
@@ -348,21 +406,5 @@ extern "C" {
 		        *reinterpret_cast<const snapshot*>(snap)
 		    ))
 		);
-	}
-
-	void ink_compile_json(const char* input_filename, const char* output_filename, const char** error)
-	{
-		ink::compiler::compilation_results result;
-		ink::compiler::run(input_filename, output_filename, &result);
-		if (error != nullptr && ! result.errors.empty() || ! result.warnings.empty()) {
-			std::string str{};
-			for (auto& warn : result.warnings) {
-				str += "WARNING: " + warn + '\n';
-			}
-			for (auto& err : result.errors) {
-				str += "ERROR: " + err + '\n';
-			}
-			*error = strdup(str.c_str());
-		}
 	}
 }

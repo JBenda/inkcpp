@@ -22,11 +22,12 @@
 #	include <optional>
 #	include <cctype>
 #	include <cstdint>
-#	include <cstdio>
-#	include <cstdarg>
 #endif
 #ifdef INK_ENABLE_CSTD
+#	include <cstdio>
+#	include <cstdlib>
 #	include <ctype.h>
+#	include <cassert>
 #endif
 
 // Platform specific defines //
@@ -45,7 +46,9 @@
 #else
 #	define inkAssert    ink::ink_assert
 #	define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
+
 #endif
+
 
 namespace ink
 {
@@ -156,24 +159,21 @@ namespace internal
 		while (true) {
 			switch (*(string++)) {
 				case 0: return true;
+				case '\f': [[fallthrough]];
+				case '\r': [[fallthrough]];
 				case '\n':
 					if (! includeNewline)
 						return false;
 					[[fallthrough]];
 				case '\t': [[fallthrough]];
+				case '\v': [[fallthrough]];
 				case ' ': continue;
 				default: return false;
 			}
 		}
 	}
 
-	/** check if character can be only part of a word, when two part of word characters put together
-	 * the will be a space inserted I049
-	 */
-	static inline bool is_part_of_word(char character)
-	{
-		return isalpha(character) || isdigit(character);
-	}
+	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
 
 	static inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{
@@ -197,7 +197,7 @@ namespace internal
 #endif
 } // namespace internal
 
-#ifdef INK_ENABLE_EXCEPTIONS
+#ifdef INK_ENABLE_STL
 /** exception type thrown if something goes wrong */
 using ink_exception = std::runtime_error;
 #else
@@ -217,8 +217,17 @@ private:
 };
 #endif
 
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                                \
+	    disable : 4100,                                                                             \
+	    justification : "dependend on rtti, exception and stl support not all arguments are needed" \
+	)
+#endif
 // assert
-#ifndef INK_ENABLE_UNREAL
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 {
@@ -227,31 +236,40 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 		msg = EMPTY;
 	}
 	if (! condition) {
+#if defined(INKCPP_ENABLE_STL) || defined(INKCPP_ENABLE_CSTD)
 		if constexpr (sizeof...(args) > 0) {
 			size_t size    = snprintf(nullptr, 0, msg, args...) + 1;
 			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
 			msg = message;
+		} else
+#endif
+		{
+#ifdef INK_ENABLE_EXCEPTIONS
+			throw ink_exception(msg);
+#elif defined(INK_ENABLE_CSTD)
+			fprintf(stderr, "Ink Assert: %s\n", msg);
+			abort();
+#else
+#	warning no assertion handling this could lead to invalid code paths
+#endif
 		}
-
-#	ifdef INK_ENABLE_EXCEPTIONS
-		throw ink_exception(msg);
-#	elif defined(INK_ENABLE_CSTD)
-		fprintf(stderr, "Ink Assert: %s\n", msg);
-		abort();
-#	else
-#		error "This path needs a way to warn and then terminate, otherwise it'll silently fail"
-#	endif
 	}
 }
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#else
+#	pragma warning(pop)
+#endif
 
 template<typename... Args>
 [[noreturn]] inline void ink_assert(const char* msg = nullptr, Args... args)
 {
 	ink_assert(false, msg, args...);
+#ifdef INK_ENABLE_CSTD
 	exit(EXIT_FAILURE);
-}
 #endif
+}
 
 namespace runtime::internal
 {

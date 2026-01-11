@@ -19,7 +19,7 @@ namespace ink::runtime
 story* story::from_file(const char* filename) { return new internal::story_impl(filename); }
 #endif
 
-story* story::from_binary(unsigned char* data, size_t length, bool freeOnDestroy)
+story* story::from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
 {
 	return new internal::story_impl(data, length, freeOnDestroy);
 }
@@ -35,9 +35,7 @@ unsigned char* read_file_into_memory(const char* filename, size_t* read)
 
 	ifstream ifs(filename, ios::binary | ios::ate);
 
-	if (! ifs.is_open()) {
-		ink_assert(false, "Failed to open file: %s", filename);
-	}
+	inkAssert(ifs.is_open(), "Failed to open file: " FORMAT_STRING_STR, filename);
 
 	ifstream::pos_type pos    = ifs.tellg();
 	size_t             length = ( size_t ) pos;
@@ -69,7 +67,7 @@ story_impl::story_impl(const char* filename)
 }
 #endif
 
-story_impl::story_impl(unsigned char* binary, size_t len, bool manage /*= true*/)
+story_impl::story_impl(const unsigned char* binary, size_t len, bool manage /*= true*/)
     : _file(binary)
     , _length(len)
     , _managed(manage)
@@ -269,7 +267,7 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 void story_impl::setup_pointers()
 {
 	using header = ink::internal::header;
-	_header      = header::parse_header(reinterpret_cast<char*>(_file));
+	_header      = header::parse_header(reinterpret_cast<const char*>(_file));
 
 	// String table is after the header
 	_string_table = ( char* ) _file + header::Size;

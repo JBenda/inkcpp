@@ -10,8 +10,6 @@
 #include "traits.h"
 #include "value.h"
 
-#include <cstdio>
-
 #ifndef EINVAL
 #	define EINVAL -1
 #endif
@@ -58,13 +56,6 @@ inline int toStr(char* buffer, size_t size, int32_t value)
 // https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/gcvt-s?view=msvc-160
 inline int toStr(char* buffer, size_t size, float value)
 {
-#ifdef WIN32
-	int digits = 7;
-	for (float f = value; f > 1.f; f /= 10.f) {
-		++digits;
-	}
-	int ec = _gcvt_s(buffer, size, value, digits); // number of significant digits
-#else
 	if (buffer == nullptr || size < 1) {
 		return EINVAL;
 	}
@@ -73,8 +64,7 @@ inline int toStr(char* buffer, size_t size, float value)
 		return EINVAL;
 	}
 	// trunc cat zeros B007
-	int ec = 0;
-#endif
+	int   ec  = 0;
 	char* itr = buffer + strlen(buffer) - 1;
 	while (*itr == '0') {
 		*itr-- = 0;
@@ -183,6 +173,11 @@ inline constexpr const char* str_find(const char* str, char c)
 		return str;
 	}
 	return nullptr;
+}
+
+inline constexpr bool isspace(int c)
+{
+	return c == ' ' || c == '\t' || c == '\v' || c == '\n' || c == '\f' || c == '\r';
 }
 
 /** removes leading & tailing spaces as wide spaces

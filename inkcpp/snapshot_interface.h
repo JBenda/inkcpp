@@ -70,7 +70,7 @@ public:
 		const char*                          story_string_table;
 		const snap_tag*                      runner_tags = nullptr;
 
-		loader(managed_array<const char*, true, 5>& string_table, const char* story_sting_table)
+		loader(managed_array<const char*, true, 5>& string_table, const char* story_string_table)
 		    : string_table{string_table}
 		    , story_string_table{story_string_table}
 		{
