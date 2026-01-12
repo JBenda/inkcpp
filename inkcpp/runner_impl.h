@@ -277,7 +277,7 @@ public:
 		{
 			if (index >= _threadDone.capacity()) {
 				inkAssert(index == _threadDone.capacity(), "Threads should only be created incremental");
-				_threadDone.resize(_threadDone.capacity() * 1.5);
+				_threadDone.resize(static_cast<size_t>(_threadDone.capacity() * 1.5));
 			}
 			_threadDone.set(index, value);
 		}

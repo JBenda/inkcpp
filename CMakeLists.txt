@@ -48,7 +48,7 @@ set(CMAKE_INSTALL_LIBRARY_DIR lib)
 set(CMAKE_INSTALL_INCLUDE_DIR include)
 if(MSVC)
 	# disable: aligment problems non explicit switch case
-	add_compile_options(/W4 /wd4820 /wd4061)
+	add_compile_options(/W4 /wd4820 /wd4061 -D_CRT_SECURE_NO_WARNINGS)
 else()
 	add_compile_options(-Wall -Wextra -Wpedantic)
 endif()

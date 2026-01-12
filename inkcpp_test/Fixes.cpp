@@ -63,7 +63,8 @@ SCENARIO("unknown command _ #109", "[fixes]")
 			for (size_t i = 0; i < out_str.size(); ++i) {
 				data[i] = out_str[i];
 			}
-			std::unique_ptr<story> ink{story::from_binary(data, out_str.size())};
+			std::unique_ptr<story> ink{story::from_binary(data, static_cast<ink::size_t>(out_str.size()))
+			};
 			globals                globStore = ink->new_globals();
 			runner                 main      = ink->new_runner(globStore);
 			std::string            story     = main->getall();
@@ -158,11 +159,11 @@ SCENARIO(
 		{
 			thread->getall();
 			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
-			runner                    thread = ink->new_runner_from_snapshot(*snap);
+			runner                    thread2 = ink->new_runner_from_snapshot(*snap);
 			const size_t s = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
 			THEN("loading it again will not change the string_table size")
 			{
-				runner       thread2 = ink->new_runner_from_snapshot(*snap);
+				runner       thread3 = ink->new_runner_from_snapshot(*snap);
 				const size_t s2 = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
 				REQUIRE(s == s2);
 			}
@@ -227,9 +228,9 @@ SCENARIO("Using knot visit count as condition _ #139", "[fixes]")
 				WHEN("go to 'one' twice")
 				{
 					thread->choose(1);
-					std::string content = thread->getall();
+					std::string content2 = thread->getall();
 					REQUIRE(thread->num_choices() == 3);
-					THEN("get both one strings") { REQUIRE(content == "Check\nBeen here before\n"); }
+					THEN("get both one strings") { REQUIRE(content2 == "Check\nBeen here before\n"); }
 				}
 			}
 		}
@@ -266,7 +267,7 @@ SCENARIO("Provoke thread array expension _ #142", "[fixes]")
 				REQUIRE(thread->num_choices() == 15);
 				const char options[] = "abcdefghijklmno";
 				for (const char* c = options; *c; ++c) {
-					CHECK(thread->get_choice(c - options)->text()[0] == *c);
+					CHECK(thread->get_choice(static_cast<size_t>(c - options))->text()[0] == *c);
 				}
 			}
 		}
@@ -288,7 +289,7 @@ SCENARIO("Provoke thread array expension _ #142", "[fixes]")
 				REQUIRE(thread->num_choices() == 10);
 				const char* options = "bdfhjklmno";
 				for (const char* c = options; *c; ++c) {
-					CHECK(thread->get_choice(c - options)->text()[0] == *c);
+					CHECK(thread->get_choice(static_cast<size_t>(c - options))->text()[0] == *c);
 				}
 			}
 		}

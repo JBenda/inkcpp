@@ -74,13 +74,16 @@ extern "C" {
 		FILE* file = fopen(filename, "rb");
 		fseek(file, 0, SEEK_END);
 		long file_length = ftell(file);
+		if (file_length < 0) {
+			return NULL;
+		}
 		fseek(file, 0, SEEK_SET);
 		unsigned char* data = static_cast<unsigned char*>(malloc(file_length));
 		inkAssert(data, "Malloc of size %u failed", file_length);
-		unsigned length = fread(data, sizeof(unsigned char), file_length, file);
+		size_t length = fread(data, sizeof(unsigned char), file_length, file);
 		inkAssert(
-		    file_length == length, "Expected to read file of size %u, but only read %u", file_length,
-		    length
+		    static_cast<size_t>(file_length) == length,
+		    "Expected to read file of size %u, but only read %u", file_length, length
 		);
 		fclose(file);
 		return reinterpret_cast<HInkStory*>(story::from_binary(data, file_length));
@@ -91,13 +94,16 @@ extern "C" {
 		FILE* file = fopen(filename, "rb");
 		fseek(file, 0, SEEK_END);
 		long file_length = ftell(file);
+		if (file_length < 0) {
+			return NULL;
+		}
 		fseek(file, 0, SEEK_SET);
 		unsigned char* data = static_cast<unsigned char*>(malloc(file_length));
 		inkAssert(data, "Malloc of size %u failed", file_length);
-		unsigned length = fread(data, sizeof(unsigned char), file_length, file);
+		size_t length = fread(data, sizeof(unsigned char), file_length, file);
 		inkAssert(
-		    file_length == length, "Expected to read file of size %u, but only read %u", file_length,
-		    length
+		    static_cast<size_t>(file_length) == length,
+		    "Expected to read file of size %u, but only read %u", file_length, length
 		);
 		fclose(file);
 		return reinterpret_cast<HInkSnapshot*>(snapshot::from_binary(data, file_length));
@@ -107,7 +113,7 @@ extern "C" {
 	{
 		FILE*           file = fopen(filename, "wb");
 		const snapshot& snap = *reinterpret_cast<const snapshot*>(self);
-		unsigned length = fwrite(snap.get_data(), sizeof(unsigned char), snap.get_data_len(), file);
+		size_t length = fwrite(snap.get_data(), sizeof(unsigned char), snap.get_data_len(), file);
 		inkAssert(
 		    length == snap.get_data_len(),
 		    "Snapshot write failed, snapshot of size %u, but only %u bytes where written.",
@@ -119,13 +125,17 @@ extern "C" {
 
 	HInkStory* ink_story_from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
 	{
-		return reinterpret_cast<HInkStory*>(story::from_binary(data, length, freeOnDestroy));
+		return reinterpret_cast<HInkStory*>(
+		    story::from_binary(data, static_cast<ink::size_t>(length), freeOnDestroy)
+		);
 	}
 
 	HInkSnapshot*
 	    ink_snapshot_from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
 	{
-		return reinterpret_cast<HInkSnapshot*>(snapshot::from_binary(data, length, freeOnDestroy));
+		return reinterpret_cast<HInkSnapshot*>(
+		    snapshot::from_binary(data, static_cast<ink::size_t>(length), freeOnDestroy)
+		);
 	}
 
 	void ink_snapshot_get_binary(
@@ -291,7 +301,7 @@ extern "C" {
 		    function_name,
 		    [callback](size_t len, const value* vals) {
 			    InkValue* c_vals = reinterpret_cast<InkValue*>(const_cast<value*>(vals));
-			    int       c_len  = len;
+			    int       c_len  = static_cast<int>(len);
 			    for (int i = 0; i < c_len; ++i) {
 				    c_vals[i] = inkvar_to_c(const_cast<value&>(vals[i]));
 			    }
@@ -310,7 +320,7 @@ extern "C" {
 		    function_name,
 		    [callback](size_t len, const value* vals) -> value {
 			    InkValue* c_vals = reinterpret_cast<InkValue*>(const_cast<value*>(vals));
-			    int       c_len  = len;
+			    int       c_len  = static_cast<int>(len);
 			    for (int i = 0; i < c_len; ++i) {
 				    c_vals[i] = inkvar_to_c(const_cast<value&>(vals[i]));
 			    }
