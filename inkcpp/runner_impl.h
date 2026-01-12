@@ -273,7 +273,14 @@ public:
 			_threadDone.forget();
 		}
 
-		void set(size_t index, const ip_t& value) { _threadDone.set(index, value); }
+		void set(size_t index, const ip_t& value)
+		{
+			if (index >= _threadDone.capacity()) {
+				inkAssert(index == _threadDone.capacity(), "Threads should only be created incremental");
+				_threadDone.resize(_threadDone.capacity() * 1.5);
+			}
+			_threadDone.set(index, value);
+		}
 
 		const ip_t& get(size_t index) const { return _threadDone.get(index); }
 
