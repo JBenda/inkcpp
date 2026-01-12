@@ -464,7 +464,7 @@ private:
 };
 
 template<typename T>
-class allocated_restorable_array final : public basic_restorable_array<T>
+class allocated_restorable_array : public basic_restorable_array<T>
 {
 	using base = basic_restorable_array<T>;
 

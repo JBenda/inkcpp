@@ -58,7 +58,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 
 				WHEN("we collapse to the main thraed")
 				{
-					stack.collapse_to_thread(~0);
+					stack.collapse_to_thread(~0U);
 
 					THEN("we should have the value from the original thread")
 					{
@@ -91,7 +91,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 
 						THEN("we can still collapse to the main thread")
 						{
-							stack.collapse_to_thread(~0);
+							stack.collapse_to_thread(~0U);
 							REQUIRE(stack.get(X)->get<value_type::int32>() == 100);
 							REQUIRE(stack.get(Y)->get<value_type::int32>() == 200);
 						}
@@ -140,7 +140,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 
 					WHEN("we collapse to the main thraed")
 					{
-						stack.collapse_to_thread(~0);
+						stack.collapse_to_thread(~0U);
 
 						THEN("we should have the value from the original thread")
 						{
@@ -214,7 +214,7 @@ SCENARIO("threading with the callstack", "[callstack]")
 
 				WHEN("we collapse back to the main thread")
 				{
-					stack.collapse_to_thread(~0);
+					stack.collapse_to_thread(~0U);
 					THEN("the stack should be inside the tunnel")
 					{
 						REQUIRE(stack.get(X)->type() == value_type::int32);
@@ -225,13 +225,13 @@ SCENARIO("threading with the callstack", "[callstack]")
 
 					WHEN("we do a tunnel return")
 					{
-						frame_type type;
-						auto       offset = stack.pop_frame(&type, eval_mode);
+						frame_type ftype;
+						auto       foffset = stack.pop_frame(&ftype, eval_mode);
 
 						THEN("we should be back outside")
 						{
-							REQUIRE(type == frame_type::tunnel);
-							REQUIRE(offset == 505);
+							REQUIRE(ftype == frame_type::tunnel);
+							REQUIRE(foffset == 505);
 							REQUIRE(stack.get(X)->type() == value_type::int32);
 							REQUIRE(stack.get(X)->get<value_type::int32>() == 100);
 							REQUIRE(stack.get(Y)->type() == value_type::int32);
