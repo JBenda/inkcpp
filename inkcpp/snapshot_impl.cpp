@@ -52,9 +52,11 @@ void snapshot::write_to_file(const char* filename) const
 
 namespace ink::runtime::internal
 {
-size_t snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt)
+size_t
+    snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt, bool list_definition)
 {
-	return serialization_length + sizeof(header) + (runner_cnt + 1) * sizeof(size_t);
+	return serialization_length + sizeof(header)
+	     + (runner_cnt + 1 + (list_definition ? 1 : 0)) * sizeof(size_t);
 }
 
 bool snapshot_impl::can_be_migrated(const story& story) const
@@ -79,8 +81,11 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 		migratable = migratable && node->object->can_be_migrated();
 		++runner_cnt;
 	}
+	if (migratable) {
+		_length += globals._owner->list_meta_size();
+	}
 
-	_length             = file_size(_length, runner_cnt);
+	_length             = file_size(_length, runner_cnt, migratable);
 	_header.length      = _length;
 	_header.num_runners = runner_cnt;
 	_header.hash        = globals._owner->hash();
@@ -102,12 +107,17 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 			ptr += sizeof(offset);
 			offset += node->object->snap(nullptr, snapper);
 		}
+		memcpy(ptr, &offset, sizeof(offset));
+		ptr += sizeof(offset);
+		offset += globals._owner->list_meta_size();
 	}
 
 	ptr += globals.snap(ptr, snapper);
 	for (auto node = globals._runners_start; node; node = node->next) {
 		ptr += node->object->snap(ptr, snapper);
 	}
+	memcpy(ptr, globals._owner->list_meta(), globals._owner->list_meta_size());
+	ptr += globals._owner->list_meta_size();
 }
 
 snapshot_impl::snapshot_impl(const unsigned char* data, size_t length, bool managed)

@@ -98,6 +98,8 @@ public:
 
 	const unsigned char* get_runner_snap(size_t idx) const { return _file + get_offset(idx + 1); }
 
+	const unsigned char* get_list_metadata() const { return _file + get_offset(num_runners() + 1); }
+
 	size_t num_runners() const override { return _header.num_runners; }
 
 	bool can_be_migrated() const override { return _header.migratable; }
@@ -114,7 +116,7 @@ private:
 	const unsigned char*                        _file;
 	size_t                                      _length;
 	bool                                        _managed;
-	static size_t                               file_size(size_t, size_t);
+	static size_t                               file_size(size_t, size_t, bool);
 
 	struct header {
 		size_t num_runners;

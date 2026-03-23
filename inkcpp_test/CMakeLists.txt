@@ -28,6 +28,7 @@ add_executable(
 	LookaheadSafe.cpp
 	EmptyStringForDivert.cpp
 	MoveTo.cpp
+	ListMatching.cpp
 	Fixes.cpp)
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)

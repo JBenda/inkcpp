@@ -46,6 +46,8 @@ list(
 	string_operations.cpp
 	string_operations.cpp
 	numeric_operations.cpp
+	hungarian_solver.h
+	hungarian_solver.cpp
 	casting.h
 	executioner.h
 	string_utils.h

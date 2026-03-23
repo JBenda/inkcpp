@@ -241,7 +241,10 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 	if (hash() != snapshot.hash()) {
 		globals new_globs = new_globals();
 		runner  thread    = new_runner(new_globs);
-		if (! globs->migrate_new_globals(*new_globs.cast<globals_impl>().get())) {
+		if (! globs->migrate_new_globals(
+		        *new_globs.cast<globals_impl>().get(),
+		        reinterpret_cast<const char*>(snapshot.get_list_metadata())
+		    )) {
 			delete globs;
 			return globals();
 		}
@@ -342,9 +345,11 @@ void story_impl::setup_pointers()
 			while (_header.read_list_flag(ptr) != null_flag)
 				;
 		}
+		_list_meta_size = ptr - _list_meta;
 	} else {
-		_list_meta = nullptr;
-		_lists     = nullptr;
+		_list_meta      = nullptr;
+		_list_meta_size = 0;
+		_lists          = nullptr;
 	}
 	inkAssert(
 	    _header.ink_bin_version_number == ink::InkBinVersion,

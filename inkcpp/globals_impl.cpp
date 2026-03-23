@@ -318,9 +318,10 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	return ptr;
 }
 
-bool globals_impl::migrate_new_globals(globals_impl& new_globals)
+bool globals_impl::migrate_new_globals(globals_impl& new_globals, const char* list_metadata)
 {
-	return _variables.migrate(new_globals._variables);
+	return _variables.migrate(new_globals._variables)
+	    && _lists.migrate(list_metadata, _owner->get_header());
 }
 
 config::statistics::global globals_impl::statistics() const

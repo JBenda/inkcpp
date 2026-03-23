@@ -40,9 +40,10 @@ public:
 	 * no longer existing ones are deleted.
 	 * @retval true on success
 	 * @param[in] new_globals to read current relevant variables from. It is modified to be equal to
+	 * @param[in] list_metadata old list metadata to migrate list
 	 * the globals stored inside.
 	 */
-	bool                 migrate_new_globals(globals_impl& new_globals);
+	bool                 migrate_new_globals(globals_impl& new_globals, const char* list_metadata);
 	// Initializes a new global store from the given story
 	globals_impl(const story_impl*);
 

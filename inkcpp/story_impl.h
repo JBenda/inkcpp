@@ -40,6 +40,8 @@ public:
 
 	const char* list_meta() const { return _list_meta; }
 
+	size_t list_meta_size() const { return _list_meta_size; }
+
 	bool iterate_containers(
 	    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false
 	) const;
@@ -77,6 +79,7 @@ private:
 	const char* _string_table;
 
 	const char*      _list_meta;
+	size_t           _list_meta_size;
 	const list_flag* _lists;
 
 	// container info
