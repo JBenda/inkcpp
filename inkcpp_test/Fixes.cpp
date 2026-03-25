@@ -159,11 +159,11 @@ SCENARIO(
 		{
 			thread->getall();
 			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
-			runner                    thread_2 = ink->new_runner_from_snapshot(*snap);
+			runner                    thread2 = ink->new_runner_from_snapshot(*snap);
 			const size_t s = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
 			THEN("loading it again will not change the string_table size")
 			{
-				runner       thread2 = ink->new_runner_from_snapshot(*snap);
+				runner       thread3 = ink->new_runner_from_snapshot(*snap);
 				const size_t s2 = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
 				REQUIRE(s == s2);
 			}
@@ -228,9 +228,9 @@ SCENARIO("Using knot visit count as condition _ #139", "[fixes]")
 				WHEN("go to 'one' twice")
 				{
 					thread->choose(1);
-					std::string content_2 = thread->getall();
+					std::string content2 = thread->getall();
 					REQUIRE(thread->num_choices() == 3);
-					THEN("get both one strings") { REQUIRE(content_2 == "Check\nBeen here before\n"); }
+					THEN("get both one strings") { REQUIRE(content2 == "Check\nBeen here before\n"); }
 				}
 			}
 		}
@@ -247,6 +247,50 @@ SCENARIO("Using knot visit count as condition _ #139", "[fixes]")
 				REQUIRE(thread->num_choices() == 2);
 				CHECK(thread->get_choice(0)->text() == std::string("DEFAULT"));
 				CHECK(thread->get_choice(1)->text() == std::string("Check"));
+			}
+		}
+	}
+}
+
+SCENARIO("Provoke thread array expension _ #142", "[fixes]")
+{
+	GIVEN("story with 15 threads in one know")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "142_many_threads.bin")};
+		runner                 thread = ink->new_runner();
+		WHEN("just go to choice")
+		{
+			std::string content = thread->getall();
+			REQUIRE(content == "At the top\n");
+			THEN("expect to see 15 choices")
+			{
+				REQUIRE(thread->num_choices() == 15);
+				const char options[] = "abcdefghijklmno";
+				for (const char* c = options; *c; ++c) {
+					CHECK(thread->get_choice(static_cast<size_t>(c - options))->text()[0] == *c);
+				}
+			}
+		}
+		WHEN("choose 5 options")
+		{
+			std::string content = thread->getall();
+			for (int i = 0; i < 5; ++i) {
+				REQUIRE_FALSE(thread->can_continue());
+				thread->choose(i);
+				content += thread->getall();
+			}
+			REQUIRE(
+			    content
+			    == "At the top\na\nAt the top\nc\nAt the top\ne\nAt the top\ng\nAt the top\ni\nAt the "
+			       "top\n"
+			);
+			THEN("only 11 choices are left")
+			{
+				REQUIRE(thread->num_choices() == 10);
+				const char* options = "bdfhjklmno";
+				for (const char* c = options; *c; ++c) {
+					CHECK(thread->get_choice(static_cast<size_t>(c - options))->text()[0] == *c);
+				}
 			}
 		}
 	}

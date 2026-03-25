@@ -12,12 +12,11 @@ SCENARIO("a restorable array can hold values", "[array]")
 	GIVEN("an empty array")
 	{
 		const ink::size_t length = 10;
-		test_array array = test_array(length, 0, ~0);
+		test_array        array  = test_array(length, 0U, ~0U);
 
 		THEN("the default values should be zero")
 		{
-			for (ink::size_t i = 0; i < length; i++)
-			{
+			for (ink::size_t i = 0; i < length; i++) {
 				REQUIRE(array[i] == 0);
 			}
 		}
@@ -26,15 +25,11 @@ SCENARIO("a restorable array can hold values", "[array]")
 		{
 			array.set(3, 15);
 
-			THEN("the value should be set")
-			{
-				REQUIRE(array[3] == 15);
-			}
+			THEN("the value should be set") { REQUIRE(array[3] == 15); }
 
 			THEN("the other values should be zero still")
 			{
-				for (ink::size_t i = 0; i < length; i++)
-				{
+				for (ink::size_t i = 0; i < length; i++) {
 					if (i == 3)
 						continue;
 
@@ -50,7 +45,7 @@ SCENARIO("a restorable array can save/restore/forget", "[array]")
 	GIVEN("a saved array with a few values")
 	{
 		// Load up the array
-		test_array array = test_array(5, 0, ~0);
+		test_array array = test_array(5, 0U, ~0U);
 		array.set(0, 0);
 		array.set(1, 1);
 		array.set(2, 2);

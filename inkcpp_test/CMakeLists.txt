@@ -1,4 +1,4 @@
-if(INKCPP_NO_STD)
+if(INKCPP_NO_STL)
 	message(FATAL_ERROR "Can not build tests without STL support, please disable INKCPP_TEST")
 endif()
 
@@ -65,7 +65,7 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "
 					"inklecate download is not provided, please check if the download failed.
 	      You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or \
 	      the INKLECATE enviroment variable.
-	      You can also disable tests altogether by setting INKCPP_TEST=OFF")
+			You can also disable tests altogether by setting INKCPP_TEST=OFF")
 		endif(inklecate_linux_POPULATED)
 	elseif(APPLE)
 		if(inklecate_mac_POPULATED)
@@ -76,7 +76,7 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "
 					"inklecate download is not provided, please check if the download failed.
 	      You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or \
 	      the INKLECATE enviroment variable.
-	      You can also disable tests altogether by setting INKCPP_TEST=OFF")
+			You can also disable tests altogether by setting INKCPP_TEST=OFF")
 		endif(inklecate_mac_POPULATED)
 	elseif(
 		MSYS

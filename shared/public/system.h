@@ -175,10 +175,7 @@ namespace internal
 		}
 	}
 
-	static inline bool is_part_of_word(char character)
-	{
-		return isalpha(character) || isdigit(character);
-	}
+	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
 
 	static inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{

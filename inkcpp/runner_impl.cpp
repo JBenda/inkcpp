@@ -499,7 +499,7 @@ runner_impl::runner_impl(const story_impl* data, globals global)
 #ifdef INK_ENABLE_CSTD
     , _rng(static_cast<uint32_t>(time(NULL)))
 #else
-    , _rng(time(NULL))
+    , _rng()
 #endif
 {
 
