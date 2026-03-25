@@ -2,6 +2,8 @@
 
 #include "../inkcpp/hungarian_solver.h"
 
+#include <iostream>
+
 namespace ink::runtime::internal
 {
 struct MatchListValues {
@@ -15,14 +17,67 @@ float   d_value(int lh, int rh, int lh_range[2], int rh_range[2]);
 float   d_label(const char* lh, const char* rh);
 } // namespace ink::runtime::internal
 
-SCENARIO("santy check distance functions", "[list_match]") {
-	SECTION("Labels") {
-		
+SCENARIO("santy check distance functions", "[list_match]")
+{
+	SECTION("Labels")
+	{
+		SECTION("jaro_simularity")
+		{
+			GIVEN("Two Stings")
+			{
+				float j = jaro_simularity("FAREMVIEL", "FARMVILLE");
+				CHECK_THAT(j, Catch::Matchers::WithinAbs(0.88, 0.01));
+			}
+			GIVEN("Two Strings in different Casing, no impact ignore casing")
+			{
+				float j = jaro_simularity("FAREMVIEL", "farmville");
+				CHECK_THAT(j, Catch::Matchers::WithinAbs(0.88, 0.01));
+			}
+			GIVEN("Two strings with fill characters, small impact")
+			{
+				float j = jaro_simularity("FAREMVIEL", "FARMV_IL-LE");
+				CHECK_THAT(j, Catch::Matchers::WithinAbs(0.83, 0.01));
+			}
+		}
+		SECTION("jaro_winkler_simularity")
+		{
+			GIVEN("Two Strings wih without prefix")
+			{
+				float j  = jaro_simularity("ZFAREMVIEL", "YFARMVILLE");
+				float jw = jaro_winkler_simularity("ZFAREMVIEL", "YFARMVILLE");
+				CHECK_THAT(jw, Catch::Matchers::WithinAbs(j, 0.01));
+			}
+			GIVEN("Two Strings with prefix")
+			{
+				float j  = jaro_simularity("FAREMVIEL", "FARMVILLE");
+				float jw = jaro_winkler_simularity("FAREMVIEL", "FARMVILLE");
+				CHECK(j < jw);
+			}
+		}
 	}
-	SECTION("Values") {}
+	SECTION("Values")
+	{
+		int range1[] = {0, 20};
+		int range2[] = {5, 35};
+		GIVEN("Same Value")
+		{
+			float d = ink::runtime::internal::d_value(5, 5, range1, range1);
+			CHECK(d == 0);
+			d = ink::runtime::internal::d_value(5, 5, range1, range2);
+			CHECK(d == 0);
+		}
+		GIVEN("Different Value")
+		{
+			float d1 = ink::runtime::internal::d_value(10, 20, range1, range1);
+			float d2 = ink::runtime::internal::d_value(10, 20, range2, range2);
+			float d3 = ink::runtime::internal::d_value(10, 20, range1, range2);
+			CHECK(d3 == 0); // there are both in the center of their respected range
+			CHECK(d1 > d2); // same absolute distance in bigger range is a smaller distance
+		}
+	}
 }
 
-SCENARIO("find best assigments", "[list_match,hungarian]")
+SCENARIO("find best assigments", "[list_match][hungarian]")
 {
 	GIVEN("Example 1")
 	{
@@ -57,4 +112,3 @@ SCENARIO("find best assigments", "[list_match,hungarian]")
 		CHECK(matches[2] == 0);
 	}
 }
-
