@@ -2,7 +2,27 @@
 
 #include "../inkcpp/hungarian_solver.h"
 
-SCENARIO("find best assigments", "[hungarian]")
+namespace ink::runtime::internal
+{
+struct MatchListValues {
+	const char* const* names;
+	const int*         values;
+	size_t             length;
+};
+
+float** cost_matrix(const MatchListValues& rh, const MatchListValues& lh, float drop_panelty);
+float   d_value(int lh, int rh, int lh_range[2], int rh_range[2]);
+float   d_label(const char* lh, const char* rh);
+} // namespace ink::runtime::internal
+
+SCENARIO("santy check distance functions", "[list_match]") {
+	SECTION("Labels") {
+		
+	}
+	SECTION("Values") {}
+}
+
+SCENARIO("find best assigments", "[list_match,hungarian]")
 {
 	GIVEN("Example 1")
 	{
@@ -37,3 +57,4 @@ SCENARIO("find best assigments", "[hungarian]")
 		CHECK(matches[2] == 0);
 	}
 }
+
