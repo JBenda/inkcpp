@@ -98,7 +98,9 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 	// write lookup table
 	ptr += sizeof(header);
 	{
-		size_t offset = static_cast<size_t>((ptr - data) + (_header.num_runners + 1) * sizeof(size_t));
+		size_t offset = static_cast<size_t>(
+		    (ptr - data) + (_header.num_runners + 1 + migratable) * sizeof(size_t)
+		);
 		memcpy(ptr, &offset, sizeof(offset));
 		ptr += sizeof(offset);
 		offset += globals.snap(nullptr, snapper);
@@ -107,17 +109,21 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 			ptr += sizeof(offset);
 			offset += node->object->snap(nullptr, snapper);
 		}
-		memcpy(ptr, &offset, sizeof(offset));
-		ptr += sizeof(offset);
-		offset += globals._owner->list_meta_size();
+		if (migratable) {
+			memcpy(ptr, &offset, sizeof(offset));
+			ptr += sizeof(offset);
+			offset += globals._owner->list_meta_size();
+		}
 	}
 
 	ptr += globals.snap(ptr, snapper);
 	for (auto node = globals._runners_start; node; node = node->next) {
 		ptr += node->object->snap(ptr, snapper);
 	}
-	memcpy(ptr, globals._owner->list_meta(), globals._owner->list_meta_size());
-	ptr += globals._owner->list_meta_size();
+	if (migratable) {
+		memcpy(ptr, globals._owner->list_meta(), globals._owner->list_meta_size());
+		ptr += globals._owner->list_meta_size();
+	}
 }
 
 snapshot_impl::snapshot_impl(const unsigned char* data, size_t length, bool managed)

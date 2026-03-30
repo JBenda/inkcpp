@@ -276,7 +276,8 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	auto end = run->snap_load(snapshot.get_runner_snap(idx), loader);
 	inkAssert(
 	    (idx + 1 < snapshot.num_runners() && end == snapshot.get_runner_snap(idx + 1))
-	        || end == snapshot.get_data() + snapshot.get_data_len(),
+	        || end == snapshot.get_data() + snapshot.get_data_len()
+	        || end == snapshot.get_list_metadata(),
 	    "not all data were used for runner reconstruction"
 	);
 	if (hash() != snapshot.hash()) {
