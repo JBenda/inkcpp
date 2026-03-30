@@ -106,7 +106,7 @@ public:
 	}
 };
 
-float hungarian_solver(const float* cost, int* matches, size_t n)
+float hungarian_solver(const float* cost, int* matches, size_t n, float threshold)
 {
 	HungarienCtx ctx(cost, n);
 	for (size_t row = 1; row <= n; ++row) {
@@ -120,6 +120,9 @@ float hungarian_solver(const float* cost, int* matches, size_t n)
 		int row      = ctx[col] - 1;
 		matches[row] = col - 1;
 		total_cost += cost[row * n + matches[row]];
+		if (threshold != 0 && cost[row * n + matches[row]] >= threshold) {
+			matches[row] = -1;
+		}
 	}
 	return total_cost;
 }

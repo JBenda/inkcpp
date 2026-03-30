@@ -266,6 +266,16 @@ public:
 	list_interface* handout_list(list);
 
 private:
+	/** create a list with id == idx.
+	 * @attention used for migration only
+	 * @sa create()
+	 */
+	list                    create_at(size_t idx);
+	/** create permanent list list id == idx.
+	 * @attention used for migration only
+	 * @se create_permenant_at()
+	 */
+	list                    create_permament_at(size_t idx);
 	void                    copy_lists(const data_t* src, data_t* dst);
 	static constexpr size_t bits_per_data = sizeof(data_t) * 8U;
 

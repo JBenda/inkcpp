@@ -13,6 +13,7 @@ struct MatchListValues {
 };
 
 float** cost_matrix(const MatchListValues& rh, const MatchListValues& lh, float drop_panelty);
+float   d_contains(const int lh[2], const int rh[2], const int* matches);
 float   d_value(int lh, int rh, int lh_range[2], int rh_range[2]);
 float   d_label(const char* lh, const char* rh);
 } // namespace ink::runtime::internal
@@ -75,6 +76,49 @@ SCENARIO("santy check distance functions", "[list_match]")
 			CHECK(d1 > d2); // same absolute distance in bigger range is a smaller distance
 		}
 	}
+	SECTION("Sets")
+	{
+		GIVEN("Equal Sets")
+		{
+			int   lh[]      = {5, 10};
+			int   rh[]      = {5, 10};
+			int   matches[] = {0, 0, 0, 0, 0, 5, 6, 7, 8, 9};
+			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(1, 0.001));
+		}
+		GIVEN("Dropped Values")
+		{
+			int   lh[]      = {5, 10};
+			int   rh[]      = {5, 8};
+			int   matches[] = {0, 0, 0, 0, 0, 5, -1, -1, 6, 7};
+			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.6, 0.001));
+		}
+		GIVEN("New Values")
+		{
+			int   lh[]      = {5, 8};
+			int   rh[]      = {5, 10};
+			int   matches[] = {0, 0, 0, 0, 0, 5, 6, 7};
+			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.6, 0.001));
+		}
+		GIVEN("Swapped Values")
+		{
+			int   lh[]      = {5, 10};
+			int   rh[]      = {5, 10};
+			int   matches[] = {0, 0, 0, 0, 0, 5, 9, 6, 8, 7};
+			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(1, 0.001));
+		}
+		GIVEN("Changed Values")
+		{
+			int   lh[]      = {5, 10};
+			int   rh[]      = {5, 10};
+			int   matches[] = {0, 0, 0, 0, 0, 5, 9, -1, -1, -1};
+			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.25, 0.001));
+		}
+	}
 }
 
 SCENARIO("find best assigments", "[list_match][hungarian]")
@@ -110,5 +154,20 @@ SCENARIO("find best assigments", "[list_match][hungarian]")
 		CHECK(matches[0] == 2);
 		CHECK(matches[1] == 1);
 		CHECK(matches[2] == 0);
+	}
+	GIVEN("With Example 1 Threshold") {
+		// clang-format off
+		float cost[] = {
+			8/**/, 5    , 9    ,
+			4    , 2    , 4/**/,
+			7    , 3/**/, 8    ,
+		};
+		// clang-format on
+		int   matches[3];
+		float total_cost = hungarian_solver(cost, matches, 3, 5);
+		CHECK(total_cost == 15.f);
+		CHECK(matches[0] == -1);
+		CHECK(matches[1] == 2);
+		CHECK(matches[2] == 1);
 	}
 }

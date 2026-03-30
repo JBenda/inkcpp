@@ -25,7 +25,8 @@ float jaro_winkler_simularity(const char* lh, const char* rh);
  * https://en.wikipedia.org/wiki/Hungarian_algorithm
  * @param[in] cost matrix m x n
  * @param[out] matches optimal mapping m -> n
+ * @param threshold matches with a value higher than threshold will be set to `-1`, use 0 to ignore.
  * @param n number of jobs/assignments
  * @return total cost of assigment
  */
-float hungarian_solver(const float* cost, int* matches, size_t n);
+float hungarian_solver(const float* cost, int* matches, size_t n, float threshold = 0);
