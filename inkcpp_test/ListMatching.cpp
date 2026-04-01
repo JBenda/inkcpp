@@ -1,8 +1,12 @@
 #include "catch.hpp"
 
 #include "../inkcpp/hungarian_solver.h"
+#include <story.h>
+#include <runner.h>
+#include <globals.h>
+#include <snapshot.h>
 
-#include <iostream>
+using namespace ink::runtime;
 
 namespace ink::runtime::internal
 {
@@ -169,5 +173,34 @@ SCENARIO("find best assigments", "[list_match][hungarian]")
 		CHECK(matches[0] == -1);
 		CHECK(matches[1] == 2);
 		CHECK(matches[2] == 1);
+	}
+}
+
+SCENARIO("Simple List Migration stories", "[list_match]")
+{
+	GIVEN("Splitted List")
+	{
+		std::unique_ptr<story> ink_a{story::from_file(INK_TEST_RESOURCE_DIR "ListMatchStoryA.bin")};
+		std::unique_ptr<story> ink_b{story::from_file(INK_TEST_RESOURCE_DIR "ListMatchStoryB.bin")};
+		globals                globals_a = ink_a->new_globals();
+		runner                 thread_a  = ink_a->new_runner(globals_a);
+		WHEN("Load new list extensions, split and typo fix")
+		{
+			CHECK(thread_a->getline() == "You are currently at Flor\n");
+			REQUIRE(thread_a->has_choices());
+			thread_a->choose(0);
+			std::unique_ptr<snapshot> snap{thread_a->create_snapshot()};
+			REQUIRE(snap->can_be_migrated());
+			CHECK(
+			    thread_a->getall()
+			    == "More\nYou are still at Flor, all posibilities are Flor, Balcony, Kitchen, Garden\n"
+			);
+			auto globals_b = ink_b->new_globals_from_snapshot(*snap);
+			auto thread_b  = ink_b->new_runner_from_snapshot(*snap);
+			CHECK(
+			    thread_b->getall()
+			    == "More\nYou are still at Floor, all posibilities are Floor, Kitchen, Livingroom\n"
+			);
+		}
 	}
 }

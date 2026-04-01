@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "snapshot.h"
 #include "../snapshot_impl.h"
 
 #include <memory>
@@ -8,6 +7,7 @@
 #include <choice.h>
 #include <runner.h>
 #include <compiler.h>
+#include <snapshot.h>
 
 using namespace ink::runtime;
 
@@ -183,5 +183,43 @@ SCENARIO("Simple isolated migration tests.")
 				REQUIRE(new_thread->get_knot_tag(0) == std::string("knot:different"));
 			}
 		}
+	}
+}
+
+SCENARIO("Migration Test for small story")
+{
+	std::unique_ptr<story> before{story::from_file(INK_TEST_RESOURCE_DIR "MigrationBefore.bin")};
+	std::unique_ptr<story> after{story::from_file(INK_TEST_RESOURCE_DIR "MigrationAfter.bin")};
+	GIVEN("Test sequcen with multiple loads")
+	{
+		runner thread_before = before->new_runner();
+		REQUIRE(thread_before->getall() == "We're going to the seaside!\n");
+		CHECK(thread_before->num_choices() == 3);
+		CHECK(thread_before->get_choice(0)->text() == std::string("Make a sand castle"));
+		CHECK(thread_before->get_choice(1)->text() == std::string("Go swimming"));
+		CHECK(thread_before->get_choice(2)->text() == std::string("Time to go home"));
+		thread_before->choose(0);
+		REQUIRE(thread_before->getall() == "We made a great sand castle, it even has a moat!\nWe're going to the seaside!\nSo far we've done the following: SandCastle\n");
+		CHECK(thread_before->num_choices() == 3);
+		CHECK(thread_before->get_choice(0)->text() == std::string("Make a sand castle"));
+		CHECK(thread_before->get_choice(1)->text() == std::string("Go swimming"));
+		CHECK(thread_before->get_choice(2)->text() == std::string("Time to go home"));
+
+		thread_before->choose(1);
+		std::unique_ptr<snapshot> snap1{thread_before->create_snapshot()};
+		REQUIRE(thread_before->getall() == "We swim and swam, it was delightful!\nWe're going to the seaside!\nSo far we've done the following: Swimming, SandCastle\n");
+
+		CHECK(thread_before->num_choices() == 2);
+		CHECK(thread_before->get_choice(0)->text() == std::string("Make a sand castle"));
+		CHECK(thread_before->get_choice(1)->text() == std::string("Time to go home"));
+
+		runner thread_after = after->new_runner_from_snapshot(*snap1);
+		REQUIRE(thread_after->getall() == "We swim and swam, it was delightful!\nWe're going to the seaside!\nSo far we've done the following: Swimming, SandCastle\n");
+		CHECK(thread_after->num_choices() == 3);
+		CHECK(thread_after->get_choice(0)->text() == std::string("Make a sand castle"));
+		CHECK(thread_after->get_choice(1)->text() == std::string("Get Ice Cream"));
+		CHECK(thread_after->get_choice(2)->text() == std::string("Time to go home"));
+		thread_after->choose(1);
+		REQUIRE(thread_after->getall() == "We got ice cream, mine was raspberry!\nWe're going to the seaside!\nSo far we've done the following: Swimming, SandCastle, IceCream\n");
 	}
 }

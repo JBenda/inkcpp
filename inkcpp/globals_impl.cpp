@@ -26,22 +26,27 @@ globals_impl::globals_impl(const story_impl* story)
 	_visit_counts.resize(_num_containers);
 	if (_lists) {
 		// initialize static lists
-		const list_flag* flags = story->lists();
+		init_static_list_flags();
+	}
+}
+
+void globals_impl::init_static_list_flags()
+{
+	const list_flag* flags = _owner->lists();
+	while (*flags != null_flag) {
+		list_table::list l = _lists.create_permament();
 		while (*flags != null_flag) {
-			list_table::list l = _lists.create_permament();
-			while (*flags != null_flag) {
-				list_flag flag = _lists.external_fvalue_to_internal(*flags);
-				_lists.add_inplace(l, flag);
-				++flags;
-			}
+			list_flag flag = _lists.external_fvalue_to_internal(*flags);
+			_lists.add_inplace(l, flag);
 			++flags;
 		}
-		for (const auto& flag : _lists.named_flags()) {
-			set_variable(
-			    hash_string(flag.name),
-			    value{}.set<value_type::list_flag>(list_flag{flag.flag.list_id, flag.flag.flag})
-			);
-		}
+		++flags;
+	}
+	for (const auto& flag : _lists.named_flags()) {
+		set_variable(
+		    hash_string(flag.name),
+		    value{}.set<value_type::list_flag>(list_flag{flag.flag.list_id, flag.flag.flag})
+		);
 	}
 }
 
@@ -284,13 +289,20 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	_globals_initialized = true;
 	ptr                  = snap_read(ptr, _turn_cnt);
 	ptr                  = _visit_counts.snap_load(ptr, loader);
-	size_t old_capacity  = _visit_counts.capacity();
+	size_t old_capacity  = _visit_counts.loaded_capacity();
 	// shuffle values if needed
 	if (loader.migratable) {
-		_visit_counts.resize(_owner->num_containers());
+		// extend array if needed
+		if (_visit_counts.capacity() < _owner->num_containers()) {
+			_visit_counts.resize(_owner->num_containers());
+		}
 		_visit_counts.save();
 	}
-	inkAssert(old_capacity == _visit_counts.capacity(), "Missmatching number of tracked containers.");
+
+	inkAssert(
+	    _visit_counts.capacity() >= _owner->num_containers(),
+	    "Missmatching number of tracked containers."
+	);
 	for (size_t i = 0; i < old_capacity; ++i) {
 		hash_t path;
 		ptr = snap_read(ptr, path);
@@ -320,8 +332,15 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 
 bool globals_impl::migrate_new_globals(globals_impl& new_globals, const char* list_metadata)
 {
-	return _variables.migrate(new_globals._variables)
-	    && _lists.migrate(list_metadata, _owner->get_header());
+	bool success = _variables.migrate(new_globals._variables)
+	            && ((! _lists) || _lists.migrate(list_metadata, _owner->get_header()));
+	if (! success) {
+		return false;
+	}
+	if (_lists) {
+		init_static_list_flags();
+	}
+	return true;
 }
 
 config::statistics::global globals_impl::statistics() const

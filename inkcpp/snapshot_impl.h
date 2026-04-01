@@ -128,7 +128,10 @@ private:
 
 	size_t get_offset(size_t idx) const
 	{
-		inkAssert(idx <= _header.num_runners, "Out of Bound access for runner in snapshot.");
+		inkAssert(
+		    idx <= _header.num_runners + (can_be_migrated() ? 1 : 0),
+		    "Out of Bound access for runner in snapshot."
+		);
 		return reinterpret_cast<const size_t*>(_file + sizeof(header))[idx];
 	}
 };

@@ -30,6 +30,8 @@ class globals_impl final
 {
 	friend snapshot_impl;
 
+	void init_static_list_flags();
+
 public:
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);

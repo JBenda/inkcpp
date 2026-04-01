@@ -29,7 +29,8 @@ add_executable(
 	EmptyStringForDivert.cpp
 	MoveTo.cpp
 	ListMatching.cpp
-	Fixes.cpp)
+	Fixes.cpp
+	Migration.cpp)
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
 target_include_directories(inkcpp_test PRIVATE ../shared/private/)

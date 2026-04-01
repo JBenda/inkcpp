@@ -683,6 +683,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
+	// TODO: remove
 	ptr                         = snap_write(ptr, _story->container_hash(_ptr - 6), should_write);
 	ptr                         = snap_write(ptr, offset, should_write);
 	offset                      = _backup - _story->instructions();
@@ -726,6 +727,7 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	auto           ptr = data;
 	std::uintptr_t offset;
 	hash_t         current_knot_name;
+	// TODO: remove
 	ptr     = snap_read(ptr, current_knot_name);
 	ptr     = snap_read(ptr, offset);
 	_ptr    = offset == 0 ? nullptr : _story->instructions() + offset;
@@ -841,6 +843,9 @@ bool runner_impl::migrate_to(hash_t path)
 			}
 		}
 	}
+	// rebuild container stack to display new offsets
+	_container.clear();
+	_ptr = nullptr;
 	jump(destination, false, true);
 	return true;
 }

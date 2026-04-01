@@ -1062,7 +1062,7 @@ bool list_table::migrate(const char* old_list_metadata, const ink::internal::hea
 		// migrate
 		list new_list{-1};
 		switch (old_ref_table._entry_state[idx]) {
-			case state::permanent: new_list = create_permament_at(idx); break;
+			// permanent list are a result of the list definition and do not need to be migrated
 			case state::used: new_list = create_at(idx); break;
 			default: continue;
 		}

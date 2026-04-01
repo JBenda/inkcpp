@@ -326,6 +326,12 @@ public:
 	// size of the array
 	inline size_t capacity() const { return _capacity; }
 
+	inline size_t loaded_capacity() const
+	{
+		inkAssert(_loaded_capacity != ~0, "This object was not loaded from a snapshot.");
+		return _loaded_capacity;
+	}
+
 	// only const indexing is supported due to save/restore system
 	inline const T& operator[](size_t index) const { return get(index); }
 
@@ -372,6 +378,9 @@ private:
 
 	// size of both _array and _temp
 	size_t _capacity;
+	// if loaded with snap_load, this value was the original size, the current capacaty might be
+	// higher
+	size_t _loaded_capacity = ~0;
 
 	// null
 	const T _null;
@@ -565,18 +574,18 @@ inline const unsigned char*
 {
 	auto ptr = data;
 	ptr      = snap_read(ptr, _saved);
-	decltype(_capacity) capacity;
-	ptr = snap_read(ptr, capacity);
+	ptr      = snap_read(ptr, _loaded_capacity);
 	if (buffer() == nullptr) {
-		static_cast<allocated_restorable_array<T>&>(*this).resize(capacity);
+		static_cast<allocated_restorable_array<T>&>(*this).resize(_loaded_capacity);
 	}
 	inkAssert(
-	    _capacity >= capacity, "New config does not allow for necessary size used by this snapshot!"
+	    _capacity >= _loaded_capacity,
+	    "New config does not allow for necessary size used by this snapshot!"
 	);
 	T null;
 	ptr = snap_read(ptr, null);
 	inkAssert(null == _null, "null value is different to snapshot!");
-	for (size_t i = 0; i < _capacity; ++i) {
+	for (size_t i = 0; i < _loaded_capacity; ++i) {
 		ptr = snap_read(ptr, _array[i]);
 		ptr = snap_read(ptr, _temp[i]);
 	}
