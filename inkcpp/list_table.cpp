@@ -892,12 +892,15 @@ config::statistics::list_table list_table::statistics() const
  * @param lh,rh flag indexes contained in the lists
  * @param matches mapping from lh -> rh, -1 for dropped
  */
-float d_contains(const int lh[2], const int rh[2], const int* matches)
+float d_contains(const size_t lh[2], const size_t rh[2], const int* matches)
 {
 	int n_union        = (lh[1] - lh[0]) + (rh[1] - rh[0]);
 	int n_intersection = 0;
-	for (int i = lh[0]; i < lh[1]; ++i) {
-		if (matches[i] >= rh[0] && matches[i] < rh[1]) {
+	for (size_t i = lh[0]; i < lh[1]; ++i) {
+		if (matches[i] == -1) {
+			continue;
+		}
+		if (static_cast<size_t>(matches[i]) >= rh[0] && static_cast<size_t>(matches[i]) < rh[1]) {
 			n_intersection += 1;
 		}
 	}
@@ -963,10 +966,19 @@ float* cost_matrix(
 	float* matrix  = new float[n_lists * n_lists];
 	for (size_t i = 0; i < lh.length; ++i) {
 		for (size_t j = 0; j < rh.length; ++j) {
-			float dl         = d_label(lh.names[i], rh.names[j]);
-			int   lh_range[] = {lh.list_ends[i], lh.list_ends[i + 1]};
-			int   rh_range[] = {rh.list_ends[j], rh.list_ends[j + 1]};
-			float dv         = d_contains(lh_range, rh_range, value_matches);
+			float  dl               = d_label(lh.names[i], rh.names[j]);
+			size_t lh_range[]       = {i == 0 ? 0 : lh.list_ends[i - 1], lh.list_ends[i]};
+			size_t rh_range[]       = {j == 0 ? 0 : rh.list_ends[j - 1], rh.list_ends[j]};
+			float  dv               = d_contains(lh_range, rh_range, value_matches);
+			matrix[i * n_lists + j] = dv * 0.8f + dl * 0.2f;
+		}
+		for (size_t j = rh.length; j < n_lists; ++j) {
+			matrix[i * n_lists + j] = drop_penalty;
+		}
+	}
+	for (size_t i = lh.length; i < n_lists; ++i) {
+		for (size_t j = 0; j < n_lists; ++j) {
+			matrix[i * n_lists + j] = drop_penalty;
 		}
 	}
 	return matrix;
@@ -984,7 +996,7 @@ float* cost_matrix(const MatchListValues& lh, const MatchListValues& rh, float d
 		for (size_t j = 0; j < rh.length; ++j) {
 			float dl                = d_label(lh.names[i], rh.names[j]);
 			float dv                = d_value(lh.values[i], rh.values[j], lh_range, rh_range);
-			matrix[i * n_flags + j] = dl * 0.8 + dv * 0.2;
+			matrix[i * n_flags + j] = dl * 0.8f + dv * 0.2f;
 		}
 		for (size_t j = rh.length; j < n_flags; ++j) {
 			matrix[i * n_flags + j] = drop_penalty;
@@ -998,16 +1010,15 @@ float* cost_matrix(const MatchListValues& lh, const MatchListValues& rh, float d
 	return matrix;
 }
 
-list_table::list_table(
-    const char* data, const ink::internal::header&, const decltype(_data)& values,
-    const decltype(_entry_state)& state
-)
-{
-}
-
 bool list_table::migrate(const char* old_list_metadata, const ink::internal::header& header)
 {
-	list_table old_ref_table(old_list_metadata, header, _data, _entry_state);
+	list_table old_ref_table(old_list_metadata, header);
+	for (const auto& x : _data) {
+		old_ref_table._data.push() = x;
+	}
+	for (const auto& x : _entry_state) {
+		old_ref_table._entry_state.push() = x;
+	}
 	_data.clear();
 	_entry_state.clear();
 
@@ -1026,65 +1037,64 @@ bool list_table::migrate(const char* old_list_metadata, const ink::internal::hea
 
 
 	// high confidance list value matches
-	constexpr float HIGH_CONFIDANCE_DROP_PANELTY = 0.3;
-	constexpr float LOW_CONFIDANCE_DROP_PANELTY  = 0.6;
+	constexpr float HIGH_CONFIDANCE_DROP_PANELTY = 0.3f;
+	constexpr float LOW_CONFIDANCE_DROP_PANELTY  = 0.6f;
 	float*          value_matrix                 = cost_matrix(
-      MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
       MatchListValues{
           old_ref_table._flag_names.data(), old_ref_table._flag_values.data(),
           old_ref_table.numFlags()
       },
+      MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
       LOW_CONFIDANCE_DROP_PANELTY
   );
-	const int   n_flags       = std::max(numFlags(), old_ref_table.numFlags());
-	int*        value_matches = new int[n_flags];
-	const float value_cost_high
-	    = hungarian_solver(value_matrix, value_matches, n_flags, HIGH_CONFIDANCE_DROP_PANELTY);
+	const int n_flags       = std::max(numFlags(), old_ref_table.numFlags());
+	int*      value_matches = new int[n_flags];
+	hungarian_solver(value_matrix, value_matches, n_flags, HIGH_CONFIDANCE_DROP_PANELTY);
 
 	// list matches
 	float* list_matrix = cost_matrix(
-	    MatchList{_list_end.data(), _list_names.data(), numLists()},
 	    MatchList{
 	        old_ref_table._list_end.data(), old_ref_table._list_names.data(), old_ref_table.numLists()
 	    },
-	    value_matches, LOW_CONFIDANCE_DROP_PANELTY
+	    MatchList{_list_end.data(), _list_names.data(), numLists()}, value_matches,
+	    LOW_CONFIDANCE_DROP_PANELTY
 	);
-	const int   n_lists      = std::max(numLists(), old_ref_table.numLists());
-	int*        list_matches = new int[n_lists];
-	const float total_list_cost
-	    = hungarian_solver(list_matrix, list_matches, n_lists, LOW_CONFIDANCE_DROP_PANELTY);
+	const int n_lists      = std::max(numLists(), old_ref_table.numLists());
+	int*      list_matches = new int[n_lists];
+	hungarian_solver(list_matrix, list_matches, n_lists, LOW_CONFIDANCE_DROP_PANELTY);
 
 	// low confidence list_value matches
-	const float value_cost_low
-	    = hungarian_solver(value_matrix, value_matches, n_flags, LOW_CONFIDANCE_DROP_PANELTY);
+	hungarian_solver(value_matrix, value_matches, n_flags, LOW_CONFIDANCE_DROP_PANELTY);
 
 	for (size_t idx = 0; idx < old_ref_table._entry_state.size(); ++idx) {
 		// migrate
 		list new_list{-1};
 		switch (old_ref_table._entry_state[idx]) {
-			// permanent list are a result of the list definition and do not need to be migrated
+			case state::permanent: new_list = create_permament_at(idx); break;
 			case state::used: new_list = create_at(idx); break;
 			default: continue;
 		}
 		inkAssert(new_list.lid >= 0, "Failed to create new list entry for migration.");
 		inkAssert(
-		    static_cast<size_t>(new_list.lid) != idx,
+		    static_cast<size_t>(new_list.lid) == idx,
 		    "At position list creation failed with different valid idx."
 		);
-		const data_t* entry     = old_ref_table.getPtr(idx);
-		data_t*       new_entry = getPtr(idx);
-		bool          migrated  = false;
+		const data_t* entry         = old_ref_table.getPtr(idx);
+		data_t*       new_entry     = getPtr(idx);
+		bool          migrated      = false;
+		bool          is_empty_list = true;
 		for (size_t i = 0; i < old_ref_table.numLists(); ++i) {
 			if (old_ref_table.hasList(entry, i)) {
-				bool hit = false;
-				for (size_t j = old_ref_table.listBegin(i); j < old_ref_table._list_end[j]; ++j) {
+				bool hit           = false;
+				bool is_empty_list = false;
+				for (size_t j = old_ref_table.listBegin(i); j < old_ref_table._list_end[i]; ++j) {
 					if (old_ref_table.hasFlag(entry, j) && old_ref_table._flag_names[j]) {
 						if (value_matches[j] != -1) {
 							hit      = true;
 							migrated = true;
-							for (size_t k = 0; _list_end[k] < static_cast<size_t>(value_matches[j]); ++k) {
-								setList(new_entry, k);
-							}
+							size_t k;
+							for (k = 0; _list_end[k] < static_cast<size_t>(value_matches[j]); ++k) {}
+							setList(new_entry, k);
 							setFlag(new_entry, value_matches[j]);
 						}
 					}
@@ -1097,7 +1107,7 @@ bool list_table::migrate(const char* old_list_metadata, const ink::internal::hea
 			}
 		}
 		// drop list
-		if (! migrated) {
+		if (! is_empty_list && ! migrated) {
 			// FIXME: remove list ?
 			// _entry_state [idx] = state::empty;
 			return false;

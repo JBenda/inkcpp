@@ -152,6 +152,11 @@ extern "C" {
 		return reinterpret_cast<const snapshot*>(self)->num_runners();
 	}
 
+	bool ink_snapshot_can_be_migrated(const HInkSnapshot* self)
+	{
+		return reinterpret_cast<const snapshot*>(self)->can_be_migrated();
+	}
+
 	const char* ink_choice_text(const HInkChoice* self)
 	{
 		return reinterpret_cast<const choice*>(self)->text();

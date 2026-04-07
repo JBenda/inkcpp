@@ -668,7 +668,6 @@ bool runner_impl::can_be_migrated() const
 	if (_entered_knot) {
 		return false;
 	}
-	// TODO(JBe): next store _ptr as path
 	hash_t c_hash = _story->container_hash(_ptr - 6);
 	if (c_hash == 0) {
 		return false;

@@ -100,7 +100,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 		        return py::make_iterator(self.begin(list_name), self.end());
 	        },
 	        R"(Rerutrns all flags contained in this list from a list of name list_name.
-	      
+
 Use iter(List) to iterate over all flags.)",
 	        py::keep_alive<0, 1>(), py::arg("list_name").none(false)
 	    )
@@ -183,7 +183,7 @@ Use iter(List) to iterate over all flags.)",
 		    return self.get<value::Type::String>();
 	    },
 	    R"(If value contains a inkcpp_py.Value.Type.String, return it. Else throws an AttributeError.
-  
+
 If you want convert it to a string use: `str(value)`.)"
 	);
 	py_value.def(
@@ -218,6 +218,10 @@ If you want convert it to a string use: `str(value)`.)"
 	    .def(
 	        "write_to_file", &snapshot::write_to_file, "Store snapshot in file.",
 	        py::arg("filename").none(false)
+	    )
+	    .def(
+	        "can_be_migrated", &snapshot::can_be_migrated,
+	        "If the snapshot can be migrated to a changed story file."
 	    )
 	    .def_static(
 	        "from_file", &snapshot::from_file, "Load snapshot from file",
@@ -506,7 +510,7 @@ Reconstructs a runner from a snapshot.
 Args:
     snapshot: snapshot to load runner from.
     globals: store used by this runner, else load the store from the file and use it.
-                                           (created with inkcpp_py.Story.new_runner_from_snapshot) 
+                                           (created with inkcpp_py.Story.new_runner_from_snapshot)
     runner_id: if multiple runners are stored in the snapshot, id of runner to reconstruct. (ids start at 0 and are dense)
 
 Returns:

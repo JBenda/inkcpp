@@ -267,7 +267,7 @@ SCENARIO("Provoke thread array expension _ #142", "[fixes]")
 				REQUIRE(thread->num_choices() == 15);
 				const char options[] = "abcdefghijklmno";
 				for (const char* c = options; *c; ++c) {
-					CHECK(thread->get_choice(static_cast<size_t>(c - options))->text()[0] == *c);
+					CHECK(thread->get_choice(static_cast<ink::size_t>(c - options))->text()[0] == *c);
 				}
 			}
 		}
@@ -289,7 +289,7 @@ SCENARIO("Provoke thread array expension _ #142", "[fixes]")
 				REQUIRE(thread->num_choices() == 10);
 				const char* options = "bdfhjklmno";
 				for (const char* c = options; *c; ++c) {
-					CHECK(thread->get_choice(static_cast<size_t>(c - options))->text()[0] == *c);
+					CHECK(thread->get_choice(static_cast<ink::size_t>(c - options))->text()[0] == *c);
 				}
 			}
 		}

@@ -346,7 +346,7 @@ void story_impl::setup_pointers()
 			while (_header.read_list_flag(ptr) != null_flag)
 				;
 		}
-		_list_meta_size = ptr - _list_meta;
+		_list_meta_size = static_cast<size_t>(ptr - _list_meta);
 	} else {
 		_list_meta      = nullptr;
 		_list_meta_size = 0;

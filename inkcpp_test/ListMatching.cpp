@@ -17,7 +17,7 @@ struct MatchListValues {
 };
 
 float** cost_matrix(const MatchListValues& rh, const MatchListValues& lh, float drop_panelty);
-float   d_contains(const int lh[2], const int rh[2], const int* matches);
+float   d_contains(const size_t lh[2], const size_t rh[2], const int* matches);
 float   d_value(int lh, int rh, int lh_range[2], int rh_range[2]);
 float   d_label(const char* lh, const char* rh);
 } // namespace ink::runtime::internal
@@ -84,42 +84,42 @@ SCENARIO("santy check distance functions", "[list_match]")
 	{
 		GIVEN("Equal Sets")
 		{
-			int   lh[]      = {5, 10};
-			int   rh[]      = {5, 10};
-			int   matches[] = {0, 0, 0, 0, 0, 5, 6, 7, 8, 9};
-			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			ink::size_t lh[]      = {5, 10};
+			ink::size_t rh[]      = {5, 10};
+			int         matches[] = {0, 0, 0, 0, 0, 5, 6, 7, 8, 9};
+			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
 			CHECK_THAT(d, Catch::Matchers::WithinAbs(1, 0.001));
 		}
 		GIVEN("Dropped Values")
 		{
-			int   lh[]      = {5, 10};
-			int   rh[]      = {5, 8};
-			int   matches[] = {0, 0, 0, 0, 0, 5, -1, -1, 6, 7};
-			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			ink::size_t lh[]      = {5, 10};
+			ink::size_t rh[]      = {5, 8};
+			int         matches[] = {0, 0, 0, 0, 0, 5, -1, -1, 6, 7};
+			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
 			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.6, 0.001));
 		}
 		GIVEN("New Values")
 		{
-			int   lh[]      = {5, 8};
-			int   rh[]      = {5, 10};
-			int   matches[] = {0, 0, 0, 0, 0, 5, 6, 7};
-			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			ink::size_t lh[]      = {5, 8};
+			ink::size_t rh[]      = {5, 10};
+			int         matches[] = {0, 0, 0, 0, 0, 5, 6, 7};
+			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
 			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.6, 0.001));
 		}
 		GIVEN("Swapped Values")
 		{
-			int   lh[]      = {5, 10};
-			int   rh[]      = {5, 10};
-			int   matches[] = {0, 0, 0, 0, 0, 5, 9, 6, 8, 7};
-			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			ink::size_t lh[]      = {5, 10};
+			ink::size_t rh[]      = {5, 10};
+			int         matches[] = {0, 0, 0, 0, 0, 5, 9, 6, 8, 7};
+			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
 			CHECK_THAT(d, Catch::Matchers::WithinAbs(1, 0.001));
 		}
 		GIVEN("Changed Values")
 		{
-			int   lh[]      = {5, 10};
-			int   rh[]      = {5, 10};
-			int   matches[] = {0, 0, 0, 0, 0, 5, 9, -1, -1, -1};
-			float d         = ink::runtime::internal::d_contains(lh, rh, matches);
+			ink::size_t lh[]      = {5, 10};
+			ink::size_t rh[]      = {5, 10};
+			int         matches[] = {0, 0, 0, 0, 0, 5, 9, -1, -1, -1};
+			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
 			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.25, 0.001));
 		}
 	}
@@ -186,20 +186,20 @@ SCENARIO("Simple List Migration stories", "[list_match]")
 		runner                 thread_a  = ink_a->new_runner(globals_a);
 		WHEN("Load new list extensions, split and typo fix")
 		{
-			CHECK(thread_a->getline() == "You are currently at Flor\n");
+			CHECK(thread_a->getline() == "You are currently at Flor, Balcony\n");
 			REQUIRE(thread_a->has_choices());
 			thread_a->choose(0);
 			std::unique_ptr<snapshot> snap{thread_a->create_snapshot()};
 			REQUIRE(snap->can_be_migrated());
 			CHECK(
 			    thread_a->getall()
-			    == "More\nYou are still at Flor, all posibilities are Flor, Balcony, Kitchen, Garden\n"
+			    == "More\nYou are still at Flor, Balcony - all posibilities are Flor, Balcony, Kitchen, Garden\n"
 			);
 			auto globals_b = ink_b->new_globals_from_snapshot(*snap);
-			auto thread_b  = ink_b->new_runner_from_snapshot(*snap);
+			auto thread_b  = ink_b->new_runner_from_snapshot(*snap, globals_b);
 			CHECK(
 			    thread_b->getall()
-			    == "More\nYou are still at Floor, all posibilities are Floor, Kitchen, Livingroom\n"
+			    == "More\nYou are still at Floor, Balcony - all posibilities are Kitchen, Street, Floor, Balcony, Livingroom, Garden\n"
 			);
 		}
 	}
