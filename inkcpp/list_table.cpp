@@ -1085,8 +1085,8 @@ bool list_table::migrate(const char* old_list_metadata, const ink::internal::hea
 		bool          is_empty_list = true;
 		for (size_t i = 0; i < old_ref_table.numLists(); ++i) {
 			if (old_ref_table.hasList(entry, i)) {
-				bool hit           = false;
-				bool is_empty_list = false;
+				bool hit      = false;
+				is_empty_list = false;
 				for (size_t j = old_ref_table.listBegin(i); j < old_ref_table._list_end[i]; ++j) {
 					if (old_ref_table.hasFlag(entry, j) && old_ref_table._flag_names[j]) {
 						if (value_matches[j] != -1) {

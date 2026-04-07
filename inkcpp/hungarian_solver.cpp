@@ -7,7 +7,7 @@
 
 class HungarienCtx
 {
-	const size_t n;
+	const int    n;
 	const float* cost;
 
 	struct {
@@ -21,7 +21,7 @@ class HungarienCtx
 	bool*  visit_col;
 
 public:
-	HungarienCtx(const float* cost, size_t n)
+	HungarienCtx(const float* cost, int n)
 	    : n{n}
 	    , cost{cost}
 	{
@@ -48,10 +48,10 @@ public:
 
 	int operator[](int col) { return col_2_row[col]; }
 
-	void init_search(size_t row)
+	void init_search(int row)
 	{
 		col_2_row[0] = row;
-		for (size_t i = 0; i <= n; ++i) {
+		for (size_t i = 0; i <= static_cast<size_t>(n); ++i) {
 			visit_col[i] = false;
 			slack[i]     = std::numeric_limits<float>::max();
 			path[i]      = 0;
@@ -66,7 +66,7 @@ public:
 			int   current_row      = col_2_row[current_col];
 			float delta            = std::numeric_limits<float>::max();
 			int   next_col         = 0;
-			for (size_t col = 1; col <= n; ++col) {
+			for (int col = 1; col <= n; ++col) {
 				if (! visit_col[col]) {
 					float reduced
 					    = cost[(current_row - 1) * n + (col - 1)] - pot.row[current_row] - pot.col[col];
@@ -81,7 +81,7 @@ public:
 				}
 			}
 
-			for (size_t col = 0; col <= n; ++col) {
+			for (size_t col = 0; col <= static_cast<size_t>(n); ++col) {
 				if (visit_col[col]) {
 					pot.row[col_2_row[col]] += delta;
 					pot.col[col] -= delta;
@@ -110,7 +110,7 @@ float hungarian_solver(const float* cost, int* matches, size_t n, float threshol
 {
 	HungarienCtx ctx(cost, n);
 	for (size_t row = 1; row <= n; ++row) {
-		ctx.init_search(row);
+		ctx.init_search(static_cast<int>(row));
 		int end_col = ctx.find_augmenting_path();
 		ctx.augment_matching(end_col);
 	}
