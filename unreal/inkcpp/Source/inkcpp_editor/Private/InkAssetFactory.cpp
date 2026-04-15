@@ -81,7 +81,7 @@ void TraversImports(
 	);
 	while (matcher.FindNext()) {
 		std::filesystem::path match_file_path = filepath;
-		match_file_path.replace_filename(TCHAR_TO_ANSI(*matcher.GetCaptureGroup(2)));
+		match_file_path.replace_filename(TCHAR_TO_UTF8(*matcher.GetCaptureGroup(2)));
 		TraversImports(AssetImportData, visited, match_file_path);
 	}
 }
@@ -97,7 +97,7 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 	static const std::string ink_suffix{".ink"};
 	try {
 		using path            = std::filesystem::path;
-		std::string cFilename = TCHAR_TO_ANSI(*Filename);
+		std::string cFilename = TCHAR_TO_UTF8(*Filename);
 		path        story_path(cFilename, path::format::generic_format);
 		story_path.make_preferred();
 		bool use_temp_file = false;
@@ -112,7 +112,7 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 				return nullptr;
 			}
 			path path_bin(
-			    TCHAR_TO_ANSI(*IPluginManager::Get().FindPlugin(TEXT("InkCPP"))->GetBaseDir()),
+			    TCHAR_TO_UTF8(*IPluginManager::Get().FindPlugin(TEXT("InkCPP"))->GetBaseDir()),
 			    path::format::generic_format
 			);
 			path_bin.make_preferred();

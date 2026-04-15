@@ -538,7 +538,7 @@ runner_impl::line_type runner_impl::getline()
 #	ifdef INK_ENABLE_STL
 	line_type result{_output.get()};
 #	elif defined(INK_ENABLE_UNREAL)
-	line_type result{ANSI_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists()))};
+	line_type result{UTF8_TO_TCHAR(_output.get_alloc(_globals->strings(), _globals->lists()))};
 #	else
 #		error unsupported constraints for getline
 #	endif

@@ -64,14 +64,14 @@ void UInkThread::RegisterExternalFunction(
     const FString& functionName, const FExternalFunctionDelegate& function, bool lookaheadSafe
 )
 {
-	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function, lookaheadSafe);
+	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_UTF8(*functionName)), function, lookaheadSafe);
 }
 
 void UInkThread::RegisterExternalEvent(
     const FString& functionName, const FExternalFunctionVoidDelegate& function, bool lookaheadSafe
 )
 {
-	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_ANSI(*functionName)), function, lookaheadSafe);
+	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_UTF8(*functionName)), function, lookaheadSafe);
 }
 
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)
@@ -108,7 +108,7 @@ bool UInkThread::ExecuteInternal()
 			return true;
 		mbHasRun = true;
 		if (mStartPath.Len()) {
-			mpRunner->move_to(ink::hash_string(TCHAR_TO_ANSI(*mStartPath)));
+			mpRunner->move_to(ink::hash_string(TCHAR_TO_UTF8(*mStartPath)));
 		}
 
 		if (mbInChoice) {
