@@ -27,7 +27,7 @@ snapshot* snapshot::from_file(const char* filename)
 {
 	std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
 	if (! ifs.is_open()) {
-		throw ink_exception("Failed to open snapshot file: " + std::string(filename));
+		inkAssert(false, "Failed to open snapshot file: %s", filename);
 	}
 
 	size_t         length = static_cast<size_t>(ifs.tellg());
@@ -43,7 +43,7 @@ void snapshot::write_to_file(const char* filename) const
 {
 	std::ofstream ofs(filename, std::ios::binary);
 	if (! ofs.is_open()) {
-		throw ink_exception("Failed to open file to write snapshot: " + std::string(filename));
+		inkAssert(false, "Failed to open file to write snapshot: %s", filename);
 	}
 	ofs.write(reinterpret_cast<const char*>(get_data()), get_data_len());
 }
@@ -52,9 +52,16 @@ void snapshot::write_to_file(const char* filename) const
 
 namespace ink::runtime::internal
 {
-size_t snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt)
+size_t
+    snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt, bool list_definition)
 {
-	return serialization_length + sizeof(header) + (runner_cnt + 1) * sizeof(size_t);
+	return serialization_length + sizeof(header)
+	     + (runner_cnt + 1 + (list_definition ? 1 : 0)) * sizeof(size_t);
+}
+
+bool snapshot_impl::can_be_migrated(const story& story) const
+{
+	return can_be_migrated() || (story.hash() == _header.hash);
 }
 
 const unsigned char* snapshot_impl::get_data() const { return _file; }
@@ -64,17 +71,25 @@ size_t snapshot_impl::get_data_len() const { return _length; }
 snapshot_impl::snapshot_impl(const globals_impl& globals)
     : _managed{true}
 {
-	snapshot_interface::snapper snapper{globals.strings(), globals._owner->string(0)};
-	_length           = globals.snap(nullptr, snapper);
-	size_t runner_cnt = 0;
+	snapshot_interface::snapper snapper(globals.strings(), globals._owner->string(0));
+	bool                        migratable = globals.can_be_migrated();
+	size_t                      runner_cnt = 0;
+
+	_length = globals.snap(nullptr, snapper);
 	for (auto node = globals._runners_start; node; node = node->next) {
 		_length += node->object->snap(nullptr, snapper);
+		migratable = migratable && node->object->can_be_migrated();
 		++runner_cnt;
 	}
+	if (migratable) {
+		_length += globals._owner->list_meta_size();
+	}
 
-	_length             = file_size(_length, runner_cnt);
+	_length             = file_size(_length, runner_cnt, migratable);
 	_header.length      = _length;
 	_header.num_runners = runner_cnt;
+	_header.hash        = globals._owner->hash();
+	_header.migratable  = migratable;
 	unsigned char* data = new unsigned char[_length];
 	_file               = data;
 	unsigned char* ptr  = data;
@@ -83,7 +98,9 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 	// write lookup table
 	ptr += sizeof(header);
 	{
-		size_t offset = (ptr - data) + (_header.num_runners + 1) * sizeof(size_t);
+		size_t offset = static_cast<size_t>(
+		    (ptr - data) + (_header.num_runners + 1 + migratable) * sizeof(size_t)
+		);
 		memcpy(ptr, &offset, sizeof(offset));
 		ptr += sizeof(offset);
 		offset += globals.snap(nullptr, snapper);
@@ -92,11 +109,20 @@ snapshot_impl::snapshot_impl(const globals_impl& globals)
 			ptr += sizeof(offset);
 			offset += node->object->snap(nullptr, snapper);
 		}
+		if (migratable) {
+			memcpy(ptr, &offset, sizeof(offset));
+			ptr += sizeof(offset);
+			offset += globals._owner->list_meta_size();
+		}
 	}
 
 	ptr += globals.snap(ptr, snapper);
 	for (auto node = globals._runners_start; node; node = node->next) {
 		ptr += node->object->snap(ptr, snapper);
+	}
+	if (migratable) {
+		memcpy(ptr, globals._owner->list_meta(), globals._owner->list_meta_size());
+		ptr += globals._owner->list_meta_size();
 	}
 }
 
@@ -108,6 +134,7 @@ snapshot_impl::snapshot_impl(const unsigned char* data, size_t length, bool mana
 	const unsigned char* ptr = data;
 	memcpy(&_header, ptr, sizeof(_header));
 	inkAssert(_header.length == _length, "Corrupted file length");
+	inkAssert(_header.version == decltype(_header){}.version, "Snapshot version missmatch");
 }
 
 size_t snap_choice::snap(unsigned char* data, const snapper& snapper) const
@@ -122,13 +149,13 @@ size_t snap_choice::snap(unsigned char* data, const snapper& snapper) const
 		ptr = snap_write(ptr, false, should_write);
 	} else {
 		ptr                         = snap_write(ptr, true, should_write);
-		std::uintptr_t offset_start = _tags_start != nullptr ? _tags_start - snapper.runner_tags : 0;
+		std::uintptr_t offset_start = _tags_start - snapper.runner_tags;
 		ptr                         = snap_write(ptr, offset_start, should_write);
-		std::uintptr_t offset_end   = _tags_end != nullptr ? _tags_end - snapper.runner_tags : 0;
+		std::uintptr_t offset_end   = _tags_end - snapper.runner_tags;
 		ptr                         = snap_write(ptr, offset_end, should_write);
 	}
 	ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* snap_choice::snap_load(const unsigned char* data, const loader& loader)
@@ -167,7 +194,7 @@ size_t snap_tag::snap(unsigned char* data, const snapper& snapper) const
 		ptr       = snap_write(ptr, true, should_write);
 		ptr       = snap_write(ptr, id, should_write);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* snap_tag::snap_load(const unsigned char* data, const loader& loader)

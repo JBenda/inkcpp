@@ -30,7 +30,7 @@ namespace runtime
 
 		public:
 			// Constant to identify an invalid position in the stream
-			static constexpr size_t npos = ~0;
+			static constexpr size_t npos = ~0U;
 
 			// Append data to stream
 			void append(const value&);
@@ -127,6 +127,7 @@ namespace runtime
 			char last_char() const { return _last_char; }
 
 			// snapshot interface
+			bool                 can_be_migrated() const;
 			size_t               snap(unsigned char* data, const snapper&) const;
 			const unsigned char* snap_load(const unsigned char* data, const loader&);
 

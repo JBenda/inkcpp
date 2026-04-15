@@ -15,31 +15,40 @@
 #	include "Hash/CityHash.h"
 #endif
 #ifdef INK_ENABLE_STL
-#	include <exception>
+#	ifdef INK_ENABLE_EXCEPTIONS
+#		include <exception>
+#	endif
 #	include <stdexcept>
 #	include <optional>
 #	include <cctype>
 #	include <cstdint>
-#	include <cstdio>
-#	include <cstdarg>
 #endif
 #ifdef INK_ENABLE_CSTD
+#	include <cstdio>
+#	include <cstdlib>
 #	include <ctype.h>
+#	include <cassert>
 #endif
 
 // Platform specific defines //
 
 #ifdef INK_ENABLE_UNREAL
-#	define inkZeroMemory(buff, len)        FMemory::Memset(buff, 0, len)
-#	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
-#	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
-#	define FORMAT_STRING_STR               "%hs"
+#	define inkZeroMemory(buff, len) FMemory::Memset(buff, 0, len)
+#	define FORMAT_STRING_STR        "%hs"
 #else
 #	define inkZeroMemory     ink::internal::zero_memory
-#	define inkAssert         ink::ink_assert
-#	define inkFail(...)      ink::ink_assert(false, __VA_ARGS__)
 #	define FORMAT_STRING_STR "%s"
 #endif
+
+#ifdef INK_ENABLE_UNREAL
+#	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
+#	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
+#else
+#	define inkAssert    ink::ink_assert
+#	define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
+
+#endif
+
 
 namespace ink
 {
@@ -65,15 +74,6 @@ typedef uint32_t hash_t;
 /** Invalid hash value */
 const hash_t InvalidHash = 0;
 
-#ifdef INK_ENABLE_UNREAL
-/** Simple hash for serialization of strings */
-inline hash_t hash_string(const char* string)
-{
-	return CityHash32(string, FCStringAnsi::Strlen(string));
-}
-#else
-hash_t hash_string(const char* string);
-#endif
 
 /** Byte type */
 typedef unsigned char byte_t;
@@ -127,10 +127,29 @@ constexpr list_flag null_flag{-1, -1};
 /** value representing an empty list */
 constexpr list_flag empty_flag{-1, 0};
 
+#ifdef INK_ENABLE_UNREAL
+/** Simple hash for serialization of strings */
+inline hash_t hash_string(const char* string)
+{
+	return CityHash32(string, FCStringAnsi::Strlen(string));
+}
+#else
+hash_t hash_string(const char* string);
+hash_t hash_data(const unsigned char* data, size_t len);
+#endif
+
 namespace internal
 {
+#ifdef __GNUC__
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                         \
+	    disable : 4514,                                                                      \
+	    justification : "functions are defined in header file, they do not need to be used." \
+	)
+#endif
 	/** Checks if a string starts with a given prefix*/
-	static bool starts_with(const char* string, const char* prefix)
+	static inline constexpr bool starts_with(const char* string, const char* prefix)
 	{
 		while (*prefix) {
 			if (*string != *prefix) {
@@ -143,28 +162,29 @@ namespace internal
 	}
 
 	/** Checks if a string is only whitespace*/
-	static bool is_whitespace(const char* string, bool includeNewline = true)
+	static inline constexpr bool is_whitespace(const char* string, bool includeNewline = true)
 	{
 		// Iterate string
 		while (true) {
 			switch (*(string++)) {
 				case 0: return true;
+				case '\f': [[fallthrough]];
+				case '\r': [[fallthrough]];
 				case '\n':
 					if (! includeNewline)
 						return false;
+					[[fallthrough]];
 				case '\t': [[fallthrough]];
+				case '\v': [[fallthrough]];
 				case ' ': continue;
 				default: return false;
 			}
 		}
 	}
 
-	/** check if character can be only part of a word, when two part of word characters put together
-	 * the will be a space inserted I049
-	 */
 	inline bool is_part_of_word(char character) { return isalpha(character) || isdigit(character); }
 
-	inline constexpr bool is_whitespace(char character, bool includeNewline = true)
+	static inline constexpr bool is_whitespace(char character, bool includeNewline = true)
 	{
 		switch (character) {
 			case '\n':
@@ -179,6 +199,10 @@ namespace internal
 #ifndef INK_ENABLE_UNREAL
 	/** populate memory with Zero */
 	void zero_memory(void* buffer, size_t length);
+#endif
+#ifdef __GNUC__
+#else
+#	pragma warning(pop)
 #endif
 } // namespace internal
 
@@ -202,8 +226,17 @@ private:
 };
 #endif
 
+#ifdef __GNUC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#	pragma warning(push)
+#	pragma warning(                                                                                \
+	    disable : 4100,                                                                             \
+	    justification : "dependend on rtti, exception and stl support not all arguments are needed" \
+	)
+#endif
 // assert
-#ifndef INK_ENABLE_UNREAL
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 {
@@ -212,28 +245,42 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 		msg = EMPTY;
 	}
 	if (! condition) {
+#if defined(INK_ENABLE_STL) || defined(INK_ENABLE_CSTD)
 		if constexpr (sizeof...(args) > 0) {
 			size_t size    = snprintf(nullptr, 0, msg, args...) + 1;
 			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
-			throw ink_exception(message);
-		} else {
-			throw ink_exception(msg);
+			msg = message;
 		}
+#endif
+#ifdef INK_ENABLE_EXCEPTIONS
+		throw ink_exception(msg);
+#elif defined(INK_ENABLE_CSTD)
+		fprintf(stderr, "Ink Assert: %s\n", msg);
+		abort();
+#else
+#	warning no assertion handling this could lead to invalid code paths
+#endif
 	}
 }
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
+#else
+#	pragma warning(pop)
+#endif
 
 template<typename... Args>
 [[noreturn]] inline void ink_assert(const char* msg = nullptr, Args... args)
 {
 	ink_assert(false, msg, args...);
+#ifdef INK_ENABLE_CSTD
 	exit(EXIT_FAILURE);
-}
 #endif
+}
 
 namespace runtime::internal
 {
-	constexpr unsigned abs(int i) { return i < 0 ? -i : i; }
+	constexpr unsigned abs(int i) { return static_cast<unsigned>(i < 0 ? -i : i); }
 
 	template<typename T>
 	struct always_false {

@@ -58,7 +58,7 @@ void json_compiler::compile(
 
 struct container_meta {
 	std::string         name;
-	container_t         indexToReturn        = ~0;
+	container_t         indexToReturn        = ~0U;
 	bool                recordInContainerMap = false;
 	vector<defer_entry> deferred;
 	CommandFlag         cmd_flags = CommandFlag::NO_FLAGS;
@@ -139,17 +139,17 @@ void json_compiler::compile_container(
 	if (is_knot) {
 		// it is not a wave or choice
 		if (::ink::internal::starts_with(name_override.c_str(), "c-")
-		    || ::ink::internal::starts_with(name_override.c_str(), "g-")) {
+		    || ::ink::internal::starts_with(name_override.c_str(), "g-")
+		    || ::ink::internal::starts_with(name_override.c_str(), "s")
+		    || ::ink::internal::starts_with(name_override.c_str(), "b")) {
 			is_knot = false;
-			for (auto itr = name_override.begin() + 2; itr != name_override.end(); ++itr) {
+			for (auto itr = name_override.begin() + (name_override[1] == '-' ? 2 : 1);
+			     itr != name_override.end(); ++itr) {
 				if (*itr > '9' || *itr < '0') {
 					is_knot = true;
 					break;
 				}
 			}
-		} else if (name_override == "s"
-		           || name_override == "b") { // it is not a shared part of a choice
-			is_knot = false;
 		}
 	}
 	handle_container_metadata(*container.rbegin(), meta, is_knot);
@@ -247,7 +247,7 @@ void json_compiler::compile_container(
 
 	// Write end container marker, End pointer should point to End command (form symetry with START
 	// command)
-	if (meta.indexToReturn != ~0)
+	if (meta.indexToReturn != ~0U)
 		_emitter->write(Command::END_CONTAINER_MARKER, meta.indexToReturn, meta.cmd_flags);
 
 	// Record end position in map
@@ -355,7 +355,6 @@ void json_compiler::compile_complex_command(const nlohmann::json& command)
 
 	// Read count
 	else if (get(command, "CNT?", val)) {
-		// TODO: Why is this true again?
 		_emitter->write_path(Command::READ_COUNT, CommandFlag::NO_FLAGS, val, true);
 	}
 
@@ -412,8 +411,7 @@ void json_compiler::compile_complex_command(const nlohmann::json& command)
 
 	else if (get(command, "#", val)) {
 		if (_ink_version > 20) {
-			ink_exception("with inkVerison 21 the tag system chages, and the '#: <tag>' is deprecated now"
-			);
+			inkFail("with inkVerison 21 the tag system chages, and the '#: <tag>' is deprecated now");
 		}
 		_emitter->write_string(Command::TAG, CommandFlag::NO_FLAGS, val);
 	}

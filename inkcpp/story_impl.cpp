@@ -19,7 +19,7 @@ namespace ink::runtime
 story* story::from_file(const char* filename) { return new internal::story_impl(filename); }
 #endif
 
-story* story::from_binary(unsigned char* data, size_t length, bool freeOnDestroy)
+story* story::from_binary(const unsigned char* data, size_t length, bool freeOnDestroy)
 {
 	return new internal::story_impl(data, length, freeOnDestroy);
 }
@@ -35,9 +35,7 @@ unsigned char* read_file_into_memory(const char* filename, size_t* read)
 
 	ifstream ifs(filename, ios::binary | ios::ate);
 
-	if (! ifs.is_open()) {
-		throw ink_exception("Failed to open file: " + std::string(filename));
-	}
+	inkAssert(ifs.is_open(), "Failed to open file: " FORMAT_STRING_STR, filename);
 
 	ifstream::pos_type pos    = ifs.tellg();
 	size_t             length = ( size_t ) pos;
@@ -69,7 +67,7 @@ story_impl::story_impl(const char* filename)
 }
 #endif
 
-story_impl::story_impl(unsigned char* binary, size_t len, bool manage /*= true*/)
+story_impl::story_impl(const unsigned char* binary, size_t len, bool manage /*= true*/)
     : _file(binary)
     , _length(len)
     , _managed(manage)
@@ -186,15 +184,25 @@ globals story_impl::new_globals()
 globals story_impl::new_globals_from_snapshot(const snapshot& data)
 {
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
-	auto*                globs    = new globals_impl(this);
-	auto                 end      = globs->snap_load(
-      snapshot.get_globals_snap(),
-      snapshot_interface::loader{
-          snapshot.strings(),
-          _string_table,
-      }
-  );
+	if (! snapshot.can_be_migrated(*this)) {
+		return globals();
+	}
+	auto* globs = new globals_impl(this);
+	snapshot.strings().clear();
+	snapshot_interface::loader loader(snapshot.strings(), _string_table, snapshot.can_be_migrated());
+	auto                       end = globs->snap_load(snapshot.get_globals_snap(), loader);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
+	if (hash() != snapshot.hash()) {
+		globals new_globs = new_globals();
+		runner  thread    = new_runner(new_globs);
+		if (! globs->migrate_new_globals(
+		        *new_globs.cast<globals_impl>().get(),
+		        reinterpret_cast<const char*>(snapshot.get_list_metadata())
+		    )) {
+			delete globs;
+			return globals();
+		}
+	}
 	return globals(globs, _block);
 }
 
@@ -210,36 +218,45 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
 	if (store == nullptr)
 		store = new_globals_from_snapshot(snapshot);
-	auto* run    = new runner_impl(this, store);
-	auto  loader = snapshot_interface::loader{
-      snapshot.strings(),
-      _string_table,
-  };
+	auto* run = new runner_impl(this, store);
 	// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to
 	// use
-	idx      = (data.num_runners() - idx - 1);
+	idx       = (data.num_runners() - idx - 1);
+	snapshot_interface::loader loader{
+	    snapshot.strings(),
+	    _string_table,
+	    snapshot.can_be_migrated(),
+	};
 	auto end = run->snap_load(snapshot.get_runner_snap(idx), loader);
 	inkAssert(
 	    (idx + 1 < snapshot.num_runners() && end == snapshot.get_runner_snap(idx + 1))
-	        || end == snapshot.get_data() + snapshot.get_data_len(),
+	        || end == snapshot.get_data() + snapshot.get_data_len()
+	        || end == snapshot.get_list_metadata(),
 	    "not all data were used for runner reconstruction"
 	);
+	if (hash() != snapshot.hash()) {
+		if (! run->migrate_to(*reinterpret_cast<const hash_t*>(snapshot.get_runner_snap(idx)))) {
+			return runner();
+		}
+	}
 	return runner(run, _block);
 }
 
 void story_impl::setup_pointers()
 {
 	const ink::internal::header& header = *reinterpret_cast<const ink::internal::header*>(_file);
-	if (! header.verify())
+	if (! header.verify()) {
 		return;
+	}
 
 	// Locate sections
 	if (header._strings._bytes)
-		_string_table = reinterpret_cast<char*>(_file + header._strings._start);
+		_string_table = reinterpret_cast<const char*>(_file + header._strings._start);
 
 	// Address list sections if they exist
 	if (header._list_meta._bytes) {
-		_list_meta = reinterpret_cast<const char*>(_file + header._list_meta._start);
+		_list_meta      = reinterpret_cast<const char*>(_file + header._list_meta._start);
+		_list_meta_size = header._list_meta._bytes;
 
 		// Lists require metadata
 		if (header._lists._bytes)

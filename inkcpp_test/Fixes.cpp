@@ -1,5 +1,6 @@
 #include "catch.hpp"
-#include "system.h"
+#include "snapshot.h"
+#include "../snapshot_impl.h"
 
 #include <story.h>
 #include <globals.h>
@@ -15,9 +16,9 @@ SCENARIO("string_table fill up #97", "[fixes]")
 {
 	GIVEN("story murder_scene")
 	{
-		auto    ink       = story::from_file(INK_TEST_RESOURCE_DIR "murder_scene.bin");
-		globals globStore = ink->new_globals();
-		runner  main      = ink->new_runner(globStore);
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "murder_scene.bin")};
+		globals                globStore = ink->new_globals();
+		runner                 main      = ink->new_runner(globStore);
 
 		WHEN("Run first choice 50 times")
 		{
@@ -62,10 +63,11 @@ SCENARIO("unknown command _ #109", "[fixes]")
 			for (size_t i = 0; i < out_str.size(); ++i) {
 				data[i] = out_str[i];
 			}
-			auto        ink       = story::from_binary(data, out_str.size());
-			globals     globStore = ink->new_globals();
-			runner      main      = ink->new_runner(globStore);
-			std::string story     = main->getall();
+			std::unique_ptr<story> ink{story::from_binary(data, static_cast<ink::size_t>(out_str.size()))
+			};
+			globals                globStore = ink->new_globals();
+			runner                 main      = ink->new_runner(globStore);
+			std::string            story     = main->getall();
 			THEN("expect correct output")
 			{
 				REQUIRE(res.warnings.size() == 0);
@@ -87,16 +89,16 @@ SCENARIO("snapshot failed inside execution _ #111", "[fixes]")
 {
 	GIVEN("story with multiline output with a knot")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin");
-		auto   ink2   = story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin")};
+		std::unique_ptr<story> ink2{story::from_file(INK_TEST_RESOURCE_DIR "111_crash.bin")};
+		runner                 thread = ink->new_runner();
 		WHEN("run store and reload")
 		{
 			auto line = thread->getline();
 			THEN("outputs first line") { REQUIRE(line == "First line of text\n"); }
-			auto   snapshot = thread->create_snapshot();
-			runner thread2  = ink2->new_runner_from_snapshot(*snapshot);
-			line            = thread->getline();
+			std::unique_ptr<ink::runtime::snapshot> snapshot{thread->create_snapshot()};
+			runner                                  thread2 = ink2->new_runner_from_snapshot(*snapshot);
+			line                                            = thread->getline();
 			THEN("outputs second line") { REQUIRE(line == "Second line of test\n"); }
 		}
 	}
@@ -106,8 +108,9 @@ SCENARIO("missing leading whitespace inside choice-only text and glued text _ #1
 {
 	GIVEN("story with problematic text")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "130_131_missing_whitespace.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR
+		                                            "130_131_missing_whitespace.bin")};
+		runner                 thread = ink->new_runner();
 		WHEN("run story")
 		{
 			auto line = thread->getline();
@@ -122,6 +125,47 @@ SCENARIO("missing leading whitespace inside choice-only text and glued text _ #1
 			THEN("no space in post choice text")
 			{
 				REQUIRE(line == "Looking around the saloon, you don't find much.");
+			}
+		}
+	}
+}
+
+SCENARIO(
+    "choice tag references are not correctly stored (as pointer instead of index) _ #116", "[fixes]"
+)
+{
+	GIVEN("story with choice tag")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR
+		                                            "116_story_with_choice_tags.bin")};
+		runner                 thread = ink->new_runner();
+		WHEN("run story, store, and reload")
+		{
+			thread->getall();
+			REQUIRE(thread->num_choices() == 1);
+			REQUIRE(thread->get_choice(0)->num_tags() == 1);
+			REQUIRE(thread->get_choice(0)->get_tag(0) == std::string("Type:Idle"));
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			THEN("snapshot loaded works")
+			{
+				runner loaded = ink->new_runner_from_snapshot(*snap);
+				loaded->getall();
+				REQUIRE(loaded->num_choices() == 1);
+				REQUIRE(loaded->get_choice(0)->num_tags() == 1);
+				REQUIRE(loaded->get_choice(0)->get_tag(0) == std::string("Type:Idle"));
+			}
+		}
+		WHEN("loading a snipshot multiple times")
+		{
+			thread->getall();
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			runner                    thread2 = ink->new_runner_from_snapshot(*snap);
+			const size_t s = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
+			THEN("loading it again will not change the string_table size")
+			{
+				runner       thread3 = ink->new_runner_from_snapshot(*snap);
+				const size_t s2 = reinterpret_cast<internal::snapshot_impl*>(snap.get())->strings().size();
+				REQUIRE(s == s2);
 			}
 		}
 	}
@@ -154,6 +198,99 @@ SCENARIO("Casting during redefinition is too strict _ #134", "[fixes]")
 				REQUIRE_NOTHROW(thread->move_to(ink::hash_string(name.c_str())));
 				std::string line;
 				REQUIRE_THROWS_AS(line = thread->getline(), ink::ink_exception);
+			}
+		}
+	}
+}
+
+SCENARIO("Using knot visit count as condition _ #139", "[fixes]")
+{
+	GIVEN("story with conditional choice.")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "139_conditional_choice.bin")
+		};
+		runner                 thread = ink->new_runner();
+		WHEN("visit knot 'one' an going back to choice")
+		{
+			std::string content = thread->getall();
+			REQUIRE_FALSE(thread->can_continue());
+			REQUIRE(thread->num_choices() == 2);
+			thread->choose(1);
+			content += thread->getall();
+			REQUIRE(content == "Check\nFirst time at one\n");
+			THEN("conditinal choice is displayed")
+			{
+				REQUIRE(thread->num_choices() == 3);
+				CHECK(thread->get_choice(0)->text() == std::string("DEFAULT"));
+				CHECK(thread->get_choice(1)->text() == std::string("Check"));
+				CHECK(thread->get_choice(2)->text() == std::string("Test"));
+
+				WHEN("go to 'one' twice")
+				{
+					thread->choose(1);
+					std::string content2 = thread->getall();
+					REQUIRE(thread->num_choices() == 3);
+					THEN("get both one strings") { REQUIRE(content2 == "Check\nBeen here before\n"); }
+				}
+			}
+		}
+		WHEN("loop back to choice")
+		{
+			std::string content = thread->getall();
+			REQUIRE_FALSE(thread->can_continue());
+			REQUIRE(thread->num_choices() == 2);
+			thread->choose(0);
+			content += thread->getall();
+			REQUIRE(content == "DEFAULT\nLoopback");
+			THEN("conditinal choice is not displayed")
+			{
+				REQUIRE(thread->num_choices() == 2);
+				CHECK(thread->get_choice(0)->text() == std::string("DEFAULT"));
+				CHECK(thread->get_choice(1)->text() == std::string("Check"));
+			}
+		}
+	}
+}
+
+SCENARIO("Provoke thread array expension _ #142", "[fixes]")
+{
+	GIVEN("story with 15 threads in one know")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "142_many_threads.bin")};
+		runner                 thread = ink->new_runner();
+		WHEN("just go to choice")
+		{
+			std::string content = thread->getall();
+			REQUIRE(content == "At the top\n");
+			THEN("expect to see 15 choices")
+			{
+				REQUIRE(thread->num_choices() == 15);
+				const char options[] = "abcdefghijklmno";
+				for (const char* c = options; *c; ++c) {
+					CHECK(thread->get_choice(static_cast<ink::size_t>(c - options))->text()[0] == *c);
+				}
+			}
+		}
+		WHEN("choose 5 options")
+		{
+			std::string content = thread->getall();
+			for (int i = 0; i < 5; ++i) {
+				REQUIRE_FALSE(thread->can_continue());
+				thread->choose(i);
+				content += thread->getall();
+			}
+			REQUIRE(
+			    content
+			    == "At the top\na\nAt the top\nc\nAt the top\ne\nAt the top\ng\nAt the top\ni\nAt the "
+			       "top\n"
+			);
+			THEN("only 11 choices are left")
+			{
+				REQUIRE(thread->num_choices() == 10);
+				const char* options = "bdfhjklmno";
+				for (const char* c = options; *c; ++c) {
+					CHECK(thread->get_choice(static_cast<ink::size_t>(c - options))->text()[0] == *c);
+				}
 			}
 		}
 	}

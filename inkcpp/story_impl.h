@@ -25,20 +25,22 @@ public:
 #endif
 	// Create story from allocated binary data in memory. If manage is true, this class will delete
 	//  the pointers on destruction
-	story_impl(unsigned char* binary, size_t len, bool manage = true);
+	story_impl(const unsigned char* binary, size_t len, bool manage = true);
 	virtual ~story_impl();
 
 	const char* string(uint32_t index) const;
 
-	inline const ip_t instructions() const { return _instruction_data; }
+	inline ip_t instructions() const { return _instruction_data; }
 
-	inline const ip_t end() const { return _file + _length; }
+	inline ip_t end() const { return _file + _length; }
 
 	inline uint32_t num_containers() const { return _num_containers; }
 
 	const list_flag* lists() const { return _lists; }
 
 	const char* list_meta() const { return _list_meta; }
+
+	size_t list_meta_size() const { return _list_meta_size; }
 
 	// Find the innermost container containing offset. If offset is the start of a container, return
 	// that container.
@@ -77,19 +79,22 @@ public:
 	virtual runner
 	    new_runner_from_snapshot(const snapshot&, globals store = nullptr, unsigned idx = 0) override;
 
+	hash_t hash() const override { return hash_data(_file, _length); }
+
 private:
 	void setup_pointers();
 
 private:
 	// file information
-	uint8_t* _file;
-	size_t   _length;
+	const unsigned char* _file;
+	size_t               _length;
 
 	// string table
 	const char* _string_table = nullptr;
 
-	const char*      _list_meta = nullptr;
-	const list_flag* _lists     = nullptr;
+	const char*      _list_meta      = nullptr;
+	size_t           _list_meta_size = 0;
+	const list_flag* _lists          = nullptr;
 
 	// Information about containers.
 	const container_data_t* _container_data = nullptr;
@@ -106,7 +111,7 @@ private:
 	// instruction info
 	ip_t _instruction_data = nullptr;
 
-	// story block used to creat various weak pointers
+	// story block used to create various weak pointers
 	ref_block* _block;
 
 	// whether we need to delete our binary data after we destruct

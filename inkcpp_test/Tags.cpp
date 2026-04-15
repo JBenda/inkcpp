@@ -12,10 +12,10 @@ using namespace ink::runtime;
 
 SCENARIO("tags", "[ahf]")
 {
-	auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "AHF.bin");
-	runner thread = ink->new_runner();
+	std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "AHF.bin")};
+	runner                 thread = ink->new_runner();
 	thread->move_to(ink::hash_string("test_knot"));
-	while(thread->can_continue()) {
+	while (thread->can_continue()) {
 		auto line = thread->getline();
 	}
 	REQUIRE(thread->can_continue() == false);
@@ -25,8 +25,8 @@ SCENARIO("run story with tags", "[tags][story]")
 {
 	GIVEN("a story with tags")
 	{
-		story* _ink    = story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
-		runner _thread = _ink->new_runner();
+		std::unique_ptr<story> _ink{story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin")};
+		runner                 _thread = _ink->new_runner();
 		WHEN("starting the thread")
 		{
 			CHECK_FALSE(_thread->has_tags());

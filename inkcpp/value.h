@@ -14,7 +14,6 @@
 #include "system.h"
 #include "command.h"
 #include "list_table.h"
-#include "snapshot_impl.h"
 #include "tuple.hpp"
 #include "types.h"
 
@@ -108,6 +107,7 @@ class value : public snapshot_interface
 {
 public:
 	// snapshot interface
+	bool                 can_be_migrated() const;
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
@@ -185,8 +185,9 @@ private:
 		} else if (ty != type()) {
 			return redefine<ty + 1>(oth, env);
 		} else {
-			return internal::redefine<ty, typename ret<ty>::type, tuple<T*...>>(env
-			)(get<ty>(), oth.get<ty>());
+			return internal::redefine<ty, typename ret<ty>::type, tuple<T*...>>(env)(
+			    get<ty>(), oth.get<ty>()
+			);
 		}
 	}
 
@@ -225,7 +226,7 @@ private:
 };
 
 template<value_type ty, typename T, typename ENV>
-value redefine<ty, T, ENV>::operator()(const T& lh, const T& rh)
+value redefine<ty, T, ENV>::operator()(const T&, const T& rh)
 {
 	return value{}.set<ty>(rh);
 }

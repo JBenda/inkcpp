@@ -14,15 +14,15 @@ SCENARIO("run a story with external function and fallback function", "[external 
 {
 	GIVEN("story with two external functions, one with fallback")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "FallBack.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "FallBack.bin")};
+		runner                 thread = ink->new_runner();
 
 		WHEN("bind both external functions")
 		{
 			int  cnt_sqrt = 0;
-			auto fn_sqrt  = [&cnt_sqrt](int x) -> int {
+			auto fn_sqrt  = [&cnt_sqrt](double x) -> double {
         ++cnt_sqrt;
-        return sqrt(x);
+        return static_cast<int>(sqrt(x));
 			};
 			int  cnt_greeting = 0;
 			auto fn_greeting  = [&cnt_greeting]() -> const char* {
@@ -49,9 +49,9 @@ SCENARIO("run a story with external function and fallback function", "[external 
 		WHEN("only bind function without fallback")
 		{
 			int  cnt_sqrt = 0;
-			auto fn_sqrt  = [&cnt_sqrt](int x) -> int {
+			auto fn_sqrt  = [&cnt_sqrt](double x) -> double {
         ++cnt_sqrt;
-        return sqrt(x);
+        return static_cast<int>(sqrt(x));
 			};
 
 			thread->bind("sqrt", fn_sqrt);

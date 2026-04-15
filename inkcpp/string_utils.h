@@ -10,8 +10,6 @@
 #include "traits.h"
 #include "value.h"
 
-#include <cstdio>
-
 #ifndef EINVAL
 #	define EINVAL -1
 #endif
@@ -23,13 +21,13 @@ namespace ink::runtime::internal
 inline int toStr(char* buffer, size_t size, uint32_t value)
 {
 #ifdef WIN32
-	return _itoa_s(value, buffer, size, 10);
+	return _itoa_s(static_cast<int>(value), buffer, size, 10);
 #else
 	if (buffer == nullptr || size < 1) {
 		return EINVAL;
 	}
 	int res = snprintf(buffer, size, "%d", value);
-	if (res > 0 && res < size) {
+	if (res > 0 && static_cast<size_t>(res) < size) {
 		return 0;
 	}
 	return EINVAL;
@@ -47,7 +45,7 @@ inline int toStr(char* buffer, size_t size, int32_t value)
 		return EINVAL;
 	}
 	int res = snprintf(buffer, size, "%d", value);
-	if (res > 0 && res < size) {
+	if (res > 0 && static_cast<size_t>(res) < size) {
 		return 0;
 	}
 	return EINVAL;
@@ -58,23 +56,15 @@ inline int toStr(char* buffer, size_t size, int32_t value)
 // https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/gcvt-s?view=msvc-160
 inline int toStr(char* buffer, size_t size, float value)
 {
-#ifdef WIN32
-	int digits = 7;
-	for (float f = value; f > 1.f; f /= 10.f) {
-		++digits;
-	}
-	int ec = _gcvt_s(buffer, size, value, digits); // number of significant digits
-#else
 	if (buffer == nullptr || size < 1) {
 		return EINVAL;
 	}
 	int res = snprintf(buffer, size, "%.7f", value);
-	if (res < 0 || res >= size) {
+	if (res < 0 || static_cast<size_t>(res) >= size) {
 		return EINVAL;
 	}
 	// trunc cat zeros B007
-	int ec = 0;
-#endif
+	int   ec  = 0;
 	char* itr = buffer + strlen(buffer) - 1;
 	while (*itr == '0') {
 		*itr-- = 0;
@@ -151,7 +141,7 @@ inline constexpr size_t value_length(const value& v)
 		case value_type::boolean:
 			return v.get<value_type::boolean>() ? c_str_len("true") : c_str_len("false");
 		case value_type::newline: return 1;
-		default: inkFail("Can't determine length of this value type"); return -1;
+		default: inkFail("Can't determine length of this value type"); return ~0U;
 	}
 }
 
@@ -185,6 +175,11 @@ inline constexpr const char* str_find(const char* str, char c)
 	return nullptr;
 }
 
+inline constexpr bool isspace(int c)
+{
+	return c == ' ' || c == '\t' || c == '\v' || c == '\n' || c == '\f' || c == '\r';
+}
+
 /** removes leading & tailing spaces as wide spaces
  * @param begin iterator of string
  * @param end iterator of string
@@ -196,15 +191,22 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 	auto dst = begin;
 	for (auto src = begin; src != end; ++src) {
 		if (dst == begin) {
-			if (LEADING_SPACES && isspace(static_cast<unsigned char>(src[0]))) {
-				continue;
+			if constexpr (LEADING_SPACES) {
+				if (isspace(static_cast<unsigned char>(src[0]))) {
+					continue;
+				}
 			}
 		} else if (src[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
 			continue;
-		} else if ((isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n')
-		           && ((src + 1 == end && TAILING_SPACES)
-		               || ((src + 1 != end) && isspace(static_cast<unsigned char>(src[1]))))) {
-			continue;
+		} else if (isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n') {
+			if constexpr (TAILING_SPACES) {
+				if (src + 1 == end) {
+					continue;
+				}
+			}
+			if (src + 1 != end && isspace(static_cast<unsigned char>(src[1]))) {
+				continue;
+			}
 		} else if (src[0] == '\n' && dst != begin && dst[-1] == '\n') {
 			continue;
 		}

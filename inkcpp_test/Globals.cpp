@@ -9,13 +9,13 @@ using namespace ink::runtime;
 
 SCENARIO("run story with global variable", "[global variables]")
 {
-	GIVEN ("a story with global variables")
+	GIVEN("a story with global variables")
 	{
-		auto    ink       = story::from_file(INK_TEST_RESOURCE_DIR "GlobalStory.bin");
-		globals globStore = ink->new_globals();
-		runner thread = ink->new_runner(globStore);
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "GlobalStory.bin")};
+		globals                globStore = ink->new_globals();
+		runner                 thread    = ink->new_runner(globStore);
 
-		WHEN( "just runs")
+		WHEN("just runs")
 		{
 			THEN("variables should contain values as in inkScript")
 			{
@@ -24,12 +24,10 @@ SCENARIO("run story with global variable", "[global variables]")
 				REQUIRE(*globStore->get<const char*>("friendly_name_of_player") == std::string{"Jackie"});
 			}
 		}
-		WHEN ("edit number")
+		WHEN("edit number")
 		{
-			bool resi
-				= globStore->set<int32_t>("age", 30);
-			bool resc
-				= globStore->set<const char*>("friendly_name_of_player", "Freddy");
+			bool resi = globStore->set<int32_t>("age", 30);
+			bool resc = globStore->set<const char*>("friendly_name_of_player", "Freddy");
 			THEN("execution should success")
 			{
 				REQUIRE(resi == true);
@@ -41,7 +39,7 @@ SCENARIO("run story with global variable", "[global variables]")
 				REQUIRE(*globStore->get<int32_t>("age") == 30);
 				REQUIRE(*globStore->get<const char*>("friendly_name_of_player") == std::string{"Freddy"});
 			}
-			WHEN ("something added to string")
+			WHEN("something added to string")
 			{
 				// concat in GlobalsStory.ink
 				thread->getall();
@@ -51,9 +49,9 @@ SCENARIO("run story with global variable", "[global variables]")
 				}
 			}
 		}
-		WHEN ("name or type not exist")
+		WHEN("name or type not exist")
 		{
-			auto wrongType = globStore->get<uint32_t>("age");
+			auto wrongType       = globStore->get<uint32_t>("age");
 			auto notExistingName = globStore->get<int32_t>("foo");
 			THEN("should return nullptr")
 			{

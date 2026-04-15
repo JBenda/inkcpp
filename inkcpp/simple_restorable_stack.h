@@ -45,15 +45,18 @@ public:
 	bool rev_iter(const T*& iterator) const;
 
 	// == Save/Restore ==
+	bool is_saved() const { return _save != InvalidIndex; }
+
 	void save();
 	void restore();
 	void forget();
 
+	virtual bool                 can_be_migrated() const;
 	virtual size_t               snap(unsigned char* data, const snapper&) const;
 	virtual const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 protected:
-	virtual void overflow(T*& buffer, size_t& size) { inkFail("Stack overflow!"); }
+	virtual void overflow(T*&, size_t&) { inkFail("Stack overflow!"); }
 
 	void initialize_data(T* buffer, size_t size)
 	{
@@ -71,7 +74,7 @@ private:
 	size_t  _size;
 	const T _null;
 
-	const static size_t InvalidIndex = ~0;
+	const static size_t InvalidIndex = ~0U;
 
 	size_t _pos  = 0;
 	size_t _save = InvalidIndex, _jump = InvalidIndex;
@@ -291,6 +294,12 @@ inline void simple_restorable_stack<T>::forget()
 }
 
 template<typename T>
+bool simple_restorable_stack<T>::can_be_migrated() const
+{
+	return ! is_saved();
+}
+
+template<typename T>
 size_t simple_restorable_stack<T>::snap(unsigned char* data, const snapper&) const
 {
 	unsigned char* ptr          = data;
@@ -309,12 +318,11 @@ size_t simple_restorable_stack<T>::snap(unsigned char* data, const snapper&) con
 	for (size_t i = 0; i < max; ++i) {
 		ptr = snap_write(ptr, _buffer[i], should_write);
 	}
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 template<typename T>
-const unsigned char*
-    simple_restorable_stack<T>::snap_load(const unsigned char* ptr, const loader& loader)
+const unsigned char* simple_restorable_stack<T>::snap_load(const unsigned char* ptr, const loader&)
 {
 	T null;
 	ptr = snap_read(ptr, null);

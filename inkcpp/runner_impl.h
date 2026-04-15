@@ -123,14 +123,16 @@ public:
 
 	size_t               snap(unsigned char* data, snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, loader&);
+	bool                 can_be_migrated() const;
 
-#ifdef INK_ENABLE_CSTD
 	// c-style getline
 	virtual const char* getline_alloc() override;
-#endif
 
 	// move to path
 	virtual bool move_to(hash_t path) override;
+
+	// move to path but keep as much state as possible
+	bool migrate_to(hash_t path);
 
 #if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 	// Gets a single line of output
@@ -195,7 +197,7 @@ private:
 
 private:
 	template<typename T>
-	inline T read();
+	inline T read(optional<ip_t> pos = nullopt);
 
 	choice& add_choice();
 	void    clear_choices();
@@ -210,11 +212,13 @@ private:
 		KEEP_KNOT, ///< keep knot and global tags
 	};
 	void clear_tags(tags_clear_level which);
+	// Fetch string only tags at Tag/Global level
+	void fetch_tags(ip_t begin);
 
 	// Special code for jumping from the current IP to another
 	void     jump(ip_t, bool record_visits, bool track_knot_visit);
-	uint32_t _current_knot_id        = ~0; // id to detect knot changes from the outside
-	uint32_t _current_knot_id_backup = ~0;
+	uint32_t _current_knot_id        = ~0U; // id to detect knot changes from the outside
+	uint32_t _current_knot_id_backup = ~0U;
 	uint32_t _entered_knot   = false; // if we are in the first action after a jump to an snitch/knot
 	bool     _entered_global = false; // if we are in the first action after a jump to an snitch/knot
 
@@ -236,7 +240,7 @@ public:
 	public:
 		template<bool... D, bool con = dynamic, enable_if_t<con, bool> = true>
 		threads()
-		    : base(~0)
+		    : base(~0U)
 		    , _threadDone(nullptr, reinterpret_cast<ip_t>(~0))
 		{
 			static_assert(sizeof...(D) == 0, "Don't use explicit template arguments!");
@@ -275,7 +279,14 @@ public:
 			_threadDone.forget();
 		}
 
-		void set(size_t index, const ip_t& value) { _threadDone.set(index, value); }
+		void set(size_t index, const ip_t& value)
+		{
+			if (index >= _threadDone.capacity()) {
+				inkAssert(index == _threadDone.capacity(), "Threads should only be created incremental");
+				_threadDone.resize(static_cast<size_t>(_threadDone.capacity() * 1.5));
+			}
+			_threadDone.set(index, value);
+		}
 
 		const ip_t& get(size_t index) const { return _threadDone.get(index); }
 
@@ -369,7 +380,7 @@ size_t runner_impl::threads<dynamic, N>::snap(unsigned char* data, const snapper
 	unsigned char* ptr = data;
 	ptr += base::snap(data ? ptr : nullptr, snapper);
 	ptr += _threadDone.snap(data ? ptr : nullptr, snapper);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 template<bool dynamic, size_t N>
@@ -382,7 +393,7 @@ const unsigned char*
 }
 
 template<>
-inline const char* runner_impl::read();
+inline const char* runner_impl::read(optional<ip_t>);
 
 template<runner_impl::tags_level L>
 bool runner_impl::has_tags() const

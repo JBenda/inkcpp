@@ -20,10 +20,10 @@ namespace internal
 		{
 		}
 
+		static void remove_reference(ref_block*&);
+
 		size_t references;
 		bool   valid;
-
-		static void remove_reference(ref_block*&);
 	};
 
 	/** @private */

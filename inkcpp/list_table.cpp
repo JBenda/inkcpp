@@ -6,12 +6,14 @@
  */
 #include "list_table.h"
 #include "config.h"
+#include "hungarian_solver.h"
 #include "system.h"
 #include "traits.h"
 #include "header.h"
 #include "random.h"
 #include "string_utils.h"
 #include "list_impl.h"
+#include <limits>
 
 #ifdef INK_ENABLE_STL
 #	include <ostream>
@@ -43,7 +45,7 @@ list_table::list_table(const char* data)
 	int         start = 0;
 	while ((flag = read_list_flag(ptr)) != null_flag) {
 		// start of new list
-		if (_list_end.size() == flag.list_id) {
+		if (static_cast<int16_t>(_list_end.size()) == flag.list_id) {
 			start              = _list_end.size() == 0 ? 0 : _list_end.back();
 			_list_end.push()   = start;
 			_list_names.push() = ptr;
@@ -74,12 +76,30 @@ list_table::list list_table::create()
 	}
 
 	list new_entry(_entry_state.size());
-	// TODO: initelized unused?
+	// TODO: initialized unused?
 	_entry_state.push() = state::used;
 	for (int i = 0; i < _entrySize; ++i) {
 		_data.push() = 0;
 	}
 	return new_entry;
+}
+
+list_table::list list_table::create_at(size_t idx)
+{
+	if (idx < _entry_state.size()) {
+		if (_entry_state[idx] == state::empty) {
+			_entry_state[idx] = state::used;
+			return list(idx);
+		}
+		return list(-1);
+	}
+	while (_entry_state.size() <= idx) {
+		_entry_state.push() = state::empty;
+		for (int i = 0; i < _entrySize; ++i) {
+			_data.push() = 0;
+		}
+	}
+	return list(idx);
 }
 
 void list_table::clear_usage()
@@ -112,7 +132,7 @@ void list_table::gc()
 	_list_handouts.clear();
 }
 
-int list_table::toFid(list_flag e) const { return listBegin(e.list_id) + e.flag; }
+size_t list_table::toFid(list_flag e) const { return listBegin(e.list_id) + e.flag; }
 
 size_t list_table::stringLen(const list_flag& e) const { return c_str_len(toString(e)); }
 
@@ -130,9 +150,9 @@ size_t list_table::stringLen(const list& l) const
 	size_t        len   = 0;
 	const data_t* entry = getPtr(l.lid);
 	bool          first = true;
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(entry, i)) {
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(entry, j) && _flag_names[j]) {
 					if (! first) {
 						len += 2; // ', '
@@ -163,14 +183,18 @@ char* list_table::toString(char* out, const list& l) const
 
 	while (1) {
 		bool change = false;
-		for (int i = 0; i < numLists(); ++i) {
+		for (size_t i = 0; i < numLists(); ++i) {
 			if (hasList(entry, i)) {
-				for (int j = listBegin(i); j < _list_end[i]; ++j) {
+				for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 					if (! hasFlag(entry, j)) {
 						continue;
 					}
 					int value = _flag_values[j];
-					if (first || value > last_value || (value == last_value && i > last_list)) {
+					// the cast is ok, since if we are in the
+					// first round, `first` is true and we do not evaluate
+					// second round, `last_list` is >= 0
+					if (first || value > last_value
+					    || (value == last_value && i > static_cast<size_t>(last_list))) {
 						if (min_id == -1 || value < min_value) {
 							change    = true;
 							min_list  = i;
@@ -206,10 +230,10 @@ list_table::list list_table::range(list_table::list l, int min, int max)
 	data_t* in           = getPtr(l.lid);
 	data_t* out          = getPtr(res.lid);
 	bool    has_any_list = false;
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(in, i)) {
 			bool has_flag = false;
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				int value = _flag_values[j];
 				if (value < min) {
 					continue;
@@ -265,6 +289,15 @@ list_table::list list_table::create_permament()
 	return res;
 }
 
+list_table::list list_table::create_permament_at(size_t idx)
+{
+	list res = create_at(idx);
+	if (res.lid >= 0) {
+		_entry_state[res.lid] = state::permanent;
+	}
+	return res;
+}
+
 list_table::list& list_table::add_inplace(list& lh, list_flag rh)
 {
 	if (rh.list_id < 0)
@@ -301,10 +334,10 @@ list_table::list list_table::sub(list lh, list rh)
 		o[i] = (l[i] & r[i]) ^ l[i];
 	}
 
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(r, i)) {
 			if (hasList(l, i)) {
-				for (int j = listBegin(i); j < _list_end[i]; ++j) {
+				for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 					if (hasFlag(o, j)) {
 						setList(o, i);
 						active_flag = true;
@@ -317,7 +350,7 @@ list_table::list list_table::sub(list lh, list rh)
 	if (active_flag) {
 		return res;
 	}
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(o, i)) {
 			return res;
 		}
@@ -335,13 +368,13 @@ list_table::list list_table::sub(list lh, list_flag rh)
 		o[i] = l[i];
 	}
 	setFlag(o, toFid(rh), false);
-	for (int i = listBegin(rh.list_id); i < _list_end[rh.list_id]; ++i) {
+	for (size_t i = listBegin(rh.list_id); i < _list_end[rh.list_id]; ++i) {
 		if (hasFlag(o, i)) {
 			return res;
 		}
 	}
 	setList(l, rh.list_id, false);
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(o, i)) {
 			return res;
 		}
@@ -371,13 +404,13 @@ list_table::list list_table::add(list arg, int n)
 	data_t* o           = getPtr(res.lid);
 	bool    active_flag = false;
 	;
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(l, i)) {
 			bool has_flag = false;
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(l, j)) {
 					int value = _flag_values[j] + n;
-					for (int k = j + 1; k < _list_end[i]; ++k) {
+					for (size_t k = j + 1; k < _list_end[i]; ++k) {
 						if (value == _flag_values[k]) {
 							setFlag(o, k);
 							has_flag = true;
@@ -404,9 +437,9 @@ list_flag list_table::add(list_flag arg, int n)
 		return arg;
 	}
 	int value = _flag_values[arg.flag] + n;
-	for (int i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
+	for (size_t i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
 		if (_flag_values[i] == value) {
-			arg.flag = i;
+			arg.flag = static_cast<int16_t>(i);
 			return arg;
 		}
 	}
@@ -425,13 +458,13 @@ list_table::list list_table::sub(list arg, int n)
 	data_t* l           = getPtr(arg.lid);
 	data_t* o           = getPtr(res.lid);
 	bool    active_flag = false;
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(l, i)) {
 			bool has_flag = false;
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(l, j)) {
 					int value = _flag_values[j] - n;
-					for (int k = j - 1; k >= listBegin(i); --k) {
+					for (size_t k = j - 1; k != ~0U && k >= listBegin(i) && k != ~0U; --k) {
 						if (_flag_values[k] == value) {
 							setFlag(o, k);
 							has_flag = true;
@@ -469,9 +502,9 @@ int32_t list_table::count(list l) const
 {
 	int           count = 0;
 	const data_t* data  = getPtr(l.lid);
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(data, i)) {
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (_flag_names[j] != nullptr && hasFlag(data, j)) {
 					++count;
 				}
@@ -485,14 +518,14 @@ list_flag list_table::min(list l) const
 {
 	list_flag     res{-1, -1};
 	const data_t* data = getPtr(l.lid);
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(data, i)) {
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(data, j)) {
 					int value = _flag_values[j];
 					if (res.flag < 0 || value < res.flag) {
-						res.flag    = value;
-						res.list_id = i;
+						res.flag    = static_cast<int16_t>(value);
+						res.list_id = static_cast<int16_t>(i);
 					}
 					break;
 				}
@@ -506,14 +539,14 @@ list_flag list_table::max(list l) const
 {
 	list_flag     res{-1, -1};
 	const data_t* data = getPtr(l.lid);
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(data, i)) {
-			for (int j = _list_end[i] - 1; j >= listBegin(i); --j) {
+			for (size_t j = _list_end[i] - 1; j != ~0U && j >= listBegin(i); --j) {
 				if (hasFlag(data, j)) {
 					int value = _flag_values[j];
 					if (value > res.flag) {
-						res.flag    = value;
-						res.list_id = i;
+						res.flag    = static_cast<int16_t>(value);
+						res.list_id = static_cast<int16_t>(i);
 					}
 					break;
 				}
@@ -527,12 +560,12 @@ bool list_table::equal(list lh, list rh) const
 {
 	const data_t* l = getPtr(lh.lid);
 	const data_t* r = getPtr(rh.lid);
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(l, i) != hasList(r, i)) {
 			return false;
 		}
 		if (hasList(l, i)) {
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(l, j) != hasFlag(r, j)) {
 					return false;
 				}
@@ -545,13 +578,13 @@ bool list_table::equal(list lh, list rh) const
 bool list_table::equal(list lh, list_flag rh) const
 {
 	const data_t* l = getPtr(lh.lid);
-	for (int i = 0; i < numLists(); ++i) {
-		if (hasList(l, i) != (rh.list_id == i)) {
+	for (size_t i = 0; i < numLists(); ++i) {
+		if (hasList(l, i) != (rh.list_id == static_cast<int16_t>(i))) {
 			return false;
 		}
 	}
-	for (int i = listBegin(rh.list_id); i < _list_end[rh.list_id]; ++i) {
-		if (hasFlag(l, i) != (rh.flag == i - listBegin(rh.list_id))) {
+	for (size_t i = listBegin(rh.list_id); i < _list_end[rh.list_id]; ++i) {
+		if (hasFlag(l, i) != (rh.flag == static_cast<int16_t>(i - listBegin(rh.list_id)))) {
 			return false;
 		}
 	}
@@ -563,10 +596,10 @@ list_table::list list_table::all(list arg)
 	list    res = create();
 	data_t* l   = getPtr(arg.lid);
 	data_t* o   = getPtr(res.lid);
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(l, i)) {
 			setList(o, i);
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				setFlag(o, j);
 			}
 		}
@@ -580,7 +613,7 @@ list_table::list list_table::all(list_flag arg)
 	if (arg != null_flag) {
 		data_t* o = getPtr(res.lid);
 		setList(o, arg.list_id);
-		for (int i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
+		for (size_t i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
 			setFlag(o, i);
 		}
 	}
@@ -593,10 +626,10 @@ list_table::list list_table::invert(list arg)
 	list    res = create();
 	data_t* l   = getPtr(arg.lid);
 	data_t* o   = getPtr(res.lid);
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(l, i)) {
 			bool hasList = false;
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				bool have = hasFlag(l, j);
 				if (! have) {
 					hasList = true;
@@ -616,8 +649,8 @@ list_table::list list_table::invert(list_flag arg)
 	list res = create();
 	if (arg != null_flag) {
 		data_t* o = getPtr(res.lid);
-		for (int i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
-			setFlag(o, i, i - listBegin(arg.list_id) != arg.flag);
+		for (size_t i = listBegin(arg.list_id); i < _list_end[arg.list_id]; ++i) {
+			setFlag(o, i, arg.flag != static_cast<int16_t>(i - listBegin(arg.list_id)));
 		}
 	}
 	return res;
@@ -656,9 +689,9 @@ list_flag list_table::lrnd(list lh, prng& rng) const
 	int           n = count(lh);
 	n               = rng.rand(n);
 	int count       = 0;
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(l, i)) {
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(l, j)) {
 					if (count++ == n) {
 						return list_flag{
@@ -677,12 +710,12 @@ bool list_table::has(list lh, list rh) const
 {
 	const data_t* r = getPtr(rh.lid);
 	const data_t* l = getPtr(lh.lid);
-	for (int i = 0; i < numLists(); ++i) {
+	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(r, i)) {
 			if (! hasList(l, i)) {
 				return false;
 			}
-			for (int j = listBegin(i); j < _list_end[i]; ++j) {
+			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(r, j) && ! hasFlag(l, j)) {
 					return false;
 				}
@@ -700,7 +733,7 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 		list_flag list = get_list_id(flag_name); // since flag_name is `list_name.flag_name`
 		flag_name      = periode + 1;
 		int list_begin = list.list_id == 0 ? 0 : _list_end[list.list_id - 1];
-		for (int i = list_begin; i != _list_end[list.list_id]; ++i) {
+		for (size_t i = list_begin; i != _list_end[list.list_id]; ++i) {
 			if (str_equal(flag_name, _flag_names[i])) {
 				return {
 				    list_flag{list.list_id, static_cast<int16_t>(i - list_begin)}
@@ -710,12 +743,12 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 	} else {
 		for (auto flag_itr = _flag_names.begin(); flag_itr != _flag_names.end(); ++flag_itr) {
 			if (str_equal(*flag_itr, flag_name)) {
-				int fid   = flag_itr - _flag_names.begin();
-				int lid   = 0;
-				int begin = 0;
-				for (auto list_itr = _list_end.begin(); list_itr != _list_end.end(); ++list_itr) {
+				size_t fid   = static_cast<size_t>(flag_itr - _flag_names.begin());
+				size_t lid   = 0;
+				int    begin = 0;
+				for (auto* list_itr = _list_end.begin(); list_itr != _list_end.end(); ++list_itr) {
 					if (*list_itr > fid) {
-						lid = list_itr - _list_end.begin();
+						lid = static_cast<size_t>(list_itr - _list_end.begin());
 						break;
 					}
 					begin = *list_itr;
@@ -733,7 +766,7 @@ list_flag list_table::get_list_id(const char* list_name) const
 {
 	using int_t        = decltype(list_flag::list_id);
 	const char* period = str_find(list_name, '.');
-	size_t      len    = period ? period - list_name : c_str_len(list_name);
+	size_t      len    = period ? static_cast<size_t>(period - list_name) : c_str_len(list_name);
 	for (int_t i = 0; i < static_cast<int_t>(_list_names.size()); ++i) {
 		if (str_equal_len(list_name, _list_names[i], len)) {
 			return list_flag{i, -1};
@@ -752,8 +785,8 @@ list_table::list list_table::redefine(list lh, list rh)
 
 	// if the new list has no origin: give it the origin of the old value
 	bool has_origin = false;
-	for (int i = 0; i < numLists(); ++i) {
-		if (hasList(r, i)) {
+	for (size_t i = 0; i < numLists(); ++i) {
+		if (hasList(r, static_cast<int>(i))) {
 			has_origin = true;
 			break;
 		}
@@ -790,14 +823,18 @@ std::ostream& list_table::write(std::ostream& os, list l) const
 
 	while (1) {
 		bool change = false;
-		for (int i = 0; i < numLists(); ++i) {
-			if (hasList(entry, i)) {
-				for (int j = listBegin(i); j < _list_end[i]; ++j) {
-					if (! hasFlag(entry, j)) {
+		for (size_t i = 0; i < numLists(); ++i) {
+			if (hasList(entry, static_cast<int>(i))) {
+				for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
+					if (! hasFlag(entry, static_cast<int>(j))) {
 						continue;
 					}
 					int value = _flag_values[j];
-					if (first || value > last_value || (value == last_value && i > last_list)) {
+					// the cast is ok, since if we are in the
+					// first round, `first` is true and we do not evaluate
+					// second round, `last_list` is >= 0
+					if (first || value > last_value
+					    || (value == last_value && i > static_cast<size_t>(last_list))) {
 						if (min_id == -1 || value < min_value) {
 							min_value = value;
 							min_id    = j;
@@ -830,7 +867,7 @@ size_t list_table::snap(unsigned char* data, const snapper& snapper) const
 	unsigned char* ptr = data;
 	ptr += _data.snap(data ? ptr : nullptr, snapper);
 	ptr += _entry_state.snap(data ? ptr : nullptr, snapper);
-	return ptr - data;
+	return static_cast<size_t>(ptr - data);
 }
 
 const unsigned char* list_table::snap_load(const unsigned char* ptr, const loader& loader)
@@ -849,5 +886,246 @@ config::statistics::list_table list_table::statistics() const
 	    _entry_state.statistics(),
 	};
 }
+
+/** Distance of two lists based on their contained values.
+ * https://en.wikipedia.org/wiki/Jaccard_index
+ * @param lh,rh flag indexes contained in the lists
+ * @param matches mapping from lh -> rh, -1 for dropped
+ */
+float d_contains(const size_t lh[2], const size_t rh[2], const int* matches)
+{
+	int n_union        = (lh[1] - lh[0]) + (rh[1] - rh[0]);
+	int n_intersection = 0;
+	for (size_t i = lh[0]; i < lh[1]; ++i) {
+		if (matches[i] == -1) {
+			continue;
+		}
+		if (static_cast<size_t>(matches[i]) >= rh[0] && static_cast<size_t>(matches[i]) < rh[1]) {
+			n_intersection += 1;
+		}
+	}
+	n_union -= n_intersection;
+	return static_cast<float>(n_intersection) / n_union;
+}
+
+/** Distance function for string labels.
+ * @param lh,rh null terminated ASCII strings to compare
+ * @return 0 if identical
+ */
+float d_label(const char* lh, const char* rh)
+{
+	return 1.f - algorithms::jaro_winkler_simularity(lh, rh);
+}
+
+/** Distance function for two values.
+ * @param lh,rh numeric values to compare
+ * @param lh_range,rh_range min/max value of the number
+ * @returns 0 if identical
+ */
+float d_value(int lh, int rh, int lh_range[2], int rh_range[2])
+{
+	if (lh == rh) {
+		return 0;
+	}
+	float res = (static_cast<float>(lh) - lh_range[0]) / (lh_range[1] - lh_range[0]);
+	res -= (static_cast<float>(rh) - rh_range[0]) / (rh_range[1] - rh_range[0]);
+	if (res < 0) {
+		res = -res;
+	}
+	return res;
+}
+
+struct MatchList {
+	const size_t*      list_ends;
+	const char* const* names;
+	size_t             length;
+};
+
+struct MatchListValues {
+	const char* const* names;
+	const int*         values;
+	size_t             length;
+};
+
+void get_range(const MatchListValues& values, int range[2])
+{
+	range[0] = std::numeric_limits<int>::max();
+	range[1] = std::numeric_limits<int>::min();
+	for (size_t i = 0; i < values.length; ++i) {
+		if (values.values[i] < range[0]) {
+			range[0] = values.values[i];
+		}
+		if (values.values[i] > range[1]) {
+			range[1] = values.values[i];
+		}
+	}
+}
+
+float* cost_matrix(
+    const MatchList& lh, const MatchList& rh, const int* value_matches, float drop_penalty
+)
+{
+	size_t n_lists = lh.length > rh.length ? lh.length : rh.length;
+	float* matrix  = new float[n_lists * n_lists];
+	for (size_t i = 0; i < lh.length; ++i) {
+		for (size_t j = 0; j < rh.length; ++j) {
+			float  dl               = d_label(lh.names[i], rh.names[j]);
+			size_t lh_range[]       = {i == 0 ? 0 : lh.list_ends[i - 1], lh.list_ends[i]};
+			size_t rh_range[]       = {j == 0 ? 0 : rh.list_ends[j - 1], rh.list_ends[j]};
+			float  dv               = d_contains(lh_range, rh_range, value_matches);
+			matrix[i * n_lists + j] = dv * 0.8f + dl * 0.2f;
+		}
+		for (size_t j = rh.length; j < n_lists; ++j) {
+			matrix[i * n_lists + j] = drop_penalty;
+		}
+	}
+	for (size_t i = lh.length; i < n_lists; ++i) {
+		for (size_t j = 0; j < n_lists; ++j) {
+			matrix[i * n_lists + j] = drop_penalty;
+		}
+	}
+	return matrix;
+}
+
+float* cost_matrix(const MatchListValues& lh, const MatchListValues& rh, float drop_penalty)
+{
+	size_t n_flags = lh.length > rh.length ? lh.length : rh.length;
+	float* matrix  = new float[n_flags * n_flags];
+	int    lh_range[2], rh_range[2];
+	get_range(lh, lh_range);
+	get_range(rh, rh_range);
+
+	for (size_t i = 0; i < lh.length; ++i) {
+		for (size_t j = 0; j < rh.length; ++j) {
+			float dl                = d_label(lh.names[i], rh.names[j]);
+			float dv                = d_value(lh.values[i], rh.values[j], lh_range, rh_range);
+			matrix[i * n_flags + j] = dl * 0.8f + dv * 0.2f;
+		}
+		for (size_t j = rh.length; j < n_flags; ++j) {
+			matrix[i * n_flags + j] = drop_penalty;
+		}
+	}
+	for (size_t i = lh.length; i < n_flags; ++i) {
+		for (size_t j = 0; j < rh.length; ++j) {
+			matrix[i * n_flags + j] = drop_penalty;
+		}
+	}
+	return matrix;
+}
+
+bool list_table::migrate(const char* old_list_metadata)
+{
+	list_table old_ref_table(old_list_metadata);
+	for (const auto& x : _data) {
+		old_ref_table._data.push() = x;
+	}
+	for (const auto& x : _entry_state) {
+		old_ref_table._entry_state.push() = x;
+	}
+	_data.clear();
+	_entry_state.clear();
+
+	// find best mapping between old and new list elements
+	//     + c_ij(value) = min(|v_i - v_j|/Rv,1)
+	//     + c_ij(name) = levenshtein, cosine n-grams, jaro-winkler
+	//     + c_ij(position_in_list) = min(|p_i - p_j|/Rp, 1)
+	// find best mapping between lists
+	//     + c_ij(name) = levenshtein, cosine n-grams, jaro-winkler
+	//     + c_ij(entries) = entries existing in both
+	// 1. h_entry_map = high confidents mapping of list elements (value, name, position_in_list)
+	// 2. h_list_map = high confident mapping of lists (name, h_entry_map)
+	// 3. entry_map = mapping of list elements (value, name, position_in_list,
+	// h_list_map[list_name])
+	// 4. list_map = mapping of lists (name, entry_map)
+
+
+	// high confidance list value matches
+	constexpr float HIGH_CONFIDANCE_DROP_PANELTY = 0.3f;
+	constexpr float LOW_CONFIDANCE_DROP_PANELTY  = 0.6f;
+	float*          value_matrix                 = cost_matrix(
+      MatchListValues{
+          old_ref_table._flag_names.data(), old_ref_table._flag_values.data(),
+          old_ref_table.numFlags()
+      },
+      MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
+      LOW_CONFIDANCE_DROP_PANELTY
+  );
+	const int n_flags       = std::max(numFlags(), old_ref_table.numFlags());
+	int*      value_matches = new int[n_flags];
+	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, HIGH_CONFIDANCE_DROP_PANELTY);
+
+	// list matches
+	float* list_matrix = cost_matrix(
+	    MatchList{
+	        old_ref_table._list_end.data(), old_ref_table._list_names.data(), old_ref_table.numLists()
+	    },
+	    MatchList{_list_end.data(), _list_names.data(), numLists()}, value_matches,
+	    LOW_CONFIDANCE_DROP_PANELTY
+	);
+	const int n_lists      = std::max(numLists(), old_ref_table.numLists());
+	int*      list_matches = new int[n_lists];
+	algorithms::hungarian_solver(list_matrix, list_matches, n_lists, LOW_CONFIDANCE_DROP_PANELTY);
+
+	// low confidence list_value matches
+	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, LOW_CONFIDANCE_DROP_PANELTY);
+
+	for (size_t idx = 0; idx < old_ref_table._entry_state.size(); ++idx) {
+		// migrate
+		list new_list{-1};
+		switch (old_ref_table._entry_state[idx]) {
+			case state::permanent: new_list = create_permament_at(idx); break;
+			case state::used: new_list = create_at(idx); break;
+			default: continue;
+		}
+		inkAssert(new_list.lid >= 0, "Failed to create new list entry for migration.");
+		inkAssert(
+		    static_cast<size_t>(new_list.lid) == idx,
+		    "At position list creation failed with different valid idx."
+		);
+		const data_t* entry         = old_ref_table.getPtr(idx);
+		data_t*       new_entry     = getPtr(idx);
+		bool          migrated      = false;
+		bool          is_empty_list = true;
+		for (size_t i = 0; i < old_ref_table.numLists(); ++i) {
+			if (old_ref_table.hasList(entry, i)) {
+				bool hit      = false;
+				is_empty_list = false;
+				for (size_t j = old_ref_table.listBegin(i); j < old_ref_table._list_end[i]; ++j) {
+					if (old_ref_table.hasFlag(entry, j) && old_ref_table._flag_names[j]) {
+						if (value_matches[j] != -1) {
+							hit      = true;
+							migrated = true;
+							size_t k;
+							for (k = 0; _list_end[k] < static_cast<size_t>(value_matches[j]); ++k) {}
+							setList(new_entry, k);
+							setFlag(new_entry, value_matches[j]);
+						}
+					}
+				}
+				// keep list if list has match but all values where dropped
+				if (! hit && list_matches[i] != -1) {
+					setList(new_entry, list_matches[i]);
+					migrated = true;
+				}
+			}
+		}
+		// drop list
+		if (! is_empty_list && ! migrated) {
+			// FIXME: remove list ?
+			// _entry_state [idx] = state::empty;
+			return false;
+		}
+		// FIXME: use Assert instead?
+		// inkAssert(migrated, "Migrating list @%d would lead to an empty list", idx);
+	}
+
+
+	delete[] list_matches;
+	delete[] value_matches;
+	delete[] value_matrix;
+	delete[] list_matrix;
+	return true;
+}
+
 
 } // namespace ink::runtime::internal

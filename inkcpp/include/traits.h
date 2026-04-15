@@ -177,7 +177,7 @@ inline size_t c_str_len(const char* c)
 	const char* i = c;
 	while (*i != 0)
 		i++;
-	return i - c;
+	return static_cast<size_t>(i - c);
 }
 
 MARK_AS_STRING(char*, c_str_len(x), x);

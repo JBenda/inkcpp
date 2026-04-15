@@ -97,7 +97,7 @@ int main(int argc, const char** argv)
 
 	// Parse options
 	std::string outputFilename;
-	bool        playMode = false, testMode = false, testDirectory = false, ommit_choice_tags = false;
+	bool        playMode = false, ommit_choice_tags = false;
 	std::string snapshotFile;
 	bool        show_statistics    = false;
 	const char* inklecateOverwrite = nullptr;
@@ -114,11 +114,6 @@ int main(int argc, const char** argv)
 			}
 		} else if (option == "--ommit-choice-tags") {
 			ommit_choice_tags = true;
-		} else if (option == "-t") {
-			testMode = true;
-		} else if (option == "-td") {
-			testMode      = true;
-			testDirectory = true;
 		} else if (option == "--inklecate") {
 			if (i + 1 < argc - 1 && argv[i + 1][0] != '-') {
 				++i;
@@ -134,26 +129,14 @@ int main(int argc, const char** argv)
 	// Get input filename
 	std::string inputFilename = argv[argc - 1];
 
-	// Test mode
-	// if (testMode) {
-	// 	bool result;
-	// 	if (testDirectory) {
-	// 		result = test_directory(inputFilename);
-	// 	} else {
-	// 		result = test(inputFilename);
-	// 	}
-
-	// 	return result ? 0 : -1;
-	// }
-
 	// If output filename not specified, use input filename as guideline
 	if (outputFilename.empty()) {
 		outputFilename = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".bin");
 	}
 
 	// If input filename is an .ink file
-	int  val                   = inputFilename.find(".ink");
-	bool json_file_is_tmp_file = false;
+	size_t val                   = inputFilename.find(".ink");
+	bool   json_file_is_tmp_file = false;
 	if (val == inputFilename.length() - 4) {
 		// Create temporary filename
 		std::string jsonFile = std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".tmp");
@@ -172,33 +155,35 @@ int main(int argc, const char** argv)
 	}
 
 	// Open file and compile
-	try {
-		ink::compiler::compilation_results results;
-		std::ofstream                      fout(outputFilename, std::ios::binary | std::ios::out);
-		ink::compiler::run(inputFilename.c_str(), fout, &results);
-		fout.close();
-		if (json_file_is_tmp_file) {
-			remove(inputFilename.c_str());
-		}
+	if (inputFilename != outputFilename) {
+		try {
+			ink::compiler::compilation_results results;
+			std::ofstream                      fout(outputFilename, std::ios::binary | std::ios::out);
+			ink::compiler::run(inputFilename.c_str(), fout, &results);
+			fout.close();
+			if (json_file_is_tmp_file) {
+				remove(inputFilename.c_str());
+			}
 
-		// Report errors
-		for (auto& warn : results.warnings) {
-			std::cerr << "WARNING: " << warn << '\n';
-		}
-		for (auto& err : results.errors) {
-			std::cerr << "ERROR: " << err << '\n';
-		}
+			// Report errors
+			for (auto& warn : results.warnings) {
+				std::cerr << "WARNING: " << warn << '\n';
+			}
+			for (auto& err : results.errors) {
+				std::cerr << "ERROR: " << err << '\n';
+			}
 
-		if (results.errors.size() > 0 && playMode) {
-			std::cerr << "Cancelling play mode. Errors detected in compilation" << std::endl;
-			return -1;
+			if (results.errors.size() > 0 && playMode) {
+				std::cerr << "Cancelling play mode. Errors detected in compilation" << std::endl;
+				return -1;
+			}
+		} catch (std::exception& e) {
+			if (json_file_is_tmp_file) {
+				remove(inputFilename.c_str());
+			}
+			std::cerr << "Unhandled InkBin compiler exception: " << e.what() << std::endl;
+			return 1;
 		}
-	} catch (std::exception& e) {
-		if (json_file_is_tmp_file) {
-			remove(inputFilename.c_str());
-		}
-		std::cerr << "Unhandled InkBin compiler exception: " << e.what() << std::endl;
-		return 1;
 	}
 
 	if (! playMode) {
@@ -229,7 +214,7 @@ int main(int argc, const char** argv)
 				std::cout << thread->getline();
 				if (thread->has_tags()) {
 					std::cout << "# tags: ";
-					for (int i = 0; i < thread->num_tags(); ++i) {
+					for (ink::size_t i = 0; i < thread->num_tags(); ++i) {
 						if (i != 0) {
 							std::cout << ", ";
 						}
@@ -247,7 +232,7 @@ int main(int argc, const char** argv)
 					std::cout << index++ << ": " << c.text();
 					if (! ommit_choice_tags && c.has_tags()) {
 						std::cout << "\n\t";
-						for (size_t i = 0; i < c.num_tags(); ++i) {
+						for (ink::size_t i = 0; i < c.num_tags(); ++i) {
 							std::cout << "# " << c.get_tag(i) << " ";
 						}
 					}
@@ -263,10 +248,19 @@ int main(int argc, const char** argv)
 				std::cout << "?> ";
 				std::cin >> c;
 				if (c == -1) {
+					std::cout << "To create a migratable snapshot please enter a choice in addition, or `-1` "
+					             "to snap right now:\nsnap after\n?>";
+					std::cin >> c;
+					if (c != -1) {
+						thread->choose(c - 1);
+					}
 					snapshot* snap = thread->create_snapshot();
 					snap->write_to_file(
 					    std::regex_replace(inputFilename, std::regex("\\.[^\\.]+$"), ".snap").c_str()
 					);
+					if (snap->can_be_migrated()) {
+						std::cout << "Migratable snapshot." << std::endl;
+					}
 					delete snap;
 					break;
 				}

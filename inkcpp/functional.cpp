@@ -26,35 +26,42 @@ ink::runtime::value
 }
 
 template<>
-int32_t function_base::pop<int32_t>(basic_eval_stack* stack, list_table& lists)
+int32_t function_base::pop<int32_t>(basic_eval_stack* stack, list_table&)
 {
 	value val = stack->pop();
 	return casting::numeric_cast<value_type::int32>(val);
 }
 
 template<>
-uint32_t function_base::pop<uint32_t>(basic_eval_stack* stack, list_table& lists)
+uint32_t function_base::pop<uint32_t>(basic_eval_stack* stack, list_table&)
 {
 	value val = stack->pop();
 	return casting::numeric_cast<value_type::uint32>(val);
 }
 
 template<>
-bool function_base::pop<bool>(basic_eval_stack* stack, list_table& lists)
+bool function_base::pop<bool>(basic_eval_stack* stack, list_table&)
 {
 	value val = stack->pop();
 	return casting::numeric_cast<value_type::int32>(val) != 0;
 }
 
 template<>
-float function_base::pop<float>(basic_eval_stack* stack, list_table& lists)
+float function_base::pop<float>(basic_eval_stack* stack, list_table&)
 {
 	value val = stack->pop();
 	return casting::numeric_cast<value_type::float32>(val);
 }
 
 template<>
-const char* function_base::pop<const char*>(basic_eval_stack* stack, list_table& lists)
+double function_base::pop<double>(basic_eval_stack* stack, list_table&)
+{
+	value val = stack->pop();
+	return casting::numeric_cast<value_type::float32>(val);
+}
+
+template<>
+const char* function_base::pop<const char*>(basic_eval_stack* stack, list_table&)
 {
 	value val = stack->pop();
 	inkAssert(val.type() == value_type::string, "Type mismatch!");
@@ -77,6 +84,12 @@ template<>
 void function_base::push<float>(basic_eval_stack* stack, const float& v)
 {
 	stack->push(value{}.set<value_type::float32>(v));
+}
+
+template<>
+void function_base::push<double>(basic_eval_stack* stack, const double& v)
+{
+	stack->push(value{}.set<value_type::float32>(static_cast<float>(v)));
 }
 
 template<>

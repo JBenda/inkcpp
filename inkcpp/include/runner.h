@@ -83,7 +83,6 @@ public:
 	 */
 	virtual snapshot* create_snapshot() const = 0;
 
-#ifdef INK_ENABLE_CSTD
 	/**
 	 * Continue execution until the next newline, then allocate a c-style
 	 * string with the output. This allocated string is managed by the runtime
@@ -93,7 +92,6 @@ public:
 	 * @return allocated c-style string with the output of a single line of execution
 	 */
 	virtual const char* getline_alloc() = 0;
-#endif
 
 #if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 	/**

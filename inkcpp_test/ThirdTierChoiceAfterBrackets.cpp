@@ -14,8 +14,9 @@ SCENARIO(
 {
 	GIVEN("a story with brackets and nested choices")
 	{
-		auto   ink    = story::from_file(INK_TEST_RESOURCE_DIR "ThirdTierChoiceAfterBracketsStory.bin");
-		runner thread = ink->new_runner();
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR
+		                                            "ThirdTierChoiceAfterBracketsStory.bin")};
+		runner                 thread = ink->new_runner();
 
 		WHEN("start thread")
 		{

@@ -60,7 +60,7 @@ struct container_data {
 	uint32_t end_offset = 0;
 
 	// Index used in CNT? operations
-	container_t counter_index = ~0;
+	container_t counter_index = ~0U;
 
 	~container_data()
 	{
@@ -158,6 +158,8 @@ void binary_emitter::write_raw(
 {
 	_instructions.write(command);
 	_instructions.write(flag);
+	constexpr size_t MAX_PAYLOAD_SIZE = 4;
+	ink_assert(payload_size <= MAX_PAYLOAD_SIZE, "enforce constant instruction size");
 	if (payload_size > 0)
 		_instructions.write(( const byte_t* ) payload, payload_size);
 }
@@ -372,7 +374,7 @@ void binary_emitter::process_paths()
 		bool firstParent = true;
 
 		// We need to parse the path
-		offset_t    noop_offset = ~0;
+		offset_t    noop_offset = ~0U;
 		char*       _context    = nullptr;
 		const char* token
 		    = ink::compiler::internal::strtok_s(const_cast<char*>(path_cstr), ".", &_context);
@@ -413,13 +415,13 @@ void binary_emitter::process_paths()
 			token = ink::compiler::internal::strtok_s(nullptr, ".", &_context);
 		}
 
-		if (noop_offset != ~0) {
+		if (noop_offset != ~0U) {
 			inkAssert(! useCountIndex, "Can't count visits to a noop!");
 			_instructions.set(position, noop_offset);
 		} else {
 			// If we want the count index, write that out
 			if (useCountIndex) {
-				inkAssert(container->counter_index != ~0, "No count index available for this container!");
+				inkAssert(container->counter_index != ~0U, "No count index available for this container!");
 				_instructions.set(position, container->counter_index);
 			} else {
 				// Otherwise, write container address
@@ -503,11 +505,17 @@ void binary_emitter::set_list_meta(const list_data& list_defs)
 		_list_meta.write(flag.flag);
 		if (flag.flag.list_id != list_id) {
 			list_id = flag.flag.list_id;
-			_list_meta.write(reinterpret_cast<const byte_t*>(list_names->data()), list_names->size());
+			_list_meta.write(
+			    reinterpret_cast<const byte_t*>(list_names->data()),
+			    static_cast<size_t>(list_names->size())
+			);
 			++list_names;
 			_list_meta.write('\0');
 		}
-		_list_meta.write(reinterpret_cast<const byte_t*>(flag.name->c_str()), flag.name->size() + 1);
+		_list_meta.write(
+		    reinterpret_cast<const byte_t*>(flag.name->c_str()),
+		    static_cast<size_t>(flag.name->size()) + 1
+		);
 	}
 	_list_meta.write(null_flag);
 }
