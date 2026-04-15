@@ -912,7 +912,10 @@ float d_contains(const size_t lh[2], const size_t rh[2], const int* matches)
  * @param lh,rh null terminated ASCII strings to compare
  * @return 0 if identical
  */
-float d_label(const char* lh, const char* rh) { return 1.f - jaro_winkler_simularity(lh, rh); }
+float d_label(const char* lh, const char* rh)
+{
+	return 1.f - algorithms::jaro_winkler_simularity(lh, rh);
+}
 
 /** Distance function for two values.
  * @param lh,rh numeric values to compare
@@ -1049,7 +1052,7 @@ bool list_table::migrate(const char* old_list_metadata, const ink::internal::hea
   );
 	const int n_flags       = std::max(numFlags(), old_ref_table.numFlags());
 	int*      value_matches = new int[n_flags];
-	hungarian_solver(value_matrix, value_matches, n_flags, HIGH_CONFIDANCE_DROP_PANELTY);
+	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, HIGH_CONFIDANCE_DROP_PANELTY);
 
 	// list matches
 	float* list_matrix = cost_matrix(
@@ -1061,10 +1064,10 @@ bool list_table::migrate(const char* old_list_metadata, const ink::internal::hea
 	);
 	const int n_lists      = std::max(numLists(), old_ref_table.numLists());
 	int*      list_matches = new int[n_lists];
-	hungarian_solver(list_matrix, list_matches, n_lists, LOW_CONFIDANCE_DROP_PANELTY);
+	algorithms::hungarian_solver(list_matrix, list_matches, n_lists, LOW_CONFIDANCE_DROP_PANELTY);
 
 	// low confidence list_value matches
-	hungarian_solver(value_matrix, value_matches, n_flags, LOW_CONFIDANCE_DROP_PANELTY);
+	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, LOW_CONFIDANCE_DROP_PANELTY);
 
 	for (size_t idx = 0; idx < old_ref_table._entry_state.size(); ++idx) {
 		// migrate

@@ -1,5 +1,10 @@
 #pragma once
 
+#include "system.h"
+
+namespace ink::algorithms
+{
+
 /** Jaro Similarity of two null terminated byte strings.
  * supports ASCII encoding, UTF-8 might be broken.
  * ignores case.
@@ -30,3 +35,4 @@ float jaro_winkler_simularity(const char* lh, const char* rh);
  * @return total cost of assigment
  */
 float hungarian_solver(const float* cost, int* matches, size_t n, float threshold = 0);
+} // namespace ink::algorithms

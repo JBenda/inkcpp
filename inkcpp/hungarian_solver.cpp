@@ -1,9 +1,11 @@
 #include "hungarian_solver.h"
+
 #include "system.h"
 #include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <limits>
+#include <stdint.h>
 
 class HungarienCtx
 {
@@ -106,6 +108,8 @@ public:
 	}
 };
 
+namespace ink::algorithms
+{
 float hungarian_solver(const float* cost, int* matches, size_t n, float threshold)
 {
 	HungarienCtx ctx(cost, n);
@@ -129,12 +133,12 @@ float hungarian_solver(const float* cost, int* matches, size_t n, float threshol
 
 float jaro_simularity(const char* lh, const char* rh)
 {
-	const size_t lh_len          = strlen(lh);
+	const size_t lh_len          = static_cast<size_t>(strlen(lh));
 	uint8_t      lh_matched[256] = {};
 	if (lh_len > sizeof(lh_matched) * 8) {
 		return 0;
 	}
-	const size_t rh_len          = strlen(rh);
+	const size_t rh_len          = static_cast<size_t>(strlen(rh));
 	uint8_t      rh_matched[256] = {};
 	if (rh_len > sizeof(rh_matched) * 8) {
 		return 0;
@@ -183,7 +187,7 @@ float jaro_simularity(const char* lh, const char* rh)
 	return ((m / lh_len) + (m / rh_len) + ((m - t) / m)) / 3.f;
 }
 
-static constexpr float P = 0.1;
+static constexpr float P = 0.1f;
 
 float jaro_winkler_simularity(const char* lh, const char* rh)
 {
@@ -199,3 +203,4 @@ float jaro_winkler_simularity(const char* lh, const char* rh)
 	}
 	return j + l * P * (1 - j);
 }
+} // namespace ink::algorithms

@@ -30,17 +30,17 @@ SCENARIO("santy check distance functions", "[list_match]")
 		{
 			GIVEN("Two Stings")
 			{
-				float j = jaro_simularity("FAREMVIEL", "FARMVILLE");
+				float j = ink::algorithms::jaro_simularity("FAREMVIEL", "FARMVILLE");
 				CHECK_THAT(j, Catch::Matchers::WithinAbs(0.88, 0.01));
 			}
 			GIVEN("Two Strings in different Casing, no impact ignore casing")
 			{
-				float j = jaro_simularity("FAREMVIEL", "farmville");
+				float j = ink::algorithms::jaro_simularity("FAREMVIEL", "farmville");
 				CHECK_THAT(j, Catch::Matchers::WithinAbs(0.88, 0.01));
 			}
 			GIVEN("Two strings with fill characters, small impact")
 			{
-				float j = jaro_simularity("FAREMVIEL", "FARMV_IL-LE");
+				float j = ink::algorithms::jaro_simularity("FAREMVIEL", "FARMV_IL-LE");
 				CHECK_THAT(j, Catch::Matchers::WithinAbs(0.83, 0.01));
 			}
 		}
@@ -48,14 +48,14 @@ SCENARIO("santy check distance functions", "[list_match]")
 		{
 			GIVEN("Two Strings wih without prefix")
 			{
-				float j  = jaro_simularity("ZFAREMVIEL", "YFARMVILLE");
-				float jw = jaro_winkler_simularity("ZFAREMVIEL", "YFARMVILLE");
+				float j  = ink::algorithms::jaro_simularity("ZFAREMVIEL", "YFARMVILLE");
+				float jw = ink::algorithms::jaro_winkler_simularity("ZFAREMVIEL", "YFARMVILLE");
 				CHECK_THAT(jw, Catch::Matchers::WithinAbs(j, 0.01));
 			}
 			GIVEN("Two Strings with prefix")
 			{
-				float j  = jaro_simularity("FAREMVIEL", "FARMVILLE");
-				float jw = jaro_winkler_simularity("FAREMVIEL", "FARMVILLE");
+				float j  = ink::algorithms::jaro_simularity("FAREMVIEL", "FARMVILLE");
+				float jw = ink::algorithms::jaro_winkler_simularity("FAREMVIEL", "FARMVILLE");
 				CHECK(j < jw);
 			}
 		}
@@ -137,7 +137,7 @@ SCENARIO("find best assigments", "[list_match][hungarian]")
 		};
 		// clang-format on
 		int   matches[3];
-		float total_cost = hungarian_solver(cost, matches, 3);
+		float total_cost = ink::algorithms::hungarian_solver(cost, matches, 3);
 		CHECK(total_cost == 15.f);
 		CHECK(matches[0] == 0);
 		CHECK(matches[1] == 2);
@@ -153,7 +153,7 @@ SCENARIO("find best assigments", "[list_match][hungarian]")
 		};
 		// clang-format off
 		int matches[3];
-		float total_cost = hungarian_solver(cost, matches, 3);
+		float total_cost = ink::algorithms::hungarian_solver(cost, matches, 3);
 		CHECK(total_cost == 407);
 		CHECK(matches[0] == 2);
 		CHECK(matches[1] == 1);
@@ -168,7 +168,7 @@ SCENARIO("find best assigments", "[list_match][hungarian]")
 		};
 		// clang-format on
 		int   matches[3];
-		float total_cost = hungarian_solver(cost, matches, 3, 5);
+		float total_cost = ink::algorithms::hungarian_solver(cost, matches, 3, 5);
 		CHECK(total_cost == 15.f);
 		CHECK(matches[0] == -1);
 		CHECK(matches[1] == 2);

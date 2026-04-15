@@ -256,7 +256,7 @@ If you want convert it to a string use: `str(value)`.)"
 	        "tags",
 	        [](const choice& self) {
 		        std::vector<const char*> tags(self.num_tags());
-		        for (size_t i = 0; i < self.num_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_tags(); ++i) {
 			        tags[i] = self.get_tag(i);
 		        }
 		        return tags;
@@ -338,7 +338,7 @@ To reload:
 	        "tags",
 	        [](const runner& self) {
 		        std::vector<const char*> tags(self.num_tags());
-		        for (size_t i = 0; i < self.num_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_tags(); ++i) {
 			        tags[i] = self.get_tag(i);
 		        }
 		        return tags;
@@ -361,7 +361,7 @@ To reload:
 	        "knot_tags",
 	        [](const runner& self) {
 		        std::vector<const char*> tags(self.num_knot_tags());
-		        for (size_t i = 0; i < self.num_knot_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_knot_tags(); ++i) {
 			        tags[i] = self.get_knot_tag(i);
 		        }
 		        return tags;
@@ -385,7 +385,7 @@ To reload:
 	        "global_tags",
 	        [](const runner& self) {
 		        std::vector<const char*> tags(self.num_global_tags());
-		        for (size_t i = 0; i < self.num_global_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_global_tags(); ++i) {
 			        tags[i] = self.get_global_tag(i);
 		        }
 		        return tags;
@@ -396,15 +396,15 @@ To reload:
 	        "all_tags",
 	        [](const runner& self) {
 		        std::vector<const char*> line_tags(self.num_tags());
-		        for (size_t i = 0; i < self.num_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_tags(); ++i) {
 			        line_tags[i] = self.get_tag(i);
 		        }
 		        std::vector<const char*> knot_tags(self.num_knot_tags());
-		        for (size_t i = 0; i < self.num_knot_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_knot_tags(); ++i) {
 			        knot_tags[i] = self.get_knot_tag(i);
 		        }
 		        std::vector<const char*> global_tags(self.num_global_tags());
-		        for (size_t i = 0; i < self.num_global_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_global_tags(); ++i) {
 			        global_tags[i] = self.get_global_tag(i);
 		        }
 		        return py::dict("line"_a = line_tags, "knot"_a = knot_tags, "global"_a = global_tags);

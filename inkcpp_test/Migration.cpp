@@ -207,6 +207,7 @@ SCENARIO("Migration Test for small story")
 
 		thread_before->choose(1);
 		std::unique_ptr<snapshot> snap1{thread_before->create_snapshot()};
+		REQUIRE(snap1->can_be_migrated());
 		REQUIRE(thread_before->getall() == "We swim and swam, it was delightful!\nWe're going to the seaside!\nSo far we've done the following: Swimming, SandCastle\n");
 
 		CHECK(thread_before->num_choices() == 2);

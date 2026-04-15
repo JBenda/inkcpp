@@ -328,7 +328,9 @@ public:
 
 	inline size_t loaded_capacity() const
 	{
-		inkAssert(_loaded_capacity != ~0, "This object was not loaded from a snapshot.");
+		inkAssert(
+		    _loaded_capacity != static_cast<size_t>(~0), "This object was not loaded from a snapshot."
+		);
 		return _loaded_capacity;
 	}
 

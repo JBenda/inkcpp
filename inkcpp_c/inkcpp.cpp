@@ -80,7 +80,7 @@ extern "C" {
 		fseek(file, 0, SEEK_SET);
 		unsigned char* data = static_cast<unsigned char*>(malloc(file_length));
 		inkAssert(data, "Malloc of size %u failed", file_length);
-		unsigned length = fread(data, static_cast<unsigned>(sizeof(unsigned char)), file_length, file);
+		unsigned length = fread(data, sizeof(unsigned char), static_cast<size_t>(file_length), file);
 		inkAssert(
 		    file_length == static_cast<long>(length),
 		    "Expected to read file of size %u, but only read %u", file_length, length
