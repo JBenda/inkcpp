@@ -6,5 +6,6 @@ var searchData=
   ['has_5fknot_5ftags_3',['has_knot_tags',['../classink_1_1runtime_1_1runner__interface.html#a40910043aaa0c6803a75716b8c3be2ff',1,'ink::runtime::runner_interface']]],
   ['has_5ftags_4',['has_tags',['../classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce',1,'ink::runtime::choice::has_tags()'],['../classink_1_1runtime_1_1runner__interface.html#a0374a4dd14a26929de47e5cf12868dde',1,'ink::runtime::runner_interface::has_tags()']]],
   ['hasenum_5',['HasEnum',['../class_u_tag_list.html#a7ee9b59f50482718fe1f8eed47f24a3e',1,'UTagList']]],
-  ['hash_5fstring_6',['hash_string',['../namespaceink.html#add30d4ab28415ba7fdbbc67ed0de9630',1,'ink']]]
+  ['hash_6',['hash',['../classink_1_1runtime_1_1story.html#aa294afadf928ee0a9df25c0d0735d72e',1,'ink::runtime::story']]],
+  ['hash_5fstring_7',['hash_string',['../namespaceink.html#add30d4ab28415ba7fdbbc67ed0de9630',1,'ink']]]
 ];

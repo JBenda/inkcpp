@@ -120,12 +120,84 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a62c8e3323f8dd47b39f897460bbcead0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae8ef49f0e8742efe05cd5116b3ddfaf" id="r_aae8ef49f0e8742efe05cd5116b3ddfaf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae8ef49f0e8742efe05cd5116b3ddfaf">ink_snapshot_get_binary</a> (const <a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *self, const unsigned char **data, size_t *data_length)</td></tr>
 <tr class="separator:aae8ef49f0e8742efe05cd5116b3ddfaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a5f8f3bcb9a187733760fc7e643d292" id="r_a8a5f8f3bcb9a187733760fc7e643d292"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a5f8f3bcb9a187733760fc7e643d292">ink_snapshot_can_be_migrated</a> (const <a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *self)</td></tr>
+<tr class="memdesc:a8a5f8f3bcb9a187733760fc7e643d292"><td class="mdescLeft">&#160;</td><td class="mdescRight">if this snapshot can be migrated, if the story file changes (slightly).    <br /></td></tr>
+<tr class="separator:a8a5f8f3bcb9a187733760fc7e643d292"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Handler for a <a class="el" href="classink_1_1runtime_1_1snapshot.html">ink snapshot</a>. </p>
-<p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all associated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and runner_interface::create_snapshot() . If the runner is associated to the globals the snapshot will be identical. If multiple runners are associated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a></p>
+<p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all associated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and runner_interface::create_snapshot() . If the runner is associated to the globals the snapshot will be identical. If multiple runners are associated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a> A snapshot can be applied to an identical story file or an simulare if the snapshot is <a class="el" href="classink_1_1runtime_1_1snapshot.html#acc18d60002a0da95d16688ed1cfdf608"><code>can_be_migrated</code>()</a>. A not migrated snapshot contiouse at exactly the place you are currently at.</p>
+<p><b>A migrated one will "snap bag" to the last knot.</b></p>
+<ul>
+<li>Global variables which (name) still exist will be transfared.<ul>
+<li>New ones will be initelized with its default value</li>
+<li>Old ones will be droped</li>
+</ul>
+</li>
+<li>Temp variables which (name) still exist will be tranfared<ul>
+<li>new ones will be initelized with its default vaule (possible missing transformations)</li>
+<li>old ones will be kept</li>
+<li><b>attention</b> declarations in Tunnels will be missed</li>
+</ul>
+</li>
+<li>Stack/Threads/Tunnels must not be used in the moment of the snapshot for it to be migratable.<ul>
+<li>best practice is to create hub knots which names do not change in the progress of the update and which do not have local variables. Then only store after you stepped inside this knot.</li>
+</ul>
+</li>
+<li>Lists definitions are matched after best knowladge<ul>
+<li>for each pair of old list value and new list value the best good matching is used<ul>
+<li>the similarty is calculated based on the jaro-winkler similiarty of the value names, and the normalized difference of the values</li>
+</ul>
+</li>
+<li>for each pair of old and new list (definition) the best good match is taken<ul>
+<li>the similiraty is calculated based on the jaccard similiraty of the contained flags, and the jaro-winkler similarty of the lists names</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p class="startli">visit counts (e.g. used for once only choices)</p><ul>
+<li>existing ones (exact name match) are kept<ul>
+<li>!! a choice with no explicit label is tracked via its position in the list, reordering choices can therfore break your visit counts</li>
+</ul>
+</li>
+<li>new ones are zero</li>
+<li>old ones are discarded</li>
+</ul>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo</a></b></dt><dd>Currently the id is equal to the creation order, a way to name the single runner/threads is WIP </dd></dl>
+</li>
+</ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a8a5f8f3bcb9a187733760fc7e643d292" name="a8a5f8f3bcb9a187733760fc7e643d292"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a5f8f3bcb9a187733760fc7e643d292">&#9670;&#160;</a></span>ink_snapshot_can_be_migrated()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ink_snapshot_can_be_migrated </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_h_ink_snapshot.html">HInkSnapshot</a> *</td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>if this snapshot can be migrated, if the story file changes (slightly).   </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">self</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">True</td><td>if the snapshot was taken at a simple state which can be migrated. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a2f127c75f55d4645435f71c102fc1f75" name="a2f127c75f55d4645435f71c102fc1f75"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2f127c75f55d4645435f71c102fc1f75">&#9670;&#160;</a></span>ink_snapshot_from_binary()</h2>
 

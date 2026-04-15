@@ -1,5 +1,6 @@
 var class_h_ink_snapshot =
 [
+    [ "ink_snapshot_can_be_migrated", "class_h_ink_snapshot.html#a8a5f8f3bcb9a187733760fc7e643d292", null ],
     [ "ink_snapshot_from_binary", "class_h_ink_snapshot.html#a2f127c75f55d4645435f71c102fc1f75", null ],
     [ "ink_snapshot_from_file", "class_h_ink_snapshot.html#a432a1ea5b1326db82ce9d87a8e55bb35", null ],
     [ "ink_snapshot_get_binary", "class_h_ink_snapshot.html#aae8ef49f0e8742efe05cd5116b3ddfaf", null ],

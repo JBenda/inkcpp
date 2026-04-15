@@ -119,6 +119,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3f95b261be2b654817affb1742d230d3" id="r_a3f95b261be2b654817affb1742d230d3"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceink_1_1runtime.html#ad63cbd82595f3f52ef21543b309ba8b6">runner</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f95b261be2b654817affb1742d230d3">new_runner_from_snapshot</a> (const <a class="el" href="classink_1_1runtime_1_1snapshot.html">snapshot</a> &amp;obj, <a class="el" href="namespaceink_1_1runtime.html#a224e2e5f47e5ce0a2f88a91d16054e93">globals</a> store=nullptr, unsigned runner_id=0)=0</td></tr>
 <tr class="memdesc:a3f95b261be2b654817affb1742d230d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">reconstruct runner from a snapshot  <br /></td></tr>
 <tr class="separator:a3f95b261be2b654817affb1742d230d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa294afadf928ee0a9df25c0d0735d72e" id="r_aa294afadf928ee0a9df25c0d0735d72e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceink.html#aed82cdcf558062e527831ad78f23e5ab">hash_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa294afadf928ee0a9df25c0d0735d72e">hash</a> () const =0</td></tr>
+<tr class="memdesc:aa294afadf928ee0a9df25c0d0735d72e"><td class="mdescLeft">&#160;</td><td class="mdescRight">hash of binary/story.  <br /></td></tr>
+<tr class="separator:aa294afadf928ee0a9df25c0d0735d72e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -213,6 +216,34 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>new story object </dd></dl>
+
+</div>
+</div>
+<a id="aa294afadf928ee0a9df25c0d0735d72e" name="aa294afadf928ee0a9df25c0d0735d72e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa294afadf928ee0a9df25c0d0735d72e">&#9670;&#160;</a></span>hash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespaceink.html#aed82cdcf558062e527831ad78f23e5ab">hash_t</a> ink::runtime::story::hash </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>hash of binary/story. </p>
+<p>used to check for story changes. </p>
 
 </div>
 </div>

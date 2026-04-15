@@ -144,6 +144,9 @@
                                 <a class="function" href="#Snapshot.write_to_file">write_to_file</a>
                         </li>
                         <li>
+                                <a class="function" href="#Snapshot.can_be_migrated">can_be_migrated</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Snapshot.from_file">from_file</a>
                         </li>
                 </ul>
@@ -466,19 +469,19 @@ inkcpp_py    </h1>
     </div>
     <a class="headerlink" href="#Value.__init__"></a>
     
-            <div class="docstring"><p>__init__(<em>args, *</em>kwargs)
+            <div class="docstring"><p>__init__(*args, **kwargs)
 Overloaded function.</p>
 
 <ol>
 <li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: bool) -> None</p></li>
-<li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: int, type: <a href="#Value.Type">inkcpp_py.Value.Type</a>) -> None</p></li>
+<li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: typing.SupportsInt | typing.SupportsIndex, type: <a href="#Value.Type">inkcpp_py.Value.Type</a>) -> None</p></li>
 </ol>
 
 <p>Used to explicit set a Uint32 value. Type must be <a href="#Value.Type.Uint32">inkcpp_py.Value.Type.Uint32</a>!</p>
 
 <ol start="3">
-<li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: int) -> None</p></li>
-<li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: float) -> None</p></li>
+<li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: typing.SupportsInt | typing.SupportsIndex) -> None</p></li>
+<li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: typing.SupportsFloat | typing.SupportsIndex) -> None</p></li>
 <li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: <a href="#IList">inkcpp_py.IList</a>) -> None</p></li>
 <li><p>__init__(self: <a href="#Value">inkcpp_py.Value</a>, value: str) -> None</p></li>
 </ol>
@@ -664,13 +667,13 @@ Overloaded function.</p>
                             <div id="Value.Type.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">Value.Type</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">value</span><span class="p">:</span> <span class="nb">int</span></span>)</span>
+        <span class="name">Value.Type</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">value</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span>)</span>
 
         
     </div>
     <a class="headerlink" href="#Value.Type.__init__"></a>
     
-            <div class="docstring"><p>__init__(self: <a href="#Value.Type">inkcpp_py.Value.Type</a>, value: int) -> None</p>
+            <div class="docstring"><p>__init__(self: <a href="#Value.Type">inkcpp_py.Value.Type</a>, value: typing.SupportsInt | typing.SupportsIndex) -> None</p>
 </div>
 
 
@@ -683,7 +686,7 @@ Overloaded function.</p>
     </div>
     <a class="headerlink" href="#Value.Type.name"></a>
     
-            <div class="docstring"><p>name(self: object) -> str</p>
+            <div class="docstring"><p>name(self: object, /) -> str</p>
 </div>
 
 
@@ -818,6 +821,21 @@ Overloaded function.</p>
 
 
                             </div>
+                            <div id="Snapshot.can_be_migrated" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">can_be_migrated</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">bool</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Snapshot.can_be_migrated"></a>
+    
+            <div class="docstring"><p>If the snapshot can be migrated to a changed story file.</p>
+</div>
+
+
+                            </div>
                             <div id="Snapshot.from_file" class="classattr">
                                 <div class="attr function">
             
@@ -910,7 +928,7 @@ Overloaded function.</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">get_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+        <span class="name">get_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
 
         
     </div>
@@ -970,7 +988,7 @@ Overloaded function.</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">observe</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n"><a href="#Value">Value</a></span><span class="p">,</span> <span class="n"><a href="#Value">Value</a></span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span> <span class="n">NoneType</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+        <span class="name">observe</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n"><a href="#Value">Value</a></span><span class="p">,</span> <span class="n"><a href="#Value">Value</a></span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
         
     </div>
@@ -1108,7 +1126,7 @@ To reload:</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">get_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+        <span class="name">get_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
 
         
     </div>
@@ -1168,7 +1186,7 @@ To reload:</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">get_knot_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+        <span class="name">get_knot_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
 
         
     </div>
@@ -1243,7 +1261,7 @@ To reload:</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">get_global_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+        <span class="name">get_global_tag</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
 
         
     </div>
@@ -1303,7 +1321,7 @@ To reload:</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">get_choice</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n"><a href="#Choice">Choice</a></span>:</span></span>
+        <span class="name">get_choice</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span><span class="return-annotation">) -> <span class="n"><a href="#Choice">Choice</a></span>:</span></span>
 
         
     </div>
@@ -1335,7 +1353,7 @@ To reload:</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">choose</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+        <span class="name">choose</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
         
     </div>
@@ -1350,7 +1368,7 @@ To reload:</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">bind_void</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="n"><a href="#Value">Value</a></span><span class="p">]],</span> <span class="n">NoneType</span><span class="p">]</span>,</span><span class="param">	<span class="n">lookaheadSafe</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+        <span class="name">bind_void</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Sequence</span><span class="p">[</span><span class="n"><a href="#Value">Value</a></span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span>,</span><span class="param">	<span class="n">lookaheadSafe</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
         
     </div>
@@ -1365,7 +1383,7 @@ To reload:</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">bind</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="n"><a href="#Value">Value</a></span><span class="p">]],</span> <span class="n"><a href="#Value">Value</a></span><span class="p">]</span>,</span><span class="param">	<span class="n">lookaheadSafe</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+        <span class="name">bind</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Sequence</span><span class="p">[</span><span class="n"><a href="#Value">Value</a></span><span class="p">]],</span> <span class="n"><a href="#Value">Value</a></span><span class="p">]</span>,</span><span class="param">	<span class="n">lookaheadSafe</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
         
     </div>
@@ -1492,7 +1510,7 @@ To reload:</p>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">new_runner_from_snapshot</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">snapshot</span><span class="p">:</span> <span class="n"><a href="#Snapshot">Snapshot</a></span>,</span><span class="param">	<span class="nb">globals</span><span class="p">:</span> <span class="n"><a href="#Globals">Globals</a></span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">runner_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span></span><span class="return-annotation">) -> <span class="n"><a href="#Runner">Runner</a></span>:</span></span>
+        <span class="name">new_runner_from_snapshot</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">snapshot</span><span class="p">:</span> <span class="n"><a href="#Snapshot">Snapshot</a></span>,</span><span class="param">	<span class="nb">globals</span><span class="p">:</span> <span class="n"><a href="#Globals">Globals</a></span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">runner_id</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span> <span class="o">=</span> <span class="mi">0</span></span><span class="return-annotation">) -> <span class="n"><a href="#Runner">Runner</a></span>:</span></span>
 
         
     </div>
@@ -1505,7 +1523,7 @@ To reload:</p>
 <ul>
 <li><strong>snapshot:</strong>  snapshot to load runner from.</li>
 <li><strong>globals:</strong>  store used by this runner, else load the store from the file and use it.
-(created with <a href="#Story.new_runner_from_snapshot">inkcpp_py.Story.new_runner_from_snapshot</a>) </li>
+(created with <a href="#Story.new_runner_from_snapshot">inkcpp_py.Story.new_runner_from_snapshot</a>)</li>
 <li><strong>runner_id:</strong>  if multiple runners are stored in the snapshot, id of runner to reconstruct. (ids start at 0 and are dense)</li>
 </ul>
 

@@ -119,6 +119,10 @@ virtual <a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689"
 virtual <a class="el" href="namespaceink.html#a959b2e4aede55770f9235406e91dc689">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>num_runners</b> () const =0</td></tr>
 <tr class="memdesc:a9d580a0a4ca50685b595bf368032d8db"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of runners which are stored inside this snapshot <br /></td></tr>
 <tr class="separator:a9d580a0a4ca50685b595bf368032d8db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc18d60002a0da95d16688ed1cfdf608" id="r_acc18d60002a0da95d16688ed1cfdf608"><td class="memItemLeft" align="right" valign="top"><a id="acc18d60002a0da95d16688ed1cfdf608" name="acc18d60002a0da95d16688ed1cfdf608"></a>
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>can_be_migrated</b> () const =0</td></tr>
+<tr class="memdesc:acc18d60002a0da95d16688ed1cfdf608"><td class="mdescLeft">&#160;</td><td class="mdescRight">if this snapshot can be migrated, if the story file changes (slightly). <br /></td></tr>
+<tr class="separator:acc18d60002a0da95d16688ed1cfdf608"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7540b9363d1e5e6276f14f1161f6e70c" id="r_a7540b9363d1e5e6276f14f1161f6e70c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7540b9363d1e5e6276f14f1161f6e70c">write_to_file</a> (const char *filename) const</td></tr>
 <tr class="memdesc:a7540b9363d1e5e6276f14f1161f6e70c"><td class="mdescLeft">&#160;</td><td class="mdescRight">serialize snapshot to file  <br /></td></tr>
 <tr class="separator:a7540b9363d1e5e6276f14f1161f6e70c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,8 +138,46 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Container for an InkCPP runtime snapshot. </p>
-<p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all associated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a38aa102610dbd4764133b50d2474db6c" title="creates a snapshot containing the runner, globals and all other runners connected to the globals.">runner_interface::create_snapshot()</a> . If the runner is associated to the globals the snapshot will be identical. If multiple runners are associated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a></p>
+<p>Each snapshot contains a <a class="el" href="classink_1_1runtime_1_1globals__interface.html">globals store</a> and all associated <a class="el" href="classink_1_1runtime_1_1runner__interface.html">runners/threads</a> For convinience there exist <a class="el" href="classink_1_1runtime_1_1globals__interface.html#ae9a415c16e7ed6e0a39422899823654d">ink::runtime::globals_interface::create_snapshot()</a> and <a class="el" href="classink_1_1runtime_1_1runner__interface.html#a38aa102610dbd4764133b50d2474db6c" title="creates a snapshot containing the runner, globals and all other runners connected to the globals.">runner_interface::create_snapshot()</a> . If the runner is associated to the globals the snapshot will be identical. If multiple runners are associated to the same globals all will be contained, and cann be reconsrtucted with the id parameter of <a class="el" href="classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3">ink::runtime::story::new_runner_from_snapshot()</a> A snapshot can be applied to an identical story file or an simulare if the snapshot is <a class="el" href="#acc18d60002a0da95d16688ed1cfdf608"><code>can_be_migrated</code>()</a>. A not migrated snapshot contiouse at exactly the place you are currently at.</p>
+<p><b>A migrated one will "snap bag" to the last knot.</b></p>
+<ul>
+<li>Global variables which (name) still exist will be transfared.<ul>
+<li>New ones will be initelized with its default value</li>
+<li>Old ones will be droped</li>
+</ul>
+</li>
+<li>Temp variables which (name) still exist will be tranfared<ul>
+<li>new ones will be initelized with its default vaule (possible missing transformations)</li>
+<li>old ones will be kept</li>
+<li><b>attention</b> declarations in Tunnels will be missed</li>
+</ul>
+</li>
+<li>Stack/Threads/Tunnels must not be used in the moment of the snapshot for it to be migratable.<ul>
+<li>best practice is to create hub knots which names do not change in the progress of the update and which do not have local variables. Then only store after you stepped inside this knot.</li>
+</ul>
+</li>
+<li>Lists definitions are matched after best knowladge<ul>
+<li>for each pair of old list value and new list value the best good matching is used<ul>
+<li>the similarty is calculated based on the jaro-winkler similiarty of the value names, and the normalized difference of the values</li>
+</ul>
+</li>
+<li>for each pair of old and new list (definition) the best good match is taken<ul>
+<li>the similiraty is calculated based on the jaccard similiraty of the contained flags, and the jaro-winkler similarty of the lists names</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p class="startli">visit counts (e.g. used for once only choices)</p><ul>
+<li>existing ones (exact name match) are kept<ul>
+<li>!! a choice with no explicit label is tracked via its position in the list, reordering choices can therfore break your visit counts</li>
+</ul>
+</li>
+<li>new ones are zero</li>
+<li>old ones are discarded</li>
+</ul>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo</a></b></dt><dd>Currently the id is equal to the creation order, a way to name the single runner/threads is WIP </dd></dl>
+</li>
+</ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="ae24288652c3cc9fefbf72e3f1c15b47f" name="ae24288652c3cc9fefbf72e3f1c15b47f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae24288652c3cc9fefbf72e3f1c15b47f">&#9670;&#160;</a></span>from_binary()</h2>
