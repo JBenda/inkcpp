@@ -55,7 +55,7 @@ namespace ink::runtime
 class snapshot
 {
 public:
-	virtual ~snapshot() {};
+	virtual ~snapshot(){};
 
 	/** Construct snapshot from blob.
 	 * Memory must be kept valid until the snapshot is deconstructed.
