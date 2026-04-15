@@ -40,6 +40,8 @@ public:
 
 	const char* list_meta() const { return _list_meta; }
 
+	size_t list_meta_size() const { return _list_meta_size; }
+
 	bool iterate_containers(
 	    const uint32_t*& iterator, container_t& index, ip_t& offset, bool reverse = false
 	) const;
@@ -48,6 +50,7 @@ public:
 	CommandFlag container_flag(ip_t offset) const;
 	CommandFlag container_flag(container_t id) const;
 	hash_t      container_hash(container_t id) const;
+	hash_t      container_hash(ip_t offset) const;
 
 	ip_t find_offset_for(hash_t path) const;
 
@@ -59,6 +62,8 @@ public:
 	    new_runner_from_snapshot(const snapshot&, globals store = nullptr, unsigned idx = 0) override;
 
 	const ink::internal::header& get_header() const { return _header; }
+
+	hash_t hash() const override { return hash_data(_file, _length); }
 
 private:
 	void setup_pointers();
@@ -74,6 +79,7 @@ private:
 	const char* _string_table;
 
 	const char*      _list_meta;
+	size_t           _list_meta_size;
 	const list_flag* _lists;
 
 	// container info

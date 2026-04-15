@@ -20,7 +20,7 @@ namespace ink::runtime::internal
  * @tparam simple if the object has a trivial destructor, so delete[](char*) can be used instead of
  * calling the constructor.
  * @tparam dynamic if the memory should be allocated on the heap and grow if needed
- * @tparam initialCapacitiy number of elements to allocate at construction, if !dynamic, this is
+ * @tparam initial capacity number of elements to allocate at construction, if !dynamic, this is
  * allocated in place and can not be changed.
  */
 template<typename T, bool dynamic, size_t initialCapacity, bool simple>
@@ -157,6 +157,8 @@ public:
 
 	void extend(size_t capacity = 0);
 
+	bool can_be_migrated() const { return true; }
+
 	size_t snap(unsigned char* data, const snapper& snapper) const
 	{
 		inkAssert(! is_pointer<T>{}(), "here is a special case oversight");
@@ -229,6 +231,8 @@ public:
 		_last_size = 0;
 	}
 
+	bool is_saved() const { return _last_size != 0; }
+
 	void save() { _last_size = this->size(); }
 
 	void forgett() { _last_size = 0; }
@@ -236,6 +240,8 @@ public:
 	bool has_changed() const { return base::size() != _last_size; }
 
 	size_t last_size() const { return _last_size; }
+
+	bool can_be_migrated() const { return ! is_saved(); }
 
 	size_t snap(unsigned char* data, const snapshot_interface::snapper& snapper) const
 	{
@@ -306,7 +312,7 @@ public:
 		clear_temp();
 	}
 
-	// == Non-Copyable ==
+	// not copyable
 	basic_restorable_array(const basic_restorable_array<T>&)               = delete;
 	basic_restorable_array<T>& operator=(const basic_restorable_array<T>&) = delete;
 
@@ -315,9 +321,18 @@ public:
 
 	// get value by index
 	const T& get(size_t index) const;
+	const T& get_old(size_t index) const;
 
 	// size of the array
 	inline size_t capacity() const { return _capacity; }
+
+	inline size_t loaded_capacity() const
+	{
+		inkAssert(
+		    _loaded_capacity != static_cast<size_t>(~0), "This object was not loaded from a snapshot."
+		);
+		return _loaded_capacity;
+	}
 
 	// only const indexing is supported due to save/restore system
 	inline const T& operator[](size_t index) const { return get(index); }
@@ -331,6 +346,7 @@ public:
 	void clear(const T& value);
 
 	// snapshot interface
+	virtual bool                 can_be_migrated() const;
 	virtual size_t               snap(unsigned char* data, const snapper&) const;
 	virtual const unsigned char* snap_load(const unsigned char* data, const loader&);
 
@@ -358,12 +374,15 @@ private:
 	// real values live here
 	T* _array;
 
-	// we store values here when we're in save mode
+	// we store values here when we're in safe mode
 	//  they're copied on a call to forget()
 	T* _temp;
 
 	// size of both _array and _temp
 	size_t _capacity;
+	// if loaded with snap_load, this value was the original size, the current capacity might be
+	// higher
+	size_t _loaded_capacity = static_cast<size_t>(~0);
 
 	// null
 	const T _null;
@@ -389,12 +408,21 @@ inline const T& basic_restorable_array<T>::get(size_t index) const
 {
 	check_index(index);
 
-	// If we're in save mode and we have a value at that index, return that instead
+	// If we're in safe mode, and we have a value at that index, return that instead
 	if (_saved && _temp[index] != _null) {
 		return _temp[index];
 	}
 
 	// Otherwise, fall back on the real array
+	return _array[index];
+}
+
+template<typename T>
+inline const T& basic_restorable_array<T>::get_old(size_t index) const
+{
+	check_index(index);
+	inkAssert(_saved, "Use old only on saved arrays.");
+
 	return _array[index];
 }
 
@@ -419,7 +447,7 @@ inline void basic_restorable_array<T>::forget()
 {
 	// Run through the _temp array
 	for (size_t i = 0; i < _capacity; i++) {
-		// Copy if there's values
+		// Copy if there are values
 		if (_temp[i] != _null) {
 			_array[i] = _temp[i];
 		}
@@ -522,6 +550,12 @@ private:
 };
 
 template<typename T>
+inline bool basic_restorable_array<T>::can_be_migrated() const
+{
+	return ! _saved;
+}
+
+template<typename T>
 inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper&) const
 {
 	unsigned char* ptr          = data;
@@ -542,18 +576,18 @@ inline const unsigned char*
 {
 	auto ptr = data;
 	ptr      = snap_read(ptr, _saved);
-	decltype(_capacity) capacity;
-	ptr = snap_read(ptr, capacity);
+	ptr      = snap_read(ptr, _loaded_capacity);
 	if (buffer() == nullptr) {
-		static_cast<allocated_restorable_array<T>&>(*this).resize(capacity);
+		static_cast<allocated_restorable_array<T>&>(*this).resize(_loaded_capacity);
 	}
 	inkAssert(
-	    _capacity >= capacity, "New config does not allow for necessary size used by this snapshot!"
+	    _capacity >= _loaded_capacity,
+	    "New config does not allow for necessary size used by this snapshot!"
 	);
 	T null;
 	ptr = snap_read(ptr, null);
 	inkAssert(null == _null, "null value is different to snapshot!");
-	for (size_t i = 0; i < _capacity; ++i) {
+	for (size_t i = 0; i < _loaded_capacity; ++i) {
 		ptr = snap_read(ptr, _array[i]);
 		ptr = snap_read(ptr, _temp[i]);
 	}

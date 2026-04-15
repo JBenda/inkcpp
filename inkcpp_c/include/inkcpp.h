@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -97,6 +98,12 @@ typedef struct HInkSTory    HInkStory;
 	void ink_snapshot_get_binary(
 	    const HInkSnapshot* self, const unsigned char** data, size_t* data_length
 	);
+	/** @memberof HInkSnapshot
+	 * @copydoc ink::runtime::snapshot::can_be_migrated()
+	 * @param self
+	 * @retval True if the snapshot was taken at a simple state which can be migrated.
+	 */
+	bool ink_snapshot_can_be_migrated(const HInkSnapshot* self);
 
 	/** @class HInkChoice
 	 * @ingroup clib

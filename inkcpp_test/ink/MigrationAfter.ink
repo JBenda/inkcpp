@@ -1,0 +1,31 @@
+# source https://github.com/harryr0se from issue: #112
+LIST activities = Swimming, SandCastle, IceCream
+VAR completed = ()
+
+-> holiday
+=== holiday
+We're going to the seaside!
+{completed: So far we've done the following: {completed}}
++ [Make a sand castle] -> sand_castle -> holiday
+* [Go swimming] -> swimming -> holiday
++ [Get Ice Cream] -> ice_cream -> holiday
+* Time to go home -> home
+
+= sand_castle
+We made a great sand castle, it even has a moat!
+~ completed += SandCastle
+->->
+
+= swimming
+We swim and swam, it was delightful!
+~ completed += Swimming
+->->
+
+= ice_cream
+We got ice cream, mine was raspberry!
+~ completed += IceCream
+->->
+
+= home
+What a nice holiday that was
+-> END

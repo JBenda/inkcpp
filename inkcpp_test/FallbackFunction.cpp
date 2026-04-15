@@ -20,9 +20,9 @@ SCENARIO("run a story with external function and fallback function", "[external 
 		WHEN("bind both external functions")
 		{
 			int  cnt_sqrt = 0;
-			auto fn_sqrt  = [&cnt_sqrt](int x) -> int {
+			auto fn_sqrt  = [&cnt_sqrt](double x) -> double {
         ++cnt_sqrt;
-				return static_cast<int>(sqrt(x));
+        return static_cast<int>(sqrt(x));
 			};
 			int  cnt_greeting = 0;
 			auto fn_greeting  = [&cnt_greeting]() -> const char* {
@@ -49,9 +49,9 @@ SCENARIO("run a story with external function and fallback function", "[external 
 		WHEN("only bind function without fallback")
 		{
 			int  cnt_sqrt = 0;
-			auto fn_sqrt  = [&cnt_sqrt](int x) -> int {
+			auto fn_sqrt  = [&cnt_sqrt](double x) -> double {
         ++cnt_sqrt;
-				return static_cast<int>(sqrt(x));
+        return static_cast<int>(sqrt(x));
 			};
 
 			thread->bind("sqrt", fn_sqrt);

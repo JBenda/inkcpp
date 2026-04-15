@@ -68,11 +68,16 @@ public:
 	struct loader {
 		managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 		const char*                          story_string_table;
+		const bool                           migratable  = false;
 		const snap_tag*                      runner_tags = nullptr;
 
-		loader(managed_array<const char*, true, 5>& string_table, const char* story_string_table)
+		loader(
+		    managed_array<const char*, true, 5>& string_table, const char* story_string_table,
+		    bool migratable
+		)
 		    : string_table{string_table}
 		    , story_string_table{story_string_table}
+		    , migratable(migratable)
 		{
 		}
 
@@ -100,6 +105,16 @@ public:
 	{
 		inkFail("Snap function not implemented");
 		return nullptr;
+	};
+
+	/** Check if the snappable component is in a state which could be migrated to a/new different
+	 * story.
+	 * @attention a migration can still fail, even if @c can_be_migrated() was true.
+	 */
+	bool can_be_migrated() const
+	{
+		inkFail("Snap function not implementd");
+		return false;
 	};
 
 #ifdef __GNUC__

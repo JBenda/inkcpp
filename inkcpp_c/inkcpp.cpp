@@ -80,9 +80,9 @@ extern "C" {
 		fseek(file, 0, SEEK_SET);
 		unsigned char* data = static_cast<unsigned char*>(malloc(file_length));
 		inkAssert(data, "Malloc of size %u failed", file_length);
-		size_t length = fread(data, sizeof(unsigned char), file_length, file);
+		unsigned length = fread(data, sizeof(unsigned char), static_cast<size_t>(file_length), file);
 		inkAssert(
-		    static_cast<size_t>(file_length) == length,
+		    file_length == static_cast<long>(length),
 		    "Expected to read file of size %u, but only read %u", file_length, length
 		);
 		fclose(file);
@@ -150,6 +150,11 @@ extern "C" {
 	int ink_snapshot_num_runners(const HInkSnapshot* self)
 	{
 		return reinterpret_cast<const snapshot*>(self)->num_runners();
+	}
+
+	bool ink_snapshot_can_be_migrated(const HInkSnapshot* self)
+	{
+		return reinterpret_cast<const snapshot*>(self)->can_be_migrated();
 	}
 
 	const char* ink_choice_text(const HInkChoice* self)

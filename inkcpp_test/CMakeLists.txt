@@ -1,6 +1,7 @@
 if(INKCPP_NO_STL)
 	message(FATAL_ERROR "Can not build tests without STL support, please disable INKCPP_TEST")
 endif()
+
 add_executable(
 	inkcpp_test
 	catch.hpp
@@ -23,11 +24,13 @@ add_executable(
 	ThirdTierChoiceAfterBrackets.cpp
 	NoEarlyTags.cpp
 	ExternalFunctionsExecuteProperly.cpp
-  ExternalFunctionTypes.cpp
+	ExternalFunctionTypes.cpp
 	LookaheadSafe.cpp
 	EmptyStringForDivert.cpp
 	MoveTo.cpp
-	Fixes.cpp)
+	ListMatching.cpp
+	Fixes.cpp
+	Migration.cpp)
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
 target_include_directories(inkcpp_test PRIVATE ../shared/private/)
@@ -61,8 +64,8 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "
 			message(
 				FATAL_ERROR
 					"inklecate download is not provided, please check if the download failed.
-			You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or \
-			the INKLECATE enviroment variable.
+	      You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or \
+	      the INKLECATE enviroment variable.
 			You can also disable tests altogether by setting INKCPP_TEST=OFF")
 		endif(inklecate_linux_POPULATED)
 	elseif(APPLE)
@@ -72,8 +75,8 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "
 			message(
 				FATAL_ERROR
 					"inklecate download is not provided, please check if the download failed.
-			You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or \
-			the INKLECATE enviroment variable.
+	      You may set INKCPP_INKLECATE=NONE and provide inkcleate via your PATH or \
+	      the INKLECATE enviroment variable.
 			You can also disable tests altogether by setting INKCPP_TEST=OFF")
 		endif(inklecate_mac_POPULATED)
 	elseif(
@@ -94,8 +97,8 @@ if((inkcpp_inklecate_upper STREQUAL "ALL") OR (inkcpp_inklecate_upper STREQUAL "
 	else()
 		message(
 			FATAL_ERROR
-				"Current os could not be identified, \
-				therfore inklecate must be provided explicit for the tests to work
+				"Current os could not be identified, therfore inklecate must be provided \
+			explicit for the tests to work
 			please set INKCPP_INKLECATE=NONE and provide inklecate via your PATH or \
 			the INKLECATE enviroment variables.
 			Alternatily disable tests by setting INKCPP_TEST=OFF.")

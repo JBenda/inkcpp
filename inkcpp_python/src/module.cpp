@@ -100,7 +100,7 @@ PYBIND11_MODULE(inkcpp_py, m)
 		        return py::make_iterator(self.begin(list_name), self.end());
 	        },
 	        R"(Rerutrns all flags contained in this list from a list of name list_name.
-	      
+
 Use iter(List) to iterate over all flags.)",
 	        py::keep_alive<0, 1>(), py::arg("list_name").none(false)
 	    )
@@ -183,7 +183,7 @@ Use iter(List) to iterate over all flags.)",
 		    return self.get<value::Type::String>();
 	    },
 	    R"(If value contains a inkcpp_py.Value.Type.String, return it. Else throws an AttributeError.
-  
+
 If you want convert it to a string use: `str(value)`.)"
 	);
 	py_value.def(
@@ -219,6 +219,10 @@ If you want convert it to a string use: `str(value)`.)"
 	        "write_to_file", &snapshot::write_to_file, "Store snapshot in file.",
 	        py::arg("filename").none(false)
 	    )
+	    .def(
+	        "can_be_migrated", &snapshot::can_be_migrated,
+	        "If the snapshot can be migrated to a changed story file."
+	    )
 	    .def_static(
 	        "from_file", &snapshot::from_file, "Load snapshot from file",
 	        py::arg("filename").none(false)
@@ -252,7 +256,7 @@ If you want convert it to a string use: `str(value)`.)"
 	        "tags",
 	        [](const choice& self) {
 		        std::vector<const char*> tags(self.num_tags());
-		        for (size_t i = 0; i < self.num_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_tags(); ++i) {
 			        tags[i] = self.get_tag(i);
 		        }
 		        return tags;
@@ -334,7 +338,7 @@ To reload:
 	        "tags",
 	        [](const runner& self) {
 		        std::vector<const char*> tags(self.num_tags());
-		        for (size_t i = 0; i < self.num_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_tags(); ++i) {
 			        tags[i] = self.get_tag(i);
 		        }
 		        return tags;
@@ -357,7 +361,7 @@ To reload:
 	        "knot_tags",
 	        [](const runner& self) {
 		        std::vector<const char*> tags(self.num_knot_tags());
-		        for (size_t i = 0; i < self.num_knot_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_knot_tags(); ++i) {
 			        tags[i] = self.get_knot_tag(i);
 		        }
 		        return tags;
@@ -381,7 +385,7 @@ To reload:
 	        "global_tags",
 	        [](const runner& self) {
 		        std::vector<const char*> tags(self.num_global_tags());
-		        for (size_t i = 0; i < self.num_global_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_global_tags(); ++i) {
 			        tags[i] = self.get_global_tag(i);
 		        }
 		        return tags;
@@ -392,15 +396,15 @@ To reload:
 	        "all_tags",
 	        [](const runner& self) {
 		        std::vector<const char*> line_tags(self.num_tags());
-		        for (size_t i = 0; i < self.num_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_tags(); ++i) {
 			        line_tags[i] = self.get_tag(i);
 		        }
 		        std::vector<const char*> knot_tags(self.num_knot_tags());
-		        for (size_t i = 0; i < self.num_knot_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_knot_tags(); ++i) {
 			        knot_tags[i] = self.get_knot_tag(i);
 		        }
 		        std::vector<const char*> global_tags(self.num_global_tags());
-		        for (size_t i = 0; i < self.num_global_tags(); ++i) {
+		        for (ink::size_t i = 0; i < self.num_global_tags(); ++i) {
 			        global_tags[i] = self.get_global_tag(i);
 		        }
 		        return py::dict("line"_a = line_tags, "knot"_a = knot_tags, "global"_a = global_tags);
@@ -506,7 +510,7 @@ Reconstructs a runner from a snapshot.
 Args:
     snapshot: snapshot to load runner from.
     globals: store used by this runner, else load the store from the file and use it.
-                                           (created with inkcpp_py.Story.new_runner_from_snapshot) 
+                                           (created with inkcpp_py.Story.new_runner_from_snapshot)
     runner_id: if multiple runners are stored in the snapshot, id of runner to reconstruct. (ids start at 0 and are dense)
 
 Returns:

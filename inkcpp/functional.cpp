@@ -54,6 +54,13 @@ float function_base::pop<float>(basic_eval_stack* stack, list_table&)
 }
 
 template<>
+double function_base::pop<double>(basic_eval_stack* stack, list_table&)
+{
+	value val = stack->pop();
+	return casting::numeric_cast<value_type::float32>(val);
+}
+
+template<>
 const char* function_base::pop<const char*>(basic_eval_stack* stack, list_table&)
 {
 	value val = stack->pop();
@@ -77,6 +84,12 @@ template<>
 void function_base::push<float>(basic_eval_stack* stack, const float& v)
 {
 	stack->push(value{}.set<value_type::float32>(v));
+}
+
+template<>
+void function_base::push<double>(basic_eval_stack* stack, const double& v)
+{
+	stack->push(value{}.set<value_type::float32>(static_cast<float>(v)));
 }
 
 template<>

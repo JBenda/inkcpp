@@ -74,15 +74,6 @@ typedef uint32_t hash_t;
 /** Invalid hash value */
 const hash_t InvalidHash = 0;
 
-#ifdef INK_ENABLE_UNREAL
-/** Simple hash for serialization of strings */
-inline hash_t hash_string(const char* string)
-{
-	return CityHash32(string, FCStringAnsi::Strlen(string));
-}
-#else
-hash_t hash_string(const char* string);
-#endif
 
 /** Byte type */
 typedef unsigned char byte_t;
@@ -128,6 +119,17 @@ struct list_flag {
 constexpr list_flag null_flag{-1, -1};
 /** value representing an empty list */
 constexpr list_flag empty_flag{-1, 0};
+
+#ifdef INK_ENABLE_UNREAL
+/** Simple hash for serialization of strings */
+inline hash_t hash_string(const char* string)
+{
+	return CityHash32(string, FCStringAnsi::Strlen(string));
+}
+#else
+hash_t hash_string(const char* string);
+hash_t hash_data(const unsigned char* data, size_t len);
+#endif
 
 namespace internal
 {
@@ -236,24 +238,22 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 		msg = EMPTY;
 	}
 	if (! condition) {
-#if defined(INKCPP_ENABLE_STL) || defined(INKCPP_ENABLE_CSTD)
+#if defined(INK_ENABLE_STL) || defined(INK_ENABLE_CSTD)
 		if constexpr (sizeof...(args) > 0) {
 			size_t size    = snprintf(nullptr, 0, msg, args...) + 1;
 			char*  message = static_cast<char*>(malloc(size));
 			snprintf(message, size, msg, args...);
 			msg = message;
-		} else
+		}
 #endif
-		{
 #ifdef INK_ENABLE_EXCEPTIONS
-			throw ink_exception(msg);
+		throw ink_exception(msg);
 #elif defined(INK_ENABLE_CSTD)
-			fprintf(stderr, "Ink Assert: %s\n", msg);
-			abort();
+		fprintf(stderr, "Ink Assert: %s\n", msg);
+		abort();
 #else
 #	warning no assertion handling this could lead to invalid code paths
 #endif
-		}
 	}
 }
 #ifdef __GNUC__

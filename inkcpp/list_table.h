@@ -113,8 +113,9 @@ public:
 	list  create_permament();
 	list& add_inplace(list& lh, list_flag rh);
 
-	// parse binary list meta data
 	list_table(const char* data, const ink::internal::header&);
+	// binary list metadata of currently loaded list
+	bool migrate(const char* old_list_metadata, const ink::internal::header& header);
 
 	explicit list_table()
 	    : _entrySize{0}
@@ -147,9 +148,11 @@ public:
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
-	/** special traitment when a list get assignet again
-	 * when a list get assigned and would have no origin, it gets the origin of the base with origin
-	 * eg. I072
+	bool can_be_migrated() const { return _list_handouts.size() == 0; }
+
+	/** special treatment when a list gets assigned again
+	 * when a list gets assigned and would have no origin, it gets the origin of the base with origin
+	 * e.g. I072
 	 */
 	list redefine(list lh, list rh);
 
@@ -263,6 +266,16 @@ public:
 	list_interface* handout_list(list);
 
 private:
+	/** create a list with id == idx.
+	 * @attention used for migration only
+	 * @sa create()
+	 */
+	list                    create_at(size_t idx);
+	/** create permanent list list id == idx.
+	 * @attention used for migration only
+	 * @se create_permenant_at()
+	 */
+	list                    create_permament_at(size_t idx);
 	void                    copy_lists(const data_t* src, data_t* dst);
 	static constexpr size_t bits_per_data = sizeof(data_t) * 8U;
 
@@ -361,6 +374,11 @@ private:
 	// entries (created lists)
 	managed_array<data_t, maxMemorySize>   _data;
 	managed_array<state, config::maxLists> _entry_state;
+	// parse binary list metadata
+	list_table(
+	    const char* data, const ink::internal::header&, const decltype(_data)& values,
+	    const decltype(_entry_state)& state
+	);
 
 	// defined list (meta data)
 	managed_array<size_t, config::maxListTypes>                     _list_end;
@@ -378,13 +396,17 @@ public:
 
 	class named_flag_itr
 	{
+	public:
+		struct position {
+			list_flag   flag;
+			const char* name;
+		};
+
+	private:
 		const list_table& _list;
 		const data_t*     _data;
 
-		struct {
-			list_flag   flag;
-			const char* name;
-		} _pos;
+		position _pos;
 
 		/** carry list change.
 		 * if the iterator incremented to the next flag, also increment the list if necessary
@@ -449,7 +471,11 @@ public:
 		    , _pos{null_flag, nullptr} {};
 
 		named_flag_itr(const list_table& list, const data_t* filter, int)
-				: _list{list}, _data{filter}, _pos{{0,0},list._flag_names[0]}
+		    : _list{
+		          list
+    }
+		    , _data{filter}
+		    , _pos{{0, 0}, list._flag_names[0]}
 		{
 			goToValid();
 		}

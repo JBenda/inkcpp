@@ -74,7 +74,7 @@ Adapt `TargetPlatforms` as nessesarry. You might also want to install the Plugin
 Nice features for testing:
 + predefined choice selection `echo 1 2 1  | inkpp-cl -p story.(ink|json|bin)`
 + create snapshots to shorten testing:
-	+ create snapshot by entering `-1` as choice `echo 1 2 -1 | inkcpp-cl -p story.ink`
+	+ create snapshot by entering `-1` as choice `echo 1 2 -1 1 | inkcpp-cl -p story.ink`
  	+ load snapshot as an additional argument `echo 1 | inkcpp-cl -p story.snap story.ink`
 
 ## Including in C++ Code

@@ -6,12 +6,14 @@
  */
 #include "list_table.h"
 #include "config.h"
+#include "hungarian_solver.h"
 #include "system.h"
 #include "traits.h"
 #include "header.h"
 #include "random.h"
 #include "string_utils.h"
 #include "list_impl.h"
+#include <limits>
 
 #ifdef INK_ENABLE_STL
 #	include <ostream>
@@ -74,12 +76,30 @@ list_table::list list_table::create()
 	}
 
 	list new_entry(_entry_state.size());
-	// TODO: initelized unused?
+	// TODO: initialized unused?
 	_entry_state.push() = state::used;
 	for (int i = 0; i < _entrySize; ++i) {
 		_data.push() = 0;
 	}
 	return new_entry;
+}
+
+list_table::list list_table::create_at(size_t idx)
+{
+	if (idx < _entry_state.size()) {
+		if (_entry_state[idx] == state::empty) {
+			_entry_state[idx] = state::used;
+			return list(idx);
+		}
+		return list(-1);
+	}
+	while (_entry_state.size() <= idx) {
+		_entry_state.push() = state::empty;
+		for (int i = 0; i < _entrySize; ++i) {
+			_data.push() = 0;
+		}
+	}
+	return list(idx);
 }
 
 void list_table::clear_usage()
@@ -266,6 +286,15 @@ list_table::list list_table::create_permament()
 {
 	list res              = create();
 	_entry_state[res.lid] = state::permanent;
+	return res;
+}
+
+list_table::list list_table::create_permament_at(size_t idx)
+{
+	list res = create_at(idx);
+	if (res.lid >= 0) {
+		_entry_state[res.lid] = state::permanent;
+	}
 	return res;
 }
 
@@ -857,5 +886,246 @@ config::statistics::list_table list_table::statistics() const
 	    _entry_state.statistics(),
 	};
 }
+
+/** Distance of two lists based on their contained values.
+ * https://en.wikipedia.org/wiki/Jaccard_index
+ * @param lh,rh flag indexes contained in the lists
+ * @param matches mapping from lh -> rh, -1 for dropped
+ */
+float d_contains(const size_t lh[2], const size_t rh[2], const int* matches)
+{
+	int n_union        = (lh[1] - lh[0]) + (rh[1] - rh[0]);
+	int n_intersection = 0;
+	for (size_t i = lh[0]; i < lh[1]; ++i) {
+		if (matches[i] == -1) {
+			continue;
+		}
+		if (static_cast<size_t>(matches[i]) >= rh[0] && static_cast<size_t>(matches[i]) < rh[1]) {
+			n_intersection += 1;
+		}
+	}
+	n_union -= n_intersection;
+	return static_cast<float>(n_intersection) / n_union;
+}
+
+/** Distance function for string labels.
+ * @param lh,rh null terminated ASCII strings to compare
+ * @return 0 if identical
+ */
+float d_label(const char* lh, const char* rh)
+{
+	return 1.f - algorithms::jaro_winkler_simularity(lh, rh);
+}
+
+/** Distance function for two values.
+ * @param lh,rh numeric values to compare
+ * @param lh_range,rh_range min/max value of the number
+ * @returns 0 if identical
+ */
+float d_value(int lh, int rh, int lh_range[2], int rh_range[2])
+{
+	if (lh == rh) {
+		return 0;
+	}
+	float res = (static_cast<float>(lh) - lh_range[0]) / (lh_range[1] - lh_range[0]);
+	res -= (static_cast<float>(rh) - rh_range[0]) / (rh_range[1] - rh_range[0]);
+	if (res < 0) {
+		res = -res;
+	}
+	return res;
+}
+
+struct MatchList {
+	const size_t*      list_ends;
+	const char* const* names;
+	size_t             length;
+};
+
+struct MatchListValues {
+	const char* const* names;
+	const int*         values;
+	size_t             length;
+};
+
+void get_range(const MatchListValues& values, int range[2])
+{
+	range[0] = std::numeric_limits<int>::max();
+	range[1] = std::numeric_limits<int>::min();
+	for (size_t i = 0; i < values.length; ++i) {
+		if (values.values[i] < range[0]) {
+			range[0] = values.values[i];
+		}
+		if (values.values[i] > range[1]) {
+			range[1] = values.values[i];
+		}
+	}
+}
+
+float* cost_matrix(
+    const MatchList& lh, const MatchList& rh, const int* value_matches, float drop_penalty
+)
+{
+	size_t n_lists = lh.length > rh.length ? lh.length : rh.length;
+	float* matrix  = new float[n_lists * n_lists];
+	for (size_t i = 0; i < lh.length; ++i) {
+		for (size_t j = 0; j < rh.length; ++j) {
+			float  dl               = d_label(lh.names[i], rh.names[j]);
+			size_t lh_range[]       = {i == 0 ? 0 : lh.list_ends[i - 1], lh.list_ends[i]};
+			size_t rh_range[]       = {j == 0 ? 0 : rh.list_ends[j - 1], rh.list_ends[j]};
+			float  dv               = d_contains(lh_range, rh_range, value_matches);
+			matrix[i * n_lists + j] = dv * 0.8f + dl * 0.2f;
+		}
+		for (size_t j = rh.length; j < n_lists; ++j) {
+			matrix[i * n_lists + j] = drop_penalty;
+		}
+	}
+	for (size_t i = lh.length; i < n_lists; ++i) {
+		for (size_t j = 0; j < n_lists; ++j) {
+			matrix[i * n_lists + j] = drop_penalty;
+		}
+	}
+	return matrix;
+}
+
+float* cost_matrix(const MatchListValues& lh, const MatchListValues& rh, float drop_penalty)
+{
+	size_t n_flags = lh.length > rh.length ? lh.length : rh.length;
+	float* matrix  = new float[n_flags * n_flags];
+	int    lh_range[2], rh_range[2];
+	get_range(lh, lh_range);
+	get_range(rh, rh_range);
+
+	for (size_t i = 0; i < lh.length; ++i) {
+		for (size_t j = 0; j < rh.length; ++j) {
+			float dl                = d_label(lh.names[i], rh.names[j]);
+			float dv                = d_value(lh.values[i], rh.values[j], lh_range, rh_range);
+			matrix[i * n_flags + j] = dl * 0.8f + dv * 0.2f;
+		}
+		for (size_t j = rh.length; j < n_flags; ++j) {
+			matrix[i * n_flags + j] = drop_penalty;
+		}
+	}
+	for (size_t i = lh.length; i < n_flags; ++i) {
+		for (size_t j = 0; j < rh.length; ++j) {
+			matrix[i * n_flags + j] = drop_penalty;
+		}
+	}
+	return matrix;
+}
+
+bool list_table::migrate(const char* old_list_metadata, const ink::internal::header& header)
+{
+	list_table old_ref_table(old_list_metadata, header);
+	for (const auto& x : _data) {
+		old_ref_table._data.push() = x;
+	}
+	for (const auto& x : _entry_state) {
+		old_ref_table._entry_state.push() = x;
+	}
+	_data.clear();
+	_entry_state.clear();
+
+	// find best mapping between old and new list elements
+	//     + c_ij(value) = min(|v_i - v_j|/Rv,1)
+	//     + c_ij(name) = levenshtein, cosine n-grams, jaro-winkler
+	//     + c_ij(position_in_list) = min(|p_i - p_j|/Rp, 1)
+	// find best mapping between lists
+	//     + c_ij(name) = levenshtein, cosine n-grams, jaro-winkler
+	//     + c_ij(entries) = entries existing in both
+	// 1. h_entry_map = high confidents mapping of list elements (value, name, position_in_list)
+	// 2. h_list_map = high confident mapping of lists (name, h_entry_map)
+	// 3. entry_map = mapping of list elements (value, name, position_in_list,
+	// h_list_map[list_name])
+	// 4. list_map = mapping of lists (name, entry_map)
+
+
+	// high confidance list value matches
+	constexpr float HIGH_CONFIDANCE_DROP_PANELTY = 0.3f;
+	constexpr float LOW_CONFIDANCE_DROP_PANELTY  = 0.6f;
+	float*          value_matrix                 = cost_matrix(
+      MatchListValues{
+          old_ref_table._flag_names.data(), old_ref_table._flag_values.data(),
+          old_ref_table.numFlags()
+      },
+      MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
+      LOW_CONFIDANCE_DROP_PANELTY
+  );
+	const int n_flags       = std::max(numFlags(), old_ref_table.numFlags());
+	int*      value_matches = new int[n_flags];
+	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, HIGH_CONFIDANCE_DROP_PANELTY);
+
+	// list matches
+	float* list_matrix = cost_matrix(
+	    MatchList{
+	        old_ref_table._list_end.data(), old_ref_table._list_names.data(), old_ref_table.numLists()
+	    },
+	    MatchList{_list_end.data(), _list_names.data(), numLists()}, value_matches,
+	    LOW_CONFIDANCE_DROP_PANELTY
+	);
+	const int n_lists      = std::max(numLists(), old_ref_table.numLists());
+	int*      list_matches = new int[n_lists];
+	algorithms::hungarian_solver(list_matrix, list_matches, n_lists, LOW_CONFIDANCE_DROP_PANELTY);
+
+	// low confidence list_value matches
+	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, LOW_CONFIDANCE_DROP_PANELTY);
+
+	for (size_t idx = 0; idx < old_ref_table._entry_state.size(); ++idx) {
+		// migrate
+		list new_list{-1};
+		switch (old_ref_table._entry_state[idx]) {
+			case state::permanent: new_list = create_permament_at(idx); break;
+			case state::used: new_list = create_at(idx); break;
+			default: continue;
+		}
+		inkAssert(new_list.lid >= 0, "Failed to create new list entry for migration.");
+		inkAssert(
+		    static_cast<size_t>(new_list.lid) == idx,
+		    "At position list creation failed with different valid idx."
+		);
+		const data_t* entry         = old_ref_table.getPtr(idx);
+		data_t*       new_entry     = getPtr(idx);
+		bool          migrated      = false;
+		bool          is_empty_list = true;
+		for (size_t i = 0; i < old_ref_table.numLists(); ++i) {
+			if (old_ref_table.hasList(entry, i)) {
+				bool hit      = false;
+				is_empty_list = false;
+				for (size_t j = old_ref_table.listBegin(i); j < old_ref_table._list_end[i]; ++j) {
+					if (old_ref_table.hasFlag(entry, j) && old_ref_table._flag_names[j]) {
+						if (value_matches[j] != -1) {
+							hit      = true;
+							migrated = true;
+							size_t k;
+							for (k = 0; _list_end[k] < static_cast<size_t>(value_matches[j]); ++k) {}
+							setList(new_entry, k);
+							setFlag(new_entry, value_matches[j]);
+						}
+					}
+				}
+				// keep list if list has match but all values where dropped
+				if (! hit && list_matches[i] != -1) {
+					setList(new_entry, list_matches[i]);
+					migrated = true;
+				}
+			}
+		}
+		// drop list
+		if (! is_empty_list && ! migrated) {
+			// FIXME: remove list ?
+			// _entry_state [idx] = state::empty;
+			return false;
+		}
+		// FIXME: use Assert instead?
+		// inkAssert(migrated, "Migrating list @%d would lead to an empty list", idx);
+	}
+
+
+	delete[] list_matches;
+	delete[] value_matches;
+	delete[] value_matrix;
+	delete[] list_matrix;
+	return true;
+}
+
 
 } // namespace ink::runtime::internal

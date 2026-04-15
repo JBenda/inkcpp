@@ -107,6 +107,7 @@ class value : public snapshot_interface
 {
 public:
 	// snapshot interface
+	bool                 can_be_migrated() const;
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
 

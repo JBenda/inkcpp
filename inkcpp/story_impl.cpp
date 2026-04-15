@@ -189,14 +189,20 @@ hash_t story_impl::container_hash(container_t id) const
 		}
 	}
 	inkAssert(hit, "Unable to find container for id!");
+	hash_t hash = container_hash(offset);
+	inkAssert(hash, "Did not find hash entry for container! (1)");
+	return hash;
+}
+
+hash_t story_impl::container_hash(ip_t offset) const
+{
 	hash_t* h_iter = _container_hash_start;
-	while (iter != _container_hash_end) {
+	while (h_iter != _container_hash_end) {
 		if (instructions() + *( offset_t* ) (h_iter + 1) == offset) {
 			return *h_iter;
 		}
 		h_iter += 2;
 	}
-	inkAssert(false, "Did not find hash entry for container!");
 	return 0;
 }
 
@@ -224,14 +230,25 @@ globals story_impl::new_globals()
 globals story_impl::new_globals_from_snapshot(const snapshot& data)
 {
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
-	globals_impl*        globs    = new globals_impl(this);
+	if (! snapshot.can_be_migrated(*this)) {
+		return globals();
+	}
+	auto* globs = new globals_impl(this);
 	snapshot.strings().clear();
-	snapshot_interface::loader loader{
-	    snapshot.strings(),
-	    _string_table,
-	};
-	const unsigned char* end = globs->snap_load(snapshot.get_globals_snap(), loader);
+	snapshot_interface::loader loader(snapshot.strings(), _string_table, snapshot.can_be_migrated());
+	auto                       end = globs->snap_load(snapshot.get_globals_snap(), loader);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
+	if (hash() != snapshot.hash()) {
+		globals new_globs = new_globals();
+		runner  thread    = new_runner(new_globs);
+		if (! globs->migrate_new_globals(
+		        *new_globs.cast<globals_impl>().get(),
+		        reinterpret_cast<const char*>(snapshot.get_list_metadata())
+		    )) {
+			delete globs;
+			return globals();
+		}
+	}
 	return globals(globs, _block);
 }
 
@@ -247,20 +264,27 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
 	if (store == nullptr)
 		store = new_globals_from_snapshot(snapshot);
-	auto* run    = new runner_impl(this, store);
+	auto* run = new runner_impl(this, store);
+	// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to
+	// use
+	idx       = (data.num_runners() - idx - 1);
 	snapshot_interface::loader loader{
 	    snapshot.strings(),
 	    _string_table,
+	    snapshot.can_be_migrated(),
 	};
-	// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to
-	// use
-	idx      = (data.num_runners() - idx - 1);
 	auto end = run->snap_load(snapshot.get_runner_snap(idx), loader);
 	inkAssert(
 	    (idx + 1 < snapshot.num_runners() && end == snapshot.get_runner_snap(idx + 1))
-	        || end == snapshot.get_data() + snapshot.get_data_len(),
+	        || end == snapshot.get_data() + snapshot.get_data_len()
+	        || end == snapshot.get_list_metadata(),
 	    "not all data were used for runner reconstruction"
 	);
+	if (hash() != snapshot.hash()) {
+		if (! run->migrate_to(*reinterpret_cast<const hash_t*>(snapshot.get_runner_snap(idx)))) {
+			return runner();
+		}
+	}
 	return runner(run, _block);
 }
 
@@ -322,9 +346,11 @@ void story_impl::setup_pointers()
 			while (_header.read_list_flag(ptr) != null_flag)
 				;
 		}
+		_list_meta_size = static_cast<size_t>(ptr - _list_meta);
 	} else {
-		_list_meta = nullptr;
-		_lists     = nullptr;
+		_list_meta      = nullptr;
+		_list_meta_size = 0;
+		_lists          = nullptr;
 	}
 	inkAssert(
 	    _header.ink_bin_version_number == ink::InkBinVersion,

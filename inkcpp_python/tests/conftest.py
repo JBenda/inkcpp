@@ -37,12 +37,12 @@ def extract_paths(tmpdir):
 def story_path(tmpdir_factory):
     tmpdir = tmpdir_factory.getbasetemp()
     # tmpdir = os.fsencode('/tmp/pytest')
-    return {name: files 
-        for (name, files) in map(extract_paths(tmpdir), 
+    return {name: files
+        for (name, files) in map(extract_paths(tmpdir),
             filter(
-                lambda file: os.path.splitext(file)[1] == ".ink", 
+                lambda file: os.path.splitext(file)[1] == ".ink",
                 os.listdir("./inkcpp_test/ink/")))}
-            
+
 @pytest.fixture(scope='session', autouse=True)
 def assets(story_path, inklecate_cmd):
     res = {}
@@ -62,7 +62,7 @@ def assets(story_path, inklecate_cmd):
 
 @pytest.fixture(scope='session', autouse=True)
 def generate():
-    def g(asset):
+    def g(asset: dict[str, ink.Story]):
         store = asset.new_globals()
         return [
             asset,

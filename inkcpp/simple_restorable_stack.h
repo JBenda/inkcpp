@@ -45,10 +45,13 @@ public:
 	bool rev_iter(const T*& iterator) const;
 
 	// == Save/Restore ==
+	bool is_saved() const { return _save != InvalidIndex; }
+
 	void save();
 	void restore();
 	void forget();
 
+	virtual bool                 can_be_migrated() const;
 	virtual size_t               snap(unsigned char* data, const snapper&) const;
 	virtual const unsigned char* snap_load(const unsigned char* data, const loader&);
 
@@ -288,6 +291,12 @@ inline void simple_restorable_stack<T>::forget()
 
 	// Just reset save position
 	_save = _jump = InvalidIndex;
+}
+
+template<typename T>
+bool simple_restorable_stack<T>::can_be_migrated() const
+{
+	return ! is_saved();
 }
 
 template<typename T>
