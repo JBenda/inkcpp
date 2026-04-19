@@ -223,9 +223,17 @@ private:
 
 private:
 	ink::runtime::runner mpRunner;
+
+	UPROPERTY()
 	UTagList*            mpTags;
+
+	UPROPERTY()
 	UTagList*            mkTags = nullptr;
+
+	UPROPERTY()
 	UTagList*            mgTags = nullptr;
+
+	UPROPERTY()
 	TArray<UInkChoice*>  mCurrentChoices; /// @TODO: make accessible?
 
 	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
