@@ -109,14 +109,15 @@ bool story_impl::find_container_id(uint32_t offset, container_t& container_id) c
 }
 
 // Search sorted looking for the target or the largest value smaller than target.
+// Returns nullptr if key is smaller than all entries.
 template<typename entry>
 static const entry* upper_bound(const entry* sorted, uint32_t count, uint32_t key)
 {
-	if (count == 0)
+	if (count == 0 || sorted[0].key() > key)
 		return nullptr;
 
 	uint32_t begin = 0;
-	uint32_t end   = count;
+	uint32_t end   = count - 1;
 
 	while (begin < end) {
 		const uint32_t mid     = begin + (end - begin + 1) / 2;

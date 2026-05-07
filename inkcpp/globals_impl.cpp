@@ -304,7 +304,11 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 		hash_t path;
 		ptr = snap_read(ptr, path);
 		container_t c_id;
-		bool        found = _owner->find_container_id(path, c_id);
+		ip_t        container_ip = _owner->find_offset_for(path);
+		bool        found        = container_ip != nullptr
+		          && _owner->find_container_id(
+		              static_cast<uint32_t>(container_ip - _owner->instructions()), c_id
+		          );
 		if (! loader.migratable) {
 			inkAssert(found, "Invalid container id reference.");
 			inkAssert(c_id == i, "tracked containere are not allowed to move, expect we migrate");

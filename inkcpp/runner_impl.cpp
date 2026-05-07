@@ -359,7 +359,6 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 		// to know if it should be tracked or not.)
 		_ptr += 6;
 	}
-	_ptr = dest;
 
 	// If we're tracking knots, we only want the first one.
 	bool first_knot = track_knot_visit;
