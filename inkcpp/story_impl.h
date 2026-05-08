@@ -57,7 +57,10 @@ public:
 	// Look up the details of the given container
 	const container_data_t& container_data(container_t id) const
 	{
-		inkAssert(id < _num_containers);
+		inkAssert(
+		    id < _num_containers, "Container ID %u out of range (num_containers=%u)", ( unsigned ) id,
+		    ( unsigned ) _num_containers
+		);
 		return _container_data[id];
 	}
 

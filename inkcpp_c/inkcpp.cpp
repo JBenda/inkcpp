@@ -72,6 +72,10 @@ extern "C" {
 	HInkStory* ink_story_from_file(const char* filename)
 	{
 		FILE* file = fopen(filename, "rb");
+		if (file == NULL) {
+			fprintf(stderr, "Failed to open file: %s\n", filename);
+			return NULL;
+		}
 		fseek(file, 0, SEEK_END);
 		long file_length = ftell(file);
 		if (file_length < 0) {

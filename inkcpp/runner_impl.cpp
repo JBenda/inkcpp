@@ -335,8 +335,9 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	}
 
 	// Record location and jump.
-	const uint32_t current_offset = _ptr - _story->instructions();
-	_ptr                          = dest;
+	const uint32_t current_offset
+	    = _ptr != nullptr ? static_cast<uint32_t>(_ptr - _story->instructions()) : ~0U;
+	_ptr = dest;
 
 	// Find the container at or before dest, which will become the top of the post-jump stack.
 	const uint32_t    dest_offset = dest - _story->instructions();
@@ -368,7 +369,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	uint32_t    depth = 0;
 	for (container_t id = dest_id; id != ~0U; /* advance in body */) {
 		// Append to stack.
-		inkAssert(depth < abs(config::limitContainerDepth));
+		inkAssert(depth < abs(config::limitContainerDepth), "Container depth limit exceeded in jump!");
 		stack[depth++] = id;
 
 		// Find container for this ID.
@@ -656,7 +657,11 @@ bool runner_impl::can_be_migrated() const
 	if (_entered_knot) {
 		return false;
 	}
-	hash_t c_hash = _story->find_container_for(_ptr - _story->instructions() - 6);
+	container_t container_id
+	    = _ptr != nullptr && _ptr >= _story->instructions() + 6
+	        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
+	        : ~0U;
+	hash_t c_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
 	if (c_hash == 0) {
 		return false;
 	}
@@ -670,14 +675,20 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
-	// TODO: remove
-	ptr                         = snap_write(
-      ptr, _story->find_container_for(_ptr - _story->instructions() - 6), should_write
-  );
+	// This first field stores the hash of the container at the current position,
+	// used by migration (story_impl::new_runner_from_snapshot) to navigate to the correct location.
+	{
+		container_t container_id
+		    = (_ptr != nullptr && _ptr >= _story->instructions() + 6)
+		        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
+		        : ~0U;
+		hash_t container_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
+		ptr                   = snap_write(ptr, container_hash, should_write);
+	}
 	ptr    = snap_write(ptr, offset, should_write);
-	offset = _backup - _story->instructions();
+	offset = _backup != nullptr ? _backup - _story->instructions() : 0;
 	ptr    = snap_write(ptr, offset, should_write);
-	offset = _done - _story->instructions();
+	offset = _done != nullptr ? _done - _story->instructions() : 0;
 	ptr    = snap_write(ptr, offset, should_write);
 	ptr    = snap_write(ptr, _rng.get_state(), should_write);
 	ptr    = snap_write(ptr, _evaluation_mode, should_write);
@@ -721,9 +732,9 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	ptr     = snap_read(ptr, offset);
 	_ptr    = offset == 0 ? nullptr : _story->instructions() + offset;
 	ptr     = snap_read(ptr, offset);
-	_backup = _story->instructions() + offset;
+	_backup = offset == 0 ? nullptr : _story->instructions() + offset;
 	ptr     = snap_read(ptr, offset);
-	_done   = _story->instructions() + offset;
+	_done   = offset == 0 ? nullptr : _story->instructions() + offset;
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
@@ -744,17 +755,22 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	_current_knot_id   = ~0U;
 	ptr                = snap_read(ptr, current_knot_name);
 	if (current_knot_name) {
-		bool found = _story->find_container_id(
-		    _story->find_offset_for(current_knot_name) - _story->instructions(), _current_knot_id
-		);
+		ip_t knot_ip = _story->find_offset_for(current_knot_name);
+		bool found   = knot_ip != nullptr
+		          && _story->find_container_id(
+		              static_cast<uint32_t>(knot_ip - _story->instructions()), _current_knot_id
+		          );
 		inkAssert(found, "Unable to find current knot in migrated story.");
 	}
 	_current_knot_id_backup = ~0U;
 	ptr                     = snap_read(ptr, current_knot_name);
 	if (current_knot_name) {
-		bool found = _story->find_container_id(
-		    _story->find_offset_for(current_knot_name) - _story->instructions(), _current_knot_id_backup
-		);
+		ip_t knot_ip_backup = _story->find_offset_for(current_knot_name);
+		bool found
+		    = knot_ip_backup != nullptr
+		   && _story->find_container_id(
+		       static_cast<uint32_t>(knot_ip_backup - _story->instructions()), _current_knot_id_backup
+		   );
 		inkAssert(found, "Unable to find current knot backup in migration %u", current_knot_name);
 	}
 	ptr = _container.snap_load(ptr, loader);
@@ -1139,7 +1155,12 @@ void runner_impl::step()
 						// Record the position of the instruction pointer at the first fallthrough.
 						//  We'll use this if we run out of content and hit an implied "done" to restore
 						//  our position when a choice is chosen. See ::choose
-						set_done_ptr(_ptr);
+						// Only update if not already set: after choices are presented, subsequent
+						// fallthrough diverts at the root level (between named knots) must not
+						// overwrite the valid done pointer we already recorded.
+						if (_done == nullptr) {
+							set_done_ptr(_ptr);
+						}
 						_is_falling = true;
 					}
 

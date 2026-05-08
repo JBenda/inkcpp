@@ -105,6 +105,8 @@ bool story_impl::find_container_id(uint32_t offset, container_t& container_id) c
 	container_id = find_container_for(offset);
 
 	// Exact match?
+	if (container_id == ~0U)
+		return false;
 	return container_data(container_id)._start_offset == offset;
 }
 
@@ -288,7 +290,12 @@ void story_impl::setup_pointers()
 		_instruction_data = _file + header._instructions._start;
 
 	// Shrink file length to fit exact length of instructions section.
-	inkAssert(end() >= _instruction_data + header._instructions._bytes);
+	inkAssert(
+	    end() >= _instruction_data + header._instructions._bytes,
+	    "Story file size mismatch: file ends at %u but instructions end at %u",
+	    ( uint32_t ) (end() - _file),
+	    ( uint32_t ) (_instruction_data - _file) + header._instructions._bytes
+	);
 	_length = _instruction_data + header._instructions._bytes - _file;
 
 	// Debugging info
