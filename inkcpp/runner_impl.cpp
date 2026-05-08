@@ -46,7 +46,7 @@ namespace ink::runtime::internal
 
 hash_t runner_impl::get_current_knot() const
 {
-	return _current_knot_id == ~0U ? 0 : _story->container_hash(_current_knot_id);
+	return _current_knot_id == ~0U ? 0 : _story->container_data(_current_knot_id)._hash;
 }
 
 template<>
@@ -176,9 +176,6 @@ inline T runner_impl::read(optional<ip_t> pos)
 
 	// Read memory
 	T val = *( const T* ) ptr;
-	if (_story->get_header().endien == header::endian_types::differ) {
-		val = header::swap_bytes(val);
-	}
 
 	// Advance ip
 	if (! pos.has_value()) {
@@ -326,96 +323,88 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
 	//  divert should only be taking us from a container to that same container's end point
 	//  without entering any other containers
-	// OR IF is target is same position do nothing
-	// could happened if jumping to and of an unnamed container
+	// OR IF if target is same position do nothing
+	// could happend if jumping to and of an unnamed container
 	if (dest == _ptr) {
-		_ptr = dest;
 		return;
 	}
 
-	const uint32_t* iter = nullptr;
-	container_t     id;
-	ip_t            offset   = nullptr;
-	bool            reversed = _ptr > dest;
-	// number of container which were already on the stack at current position
-	size_t          comm_end = _container.size();
-
-	iter = nullptr;
-	while (_story->iterate_containers(iter, id, offset)) {
-		if (offset >= _ptr) {
-			break;
-		}
-	}
-	if (! reversed) {
-		_story->iterate_containers(iter, id, offset, true);
-	}
-	optional<ContainerData> last_pop = nullopt;
-	while (_story->iterate_containers(iter, id, offset, reversed)) {
-		if ((! reversed && offset >= dest) || (reversed && offset < dest)) {
-			break;
-		}
-		if (_container.empty() || _container.top().id != id) {
-			const uint32_t* iter2 = nullptr;
-			container_t     id2;
-			ip_t            offset2;
-			while (_story->iterate_containers(iter2, id2, offset2) && id2 != id) {}
-			_container.push({id, offset2 - _story->instructions()});
-		} else {
-			if (_container.size() == comm_end) {
-				last_pop = _container.pop();
-				comm_end -= 1;
-			} else {
-				_container.pop();
-			}
-		}
-	}
-	iter = nullptr;
-	while (_story->iterate_containers(iter, id, offset)) {
-		if (offset >= dest) {
-			break;
-		}
+	// Discard old stack, preserving save region.
+	while (! _container.empty()) {
+		_container.pop();
 	}
 
-	// if we jump directly to a named container start, go inside, if it's a ONLY_FIRST container
-	// it will get visited in the next step
-	// todo: check if a while is needed
-	if (offset == dest && static_cast<Command>(offset[0]) == Command::START_CONTAINER_MARKER) {
-		if (track_knot_visit
-		    && static_cast<CommandFlag>(offset[1]) & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
-			_current_knot_id = id;
-			_entered_knot    = true;
-		}
-		dest += 6;
-		_container.push({id, offset - _story->instructions()});
-		// if we entered a knot we just left, do not recount enter
-		if (reversed && comm_end == _container.size() - 1 && last_pop.has_value()
-		    && last_pop.value().id == id) {
-			comm_end += 1;
-		}
-	}
+	// Record location and jump.
+	const uint32_t current_offset
+	    = _ptr != nullptr ? static_cast<uint32_t>(_ptr - _story->instructions()) : ~0U;
 	_ptr = dest;
 
-	// iff all container (until now) are entered at first position
-	bool allEnteredAtStart = true;
-	ip_t child_position    = dest;
-	if (record_visits) {
-		const ContainerData* iData = nullptr;
-		size_t               level = _container.size();
-		while (_container.iter(iData)) {
-			if (level > comm_end
-			    || _story->container_flag(iData->offset + _story->instructions())
-			           & CommandFlag::CONTAINER_MARKER_ONLY_FIRST) {
-				auto parrent_offset = _story->instructions() + iData->offset;
-				inkAssert(child_position >= parrent_offset, "Container stack order is broken");
-				// 6 == len of START_CONTAINER_SIGNAL, if its 6 bytes behind the container it is a
-				// unnnamed subcontainers first child check if child_positino is the first child of
-				// current container
-				allEnteredAtStart = allEnteredAtStart && ((child_position - parrent_offset) <= 6);
-				child_position    = parrent_offset;
-				_globals->visit(iData->id, allEnteredAtStart);
-			}
-			level -= 1;
+	// Find the container at or before dest, which will become the top of the post-jump stack.
+	const uint32_t    dest_offset = dest - _story->instructions();
+	const container_t dest_id     = _story->find_container_for(dest_offset);
+
+	// If there's no destination container, stop.
+	if (dest_id == ~0)
+		return;
+
+	// Are we entering the new container at its start?
+	using container_data_t                 = ink::internal::container_data_t;
+	const container_data_t& dest_container = _story->container_data(dest_id);
+	if (dest_offset == dest_container._start_offset) {
+		// Record direct jump to non-knot if requested. (Knots handled below.)
+		if (record_visits && ! dest_container.knot()) {
+			_globals->visit(dest_id);
 		}
+
+		// Consume instruction so we don't process it again during normal flow. (We need to do this here
+		// to know if it should be tracked or not.)
+		_ptr += 6;
+	}
+
+	// If we're tracking knots, we only want the first one.
+	bool first_knot = track_knot_visit;
+
+	// Assemble temp stack in reverse order by traversing container tree.
+	container_t stack[abs(config::limitContainerDepth)];
+	uint32_t    depth = 0;
+	for (container_t id = dest_id; id != ~0U; /* advance in body */) {
+		// Append to stack.
+		inkAssert(depth < abs(config::limitContainerDepth), "Container depth limit exceeded in jump!");
+		stack[depth++] = id;
+
+		// Find container for this ID.
+		const container_data_t& container = _story->container_data(id);
+
+		// Is this a new knot?
+		if (container.knot() && ! container.contains(current_offset)) {
+			// Named knots/stitches need special handling - their visit counts are updated wherever the
+			// story enters them,
+			//	and we generally need to know which knot we're in, for tagging, unless we're jumping to a
+			// tunnel or similar
+			// which suppresses knot tracking.
+			//
+			// Ink has a rule about incrementing visit counts when you jump to the top of a knot, which
+			// seems to need to override inkcpp's knot_visit flag.
+			if (track_knot_visit || container._start_offset == dest_offset) {
+				_globals->visit(id);
+			}
+
+			// If tracking, update with the first knot we encounter, which is the one closest to the top
+			// of the new stack.
+			if (first_knot) {
+				_current_knot_id = id;
+				_entered_knot    = true;
+				first_knot       = false;
+			}
+		}
+
+		// Next one.
+		id = container._parent;
+	}
+
+	// Reverse order onto final stack.
+	for (uint32_t d = 0; d < depth; ++d) {
+		_container.push(stack[depth - 1 - d]);
 	}
 }
 
@@ -495,7 +484,7 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _evaluation_mode{false}
     , _choices()
     , _tags_begin(0, ~0)
-    , _container(ContainerData{})
+    , _container(~0)
 #ifdef INK_ENABLE_CSTD
     , _rng(static_cast<uint32_t>(time(NULL)))
 #else
@@ -668,7 +657,11 @@ bool runner_impl::can_be_migrated() const
 	if (_entered_knot) {
 		return false;
 	}
-	hash_t c_hash = _story->container_hash(_ptr - 6);
+	container_t container_id
+	    = _ptr != nullptr && _ptr >= _story->instructions() + 6
+	        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
+	        : ~0U;
+	hash_t c_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
 	if (c_hash == 0) {
 		return false;
 	}
@@ -682,19 +675,27 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	unsigned char* ptr          = data;
 	bool           should_write = data != nullptr;
 	std::uintptr_t offset       = _ptr != nullptr ? _ptr - _story->instructions() : 0;
-	// TODO: remove
-	ptr                         = snap_write(ptr, _story->container_hash(_ptr - 6), should_write);
-	ptr                         = snap_write(ptr, offset, should_write);
-	offset                      = _backup - _story->instructions();
-	ptr                         = snap_write(ptr, offset, should_write);
-	offset                      = _done - _story->instructions();
-	ptr                         = snap_write(ptr, offset, should_write);
-	ptr                         = snap_write(ptr, _rng.get_state(), should_write);
-	ptr                         = snap_write(ptr, _evaluation_mode, should_write);
-	ptr                         = snap_write(ptr, _string_mode, should_write);
-	ptr                         = snap_write(ptr, _saved_evaluation_mode, should_write);
-	ptr                         = snap_write(ptr, _saved, should_write);
-	ptr                         = snap_write(ptr, _is_falling, should_write);
+	// This first field stores the hash of the container at the current position,
+	// used by migration (story_impl::new_runner_from_snapshot) to navigate to the correct location.
+	{
+		container_t container_id
+		    = (_ptr != nullptr && _ptr >= _story->instructions() + 6)
+		        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
+		        : ~0U;
+		hash_t container_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
+		ptr                   = snap_write(ptr, container_hash, should_write);
+	}
+	ptr    = snap_write(ptr, offset, should_write);
+	offset = _backup != nullptr ? _backup - _story->instructions() : 0;
+	ptr    = snap_write(ptr, offset, should_write);
+	offset = _done != nullptr ? _done - _story->instructions() : 0;
+	ptr    = snap_write(ptr, offset, should_write);
+	ptr    = snap_write(ptr, _rng.get_state(), should_write);
+	ptr    = snap_write(ptr, _evaluation_mode, should_write);
+	ptr    = snap_write(ptr, _string_mode, should_write);
+	ptr    = snap_write(ptr, _saved_evaluation_mode, should_write);
+	ptr    = snap_write(ptr, _saved, should_write);
+	ptr    = snap_write(ptr, _is_falling, should_write);
 	ptr += _output.snap(data ? ptr : nullptr, snapper);
 	ptr += _stack.snap(data ? ptr : nullptr, snapper);
 	ptr += _ref_stack.snap(data ? ptr : nullptr, snapper);
@@ -706,7 +707,7 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr                 = snap_write(ptr, _entered_knot, should_write);
 	ptr                 = snap_write(ptr, get_current_knot(), should_write);
 	if (_current_knot_id_backup != ~0U) {
-		ptr = snap_write(ptr, _story->container_hash(_current_knot_id_backup), should_write);
+		ptr = snap_write(ptr, _story->container_data(_current_knot_id_backup)._hash, should_write);
 	} else {
 		hash_t none = 0;
 		ptr         = snap_write(ptr, none, should_write);
@@ -731,9 +732,9 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	ptr     = snap_read(ptr, offset);
 	_ptr    = offset == 0 ? nullptr : _story->instructions() + offset;
 	ptr     = snap_read(ptr, offset);
-	_backup = _story->instructions() + offset;
+	_backup = offset == 0 ? nullptr : _story->instructions() + offset;
 	ptr     = snap_read(ptr, offset);
-	_done   = _story->instructions() + offset;
+	_done   = offset == 0 ? nullptr : _story->instructions() + offset;
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
@@ -754,16 +755,22 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	_current_knot_id   = ~0U;
 	ptr                = snap_read(ptr, current_knot_name);
 	if (current_knot_name) {
-		bool found
-		    = _story->get_container_id(_story->find_offset_for(current_knot_name), _current_knot_id);
+		ip_t knot_ip = _story->find_offset_for(current_knot_name);
+		bool found   = knot_ip != nullptr
+		          && _story->find_container_id(
+		              static_cast<uint32_t>(knot_ip - _story->instructions()), _current_knot_id
+		          );
 		inkAssert(found, "Unable to find current knot in migrated story.");
 	}
 	_current_knot_id_backup = ~0U;
 	ptr                     = snap_read(ptr, current_knot_name);
 	if (current_knot_name) {
-		bool found = _story->get_container_id(
-		    _story->find_offset_for(current_knot_name), _current_knot_id_backup
-		);
+		ip_t knot_ip_backup = _story->find_offset_for(current_knot_name);
+		bool found
+		    = knot_ip_backup != nullptr
+		   && _story->find_container_id(
+		       static_cast<uint32_t>(knot_ip_backup - _story->instructions()), _current_knot_id_backup
+		   );
 		inkAssert(found, "Unable to find current knot backup in migration %u", current_knot_name);
 	}
 	ptr = _container.snap_load(ptr, loader);
@@ -817,7 +824,7 @@ bool runner_impl::migrate_to(hash_t path)
 	fetch_tags(_story->instructions());
 	assign_tags({tags_level::GLOBAL});
 	if (_current_knot_id != ~0U) {
-		ip_t start_of_knot = _story->find_offset_for(_story->container_hash(_current_knot_id));
+		ip_t start_of_knot = _story->find_offset_for(_story->container_data(_current_knot_id)._hash);
 		fetch_tags(start_of_knot);
 		assign_tags({tags_level::KNOT});
 		if (start_of_knot != destination) {
@@ -1148,7 +1155,12 @@ void runner_impl::step()
 						// Record the position of the instruction pointer at the first fallthrough.
 						//  We'll use this if we run out of content and hit an implied "done" to restore
 						//  our position when a choice is chosen. See ::choose
-						set_done_ptr(_ptr);
+						// Only update if not already set: after choices are presented, subsequent
+						// fallthrough diverts at the root level (between named knots) must not
+						// overwrite the valid done pointer we already recorded.
+						if (_done == nullptr) {
+							set_done_ptr(_ptr);
+						}
 						_is_falling = true;
 					}
 
@@ -1467,7 +1479,7 @@ void runner_impl::step()
 					if (flag & CommandFlag::CHOICE_IS_ONCE_ONLY) {
 						// Need to convert offset to container index
 						container_t destination = ~0U;
-						if (_story->get_container_id(_story->instructions() + path, destination)) {
+						if (_story->find_container_id(path, destination)) {
 							// Ignore the choice if we've visited the destination before
 							if (_globals->visits(destination) > 0) {
 								break;
@@ -1530,12 +1542,13 @@ void runner_impl::step()
 					// Keep track of current container
 					auto index = read<uint32_t>();
 					// offset points to command, command has size 6
-					_container.push({index, _ptr - _story->instructions() - 6});
+					_container.push(index);
 
 					// Increment visit count
-					if (flag & CommandFlag::CONTAINER_MARKER_TRACK_VISITS
-					    || flag & CommandFlag::CONTAINER_MARKER_TRACK_TURNS) {
-						_globals->visit(_container.top().id, true);
+					if (uint8_t(flag)
+					    & (uint8_t(CommandFlag::CONTAINER_MARKER_TRACK_VISITS)
+					       | uint8_t(CommandFlag::CONTAINER_MARKER_TRACK_TURNS))) {
+						_globals->visit(index);
 					}
 					if (flag & CommandFlag::CONTAINER_MARKER_IS_KNOT) {
 						_current_knot_id = index;
@@ -1545,8 +1558,7 @@ void runner_impl::step()
 				} break;
 				case Command::END_CONTAINER_MARKER: {
 					container_t index = read<container_t>();
-
-					inkAssert(_container.top().id == index, "Leaving container we are not in!");
+					inkAssert(_container.top() == index, "Leaving container we are not in!");
 
 					// Move up out of the current container
 					_container.pop();
@@ -1582,7 +1594,7 @@ void runner_impl::step()
 					// Push the visit count for the current container to the top
 					//  is 0-indexed for some reason. idk why but this is what ink expects
 					_eval.push(value{}.set<value_type::int32>(
-					    static_cast<int32_t>(_globals->visits(_container.top().id) - 1)
+					    static_cast<int32_t>(_globals->visits(_container.top()) - 1)
 					));
 				} break;
 				case Command::TURN: {

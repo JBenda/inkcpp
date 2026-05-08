@@ -10,7 +10,6 @@
 
 namespace ink::runtime::internal
 {
-
 namespace casting
 {
 	// define valid castings

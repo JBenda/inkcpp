@@ -11,7 +11,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("Simple isolated migration tests.")
+SCENARIO("Simple isolated migration tests.", "[migration]")
 {
 	std::unique_ptr<story> base_story{story::from_file(INK_TEST_RESOURCE_DIR "MigrationBase.bin")};
 	globals                base_globals = base_story->new_globals();
@@ -31,6 +31,8 @@ SCENARIO("Simple isolated migration tests.")
 		REQUIRE(base_thread->get_global_tag(1) == std::string("flavor:base"));
 		REQUIRE(base_thread->num_knot_tags() == 1);
 		REQUIRE(base_thread->get_knot_tag(0) == std::string("knot:Main"));
+		base_thread->choose(0);
+		REQUIRE(base_thread->getall() == "A\ncatch\n5 3\n1 -1 1\nOh.\n");
 	}
 	GIVEN("Simple story with changes in globals.")
 	{
@@ -48,6 +50,8 @@ SCENARIO("Simple isolated migration tests.")
 				CHECK(new_globals->get<int32_t>("do_migrate").value_or(0) == 10);
 				CHECK(new_globals->get<int32_t>("new_var").value_or(0) == 20);
 			}
+			new_thread->choose(0);
+			REQUIRE(new_thread->getall() == "A\ncatch\n1 -1 1\nOh.\n");
 		}
 		WHEN("Run base story and load in new_story")
 		{
@@ -68,7 +72,7 @@ SCENARIO("Simple isolated migration tests.")
 			THEN("expect story to continue normally")
 			{
 				content = new_thread->getall();
-				REQUIRE(content == "A\ncatch\n1 -1 0\nOh.\n");
+				REQUIRE(content == "A\ncatch\n1 -1 1\nOh.\n");
 			}
 		}
 	}
@@ -85,7 +89,7 @@ SCENARIO("Simple isolated migration tests.")
 			REQUIRE(content == "B\n-1 0 0\nThis is a simple story.\n");
 			new_thread->choose(0);
 			content = new_thread->getall();
-			REQUIRE(content == "A\ncatch\n-1 1 0\nOh.\n");
+			REQUIRE(content == "A\ncatch\n-1 1 1\nOh.\n");
 		}
 		WHEN("Run base story and load new story.")
 		{
@@ -100,7 +104,7 @@ SCENARIO("Simple isolated migration tests.")
 			THEN("Migrated visit counts. Unreachable node has visit, new node has no")
 			{
 				content = new_thread->getall();
-				REQUIRE(content == "A\ncatch\n1 1 0\nOh.\n");
+				REQUIRE(content == "A\ncatch\n1 1 1\nOh.\n");
 			}
 		}
 	}
@@ -119,7 +123,7 @@ SCENARIO("Simple isolated migration tests.")
 			REQUIRE(new_thread->get_current_knot() == 0x25e83b84);
 			content = new_thread->getall();
 			REQUIRE(new_thread->get_current_knot() == 0x25e83b84);
-			REQUIRE(content == "A\ncatch\n2 - 3\n1 -1 0\nOh.\n");
+			REQUIRE(content == "A\ncatch\n2 - 3\n1 -1 1\nOh.\n");
 		}
 		WHEN("Run base story and load new story.")
 		{
@@ -137,7 +141,7 @@ SCENARIO("Simple isolated migration tests.")
 			{
 				REQUIRE(new_thread->get_current_knot() == 0x25e83b84);
 				content = new_thread->getall();
-				REQUIRE(content == "A\ncatch\n5 - 6\n1 -1 0\nOh.\n");
+				REQUIRE(content == "A\ncatch\n5 - 6\n1 -1 1\nOh.\n");
 			}
 		}
 	}
@@ -175,18 +179,21 @@ SCENARIO("Simple isolated migration tests.")
 			runner  new_thread  = new_story->new_runner_from_snapshot(*snap, new_globals);
 			THEN("Got new global/knot tags")
 			{
-				REQUIRE(content == "A\n0 -1 0\nThis is a simple story.\n");
 				REQUIRE(new_thread->num_global_tags() == 2);
 				REQUIRE(new_thread->get_global_tag(0) == std::string("test:migration"));
 				REQUIRE(new_thread->get_global_tag(1) == std::string("flavor:changed"));
 				REQUIRE(new_thread->num_knot_tags() == 1);
 				REQUIRE(new_thread->get_knot_tag(0) == std::string("knot:different"));
 			}
+			THEN("continue the story normally")
+			{
+				REQUIRE(new_thread->getall() == "A\ncatch\n5 3\n1 -1 1\nOh.\n");
+			}
 		}
 	}
 }
 
-SCENARIO("Migration Test for small story")
+SCENARIO("Migration Test for small story", "[migration]")
 {
 	std::unique_ptr<story> before{story::from_file(INK_TEST_RESOURCE_DIR "MigrationBefore.bin")};
 	std::unique_ptr<story> after{story::from_file(INK_TEST_RESOURCE_DIR "MigrationAfter.bin")};

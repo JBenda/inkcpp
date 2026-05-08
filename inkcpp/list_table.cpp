@@ -34,7 +34,7 @@ void list_table::copy_lists(const data_t* src, data_t* dst)
 	}
 }
 
-list_table::list_table(const char* data, const ink::internal::header& header)
+list_table::list_table(const char* data)
     : _valid{false}
 {
 	if (data == nullptr) {
@@ -43,7 +43,7 @@ list_table::list_table(const char* data, const ink::internal::header& header)
 	list_flag   flag;
 	const char* ptr   = data;
 	int         start = 0;
-	while ((flag = header.read_list_flag(ptr)) != null_flag) {
+	while ((flag = read_list_flag(ptr)) != null_flag) {
 		// start of new list
 		if (static_cast<int16_t>(_list_end.size()) == flag.list_id) {
 			start              = _list_end.size() == 0 ? 0 : _list_end.back();
@@ -1013,9 +1013,9 @@ float* cost_matrix(const MatchListValues& lh, const MatchListValues& rh, float d
 	return matrix;
 }
 
-bool list_table::migrate(const char* old_list_metadata, const ink::internal::header& header)
+bool list_table::migrate(const char* old_list_metadata)
 {
-	list_table old_ref_table(old_list_metadata, header);
+	list_table old_ref_table(old_list_metadata);
 	for (const auto& x : _data) {
 		old_ref_table._data.push() = x;
 	}

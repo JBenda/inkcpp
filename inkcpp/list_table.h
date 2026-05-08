@@ -113,9 +113,9 @@ public:
 	list  create_permament();
 	list& add_inplace(list& lh, list_flag rh);
 
-	list_table(const char* data, const ink::internal::header&);
+	list_table(const char* data);
 	// binary list metadata of currently loaded list
-	bool migrate(const char* old_list_metadata, const ink::internal::header& header);
+	bool migrate(const char* old_list_metadata);
 
 	explicit list_table()
 	    : _entrySize{0}

@@ -20,7 +20,7 @@ globals_impl::globals_impl(const story_impl* story)
     , _visit_counts(visit_count(), visit_count_null_value)
     , _owner(story)
     , _runners_start(nullptr)
-    , _lists(story->list_meta(), story->get_header())
+    , _lists(story->list_meta())
     , _globals_initialized(false)
 {
 	_visit_counts.resize(_num_containers);
@@ -50,12 +50,9 @@ void globals_impl::init_static_list_flags()
 	}
 }
 
-void globals_impl::visit(uint32_t container_id, bool entering_at_start)
+void globals_impl::visit(uint32_t container_id)
 {
-	if ((! (_owner->container_flag(container_id) & CommandFlag::CONTAINER_MARKER_ONLY_FIRST))
-	    || entering_at_start) {
-		_visit_counts.set(container_id, {_visit_counts[container_id].visits + 1, 0});
-	}
+	_visit_counts.set(container_id, {_visit_counts[container_id].visits + 1, 0});
 }
 
 uint32_t globals_impl::visits(uint32_t container_id) const
@@ -276,7 +273,7 @@ size_t globals_impl::snap(unsigned char* data, const snapper& snapper) const
 	ptr = snap_write(ptr, _turn_cnt, data != nullptr);
 	ptr += _visit_counts.snap(data ? ptr : nullptr, snapper);
 	for (unsigned i = 0; i < _visit_counts.capacity(); ++i) {
-		ptr = snap_write(ptr, _owner->container_hash(i), data != nullptr);
+		ptr = snap_write(ptr, _owner->container_data(i)._hash, data != nullptr);
 	}
 	ptr += _strings.snap(data ? ptr : nullptr, snapper);
 	ptr += _lists.snap(data ? ptr : nullptr, snapper);
@@ -307,7 +304,11 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 		hash_t path;
 		ptr = snap_read(ptr, path);
 		container_t c_id;
-		bool        found = _owner->get_container_id(_owner->find_offset_for(path), c_id);
+		ip_t        container_ip = _owner->find_offset_for(path);
+		bool        found        = container_ip != nullptr
+		          && _owner->find_container_id(
+		              static_cast<uint32_t>(container_ip - _owner->instructions()), c_id
+		          );
 		if (! loader.migratable) {
 			inkAssert(found, "Invalid container id reference.");
 			inkAssert(c_id == i, "tracked containere are not allowed to move, expect we migrate");
@@ -332,8 +333,8 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 
 bool globals_impl::migrate_new_globals(globals_impl& new_globals, const char* list_metadata)
 {
-	bool success = _variables.migrate(new_globals._variables)
-	            && ((! _lists) || _lists.migrate(list_metadata, _owner->get_header()));
+	bool success
+	    = _variables.migrate(new_globals._variables) && ((! _lists) || _lists.migrate(list_metadata));
 	if (! success) {
 		return false;
 	}
