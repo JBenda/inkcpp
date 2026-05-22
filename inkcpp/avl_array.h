@@ -67,12 +67,14 @@ class avl_array
 	// 'node' structure
 	ink::runtime::internal::if_t<dynamic, Key*, Key[Size]>               key_;
 	ink::runtime::internal::if_t<dynamic, T*, T[Size]>                   val_;
-	ink::runtime::internal::if_t<dynamic, char*, char[Size]>             balance_;
 	ink::runtime::internal::if_t<dynamic, child_type*, child_type[Size]> child_;
 	size_type                                                            size_; // actual size
 	size_type                                                            _capacity;
 	size_type                                                            root_; // root node
 	ink::runtime::internal::if_t<dynamic, size_type*, size_type[Fast ? Size : 1]> parent_;
+
+	using balance_type = signed char;
+	ink::runtime::internal::if_t<dynamic, balance_type*, balance_type[Size]> balance_;
 
 	// invalid index (like 'nullptr' in a pointer implementation)
 	static const size_type INVALID_IDX = ~static_cast<size_type>(0);
@@ -197,7 +199,7 @@ public:
 		if constexpr (dynamic) {
 			key_     = new Key[Size];
 			val_     = new T[Size];
-			balance_ = new char[Size];
+			balance_ = new balance_type[Size];
 			child_   = new child_type[Size];
 			if constexpr (Fast) {
 				parent_ = new size_type[Size];
@@ -285,7 +287,7 @@ public:
 			val_ = new_data;
 		}
 		{
-			char* new_data = new char[new_size];
+			balance_type* new_data = new balance_type[new_size];
 			for (size_type i = 0; i < _capacity; ++i) {
 				new_data[i] = balance_[i];
 			}
@@ -660,7 +662,7 @@ private:
 		set_parent(target, get_parent(source));
 	}
 
-	void insert_balance(size_type node, char balance)
+	void insert_balance(size_type node, balance_type balance)
 	{
 		while (node != INVALID_IDX) {
 			balance = (balance_[node] += balance);
@@ -691,7 +693,7 @@ private:
 		}
 	}
 
-	void delete_balance(size_type node, char balance)
+	void delete_balance(size_type node, balance_type balance)
 	{
 		while (node != INVALID_IDX) {
 			balance = (balance_[node] += balance);
