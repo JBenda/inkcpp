@@ -34,13 +34,7 @@ AInkRuntime::AInkRuntime()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-AInkRuntime::~AInkRuntime()
-{
-	if (mSnapshot) {
-		delete mpSnapshot;
-	}
-	mSnapshot.Reset();
-}
+AInkRuntime::~AInkRuntime() {}
 
 // Called when the game starts or when spawned
 void AInkRuntime::BeginPlay()
@@ -60,13 +54,32 @@ void AInkRuntime::BeginPlay()
 		} else {
 			mpGlobals = mpRuntime->new_globals();
 		}
-		// initialize globals
-		mpRuntime->new_runner(mpGlobals);
 	} else {
 		UE_LOG(InkCpp, Warning, TEXT("No story asset assigned."));
 	}
 
 	Super::BeginPlay();
+}
+
+void AInkRuntime::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	mThreads.Empty();
+	mExclusiveStack.Empty();
+
+	mpGlobals = ink::runtime::globals{};
+
+	if (mpSnapshot) {
+		delete mpSnapshot;
+		mpSnapshot = nullptr;
+	}
+	mSnapshot.Reset();
+
+	if (mpRuntime) {
+		delete mpRuntime;
+		mpRuntime = nullptr;
+	}
 }
 
 // Called every frame
@@ -161,6 +174,10 @@ FInkSnapshot AInkRuntime::Snapshot()
 
 void AInkRuntime::LoadSnapshot(const FInkSnapshot& snapshot)
 {
+	if (mpSnapshot) {
+		delete mpSnapshot;
+		mpSnapshot = nullptr;
+	}
 	mSnapshot  = snapshot;
 	mpSnapshot = ink::runtime::snapshot::from_binary(
 	    reinterpret_cast<unsigned char*>(mSnapshot->data.GetData()), mSnapshot->data.Num(), false

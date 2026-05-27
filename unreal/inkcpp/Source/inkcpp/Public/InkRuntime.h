@@ -12,6 +12,7 @@
 
 #include "InkDelegates.h"
 #include "InkSnapshot.h"
+#include "InkHandles.h"
 
 #include "ink/types.h"
 #include "ink/globals.h"
@@ -21,17 +22,22 @@
 
 class UInkThread;
 struct FInkVar;
-namespace ink::runtime { class story; }
+
+namespace ink::runtime
+{
+class story;
+} // namespace ink::runtime
 
 /** Instantiated story with global variable storage and access, used to instantiate new threads.
  * @ingroup unreal
  */
 UCLASS()
+
 class INKCPP_API AInkRuntime : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AInkRuntime();
 	~AInkRuntime();
@@ -53,7 +59,7 @@ public:
 	 */
 	UInkThread* StartExisting(UInkThread* thread, FString path = "", bool runImmediately = true);
 
-	UFUNCTION(BlueprintCallable, Category="Ink")
+	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** creates a snapshot of the current runtime state.
 	 * can be loladed with @ref #LoadSnapshot()
 	 *
@@ -71,7 +77,7 @@ public:
 	void LoadSnapshot(const FInkSnapshot& snapshot);
 
 
-	UFUNCTION(BlueprintCallable, Category="Ink")
+	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** Marks a thread as "exclusive".
 	 * As long as it is running, no other threads will update.
 	 * @see #PopExclusiveThread()
@@ -80,27 +86,27 @@ public:
 	 */
 	void PushExclusiveThread(UInkThread* Thread);
 
-	UFUNCTION(BlueprintCallable, Category="Ink")
+	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** Removes a thread from the exclusive stack.
 	 * @see #PushExclusiveThread()
 	 *
 	 * @blueprint
 	 */
 	void PopExclusiveThread(UInkThread* Thread);
-	
-	UFUNCTION(BlueprintCallable, Category="Ink")
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** register a "tag function"
 	 * This function is executed if context or a tag in a special format appears
 	 * @see @ref TagFunction
 	 *
 	 * @blueprint
 	 */
-	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate & function);
+	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
 
 	/** @private for internal use */
 	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
-	
-	UFUNCTION(BlueprintCallable, Category="Ink")
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** Access a variable from the ink runtime.
 	 * variables are shared between all threads in the same runtime.
 	 * @param name of variable in ink script
@@ -108,8 +114,8 @@ public:
 	 * @blueprint
 	 */
 	FInkVar GetGlobalVariable(const FString& name);
-	
-	UFUNCTION(BlueprintCallable, Category="Ink")
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** Sets a global variable inside the ink runtime.
 	 * @param name of variable in ink script
 	 * @param value new value for the variable
@@ -118,60 +124,83 @@ public:
 	 */
 	void SetGlobalVariable(const FString& name, const FInkVar& value);
 
-	UFUNCTION(BlueprintCallable, Category="Ink")
-	/** Gets a ping if variable changes
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** Gets a ping if variable changes.
+	 * @return handle — pass to UnobserveVariable() to stop receiving callbacks
 	 * @see #ObserverVariableEvent() #ObserverVariableChange()
 	 *
 	 * @blueprint
 	 */
-	void ObserverVariable(const FString& variableName, const FVariableCallbackDelegate& callback);
+	FInkObserverHandle
+	    ObserverVariable(const FString& variableName, const FVariableCallbackDelegate& callback);
 
-	UFUNCTION(BlueprintCallable, Category="Ink")
-	/** On variable change provides new value
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** On variable change provides new value.
+	 * @return handle — pass to UnobserveVariable() to stop receiving callbacks
 	 * @see #ObserverVariable() #ObserverVariableChange()
 	 *
 	 * @blueprint
 	 */
-	void ObserverVariableEvent(const FString& variableName, const FVariableCallbackDelegateNewValue& callback);
+	FInkObserverHandle ObserverVariableEvent(
+	    const FString& variableName, const FVariableCallbackDelegateNewValue& callback
+	);
 
-	UFUNCTION(BlueprintCallable, Category="Ink")
+	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** On variable change provides old and new value.
-	 * @see #ObserverVariableEvent() #ObserverVariable()
-	 * @attention if the variable set for the firs time, the old value has value type @ref
+	 * @return handle — pass to UnobserveVariable() to stop receiving callbacks
+	 * @attention if the variable set for the first time, the old value has value type @ref
 	 * EInkVarType::None
+	 * @see #ObserverVariableEvent() #ObserverVariable()
 	 *
 	 * @blueprint
 	 */
-	void ObserverVariableChange(const FString& variableName, const FVariableCallbackDelegateNewOldValue& callback);
+	FInkObserverHandle ObserverVariableChange(
+	    const FString& variableName, const FVariableCallbackDelegateNewOldValue& callback
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** Stop receiving variable-change notifications for a previously registered observer.
+	 * @param handle the handle returned by ObserverVariable / ObserverVariableEvent /
+	 * ObserverVariableChange
+	 *
+	 * @blueprint
+	 */
+	void UnobserveVariable(const FInkObserverHandle& handle);
 
 protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
-public:	
+	/** Called when the actor is being removed from play */
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+public:
 	// Called every frame
 	/** @private */
 	virtual void Tick(float DeltaTime) override;
 
 	// Story asset used in this level
-	UPROPERTY(EditAnywhere, Category="Ink")
+	UPROPERTY(EditAnywhere, Category = "Ink")
 	/** @private */
 	class UInkAsset* InkAsset;
 
 private:
-	ink::runtime::story* mpRuntime;
+	ink::runtime::story*  mpRuntime;
 	ink::runtime::globals mpGlobals;
 
 	UPROPERTY()
 	TArray<UInkThread*> mThreads;
-	
+
 	TMap<FName, FGlobalTagFunctionMulticastDelegate> mGlobalTagFunctions;
 
 	UPROPERTY()
 	TArray<UInkThread*> mExclusiveStack;
-	
-	// UPROPERTY(EditDefaultsOnly, Category="Ink")
-	TOptional<FInkSnapshot> mSnapshot;
+
 	// snapshot generates data when re-constructing the globals to allow reconstructing the threads
-	ink::runtime::snapshot* mpSnapshot;
+	TOptional<FInkSnapshot> mSnapshot;
+	ink::runtime::snapshot* mpSnapshot = nullptr;
+
+	/** Active observer tokens. When UnobserveVariable() is called the token is set to false,
+	 *  the lambda checks it before firing and skips. Tokens are cleaned up lazily. */
+	TArray<TSharedPtr<bool>> mObserverTokens;
 };

@@ -20,7 +20,8 @@
  * -TargetPlatforms=Win64`
  * ``` <br/> And either way activating the plugin.
  *
- * The C++ API will be available soon([Issue](https://github.com/JBenda/inkcpp/issues/60)).
+ * The C++ API is available — include the plugin headers directly from your game module
+ * after adding `"inkcpp"` to your module's `PublicDependencyModuleNames` in Build.cs.
  *
  * + @ref ue_setup "General setup"
  * + @ref ue_components "UE5 Blueprints"

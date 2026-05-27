@@ -4,19 +4,22 @@
  * See file LICENSE.txt or go to
  * https://github.com/JBenda/inkcpp for full license details.
  */
-#pragma once
-
 #include "InkList.h"
+#include "inkcpp.h"
 #include <string>
 #include "ink/list.h"
 
 bool UInkList::ContainsFlag(const FString& flag_name) const
 {
+	if (! ensureMsgf(IsValid(), TEXT("UInkList::ContainsFlag called on an invalid (stale) list")))
+		return false;
 	return list_data->contains(TCHAR_TO_UTF8(*flag_name));
 }
 
 bool UInkList::ContainsEnum(const UEnum* Enum, const uint8& value) const
 {
+	if (! ensureMsgf(IsValid(), TEXT("UInkList::ContainsEnum called on an invalid (stale) list")))
+		return false;
 	if (! Enum) {
 		UE_LOG(
 		    InkCpp, Warning,
@@ -31,6 +34,8 @@ bool UInkList::ContainsEnum(const UEnum* Enum, const uint8& value) const
 TArray<uint8> UInkList::ElementsOf(const UEnum* Enum) const
 {
 	TArray<uint8> ret;
+	if (! ensureMsgf(IsValid(), TEXT("UInkList::ElementsOf called on an invalid (stale) list")))
+		return ret;
 	if (! Enum) {
 		UE_LOG(InkCpp, Warning, TEXT("Failed to provide enum for elements of!"));
 		return ret;
@@ -63,6 +68,10 @@ TArray<uint8> UInkList::ElementsOf(const UEnum* Enum) const
 TArray<FString> UInkList::ElementsOfAsString(const UEnum* Enum) const
 {
 	TArray<FString> ret;
+	if (! ensureMsgf(
+	        IsValid(), TEXT("UInkList::ElementsOfAsString called on an invalid (stale) list")
+	    ))
+		return ret;
 
 	FString EnumName = Enum->GetFName().ToString();
 	for (auto itr = list_data->begin(TCHAR_TO_UTF8(*EnumName)); itr != list_data->end(); ++itr) {
@@ -74,6 +83,8 @@ TArray<FString> UInkList::ElementsOfAsString(const UEnum* Enum) const
 TArray<FListFlag> UInkList::Elements() const
 {
 	TArray<FListFlag> ret;
+	if (! ensureMsgf(IsValid(), TEXT("UInkList::Elements called on an invalid (stale) list")))
+		return ret;
 	for (auto itr = list_data->begin(); itr != list_data->end(); ++itr) {
 		ret.Add(FListFlag{
 		    .list_name = FString((*itr).list_name),
@@ -85,5 +96,7 @@ TArray<FListFlag> UInkList::Elements() const
 
 bool UInkList::ContainsList(const FString& name) const
 {
+	if (! ensureMsgf(IsValid(), TEXT("UInkList::ContainsList called on an invalid (stale) list")))
+		return false;
 	return list_data->begin(TCHAR_TO_UTF8(*name)) != list_data->end();
 }

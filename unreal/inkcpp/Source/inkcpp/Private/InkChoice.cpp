@@ -8,17 +8,20 @@
 
 #include "ink/choice.h"
 
-FString UInkChoice::GetText() const { return data->text(); }
-
 UInkChoice::UInkChoice() { tags = NewObject<UTagList>(); }
 
-int UInkChoice::GetIndex() const { return data->index(); }
+FString UInkChoice::GetText() const { return Text; }
+
+int UInkChoice::GetIndex() const { return Index; }
 
 const UTagList* UInkChoice::GetTags() const { return tags; }
 
 void UInkChoice::Initialize(const ink::runtime::choice* c)
 {
-	data = c;
+	// Copy all data out of the runner immediately — the pointer is only valid
+	// until the next getline() or choose() call.
+	Text  = FString(UTF8_TO_TCHAR(c->text()));
+	Index = c->index();
 	if (c->has_tags()) {
 		TArray<FString> fstring_tags{};
 		for (unsigned i = 0; i < c->num_tags(); ++i) {

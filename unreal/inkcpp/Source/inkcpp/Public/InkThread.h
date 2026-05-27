@@ -11,6 +11,7 @@
 
 #include "InkVar.h"
 #include "InkDelegates.h"
+#include "InkList.h"
 
 
 #include "ink/runner.h"
@@ -26,6 +27,7 @@ class UInkChoice;
  * @ingroup unreal
  */
 UCLASS(Blueprintable)
+
 class INKCPP_API UInkThread : public UObject
 {
 	GENERATED_BODY()
@@ -193,6 +195,11 @@ public:
 	 */
 	const UTagList* GetGlobalTags();
 
+	/** Get choices from the last OnChoice event.
+	 * @return array of choices available at the current choice point, empty if not at a choice
+	 */
+	const TArray<UInkChoice*>& GetCurrentChoices() const { return mCurrentChoices; }
+
 
 protected:
 	/** @private */
@@ -200,6 +207,11 @@ protected:
 
 	/** @private */
 	virtual void OnLineWritten_Implementation(const FString& line, UTagList* tags) {}
+
+	/** @private */
+	virtual void OnKnotEntered_Implementation(const UTagList* global_tags, const UTagList* knot_tags)
+	{
+	}
 
 	/** @private */
 	virtual void OnTag_Implementation(const FString& line) {}
@@ -221,31 +233,47 @@ private:
 
 	void ExecuteTagMethod(const TArray<FString>& Params);
 
+	/** Register a UInkList that was created from runner-owned memory during this thread's
+	 * execution. The thread will call Invalidate() on all registered lists before the next
+	 * choose() call so that stale pointers are detected early.
+	 * @private
+	 */
+	void RegisterLiveList(UInkList* list);
+
+	/** Invalidate all UInkList objects registered since the last choose().
+	 * Called internally before mpRunner->choose().
+	 * @private
+	 */
+	void InvalidateLiveLists();
+
 private:
 	ink::runtime::runner mpRunner;
 
 	UPROPERTY()
-	UTagList*            mpTags;
+	UTagList* mpTags;
 
 	UPROPERTY()
-	UTagList*            mkTags = nullptr;
+	UTagList* mkTags = nullptr;
 
 	UPROPERTY()
-	UTagList*            mgTags = nullptr;
+	UTagList* mgTags = nullptr;
 
 	UPROPERTY()
-	TArray<UInkChoice*>  mCurrentChoices; /// @TODO: make accessible?
+	TArray<UInkChoice*> mCurrentChoices;
+
+	/** Lists wrapping runner-owned memory, registered during current execute cycle. */
+	TArray<TWeakObjectPtr<UInkList>> mLiveLists;
 
 	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
 
 	FString mStartPath;
 	bool    mbHasRun;
 
-	int  mnChoiceToChoose;
-	int  mnYieldCounter;
-	bool mbInChoice;
-	bool mbKill;
-	bool mbInitialized;
+	int         mnChoiceToChoose;
+	int         mnYieldCounter;
+	bool        mbInChoice;
+	bool        mbKill;
+	bool        mbInitialized;
 	ink::hash_t mCurrentKnot;
 
 	UPROPERTY()

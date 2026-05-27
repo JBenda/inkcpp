@@ -14,21 +14,21 @@ public class inkcpp : ModuleRules
 
         PublicIncludePaths.AddRange(
 			new string[] {
-				Path.Combine(ModuleDirectory, "../shared/Public")
+				Path.Combine(ModuleDirectory, "../shared/Public"),
+				Path.Combine(ModuleDirectory, "Public/ink"),
 			}
 			);
-				
-		
+
+
 		PrivateIncludePaths.AddRange(
 			new string[] {
                 Path.Combine(ModuleDirectory, "../shared/Private"),
 				Path.Combine(ModuleDirectory, "Private/ink"),
-				Path.Combine(ModuleDirectory, "Public/ink"),
 				Path.Combine(ModuleDirectory, "../ThirdParty/Private"),
             }
 			);
-			
-		
+
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -36,8 +36,8 @@ public class inkcpp : ModuleRules
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
-			
-		
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -45,11 +45,11 @@ public class inkcpp : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				// ... add private dependencies that you statically link with here ...	
+				// ... add private dependencies that you statically link with here ...
 			}
 			);
-		
-		
+
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
