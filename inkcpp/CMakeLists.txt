@@ -83,7 +83,7 @@ endforeach()
 foreach(file IN LISTS PUBLIC_HEADERS)
 	get_filename_component(file "${file}" NAME)
 	configure_file("include/${file}"
-								 "${CMAKE_BINARY_DIR}/unreal/inkcpp/Source/inkcpp/Public/ink/${FILE}" COPYONLY)
+								 "${CMAKE_BINARY_DIR}/unreal/inkcpp/Source/inkcpp/Public/ink/${file}" COPYONLY)
 endforeach()
 foreach(file IN LISTS COLLECTION_SOURCES)
 	configure_file("${file}" "${CMAKE_BINARY_DIR}/unreal/inkcpp/Source/inkcpp/Private/ink/${file}"

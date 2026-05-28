@@ -81,6 +81,7 @@ public:
 		}
 
 	public:
+		iterator(const iterator&) = default;
 		/** contains flag data */
 		struct Flag {
 			const char* flag_name; ///< name of the flag

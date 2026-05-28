@@ -5,13 +5,11 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "story_impl.h"
-#include "platform.h"
 #include "runner_impl.h"
 #include "globals_impl.h"
 #include "snapshot.h"
 #include "snapshot_impl.h"
 #include "snapshot_interface.h"
-#include "version.h"
 
 namespace ink::runtime
 {
@@ -149,7 +147,7 @@ container_t story_impl::find_container_for(uint32_t offset) const
 	// know that the parent contained the child, but the containers are sparse so we might
 	// not have anything.
 	container_t id = entry ? entry->_id : ~0;
-	while (id != ~0) {
+	while (id != ~0U) {
 		const container_data_t& data = container_data(id);
 		if (data._start_offset <= offset && data._end_offset >= offset)
 			return id;
@@ -248,7 +246,7 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 void story_impl::setup_pointers()
 {
 	const ink::internal::header& header = *reinterpret_cast<const ink::internal::header*>(_file);
-	if (! header.verify()) {
+	if (! header.validate()) {
 		return;
 	}
 

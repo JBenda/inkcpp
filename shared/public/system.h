@@ -258,6 +258,8 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 #elif defined(INK_ENABLE_CSTD)
 		fprintf(stderr, "Ink Assert: %s\n", msg);
 		abort();
+#elif defined(INK_ENABLE_UNREAL)
+	// TODO: implement UE exception handling
 #else
 #	warning no assertion handling this could lead to invalid code paths
 #endif

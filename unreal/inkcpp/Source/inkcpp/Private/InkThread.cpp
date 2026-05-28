@@ -15,10 +15,6 @@
 // Unreal includes
 #include "Internationalization/Regex.h"
 
-/** Thread-local pointer to the currently executing UInkThread, used by FInkVar to register
- *  newly created UInkList wrappers for later invalidation. */
-static thread_local UInkThread* GExecutingInkThread = nullptr;
-
 UInkThread::UInkThread()
     : mbHasRun(false)
     , mnChoiceToChoose(-1)
@@ -259,13 +255,8 @@ void UInkThread::ExecuteTagMethod(const TArray<FString>& Params)
 
 bool UInkThread::Execute()
 {
-	// Set the executing thread so FInkVar can register live lists
-	GExecutingInkThread = this;
-
 	// Execute thread
 	bool finished = ExecuteInternal();
-
-	GExecutingInkThread = nullptr;
 
 	// If we've finished, run callback
 	if (finished) {

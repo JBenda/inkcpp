@@ -10,10 +10,7 @@
 
 #include "Misc/AssertionMacros.h"
 
-// Forward declaration of the executing thread pointer defined in InkThread.cpp
-extern thread_local UInkThread* GExecutingInkThread;
-
-FInkVar::FInkVar(ink::runtime::value val)
+FInkVar::FInkVar(ink::runtime::value val, UInkThread* thread)
     : FInkVar()
 {
 	using v_types = ink::runtime::value::Type;
@@ -47,10 +44,7 @@ FInkVar::FInkVar(ink::runtime::value val)
 			ListVal = NewObject<UInkList>();
 			ListVal->SetList(val.get<v_types::List>());
 			VarType = EInkVarType::List;
-			// Register with the executing thread so it can invalidate when runner advances
-			if (GExecutingInkThread) {
-				GExecutingInkThread->RegisterLiveList(ListVal);
-			}
+			thread->RegisterLiveList(ListVal);
 			break;
 		}
 		default: inkFail("unknown type!, failed to convert ink::value to InkVar");

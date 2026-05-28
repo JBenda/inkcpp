@@ -7,6 +7,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InkRuntime.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "inkcpp.h"
 #include "UObject/TextProperty.h"
@@ -93,11 +94,12 @@ struct INKCPP_API FInkVar {
 	}
 
 	/** @private */
-	FInkVar(UInkList& List)
+	FInkVar(UInkList& List, UInkThread* thread)
 	    : VarType(EInkVarType::List)
 	    , IntVal(0)
 	    , ListVal(&List)
 	{
+		thread->RegisterLiveList(ListVal);
 	}
 
 	/** @private */

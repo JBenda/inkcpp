@@ -9,7 +9,10 @@
 
 #include "UObject/Object.h"
 
+#include "ink/choice.h"
+
 #include "InkChoice.generated.h"
+
 
 class UTagList;
 

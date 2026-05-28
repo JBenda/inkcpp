@@ -21,6 +21,11 @@ public:
 	{
 	}
 
+	list_interface& operator=(const list_interface& oth) noexcept override
+	{
+		return *this = static_cast<const list_impl&>(oth);
+	}
+
 	list_impl& operator=(const list_impl&) = default;
 
 	~list_impl() override {}
@@ -41,7 +46,8 @@ private:
 	friend ink::runtime::internal::value;
 
 	/// @todo wrong iteration order, first lists then flags
-	void next(const char*& flag_name, const char*& list_name, int& i, bool one_list_only)
-	    const override;
+	void next(
+	    const char*& flag_name, const char*& list_name, int& i, bool one_list_only
+	) const override;
 };
 } // namespace ink::runtime::internal
