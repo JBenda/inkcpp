@@ -11,9 +11,12 @@
 #include "TagList.h"
 #include "InkChoice.h"
 #include "ink/runner.h"
+#include "InkExecutionScope.h"
 
 // Unreal includes
 #include "Internationalization/Regex.h"
+
+thread_local UInkThread* GExecutingInkThread = nullptr;
 
 UInkThread::UInkThread()
     : mbHasRun(false)
@@ -255,15 +258,17 @@ void UInkThread::ExecuteTagMethod(const TArray<FString>& Params)
 
 bool UInkThread::Execute()
 {
-	// Execute thread
+	// RAII guard: sets GExecutingInkThread for this scope so that FInkVar
+	// constructors can register newly created UInkList wrappers with this
+	// thread. Automatically cleared on return (including via exception).
+	FInkExecutionScope scope(this);
+
 	bool finished = ExecuteInternal();
 
-	// If we've finished, run callback
 	if (finished) {
 		OnShutdown();
 	}
 
-	// Return result
 	return finished;
 }
 

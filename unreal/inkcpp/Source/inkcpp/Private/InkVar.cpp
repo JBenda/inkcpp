@@ -5,12 +5,18 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "InkVar.h"
-#include "InkThread.h"
+#include "InkExecutionScope.h"
 #include "ink/types.h"
 
 #include "Misc/AssertionMacros.h"
 
-FInkVar::FInkVar(ink::runtime::value val, UInkThread* thread)
+#include "InkVar.h"
+#include "InkExecutionScope.h"
+#include "ink/types.h"
+
+#include "Misc/AssertionMacros.h"
+
+FInkVar::FInkVar(ink::runtime::value val)
     : FInkVar()
 {
 	using v_types = ink::runtime::value::Type;
@@ -44,7 +50,14 @@ FInkVar::FInkVar(ink::runtime::value val, UInkThread* thread)
 			ListVal = NewObject<UInkList>();
 			ListVal->SetList(val.get<v_types::List>());
 			VarType = EInkVarType::List;
-			thread->RegisterLiveList(ListVal);
+			// Register with the executing thread (if any) via the RAII-guarded
+			// thread-local so the thread can invalidate this list before choose().
+			// GExecutingInkThread is null when called outside Execute() (e.g.
+			// GetGlobalVariable), in which case the list is globals-lifetime and
+			// needs no per-choice invalidation.
+			if (GExecutingInkThread) {
+				GExecutingInkThread->RegisterLiveList(ListVal);
+			}
 			break;
 		}
 		default: inkFail("unknown type!, failed to convert ink::value to InkVar");
