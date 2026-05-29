@@ -96,12 +96,24 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** register a "tag function"
-	 * This function is executed if context or a tag in a special format appears
+	 * This function is executed if context or a tag in a special format appears.
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
 	 * @see @ref TagFunction
 	 *
 	 * @blueprint
 	 */
-	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
+	FInkHandle RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+
+	/** Stop receiving variable-change notifications or unregister a tag function.
+	 * Prefer calling @ref FInkHandle::Cancel() directly — that does not require the runtime.
+	 * @param handle the handle returned by ObserverVariable / ObserverVariableEvent /
+	 * ObserverVariableChange / RegisterTagFunction
+	 *
+	 * @blueprint
+	 */
+	void Unregister(const FInkHandle& handle) { handle.Cancel(); }
 
 	/** @private for internal use */
 	void HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params);
@@ -126,46 +138,37 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** Gets a ping if variable changes.
-	 * @return handle — pass to UnobserveVariable() to stop receiving callbacks
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
 	 * @see #ObserverVariableEvent() #ObserverVariableChange()
 	 *
 	 * @blueprint
 	 */
-	FInkObserverHandle
+	FInkHandle
 	    ObserverVariable(const FString& variableName, const FVariableCallbackDelegate& callback);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** On variable change provides new value.
-	 * @return handle — pass to UnobserveVariable() to stop receiving callbacks
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
 	 * @see #ObserverVariable() #ObserverVariableChange()
 	 *
 	 * @blueprint
 	 */
-	FInkObserverHandle ObserverVariableEvent(
+	FInkHandle ObserverVariableEvent(
 	    const FString& variableName, const FVariableCallbackDelegateNewValue& callback
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** On variable change provides old and new value.
-	 * @return handle — pass to UnobserveVariable() to stop receiving callbacks
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
 	 * @attention if the variable set for the first time, the old value has value type @ref
 	 * EInkVarType::None
 	 * @see #ObserverVariableEvent() #ObserverVariable()
 	 *
 	 * @blueprint
 	 */
-	FInkObserverHandle ObserverVariableChange(
+	FInkHandle ObserverVariableChange(
 	    const FString& variableName, const FVariableCallbackDelegateNewOldValue& callback
 	);
-
-	UFUNCTION(BlueprintCallable, Category = "Ink")
-	/** Stop receiving variable-change notifications for a previously registered observer.
-	 * @param handle the handle returned by ObserverVariable / ObserverVariableEvent /
-	 * ObserverVariableChange
-	 *
-	 * @blueprint
-	 */
-	void UnobserveVariable(const FInkObserverHandle& handle);
 
 protected:
 	/** Called when the game starts or when spawned */
@@ -191,7 +194,10 @@ private:
 	UPROPERTY()
 	TArray<UInkThread*> mThreads;
 
-	TMap<FName, FGlobalTagFunctionMulticastDelegate> mGlobalTagFunctions;
+	/** Token storage for tag function registrations. Maps function name → parallel arrays of
+	 *  tokens and delegates. Setting a token to false skips and lazily removes that entry. */
+	TMap<FName, TArray<TSharedPtr<bool>>>     mTagFunctionTokens;
+	TMap<FName, TArray<FTagFunctionDelegate>> mTagFunctionDelegates;
 
 	UPROPERTY()
 	TArray<UInkThread*> mExclusiveStack;
@@ -200,7 +206,7 @@ private:
 	TOptional<FInkSnapshot> mSnapshot;
 	ink::runtime::snapshot* mpSnapshot = nullptr;
 
-	/** Active observer tokens. When UnobserveVariable() is called the token is set to false,
+	/** Active observer tokens. When Cancel() is called on the handle the token is set to false,
 	 *  the lambda checks it before firing and skips. Tokens are cleaned up lazily. */
 	TArray<TSharedPtr<bool>> mObserverTokens;
 };

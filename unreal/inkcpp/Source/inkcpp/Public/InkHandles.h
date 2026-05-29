@@ -12,59 +12,44 @@
 #include "InkHandles.generated.h"
 
 /**
- * Handle returned by @ref AInkRuntime::ObserveVariable() and variants.
- * Pass to @ref AInkRuntime::UnobserveVariable() to stop receiving callbacks.
- * Letting the handle go out of scope does NOT automatically unregister —
- * you must call UnobserveVariable() explicitly.
+ * Generic registration handle returned by all Register* functions on
+ * @ref AInkRuntime and @ref UInkThread.
+ *
+ * Call @ref Cancel() to cancel the registration. Letting the handle go out of scope does NOT
+ * automatically cancel — you must call Cancel() explicitly.
+ * For Blueprint graphs, pass the handle to @ref AInkRuntime::Unregister() or
+ * @ref UInkThread::Unregister() — those are thin wrappers around Cancel().
+ *
+ * The same handle type is used for variable observers, tag functions,
+ * and external functions — the registering function name already makes
+ * the context clear at the call site.
+ *
  * @ingroup unreal
  */
 USTRUCT(BlueprintType)
 
-struct INKCPP_API FInkObserverHandle {
+struct INKCPP_API FInkHandle {
 	GENERATED_BODY()
 
 	/** @private */
-	FInkObserverHandle() {}
+	FInkHandle() {}
 
 	/** @private */
-	explicit FInkObserverHandle(TSharedPtr<bool> token)
+	explicit FInkHandle(TSharedPtr<bool> token)
 	    : Token(MoveTemp(token))
 	{
 	}
 
-	/** Returns true if this handle refers to an active observer registration. */
+	/** Returns true if this handle refers to an active registration. */
 	bool IsValid() const { return Token.IsValid() && *Token; }
 
-	/** @private */
-	TSharedPtr<bool> Token;
-};
-
-/**
- * Handle returned by @ref UInkThread::RegisterExternalFunction() and
- * @ref UInkThread::RegisterExternalEvent().
- * Pass to @ref UInkThread::UnregisterExternalFunction() to remove the binding.
- * @ingroup unreal
- */
-USTRUCT(BlueprintType)
-
-struct INKCPP_API FExternalFunctionHandle {
-	GENERATED_BODY()
-
-	/** @private */
-	FExternalFunctionHandle() {}
-
-	/** @private */
-	explicit FExternalFunctionHandle(TSharedPtr<bool> token, FString name)
-	    : Token(MoveTemp(token))
-	    , FunctionName(MoveTemp(name))
+	/** Cancels the registration this handle refers to. Safe to call multiple times. */
+	void Cancel() const
 	{
+		if (Token.IsValid())
+			*Token = false;
 	}
 
-	/** Returns true if this handle refers to an active external function registration. */
-	bool IsValid() const { return Token.IsValid() && *Token; }
-
 	/** @private */
 	TSharedPtr<bool> Token;
-	/** @private */
-	FString          FunctionName;
 };

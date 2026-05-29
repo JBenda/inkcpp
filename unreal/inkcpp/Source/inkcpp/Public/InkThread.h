@@ -12,6 +12,7 @@
 #include "InkVar.h"
 #include "InkDelegates.h"
 #include "InkList.h"
+#include "InkHandles.h"
 
 
 #include "ink/runner.h"
@@ -148,36 +149,55 @@ public:
 
 	// Registers a callback for a named "tag function"
 	UFUNCTION(BlueprintCallable, Category = "Ink")
-	/** Register a callback for a named "tag function"
-	 * @see @ref TagFunction
+	/** Register a callback for a named "tag function".
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
 	 *
 	 * @blueprint
 	 */
-	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
+	FInkHandle RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
-	/** register a external function.
-	 * A function provides a return value
+	/** Register an external function that returns a value.
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
 	 * @see if you do not want to return something #RegisterExternalEvent()
 	 *
 	 * @blueprint
 	 */
-	void RegisterExternalFunction(
+	FInkHandle RegisterExternalFunction(
 	    const FString& functionName, const FExternalFunctionDelegate& function,
 	    bool lookaheadSafe = false
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
-	/** register external event.
-	 * A event has the return type void.
-	 * @see  If you want to return a value use #RegisterExternalFunction()
+	/** Register an external event (void return).
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
+	 * @see If you want to return a value use #RegisterExternalFunction()
 	 *
 	 * @blueprint
 	 */
-	void RegisterExternalEvent(
+	FInkHandle RegisterExternalEvent(
 	    const FString& functionName, const FExternalFunctionVoidDelegate& function,
 	    bool lookaheadSafe = false
 	);
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+
+	/** Unregister a previously registered external function, event, or tag function.
+	 * Prefer calling @ref FInkHandle::Cancel() directly — that does not require the thread.
+	 * @param handle the handle returned by RegisterExternalFunction() / RegisterExternalEvent() /
+	 * RegisterTagFunction()
+	 *
+	 * @blueprint
+	 */
+	void Unregister(const FInkHandle& handle) { handle.Cancel(); }
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** Unregister all external functions and events bound to this thread.
+	 * Useful when reusing a thread via StartExisting() to ensure no stale bindings remain.
+	 *
+	 * @blueprint
+	 */
+	void ClearExternalFunctions();
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** get knots assoziated with current knot.
@@ -264,7 +284,17 @@ private:
 	/** Lists wrapping runner-owned memory, registered during current execute cycle. */
 	TArray<TWeakObjectPtr<UInkList>> mLiveLists;
 
-	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
+	/** Token storage for tag function registrations. Maps function name → parallel arrays of
+	 *  tokens and delegates. Each token is shared with the corresponding FInkHandle.
+	 *  Setting a token to false causes the entry to be skipped and lazily compacted. */
+	TMap<FName, TArray<TSharedPtr<bool>>> mTagFunctionTokens;
+
+	/** Multicast delegates for tag functions, parallel to mTagFunctionTokens. */
+	TMap<FName, TArray<FTagFunctionDelegate>> mTagFunctionDelegates;
+
+	/** Token storage for external function registrations, keyed by name hash.
+	 *  A matching FInkHandle invalidates the token to suppress the binding. */
+	TMap<uint32, TSharedPtr<bool>> mExternalFunctionTokens;
 
 	FString mStartPath;
 	bool    mbHasRun;

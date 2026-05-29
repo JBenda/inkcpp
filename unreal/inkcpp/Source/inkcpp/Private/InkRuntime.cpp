@@ -131,19 +131,33 @@ void AInkRuntime::Tick(float DeltaTime)
 	}
 }
 
-void AInkRuntime::HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params)
+FInkHandle
+    AInkRuntime::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
 {
-	// Look for method and execute with parameters
-	FGlobalTagFunctionMulticastDelegate* function = mGlobalTagFunctions.Find(FName(*Params[0]));
-	if (function != nullptr) {
-		function->Broadcast(Caller, Params);
-	}
+	auto token = MakeShared<bool>(true);
+	mTagFunctionTokens.FindOrAdd(functionName).Add(token);
+	mTagFunctionDelegates.FindOrAdd(functionName).Add(function);
+	mObserverTokens.Add(token);
+	return FInkHandle(token);
 }
 
-void AInkRuntime::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
+void AInkRuntime::HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params)
 {
-	// Register tag function
-	mGlobalTagFunctions.FindOrAdd(functionName).Add(function);
+	FName name(*Params[0]);
+	auto* tokens    = mTagFunctionTokens.Find(name);
+	auto* delegates = mTagFunctionDelegates.Find(name);
+	if (! tokens || ! delegates)
+		return;
+
+	// Fire active delegates, compact dead entries lazily
+	for (int32 i = tokens->Num() - 1; i >= 0; --i) {
+		if ((*tokens)[i].IsValid() && *(*tokens)[i]) {
+			(*delegates)[i].ExecuteIfBound(Caller, Params);
+		} else {
+			tokens->RemoveAtSwap(i);
+			delegates->RemoveAtSwap(i);
+		}
+	}
 }
 
 UInkThread*
@@ -275,32 +289,49 @@ void AInkRuntime::SetGlobalVariable(const FString& name, const FInkVar& value)
 	}
 }
 
-void AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegate& callback)
+FInkHandle
+    AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegate& callback)
 {
-	mpGlobals->observe(TCHAR_TO_UTF8(*name), [callback]() { callback.Execute(); });
+	auto token = MakeShared<bool>(true);
+	mObserverTokens.Add(token);
+	// Capture token by value; if it is set to false the callback is skipped.
+	// Use TWeakObjectPtr for the bound UObject inside the delegate to avoid
+	// keeping it alive longer than the GC would otherwise.
+	mpGlobals->observe(TCHAR_TO_UTF8(*name), [token, callback]() {
+		if (token.IsValid() && *token) {
+			callback.ExecuteIfBound();
+		}
+	});
+	return FInkHandle(token);
 }
 
-void AInkRuntime::ObserverVariableEvent(
+FInkHandle AInkRuntime::ObserverVariableEvent(
     const FString& name, const FVariableCallbackDelegateNewValue& callback
 )
 {
-	mpGlobals->observe(TCHAR_TO_UTF8(*name), [callback](ink::runtime::value x) {
-		callback.Execute(FInkVar(x));
+	auto token = MakeShared<bool>(true);
+	mObserverTokens.Add(token);
+	mpGlobals->observe(TCHAR_TO_UTF8(*name), [token, callback](ink::runtime::value x) {
+		if (token.IsValid() && *token) {
+			callback.ExecuteIfBound(FInkVar(x));
+		}
 	});
+	return FInkHandle(token);
 }
 
-void AInkRuntime::ObserverVariableChange(
+FInkHandle AInkRuntime::ObserverVariableChange(
     const FString& name, const FVariableCallbackDelegateNewOldValue& callback
 )
 {
+	auto token = MakeShared<bool>(true);
+	mObserverTokens.Add(token);
 	mpGlobals->observe(
 	    TCHAR_TO_UTF8(*name),
-	    [callback](ink::runtime::value x, ink::optional<ink::runtime::value> y) {
-		    if (y.has_value()) {
-			    callback.Execute(FInkVar(x), FInkVar(y.value()));
-		    } else {
-			    callback.Execute(FInkVar(x), FInkVar());
+	    [token, callback](ink::runtime::value x, ink::optional<ink::runtime::value> y) {
+		    if (token.IsValid() && *token) {
+			    callback.ExecuteIfBound(FInkVar(x), y.has_value() ? FInkVar(y.value()) : FInkVar());
 		    }
 	    }
 	);
+	return FInkHandle(token);
 }
