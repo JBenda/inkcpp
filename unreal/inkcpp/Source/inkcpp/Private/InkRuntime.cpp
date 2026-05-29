@@ -134,7 +134,7 @@ void AInkRuntime::Tick(float DeltaTime)
 FInkHandle
     AInkRuntime::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
 {
-	auto token = MakeShared<bool>(true);
+	TSharedPtr<bool> token = MakeShared<bool>(true);
 	mTagFunctionTokens.FindOrAdd(functionName).Add(token);
 	mTagFunctionDelegates.FindOrAdd(functionName).Add(function);
 	mObserverTokens.Add(token);
@@ -292,7 +292,7 @@ void AInkRuntime::SetGlobalVariable(const FString& name, const FInkVar& value)
 FInkHandle
     AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegate& callback)
 {
-	auto token = MakeShared<bool>(true);
+	TSharedPtr<bool> token = MakeShared<bool>(true);
 	mObserverTokens.Add(token);
 	// Capture token by value; if it is set to false the callback is skipped.
 	// Use TWeakObjectPtr for the bound UObject inside the delegate to avoid
@@ -309,7 +309,7 @@ FInkHandle AInkRuntime::ObserverVariableEvent(
     const FString& name, const FVariableCallbackDelegateNewValue& callback
 )
 {
-	auto token = MakeShared<bool>(true);
+	TSharedPtr<bool> token = MakeShared<bool>(true);
 	mObserverTokens.Add(token);
 	mpGlobals->observe(TCHAR_TO_UTF8(*name), [token, callback](ink::runtime::value x) {
 		if (token.IsValid() && *token) {
@@ -323,7 +323,7 @@ FInkHandle AInkRuntime::ObserverVariableChange(
     const FString& name, const FVariableCallbackDelegateNewOldValue& callback
 )
 {
-	auto token = MakeShared<bool>(true);
+	TSharedPtr<bool> token = MakeShared<bool>(true);
 	mObserverTokens.Add(token);
 	mpGlobals->observe(
 	    TCHAR_TO_UTF8(*name),

@@ -76,7 +76,7 @@ void UInkThread::Resume() { mnYieldCounter--; }
 
 FInkHandle UInkThread::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
 {
-	auto token = MakeShared<bool>(true);
+	TSharedPtr<bool> token = MakeShared<bool>(true);
 	mTagFunctionTokens.FindOrAdd(functionName).Add(token);
 	mTagFunctionDelegates.FindOrAdd(functionName).Add(function);
 	return FInkHandle(token);
@@ -86,7 +86,7 @@ FInkHandle UInkThread::RegisterExternalFunction(
     const FString& functionName, const FExternalFunctionDelegate& function, bool lookaheadSafe
 )
 {
-	auto   token    = MakeShared<bool>(true);
+	TSharedPtr<bool>   token    = MakeShared<bool>(true);
 	uint32 nameHash = ink::hash_string(TCHAR_TO_UTF8(*functionName));
 	// If a previous binding exists for this name, invalidate it
 	if (auto* prev = mExternalFunctionTokens.Find(nameHash)) {
@@ -117,7 +117,7 @@ FInkHandle UInkThread::RegisterExternalEvent(
     const FString& functionName, const FExternalFunctionVoidDelegate& function, bool lookaheadSafe
 )
 {
-	auto   token    = MakeShared<bool>(true);
+	TSharedPtr<bool>   token    = MakeShared<bool>(true);
 	uint32 nameHash = ink::hash_string(TCHAR_TO_UTF8(*functionName));
 	if (auto* prev = mExternalFunctionTokens.Find(nameHash)) {
 		if (prev->IsValid()) {

@@ -229,7 +229,7 @@ void binary_emitter::emit_section(std::ostream& stream, const std::vector<type>&
 
 void binary_emitter::emit_section(std::ostream& stream, const binary_stream& data) const
 {
-	inkAssert((stream.tellp() & (ink::internal::header::Alignment - 1)) == 0);
+	inkAssert((stream.tellp() & (ink::internal::header::Alignment - 1)) == 0, "The stream is missaligned");
 	data.write_to(stream);
 	close_section(stream);
 }
@@ -449,7 +449,7 @@ void binary_emitter::build_container_data(
 		d._start_offset     = context->offset;
 		d._end_offset       = context->end_offset;
 		const uint8_t flags = _instructions.get(context->offset + 1);
-		inkAssert(flags < 16);
+		inkAssert(flags < 16, "Flags exceed the lower nibbel!");
 		d._flags = flags;
 
 		// Since we might be skipping tree levels, we need to be explicit about the parent.

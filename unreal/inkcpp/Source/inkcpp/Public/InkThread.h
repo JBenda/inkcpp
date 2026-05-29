@@ -7,6 +7,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InkRuntime.h"
 #include "UObject/NoExportTypes.h"
 
 #include "InkVar.h"
@@ -259,6 +260,7 @@ private:
 	 * @private
 	 */
 	void RegisterLiveList(UInkList* list);
+	friend FInkVar::FInkVar(UInkList&), FInkVar::FInkVar(ink::runtime::value);
 
 	/** Invalidate all UInkList objects registered since the last choose().
 	 * Called internally before mpRunner->choose().

@@ -93,12 +93,7 @@ struct INKCPP_API FInkVar {
 	}
 
 	/** @private */
-	FInkVar(UInkList& List)
-	    : VarType(EInkVarType::List)
-	    , IntVal(0)
-	    , ListVal(&List)
-	{
-	}
+	FInkVar(UInkList& List);
 
 	/** @private */
 	FInkVar(ink::runtime::value val);

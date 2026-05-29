@@ -6,15 +6,12 @@
  */
 #include "InkVar.h"
 #include "InkExecutionScope.h"
+#include "InkThread.h"
 #include "ink/types.h"
 
 #include "Misc/AssertionMacros.h"
 
-#include "InkVar.h"
-#include "InkExecutionScope.h"
-#include "ink/types.h"
-
-#include "Misc/AssertionMacros.h"
+extern thread_local UInkThread* GExecutingInkThread;
 
 FInkVar::FInkVar(ink::runtime::value val)
     : FInkVar()
@@ -28,8 +25,10 @@ FInkVar::FInkVar(ink::runtime::value val)
 		case v_types::Uint32:
 			UE_LOG(
 			    InkCpp, Warning,
-			    TEXT("Converting uint to int, this will cause trouble if writing it back to ink (with "
-			         "SetGlobalVariable)!")
+			    TEXT(
+			        "Converting uint to int, this will cause trouble if writing it back to ink (with "
+			        "SetGlobalVariable)!"
+			    )
 			);
 			IntVal  = ( int32 ) val.get<v_types::Uint32>();
 			VarType = EInkVarType::Int;
@@ -61,6 +60,16 @@ FInkVar::FInkVar(ink::runtime::value val)
 			break;
 		}
 		default: inkFail("unknown type!, failed to convert ink::value to InkVar");
+	}
+}
+
+FInkVar::FInkVar(UInkList& List)
+    : VarType(EInkVarType::List)
+    , IntVal(0)
+    , ListVal(&List)
+{
+	if (GExecutingInkThread) {
+		GExecutingInkThread->RegisterLiveList(ListVal);
 	}
 }
 

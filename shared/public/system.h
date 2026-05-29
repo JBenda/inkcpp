@@ -133,6 +133,12 @@ inline hash_t hash_string(const char* string)
 {
 	return CityHash32(string, FCStringAnsi::Strlen(string));
 }
+
+/** Simple hash for detcting changes in binary data. (e.g. Changes in the story file) */
+inline hash_t hash_data(const unsigned char* data, size_t len)
+{
+	return CityHash32(reinterpret_cast<const char*>(data), len);
+}
 #else
 hash_t hash_string(const char* string);
 hash_t hash_data(const unsigned char* data, size_t len);
@@ -259,7 +265,7 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 		fprintf(stderr, "Ink Assert: %s\n", msg);
 		abort();
 #elif defined(INK_ENABLE_UNREAL)
-	// TODO: implement UE exception handling
+		// TODO: implement UE exception handling
 #else
 #	warning no assertion handling this could lead to invalid code paths
 #endif

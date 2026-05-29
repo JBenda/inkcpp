@@ -591,7 +591,7 @@ bool basic_stack::can_be_migrated() const
 
 bool basic_stack::migrate(basic_stack& new_stack)
 {
-	inkAssert(can_be_migrated() && new_stack.can_be_migrated());
+	inkAssert(can_be_migrated() && new_stack.can_be_migrated(), "Unable to migrate this stack.");
 	// move existing values to new_stack, iff there the variable is also in the new stack
 	for_each_all([&new_stack](const entry& e) {
 		const value* oth = new_stack.get(e.name);

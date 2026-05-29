@@ -303,7 +303,7 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	for (size_t i = 0; i < old_capacity; ++i) {
 		hash_t path;
 		ptr = snap_read(ptr, path);
-		container_t c_id;
+		container_t c_id = ~0U;
 		ip_t        container_ip = _owner->find_offset_for(path);
 		bool        found        = container_ip != nullptr
 		          && _owner->find_container_id(

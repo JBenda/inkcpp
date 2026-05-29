@@ -204,8 +204,9 @@ private:
 		if constexpr (traits::arity == 2) {
 			return is_same<
 			    const ink::runtime::value*, typename traits::template argument<1>::type>::value;
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	template<size_t... Is>
