@@ -211,6 +211,7 @@ bool UInkThread::ExecuteInternal()
 				// before the runner state changes.
 				InvalidateLiveLists();
 				mpRunner->choose(mnChoiceToChoose);
+				mpRuntime->RunnerEnterStableState(this);
 			}
 			mnChoiceToChoose = -1;
 			mCurrentChoices.Empty();

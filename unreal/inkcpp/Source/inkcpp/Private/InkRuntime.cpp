@@ -6,6 +6,8 @@
  */
 #include "InkRuntime.h"
 
+#include "Async/Async.h"
+
 // Game includes
 #include "inkcpp.h"
 #include "InkThread.h"
@@ -19,6 +21,7 @@
 #include "ink/snapshot.h"
 #include "system.h"
 #include "types.h"
+#include <functional>
 
 namespace ink
 {
@@ -180,10 +183,49 @@ FInkSnapshot AInkRuntime::Snapshot()
 {
 	ink::runtime::snapshot* inkSnapshot = mpGlobals->create_snapshot();
 	FInkSnapshot            snapshot(
-      reinterpret_cast<const char*>(inkSnapshot->get_data()), inkSnapshot->get_data_len()
+      reinterpret_cast<const char*>(inkSnapshot->get_data()), inkSnapshot->get_data_len(),
+      inkSnapshot->can_be_migrated()
   );
 	delete inkSnapshot;
 	return snapshot;
+}
+
+TFuture<FInkSnapshot> AInkRuntime::MigratableSnapshot()
+{
+    // Fast path: already stable
+    FInkSnapshot snapshot = Snapshot();
+
+    if (snapshot.Migratable)
+    {
+        TPromise<FInkSnapshot> Immediate;
+        Immediate.SetValue(snapshot);
+        return Immediate.GetFuture();
+    }
+
+    // Slow path: wait for stability
+    TSharedRef<TPromise<FInkSnapshot>, ESPMode::ThreadSafe> Promise =
+        MakeShared<TPromise<FInkSnapshot>, ESPMode::ThreadSafe>();
+
+    mStableSnapshot = Promise;
+
+    return Promise->GetFuture();
+}
+
+void AInkRuntime::RunnerEnterStableState(UInkThread* thread)
+{
+	if (mStableSnapshot.IsValid()) {
+		thread->Yield();
+		mYieldedThreadsForSnapshot.Add(thread);
+		FInkSnapshot snapshot = Snapshot();
+		if (snapshot.Migratable) {
+			mStableSnapshot->SetValue(snapshot);
+			mStableSnapshot.Reset();
+			for (auto& _thread : mYieldedThreadsForSnapshot) {
+				_thread->Resume();
+			}
+			mYieldedThreadsForSnapshot.Empty();
+		}
+	}
 }
 
 void AInkRuntime::LoadSnapshot(const FInkSnapshot& snapshot)
@@ -197,6 +239,18 @@ void AInkRuntime::LoadSnapshot(const FInkSnapshot& snapshot)
 	    reinterpret_cast<unsigned char*>(mSnapshot->data.GetData()), mSnapshot->data.Num(), false
 	);
 	mpGlobals = mpRuntime->new_globals_from_snapshot(*mpSnapshot);
+	if (! mpGlobals.is_valid()) {
+		UE_LOG(InkCpp, Error, TEXT("Failed to load snapshot."));
+		if (! mpSnapshot->can_be_migrated()) {
+			UE_LOG(
+			    InkCpp, Error,
+			    TEXT(
+			        "Unable to load snapshot. The story has changed and the snapshot was taken at in "
+			        "instable moment."
+			    )
+			);
+		}
+	}
 }
 
 UInkThread*
@@ -204,6 +258,18 @@ UInkThread*
 {
 	if (mpRuntime == nullptr) {
 		UE_LOG(InkCpp, Warning, TEXT("Failed to start existing"));
+		return nullptr;
+	}
+
+	if (! mpGlobals.is_valid()) {
+		if (mSnapshot) {
+			UE_LOG(
+			    InkCpp, Error,
+			    TEXT("Failed to start existing, due to invalid state after failed snapshot loading.")
+			);
+		} else {
+			UE_LOG(InkCpp, Warning, TEXT("Failed to start existing"));
+		}
 		return nullptr;
 	}
 
@@ -217,8 +283,10 @@ UInkThread*
 		if (mpSnapshot->num_runners() == mThreads.Num()) {
 			UE_LOG(
 			    InkCpp, Warning,
-			    TEXT("Already created all Threads from Snapshot!, will not create more. You can Still "
-			         "create new Threads with entering the starting Path.")
+			    TEXT(
+			        "Already created all Threads from Snapshot!, will not create more. You can Still "
+			        "create new Threads with entering the starting Path."
+			    )
 			);
 			return nullptr;
 		}
@@ -230,7 +298,8 @@ UInkThread*
 
 	// If we're not starting immediately, just queue
 	if (! startImmediately ||
-	    // Even if we want to start immediately, don't if there's an exclusive thread and it's not us
+	    // Even if we want to start immediately, don't if there's an exclusive thread and it's not
+	    // us
 	    (mExclusiveStack.Num() > 0 && mExclusiveStack.Top() != thread)) {
 		mThreads.Add(thread);
 		return thread;
