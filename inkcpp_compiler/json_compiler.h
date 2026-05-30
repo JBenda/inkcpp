@@ -61,6 +61,6 @@ private: // == Private members ==
 	container_t _next_container_index;
 
 	list_data _list_meta;
-	int       _ink_version;
+	uint16_t  _ink_version;
 };
 } // namespace ink::compiler::internal

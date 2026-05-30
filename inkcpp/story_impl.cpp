@@ -188,23 +188,22 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 	if (! snapshot.can_be_migrated(*this)) {
 		return globals();
 	}
-	auto* globs = new globals_impl(this);
+	globals globs = new_globals();
 	snapshot.strings().clear();
 	snapshot_interface::loader loader(snapshot.strings(), _string_table, snapshot.can_be_migrated());
-	auto                       end = globs->snap_load(snapshot.get_globals_snap(), loader);
+	auto                       end = globs.cast<globals_impl>()->snap_load(snapshot.get_globals_snap(), loader);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
 	if (hash() != snapshot.hash()) {
 		globals new_globs = new_globals();
 		runner  thread    = new_runner(new_globs);
-		if (! globs->migrate_new_globals(
+		if (! globs.cast<globals_impl>()->migrate_new_globals(
 		        *new_globs.cast<globals_impl>().get(),
 		        reinterpret_cast<const char*>(snapshot.get_list_metadata())
 		    )) {
-			delete globs;
 			return globals();
 		}
 	}
-	return globals(globs, _block);
+	return globs;
 }
 
 runner story_impl::new_runner(globals store)
@@ -294,7 +293,7 @@ void story_impl::setup_pointers()
 	    ( uint32_t ) (end() - _file),
 	    ( uint32_t ) (_instruction_data - _file) + header._instructions._bytes
 	);
-	_length = _instruction_data + header._instructions._bytes - _file;
+	_length = static_cast<size_t>(_instruction_data + header._instructions._bytes - _file);
 
 	// Debugging info
 	/*{

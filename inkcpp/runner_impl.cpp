@@ -340,7 +340,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	_ptr = dest;
 
 	// Find the container at or before dest, which will become the top of the post-jump stack.
-	const uint32_t    dest_offset = dest - _story->instructions();
+	const uint32_t    dest_offset = static_cast<uint32_t>(dest - _story->instructions());
 	const container_t dest_id     = _story->find_container_for(dest_offset);
 
 	// If there's no destination container, stop.
@@ -484,7 +484,7 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _evaluation_mode{false}
     , _choices()
     , _tags_begin(0, ~0)
-    , _container(~0)
+    , _container(~0U)
 #ifdef INK_ENABLE_CSTD
     , _rng(static_cast<uint32_t>(time(NULL)))
 #else
@@ -662,7 +662,8 @@ bool runner_impl::can_be_migrated() const
 	        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
 	        : ~0U;
 	hash_t c_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
-	if (c_hash == 0) {
+	// if we are not at the start or terimanet bu we cannot name the current position it is not migratble
+	if (c_hash == 0 && _ptr != nullptr && _ptr != _story->instructions()) {
 		return false;
 	}
 	return _output.can_be_migrated() && _stack.can_be_migrated() && _ref_stack.can_be_migrated()
@@ -910,7 +911,8 @@ bool runner_impl::line_step()
 			_entered_global = false;
 		} else if (_entered_knot) {
 			if (has_knot_tags()) {
-				clear_tags(tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
+				clear_tags(
+				    tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
 				); // clear knot tags since whe are entering another knot
 			}
 
@@ -1445,9 +1447,11 @@ void runner_impl::step()
 
 					// Load value from output stream
 					// Push onto stack
-					_eval.push(value{}.set<value_type::string>(
-					    _output.get_alloc<false>(_globals->strings(), _globals->lists())
-					));
+					_eval.push(
+					    value{}.set<value_type::string>(
+					        _output.get_alloc<false>(_globals->strings(), _globals->lists())
+					    )
+					);
 				} break;
 
 				// == Tag commands
@@ -1593,9 +1597,11 @@ void runner_impl::step()
 					read<uint32_t>();
 					// Push the visit count for the current container to the top
 					//  is 0-indexed for some reason. idk why but this is what ink expects
-					_eval.push(value{}.set<value_type::int32>(
-					    static_cast<int32_t>(_globals->visits(_container.top()) - 1)
-					));
+					_eval.push(
+					    value{}.set<value_type::int32>(
+					        static_cast<int32_t>(_globals->visits(_container.top()) - 1)
+					    )
+					);
 				} break;
 				case Command::TURN: {
 					read<uint32_t>();
@@ -1612,7 +1618,8 @@ void runner_impl::step()
 					_eval.pop();
 
 
-					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
+					_eval.push(
+					    value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
 					);
 				} break;
 				case Command::SEED: {
@@ -1634,8 +1641,9 @@ void runner_impl::step()
 					container_t container = read<container_t>();
 
 					// Push the read count for the requested container index
-					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_globals->visits(container)
-					)));
+					_eval.push(
+					    value{}.set<value_type::int32>(static_cast<int32_t>(_globals->visits(container)))
+					);
 				} break;
 				case Command::TAG: {
 					read<uint32_t>();

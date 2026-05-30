@@ -149,10 +149,8 @@ namespace internal
 #ifdef __GNUC__
 #else
 #	pragma warning(push)
-#	pragma warning(                                                                         \
-	    disable : 4514,                                                                      \
-	    justification : "functions are defined in header file, they do not need to be used." \
-	)
+// functions are defined in header file, they do not need to be used.
+#	pragma warning(disable : 4514)
 #endif
 	/** Checks if a string starts with a given prefix*/
 	static inline constexpr bool starts_with(const char* string, const char* prefix)
@@ -237,10 +235,8 @@ private:
 #	pragma GCC diagnostic ignored "-Wunused-parameter"
 #else
 #	pragma warning(push)
-#	pragma warning(                                                                                \
-	    disable : 4100,                                                                             \
-	    justification : "dependend on rtti, exception and stl support not all arguments are needed" \
-	)
+// dependend on rtti, exception and stl support not all arguments are needed
+#	pragma warning(disable : 4100)
 #endif
 // assert
 template<typename... Args>

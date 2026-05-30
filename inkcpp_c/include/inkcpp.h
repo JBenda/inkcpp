@@ -184,6 +184,13 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	int  ink_list_iter_next(InkListIter* self);
 
+#ifdef __GNUC__
+#else
+#	pragma warning(push)
+// we use a anonymus union for convinence, feel free to change this in the future if problems should
+// occure.
+#	pragma warning(disable : 4201)
+#endif
 	/** Repserentation of a ink variable.
 	 * @ingroup clib
 	 * The concret type contained is noted in @ref InkValue::type "type", please use this information
@@ -217,6 +224,10 @@ typedef struct HInkSTory    HInkStory;
 			ValueTypeList    ///< a ink list
 		} type;            ///< indicates type contained in value
 	};
+#ifdef __GNUC__
+#else
+#	pragma warning(pop)
+#endif
 
 	// const char* ink_value_to_string(const InkValue* self);
 

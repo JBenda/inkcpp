@@ -22,7 +22,7 @@ class value;
 class snapshot_interface
 {
 public:
-	constexpr snapshot_interface(){};
+	constexpr snapshot_interface() {};
 
 	static unsigned char* snap_write(unsigned char* ptr, const void* data, size_t length, bool write)
 	{
@@ -90,9 +90,8 @@ public:
 #	pragma GCC diagnostic ignored "-Wunused-parameter"
 #else
 #	pragma warning(push)
-#	pragma warning(                                                                          \
-	    disable : 4100, justification : "non functional prototypes do not need the argument." \
-	)
+// non functional prototypes do not need the argument.
+#	pragma warning(disable : 4100)
 #endif
 
 	size_t snap(unsigned char* data, snapper&) const

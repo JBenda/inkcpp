@@ -233,5 +233,6 @@ private:
 	 *  the lambda checks it before firing and skips. Tokens are cleaned up lazily. */
 	TArray<TSharedPtr<bool>> mObserverTokens;
 	TSharedPtr<TPromise<FInkSnapshot>> mStableSnapshot;
+	UPROPERTY()
 	TArray<UInkThread*> mYieldedThreadsForSnapshot;
 };

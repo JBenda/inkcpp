@@ -30,7 +30,9 @@ add_executable(
 	MoveTo.cpp
 	ListMatching.cpp
 	Fixes.cpp
-	Migration.cpp)
+	Migration.cpp
+	MultiRunner.cpp
+)
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
 target_include_directories(inkcpp_test PRIVATE ../shared/private/)

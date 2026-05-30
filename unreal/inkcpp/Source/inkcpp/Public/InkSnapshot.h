@@ -18,7 +18,7 @@ USTRUCT(BlueprintType)
 struct INKCPP_API FInkSnapshot
 {
 	GENERATED_BODY()
-	FInkSnapshot() {}
+	FInkSnapshot() : Migratable(false) {}
 
 	/** @private */
 	FInkSnapshot(const char* snap_data, size_t snap_len, bool migratable)
@@ -43,7 +43,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
     const FInkSnapshot&, Snapshot
 );
 
-UCLASS()
+UCLASS(BlueprintType)
 class INKCPP_API UInkMigratableSnapshotAsync : public UBlueprintAsyncActionBase
 {
     GENERATED_BODY()
@@ -54,7 +54,7 @@ public:
     FInkMigratableSnapshotCompleted Completed;
 
     UFUNCTION(BlueprintCallable,
-        meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject"))
+        meta = (BlueprintInternalUseOnly = "true"))
     static UInkMigratableSnapshotAsync* GetMigratableSnapshot(
         AInkRuntime* Runtime);
 

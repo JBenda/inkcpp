@@ -320,6 +320,7 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	}
 	if (loader.migratable) {
 		_visit_counts.forget();
+		_visit_counts.resize(_num_containers);
 	}
 	inkAssert(
 	    _num_containers == _visit_counts.capacity(),

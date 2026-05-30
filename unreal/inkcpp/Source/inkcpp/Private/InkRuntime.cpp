@@ -37,7 +37,12 @@ AInkRuntime::AInkRuntime()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-AInkRuntime::~AInkRuntime() {}
+AInkRuntime::~AInkRuntime() {
+	if (mStableSnapshot.IsValid()) {
+		mStableSnapshot->SetValue(FInkSnapshot());
+		mStableSnapshot.Reset();
+	}
+}
 
 // Called when the game starts or when spawned
 void AInkRuntime::BeginPlay()

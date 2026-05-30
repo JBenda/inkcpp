@@ -54,15 +54,30 @@ public:
 	virtual void set_rng_seed(uint32_t seed) = 0;
 
 	/**
-	 * Moves the runner to the specified path
+	 * Moves the runner to the specified path.
+	 *
+	 * @sa move_to(const char*) for more conviance
 	 *
 	 * Clears any execution context and moves the runner
-	 *  to the content at the specified path.
+	 * to the content at the specified path.
 	 *
 	 * @param path path to search and move execution to
 	 * @return If the path was found
 	 */
 	virtual bool move_to(hash_t path) = 0;
+
+	/**
+	 * Moves the runner to the specified path.
+	 *
+	 * Clears any execution context and moves the runner
+	 * to the content at the specified path.
+	 *
+	 * @param path path to search and move execution to
+	 * @return If the path was found
+	 */	
+	bool move_to(const char* path) {
+		return move_to(ink::hash_string(path));
+	}
 
 	/**
 	 * Can the runner continue?
