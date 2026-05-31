@@ -148,7 +148,10 @@ public:
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
-	bool can_be_migrated() const { return _list_handouts.size() == 0; }
+	bool can_be_migrated() const
+	{
+		return true;
+	}
 
 	/** special treatment when a list gets assigned again
 	 * when a list gets assigned and would have no origin, it gets the origin of the base with origin

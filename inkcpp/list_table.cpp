@@ -1092,11 +1092,12 @@ bool list_table::migrate(const char* old_list_metadata)
 				is_empty_list = false;
 				for (size_t j = old_ref_table.listBegin(i); j < old_ref_table._list_end[i]; ++j) {
 					if (old_ref_table.hasFlag(entry, j) && old_ref_table._flag_names[j]) {
+						migrated = false;
 						if (value_matches[j] != -1) {
 							hit      = true;
 							migrated = true;
 							size_t k;
-							for (k = 0; _list_end[k] < static_cast<size_t>(value_matches[j]); ++k) {}
+							for (k = 0; _list_end[k] <= static_cast<size_t>(value_matches[j]); ++k) {}
 							setList(new_entry, k);
 							setFlag(new_entry, value_matches[j]);
 						}
