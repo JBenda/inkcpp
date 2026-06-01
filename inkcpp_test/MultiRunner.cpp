@@ -10,6 +10,7 @@
 #include <runner.h>
 #include <compiler.h>
 #include <snapshot.h>
+#include <system_error>
 
 using namespace ink::runtime;
 
@@ -74,10 +75,10 @@ SCENARIO("UE example story with multiple runner")
 		std::unique_ptr<snapshot> snap{base_globals->create_snapshot()};
 		globals                   globals_v2 = story_v2->new_globals_from_snapshot(*snap);
 		runner main_thread_v2                = story_v2->new_runner_from_snapshot(*snap, globals_v2, 1);
+		REQUIRE(main_thread_v2->getall() == "\"<Red>Ahh</>\", you cry while reaching for the door bell. Saying it was charched would be an understatement.\n");
 
 		THEN("Inventory should be still the same")
 		{
-			REQUIRE(main_thread_v2->getall() == "\"<Red>Ahh</>\", you cry while reaching for the door bell. Saying it was charched would be an understatement.\n");
 			ink::optional<value> inventory = globals_v2->get<value>("Inventory");
 			REQUIRE(inventory);
 			list                     inventory_list = inventory.value().get<value::Type::List>();
@@ -92,5 +93,48 @@ SCENARIO("UE example story with multiple runner")
 			REQUIRE(flag.flag_name == std::string("TalkWithAnimals"));
 			REQUIRE(flag.list_name == std::string("Potions"));
 		}
+
+		runner side_thread_v2 = story_v2->new_runner_from_snapshot(*snap, globals_v2, 0);
+		REQUIRE(side_thread_v2->move_to("TPotions.TTalkWithAnimals"));
+		REQUIRE(side_thread_v2->getall() == "A potion which allows the consumer to talk with a variaty of animals. Just make sure\nyour serroundings do not think you are crazy.\n");
+		side_thread_v2->choose(1);
+		REQUIRE(
+		    side_thread_v2->getall() == "A take a sip. The potion tastes like Hores, it is afull.\n"
+		);
+		REQUIRE_FALSE(side_thread_v2->can_continue());
+		REQUIRE_FALSE(side_thread_v2->has_choices());
+
+		THEN("We should now can talk with Animals")
+		{
+			{
+				ink::optional<value> state = globals_v2->get<value>("StatusConditions");
+				REQUIRE(state);
+				list                     state_list = state.value().get<value::Type::List>();
+				list_interface::iterator list_iter  = state_list->begin();
+				REQUIRE(list_iter != state_list->end());
+				list_interface::iterator::Flag flag = *list_iter;
+				REQUIRE(flag.flag_name == std::string("CanTalkWithAniamls"));
+				REQUIRE(flag.list_name == std::string("StatusConditions"));
+				++list_iter;
+				REQUIRE(list_iter == state_list->end());
+			}
+			{
+				ink::optional<value> prototype = globals_v2->get<value>("CanTalkWithAniamls");
+				REQUIRE(prototype);
+				list                     prototype_flag = prototype.value().get<value::Type::List>();
+				list_interface::iterator list_iter      = prototype_flag->begin();
+				REQUIRE(list_iter != prototype_flag->end());
+				list_interface::iterator::Flag flag = *list_iter;
+				REQUIRE(flag.flag_name == std::string("CanTalkWithAniamls"));
+				REQUIRE(flag.list_name == std::string("StatusConditions"));
+				++list_iter;
+				REQUIRE(list_iter == prototype_flag->end());
+			}
+		}
+
+		main_thread_v2->choose(2);
+		REQUIRE(main_thread_v2->getall() == "You just saw someone enter, how did they do not get shoked?\nSomething hushes through a hole beside the door, after you come closer you see it. A little gray mouse, it looks quite eloquent.\n");
+		main_thread_v2->choose(0);
+		REQUIRE(main_thread_v2->getall() == "You try to formulate your dilemma and your annoyance about the doorbell.\n(enter nice conversasion with a picky but helpful mouse)\n");
 	}
 }

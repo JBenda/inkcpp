@@ -905,7 +905,7 @@ float d_contains(const size_t lh[2], const size_t rh[2], const int* matches)
 		}
 	}
 	n_union -= n_intersection;
-	return static_cast<float>(n_intersection) / n_union;
+	return 1.f - static_cast<float>(n_intersection) / n_union;
 }
 
 /** Distance function for string labels.

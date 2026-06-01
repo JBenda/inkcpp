@@ -218,7 +218,7 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	const snapshot_impl& snapshot = reinterpret_cast<const snapshot_impl&>(data);
 	if (store == nullptr)
 		store = new_globals_from_snapshot(snapshot);
-	auto* run = new runner_impl(this, store);
+	runner run(new runner_impl(this, store), _block);
 	// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to
 	// use
 	idx       = (data.num_runners() - idx - 1);
@@ -227,7 +227,7 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	    _string_table,
 	    snapshot.can_be_migrated(),
 	};
-	auto end = run->snap_load(snapshot.get_runner_snap(idx), loader);
+	auto end = run.cast<runner_impl>()->snap_load(snapshot.get_runner_snap(idx), loader);
 	inkAssert(
 	    (idx + 1 < snapshot.num_runners() && end == snapshot.get_runner_snap(idx + 1))
 	        || end == snapshot.get_data() + snapshot.get_data_len()
@@ -235,11 +235,15 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	    "not all data were used for runner reconstruction"
 	);
 	if (hash() != snapshot.hash()) {
-		if (! run->migrate_to(*reinterpret_cast<const hash_t*>(snapshot.get_runner_snap(idx)))) {
+		hash_t current_node = *reinterpret_cast<const hash_t*>(snapshot.get_runner_snap(idx));
+		if (current_node == 0) {
+			return run;
+		}
+		if (! run.cast<runner_impl>()->migrate_to(current_node)) {
 			return runner();
 		}
 	}
-	return runner(run, _block);
+	return run;
 }
 
 void story_impl::setup_pointers()

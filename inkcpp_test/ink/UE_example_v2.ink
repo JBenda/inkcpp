@@ -95,14 +95,14 @@ You're climbing the 56 steps up to the door; high tides are an annoying thing.
     "<Red>Ahh</>", you cry while reaching for the door bell. Saying it was charched would be an understatement.
     { Health <= 0: -> Faint}
     -> Entrance_cycle
-+ {knock && Knowladge ? (YellowDress)} [Inspect the Door]
++ {knock && Knowladge ? YellowDress} [Inspect the Door]
     You just saw someone enter, how did they do not get shoked?
     -> Entrance_mouse ->
     -> Entrance_cycle
 + {not MansionFrontDoorLocked} [Open the Door]
     On high alert you press the door handle, it opens. Quite smooth and easy.
     You step inside.
-    TODO: to be continue
+    ToBeContinued
     -> DONE
     
 = Entrance_mouse
@@ -111,7 +111,7 @@ You're climbing the 56 steps up to the door; high tides are an annoying thing.
         You try to formulate your dilemma and your annoyance about the doorbell.
         {StatusConditions ? (CanTalkWithAniamls):
             ~ MansionFrontDoorLocked = false
-            TODO: enter nice conversasion with a picky but helpful mouse
+            (enter nice conversasion with a picky but helpful mouse)
         -else:
             The mouse squeaked, then was silent. It seems it tried to answer you, but you are unable to understand it.
         }

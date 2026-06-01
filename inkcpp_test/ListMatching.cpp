@@ -88,7 +88,7 @@ SCENARIO("santy check distance functions", "[list_match]")
 			ink::size_t rh[]      = {5, 10};
 			int         matches[] = {0, 0, 0, 0, 0, 5, 6, 7, 8, 9};
 			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
-			CHECK_THAT(d, Catch::Matchers::WithinAbs(1, 0.001));
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(0, 0.001));
 		}
 		GIVEN("Dropped Values")
 		{
@@ -96,7 +96,7 @@ SCENARIO("santy check distance functions", "[list_match]")
 			ink::size_t rh[]      = {5, 8};
 			int         matches[] = {0, 0, 0, 0, 0, 5, -1, -1, 6, 7};
 			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
-			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.6, 0.001));
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.4, 0.001));
 		}
 		GIVEN("New Values")
 		{
@@ -104,7 +104,7 @@ SCENARIO("santy check distance functions", "[list_match]")
 			ink::size_t rh[]      = {5, 10};
 			int         matches[] = {0, 0, 0, 0, 0, 5, 6, 7};
 			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
-			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.6, 0.001));
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.4, 0.001));
 		}
 		GIVEN("Swapped Values")
 		{
@@ -112,7 +112,7 @@ SCENARIO("santy check distance functions", "[list_match]")
 			ink::size_t rh[]      = {5, 10};
 			int         matches[] = {0, 0, 0, 0, 0, 5, 9, 6, 8, 7};
 			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
-			CHECK_THAT(d, Catch::Matchers::WithinAbs(1, 0.001));
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(0, 0.001));
 		}
 		GIVEN("Changed Values")
 		{
@@ -120,7 +120,7 @@ SCENARIO("santy check distance functions", "[list_match]")
 			ink::size_t rh[]      = {5, 10};
 			int         matches[] = {0, 0, 0, 0, 0, 5, 9, -1, -1, -1};
 			float       d         = ink::runtime::internal::d_contains(lh, rh, matches);
-			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.25, 0.001));
+			CHECK_THAT(d, Catch::Matchers::WithinAbs(0.75, 0.001));
 		}
 	}
 }
