@@ -117,8 +117,17 @@ public:
 	list_table(const char* data);
 	void init_static_list_flags(const list_flag* permanent_lists, basic_stack& variables);
 	// binary list metadata of currently loaded list
-	bool migrate(
-	    const char* old_list_metadata, const list_flag* permanent_lists, basic_stack& variables
+	bool create_match_lut(
+	    const char*                                                old_list_metadata,
+	    ink::runtime::internal::managed_array<int, true, 5, true>& list_list_matches,
+	    ink::runtime::internal::managed_array<int, true, 5, true>& list_value_matches,
+	    const list_table*&                                         old_ref_table
+	);
+	bool migrate_variables(
+	    ink::runtime::internal::managed_array<int, true, 5, true>&       list_old_new_map,
+	    const ink::runtime::internal::managed_array<int, true, 5, true>& list_list_matches,
+	    const ink::runtime::internal::managed_array<int, true, 5, true>& list_value_matches,
+	    const list_table& old_ref_table, basic_stack& variables
 	);
 
 	explicit list_table()

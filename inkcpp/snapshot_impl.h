@@ -75,14 +75,15 @@ static_assert(sizeof(snap_tag) == sizeof(const char*));
 class snapshot_impl final : public snapshot
 {
 public:
-	~snapshot_impl() override
-	{
-		if (_managed) {
-			delete[] _file;
-		}
-	};
+	~snapshot_impl() override;
 
 	managed_array<const char*, true, 5>& strings() const { return string_table; }
+
+	managed_array<int, true, 5, true>& list_old_new_map() const { return list_old_new_map_table; }
+
+	managed_array<int, true, 5, true>& list_list_matches() const { return list_list_matches_table; }
+
+	managed_array<int, true, 5, true>& list_value_matches() const { return list_value_matches_table; }
 
 	const unsigned char* get_data() const override;
 	size_t               get_data_len() const override;
@@ -108,11 +109,15 @@ public:
 
 	hash_t hash() const { return _header.hash; }
 
+	mutable const list_table* old_ref_table = nullptr;
 
 private:
 	// file information
 	// only populated when loading snapshots
 	mutable managed_array<const char*, true, 5> string_table;
+	mutable managed_array<int, true, 5, true>   list_old_new_map_table;
+	mutable managed_array<int, true, 5, true>   list_list_matches_table;
+	mutable managed_array<int, true, 5, true>   list_value_matches_table;
 	const unsigned char*                        _file;
 	size_t                                      _length;
 	bool                                        _managed;

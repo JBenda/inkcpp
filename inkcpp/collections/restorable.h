@@ -228,7 +228,7 @@ public:
 
 	// Forward iterate
 	template<typename CallbackMethod, typename IsNullPredicate>
-	void for_each(CallbackMethod callback, IsNullPredicate isNull) const
+	void for_each(CallbackMethod callback, IsNullPredicate isNull)
 	{
 		if (_pos == 0) {
 			return;

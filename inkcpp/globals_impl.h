@@ -43,7 +43,7 @@ public:
 	 * @param[in] list_metadata old list metadata to migrate list
 	 * the globals stored inside.
 	 */
-	bool                 migrate_new_globals(globals_impl& new_globals, const char* list_metadata);
+	bool                 migrate_new_globals(const loader& loader, globals_impl& new_globals, const char* list_metadata);
 	// Initializes a new global store from the given story
 	globals_impl(const story_impl*);
 

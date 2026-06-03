@@ -312,12 +312,28 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	return ptr;
 }
 
-bool globals_impl::migrate_new_globals(globals_impl& new_globals, const char* list_metadata)
+bool globals_impl::migrate_new_globals(
+    const loader& loader, globals_impl& new_globals, const char* list_metadata
+)
 {
-	bool success = _variables.migrate(new_globals._variables)
-	            && ((! _lists) || _lists.migrate(list_metadata, _owner->lists(), _variables));
-	if (! success) {
+	if (! _variables.migrate(new_globals._variables)) {
 		return false;
+	}
+	if (_lists && ! loader.old_ref_table) {
+		if (! _lists.create_match_lut(
+		        list_metadata, loader.list_list_matches, loader.list_value_matches, loader.old_ref_table
+		    )) {
+			return false;
+		}
+	}
+	if (_lists) {
+		_lists.init_static_list_flags(_owner->lists(), _variables);
+		if (! _lists.migrate_variables(
+		        loader.list_old_new_map, loader.list_list_matches, loader.list_value_matches,
+		        *loader.old_ref_table, _variables
+		    )) {
+			return false;
+		}
 	}
 	return true;
 }

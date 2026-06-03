@@ -13,6 +13,7 @@
 #include "snapshot_impl.h"
 #include "story_impl.h"
 #include "system.h"
+#include "types.h"
 #include "value.h"
 
 #ifdef INK_ENABLE_STL
@@ -662,7 +663,8 @@ bool runner_impl::can_be_migrated() const
 	        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
 	        : ~0U;
 	hash_t c_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
-	// if we are not at the start or terimanet bu we cannot name the current position it is not migratble
+	// if we are not at the start or terimanet bu we cannot name the current position it is not
+	// migratble
 	if (c_hash == 0 && _ptr != nullptr && _ptr != _story->instructions()) {
 		return false;
 	}
@@ -815,7 +817,7 @@ bool runner_impl::move_to(hash_t path)
 	return true;
 }
 
-bool runner_impl::migrate_to(hash_t path)
+bool runner_impl::migrate_to(const loader& loader, hash_t path)
 {
 	ip_t destination = _story->find_offset_for(path);
 	if (destination == nullptr) {
@@ -854,6 +856,13 @@ bool runner_impl::migrate_to(hash_t path)
 	_container.clear();
 	_ptr = nullptr;
 	jump(destination, false, true);
+
+	if (loader.old_ref_table && ! _globals->lists().migrate_variables(
+	        loader.list_old_new_map, loader.list_list_matches, loader.list_value_matches,
+	        *loader.old_ref_table, _stack
+	    )) {
+		return false;
+	}
 	return true;
 }
 

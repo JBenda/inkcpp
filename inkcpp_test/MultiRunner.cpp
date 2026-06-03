@@ -57,25 +57,39 @@ SCENARIO("UE example story with multiple runner")
 		main_thread->choose(1);
 		THEN("Inventory should be as expected")
 		{
-			ink::optional<value> inventory = base_globals->get<value>("Inventory");
-			REQUIRE(inventory);
-			list                     inventory_list = inventory.value().get<value::Type::List>();
-			list_interface::iterator list_iter      = inventory_list->begin();
-			REQUIRE(list_iter != inventory_list->end());
-			list_interface::iterator::Flag flag = *list_iter;
-			REQUIRE(flag.flag_name == std::string("Skull"));
-			REQUIRE(flag.list_name == std::string("Clues"));
-			++list_iter;
-			REQUIRE(list_iter != inventory_list->end());
-			flag = *list_iter;
-			REQUIRE(flag.flag_name == std::string("TalkWithAnimals"));
-			REQUIRE(flag.list_name == std::string("Potions"));
+			{
+
+				ink::optional<value> inventory = base_globals->get<value>("Inventory");
+				REQUIRE(inventory);
+				list                     inventory_list = inventory.value().get<value::Type::List>();
+				list_interface::iterator list_iter      = inventory_list->begin();
+				REQUIRE(list_iter != inventory_list->end());
+				list_interface::iterator::Flag flag = *list_iter;
+				REQUIRE(flag.flag_name == std::string("Skull"));
+				REQUIRE(flag.list_name == std::string("Clues"));
+				++list_iter;
+				REQUIRE(list_iter != inventory_list->end());
+				flag = *list_iter;
+				REQUIRE(flag.flag_name == std::string("TalkWithAnimals"));
+				REQUIRE(flag.list_name == std::string("Potions"));
+			}
+			{
+				ink::optional<value> knowladge = base_globals->get<value>("Knowladge");
+				REQUIRE(knowladge);
+				list                     knowlagde_flag = knowladge.value().get<value::Type::List>();
+				list_interface::iterator list_iter      = knowlagde_flag->begin();
+				REQUIRE(list_iter != knowlagde_flag->end());
+				list_interface::iterator::Flag flag = *list_iter;
+				REQUIRE(flag.flag_name == std::string("YellowDress"));
+				REQUIRE(flag.list_name == std::string("Knowladge"));
+				++list_iter;
+				REQUIRE(list_iter == knowlagde_flag->end());
+			}
 		}
 
 		std::unique_ptr<snapshot> snap{base_globals->create_snapshot()};
 		globals                   globals_v2 = story_v2->new_globals_from_snapshot(*snap);
-		runner main_thread_v2                = story_v2->new_runner_from_snapshot(*snap, globals_v2, 1);
-		REQUIRE(main_thread_v2->getall() == "\"<Red>Ahh</>\", you cry while reaching for the door bell. Saying it was charched would be an understatement.\n");
+		runner main_thread_v2                = story_v2->new_runner_from_snapshot(*snap, globals_v2, 1);		
 
 		THEN("Inventory should be still the same")
 		{
@@ -104,7 +118,7 @@ SCENARIO("UE example story with multiple runner")
 		REQUIRE_FALSE(side_thread_v2->can_continue());
 		REQUIRE_FALSE(side_thread_v2->has_choices());
 
-		THEN("We should now can talk with Animals")
+		// THEN("We should now can talk with Animals")
 		{
 			{
 				ink::optional<value> state = globals_v2->get<value>("StatusConditions");
@@ -130,8 +144,25 @@ SCENARIO("UE example story with multiple runner")
 				++list_iter;
 				REQUIRE(list_iter == prototype_flag->end());
 			}
-		}
+			{
+				ink::optional<value> knowladge = globals_v2->get<value>("Knowladge");
+				REQUIRE(knowladge);
+				list knowlagde_flag = knowladge.value().get<value::Type::List>();
+				list_interface::iterator list_iter = knowlagde_flag->begin();
+				REQUIRE(list_iter != knowlagde_flag->end());
+				list_interface::iterator::Flag flag = *list_iter;
+				REQUIRE(flag.flag_name == std::string());
+				REQUIRE(flag.list_name == std::string());
+				++list_iter;
+				REQUIRE(list_iter == knowlagde_flag->end());
 
+			}
+		}
+		REQUIRE(main_thread_v2->getall() == "\"<Red>Ahh</>\", you cry while reaching for the door bell. Saying it was charched would be an understatement.\n");
+		REQUIRE(main_thread_v2->num_choices() == 3);
+		REQUIRE(main_thread_v2->get_choice(0)->text() == std::string("look around"));
+		REQUIRE(main_thread_v2->get_choice(1)->text() == std::string("Knock again?"));
+		REQUIRE(main_thread_v2->get_choice(2)->text() == std::string());
 		main_thread_v2->choose(2);
 		REQUIRE(main_thread_v2->getall() == "You just saw someone enter, how did they do not get shoked?\nSomething hushes through a hole beside the door, after you come closer you see it. A little gray mouse, it looks quite eloquent.\n");
 		main_thread_v2->choose(0);

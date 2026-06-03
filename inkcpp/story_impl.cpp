@@ -190,14 +190,17 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 	}
 	globals globs = new_globals();
 	snapshot.strings().clear();
-	snapshot_interface::loader loader(snapshot.strings(), _string_table, snapshot.can_be_migrated());
-	auto                       end = globs.cast<globals_impl>()->snap_load(snapshot.get_globals_snap(), loader);
+	snapshot_interface::loader loader(
+	    snapshot.strings(), _string_table, snapshot.list_list_matches(), snapshot.list_old_new_map(),
+	    snapshot.list_value_matches(), snapshot.can_be_migrated(), snapshot.old_ref_table
+	);
+	auto end = globs.cast<globals_impl>()->snap_load(snapshot.get_globals_snap(), loader);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
 	if (hash() != snapshot.hash()) {
 		globals new_globs = new_globals();
 		runner  thread    = new_runner(new_globs);
 		if (! globs.cast<globals_impl>()->migrate_new_globals(
-		        *new_globs.cast<globals_impl>().get(),
+		        loader, *new_globs.cast<globals_impl>().get(),
 		        reinterpret_cast<const char*>(snapshot.get_list_metadata())
 		    )) {
 			return globals();
@@ -221,11 +224,15 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	runner run(new runner_impl(this, store), _block);
 	// snapshot id is inverso of creation time, but creation time is the more intouitve numbering to
 	// use
-	idx       = (data.num_runners() - idx - 1);
+	idx = (data.num_runners() - idx - 1);
 	snapshot_interface::loader loader{
 	    snapshot.strings(),
 	    _string_table,
+	    snapshot.list_old_new_map(),
+	    snapshot.list_list_matches(),
+	    snapshot.list_value_matches(),
 	    snapshot.can_be_migrated(),
+	    snapshot.old_ref_table
 	};
 	auto end = run.cast<runner_impl>()->snap_load(snapshot.get_runner_snap(idx), loader);
 	inkAssert(
@@ -239,7 +246,7 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 		if (current_node == 0) {
 			return run;
 		}
-		if (! run.cast<runner_impl>()->migrate_to(current_node)) {
+		if (! run.cast<runner_impl>()->migrate_to(loader, current_node)) {
 			return runner();
 		}
 	}

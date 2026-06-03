@@ -132,7 +132,7 @@ public:
 	virtual bool move_to(hash_t path) override;
 
 	// move to path but keep as much state as possible
-	bool migrate_to(hash_t path);
+	bool migrate_to(const loader& loader, hash_t path);
 
 #if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 	// Gets a single line of output
