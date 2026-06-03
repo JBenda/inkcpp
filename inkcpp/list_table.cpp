@@ -72,6 +72,10 @@ list_table::list list_table::create()
 	for (size_t i = 0; i < _entry_state.size(); ++i) {
 		if (_entry_state[i] == state::empty) {
 			_entry_state[i] = state::used;
+			memset(
+			    _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(i), 0,
+			    _entrySize
+			);
 			return list(i);
 		}
 	}
@@ -90,15 +94,23 @@ list_table::list list_table::create_at(size_t idx)
 	if (idx < _entry_state.size()) {
 		if (_entry_state[idx] == state::empty) {
 			_entry_state[idx] = state::used;
+			memset(
+			    _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(idx), 0,
+			    _entrySize
+			);
 			return list(idx);
 		}
 		return list(-1);
 	}
-	while (_entry_state.size() <= idx) {
+	while (_entry_state.size() < idx) {
 		_entry_state.push() = state::empty;
 		for (int i = 0; i < _entrySize; ++i) {
 			_data.push() = 0;
 		}
+	}
+	_entry_state.push() = state::used;
+	for (int i = 0; i < _entrySize; ++i) {
+		_data.push() = 0;
 	}
 	return list(idx);
 }
