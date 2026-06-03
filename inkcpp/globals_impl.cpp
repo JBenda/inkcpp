@@ -26,27 +26,7 @@ globals_impl::globals_impl(const story_impl* story)
 	_visit_counts.resize(_num_containers);
 	if (_lists) {
 		// initialize static lists
-		init_static_list_flags();
-	}
-}
-
-void globals_impl::init_static_list_flags()
-{
-	const list_flag* flags = _owner->lists();
-	while (*flags != null_flag) {
-		list_table::list l = _lists.create_permament();
-		while (*flags != null_flag) {
-			list_flag flag = _lists.external_fvalue_to_internal(*flags);
-			_lists.add_inplace(l, flag);
-			++flags;
-		}
-		++flags;
-	}
-	for (const auto& flag : _lists.named_flags()) {
-		set_variable(
-		    hash_string(flag.name),
-		    value{}.set<value_type::list_flag>(list_flag{flag.flag.list_id, flag.flag.flag})
-		);
+		_lists.init_static_list_flags(_owner->lists(), _variables);
 	}
 }
 
@@ -302,8 +282,8 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	);
 	for (size_t i = 0; i < old_capacity; ++i) {
 		hash_t path;
-		ptr = snap_read(ptr, path);
-		container_t c_id = ~0U;
+		ptr                      = snap_read(ptr, path);
+		container_t c_id         = ~0U;
 		ip_t        container_ip = _owner->find_offset_for(path);
 		bool        found        = container_ip != nullptr
 		          && _owner->find_container_id(
@@ -334,13 +314,10 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 
 bool globals_impl::migrate_new_globals(globals_impl& new_globals, const char* list_metadata)
 {
-	bool success
-	    = _variables.migrate(new_globals._variables) && ((! _lists) || _lists.migrate(list_metadata));
+	bool success = _variables.migrate(new_globals._variables)
+	            && ((! _lists) || _lists.migrate(list_metadata, _owner->lists(), _variables));
 	if (! success) {
 		return false;
-	}
-	if (_lists) {
-		init_static_list_flags();
 	}
 	return true;
 }

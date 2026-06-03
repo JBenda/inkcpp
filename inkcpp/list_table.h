@@ -22,6 +22,7 @@ struct header;
 
 namespace ink::runtime::internal
 {
+class basic_stack;
 class prng;
 
 // TODO: move to utils
@@ -114,8 +115,11 @@ public:
 	list& add_inplace(list& lh, list_flag rh);
 
 	list_table(const char* data);
+	void init_static_list_flags(const list_flag* permanent_lists, basic_stack& variables);
 	// binary list metadata of currently loaded list
-	bool migrate(const char* old_list_metadata);
+	bool migrate(
+	    const char* old_list_metadata, const list_flag* permanent_lists, basic_stack& variables
+	);
 
 	explicit list_table()
 	    : _entrySize{0}
@@ -148,10 +152,7 @@ public:
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
 
-	bool can_be_migrated() const
-	{
-		return true;
-	}
+	bool can_be_migrated() const { return true; }
 
 	/** special treatment when a list gets assigned again
 	 * when a list gets assigned and would have no origin, it gets the origin of the base with origin
@@ -269,6 +270,9 @@ public:
 	list_interface* handout_list(list);
 
 private:
+	/** initelizes static lists defined in the story. */
+	void impl_init_static_list(const list_flag* permanent_lists);
+
 	/** create a list with id == idx.
 	 * @attention used for migration only
 	 * @sa create()

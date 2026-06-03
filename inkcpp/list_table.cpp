@@ -13,6 +13,7 @@
 #include "random.h"
 #include "string_utils.h"
 #include "list_impl.h"
+#include "stack.h"
 #include <limits>
 
 #ifdef INK_ENABLE_STL
@@ -1013,7 +1014,9 @@ float* cost_matrix(const MatchListValues& lh, const MatchListValues& rh, float d
 	return matrix;
 }
 
-bool list_table::migrate(const char* old_list_metadata)
+bool list_table::migrate(
+    const char* old_list_metadata, const list_flag* permanent_lists, basic_stack& variables
+)
 {
 	list_table old_ref_table(old_list_metadata);
 	for (const auto& x : _data) {
@@ -1025,6 +1028,7 @@ bool list_table::migrate(const char* old_list_metadata)
 	_data.clear();
 	_entry_state.clear();
 
+	impl_init_static_list(permanent_lists);
 	// find best mapping between old and new list elements
 	//     + c_ij(value) = min(|v_i - v_j|/Rv,1)
 	//     + c_ij(name) = levenshtein, cosine n-grams, jaro-winkler
@@ -1069,14 +1073,19 @@ bool list_table::migrate(const char* old_list_metadata)
 	// low confidence list_value matches
 	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, LOW_CONFIDANCE_DROP_PANELTY);
 
-	for (size_t idx = 0; idx < old_ref_table._entry_state.size(); ++idx) {
+
+	for (value& entry : variables.get_all<value_type::list>()) {
+		list   old_list = entry.get<value_type::list>();
+		size_t idx      = old_list.lid;
 		// migrate
-		list new_list{-1};
+		list   new_list{-1};
 		switch (old_ref_table._entry_state[idx]) {
-			case state::permanent: new_list = create_permament_at(idx); break;
-			case state::used: new_list = create_at(idx); break;
+			case state::permanent: new_list = create_permament(); break;
+			case state::used: new_list = create(); break;
 			default: continue;
 		}
+		entry.set<value_type::list>(list(new_list));
+
 		inkAssert(new_list.lid >= 0, "Failed to create new list entry for migration.");
 		inkAssert(
 		    static_cast<size_t>(new_list.lid) == idx,
@@ -1126,6 +1135,32 @@ bool list_table::migrate(const char* old_list_metadata)
 	delete[] value_matrix;
 	delete[] list_matrix;
 	return true;
+}
+
+void list_table::impl_init_static_list(const list_flag* permanent_lists)
+{
+	const list_flag* flags = permanent_lists;
+	while (*flags != null_flag) {
+		list_table::list l = create_permament();
+		while (*flags != null_flag) {
+			list_flag flag = external_fvalue_to_internal(*flags);
+			add_inplace(l, flag);
+			++flags;
+		}
+		++flags;
+	}
+}
+
+void list_table::init_static_list_flags(const list_flag* permanent_lists, basic_stack& variables)
+{
+	impl_init_static_list(permanent_lists);
+
+	for (const auto& flag : named_flags()) {
+		variables.set(
+		    hash_string(flag.name),
+		    value{}.set<value_type::list_flag>(list_flag{flag.flag.list_id, flag.flag.flag})
+		);
+	}
 }
 
 
