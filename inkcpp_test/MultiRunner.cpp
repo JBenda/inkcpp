@@ -151,8 +151,8 @@ SCENARIO("UE example story with multiple runner")
 				list_interface::iterator list_iter = knowlagde_flag->begin();
 				REQUIRE(list_iter != knowlagde_flag->end());
 				list_interface::iterator::Flag flag = *list_iter;
-				REQUIRE(flag.flag_name == std::string());
-				REQUIRE(flag.list_name == std::string());
+				REQUIRE(flag.flag_name == std::string("YellowDress"));
+				REQUIRE(flag.list_name == std::string("Knowladge"));
 				++list_iter;
 				REQUIRE(list_iter == knowlagde_flag->end());
 
@@ -162,7 +162,7 @@ SCENARIO("UE example story with multiple runner")
 		REQUIRE(main_thread_v2->num_choices() == 3);
 		REQUIRE(main_thread_v2->get_choice(0)->text() == std::string("look around"));
 		REQUIRE(main_thread_v2->get_choice(1)->text() == std::string("Knock again?"));
-		REQUIRE(main_thread_v2->get_choice(2)->text() == std::string());
+		REQUIRE(main_thread_v2->get_choice(2)->text() == std::string("Inspect the Door"));
 		main_thread_v2->choose(2);
 		REQUIRE(main_thread_v2->getall() == "You just saw someone enter, how did they do not get shoked?\nSomething hushes through a hole beside the door, after you come closer you see it. A little gray mouse, it looks quite eloquent.\n");
 		main_thread_v2->choose(0);

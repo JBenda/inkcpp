@@ -1089,7 +1089,7 @@ bool list_table::create_match_lut(
 
 	// low confidence list_value matches
 	algorithms::hungarian_solver(
-	    value_matrix, list_list_matches.data(), n_flags, LOW_CONFIDANCE_DROP_PANELTY
+	    value_matrix, list_value_matches.data(), n_flags, LOW_CONFIDANCE_DROP_PANELTY
 	);
 
 
@@ -1130,7 +1130,7 @@ bool list_table::migrate_variables(
 
 		    inkAssert(new_list.lid >= 0, "Failed to create new list entry for migration.");
 		    const data_t* entry         = old_ref_table.getPtr(idx);
-		    data_t*       new_entry     = getPtr(idx);
+		    data_t*       new_entry     = getPtr(new_list.lid);
 		    bool          migrated      = false;
 		    bool          is_empty_list = true;
 		    for (size_t i = 0; i < old_ref_table.numLists(); ++i) {
