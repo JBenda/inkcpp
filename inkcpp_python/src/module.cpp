@@ -453,10 +453,14 @@ iter(inkcpp_py.Runner) returns a iterator over all current choices.)",
 	        "bind",
 	        [](runner& self, const char* function_name, std::function<value(std::vector<value>)> f,
 	           bool lookaheadSafe) {
-		        self.bind(function_name, [f](size_t len, const value* vals) {
-			        std::vector args(vals, vals + len);
-			        return f(args);
-		        });
+		        self.bind(
+		            function_name,
+		            [f](size_t len, const value* vals) {
+			            std::vector args(vals, vals + len);
+			            return f(args);
+		            },
+		            lookaheadSafe
+		        );
 	        },
 	        py::arg("function_name").none(false), py::arg("function").none(false),
 	        py::arg_v("lookaheadSafe", false).none(false), "Bind a function with return value"
