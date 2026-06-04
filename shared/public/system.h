@@ -40,13 +40,26 @@
 #	define FORMAT_STRING_STR "%s"
 #endif
 
+/**
+ * @def inkAssert(condition, format_string, args...)
+ * @ingroup cpp
+ * Compile argument agnostic assert macro.
+ * behaves diffrent base on if it is an UnrealEngine compilation or standalone.
+ * Also respects INKCPP_NO_RTTI, INKCPP_NO_STD and INKCPP_NO_EXCEPTIONS.
+ */
+/**
+ * @def inkFail(format_string, args...)
+ * @ingroup cpp
+ * Compile argument agnostic assert macro (always asserts).
+ * @sa inkAssert
+ */
+
 #ifdef INK_ENABLE_UNREAL
 #	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
 #	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
 #else
-#	define inkAssert    ink::ink_assert
-#	define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
-
+#	define inkAssert(...) ink::ink_assert(__VA_ARGS__)
+#	define inkFail(...)   ink::ink_assert(false, __VA_ARGS__)
 #endif
 
 
@@ -114,13 +127,6 @@ struct list_flag {
 
 	bool operator!=(const list_flag& o) const { return ! (*this == o); }
 };
-
-inline list_flag read_list_flag(const char*& ptr)
-{
-	list_flag result = *reinterpret_cast<const list_flag*>(ptr);
-	ptr += sizeof(list_flag);
-	return result;
-}
 
 /** value of an unset list_flag */
 constexpr list_flag null_flag{-1, -1};
@@ -238,7 +244,8 @@ private:
 // dependend on rtti, exception and stl support not all arguments are needed
 #	pragma warning(disable : 4100)
 #endif
-// assert
+/** Assert helper, not to be used directly, please use @ref inkAssert and @ref inkFail to be
+ * enviroment agnostic. */
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 {
@@ -273,6 +280,8 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 #	pragma warning(pop)
 #endif
 
+/** Assert helper, not to be used directly, please use @ref inkAssert and @ref inkFail to be
+ * enviroment agnostic. */
 template<typename... Args>
 [[noreturn]] inline void ink_assert(const char* msg = nullptr, Args... args)
 {

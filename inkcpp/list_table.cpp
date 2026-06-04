@@ -36,6 +36,13 @@ void list_table::copy_lists(const data_t* src, data_t* dst)
 	}
 }
 
+inline list_flag read_list_flag(const char*& ptr)
+{
+	list_flag result = *reinterpret_cast<const list_flag*>(ptr);
+	ptr += sizeof(list_flag);
+	return result;
+}
+
 list_table::list_table(const char* data)
     : _valid{false}
 {

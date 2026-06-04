@@ -302,7 +302,7 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	ink_hash_t        ink_hash_string(const char* str);
 	/** @memberof HInkRunner
-	 * @copydoc ink::runtime::runner_interface::knot_tag()
+	 * @copydoc ink::runtime::runner_interface::get_knot_tag()
 	 * @param self
 	 */
 	const char*       ink_runner_knot_tag(const HInkRunner* self, int index);
@@ -312,7 +312,7 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	int               ink_runner_num_global_tags(const HInkRunner* self);
 	/** @memberof HInkRunner
-	 * @copydoc ink::runtime::runner_interface::global_tag()
+	 * @copydoc ink::runtime::runner_interface::get_global_tag()
 	 * @param self
 	 */
 	const char*       ink_runner_global_tag(const HInkRunner* self, int index);

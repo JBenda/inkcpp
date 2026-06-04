@@ -9,7 +9,7 @@
 #include "config.h"
 #include "system.h"
 #include "array.h"
-#include "snapshot_impl.h"
+#include "list.h"
 
 #ifdef INK_ENABLE_STL
 #	include <iosfwd>

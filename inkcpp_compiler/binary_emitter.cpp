@@ -229,7 +229,9 @@ void binary_emitter::emit_section(std::ostream& stream, const std::vector<type>&
 
 void binary_emitter::emit_section(std::ostream& stream, const binary_stream& data) const
 {
-	inkAssert((stream.tellp() & (ink::internal::header::Alignment - 1)) == 0, "The stream is missaligned");
+	inkAssert(
+	    (stream.tellp() & (ink::internal::header::Alignment - 1)) == 0, "The stream is missaligned"
+	);
 	data.write_to(stream);
 	close_section(stream);
 }
@@ -275,9 +277,15 @@ void binary_emitter::output(std::ostream& out)
 	header._strings.setup(offset, _strings.pos());
 	header._list_meta.setup(offset, _list_meta.pos());
 	header._lists.setup(offset, _lists.pos());
-	header._containers.setup(offset, static_cast<ink::uint32_t>(container_data.size() * sizeof(container_data_t)));
-	header._container_map.setup(offset, static_cast<ink::uint32_t>(_container_map.size() * sizeof(container_map_t)));
-	header._container_hash.setup(offset, static_cast<ink::uint32_t>(container_hash.size() * sizeof(container_hash_t)));
+	header._containers.setup(
+	    offset, static_cast<ink::uint32_t>(container_data.size() * sizeof(container_data_t))
+	);
+	header._container_map.setup(
+	    offset, static_cast<ink::uint32_t>(_container_map.size() * sizeof(container_map_t))
+	);
+	header._container_hash.setup(
+	    offset, static_cast<ink::uint32_t>(container_hash.size() * sizeof(container_hash_t))
+	);
 	header._instructions.setup(offset, _instructions.pos());
 
 	// Write the header
@@ -443,7 +451,7 @@ void binary_emitter::build_container_data(
 ) const
 {
 	// Build data for this container
-	if (context->counter_index != ~0) {
+	if (context->counter_index != ~0U) {
 		container_data_t& d = data[context->counter_index];
 		d._parent           = parent;
 		d._start_offset     = context->offset;
@@ -476,7 +484,7 @@ void binary_emitter::build_container_hash_map(
 		const hash_t child_name_hash = hash_string(child_name.c_str());
 
 		// Store hash in the data.
-		if (child.second->counter_index != ~0) {
+		if (child.second->counter_index != ~0U) {
 			data[child.second->counter_index]._hash = child_name_hash;
 		}
 

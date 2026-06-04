@@ -48,6 +48,7 @@ public:
 	{
 	}
 
+	/** copy assigment operator. */
 	virtual list_interface& operator=(const list_interface&) = default;
 
 	virtual ~list_interface() {}
@@ -81,6 +82,7 @@ public:
 		}
 
 	public:
+		/** copy constructor. */
 		iterator(const iterator&) = default;
 
 		/** contains flag data */
@@ -204,6 +206,7 @@ protected:
 
 	/** @private */
 	internal::list_table* _list_table;
+	/** @private */
 	int                   _list;
 };
 

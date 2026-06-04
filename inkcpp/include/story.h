@@ -25,7 +25,7 @@ namespace ink::runtime
 class story
 {
 public:
-	virtual ~story(){};
+	virtual ~story() {};
 #pragma region Interface Methods
 	/**
 	 * Creates a new global store
@@ -108,6 +108,7 @@ public:
 } // namespace ink::runtime
 
 /** @namespace ink
+ * @ingroup cpp
  * Namespace contaning all modules and classes from InkCPP
  *
  * (Unreal Blueprint Classes Excluded, but there will not be there in a normal build)

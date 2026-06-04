@@ -178,7 +178,6 @@ SCENARIO("find best assigments", "[list_match][hungarian]")
 
 SCENARIO("Simple List Migration stories", "[list_match]")
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_LEAK_CHECK_DF);
 	GIVEN("Splitted List")
 	{
 		std::unique_ptr<story> ink_a{story::from_file(INK_TEST_RESOURCE_DIR "ListMatchStoryA.bin")};
@@ -196,11 +195,11 @@ SCENARIO("Simple List Migration stories", "[list_match]")
 			    thread_a->getall()
 			    == "More\nYou are still at Flor, Balcony - all posibilities are Flor, Balcony, Kitchen, Garden\n"
 			);
-			
+
 
 			auto globals_b = ink_b->new_globals_from_snapshot(*snap);
 
-			auto thread_b  = ink_b->new_runner_from_snapshot(*snap, globals_b);
+			auto thread_b = ink_b->new_runner_from_snapshot(*snap, globals_b);
 
 			CHECK(
 			    thread_b->getall()

@@ -170,8 +170,7 @@ void runner_impl::set_var<runner_impl::Scope::NONE>(
 template<typename T>
 inline T runner_impl::read(optional<ip_t> pos)
 {
-	using header = ink::internal::header;
-	ip_t ptr     = pos.value_or(_ptr);
+	ip_t ptr = pos.value_or(_ptr);
 	// Sanity
 	inkAssert(ptr + sizeof(T) <= _story->end(), "Unexpected EOF in Ink execution");
 
@@ -345,7 +344,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	const container_t dest_id     = _story->find_container_for(dest_offset);
 
 	// If there's no destination container, stop.
-	if (dest_id == ~0)
+	if (dest_id == ~0U)
 		return;
 
 	// Are we entering the new container at its start?
@@ -486,13 +485,11 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _choices()
     , _tags_begin(0, ~0)
     , _container(~0U)
-#ifdef INK_ENABLE_CSTD
-    , _rng(static_cast<uint32_t>(time(NULL)))
-#else
-    , _rng()
-#endif
 {
 
+#ifdef INK_ENABLE_CSTD
+	_rng.srand(static_cast<uint32_t>(time(NULL)));
+#endif
 
 	// register with globals
 	_globals->add_runner(this);
@@ -857,7 +854,8 @@ bool runner_impl::migrate_to(const loader& loader, hash_t path)
 	_ptr = nullptr;
 	jump(destination, false, true);
 
-	if (loader.old_ref_table && ! _globals->lists().migrate_variables(
+	if (loader.old_ref_table
+	    && ! _globals->lists().migrate_variables(
 	        loader.list_old_new_map, loader.list_list_matches, loader.list_value_matches,
 	        *loader.old_ref_table, _stack
 	    )) {
@@ -920,8 +918,7 @@ bool runner_impl::line_step()
 			_entered_global = false;
 		} else if (_entered_knot) {
 			if (has_knot_tags()) {
-				clear_tags(
-				    tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
+				clear_tags(tags_clear_level::KEEP_GLOBAL_AND_UNKNOWN
 				); // clear knot tags since whe are entering another knot
 			}
 
@@ -992,9 +989,8 @@ bool runner_impl::line_step()
 void runner_impl::step()
 {
 #ifdef INK_ENABLE_EXCEPTIONS
-	try
+	try {
 #endif
-	{
 		inkAssert(_ptr != nullptr, "Can not step! Do not have a valid pointer");
 
 		// Load current command
@@ -1456,11 +1452,9 @@ void runner_impl::step()
 
 					// Load value from output stream
 					// Push onto stack
-					_eval.push(
-					    value{}.set<value_type::string>(
-					        _output.get_alloc<false>(_globals->strings(), _globals->lists())
-					    )
-					);
+					_eval.push(value{}.set<value_type::string>(
+					    _output.get_alloc<false>(_globals->strings(), _globals->lists())
+					));
 				} break;
 
 				// == Tag commands
@@ -1606,11 +1600,9 @@ void runner_impl::step()
 					read<uint32_t>();
 					// Push the visit count for the current container to the top
 					//  is 0-indexed for some reason. idk why but this is what ink expects
-					_eval.push(
-					    value{}.set<value_type::int32>(
-					        static_cast<int32_t>(_globals->visits(_container.top()) - 1)
-					    )
-					);
+					_eval.push(value{}.set<value_type::int32>(
+					    static_cast<int32_t>(_globals->visits(_container.top()) - 1)
+					));
 				} break;
 				case Command::TURN: {
 					read<uint32_t>();
@@ -1627,8 +1619,7 @@ void runner_impl::step()
 					_eval.pop();
 
 
-					_eval.push(
-					    value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
+					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_rng.rand(sequenceLength)))
 					);
 				} break;
 				case Command::SEED: {
@@ -1650,9 +1641,8 @@ void runner_impl::step()
 					container_t container = read<container_t>();
 
 					// Push the read count for the requested container index
-					_eval.push(
-					    value{}.set<value_type::int32>(static_cast<int32_t>(_globals->visits(container)))
-					);
+					_eval.push(value{}.set<value_type::int32>(static_cast<int32_t>(_globals->visits(container)
+					)));
 				} break;
 				case Command::TAG: {
 					read<uint32_t>();
@@ -1667,9 +1657,8 @@ void runner_impl::step()
 			*_debug_stream << std::endl;
 		}
 #endif
-	}
 #ifdef INK_ENABLE_EXCEPTIONS
-	catch (...) {
+	} catch (...) {
 		// Reset our whole state as it's probably corrupt
 		reset();
 		throw;
