@@ -391,3 +391,50 @@ SCENARIO("Migratability of finished threads", "[migration][integration]")
 		}
 	}
 }
+
+SCENARIO("Migratibility of the UE_example story", "[migration][intigration]")
+{
+	GIVEN("The UE examplestory v1 and v2")
+	{
+		std::unique_ptr<story> story_v1{story::from_file(INK_TEST_RESOURCE_DIR "UE_example.bin")};
+		std::unique_ptr<story> story_v2{story::from_file(INK_TEST_RESOURCE_DIR "UE_example_v2.bin")};
+		runner                 thread = story_v1->new_runner();
+		std::string            last_target{};
+		auto                   callback = [&last_target](const char* target) {
+      last_target = target;
+		};
+		thread->bind("transition", callback, false);
+		WHEN("go to mansion in v1")
+		{
+			REQUIRE(
+			    thread->getall() == "You step outside your car. Its a wired feeling beehing here again.\n"
+			);
+			REQUIRE(last_target == "");
+			REQUIRE(thread->num_choices() == 2);
+			thread->choose(1);
+			THEN("expect normal output")
+			{
+				REQUIRE(thread->getall() == "You startk walking to Mansion.Entrance.\nJust in time you are able to see the door, someone with with a yellow summer dress enters it.\nYou're climbing the 56 steps up to the door; high tides are an annoying thing.\n");
+				REQUIRE(last_target == "Mansion.Entrance");
+			}
+		}
+		WHEN("go to mansion in v1, but get after choice text in v2")
+		{
+			REQUIRE(
+			    thread->getall() == "You step outside your car. Its a wired feeling beehing here again.\n"
+			);
+			REQUIRE(last_target == "");
+			REQUIRE(thread->num_choices() == 2);
+			thread->choose(1);
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			REQUIRE(snap->can_be_migrated());
+			runner thread2 = story_v2->new_runner_from_snapshot(*snap);
+			thread2->bind("transition", callback, false);
+			THEN("the new text at the same location should be displayed")
+			{
+				REQUIRE(thread2->getall() == "");
+				REQUIRE(last_target == "Mansion.Entrance");
+			}
+		}
+	}
+}
