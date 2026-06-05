@@ -458,6 +458,8 @@ inline void basic_restorable_array<T>::forget()
 		// Clear
 		_temp[i] = _null;
 	}
+
+	_saved = false;
 }
 
 template<typename T>
@@ -582,8 +584,8 @@ inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper
 }
 
 template<typename T>
-inline const unsigned char*
-    basic_restorable_array<T>::impl_snap_load_meta(const unsigned char* data)
+inline const unsigned char* basic_restorable_array<T>::impl_snap_load_meta(const unsigned char* data
+)
 {
 	auto ptr = data;
 	ptr      = snap_read(ptr, _saved);
@@ -611,9 +613,8 @@ inline const unsigned char*
 }
 
 template<typename T, size_t SIZE>
-inline const unsigned char* fixed_restorable_array<T, SIZE>::snap_load(
-    const unsigned char* data, const snapshot_interface::loader&
-)
+inline const unsigned char* fixed_restorable_array<
+    T, SIZE>::snap_load(const unsigned char* data, const snapshot_interface::loader&)
 {
 	auto ptr = data;
 	ptr      = base::impl_snap_load_meta(ptr);
@@ -622,9 +623,8 @@ inline const unsigned char* fixed_restorable_array<T, SIZE>::snap_load(
 }
 
 template<typename T>
-inline const unsigned char* allocated_restorable_array<T>::snap_load(
-    const unsigned char* data, const snapshot_interface::loader&
-)
+inline const unsigned char* allocated_restorable_array<
+    T>::snap_load(const unsigned char* data, const snapshot_interface::loader&)
 {
 	auto ptr = data;
 	ptr      = base::impl_snap_load_meta(ptr);
