@@ -278,6 +278,9 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 			_visit_counts.resize(_owner->num_containers());
 		}
 		_visit_counts.save();
+		for (size_t i = 0; i < old_capacity; ++i) {
+			_visit_counts.set(i, visit_count());
+		}
 	}
 
 	inkAssert(
