@@ -14,7 +14,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("UE example story snapshot migratability")
+SCENARIO("UE example story snapshot migratability", "[snapshot][migration][integration]")
 {
 	std::unique_ptr<story> base_story{story::from_file(INK_TEST_RESOURCE_DIR "UE_example.bin")};
 
@@ -72,7 +72,7 @@ SCENARIO("UE example story snapshot migratability")
 	}
 }
 
-SCENARIO("UE example story migration from v1 to v2")
+SCENARIO("UE example story migration from v1 to v2", "[snapshot][migration][integration]")
 {
 	std::unique_ptr<story> base_story{story::from_file(INK_TEST_RESOURCE_DIR "UE_example.bin")};
 	std::unique_ptr<story> story_v2{story::from_file(INK_TEST_RESOURCE_DIR "UE_example_v2.bin")};

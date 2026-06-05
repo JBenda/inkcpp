@@ -10,291 +10,317 @@
 
 using namespace ink::runtime;
 
-SCENARIO("tags", "[ahf]")
+SCENARIO("tags", "[tags][runtime]")
 {
-	std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "AHF.bin")};
-	runner                 thread = ink->new_runner();
-	thread->move_to(ink::hash_string("test_knot"));
-	while (thread->can_continue()) {
-		auto line = thread->getline();
+	GIVEN("a story moved to test_knot")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "AHF.bin")};
+		runner                 thread = ink->new_runner();
+		thread->move_to(ink::hash_string("test_knot"));
+
+		WHEN("all lines are consumed")
+		{
+			while (thread->can_continue()) {
+				thread->getline();
+			}
+
+			THEN("the thread cannot continue") { REQUIRE(thread->can_continue() == false); }
+		}
 	}
-	REQUIRE(thread->can_continue() == false);
 }
 
-SCENARIO("run story with tags", "[tags][story]")
+SCENARIO("run story with tags", "[tags][runtime]")
 {
 	GIVEN("a story with tags")
 	{
-		std::unique_ptr<story> _ink{story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin")};
-		runner                 _thread = _ink->new_runner();
-		WHEN("starting the thread")
-		{
-			CHECK_FALSE(_thread->has_tags());
-			CHECK(_thread->get_current_knot() == 0);
-		}
-		WHEN("on the first line")
-		{
-			CHECK(_thread->getline() == "First line has global tags only\n");
-			THEN("it has the global tags")
-			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("global_tags_only"));
-				CHECK(_thread->has_global_tags());
-				CHECK_FALSE(_thread->has_knot_tags());
-				CHECK(_thread->has_tags());
-				REQUIRE(_thread->num_global_tags() == 1);
-				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
-				REQUIRE(_thread->num_tags() == 1);
-				CHECK(std::string(_thread->get_tag(0)) == "global_tag");
-			}
-		}
-		WHEN("on the second line")
-		{
-			_thread->getline();
-			CHECK(_thread->getline() == "Second line has one tag\n");
-			THEN("it has one tag")
-			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("global_tags_only"));
-				CHECK(_thread->has_tags());
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(_thread->num_knot_tags() == 0);
-				REQUIRE(_thread->num_tags() == 1);
-				CHECK(std::string(_thread->get_tag(0)) == "tagged");
-			}
-		}
-		WHEN("on the third line")
-		{
-			_thread->getline();
-			_thread->getline();
-			CHECK(_thread->getline() == "Third line has two tags\n");
-			THEN("it has two tags")
-			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("global_tags_only"));
-				CHECK(_thread->has_tags());
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(_thread->num_knot_tags() == 0);
-				REQUIRE(_thread->num_tags() == 2);
-				CHECK(std::string(_thread->get_tag(0)) == "tag next line");
-				CHECK(std::string(_thread->get_tag(1)) == "more tags");
-			}
-		}
-		WHEN("on the fourth line")
-		{
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			CHECK(_thread->getline() == "Fourth line has three tags\n");
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin")};
+		runner                 thread = ink->new_runner();
 
-			THEN("it has three tags")
+		THEN("initially there are no tags and the runner has not moved to any knot")
+		{
+			CHECK_FALSE(thread->has_tags());
+			CHECK(thread->get_current_knot() == 0);
+		}
+
+		WHEN("the first line is read")
+		{
+			std::string line = thread->getline();
+
+			THEN("the output is correct and only global tags are present")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("global_tags_only"));
-				CHECK(_thread->has_tags());
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(_thread->num_knot_tags() == 0);
-				REQUIRE(_thread->num_tags() == 3);
-				CHECK(std::string(_thread->get_tag(0)) == "above");
-				CHECK(std::string(_thread->get_tag(1)) == "side");
-				CHECK(std::string(_thread->get_tag(2)) == "across");
+				REQUIRE(line == "First line has global tags only\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("global_tags_only"));
+				CHECK(thread->has_global_tags());
+				CHECK_FALSE(thread->has_knot_tags());
+				CHECK(thread->has_tags());
+				REQUIRE(thread->num_global_tags() == 1);
+				CHECK(std::string(thread->get_global_tag(0)) == "global_tag");
+				REQUIRE(thread->num_tags() == 1);
+				CHECK(std::string(thread->get_tag(0)) == "global_tag");
 			}
 		}
-		WHEN("entering a knot")
+
+		WHEN("the second line is read")
 		{
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			CHECK(_thread->getline() == "Hello\n");
-			THEN("it has four tags")
+			// skip line 1
+			thread->getline();
+			std::string line = thread->getline();
+
+			THEN("the output is correct and one inline tag is present")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("start"));
-				CHECK(_thread->has_tags());
-				CHECK(_thread->num_global_tags() == 1);
-				REQUIRE(_thread->num_tags() == 4);
-				CHECK(std::string(_thread->get_tag(0)) == "knot_tag_start");
-				CHECK(std::string(_thread->get_tag(1)) == "second_knot_tag_start");
-				CHECK(std::string(_thread->get_tag(2)) == "third_knot_tag");
-				CHECK(std::string(_thread->get_tag(3)) == "output_tag_h");
-				REQUIRE(_thread->num_knot_tags() == 3);
-				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_start");
-				CHECK(std::string(_thread->get_knot_tag(1)) == "second_knot_tag_start");
-				CHECK(std::string(_thread->get_knot_tag(2)) == "third_knot_tag");
+				REQUIRE(line == "Second line has one tag\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("global_tags_only"));
+				CHECK(thread->has_tags());
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(thread->num_knot_tags() == 0);
+				REQUIRE(thread->num_tags() == 1);
+				CHECK(std::string(thread->get_tag(0)) == "tagged");
 			}
 		}
-		WHEN("on the next line")
+
+		WHEN("the third line is read")
 		{
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			CHECK(_thread->getline() == "Second line has no tags\n");
-			THEN("it has no tags")
+			// skip lines 1-2
+			for (int i = 0; i < 2; ++i) {
+				thread->getline();
+			}
+			std::string line = thread->getline();
+
+			THEN("the output is correct and two inline tags are present")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("start"));
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(_thread->num_knot_tags() == 3);
-				CHECK_FALSE(_thread->has_tags());
-				REQUIRE(_thread->num_tags() == 0);
+				REQUIRE(line == "Third line has two tags\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("global_tags_only"));
+				CHECK(thread->has_tags());
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(thread->num_knot_tags() == 0);
+				REQUIRE(thread->num_tags() == 2);
+				CHECK(std::string(thread->get_tag(0)) == "tag next line");
+				CHECK(std::string(thread->get_tag(1)) == "more tags");
 			}
 		}
-		WHEN("at the first choice list")
+
+		WHEN("the fourth line is read")
 		{
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			CHECK_FALSE(_thread->can_continue());
+			// skip lines 1-3
+			for (int i = 0; i < 3; ++i) {
+				thread->getline();
+			}
+			std::string line = thread->getline();
 
-			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 2);
-			auto choice_list = _thread->begin();
-
-			THEN("check tags on choices")
+			THEN("the output is correct and three inline tags are present")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("start"));
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(_thread->num_knot_tags() == 3);
-				CHECK(std::string(choice_list[0].text()) == "a");
-				CHECK_FALSE(choice_list[0].has_tags());
-				REQUIRE(choice_list[0].num_tags() == 0);
-
-				CHECK(std::string(choice_list[1].text()) == "b");
-				CHECK(choice_list[1].has_tags());
-				REQUIRE(choice_list[1].num_tags() == 2);
-				CHECK(std::string(choice_list[1].get_tag(0)) == "choice_tag_b");
-				CHECK(std::string(choice_list[1].get_tag(1)) == "choice_tag_b_2");
+				REQUIRE(line == "Fourth line has three tags\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("global_tags_only"));
+				CHECK(thread->has_tags());
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(thread->num_knot_tags() == 0);
+				REQUIRE(thread->num_tags() == 3);
+				CHECK(std::string(thread->get_tag(0)) == "above");
+				CHECK(std::string(thread->get_tag(1)) == "side");
+				CHECK(std::string(thread->get_tag(2)) == "across");
 			}
 		}
-		WHEN("selecting the second choice")
-		{
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->choose(1);
 
-			CHECK(_thread->getline() == "Knot2\n");
-			THEN("it has two tags")
+		WHEN("the knot entry line is read")
+		{
+			// skip lines 1-4
+			for (int i = 0; i < 4; ++i) {
+				thread->getline();
+			}
+			std::string line = thread->getline();
+
+			THEN("the output is correct and knot tags are combined with global and inline tags")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
-				INFO(_thread->get_knot_tag(0));
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(_thread->has_tags());
-				REQUIRE(_thread->num_tags() == 2);
-				CHECK(std::string(_thread->get_tag(0)) == "knot_tag_2");
-				CHECK(std::string(_thread->get_tag(1)) == "output_tag_k");
-				CHECK(_thread->has_knot_tags());
-				REQUIRE(_thread->num_knot_tags() == 1);
-				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_2");
+				REQUIRE(line == "Hello\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("start"));
+				CHECK(thread->has_tags());
+				CHECK(thread->num_global_tags() == 1);
+				REQUIRE(thread->num_tags() == 4);
+				CHECK(std::string(thread->get_tag(0)) == "knot_tag_start");
+				CHECK(std::string(thread->get_tag(1)) == "second_knot_tag_start");
+				CHECK(std::string(thread->get_tag(2)) == "third_knot_tag");
+				CHECK(std::string(thread->get_tag(3)) == "output_tag_h");
+				REQUIRE(thread->num_knot_tags() == 3);
+				CHECK(std::string(thread->get_knot_tag(0)) == "knot_tag_start");
+				CHECK(std::string(thread->get_knot_tag(1)) == "second_knot_tag_start");
+				CHECK(std::string(thread->get_knot_tag(2)) == "third_knot_tag");
 			}
 		}
-		WHEN("jumping to a knot")
+
+		WHEN("the line after the knot header is read")
 		{
-			_thread->move_to(ink::hash_string("knot2"));
-			REQUIRE(_thread->getline() == "Knot2\n");
-			THEN("global tags are missing")
+			// skip lines 1-5
+			for (int i = 0; i < 5; ++i) {
+				thread->getline();
+			}
+			std::string line = thread->getline();
+
+			THEN("the output is correct and no inline tags are present")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
-				CHECK(_thread->num_global_tags() == 0);
-				CHECK(_thread->has_tags());
-				REQUIRE(_thread->num_tags() == 2);
-				CHECK(std::string(_thread->get_tag(0)) == "knot_tag_2");
-				CHECK(std::string(_thread->get_tag(1)) == "output_tag_k");
-				CHECK(_thread->has_knot_tags());
-				REQUIRE(_thread->num_knot_tags() == 1);
-				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_2");
+				REQUIRE(line == "Second line has no tags\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("start"));
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(thread->num_knot_tags() == 3);
+				CHECK_FALSE(thread->has_tags());
+				REQUIRE(thread->num_tags() == 0);
 			}
 		}
-		WHEN("at the second choice list")
+
+		WHEN("all six lines are consumed and the first choice list appears")
 		{
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->choose(1);
-			_thread->getline();
-			CHECK(! _thread->can_continue());
+			for (int i = 0; i < 6; ++i) {
+				thread->getline();
+			}
+			auto choices = thread->begin();
 
-			REQUIRE(std::distance(_thread->begin(), _thread->end()) == 3);
-			auto choice_list = _thread->begin();
-
-			THEN("check tags on choices")
+			THEN("the runner is at a choice point with two correctly tagged options")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(_thread->num_knot_tags() == 1);
-				CHECK(_thread->num_tags() == 2);
-				CHECK(std::string(choice_list[0].text()) == "e");
-				CHECK_FALSE(choice_list[0].has_tags());
-				REQUIRE(choice_list[0].num_tags() == 0);
+				CHECK_FALSE(thread->can_continue());
+				CHECK(thread->get_current_knot() == ink::hash_string("start"));
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(thread->num_knot_tags() == 3);
+				REQUIRE(std::distance(thread->begin(), thread->end()) == 2);
 
-				CHECK(std::string(choice_list[1].text()) == "f with detail");
-				CHECK(choice_list[1].has_tags());
-				REQUIRE(choice_list[1].num_tags() == 4);
-				CHECK(std::string(choice_list[1].get_tag(0)) == "shared_tag");
-				CHECK(std::string(choice_list[1].get_tag(1)) == "shared_tag_2");
-				CHECK(std::string(choice_list[1].get_tag(2)) == "choice_tag");
-				CHECK(std::string(choice_list[1].get_tag(3)) == "choice_tag_2");
+				CHECK(std::string(choices[0].text()) == "a");
+				CHECK_FALSE(choices[0].has_tags());
+				REQUIRE(choices[0].num_tags() == 0);
 
-				CHECK(std::string(choice_list[2].text()) == "g");
-				CHECK(choice_list[2].has_tags());
-				REQUIRE(choice_list[2].num_tags() == 1);
-				CHECK(std::string(choice_list[2].get_tag(0)) == "choice_tag_g");
+				CHECK(std::string(choices[1].text()) == "b");
+				CHECK(choices[1].has_tags());
+				REQUIRE(choices[1].num_tags() == 2);
+				CHECK(std::string(choices[1].get_tag(0)) == "choice_tag_b");
+				CHECK(std::string(choices[1].get_tag(1)) == "choice_tag_b_2");
 			}
 		}
-		WHEN("selecting the choice with shared tags")
-		{
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->choose(1);
-			_thread->getline();
-			_thread->choose(1);
 
-			REQUIRE(_thread->getline() == "f and content\n");
-			THEN("it has four tags")
+		WHEN("choice 'b' is selected at the first choice list")
+		{
+			for (int i = 0; i < 6; ++i) {
+				thread->getline();
+			}
+			thread->choose(1);
+			std::string line = thread->getline();
+
+			THEN("the output is correct and the new knot's tags are reflected")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(_thread->num_knot_tags() == 1);
-				CHECK(_thread->has_tags());
-				REQUIRE(_thread->num_tags() == 4);
-				CHECK(std::string(_thread->get_tag(0)) == "shared_tag");
-				CHECK(std::string(_thread->get_tag(1)) == "shared_tag_2");
-				CHECK(std::string(_thread->get_tag(2)) == "content_tag");
-				CHECK(std::string(_thread->get_tag(3)) == "content_tag_2");
+				REQUIRE(line == "Knot2\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("knot2.sub"));
+				INFO(thread->get_knot_tag(0));
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(thread->has_tags());
+				REQUIRE(thread->num_tags() == 2);
+				CHECK(std::string(thread->get_tag(0)) == "knot_tag_2");
+				CHECK(std::string(thread->get_tag(1)) == "output_tag_k");
+				CHECK(thread->has_knot_tags());
+				REQUIRE(thread->num_knot_tags() == 1);
+				CHECK(std::string(thread->get_knot_tag(0)) == "knot_tag_2");
 			}
 		}
-		WHEN("on the last line")
+
+		WHEN("the runner jumps directly to knot2")
 		{
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->getline();
-			_thread->choose(1);
-			_thread->getline();
-			_thread->choose(1);
-			_thread->getline();
-			CHECK(_thread->getline() == "out\n");
-			THEN("it has one tag")
+			thread->move_to(ink::hash_string("knot2"));
+			std::string line = thread->getline();
+
+			THEN("the output is correct and global tags are absent since the global section was skipped")
 			{
-				CHECK(_thread->get_current_knot() == ink::hash_string("knot2.sub"));
-				CHECK(_thread->num_global_tags() == 1);
-				CHECK(std::string(_thread->get_global_tag(0)) == "global_tag");
-				REQUIRE(_thread->num_knot_tags() == 1);
-				CHECK(std::string(_thread->get_knot_tag(0)) == "knot_tag_2");
-				CHECK(_thread->has_tags());
-				REQUIRE(_thread->num_tags() == 1);
-				CHECK(std::string(_thread->get_tag(0)) == "close_tag");
+				REQUIRE(line == "Knot2\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("knot2.sub"));
+				CHECK(thread->num_global_tags() == 0);
+				CHECK(thread->has_tags());
+				REQUIRE(thread->num_tags() == 2);
+				CHECK(std::string(thread->get_tag(0)) == "knot_tag_2");
+				CHECK(std::string(thread->get_tag(1)) == "output_tag_k");
+				CHECK(thread->has_knot_tags());
+				REQUIRE(thread->num_knot_tags() == 1);
+				CHECK(std::string(thread->get_knot_tag(0)) == "knot_tag_2");
+			}
+		}
+
+		WHEN("choice 'b' is selected and the second choice list appears")
+		{
+			for (int i = 0; i < 6; ++i) {
+				thread->getline();
+			}
+			thread->choose(1);
+			thread->getline(); // consume "Knot2"
+			auto choices = thread->begin();
+
+			THEN("three choices are present with correct tags")
+			{
+				CHECK_FALSE(thread->can_continue());
+				CHECK(thread->get_current_knot() == ink::hash_string("knot2.sub"));
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(thread->num_knot_tags() == 1);
+				CHECK(thread->num_tags() == 2);
+				REQUIRE(std::distance(thread->begin(), thread->end()) == 3);
+
+				CHECK(std::string(choices[0].text()) == "e");
+				CHECK_FALSE(choices[0].has_tags());
+				REQUIRE(choices[0].num_tags() == 0);
+
+				CHECK(std::string(choices[1].text()) == "f with detail");
+				CHECK(choices[1].has_tags());
+				REQUIRE(choices[1].num_tags() == 4);
+				CHECK(std::string(choices[1].get_tag(0)) == "shared_tag");
+				CHECK(std::string(choices[1].get_tag(1)) == "shared_tag_2");
+				CHECK(std::string(choices[1].get_tag(2)) == "choice_tag");
+				CHECK(std::string(choices[1].get_tag(3)) == "choice_tag_2");
+
+				CHECK(std::string(choices[2].text()) == "g");
+				CHECK(choices[2].has_tags());
+				REQUIRE(choices[2].num_tags() == 1);
+				CHECK(std::string(choices[2].get_tag(0)) == "choice_tag_g");
+			}
+		}
+
+		WHEN("choice 'b' then choice 'f with detail' is selected")
+		{
+			for (int i = 0; i < 6; ++i) {
+				thread->getline();
+			}
+			thread->choose(1);
+			thread->getline(); // "Knot2"
+			thread->choose(1);
+			std::string line = thread->getline();
+
+			THEN("the output is correct and four tags combining shared and content tags are present")
+			{
+				REQUIRE(line == "f and content\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("knot2.sub"));
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(thread->num_knot_tags() == 1);
+				CHECK(thread->has_tags());
+				REQUIRE(thread->num_tags() == 4);
+				CHECK(std::string(thread->get_tag(0)) == "shared_tag");
+				CHECK(std::string(thread->get_tag(1)) == "shared_tag_2");
+				CHECK(std::string(thread->get_tag(2)) == "content_tag");
+				CHECK(std::string(thread->get_tag(3)) == "content_tag_2");
+			}
+		}
+
+		WHEN("the story is played through to the final line")
+		{
+			for (int i = 0; i < 6; ++i) {
+				thread->getline();
+			}
+			thread->choose(1);
+			thread->getline(); // "Knot2"
+			thread->choose(1);
+			thread->getline(); // "f and content"
+			std::string line = thread->getline();
+
+			THEN("the output is correct and one closing tag is present alongside global and knot tags")
+			{
+				REQUIRE(line == "out\n");
+				CHECK(thread->get_current_knot() == ink::hash_string("knot2.sub"));
+				CHECK(thread->num_global_tags() == 1);
+				CHECK(std::string(thread->get_global_tag(0)) == "global_tag");
+				REQUIRE(thread->num_knot_tags() == 1);
+				CHECK(std::string(thread->get_knot_tag(0)) == "knot_tag_2");
+				CHECK(thread->has_tags());
+				REQUIRE(thread->num_tags() == 1);
+				CHECK(std::string(thread->get_tag(0)) == "close_tag");
 			}
 		}
 	}

@@ -7,7 +7,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("run story with global variable", "[global variables]")
+SCENARIO("run story with global variable", "[globals][runtime]")
 {
 	GIVEN("a story with global variables")
 	{
@@ -15,57 +15,73 @@ SCENARIO("run story with global variable", "[global variables]")
 		globals                globStore = ink->new_globals();
 		runner                 thread    = ink->new_runner(globStore);
 
-		WHEN("just runs")
+		WHEN("the story runs with default variable values")
 		{
-			THEN("variables should contain values as in inkScript")
+			std::string out = thread->getall();
+
+			THEN("the output uses the default variable values")
 			{
-				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Jackie. I'm 23 years old.\nFoo:23\n");
+				REQUIRE(
+				    out
+				    == "My name is Jean Passepartout, but my friend's call me Jackie. I'm 23 years old.\nFoo:23\n"
+				);
+			}
+
+			THEN("the globals store reflects the default values")
+			{
 				REQUIRE(*globStore->get<int32_t>("age") == 23);
 				REQUIRE(*globStore->get<const char*>("friendly_name_of_player") == std::string{"Jackie"});
 			}
 		}
-		WHEN("edit number")
+
+		WHEN("global variables are overridden before the story runs")
 		{
 			bool resi = globStore->set<int32_t>("age", 30);
 			bool resc = globStore->set<const char*>("friendly_name_of_player", "Freddy");
-			THEN("execution should success")
+
+			THEN("the set operations succeed")
 			{
 				REQUIRE(resi == true);
 				REQUIRE(resc == true);
 			}
-			THEN("variable should contain new value")
+
+			THEN("the output uses the overridden variable values")
 			{
-				REQUIRE(thread->getall() == "My name is Jean Passepartout, but my friend's call me Freddy. I'm 30 years old.\nFoo:30\n");
+				std::string out = thread->getall();
+				REQUIRE(
+				    out
+				    == "My name is Jean Passepartout, but my friend's call me Freddy. I'm 30 years old.\nFoo:30\n"
+				);
 				REQUIRE(*globStore->get<int32_t>("age") == 30);
 				REQUIRE(*globStore->get<const char*>("friendly_name_of_player") == std::string{"Freddy"});
 			}
-			WHEN("something added to string")
+
+			AND_WHEN("the story runs and a string is concatenated by the ink script")
 			{
-				// concat in GlobalsStory.ink
 				thread->getall();
-				THEN("get should return the whole string")
+
+				THEN("the globals store reflects the concatenated string")
 				{
 					REQUIRE(*globStore->get<const char*>("concat") == std::string{"Foo:30"});
 				}
 			}
 		}
-		WHEN("name or type not exist")
+
+		WHEN("a variable is accessed with the wrong type")
 		{
-			auto wrongType       = globStore->get<uint32_t>("age");
-			auto notExistingName = globStore->get<int32_t>("foo");
-			THEN("should return nullptr")
+			THEN("get returns no value")
 			{
-				REQUIRE(wrongType.has_value() == false);
-				REQUIRE(notExistingName.has_value() == false);
+				REQUIRE(globStore->get<uint32_t>("age").has_value() == false);
 			}
 
-			bool rest = globStore->set<uint32_t>("age", 3);
-			bool resn = globStore->set<int32_t>("foo", 3);
-			THEN("should return false")
-			{
-				REQUIRE(rest == false);
-				REQUIRE(resn == false);
-			}
+			THEN("set returns false") { REQUIRE(globStore->set<uint32_t>("age", 3) == false); }
+		}
+
+		WHEN("a variable name that does not exist is accessed")
+		{
+			THEN("get returns no value") { REQUIRE(globStore->get<int32_t>("foo").has_value() == false); }
+
+			THEN("set returns false") { REQUIRE(globStore->set<int32_t>("foo", 3) == false); }
 		}
 	}
 }

@@ -9,7 +9,7 @@ using namespace ink::runtime;
 
 SCENARIO(
     "a story with a bracketed choice as a second choice, and then a third choice, chooses properly",
-    "[choices]"
+    "[choices][runtime]"
 )
 {
 	GIVEN("a story with brackets and nested choices")
@@ -18,21 +18,34 @@ SCENARIO(
 		                                            "ThirdTierChoiceAfterBracketsStory.bin")};
 		runner                 thread = ink->new_runner();
 
-		WHEN("start thread")
+		WHEN("the story starts")
 		{
-			THEN("thread doesn't error")
+			thread->getall();
+
+			THEN("the first tier choices are presented") { REQUIRE(thread->has_choices()); }
+
+			AND_WHEN("the first choice is made")
 			{
-				thread->getall();
-				REQUIRE(thread->has_choices());
 				thread->choose(0);
 				thread->getall();
-				REQUIRE(thread->has_choices());
-				thread->choose(0);
-				thread->getall();
-				REQUIRE(thread->has_choices());
-				thread->choose(0);
-				thread->getall();
-				REQUIRE(! thread->has_choices());
+
+				THEN("the second tier choices are presented") { REQUIRE(thread->has_choices()); }
+
+				AND_WHEN("the second choice is made")
+				{
+					thread->choose(0);
+					thread->getall();
+
+					THEN("the third tier choices are presented") { REQUIRE(thread->has_choices()); }
+
+					AND_WHEN("the third choice is made")
+					{
+						thread->choose(0);
+						thread->getall();
+
+						THEN("the story ends with no further choices") { REQUIRE_FALSE(thread->has_choices()); }
+					}
+				}
 			}
 		}
 	}

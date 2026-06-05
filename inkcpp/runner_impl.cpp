@@ -589,10 +589,10 @@ void runner_impl::advance_line()
 	if (_saved) {
 		restore();
 	}
-	_globals->gc();
 	if (_output.saved()) {
 		_output.restore();
 	}
+	_globals->gc();
 }
 
 bool runner_impl::can_continue() const { return _ptr != nullptr && ! has_choices(); }

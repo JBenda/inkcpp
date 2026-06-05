@@ -8,7 +8,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("a story with external functions and glue", "[external]")
+SCENARIO("a story with external functions and glue", "[external-functions][glue][runtime]")
 {
 	GIVEN("the story")
 	{

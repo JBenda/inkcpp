@@ -8,7 +8,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("run a story, but jump around manually", "[move_to]")
+SCENARIO("run a story, but jump around manually", "[move-to][runtime]")
 {
 	GIVEN("a story with side talking points")
 	{

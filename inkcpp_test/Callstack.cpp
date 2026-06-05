@@ -17,7 +17,7 @@ value operator""_v(unsigned long long i)
 	return value{}.set<value_type::int32>(static_cast<int32_t>(i));
 }
 
-SCENARIO("threading with the callstack", "[callstack]")
+SCENARIO("threading with the callstack", "[callstack][unit][internals]")
 {
 	GIVEN("a callstack with a few temporary variables")
 	{

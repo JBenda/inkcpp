@@ -8,7 +8,10 @@
 
 using namespace ink::runtime;
 
-SCENARIO("a story with an external function evaluates the function at the right time", "[story]")
+SCENARIO(
+    "a story with an external function evaluates the function at the right time",
+    "[external-functions][runtime]"
+)
 {
 	GIVEN("a story with an external function")
 	{

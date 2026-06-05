@@ -8,7 +8,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("run story with hidden choice")
+SCENARIO("run story with hidden choice", "[choices][labels][runtime]")
 {
 	GIVEN("a story with choice visible by second visit")
 	{

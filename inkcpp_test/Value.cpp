@@ -37,7 +37,7 @@ void cp_str(char* dst, const char* src)
 	*dst = 0;
 }
 
-SCENARIO("compare concatenated values")
+SCENARIO("compare concatenated values", "[values][unit][internals]")
 {
 	string_table  str_table;
 	list_table    lst_table{};
