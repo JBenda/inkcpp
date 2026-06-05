@@ -51,7 +51,7 @@ SCENARIO("Simple isolated migration tests.", "[migration][integration]")
 
 				THEN("the story outputs the expected follow-up content")
 				{
-					REQUIRE(base_thread->getall() == "A\ncatch\n5 3\n1 -1 1\nOh.\n");
+					REQUIRE(base_thread->getall() == "A\ncatch\n5 3\n1 -1 1\n1 0 1\nOh.\n");
 				}
 			}
 		}
@@ -140,7 +140,7 @@ SCENARIO("Simple isolated migration tests.", "[migration][integration]")
 
 					THEN("the story continues with the new knot's output")
 					{
-						REQUIRE(new_thread->getall() == "A\ncatch\n-1 1 1\nOh.\n");
+						REQUIRE(new_thread->getall() == "A\ncatch\n-1 1 1\n0 1 1\nOh.\n");
 					}
 				}
 			}
@@ -158,7 +158,7 @@ SCENARIO("Simple isolated migration tests.", "[migration][integration]")
 
 				THEN("visit counts are migrated and the story continues with node-aware output")
 				{
-					REQUIRE(new_thread->getall() == "A\ncatch\n1 1 1\nOh.\n");
+					REQUIRE(new_thread->getall() == "A\ncatch\n1 -1 1\n1 0 1\nOh.\n");
 				}
 			}
 		}
@@ -189,7 +189,7 @@ SCENARIO("Simple isolated migration tests.", "[migration][integration]")
 					THEN("the story continues with updated temporary variable output at the same knot")
 					{
 						REQUIRE(new_thread->get_current_knot() == 0x25e83b84);
-						REQUIRE(after == "A\ncatch\n2 - 3\n1 -1 1\nOh.\n");
+						REQUIRE(after == "A\ncatch\n2 - 3\n1 -1 1\n1 0 1\nOh.\n");
 					}
 				}
 			}
@@ -211,7 +211,7 @@ SCENARIO("Simple isolated migration tests.", "[migration][integration]")
 				THEN("the old temporary variable is preserved and the new one uses its default")
 				{
 					REQUIRE(new_thread->get_current_knot() == 0x25e83b84);
-					REQUIRE(after == "A\ncatch\n5 - 6\n1 -1 1\nOh.\n");
+					REQUIRE(after == "A\ncatch\n5 - 6\n1 -1 1\n1 0 1\nOh.\n");
 				}
 			}
 		}
@@ -266,7 +266,7 @@ SCENARIO("Simple isolated migration tests.", "[migration][integration]")
 
 				THEN("the story continues normally from the migration point")
 				{
-					REQUIRE(new_thread->getall() == "A\ncatch\n5 3\n1 -1 1\nOh.\n");
+					REQUIRE(new_thread->getall() == "A\ncatch\n5 3\n1 -1 1\n1 0 1\nOh.\n");
 				}
 			}
 		}

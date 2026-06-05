@@ -317,7 +317,7 @@ void runner_impl::fetch_tags(ip_t begin)
 	}
 }
 
-void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
+void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit, bool preserve_turns)
 {
 	// Optimization: if we are _is_falling, then we can
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
@@ -353,7 +353,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (dest_offset == dest_container._start_offset) {
 		// Record direct jump to non-knot if requested. (Knots handled below.)
 		if (record_visits && ! dest_container.knot()) {
-			_globals->visit(dest_id);
+			_globals->visit(dest_id, preserve_turns);
 		}
 
 		// Consume instruction so we don't process it again during normal flow. (We need to do this here
@@ -386,7 +386,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			// Ink has a rule about incrementing visit counts when you jump to the top of a knot, which
 			// seems to need to override inkcpp's knot_visit flag.
 			if (track_knot_visit || container._start_offset == dest_offset) {
-				_globals->visit(id);
+				_globals->visit(id, preserve_turns);
 			}
 
 			// If tracking, update with the first knot we encounter, which is the one closest to the top
@@ -849,10 +849,12 @@ bool runner_impl::migrate_to(const loader& loader, hash_t path)
 			}
 		}
 	}
-	// rebuild container stack to display new offsets
+	// rebuild container stack using new story offsets.
+	// preserve_turns=true keeps the turns-since counters restored from the snapshot intact;
+	// without this the visit() call inside jump() would reset them to 0.
 	_container.clear();
 	_ptr = nullptr;
-	jump(destination, false, true);
+	jump(destination, false, true, true);
 
 	if (loader.old_ref_table
 	    && ! _globals->lists().migrate_variables(

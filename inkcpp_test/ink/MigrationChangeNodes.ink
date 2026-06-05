@@ -14,5 +14,6 @@ This is a simple story.
 * B
 - catch
 {TURNS_SINCE(-> Node1)} {TURNS_SINCE(-> NewNode)} {TURNS_SINCE(-> Main)}
+{Node1} {NewNode} {Main}
 Oh.
 ->DONE

@@ -30,9 +30,13 @@ globals_impl::globals_impl(const story_impl* story)
 	}
 }
 
-void globals_impl::visit(uint32_t container_id)
+void globals_impl::visit(uint32_t container_id, bool preserve_turns)
 {
-	_visit_counts.set(container_id, {_visit_counts[container_id].visits + 1, 0});
+	const int32_t existing_turns = _visit_counts[container_id].turns;
+	_visit_counts.set(
+	    container_id, {_visit_counts[container_id].visits + (preserve_turns ? 0 : 1),
+	                   preserve_turns ? existing_turns : 0}
+	);
 }
 
 uint32_t globals_impl::visits(uint32_t container_id) const
