@@ -5,8 +5,8 @@ set(INKCPP_UNREAL_RunUAT_PATH
 		CACHE FILEPATH
 					"Path to Unreal engine installation RunUAT file. Used to automatcally build the plugin.")
 option(INKCPP_UNREAL "Prepare sourcefiles for a UE Plugin (this will download " OFF)
-option(INKCPP_DOC_BlueprintUE "Building doxygen documentation with BlueprintUE visualisation "
-			 "for unreal blueprints. (Requires node js)" ON)
+option(INKCPP_DOC_BlueprintUE "Building doxygen documentation with BlueprintUE visualisation \
+			 for unreal blueprints. (Requires node js)" ON)
 set(INKCPP_UNREAL_TARGET_PLATFORM
 		"Win64"
 		CACHE STRING "Target platform for the UE Plugin one of Win64, Mac, Linux")
@@ -66,13 +66,12 @@ if(INKCPP_UNREAL)
 	if((NOT DEFINED INKCPP_UNREAL_RunUAT_PATH) OR (NOT "${INKCPP_UNREAL_RunUAT_PATH}" STREQUAL ""))
 		if(NOT IS_READABLE "${INKCPP_UNREAL_RunUAT_PATH}")
 			message(
-				WARNING
-					"Unable to find RunUAT script at >${INKCPP_UNREAL_RunUAT_PATH}<, will not be able "
-					"to build target `unreal` set the filepath with the variable INKCPP_UNREAL_RunUAT_PATH")
+				WARNING "Unable to find RunUAT script at >${INKCPP_UNREAL_RunUAT_PATH}<, will not be able \
+					to build target `unreal` set the filepath with the variable INKCPP_UNREAL_RunUAT_PATH")
 		endif()
 	else()
-		message(WARNING, "To directly build the plugin with `cmake --build . --target unreal` please "
-						"set INKCPP_UNREAL_RunUAT_PATH to point to unreals RunUAT script.")
+		message(WARNING, "To directly build the plugin with `cmake --build . --target unreal` please \
+						set INKCPP_UNREAL_RunUAT_PATH to point to unreals RunUAT script.")
 	endif()
 
 	add_custom_target(
