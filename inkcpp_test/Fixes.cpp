@@ -2,6 +2,7 @@
 #include "snapshot.h"
 #include "../snapshot_impl.h"
 
+#include <memory>
 #include <story.h>
 #include <globals.h>
 #include <choice.h>
@@ -350,6 +351,27 @@ SCENARIO("Provoke thread array expension _ #142", "[regression][runtime]")
 				for (const char* c = options; *c; ++c) {
 					CHECK(thread->get_choice(static_cast<ink::size_t>(c - options))->text()[0] == *c);
 				}
+			}
+		}
+	}
+}
+
+SCENARIO("Node text lookup error after loading story", "[regression][runtime][migration]")
+{
+	GIVEN("UE_example.ink and UE_example2.ink")
+	{
+		std::unique_ptr<story> v1{story::from_file(INK_TEST_RESOURCE_DIR "UE_example.bin")};
+		std::unique_ptr<story> v2{story::from_file(INK_TEST_RESOURCE_DIR "UE_example_v2.bin")};
+		WHEN("choosing a choice and v1, loading it in v2 and snap again")
+		{
+			runner thread = v1->new_runner();
+			thread->getall();
+			thread->choose(1);
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			runner                    thread_v2 = v2->new_runner_from_snapshot(*snap);
+			THEN("no assert when snapping again")
+			{
+				std::unique_ptr<snapshot> snap2{thread_v2->create_snapshot()};
 			}
 		}
 	}

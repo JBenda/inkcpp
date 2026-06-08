@@ -312,7 +312,9 @@ void runner_impl::fetch_tags(ip_t begin)
 			iter += 6;
 			continue;
 		}
-		add_tag(read<const char*>(iter + 6 + 2), tags_level::UNKNOWN);
+		// store tags in dynamic data, too keep migratable stories on the table
+		// TODO: maybe let tags live on the static data again.
+		add_tag(_globals->strings().duplicate(read<const char*>(iter + 6 + 2)), tags_level::UNKNOWN);
 		iter += 18;
 	}
 }
@@ -1651,6 +1653,7 @@ void runner_impl::step()
 					)));
 				} break;
 				case Command::TAG: {
+					inkFail("Command::TAG is Deprecated!");
 					read<uint32_t>();
 					add_tag(read<const char*>(), tags_level::UNKNOWN);
 				} break;
