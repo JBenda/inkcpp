@@ -176,6 +176,24 @@ ip_t story_impl::find_offset_for(hash_t path) const
 	return entry && entry->_hash == path ? _instruction_data + entry->_offset : nullptr;
 }
 
+hash_t story_impl::find_migration_hash(uint32_t offset) const
+{
+	// Callers pass (_ptr - instructions - 6).  For *tracked* containers jump() advances _ptr by 6
+	// past the START_CONTAINER_MARKER, so (_ptr - 6) == marker offset == hash-entry offset. ✓
+	// For *untracked* containers (no marker emitted, e.g. unlabeled choice bodies c-0, c-1) jump()
+	// does NOT advance _ptr, so (_ptr - 6) is 6 bytes BEFORE the container — the hash-entry offset
+	// is actually (_ptr - instructions) == (offset + 6).  Try both.
+	for (uint32_t i = 0; i < _container_hash_size; ++i) {
+		if (_container_hash[i]._offset == offset || _container_hash[i]._offset == offset + 6) {
+			return _container_hash[i]._hash;
+		}
+	}
+
+	// No named-container match: position is mid-content.  Return the innermost tracked container.
+	container_t container_id = find_container_for(offset);
+	return (container_id != ~0U) ? container_data(container_id)._hash : 0;
+}
+
 globals story_impl::new_globals()
 {
 	// create the new globals store

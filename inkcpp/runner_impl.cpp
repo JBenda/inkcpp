@@ -655,13 +655,14 @@ bool runner_impl::can_be_migrated() const
 	if (_entered_knot) {
 		return false;
 	}
-	container_t container_id
-	    = _ptr != nullptr && _ptr >= _story->instructions() + 6
-	        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
-	        : ~0U;
-	hash_t c_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
-	// if we are not at the start or terimanet bu we cannot name the current position it is not
-	// migratble
+	hash_t c_hash = 0;
+	if (_ptr != nullptr && _ptr >= _story->instructions() + 6) {
+		// Use find_migration_hash so that named-but-untracked containers (e.g. unlabeled choice
+		// bodies c-0, c-1 that are in _container_hash but not _container_map) are found correctly.
+		c_hash = _story->find_migration_hash(static_cast<uint32_t>(_ptr - _story->instructions() - 6));
+	}
+	// if we are not at the start or terminal but we cannot name the current position it is not
+	// migratable
 	if (c_hash == 0 && _ptr != nullptr && _ptr != _story->instructions()) {
 		return false;
 	}
@@ -678,12 +679,15 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	// This first field stores the hash of the container at the current position,
 	// used by migration (story_impl::new_runner_from_snapshot) to navigate to the correct location.
 	{
-		container_t container_id
-		    = (_ptr != nullptr && _ptr >= _story->instructions() + 6)
-		        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
-		        : ~0U;
-		hash_t container_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
-		ptr                   = snap_write(ptr, container_hash, should_write);
+		hash_t container_hash = 0;
+		if (_ptr != nullptr && _ptr >= _story->instructions() + 6) {
+			// Use find_migration_hash so that named-but-untracked containers (e.g. unlabeled
+			// choice bodies c-0, c-1) that live in _container_hash but not _container_map are
+			// found via their exact start-offset, not approximated via their tracked parent.
+			container_hash
+			    = _story->find_migration_hash(static_cast<uint32_t>(_ptr - _story->instructions() - 6));
+		}
+		ptr = snap_write(ptr, container_hash, should_write);
 	}
 	ptr    = snap_write(ptr, offset, should_write);
 	offset = _backup != nullptr ? _backup - _story->instructions() : 0;

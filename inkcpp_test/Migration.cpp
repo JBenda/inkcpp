@@ -417,6 +417,16 @@ SCENARIO("Migratibility of the UE_example story", "[migration][intigration]")
 				REQUIRE(thread->getall() == "You startk walking to Mansion.Entrance.\nJust in time you are able to see the door, someone with with a yellow summer dress enters it.\nYou're climbing the 56 steps up to the door; high tides are an annoying thing.\n");
 				REQUIRE(last_target == "Mansion.Entrance");
 			}
+			AND_WHEN("knock in v1")
+			{
+				REQUIRE(thread->getall() == "You startk walking to Mansion.Entrance.\nJust in time you are able to see the door, someone with with a yellow summer dress enters it.\nYou're climbing the 56 steps up to the door; high tides are an annoying thing.\n");
+				REQUIRE(thread->num_choices() == 2);
+				thread->choose(1);
+				THEN("expect normal output")
+				{
+					REQUIRE(thread->getall() == "\"<Red>Ahh</>\", you cry while reaching for the door bell. Saying it was charched would be an understatement.\n");
+				}
+			}
 		}
 		WHEN("go to mansion in v1, but get after choice text in v2")
 		{
@@ -432,8 +442,23 @@ SCENARIO("Migratibility of the UE_example story", "[migration][intigration]")
 			thread2->bind("transition", callback, false);
 			THEN("the new text at the same location should be displayed")
 			{
-				REQUIRE(thread2->getall() == "");
+				REQUIRE(thread2->getall() == "You startk walking to Mansion.Entrance.\nYou're climbing the 56 steps up to the door; high tides are an annoying thing.\n");
 				REQUIRE(last_target == "Mansion.Entrance");
+			}
+		}
+		WHEN("knock in v1, but get after choice text in v2")
+		{
+			thread->getall();
+			thread->choose(1);
+			thread->getall();
+			thread->choose(1);
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			REQUIRE(snap->can_be_migrated());
+			runner thread2 = story_v2->new_runner_from_snapshot(*snap);
+			thread2->bind("transition", callback, false);
+			THEN("the new text at the same location should be displayed")
+			{
+				REQUIRE(thread2->getall() == "\"<Red>Ahh</>\", you cry while reaching for the door bell. Saying it was charched would be an understatement.\n");
 			}
 		}
 	}
