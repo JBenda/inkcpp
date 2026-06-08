@@ -1,10 +1,10 @@
 # date:2025.03.22
 LIST Potions = TalkWithAnimals, Invisibility
 LIST Clues = Skull, Feather
+LIST Knowladge = YellowDress
 VAR Inventory = (Skull, TalkWithAnimals)
 VAR Health = 100
-VAR can_talk_with_animals = false
-VAR is_insible = false
+LIST StatusConditions = CanTalkWithAniamls, IsInvisible
 
 -> Mansion.Car
 
@@ -31,24 +31,24 @@ You startk walking to {to}.
 = TTalkWithAnimals
     A potion which allows the consumer to talk with a variaty of animals. Just make sure
     your serroundings do not think you are crazy.
-    {can_talk_with_animals: Drinking more of it will not increase the effect.}
+    {StatusConditions ? (CanTalkWithAniamls): Drinking more of it will not increase the effect.}
     + [Put it Back]
       You put the potion back into your pouch.
       -> END
-    + {not can_talk_with_animals} [Drink]
+    + {not (StatusConditions ? CanTalkWithAniamls)} [Drink]
+    ~ StatusConditions += CanTalkWithAniamls
     A take a sip. The potion tastes like Hores, it is afull.
-    ~ can_talk_with_animals = true
     -> END
 = TInvisibility
     A potion which allows the consumer to stay unseen for the human eye. Not tested
     wtih other speccies.
-    {is_insible: Drinking more of it will not increase the effect.}
+    {StatusConditions ? (IsInvisible): Drinking more of it will not increase the effect.}
     + [Put it Back] 
       You put the potion back into your pouch.
       -> END
-    + {not is_insible}[Drink]
+    + {not (StatusConditions ? (IsInvisible))}[Drink]
+    ~ StatusConditions += IsInvisible
     You put a small drop on your thoungh. It feels like liking a battery, such a nice feeling
-    ~ is_insible = true
     -> END
 
 === Faint
@@ -63,6 +63,7 @@ No further action for today ...
 You step outside your car. Its a wired feeling beehing here again.
 -> Car_cycle
 = Car_cycle
+# background:Car
 + (look_around)[look around # Type:Idle]
     It is a strange day. Despite it beeing spring, the sky is one massive gray soup. # style:Gray
     -> Car_cycle
@@ -72,10 +73,14 @@ You step outside your car. Its a wired feeling beehing here again.
 
 = Entrance
 # background:Mansion
-{not Mansion.look_around: Just in time you are able to see the door, someone with with a yellow summer dress enters it.}
-You climbing the 56 steps up to the door, high water is a dump thing.
+{not Mansion.look_around: 
+    ~ Knowladge += YellowDress
+    Just in time you are able to see the door, someone with with a yellow summer dress enters it. 
+}
+You're climbing the 56 steps up to the door; high tides are an annoying thing.
 -> Entrance_cycle
 = Entrance_cycle
+# background:Mansion
 + (look_around) [look around # Type:Idle ]
   While watching around you, <>
     {Inventory hasnt Invisibility:
@@ -89,8 +94,12 @@ You climbing the 56 steps up to the door, high water is a dump thing.
   You pick up the bottle and inspect it more. It is labeld "<Blue>Invisible</>, just this one word written with and edding.
   -> Entrance_cycle
 + (knock)[Knock {knock: again?} # {knock: Type:Danger} ]
-    "<Red>Ahh</>", you cry while reaching for the door bell. Saying it was charched would be an understatement.
     ~ Health -= 20
+    "<Red>Ahh</>", you cry while reaching for the door bell. Saying it was charched would be an understatement.
     { Health <= 0: -> Faint}
+    -> Entrance_cycle
++ {knock && Knowladge ? (YellowDress)} [Inspect the Door]
+    You just saw someone enter, how did they do not get shoked?
+    <Gray>It seems the developr run out of time, maybe in the next version we can continue?</>
     -> Entrance_cycle
 -> DONE
