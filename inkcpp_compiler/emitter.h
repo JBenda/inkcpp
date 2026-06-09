@@ -24,7 +24,7 @@ public:
 	virtual ~emitter() {}
 
 	// starts up the emitter (and calls initialize)
-	void start(int ink_version, compilation_results* results = nullptr);
+	void start(uint16_t ink_version, compilation_results* results = nullptr);
 
 	// tells the emitter compilation is done (and calls finalize)
 	void finish(container_t max_container_index);
@@ -107,6 +107,6 @@ protected:
 	container_t   _max_container_index;
 
 	// ink version
-	int _ink_version;
+	uint16_t _ink_version;
 };
 } // namespace ink::compiler::internal

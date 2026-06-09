@@ -48,6 +48,7 @@ public:
 	{
 	}
 
+	/** copy assigment operator. */
 	virtual list_interface& operator=(const list_interface&) = default;
 
 	virtual ~list_interface() {}
@@ -81,6 +82,9 @@ public:
 		}
 
 	public:
+		/** copy constructor. */
+		iterator(const iterator&) = default;
+
 		/** contains flag data */
 		struct Flag {
 			const char* flag_name; ///< name of the flag
@@ -127,9 +131,8 @@ public:
 #	pragma GCC diagnostic ignored "-Wunused-parameter"
 #else
 #	pragma warning(push)
-#	pragma warning(                                                                          \
-	    disable : 4100, justification : "non functional prototypes do not need the argument." \
-	)
+// non functional prototypes do not need the argument.
+#	pragma warning(disable : 4100)
 #endif
 
 	/** checks if a flag is contained in the list */
@@ -203,6 +206,7 @@ protected:
 
 	/** @private */
 	internal::list_table* _list_table;
+	/** @private */
 	int                   _list;
 };
 

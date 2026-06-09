@@ -273,10 +273,32 @@ Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name=""
 End Object
 `
 }
-function construct_ueasset(type, signature) {
+function build_actionbase(type, name, args) {
+	for (const key in args) {
+		args[key] = build_pin(args[key])
+	}
+	return `
+Begin Object Class=/Script/BlueprintGraph.K2Node_AsyncAction Name=""
+   ProxyFactoryFunctionName="${name}"
+   NodePosX=0
+   NodePosY=0
+   CustomProperties Pin (PinName="execute",PinType.PinCategory="exec",)
+   CustomProperties Pin (PinName="then",Direction="EGPD_Output",PinType.PinCategory="exec",)
+   CustomProperties Pin (PinName="Completed",PinFriendlyName=NSLOCTEXT("UObjectDisplayNames", "", "Completed"),Direction="EGPD_Output",PinType.PinCategory="exec",)
+   CustomProperties Pin (PinName="Snapshot",,Direction="EGPD_Output",PinType.PinCategory="struct",)
+   ${args.join("")}
+End Object
+`
+}
+function construct_ueasset(type, signature, doxy_blueprint_args) {
     var builder = undefined;
     switch (type) {
-        case "BlueprintCallable": builder = build_call; break;
+        case "BlueprintCallable":
+        	if (doxy_blueprint_args.length >= 2 && doxy_blueprint_args[0] == "ActionBase") {
+        		builder = build_actionbase;
+      		} else {
+        		builder = build_call;
+      		} break;
         case "BlueprintImplementableEvent": builder = build_event; break;
         case "BlueprintPure": builder = build_pure; break;
         default: throw new Exception(`unknown type: '${type}'`);
@@ -345,15 +367,16 @@ for (const arg of argv) {
         var input = fs.readFileSync(arg).toString();
         var out_str = input;
         var offset = 0;
-        var re = /(DOC_UF|UFUNCTION)\(\s*(?<type>[^,]*),[^]*?\).*\s*\/\*\*[^]*?(?<pos>@blueprint)[^]*?\*\/\s*(?<signature>[^;]*);/gmd;
+        var re = /(DOC_UF|UFUNCTION)\(\s*(?<type>[^,]*),[^]*?\).*\s*\/\*\*[^]*?(?<pos>@blueprint(\{(?<blueprintParams>[^}]+)\})?)[^]*?\*\/\s*(?<signature>[^;]*);/gmd;
         while ((m = re.exec(input)) != null) {
             let type = m.groups.type;
             let signature = m.groups.signature;
             let pos = m.indices.groups.pos;
+            let blueprintParams = (!!m.groups.blueprintParams && m.groups.blueprintParams.split(",").map(item => item.trim())) || [];
             let output = new HTMLElement("body");
             let document = new Document();
             new window.blueprintUE.render.Main(
-                construct_ueasset(type, signature),
+                construct_ueasset(type, signature, blueprintParams),
                 output, {
                     height: "643px"
                 }
@@ -374,4 +397,3 @@ new window.blueprintUE.render.Main(
     }
 ).start();
 console.log(`${prefix}${output.querySelector('.node')}${suffix}`);
-

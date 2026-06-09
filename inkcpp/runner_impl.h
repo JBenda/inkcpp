@@ -132,7 +132,7 @@ public:
 	virtual bool move_to(hash_t path) override;
 
 	// move to path but keep as much state as possible
-	bool migrate_to(hash_t path);
+	bool migrate_to(const loader& loader, hash_t path);
 
 #if defined(INK_ENABLE_STL) || defined(INK_ENABLE_UNREAL)
 	// Gets a single line of output
@@ -215,8 +215,10 @@ private:
 	// Fetch string only tags at Tag/Global level
 	void fetch_tags(ip_t begin);
 
-	// Special code for jumping from the current IP to another
-	void     jump(ip_t, bool record_visits, bool track_knot_visit);
+	// Special code for jumping from the current IP to another.
+	// preserve_turns: if true, existing turns-since counters on visited knots are not reset
+	// (used during snapshot migration to keep the restored turn values intact).
+	void     jump(ip_t, bool record_visits, bool track_knot_visit, bool preserve_turns = false);
 	uint32_t _current_knot_id        = ~0U; // id to detect knot changes from the outside
 	uint32_t _current_knot_id_backup = ~0U;
 	uint32_t _entered_knot   = false; // if we are in the first action after a jump to an snitch/knot

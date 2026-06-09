@@ -9,29 +9,33 @@
 
 #include "UObject/Object.h"
 
+#include "ink/choice.h"
+
 #include "InkChoice.generated.h"
 
-namespace ink::runtime { class choice; }
+
 class UTagList;
 
 /** Representing a Ink Choice in the story flow
  * @ingroup unreal
  */
 UCLASS(BlueprintType)
-class UInkChoice : public UObject
+
+class INKCPP_API UInkChoice : public UObject
 {
 	GENERATED_BODY()
+
 public:
 	UInkChoice();
 
-	UFUNCTION(BlueprintPure, Category="Ink")
+	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** Access context of choice.
 	 * @return text contained in choice
 	 * @blueprint
 	 */
 	FString GetText() const;
 
-	UFUNCTION(BlueprintPure, Category="Ink")
+	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** Get identifier for @ref UInkThread::PickChoice()
 	 * @return id used in @ref UInkThread::PickChoice()
 	 *
@@ -39,7 +43,7 @@ public:
 	 */
 	int GetIndex() const;
 
-	UFUNCTION(BlueprintPure, Category="Ink")
+	UFUNCTION(BlueprintPure, Category = "Ink")
 	/** Tags associated with the choice.
 	 * @return with choice associated tags
 	 *
@@ -49,10 +53,13 @@ public:
 
 protected:
 	friend class UInkThread;
-	/** @private */
-	void Initialize(const ink::runtime::choice*);
+	/** Copies choice data out of the runner. Safe to call after the runner advances.
+	 * @private
+	 */
+	void Initialize(const ink::runtime::choice* c);
 
 private:
-	const ink::runtime::choice* data;
+	FString              Text;
+	int                  Index = -1;
 	TObjectPtr<UTagList> tags;
 };

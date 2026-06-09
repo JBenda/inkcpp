@@ -6,6 +6,8 @@
  */
 #include "InkRuntime.h"
 
+#include "Async/Async.h"
+
 // Game includes
 #include "inkcpp.h"
 #include "InkThread.h"
@@ -19,6 +21,7 @@
 #include "ink/snapshot.h"
 #include "system.h"
 #include "types.h"
+#include <functional>
 
 namespace ink
 {
@@ -36,10 +39,10 @@ AInkRuntime::AInkRuntime()
 
 AInkRuntime::~AInkRuntime()
 {
-	if (mSnapshot) {
-		delete mpSnapshot;
+	if (mStableSnapshot.IsValid()) {
+		mStableSnapshot->SetValue(FInkSnapshot());
+		mStableSnapshot.Reset();
 	}
-	mSnapshot.Reset();
 }
 
 // Called when the game starts or when spawned
@@ -60,13 +63,32 @@ void AInkRuntime::BeginPlay()
 		} else {
 			mpGlobals = mpRuntime->new_globals();
 		}
-		// initialize globals
-		mpRuntime->new_runner(mpGlobals);
 	} else {
 		UE_LOG(InkCpp, Warning, TEXT("No story asset assigned."));
 	}
 
 	Super::BeginPlay();
+}
+
+void AInkRuntime::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	mThreads.Empty();
+	mExclusiveStack.Empty();
+
+	mpGlobals = ink::runtime::globals{};
+
+	if (mpSnapshot) {
+		delete mpSnapshot;
+		mpSnapshot = nullptr;
+	}
+	mSnapshot.Reset();
+
+	if (mpRuntime) {
+		delete mpRuntime;
+		mpRuntime = nullptr;
+	}
 }
 
 // Called every frame
@@ -118,19 +140,33 @@ void AInkRuntime::Tick(float DeltaTime)
 	}
 }
 
-void AInkRuntime::HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params)
+FInkHandle
+    AInkRuntime::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
 {
-	// Look for method and execute with parameters
-	FGlobalTagFunctionMulticastDelegate* function = mGlobalTagFunctions.Find(FName(*Params[0]));
-	if (function != nullptr) {
-		function->Broadcast(Caller, Params);
-	}
+	TSharedPtr<bool> token = MakeShared<bool>(true);
+	mTagFunctionTokens.FindOrAdd(functionName).Add(token);
+	mTagFunctionDelegates.FindOrAdd(functionName).Add(function);
+	mObserverTokens.Add(token);
+	return FInkHandle(token);
 }
 
-void AInkRuntime::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
+void AInkRuntime::HandleTagFunction(UInkThread* Caller, const TArray<FString>& Params)
 {
-	// Register tag function
-	mGlobalTagFunctions.FindOrAdd(functionName).Add(function);
+	FName name(*Params[0]);
+	auto* tokens    = mTagFunctionTokens.Find(name);
+	auto* delegates = mTagFunctionDelegates.Find(name);
+	if (! tokens || ! delegates)
+		return;
+
+	// Fire active delegates, compact dead entries lazily
+	for (int32 i = tokens->Num() - 1; i >= 0; --i) {
+		if ((*tokens)[i].IsValid() && *(*tokens)[i]) {
+			(*delegates)[i].ExecuteIfBound(Caller, Params);
+		} else {
+			tokens->RemoveAtSwap(i);
+			delegates->RemoveAtSwap(i);
+		}
+	}
 }
 
 UInkThread*
@@ -153,19 +189,71 @@ FInkSnapshot AInkRuntime::Snapshot()
 {
 	ink::runtime::snapshot* inkSnapshot = mpGlobals->create_snapshot();
 	FInkSnapshot            snapshot(
-      reinterpret_cast<const char*>(inkSnapshot->get_data()), inkSnapshot->get_data_len()
+      reinterpret_cast<const char*>(inkSnapshot->get_data()), inkSnapshot->get_data_len(),
+      inkSnapshot->can_be_migrated()
   );
 	delete inkSnapshot;
 	return snapshot;
 }
 
+TFuture<FInkSnapshot> AInkRuntime::MigratableSnapshot()
+{
+	// Fast path: already stable
+	FInkSnapshot snapshot = Snapshot();
+
+	if (snapshot.Migratable) {
+		TPromise<FInkSnapshot> Immediate;
+		Immediate.SetValue(snapshot);
+		return Immediate.GetFuture();
+	}
+
+	// Slow path: wait for stability
+	TSharedRef<TPromise<FInkSnapshot>, ESPMode::ThreadSafe> Promise
+	    = MakeShared<TPromise<FInkSnapshot>, ESPMode::ThreadSafe>();
+
+	mStableSnapshot = Promise;
+
+	return Promise->GetFuture();
+}
+
+void AInkRuntime::RunnerEnterStableState(UInkThread* thread)
+{
+	if (mStableSnapshot.IsValid()) {
+		thread->Yield();
+		mYieldedThreadsForSnapshot.Add(thread);
+		FInkSnapshot snapshot = Snapshot();
+		if (snapshot.Migratable) {
+			mStableSnapshot->SetValue(snapshot);
+			mStableSnapshot.Reset();
+			for (auto& _thread : mYieldedThreadsForSnapshot) {
+				_thread->Resume();
+			}
+			mYieldedThreadsForSnapshot.Empty();
+		}
+	}
+}
+
 void AInkRuntime::LoadSnapshot(const FInkSnapshot& snapshot)
 {
+	if (mpSnapshot) {
+		delete mpSnapshot;
+		mpSnapshot = nullptr;
+	}
 	mSnapshot  = snapshot;
 	mpSnapshot = ink::runtime::snapshot::from_binary(
 	    reinterpret_cast<unsigned char*>(mSnapshot->data.GetData()), mSnapshot->data.Num(), false
 	);
 	mpGlobals = mpRuntime->new_globals_from_snapshot(*mpSnapshot);
+	if (! mpGlobals.is_valid()) {
+		UE_LOG(InkCpp, Error, TEXT("Failed to load snapshot."));
+		if (! mpSnapshot->can_be_migrated()) {
+			UE_LOG(
+			    InkCpp, Error,
+			    TEXT("Unable to load snapshot. The story has changed and the snapshot was taken at in "
+			         "instable moment.")
+			);
+		}
+	}
 }
 
 UInkThread*
@@ -173,6 +261,18 @@ UInkThread*
 {
 	if (mpRuntime == nullptr) {
 		UE_LOG(InkCpp, Warning, TEXT("Failed to start existing"));
+		return nullptr;
+	}
+
+	if (! mpGlobals.is_valid()) {
+		if (mSnapshot) {
+			UE_LOG(
+			    InkCpp, Error,
+			    TEXT("Failed to start existing, due to invalid state after failed snapshot loading.")
+			);
+		} else {
+			UE_LOG(InkCpp, Warning, TEXT("Failed to start existing"));
+		}
 		return nullptr;
 	}
 
@@ -199,7 +299,8 @@ UInkThread*
 
 	// If we're not starting immediately, just queue
 	if (! startImmediately ||
-	    // Even if we want to start immediately, don't if there's an exclusive thread and it's not us
+	    // Even if we want to start immediately, don't if there's an exclusive thread and it's not
+	    // us
 	    (mExclusiveStack.Num() > 0 && mExclusiveStack.Top() != thread)) {
 		mThreads.Add(thread);
 		return thread;
@@ -258,32 +359,49 @@ void AInkRuntime::SetGlobalVariable(const FString& name, const FInkVar& value)
 	}
 }
 
-void AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegate& callback)
+FInkHandle
+    AInkRuntime::ObserverVariable(const FString& name, const FVariableCallbackDelegate& callback)
 {
-	mpGlobals->observe(TCHAR_TO_UTF8(*name), [callback]() { callback.Execute(); });
+	TSharedPtr<bool> token = MakeShared<bool>(true);
+	mObserverTokens.Add(token);
+	// Capture token by value; if it is set to false the callback is skipped.
+	// Use TWeakObjectPtr for the bound UObject inside the delegate to avoid
+	// keeping it alive longer than the GC would otherwise.
+	mpGlobals->observe(TCHAR_TO_UTF8(*name), [token, callback]() {
+		if (token.IsValid() && *token) {
+			callback.ExecuteIfBound();
+		}
+	});
+	return FInkHandle(token);
 }
 
-void AInkRuntime::ObserverVariableEvent(
+FInkHandle AInkRuntime::ObserverVariableEvent(
     const FString& name, const FVariableCallbackDelegateNewValue& callback
 )
 {
-	mpGlobals->observe(TCHAR_TO_UTF8(*name), [callback](ink::runtime::value x) {
-		callback.Execute(FInkVar(x));
+	TSharedPtr<bool> token = MakeShared<bool>(true);
+	mObserverTokens.Add(token);
+	mpGlobals->observe(TCHAR_TO_UTF8(*name), [token, callback](ink::runtime::value x) {
+		if (token.IsValid() && *token) {
+			callback.ExecuteIfBound(FInkVar(x));
+		}
 	});
+	return FInkHandle(token);
 }
 
-void AInkRuntime::ObserverVariableChange(
+FInkHandle AInkRuntime::ObserverVariableChange(
     const FString& name, const FVariableCallbackDelegateNewOldValue& callback
 )
 {
+	TSharedPtr<bool> token = MakeShared<bool>(true);
+	mObserverTokens.Add(token);
 	mpGlobals->observe(
 	    TCHAR_TO_UTF8(*name),
-	    [callback](ink::runtime::value x, ink::optional<ink::runtime::value> y) {
-		    if (y.has_value()) {
-			    callback.Execute(FInkVar(x), FInkVar(y.value()));
-		    } else {
-			    callback.Execute(FInkVar(x), FInkVar());
+	    [token, callback](ink::runtime::value x, ink::optional<ink::runtime::value> y) {
+		    if (token.IsValid() && *token) {
+			    callback.ExecuteIfBound(FInkVar(x), y.has_value() ? FInkVar(y.value()) : FInkVar());
 		    }
 	    }
 	);
+	return FInkHandle(token);
 }

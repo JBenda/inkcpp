@@ -10,14 +10,16 @@
 
 using namespace ink::runtime;
 
-SCENARIO("run a story with external function and fallback function", "[external function]")
+SCENARIO(
+    "run a story with external function and fallback function", "[external-functions][runtime]"
+)
 {
-	GIVEN("story with two external functions, one with fallback")
+	GIVEN("a story with two external functions, one with fallback")
 	{
 		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "FallBack.bin")};
 		runner                 thread = ink->new_runner();
 
-		WHEN("bind both external functions")
+		WHEN("both external functions are bound")
 		{
 			int  cnt_sqrt = 0;
 			auto fn_sqrt  = [&cnt_sqrt](double x) -> double {
@@ -32,10 +34,10 @@ SCENARIO("run a story with external function and fallback function", "[external 
 
 			thread->bind("sqrt", fn_sqrt);
 			thread->bind("greeting", fn_greeting);
-
 			std::string out;
 			REQUIRE_NOTHROW(out = thread->getall());
-			THEN("Both function should be called the correct amount of times")
+
+			THEN("the bound greeting is used and both functions are called the correct number of times")
 			{
 				REQUIRE(
 				    out
@@ -46,7 +48,8 @@ SCENARIO("run a story with external function and fallback function", "[external 
 				REQUIRE(cnt_greeting == 1);
 			}
 		}
-		WHEN("only bind function without fallback")
+
+		WHEN("only the function without a fallback is bound")
 		{
 			int  cnt_sqrt = 0;
 			auto fn_sqrt  = [&cnt_sqrt](double x) -> double {
@@ -55,11 +58,10 @@ SCENARIO("run a story with external function and fallback function", "[external 
 			};
 
 			thread->bind("sqrt", fn_sqrt);
-
 			std::string out;
 			REQUIRE_NOTHROW(out = thread->getall());
-			;
-			THEN("Sqrt should be falled twice, and uses default greeting")
+
+			THEN("the fallback greeting is used and sqrt is called the correct number of times")
 			{
 				REQUIRE(
 				    out
@@ -68,10 +70,14 @@ SCENARIO("run a story with external function and fallback function", "[external 
 				REQUIRE(cnt_sqrt == 2);
 			}
 		}
-		WHEN("bind no function")
+
+		WHEN("no functions are bound")
 		{
-			std::string out;
-			REQUIRE_THROWS_AS(out = thread->getall(), ink::ink_exception);
+			THEN("running the story throws an exception for the missing non-fallback function")
+			{
+				std::string out;
+				REQUIRE_THROWS_AS(out = thread->getall(), ink::ink_exception);
+			}
 		}
 	}
 }

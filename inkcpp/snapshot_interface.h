@@ -18,6 +18,7 @@ class managed_array;
 class snap_tag;
 class string_table;
 class value;
+class list_table;
 
 class snapshot_interface
 {
@@ -70,14 +71,25 @@ public:
 		const char*                          story_string_table;
 		const bool                           migratable  = false;
 		const snap_tag*                      runner_tags = nullptr;
+		managed_array<int, true, 5, true>&   list_old_new_map;
+		managed_array<int, true, 5, true>&   list_list_matches;
+		managed_array<int, true, 5, true>&   list_value_matches;
+		const list_table*&                   old_ref_table;
 
 		loader(
 		    managed_array<const char*, true, 5>& string_table, const char* story_string_table,
-		    bool migratable
+		    managed_array<int, true, 5, true>& list_old_new_map,
+		    managed_array<int, true, 5, true>& list_list_matches,
+		    managed_array<int, true, 5, true>& list_value_matches, bool migratable,
+		    const list_table*& old_ref_table
 		)
 		    : string_table{string_table}
 		    , story_string_table{story_string_table}
 		    , migratable(migratable)
+		    , list_old_new_map(list_old_new_map)
+		    , list_list_matches(list_list_matches)
+		    , list_value_matches(list_value_matches)
+		    , old_ref_table(old_ref_table)
 		{
 		}
 
@@ -90,9 +102,8 @@ public:
 #	pragma GCC diagnostic ignored "-Wunused-parameter"
 #else
 #	pragma warning(push)
-#	pragma warning(                                                                          \
-	    disable : 4100, justification : "non functional prototypes do not need the argument." \
-	)
+// non functional prototypes do not need the argument.
+#	pragma warning(disable : 4100)
 #endif
 
 	size_t snap(unsigned char* data, snapper&) const

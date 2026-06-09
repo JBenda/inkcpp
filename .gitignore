@@ -20,6 +20,11 @@ build/*
 bin/
 Bin/
 
+# python build artifacts
+dist/
+__pycache__/
+inkcpp_py.egg-info/
+
 # Visual Studio
 /out/build/
 .vs

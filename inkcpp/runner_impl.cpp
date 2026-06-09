@@ -13,6 +13,7 @@
 #include "snapshot_impl.h"
 #include "story_impl.h"
 #include "system.h"
+#include "types.h"
 #include "value.h"
 
 #ifdef INK_ENABLE_STL
@@ -169,8 +170,7 @@ void runner_impl::set_var<runner_impl::Scope::NONE>(
 template<typename T>
 inline T runner_impl::read(optional<ip_t> pos)
 {
-	using header = ink::internal::header;
-	ip_t ptr     = pos.value_or(_ptr);
+	ip_t ptr = pos.value_or(_ptr);
 	// Sanity
 	inkAssert(ptr + sizeof(T) <= _story->end(), "Unexpected EOF in Ink execution");
 
@@ -312,12 +312,14 @@ void runner_impl::fetch_tags(ip_t begin)
 			iter += 6;
 			continue;
 		}
-		add_tag(read<const char*>(iter + 6 + 2), tags_level::UNKNOWN);
+		// store tags in dynamic data, too keep migratable stories on the table
+		// TODO: maybe let tags live on the static data again.
+		add_tag(_globals->strings().duplicate(read<const char*>(iter + 6 + 2)), tags_level::UNKNOWN);
 		iter += 18;
 	}
 }
 
-void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
+void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit, bool preserve_turns)
 {
 	// Optimization: if we are _is_falling, then we can
 	//  _should be_ able to safely assume that there is nothing to do here. A falling
@@ -340,11 +342,11 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	_ptr = dest;
 
 	// Find the container at or before dest, which will become the top of the post-jump stack.
-	const uint32_t    dest_offset = dest - _story->instructions();
+	const uint32_t    dest_offset = static_cast<uint32_t>(dest - _story->instructions());
 	const container_t dest_id     = _story->find_container_for(dest_offset);
 
 	// If there's no destination container, stop.
-	if (dest_id == ~0)
+	if (dest_id == ~0U)
 		return;
 
 	// Are we entering the new container at its start?
@@ -353,7 +355,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 	if (dest_offset == dest_container._start_offset) {
 		// Record direct jump to non-knot if requested. (Knots handled below.)
 		if (record_visits && ! dest_container.knot()) {
-			_globals->visit(dest_id);
+			_globals->visit(dest_id, preserve_turns);
 		}
 
 		// Consume instruction so we don't process it again during normal flow. (We need to do this here
@@ -386,7 +388,7 @@ void runner_impl::jump(ip_t dest, bool record_visits, bool track_knot_visit)
 			// Ink has a rule about incrementing visit counts when you jump to the top of a knot, which
 			// seems to need to override inkcpp's knot_visit flag.
 			if (track_knot_visit || container._start_offset == dest_offset) {
-				_globals->visit(id);
+				_globals->visit(id, preserve_turns);
 			}
 
 			// If tracking, update with the first knot we encounter, which is the one closest to the top
@@ -484,14 +486,12 @@ runner_impl::runner_impl(const story_impl* data, globals global)
     , _evaluation_mode{false}
     , _choices()
     , _tags_begin(0, ~0)
-    , _container(~0)
-#ifdef INK_ENABLE_CSTD
-    , _rng(static_cast<uint32_t>(time(NULL)))
-#else
-    , _rng()
-#endif
+    , _container(~0U)
 {
 
+#ifdef INK_ENABLE_CSTD
+	_rng.srand(static_cast<uint32_t>(time(NULL)));
+#endif
 
 	// register with globals
 	_globals->add_runner(this);
@@ -591,10 +591,10 @@ void runner_impl::advance_line()
 	if (_saved) {
 		restore();
 	}
-	_globals->gc();
 	if (_output.saved()) {
 		_output.restore();
 	}
+	_globals->gc();
 }
 
 bool runner_impl::can_continue() const { return _ptr != nullptr && ! has_choices(); }
@@ -657,12 +657,15 @@ bool runner_impl::can_be_migrated() const
 	if (_entered_knot) {
 		return false;
 	}
-	container_t container_id
-	    = _ptr != nullptr && _ptr >= _story->instructions() + 6
-	        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
-	        : ~0U;
-	hash_t c_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
-	if (c_hash == 0) {
+	hash_t c_hash = 0;
+	if (_ptr != nullptr && _ptr >= _story->instructions() + 6) {
+		// Use find_migration_hash so that named-but-untracked containers (e.g. unlabeled choice
+		// bodies c-0, c-1 that are in _container_hash but not _container_map) are found correctly.
+		c_hash = _story->find_migration_hash(static_cast<uint32_t>(_ptr - _story->instructions() - 6));
+	}
+	// if we are not at the start or terminal but we cannot name the current position it is not
+	// migratable
+	if (c_hash == 0 && _ptr != nullptr && _ptr != _story->instructions()) {
 		return false;
 	}
 	return _output.can_be_migrated() && _stack.can_be_migrated() && _ref_stack.can_be_migrated()
@@ -678,12 +681,15 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	// This first field stores the hash of the container at the current position,
 	// used by migration (story_impl::new_runner_from_snapshot) to navigate to the correct location.
 	{
-		container_t container_id
-		    = (_ptr != nullptr && _ptr >= _story->instructions() + 6)
-		        ? _story->find_container_for(static_cast<uint32_t>(_ptr - _story->instructions() - 6))
-		        : ~0U;
-		hash_t container_hash = (container_id != ~0U) ? _story->container_data(container_id)._hash : 0;
-		ptr                   = snap_write(ptr, container_hash, should_write);
+		hash_t container_hash = 0;
+		if (_ptr != nullptr && _ptr >= _story->instructions() + 6) {
+			// Use find_migration_hash so that named-but-untracked containers (e.g. unlabeled
+			// choice bodies c-0, c-1) that live in _container_hash but not _container_map are
+			// found via their exact start-offset, not approximated via their tracked parent.
+			container_hash
+			    = _story->find_migration_hash(static_cast<uint32_t>(_ptr - _story->instructions() - 6));
+		}
+		ptr = snap_write(ptr, container_hash, should_write);
 	}
 	ptr    = snap_write(ptr, offset, should_write);
 	offset = _backup != nullptr ? _backup - _story->instructions() : 0;
@@ -814,7 +820,7 @@ bool runner_impl::move_to(hash_t path)
 	return true;
 }
 
-bool runner_impl::migrate_to(hash_t path)
+bool runner_impl::migrate_to(const loader& loader, hash_t path)
 {
 	ip_t destination = _story->find_offset_for(path);
 	if (destination == nullptr) {
@@ -849,10 +855,20 @@ bool runner_impl::migrate_to(hash_t path)
 			}
 		}
 	}
-	// rebuild container stack to display new offsets
+	// rebuild container stack using new story offsets.
+	// preserve_turns=true keeps the turns-since counters restored from the snapshot intact;
+	// without this the visit() call inside jump() would reset them to 0.
 	_container.clear();
 	_ptr = nullptr;
-	jump(destination, false, true);
+	jump(destination, false, true, true);
+
+	if (loader.old_ref_table
+	    && ! _globals->lists().migrate_variables(
+	        loader.list_old_new_map, loader.list_list_matches, loader.list_value_matches,
+	        *loader.old_ref_table, _stack
+	    )) {
+		return false;
+	}
 	return true;
 }
 
@@ -981,9 +997,8 @@ bool runner_impl::line_step()
 void runner_impl::step()
 {
 #ifdef INK_ENABLE_EXCEPTIONS
-	try
+	try {
 #endif
-	{
 		inkAssert(_ptr != nullptr, "Can not step! Do not have a valid pointer");
 
 		// Load current command
@@ -1638,6 +1653,7 @@ void runner_impl::step()
 					)));
 				} break;
 				case Command::TAG: {
+					inkFail("Command::TAG is Deprecated!");
 					read<uint32_t>();
 					add_tag(read<const char*>(), tags_level::UNKNOWN);
 				} break;
@@ -1650,9 +1666,8 @@ void runner_impl::step()
 			*_debug_stream << std::endl;
 		}
 #endif
-	}
 #ifdef INK_ENABLE_EXCEPTIONS
-	catch (...) {
+	} catch (...) {
 		// Reset our whole state as it's probably corrupt
 		reset();
 		throw;

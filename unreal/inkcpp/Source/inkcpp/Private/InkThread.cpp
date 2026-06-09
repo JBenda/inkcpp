@@ -11,9 +11,12 @@
 #include "TagList.h"
 #include "InkChoice.h"
 #include "ink/runner.h"
+#include "InkExecutionScope.h"
 
 // Unreal includes
 #include "Internationalization/Regex.h"
+
+thread_local UInkThread* GExecutingInkThread = nullptr;
 
 UInkThread::UInkThread()
     : mbHasRun(false)
@@ -25,6 +28,23 @@ UInkThread::UInkThread()
 }
 
 UInkThread::~UInkThread() {}
+
+void UInkThread::RegisterLiveList(UInkList* list)
+{
+	if (list) {
+		mLiveLists.Add(list);
+	}
+}
+
+void UInkThread::InvalidateLiveLists()
+{
+	for (auto& weak : mLiveLists) {
+		if (weak.IsValid()) {
+			weak->Invalidate();
+		}
+	}
+	mLiveLists.Reset();
+}
 
 void UInkThread::Yield() { mnYieldCounter++; }
 
@@ -54,24 +74,81 @@ const UTagList* UInkThread::GetGlobalTags()
 
 void UInkThread::Resume() { mnYieldCounter--; }
 
-void UInkThread::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
+FInkHandle UInkThread::RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function)
 {
-	// Register tag function
-	mTagFunctions.FindOrAdd(functionName).Add(function);
+	TSharedPtr<bool> token = MakeShared<bool>(true);
+	mTagFunctionTokens.FindOrAdd(functionName).Add(token);
+	mTagFunctionDelegates.FindOrAdd(functionName).Add(function);
+	return FInkHandle(token);
 }
 
-void UInkThread::RegisterExternalFunction(
+FInkHandle UInkThread::RegisterExternalFunction(
     const FString& functionName, const FExternalFunctionDelegate& function, bool lookaheadSafe
 )
 {
-	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_UTF8(*functionName)), function, lookaheadSafe);
+	TSharedPtr<bool> token    = MakeShared<bool>(true);
+	uint32           nameHash = ink::hash_string(TCHAR_TO_UTF8(*functionName));
+	// If a previous binding exists for this name, invalidate it
+	if (auto* prev = mExternalFunctionTokens.Find(nameHash)) {
+		if (prev->IsValid()) {
+			**prev = false;
+		}
+	}
+	mExternalFunctionTokens.Add(nameHash, token);
+	// Bind a wrapper lambda that checks the token before forwarding
+	mpRunner->bind(
+	    nameHash,
+	    [token, function](size_t argc, const ink::runtime::value* argv) -> ink::runtime::value {
+		    if (token.IsValid() && *token) {
+			    TArray<FInkVar> args;
+			    for (size_t i = 0; i < argc; ++i) {
+				    args.Add(FInkVar(argv[i]));
+			    }
+			    return function.Execute(args).to_value();
+		    }
+		    return ink::runtime::value{};
+	    },
+	    lookaheadSafe
+	);
+	return FInkHandle(token);
 }
 
-void UInkThread::RegisterExternalEvent(
+FInkHandle UInkThread::RegisterExternalEvent(
     const FString& functionName, const FExternalFunctionVoidDelegate& function, bool lookaheadSafe
 )
 {
-	mpRunner->bind_delegate(ink::hash_string(TCHAR_TO_UTF8(*functionName)), function, lookaheadSafe);
+	TSharedPtr<bool> token    = MakeShared<bool>(true);
+	uint32           nameHash = ink::hash_string(TCHAR_TO_UTF8(*functionName));
+	if (auto* prev = mExternalFunctionTokens.Find(nameHash)) {
+		if (prev->IsValid()) {
+			**prev = false;
+		}
+	}
+	mExternalFunctionTokens.Add(nameHash, token);
+	mpRunner->bind(
+	    nameHash,
+	    [token, function](size_t argc, const ink::runtime::value* argv) {
+		    if (token.IsValid() && *token) {
+			    TArray<FInkVar> args;
+			    for (size_t i = 0; i < argc; ++i) {
+				    args.Add(FInkVar(argv[i]));
+			    }
+			    function.ExecuteIfBound(args);
+		    }
+	    },
+	    lookaheadSafe
+	);
+	return FInkHandle(token);
+}
+
+void UInkThread::ClearExternalFunctions()
+{
+	for (auto& pair : mExternalFunctionTokens) {
+		if (pair.Value.IsValid()) {
+			*pair.Value = false;
+		}
+	}
+	mExternalFunctionTokens.Empty();
 }
 
 void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::runner thread)
@@ -87,7 +164,10 @@ void UInkThread::Initialize(FString path, AInkRuntime* runtime, ink::runtime::ru
 	mpTags        = NewObject<UTagList>();
 	mkTags        = NewObject<UTagList>();
 	mgTags        = NewObject<UTagList>();
-	mTagFunctions.Reset();
+	mTagFunctionTokens.Reset();
+	mTagFunctionDelegates.Reset();
+	// Note: external function tokens are intentionally NOT cleared here.
+	// Call ClearExternalFunctions() explicitly before reuse via StartExisting().
 	mCurrentChoices.Reset();
 	mnChoiceToChoose = -1;
 	mbHasRun         = false;
@@ -127,7 +207,11 @@ bool UInkThread::ExecuteInternal()
 		// Handle pending choice
 		if (mnChoiceToChoose != -1) {
 			if (ensure(mpRunner->num_choices() > 0)) {
+				// Invalidate all UInkList objects created from runner memory
+				// before the runner state changes.
+				InvalidateLiveLists();
 				mpRunner->choose(mnChoiceToChoose);
+				mpRuntime->RunnerEnterStableState(this);
 			}
 			mnChoiceToChoose = -1;
 			mCurrentChoices.Empty();
@@ -223,10 +307,20 @@ bool UInkThread::ExecuteInternal()
 
 void UInkThread::ExecuteTagMethod(const TArray<FString>& Params)
 {
-	// Look for method and execute with parameters
-	FTagFunctionMulticastDelegate* function = mTagFunctions.Find(FName(*Params[0]));
-	if (function != nullptr) {
-		function->Broadcast(this, Params);
+	FName name(*Params[0]);
+
+	// Fire thread-local tag functions
+	auto* tokens    = mTagFunctionTokens.Find(name);
+	auto* delegates = mTagFunctionDelegates.Find(name);
+	if (tokens && delegates) {
+		for (int32 i = tokens->Num() - 1; i >= 0; --i) {
+			if ((*tokens)[i].IsValid() && *(*tokens)[i]) {
+				(*delegates)[i].ExecuteIfBound(this, Params);
+			} else {
+				tokens->RemoveAtSwap(i);
+				delegates->RemoveAtSwap(i);
+			}
+		}
 	}
 
 	// Forward to runtime
@@ -235,17 +329,17 @@ void UInkThread::ExecuteTagMethod(const TArray<FString>& Params)
 
 bool UInkThread::Execute()
 {
-	// Execute thread
+	// RAII guard: sets GExecutingInkThread for this scope so that FInkVar
+	// constructors can register newly created UInkList wrappers with this
+	// thread. Automatically cleared on return (including via exception).
+	FInkExecutionScope scope(this);
+
 	bool finished = ExecuteInternal();
 
-	// If we've finished, run callback
 	if (finished) {
-		// Allow outsiders to subscribe
-		// TODO: OnThreadShutdown.Broadcast();
 		OnShutdown();
 	}
 
-	// Return result
 	return finished;
 }
 

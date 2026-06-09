@@ -4,7 +4,7 @@
 
 using ink::runtime::internal::restorable;
 
-SCENARIO("a restorable collection can operate like a stack", "[restorable]")
+SCENARIO("a restorable collection can operate like a stack", "[restorable][unit][internals]")
 {
 	GIVEN("an empty restorable collection")
 	{
@@ -120,7 +120,10 @@ void ForgetAndVerifyStack(
 	}
 }
 
-SCENARIO("a collection can be restored no matter how many times you push or pop", "[restorable]")
+SCENARIO(
+    "a collection can be restored no matter how many times you push or pop",
+    "[restorable][unit][internals]"
+)
 {
 	// Create the collection
 	constexpr size_t size = 128;
@@ -186,7 +189,7 @@ SCENARIO("a collection can be restored no matter how many times you push or pop"
 	}
 }
 
-SCENARIO("saving does not disrupt iteration", "[restorable]")
+SCENARIO("saving does not disrupt iteration", "[restorable][unit][internals]")
 {
 	// Create the collection
 	constexpr size_t size = 128;
@@ -271,7 +274,7 @@ SCENARIO("saving does not disrupt iteration", "[restorable]")
 	}
 }
 
-SCENARIO("save points can be forgotten", "[restorable]")
+SCENARIO("save points can be forgotten", "[restorable][unit][internals]")
 {
 	// Create the collection
 	constexpr size_t size = 128;

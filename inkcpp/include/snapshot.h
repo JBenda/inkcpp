@@ -11,7 +11,7 @@
 namespace ink::runtime
 {
 /**
- * Container for an InkCPP runtime snapshot.
+ * Container for an InkCPP runtime snapshot, which can be @ref snapshot_migration "migrated".
  * Each snapshot contains a @ref ink::runtime::globals_interface "globals store"
  * and all associated @ref ink::runtime::runner_interface "runners/threads"
  * For convinience there exist @ref ink::runtime::globals_interface::create_snapshot() and
@@ -23,7 +23,10 @@ namespace ink::runtime
  * ink::runtime::snapshot::can_be_migrated() "@c can_be_migrated()".
  * A not migrated snapshot contiouse at exactly the place you are currently at.
  *
- * **A migrated one will "snap bag" to the last knot.**
+ * @section snapshot_migration Migration
+ *
+ * Migrating a snapshot will "snap bag" to the last Knot, there for it is best practive to do this
+ * only directly after choosing a choice.
  *
  * + Global variables which (name) still exist will be transfared.
  *   + New ones will be initelized with its default value
@@ -73,7 +76,8 @@ public:
 	virtual size_t               get_data_len() const    = 0;
 	/** number of runners which are stored inside this snapshot */
 	virtual size_t               num_runners() const     = 0;
-	/** if this snapshot can be migrated, if the story file changes (slightly). */
+	/** if this snapshot can be migrated, if the story file changes (slightly), for details see @ref
+	 * snapshot_migration. */
 	virtual bool                 can_be_migrated() const = 0;
 
 #ifdef INK_ENABLE_STL

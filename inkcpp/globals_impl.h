@@ -30,8 +30,6 @@ class globals_impl final
 {
 	friend snapshot_impl;
 
-	void init_static_list_flags();
-
 public:
 	size_t               snap(unsigned char* data, const snapper&) const;
 	const unsigned char* snap_load(const unsigned char* data, const loader&);
@@ -45,7 +43,9 @@ public:
 	 * @param[in] list_metadata old list metadata to migrate list
 	 * the globals stored inside.
 	 */
-	bool                 migrate_new_globals(globals_impl& new_globals, const char* list_metadata);
+	bool                 migrate_new_globals(
+	                    const loader& loader, globals_impl& new_globals, const char* list_metadata
+	                );
 	// Initializes a new global store from the given story
 	globals_impl(const story_impl*);
 
@@ -64,8 +64,10 @@ protected:
 	void internal_observe(hash_t name, internal::callback_base* callback) override;
 
 public:
-	// Records a visit to a container
-	void visit(uint32_t container_id);
+	// Records a visit to a container.
+	// If preserve_turns is true the existing turns-since counter is kept intact
+	// (used during snapshot migration to avoid clobbering the restored value).
+	void visit(uint32_t container_id, bool preserve_turns = false);
 
 	// Checks the number of visits to a container
 	uint32_t visits(uint32_t container_id) const;

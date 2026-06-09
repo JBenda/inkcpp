@@ -5,6 +5,7 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "list_table.h"
+#include "array.h"
 #include "config.h"
 #include "hungarian_solver.h"
 #include "system.h"
@@ -13,6 +14,7 @@
 #include "random.h"
 #include "string_utils.h"
 #include "list_impl.h"
+#include "stack.h"
 #include <limits>
 
 #ifdef INK_ENABLE_STL
@@ -32,6 +34,13 @@ void list_table::copy_lists(const data_t* src, data_t* dst)
 	if (rest) {
 		dst[len] |= src[len] & (~static_cast<data_t>(0) << (bits_per_data - rest));
 	}
+}
+
+inline list_flag read_list_flag(const char*& ptr)
+{
+	list_flag result = *reinterpret_cast<const list_flag*>(ptr);
+	ptr += sizeof(list_flag);
+	return result;
 }
 
 list_table::list_table(const char* data)
@@ -71,6 +80,10 @@ list_table::list list_table::create()
 	for (size_t i = 0; i < _entry_state.size(); ++i) {
 		if (_entry_state[i] == state::empty) {
 			_entry_state[i] = state::used;
+			memset(
+			    _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(i), 0,
+			    _entrySize
+			);
 			return list(i);
 		}
 	}
@@ -89,15 +102,23 @@ list_table::list list_table::create_at(size_t idx)
 	if (idx < _entry_state.size()) {
 		if (_entry_state[idx] == state::empty) {
 			_entry_state[idx] = state::used;
+			memset(
+			    _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(idx), 0,
+			    _entrySize
+			);
 			return list(idx);
 		}
 		return list(-1);
 	}
-	while (_entry_state.size() <= idx) {
+	while (_entry_state.size() < idx) {
 		_entry_state.push() = state::empty;
 		for (int i = 0; i < _entrySize; ++i) {
 			_data.push() = 0;
 		}
+	}
+	_entry_state.push() = state::used;
+	for (int i = 0; i < _entrySize; ++i) {
+		_data.push() = 0;
 	}
 	return list(idx);
 }
@@ -905,7 +926,7 @@ float d_contains(const size_t lh[2], const size_t rh[2], const int* matches)
 		}
 	}
 	n_union -= n_intersection;
-	return static_cast<float>(n_intersection) / n_union;
+	return 1.f - static_cast<float>(n_intersection) / n_union;
 }
 
 /** Distance function for string labels.
@@ -1013,14 +1034,20 @@ float* cost_matrix(const MatchListValues& lh, const MatchListValues& rh, float d
 	return matrix;
 }
 
-bool list_table::migrate(const char* old_list_metadata)
+bool list_table::create_match_lut(
+    const char*                                                old_list_metadata,
+    ink::runtime::internal::managed_array<int, true, 5, true>& list_list_matches,
+    ink::runtime::internal::managed_array<int, true, 5, true>& list_value_matches,
+    const list_table*&                                         old_ref_table
+)
 {
-	list_table old_ref_table(old_list_metadata);
+	list_table* ref_table = new list_table(old_list_metadata);
+	old_ref_table         = ref_table;
 	for (const auto& x : _data) {
-		old_ref_table._data.push() = x;
+		ref_table->_data.push() = x;
 	}
 	for (const auto& x : _entry_state) {
-		old_ref_table._entry_state.push() = x;
+		ref_table->_entry_state.push() = x;
 	}
 	_data.clear();
 	_entry_state.clear();
@@ -1044,87 +1071,136 @@ bool list_table::migrate(const char* old_list_metadata)
 	constexpr float LOW_CONFIDANCE_DROP_PANELTY  = 0.6f;
 	float*          value_matrix                 = cost_matrix(
       MatchListValues{
-          old_ref_table._flag_names.data(), old_ref_table._flag_values.data(),
-          old_ref_table.numFlags()
+          ref_table->_flag_names.data(), ref_table->_flag_values.data(), ref_table->numFlags()
       },
       MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
       LOW_CONFIDANCE_DROP_PANELTY
   );
-	const int n_flags       = std::max(numFlags(), old_ref_table.numFlags());
-	int*      value_matches = new int[n_flags];
-	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, HIGH_CONFIDANCE_DROP_PANELTY);
+	const int n_flags = std::max(numFlags(), ref_table->numFlags());
+	list_value_matches.resize(n_flags);
+	algorithms::hungarian_solver(
+	    value_matrix, list_value_matches.data(), n_flags, HIGH_CONFIDANCE_DROP_PANELTY
+	);
 
 	// list matches
 	float* list_matrix = cost_matrix(
-	    MatchList{
-	        old_ref_table._list_end.data(), old_ref_table._list_names.data(), old_ref_table.numLists()
-	    },
-	    MatchList{_list_end.data(), _list_names.data(), numLists()}, value_matches,
+	    MatchList{ref_table->_list_end.data(), ref_table->_list_names.data(), ref_table->numLists()},
+	    MatchList{_list_end.data(), _list_names.data(), numLists()}, list_value_matches.data(),
 	    LOW_CONFIDANCE_DROP_PANELTY
 	);
-	const int n_lists      = std::max(numLists(), old_ref_table.numLists());
-	int*      list_matches = new int[n_lists];
-	algorithms::hungarian_solver(list_matrix, list_matches, n_lists, LOW_CONFIDANCE_DROP_PANELTY);
+	const int n_lists = std::max(numLists(), ref_table->numLists());
+	list_list_matches.resize(n_lists);
+	algorithms::hungarian_solver(
+	    list_matrix, list_list_matches.data(), n_lists, LOW_CONFIDANCE_DROP_PANELTY
+	);
 
 	// low confidence list_value matches
-	algorithms::hungarian_solver(value_matrix, value_matches, n_flags, LOW_CONFIDANCE_DROP_PANELTY);
-
-	for (size_t idx = 0; idx < old_ref_table._entry_state.size(); ++idx) {
-		// migrate
-		list new_list{-1};
-		switch (old_ref_table._entry_state[idx]) {
-			case state::permanent: new_list = create_permament_at(idx); break;
-			case state::used: new_list = create_at(idx); break;
-			default: continue;
-		}
-		inkAssert(new_list.lid >= 0, "Failed to create new list entry for migration.");
-		inkAssert(
-		    static_cast<size_t>(new_list.lid) == idx,
-		    "At position list creation failed with different valid idx."
-		);
-		const data_t* entry         = old_ref_table.getPtr(idx);
-		data_t*       new_entry     = getPtr(idx);
-		bool          migrated      = false;
-		bool          is_empty_list = true;
-		for (size_t i = 0; i < old_ref_table.numLists(); ++i) {
-			if (old_ref_table.hasList(entry, i)) {
-				bool hit      = false;
-				is_empty_list = false;
-				for (size_t j = old_ref_table.listBegin(i); j < old_ref_table._list_end[i]; ++j) {
-					if (old_ref_table.hasFlag(entry, j) && old_ref_table._flag_names[j]) {
-						if (value_matches[j] != -1) {
-							hit      = true;
-							migrated = true;
-							size_t k;
-							for (k = 0; _list_end[k] < static_cast<size_t>(value_matches[j]); ++k) {}
-							setList(new_entry, k);
-							setFlag(new_entry, value_matches[j]);
-						}
-					}
-				}
-				// keep list if list has match but all values where dropped
-				if (! hit && list_matches[i] != -1) {
-					setList(new_entry, list_matches[i]);
-					migrated = true;
-				}
-			}
-		}
-		// drop list
-		if (! is_empty_list && ! migrated) {
-			// FIXME: remove list ?
-			// _entry_state [idx] = state::empty;
-			return false;
-		}
-		// FIXME: use Assert instead?
-		// inkAssert(migrated, "Migrating list @%d would lead to an empty list", idx);
-	}
+	algorithms::hungarian_solver(
+	    value_matrix, list_value_matches.data(), n_flags, LOW_CONFIDANCE_DROP_PANELTY
+	);
 
 
-	delete[] list_matches;
-	delete[] value_matches;
 	delete[] value_matrix;
 	delete[] list_matrix;
 	return true;
+}
+
+bool list_table::migrate_variables(
+    ink::runtime::internal::managed_array<int, true, 5, true>&       list_old_new_map,
+    const ink::runtime::internal::managed_array<int, true, 5, true>& list_list_matches,
+    const ink::runtime::internal::managed_array<int, true, 5, true>& list_value_matches,
+    const list_table& old_ref_table, basic_stack& variables
+)
+{
+	// TODO: optimize: map equal permanent values (old list x -> new list x)
+	bool migration_succeeded = true;
+	variables.for_each(
+	    [&](entry& value) {
+		    list   old_list = value.data.get<value_type::list>();
+		    size_t idx      = old_list.lid;
+		    while (list_old_new_map.size() <= idx) {
+			    list_old_new_map.push() = -1;
+		    }
+		    if (list_old_new_map[idx] != -1) {
+			    value.data.set<value_type::list>(list(list_old_new_map[idx]));
+			    return;
+		    }
+		    // migrate
+		    list new_list{-1};
+		    switch (old_ref_table._entry_state[idx]) {
+			    case state::permanent: new_list = create_permament(); break;
+			    case state::used: new_list = create(); break;
+			    default: return;
+		    }
+		    list_old_new_map[idx] = new_list.lid;
+		    value.data.set<value_type::list>(new_list);
+
+		    inkAssert(new_list.lid >= 0, "Failed to create new list entry for migration.");
+		    const data_t* entry         = old_ref_table.getPtr(idx);
+		    data_t*       new_entry     = getPtr(new_list.lid);
+		    bool          migrated      = false;
+		    bool          is_empty_list = true;
+		    for (size_t i = 0; i < old_ref_table.numLists(); ++i) {
+			    if (old_ref_table.hasList(entry, i)) {
+				    bool hit      = false;
+				    is_empty_list = false;
+				    for (size_t j = old_ref_table.listBegin(i); j < old_ref_table._list_end[i]; ++j) {
+					    if (old_ref_table.hasFlag(entry, j) && old_ref_table._flag_names[j]) {
+						    migrated = false;
+						    if (list_value_matches[j] != -1) {
+							    hit      = true;
+							    migrated = true;
+							    size_t k;
+							    for (k = 0; _list_end[k] <= static_cast<size_t>(list_value_matches[j]); ++k) {}
+							    setList(new_entry, k);
+							    setFlag(new_entry, list_value_matches[j]);
+						    }
+					    }
+				    }
+				    // keep list if list has match but all values where dropped
+				    if (! hit && list_list_matches[i] != -1) {
+					    setList(new_entry, list_list_matches[i]);
+					    migrated = true;
+				    }
+			    }
+		    }
+		    // drop list
+		    if (! is_empty_list && ! migrated) {
+			    // FIXME: remove list ?
+			    // _entry_state [idx] = state::empty;
+			    migration_succeeded = false;
+		    }
+		    // inkAssert(migrated, "Migrating list @%d would lead to an empty list", idx);
+	    },
+	    [](const entry& v) { return v.data.type() != value_type::list; }
+	);
+	return migration_succeeded;
+}
+
+void list_table::impl_init_static_list(const list_flag* permanent_lists)
+{
+	const list_flag* flags = permanent_lists;
+	while (*flags != null_flag) {
+		list_table::list l = create_permament();
+		while (*flags != null_flag) {
+			list_flag flag = external_fvalue_to_internal(*flags);
+			add_inplace(l, flag);
+			++flags;
+		}
+		++flags;
+	}
+}
+
+void list_table::init_static_list_flags(const list_flag* permanent_lists, basic_stack& variables)
+{
+	impl_init_static_list(permanent_lists);
+
+	for (const auto& flag : named_flags()) {
+		variables.set(
+		    hash_string(flag.name),
+		    value{}.set<value_type::list_flag>(list_flag{flag.flag.list_id, flag.flag.flag})
+		);
+	}
 }
 
 

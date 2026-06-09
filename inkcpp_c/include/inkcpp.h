@@ -184,6 +184,13 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	int  ink_list_iter_next(InkListIter* self);
 
+#ifdef __GNUC__
+#else
+#	pragma warning(push)
+  // we use a anonymus union for convinence, feel free to change this in the future if problems
+  // should occure.
+#	pragma warning(disable : 4201)
+#endif
 	/** Repserentation of a ink variable.
 	 * @ingroup clib
 	 * The concret type contained is noted in @ref InkValue::type "type", please use this information
@@ -217,6 +224,10 @@ typedef struct HInkSTory    HInkStory;
 			ValueTypeList    ///< a ink list
 		} type;            ///< indicates type contained in value
 	};
+#ifdef __GNUC__
+#else
+#	pragma warning(pop)
+#endif
 
 	// const char* ink_value_to_string(const InkValue* self);
 
@@ -291,7 +302,7 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	ink_hash_t        ink_hash_string(const char* str);
 	/** @memberof HInkRunner
-	 * @copydoc ink::runtime::runner_interface::knot_tag()
+	 * @copydoc ink::runtime::runner_interface::get_knot_tag()
 	 * @param self
 	 */
 	const char*       ink_runner_knot_tag(const HInkRunner* self, int index);
@@ -301,7 +312,7 @@ typedef struct HInkSTory    HInkStory;
 	 */
 	int               ink_runner_num_global_tags(const HInkRunner* self);
 	/** @memberof HInkRunner
-	 * @copydoc ink::runtime::runner_interface::global_tag()
+	 * @copydoc ink::runtime::runner_interface::get_global_tag()
 	 * @param self
 	 */
 	const char*       ink_runner_global_tag(const HInkRunner* self, int index);

@@ -33,6 +33,8 @@ namespace runtime
 
 		class basic_stack : protected restorable<entry>
 		{
+			friend list_table;
+
 		protected:
 			basic_stack(entry* data, size_t size);
 

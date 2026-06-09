@@ -10,7 +10,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("List logic operations", "[lists]")
+SCENARIO("List logic operations", "[lists][runtime]")
 {
 	GIVEN("a demo story")
 	{
@@ -46,7 +46,7 @@ Hey
 	}
 }
 
-SCENARIO("run a story with lists", "[lists]")
+SCENARIO("run a story with lists", "[lists][runtime]")
 {
 	GIVEN("a story with multi lists")
 	{

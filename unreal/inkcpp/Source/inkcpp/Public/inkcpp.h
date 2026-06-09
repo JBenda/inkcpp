@@ -17,10 +17,12 @@
  * ```sh
  * /UNREAL_ENGINE/Build/BatchFiles/RunUAT.bat BuildPlugin
  * -plugin=/AN_TEMP_DIRECTORY/inkcpp/inkcpp.uplugin -package=/YOUR_UNREAL_PROJECT/Plugins/inkcpp
- * -TargetPlatforms=Win64`
- * ``` <br/> And either way activating the plugin.
+ * -TargetPlatforms=Win64
+ * ```
+ * <br/> And either way activating the plugin.
  *
- * The C++ API will be available soon([Issue](https://github.com/JBenda/inkcpp/issues/60)).
+ * The C++ API is available — include the plugin headers directly from your game module
+ * after adding `"inkcpp"` to your module's `PublicDependencyModuleNames` in Build.cs.
  *
  * + @ref ue_setup "General setup"
  * + @ref ue_components "UE5 Blueprints"
@@ -184,39 +186,57 @@
  * width="80%"/></a>
  * @endhtmlonly
  *
+ * @htmlonly
  * <a href="https://blueprintue.com/blueprint/mf-hwyg5/">
  * <img
  * alt="A InkThread Yield Resume example Blueprint"
  * src="../unreal/imgs/YieldResume.png"
  * width="80%"/></a>
+ * @endhtmlonly
+ *
+ * @htmlonly
+ * <a href="https://blueprintue.com/blueprint/fiifmu3l/">
+ * <img
+ * alt="A InkThread Yield Resume example Blueprint"
+ * src="../unreal/imgs/SaveGame.png"
+ * width="80%"/></a>
+ * @endhtmlonly
  *
  * @subsubsection ue_example_demo_DemoThread DemoThread
  *
+ * @htmlonly
  * <a href="https://blueprintue.com/blueprint/q8wep7r6/">
  * <img
  * alt="Example of the ussage of TagList::GetValue inside processing a new context line."
  * src="../unreal/imgs/TagListGetValue.png"
  * width="80%"/></a>
+ * @endhtmlonly
  *
+ * @htmlonly
  * <a href="https://blueprintue.com/blueprint/r5jbthpn/">
  * <img
  * alt="Example for choice handling."
  * src="../unreal/imgs/HandleChoice.png"
  * width="80%"/></a>
+ * @endhtmlonly
  *
  * @subsection ue_example_minimal Minimal
  *
+ * @htmlonly
  * <a href="https://blueprintue.com/blueprint/712hsqyl/">
  * <img
  * alt="Minmal InkRuntime Blueprint"
  * src="../unreal/imgs/MinimalRuntime.png"
  * width="80%"/></a>
+ * @endhtmlonly
  *
+ * @htmlonly
  * <a href="https://blueprintue.com/blueprint/-da0bqy5/">
  * <img
  * alt="Minimal InkThread Blueprint"
  * src="../unreal/imgs/MinimalThread.png"
  * width="80%"/></a>
+ * @endhtmlonly
  *
  */
 

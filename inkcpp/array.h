@@ -346,12 +346,15 @@ public:
 	void clear(const T& value);
 
 	// snapshot interface
-	virtual bool                 can_be_migrated() const;
-	virtual size_t               snap(unsigned char* data, const snapper&) const;
-	virtual const unsigned char* snap_load(const unsigned char* data, const loader&);
+	bool                         can_be_migrated() const;
+	size_t                       snap(unsigned char* data, const snapper&) const;
+	virtual const unsigned char* snap_load(const unsigned char* data, const loader&) = 0;
 
 protected:
 	inline T* buffer() { return _array; }
+
+	const unsigned char* impl_snap_load_meta(const unsigned char* data);
+	const unsigned char* impl_snap_load_payload(const unsigned char* data);
 
 	void set_new_buffer(T* buffer, size_t capacity)
 	{
@@ -455,6 +458,8 @@ inline void basic_restorable_array<T>::forget()
 		// Clear
 		_temp[i] = _null;
 	}
+
+	_saved = false;
 }
 
 template<typename T>
@@ -480,12 +485,17 @@ inline void basic_restorable_array<T>::clear(const T& value)
 template<typename T, size_t SIZE>
 class fixed_restorable_array : public basic_restorable_array<T>
 {
+	using base = basic_restorable_array<T>;
+
 public:
 	fixed_restorable_array(const T& initial, const T& nullValue)
 	    : basic_restorable_array<T>(_buffer, SIZE * 2, nullValue)
 	{
 		basic_restorable_array<T>::clear(initial);
 	}
+
+	const unsigned char*
+	    snap_load(const unsigned char* data, const snapshot_interface::loader&) override;
 
 private:
 	T _buffer[SIZE * 2];
@@ -519,7 +529,7 @@ public:
 		size_t new_capacity = 2 * n;
 		T*     new_buffer   = new T[new_capacity];
 		if (_buffer) {
-			for (size_t i = 0; i < base::capacity(); ++i) {
+			for (size_t i = 0; i < base::capacity() && i < n; ++i) {
 				new_buffer[i]     = _buffer[i];
 				// copy temp
 				new_buffer[i + n] = _buffer[i + base::capacity()];
@@ -542,6 +552,9 @@ public:
 			_buffer = nullptr;
 		}
 	}
+
+	const unsigned char*
+	    snap_load(const unsigned char* data, const snapshot_interface::loader&) override;
 
 private:
 	T  _initialValue;
@@ -571,26 +584,55 @@ inline size_t basic_restorable_array<T>::snap(unsigned char* data, const snapper
 }
 
 template<typename T>
-inline const unsigned char*
-    basic_restorable_array<T>::snap_load(const unsigned char* data, const loader&)
+inline const unsigned char* basic_restorable_array<T>::impl_snap_load_meta(const unsigned char* data
+)
 {
 	auto ptr = data;
 	ptr      = snap_read(ptr, _saved);
 	ptr      = snap_read(ptr, _loaded_capacity);
-	if (buffer() == nullptr) {
-		static_cast<allocated_restorable_array<T>&>(*this).resize(_loaded_capacity);
-	}
-	inkAssert(
-	    _capacity >= _loaded_capacity,
-	    "New config does not allow for necessary size used by this snapshot!"
-	);
 	T null;
 	ptr = snap_read(ptr, null);
 	inkAssert(null == _null, "null value is different to snapshot!");
-	for (size_t i = 0; i < _loaded_capacity; ++i) {
+	return ptr;
+}
+
+template<typename T>
+inline const unsigned char*
+    basic_restorable_array<T>::impl_snap_load_payload(const unsigned char* data)
+{
+	inkAssert(
+	    capacity() >= loaded_capacity(),
+	    "New config does not allow for necessary size used by this snapshot!"
+	);
+	auto ptr = data;
+	for (size_t i = 0; i < loaded_capacity(); ++i) {
 		ptr = snap_read(ptr, _array[i]);
 		ptr = snap_read(ptr, _temp[i]);
 	}
 	return ptr;
 }
+
+template<typename T, size_t SIZE>
+inline const unsigned char* fixed_restorable_array<
+    T, SIZE>::snap_load(const unsigned char* data, const snapshot_interface::loader&)
+{
+	auto ptr = data;
+	ptr      = base::impl_snap_load_meta(ptr);
+	ptr      = base::impl_snap_load_payload(ptr);
+	return ptr;
+}
+
+template<typename T>
+inline const unsigned char* allocated_restorable_array<
+    T>::snap_load(const unsigned char* data, const snapshot_interface::loader&)
+{
+	auto ptr = data;
+	ptr      = base::impl_snap_load_meta(ptr);
+	if (base::buffer() == nullptr || base::capacity() < base::loaded_capacity()) {
+		resize(base::loaded_capacity());
+	}
+	ptr = base::impl_snap_load_payload(ptr);
+	return ptr;
+}
+
 } // namespace ink::runtime::internal

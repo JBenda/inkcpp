@@ -36,8 +36,8 @@ You startk walking to {to}.
       You put the potion back into your pouch.
       -> END
     + {not (StatusConditions ? CanTalkWithAniamls)} [Drink]
-    ~ StatusConditions += CanTalkWithAniamls
-    A take a sip. The potion tastes like Hores, it is afull.
+      ~ StatusConditions += CanTalkWithAniamls
+      A take a sip. The potion tastes like Hores, it is afull.
     -> END
 = TInvisibility
     A potion which allows the consumer to stay unseen for the human eye. Not tested
@@ -57,10 +57,11 @@ You collapse, the next thing you can remember is how you are given to the ambula
 No further action for today ...
 -> DONE
 
+VAR MansionFrontDoorLocked = true
 === Mansion
 = Car
 # background:Car
-You step outside your car. Its a wired feeling beehing here again.
+At first there is anger about the traffic jam and your 1h delay. But your memories of this place let this feeling fade away.
 -> Car_cycle
 = Car_cycle
 # background:Car
@@ -73,10 +74,6 @@ You step outside your car. Its a wired feeling beehing here again.
 
 = Entrance
 # background:Mansion
-{not Mansion.look_around: 
-    ~ Knowladge += YellowDress
-    Just in time you are able to see the door, someone with with a yellow summer dress enters it. 
-}
 You're climbing the 56 steps up to the door; high tides are an annoying thing.
 -> Entrance_cycle
 = Entrance_cycle
@@ -98,8 +95,27 @@ You're climbing the 56 steps up to the door; high tides are an annoying thing.
     "<Red>Ahh</>", you cry while reaching for the door bell. Saying it was charched would be an understatement.
     { Health <= 0: -> Faint}
     -> Entrance_cycle
-+ {knock && Knowladge ? (YellowDress)} [Inspect the Door]
++ {knock && Knowladge ? YellowDress} [Inspect the Door]
     You just saw someone enter, how did they do not get shoked?
-    <Gray>It seems the developr run out of time, maybe in the next version we can continue?</>
+    -> Entrance_mouse ->
     -> Entrance_cycle
++ {not MansionFrontDoorLocked} [Open the Door]
+    On high alert you press the door handle, it opens. Quite smooth and easy.
+    You step inside.
+    ToBeContinued
+    -> DONE
+    
+= Entrance_mouse
+    Something hushes through a hole beside the door, after you come closer you see it. A little gray mouse, it looks quite eloquent.
+    + [Ask the mouse for help]
+        You try to formulate your dilemma and your annoyance about the doorbell.
+        {StatusConditions ? (CanTalkWithAniamls):
+            ~ MansionFrontDoorLocked = false
+            (enter nice conversasion with a picky but helpful mouse)
+        -else:
+            The mouse squeaked, then was silent. It seems it tried to answer you, but you are unable to understand it.
+        }
+    + A ugly little creature, ignore it.
+    - ->->
+
 -> DONE

@@ -52,6 +52,16 @@ void snapshot::write_to_file(const char* filename) const
 
 namespace ink::runtime::internal
 {
+snapshot_impl::~snapshot_impl()
+{
+	if (_managed) {
+		delete[] _file;
+	}
+	if (old_ref_table) {
+		delete old_ref_table;
+	}
+};
+
 size_t
     snapshot_impl::file_size(size_t serialization_length, size_t runner_cnt, bool list_definition)
 {

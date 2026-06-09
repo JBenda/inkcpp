@@ -75,6 +75,12 @@ public:
 
 	ip_t find_offset_for(hash_t path) const;
 
+	// Find the hash to use for migration at the given instruction offset.
+	// First tries an exact match in _container_hash (handles named but untracked containers such as
+	// unlabeled choice bodies c-0, c-1, etc.), then falls back to find_container_for for positions
+	// that are mid-content rather than at a container boundary.
+	hash_t find_migration_hash(uint32_t offset) const;
+
 	// Creates a new global store for use with runners executing this story
 	virtual globals new_globals() override;
 	virtual globals new_globals_from_snapshot(const snapshot&) override;

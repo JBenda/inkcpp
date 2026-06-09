@@ -21,6 +21,11 @@ public:
 	{
 	}
 
+	list_interface& operator=(const list_interface& oth) noexcept override
+	{
+		return *this = static_cast<const list_impl&>(oth);
+	}
+
 	list_impl& operator=(const list_impl&) = default;
 
 	~list_impl() override {}

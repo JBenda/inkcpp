@@ -22,5 +22,6 @@ This is a simple story.
 - catch
 {tKeep} - {tNew}
 {TURNS_SINCE(-> Node1)} {TURNS_SINCE(-> OldNode)} {TURNS_SINCE(-> Main)}
+{Node1} {OldNode} {Main}
 Oh.
 ->DONE

@@ -37,7 +37,7 @@ struct header {
 		}
 	}
 
-	bool verify() const;
+	bool validate() const;
 
 	struct section_t {
 		uint32_t _start = 0;

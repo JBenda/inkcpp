@@ -7,10 +7,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InkRuntime.h"
 #include "UObject/NoExportTypes.h"
 
 #include "InkVar.h"
 #include "InkDelegates.h"
+#include "InkList.h"
+#include "InkHandles.h"
 
 
 #include "ink/runner.h"
@@ -26,6 +29,7 @@ class UInkChoice;
  * @ingroup unreal
  */
 UCLASS(Blueprintable)
+
 class INKCPP_API UInkThread : public UObject
 {
 	GENERATED_BODY()
@@ -146,36 +150,55 @@ public:
 
 	// Registers a callback for a named "tag function"
 	UFUNCTION(BlueprintCallable, Category = "Ink")
-	/** Register a callback for a named "tag function"
-	 * @see @ref TagFunction
+	/** Register a callback for a named "tag function".
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
 	 *
 	 * @blueprint
 	 */
-	void RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
+	FInkHandle RegisterTagFunction(FName functionName, const FTagFunctionDelegate& function);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
-	/** register a external function.
-	 * A function provides a return value
+	/** Register an external function that returns a value.
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
 	 * @see if you do not want to return something #RegisterExternalEvent()
 	 *
 	 * @blueprint
 	 */
-	void RegisterExternalFunction(
+	FInkHandle RegisterExternalFunction(
 	    const FString& functionName, const FExternalFunctionDelegate& function,
 	    bool lookaheadSafe = false
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
-	/** register external event.
-	 * A event has the return type void.
-	 * @see  If you want to return a value use #RegisterExternalFunction()
+	/** Register an external event (void return).
+	 * @return handle — call Cancel() to remove this binding (or pass to Unregister() from Blueprint)
+	 * @see If you want to return a value use #RegisterExternalFunction()
 	 *
 	 * @blueprint
 	 */
-	void RegisterExternalEvent(
+	FInkHandle RegisterExternalEvent(
 	    const FString& functionName, const FExternalFunctionVoidDelegate& function,
 	    bool lookaheadSafe = false
 	);
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+
+	/** Unregister a previously registered external function, event, or tag function.
+	 * Prefer calling @ref FInkHandle::Cancel() directly — that does not require the thread.
+	 * @param handle the handle returned by RegisterExternalFunction() / RegisterExternalEvent() /
+	 * RegisterTagFunction()
+	 *
+	 * @blueprint
+	 */
+	void Unregister(const FInkHandle& handle) { handle.Cancel(); }
+
+	UFUNCTION(BlueprintCallable, Category = "Ink")
+	/** Unregister all external functions and events bound to this thread.
+	 * Useful when reusing a thread via StartExisting() to ensure no stale bindings remain.
+	 *
+	 * @blueprint
+	 */
+	void ClearExternalFunctions();
 
 	UFUNCTION(BlueprintCallable, Category = "Ink")
 	/** get knots assoziated with current knot.
@@ -193,6 +216,11 @@ public:
 	 */
 	const UTagList* GetGlobalTags();
 
+	/** Get choices from the last OnChoice event.
+	 * @return array of choices available at the current choice point, empty if not at a choice
+	 */
+	const TArray<UInkChoice*>& GetCurrentChoices() const { return mCurrentChoices; }
+
 
 protected:
 	/** @private */
@@ -200,6 +228,11 @@ protected:
 
 	/** @private */
 	virtual void OnLineWritten_Implementation(const FString& line, UTagList* tags) {}
+
+	/** @private */
+	virtual void OnKnotEntered_Implementation(const UTagList* global_tags, const UTagList* knot_tags)
+	{
+	}
 
 	/** @private */
 	virtual void OnTag_Implementation(const FString& line) {}
@@ -221,31 +254,58 @@ private:
 
 	void ExecuteTagMethod(const TArray<FString>& Params);
 
+	/** Register a UInkList that was created from runner-owned memory during this thread's
+	 * execution. The thread will call Invalidate() on all registered lists before the next
+	 * choose() call so that stale pointers are detected early.
+	 * @private
+	 */
+	void RegisterLiveList(UInkList* list);
+	friend FInkVar::FInkVar(UInkList&), FInkVar::FInkVar(ink::runtime::value);
+
+	/** Invalidate all UInkList objects registered since the last choose().
+	 * Called internally before mpRunner->choose().
+	 * @private
+	 */
+	void InvalidateLiveLists();
+
 private:
 	ink::runtime::runner mpRunner;
 
 	UPROPERTY()
-	UTagList*            mpTags;
+	UTagList* mpTags;
 
 	UPROPERTY()
-	UTagList*            mkTags = nullptr;
+	UTagList* mkTags = nullptr;
 
 	UPROPERTY()
-	UTagList*            mgTags = nullptr;
+	UTagList* mgTags = nullptr;
 
 	UPROPERTY()
-	TArray<UInkChoice*>  mCurrentChoices; /// @TODO: make accessible?
+	TArray<UInkChoice*> mCurrentChoices;
 
-	TMap<FName, FTagFunctionMulticastDelegate> mTagFunctions;
+	/** Lists wrapping runner-owned memory, registered during current execute cycle. */
+	TArray<TWeakObjectPtr<UInkList>> mLiveLists;
+
+	/** Token storage for tag function registrations. Maps function name → parallel arrays of
+	 *  tokens and delegates. Each token is shared with the corresponding FInkHandle.
+	 *  Setting a token to false causes the entry to be skipped and lazily compacted. */
+	TMap<FName, TArray<TSharedPtr<bool>>> mTagFunctionTokens;
+
+	/** Multicast delegates for tag functions, parallel to mTagFunctionTokens. */
+	TMap<FName, TArray<FTagFunctionDelegate>> mTagFunctionDelegates;
+
+	/** Token storage for external function registrations, keyed by name hash.
+	 *  A matching FInkHandle invalidates the token to suppress the binding. */
+	TMap<uint32, TSharedPtr<bool>> mExternalFunctionTokens;
 
 	FString mStartPath;
 	bool    mbHasRun;
 
-	int  mnChoiceToChoose;
-	int  mnYieldCounter;
-	bool mbInChoice;
-	bool mbKill;
-	bool mbInitialized;
+	int         mnChoiceToChoose;
+	int         mnYieldCounter;
+	bool        mbInChoice;
+	bool        mbKill;
+	bool        mbInitialized;
 	ink::hash_t mCurrentKnot;
 
 	UPROPERTY()

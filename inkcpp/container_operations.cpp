@@ -40,6 +40,7 @@ void operation<Command::CHOICE_COUNT, value_type::none, void>::operator()(
     basic_eval_stack& stack, value* vals
 )
 {
+	( void ) vals;
 	stack.push(value{}.set<value_type::int32>(static_cast<int32_t>(_runner.num_choices())));
 }
 

@@ -26,33 +26,17 @@ globals_impl::globals_impl(const story_impl* story)
 	_visit_counts.resize(_num_containers);
 	if (_lists) {
 		// initialize static lists
-		init_static_list_flags();
+		_lists.init_static_list_flags(_owner->lists(), _variables);
 	}
 }
 
-void globals_impl::init_static_list_flags()
+void globals_impl::visit(uint32_t container_id, bool preserve_turns)
 {
-	const list_flag* flags = _owner->lists();
-	while (*flags != null_flag) {
-		list_table::list l = _lists.create_permament();
-		while (*flags != null_flag) {
-			list_flag flag = _lists.external_fvalue_to_internal(*flags);
-			_lists.add_inplace(l, flag);
-			++flags;
-		}
-		++flags;
-	}
-	for (const auto& flag : _lists.named_flags()) {
-		set_variable(
-		    hash_string(flag.name),
-		    value{}.set<value_type::list_flag>(list_flag{flag.flag.list_id, flag.flag.flag})
-		);
-	}
-}
-
-void globals_impl::visit(uint32_t container_id)
-{
-	_visit_counts.set(container_id, {_visit_counts[container_id].visits + 1, 0});
+	const int32_t existing_turns = _visit_counts[container_id].turns;
+	_visit_counts.set(
+	    container_id, {_visit_counts[container_id].visits + (preserve_turns ? 0 : 1),
+	                   preserve_turns ? existing_turns : 0}
+	);
 }
 
 uint32_t globals_impl::visits(uint32_t container_id) const
@@ -294,6 +278,9 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 			_visit_counts.resize(_owner->num_containers());
 		}
 		_visit_counts.save();
+		for (size_t i = 0; i < old_capacity; ++i) {
+			_visit_counts.set(i, visit_count());
+		}
 	}
 
 	inkAssert(
@@ -302,8 +289,8 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	);
 	for (size_t i = 0; i < old_capacity; ++i) {
 		hash_t path;
-		ptr = snap_read(ptr, path);
-		container_t c_id;
+		ptr                      = snap_read(ptr, path);
+		container_t c_id         = ~0U;
 		ip_t        container_ip = _owner->find_offset_for(path);
 		bool        found        = container_ip != nullptr
 		          && _owner->find_container_id(
@@ -320,6 +307,7 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	}
 	if (loader.migratable) {
 		_visit_counts.forget();
+		_visit_counts.resize(_num_containers);
 	}
 	inkAssert(
 	    _num_containers == _visit_counts.capacity(),
@@ -331,15 +319,28 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	return ptr;
 }
 
-bool globals_impl::migrate_new_globals(globals_impl& new_globals, const char* list_metadata)
+bool globals_impl::migrate_new_globals(
+    const loader& loader, globals_impl& new_globals, const char* list_metadata
+)
 {
-	bool success
-	    = _variables.migrate(new_globals._variables) && ((! _lists) || _lists.migrate(list_metadata));
-	if (! success) {
+	if (! _variables.migrate(new_globals._variables)) {
 		return false;
 	}
+	if (_lists && ! loader.old_ref_table) {
+		if (! _lists.create_match_lut(
+		        list_metadata, loader.list_list_matches, loader.list_value_matches, loader.old_ref_table
+		    )) {
+			return false;
+		}
+	}
 	if (_lists) {
-		init_static_list_flags();
+		_lists.init_static_list_flags(_owner->lists(), _variables);
+		if (! _lists.migrate_variables(
+		        loader.list_old_new_map, loader.list_list_matches, loader.list_value_matches,
+		        *loader.old_ref_table, _variables
+		    )) {
+			return false;
+		}
 	}
 	return true;
 }

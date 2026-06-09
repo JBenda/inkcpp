@@ -8,7 +8,7 @@
 
 namespace ink::compiler::internal
 {
-void emitter::start(int ink_version, compilation_results* results)
+void emitter::start(uint16_t ink_version, compilation_results* results)
 {
 	// store
 	_ink_version = ink_version;

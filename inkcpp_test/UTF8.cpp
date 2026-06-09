@@ -11,7 +11,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("a story supports UTF-8", "[utf-8]")
+SCENARIO("a story supports UTF-8", "[utf-8][compiler][runtime]")
 {
 	GIVEN("a story with UTF8 characters")
 	{

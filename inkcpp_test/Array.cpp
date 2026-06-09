@@ -7,7 +7,7 @@ using ink::runtime::internal::allocated_restorable_array;
 
 typedef allocated_restorable_array<uint32_t> test_array;
 
-SCENARIO("a restorable array can hold values", "[array]")
+SCENARIO("a restorable array can hold values", "[array][unit][internals]")
 {
 	GIVEN("an empty array")
 	{
@@ -40,7 +40,7 @@ SCENARIO("a restorable array can hold values", "[array]")
 	}
 }
 
-SCENARIO("a restorable array can save/restore/forget", "[array]")
+SCENARIO("a restorable array can save/restore/forget", "[array][unit][internals]")
 {
 	GIVEN("a saved array with a few values")
 	{

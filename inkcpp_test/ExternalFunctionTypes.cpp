@@ -8,7 +8,7 @@
 
 using namespace ink::runtime;
 
-SCENARIO("a story with external functions support types", "[story]")
+SCENARIO("a story with external functions support types", "[external-functions][runtime]")
 {
 	GIVEN("a story with external functions")
 	{

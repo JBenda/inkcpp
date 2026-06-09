@@ -200,6 +200,8 @@ jobs:
     name: Build Doxygen documentation
     needs: [compilation, build-python]
     runs-on: ubuntu-latest
+    env:
+      DOXYGEN_VERSION: "1.17.0"
     steps:
     - uses: actions/checkout@v4
       with:
@@ -215,13 +217,19 @@ jobs:
         pybind11-stubgen
         pdoc
         --user
+    - uses: actions/cache@v5
+      id: cache-doxygen
+      with:
+        path: doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
+        key: doxygen-${{ env.DOXYGEN_VERSION }}
+    - name: download Doxygen
+      if: steps.cache-doxygen.outputs.cache-hit != 'true'
+      run: wget https://www.doxygen.nl/files/doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz
     - name: Install Doxygen
       run: |
         sudo apt-get install graphviz -y
-        wget https://www.doxygen.nl/files/doxygen-1.10.0.linux.bin.tar.gz
-        gunzip doxygen-*.tar.gz
-        tar xf doxygen-*.tar
-        cd doxygen-1.10.0/
+        tar xzf doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz
+        cd doxygen-$DOXYGEN_VERSION/
         sudo make install
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v2

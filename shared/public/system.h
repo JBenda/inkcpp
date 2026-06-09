@@ -40,13 +40,26 @@
 #	define FORMAT_STRING_STR "%s"
 #endif
 
+/**
+ * @def inkAssert(condition, format_string, args...)
+ * @ingroup cpp
+ * Compile argument agnostic assert macro.
+ * behaves diffrent base on if it is an UnrealEngine compilation or standalone.
+ * Also respects INKCPP_NO_RTTI, INKCPP_NO_STD and INKCPP_NO_EXCEPTIONS.
+ */
+/**
+ * @def inkFail(format_string, args...)
+ * @ingroup cpp
+ * Compile argument agnostic assert macro (always asserts).
+ * @sa inkAssert
+ */
+
 #ifdef INK_ENABLE_UNREAL
 #	define inkAssert(condition, text, ...) checkf(condition, TEXT(text), ##__VA_ARGS__)
 #	define inkFail(text, ...)              checkf(false, TEXT(text), ##__VA_ARGS__)
 #else
-#	define inkAssert    ink::ink_assert
-#	define inkFail(...) ink::ink_assert(false, __VA_ARGS__)
-
+#	define inkAssert(...) ink::ink_assert(__VA_ARGS__)
+#	define inkFail(...)   ink::ink_assert(false, __VA_ARGS__)
 #endif
 
 
@@ -115,13 +128,6 @@ struct list_flag {
 	bool operator!=(const list_flag& o) const { return ! (*this == o); }
 };
 
-inline list_flag read_list_flag(const char*& ptr)
-{
-	list_flag result = *reinterpret_cast<const list_flag*>(ptr);
-	ptr += sizeof(list_flag);
-	return result;
-}
-
 /** value of an unset list_flag */
 constexpr list_flag null_flag{-1, -1};
 /** value representing an empty list */
@@ -133,6 +139,12 @@ inline hash_t hash_string(const char* string)
 {
 	return CityHash32(string, FCStringAnsi::Strlen(string));
 }
+
+/** Simple hash for detcting changes in binary data. (e.g. Changes in the story file) */
+inline hash_t hash_data(const unsigned char* data, size_t len)
+{
+	return CityHash32(reinterpret_cast<const char*>(data), len);
+}
 #else
 hash_t hash_string(const char* string);
 hash_t hash_data(const unsigned char* data, size_t len);
@@ -143,10 +155,8 @@ namespace internal
 #ifdef __GNUC__
 #else
 #	pragma warning(push)
-#	pragma warning(                                                                         \
-	    disable : 4514,                                                                      \
-	    justification : "functions are defined in header file, they do not need to be used." \
-	)
+// functions are defined in header file, they do not need to be used.
+#	pragma warning(disable : 4514)
 #endif
 	/** Checks if a string starts with a given prefix*/
 	static inline constexpr bool starts_with(const char* string, const char* prefix)
@@ -231,12 +241,11 @@ private:
 #	pragma GCC diagnostic ignored "-Wunused-parameter"
 #else
 #	pragma warning(push)
-#	pragma warning(                                                                                \
-	    disable : 4100,                                                                             \
-	    justification : "dependend on rtti, exception and stl support not all arguments are needed" \
-	)
+// dependend on rtti, exception and stl support not all arguments are needed
+#	pragma warning(disable : 4100)
 #endif
-// assert
+/** Assert helper, not to be used directly, please use @ref inkAssert and @ref inkFail to be
+ * enviroment agnostic. */
 template<typename... Args>
 void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 {
@@ -258,6 +267,8 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 #elif defined(INK_ENABLE_CSTD)
 		fprintf(stderr, "Ink Assert: %s\n", msg);
 		abort();
+#elif defined(INK_ENABLE_UNREAL)
+		// TODO: implement UE exception handling
 #else
 #	warning no assertion handling this could lead to invalid code paths
 #endif
@@ -269,6 +280,8 @@ void ink_assert(bool condition, const char* msg = nullptr, Args... args)
 #	pragma warning(pop)
 #endif
 
+/** Assert helper, not to be used directly, please use @ref inkAssert and @ref inkFail to be
+ * enviroment agnostic. */
 template<typename... Args>
 [[noreturn]] inline void ink_assert(const char* msg = nullptr, Args... args)
 {
