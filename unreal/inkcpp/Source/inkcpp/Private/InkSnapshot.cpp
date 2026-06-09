@@ -3,8 +3,8 @@
 
 #include "Async/Async.h"
 
-UInkMigratableSnapshotAsync*
-    UInkMigratableSnapshotAsync::GetMigratableSnapshot(AInkRuntime* Runtime)
+UInkMigratableSnapshotAsync* UInkMigratableSnapshotAsync::GetMigratableSnapshot(AInkRuntime* Runtime
+)
 {
 	UInkMigratableSnapshotAsync* Node = NewObject<UInkMigratableSnapshotAsync>();
 	Node->Runtime                     = Runtime;

@@ -46,8 +46,7 @@ private:
 	friend ink::runtime::internal::value;
 
 	/// @todo wrong iteration order, first lists then flags
-	void next(
-	    const char*& flag_name, const char*& list_name, int& i, bool one_list_only
-	) const override;
+	void next(const char*& flag_name, const char*& list_name, int& i, bool one_list_only)
+	    const override;
 };
 } // namespace ink::runtime::internal

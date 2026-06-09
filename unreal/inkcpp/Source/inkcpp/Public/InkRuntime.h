@@ -77,12 +77,13 @@ public:
 	FInkSnapshot Snapshot();
 
 	/** creates a snapshot the next time the story is in a stable state.
-	 * for Blueprints please use snapshotAsync::UInkMigratableSnapshotAsync()   
+	 * for Blueprints please use snapshotAsync::UInkMigratableSnapshotAsync()
 	 * This snapshot can be loaded with a new version of the same story.
 	 * can be loaded with @ref #LoadSnapshot()
 	 *
 	 * @attention typical this snapshot will be created after the next choice is taken.
-	 * To archive this each active runner will yield after the next choice and only continue after the snapshot is taken.
+	 * To archive this each active runner will yield after the next choice and only continue after the
+	 * snapshot is taken.
 	 *
 	 */
 	TFuture<FInkSnapshot> MigratableSnapshot();
@@ -231,7 +232,7 @@ private:
 
 	/** Active observer tokens. When Cancel() is called on the handle the token is set to false,
 	 *  the lambda checks it before firing and skips. Tokens are cleaned up lazily. */
-	TArray<TSharedPtr<bool>> mObserverTokens;
+	TArray<TSharedPtr<bool>>           mObserverTokens;
 	TSharedPtr<TPromise<FInkSnapshot>> mStableSnapshot;
 	UPROPERTY()
 	TArray<UInkThread*> mYieldedThreadsForSnapshot;

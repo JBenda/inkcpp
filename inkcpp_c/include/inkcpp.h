@@ -187,8 +187,8 @@ typedef struct HInkSTory    HInkStory;
 #ifdef __GNUC__
 #else
 #	pragma warning(push)
-// we use a anonymus union for convinence, feel free to change this in the future if problems should
-// occure.
+  // we use a anonymus union for convinence, feel free to change this in the future if problems
+  // should occure.
 #	pragma warning(disable : 4201)
 #endif
 	/** Repserentation of a ink variable.

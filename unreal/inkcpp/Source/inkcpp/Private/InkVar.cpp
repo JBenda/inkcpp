@@ -25,10 +25,8 @@ FInkVar::FInkVar(ink::runtime::value val)
 		case v_types::Uint32:
 			UE_LOG(
 			    InkCpp, Warning,
-			    TEXT(
-			        "Converting uint to int, this will cause trouble if writing it back to ink (with "
-			        "SetGlobalVariable)!"
-			    )
+			    TEXT("Converting uint to int, this will cause trouble if writing it back to ink (with "
+			         "SetGlobalVariable)!")
 			);
 			IntVal  = ( int32 ) val.get<v_types::Uint32>();
 			VarType = EInkVarType::Int;

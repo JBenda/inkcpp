@@ -86,8 +86,8 @@ FInkHandle UInkThread::RegisterExternalFunction(
     const FString& functionName, const FExternalFunctionDelegate& function, bool lookaheadSafe
 )
 {
-	TSharedPtr<bool>   token    = MakeShared<bool>(true);
-	uint32 nameHash = ink::hash_string(TCHAR_TO_UTF8(*functionName));
+	TSharedPtr<bool> token    = MakeShared<bool>(true);
+	uint32           nameHash = ink::hash_string(TCHAR_TO_UTF8(*functionName));
 	// If a previous binding exists for this name, invalidate it
 	if (auto* prev = mExternalFunctionTokens.Find(nameHash)) {
 		if (prev->IsValid()) {
@@ -117,8 +117,8 @@ FInkHandle UInkThread::RegisterExternalEvent(
     const FString& functionName, const FExternalFunctionVoidDelegate& function, bool lookaheadSafe
 )
 {
-	TSharedPtr<bool>   token    = MakeShared<bool>(true);
-	uint32 nameHash = ink::hash_string(TCHAR_TO_UTF8(*functionName));
+	TSharedPtr<bool> token    = MakeShared<bool>(true);
+	uint32           nameHash = ink::hash_string(TCHAR_TO_UTF8(*functionName));
 	if (auto* prev = mExternalFunctionTokens.Find(nameHash)) {
 		if (prev->IsValid()) {
 			**prev = false;

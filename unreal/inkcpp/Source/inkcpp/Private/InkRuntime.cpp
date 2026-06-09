@@ -37,7 +37,8 @@ AInkRuntime::AInkRuntime()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-AInkRuntime::~AInkRuntime() {
+AInkRuntime::~AInkRuntime()
+{
 	if (mStableSnapshot.IsValid()) {
 		mStableSnapshot->SetValue(FInkSnapshot());
 		mStableSnapshot.Reset();
@@ -197,23 +198,22 @@ FInkSnapshot AInkRuntime::Snapshot()
 
 TFuture<FInkSnapshot> AInkRuntime::MigratableSnapshot()
 {
-    // Fast path: already stable
-    FInkSnapshot snapshot = Snapshot();
+	// Fast path: already stable
+	FInkSnapshot snapshot = Snapshot();
 
-    if (snapshot.Migratable)
-    {
-        TPromise<FInkSnapshot> Immediate;
-        Immediate.SetValue(snapshot);
-        return Immediate.GetFuture();
-    }
+	if (snapshot.Migratable) {
+		TPromise<FInkSnapshot> Immediate;
+		Immediate.SetValue(snapshot);
+		return Immediate.GetFuture();
+	}
 
-    // Slow path: wait for stability
-    TSharedRef<TPromise<FInkSnapshot>, ESPMode::ThreadSafe> Promise =
-        MakeShared<TPromise<FInkSnapshot>, ESPMode::ThreadSafe>();
+	// Slow path: wait for stability
+	TSharedRef<TPromise<FInkSnapshot>, ESPMode::ThreadSafe> Promise
+	    = MakeShared<TPromise<FInkSnapshot>, ESPMode::ThreadSafe>();
 
-    mStableSnapshot = Promise;
+	mStableSnapshot = Promise;
 
-    return Promise->GetFuture();
+	return Promise->GetFuture();
 }
 
 void AInkRuntime::RunnerEnterStableState(UInkThread* thread)
@@ -249,10 +249,8 @@ void AInkRuntime::LoadSnapshot(const FInkSnapshot& snapshot)
 		if (! mpSnapshot->can_be_migrated()) {
 			UE_LOG(
 			    InkCpp, Error,
-			    TEXT(
-			        "Unable to load snapshot. The story has changed and the snapshot was taken at in "
-			        "instable moment."
-			    )
+			    TEXT("Unable to load snapshot. The story has changed and the snapshot was taken at in "
+			         "instable moment.")
 			);
 		}
 	}
@@ -288,10 +286,8 @@ UInkThread*
 		if (mpSnapshot->num_runners() == mThreads.Num()) {
 			UE_LOG(
 			    InkCpp, Warning,
-			    TEXT(
-			        "Already created all Threads from Snapshot!, will not create more. You can Still "
-			        "create new Threads with entering the starting Path."
-			    )
+			    TEXT("Already created all Threads from Snapshot!, will not create more. You can Still "
+			         "create new Threads with entering the starting Path.")
 			);
 			return nullptr;
 		}
