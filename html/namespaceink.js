@@ -1,6 +1,7 @@
 var namespaceink =
 [
     [ "compiler", "namespaceink_1_1compiler.html", "namespaceink_1_1compiler" ],
+    [ "config", "namespaceink_1_1config.html", "namespaceink_1_1config" ],
     [ "runtime", "namespaceink_1_1runtime.html", "namespaceink_1_1runtime" ],
     [ "byte_t", "namespaceink.html#a5f188f340dc3f2b54a7ba0a8bdd2141e", null ],
     [ "container_t", "namespaceink.html#a3dab6bf49d5b4a95eaa1faf0f5d6b6c0", null ],
@@ -13,7 +14,10 @@ var namespaceink =
     [ "size_t", "namespaceink.html#a959b2e4aede55770f9235406e91dc689", null ],
     [ "thread_t", "namespaceink.html#abc65bdba9646b6c75e67b50ae4d75f4a", null ],
     [ "uint32_t", "namespaceink.html#a0f7783f9d24518b373a9e367eeb6fd67", null ],
+    [ "hash_data", "namespaceink.html#aa6cbe74bcafeed42e49544cb9e643126", null ],
     [ "hash_string", "namespaceink.html#add30d4ab28415ba7fdbbc67ed0de9630", null ],
+    [ "ink_assert", "namespaceink.html#a46585653323324aaf14bd8f236a58d3d", null ],
+    [ "ink_assert", "namespaceink.html#a87f69a54bd13f8cc29e047e572e7acb7", null ],
     [ "empty_flag", "namespaceink.html#ad600938294c97cacf02ab21ca278bf7d", null ],
     [ "InkBinVersion", "namespaceink.html#a8426126aa837a035525e2bf89ad1bddc", null ],
     [ "InkVersion", "namespaceink.html#a32a7e445e0f95e8d26971e7b752c108b", null ],

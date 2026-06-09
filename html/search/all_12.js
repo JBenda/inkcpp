@@ -14,5 +14,6 @@ var searchData=
   ['valuetypenone_11',['ValueTypeNone',['../struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206a783e447c91698853ea2b5acf4462e8ad',1,'InkValue']]],
   ['valuetypestring_12',['ValueTypeString',['../struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206a2cc9083f2d9d4ee93908cee468a62d99',1,'InkValue']]],
   ['valuetypeuint32_13',['ValueTypeUint32',['../struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206acf1a01fda62030ca84daed23e9a54e94',1,'InkValue']]],
-  ['variables_5fobservers_14',['variables_observers',['../structink_1_1config_1_1statistics_1_1global.html#ac6dab9f4e6b1c7e89623d4b94c49fca5',1,'ink::config::statistics::global']]]
+  ['variables_14',['variables',['../structink_1_1config_1_1statistics_1_1global.html#a36bb7b88c3d22966afd30753b1d0464e',1,'ink::config::statistics::global']]],
+  ['variables_5fobservers_15',['variables_observers',['../structink_1_1config_1_1statistics_1_1global.html#ac6dab9f4e6b1c7e89623d4b94c49fca5',1,'ink::config::statistics::global']]]
 ];

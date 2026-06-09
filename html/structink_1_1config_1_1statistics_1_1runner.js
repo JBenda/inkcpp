@@ -6,5 +6,6 @@ var structink_1_1config_1_1statistics_1_1runner =
     [ "evaluation_stack", "structink_1_1config_1_1statistics_1_1runner.html#a1a277bb42c34661b37b4b510dbbf6cd1", null ],
     [ "output", "structink_1_1config_1_1statistics_1_1runner.html#aa29bd29a50c15a582189d574f93e2365", null ],
     [ "runtime_ref_stack", "structink_1_1config_1_1statistics_1_1runner.html#a2c92086d5eb242834e4adfa7911c84fd", null ],
-    [ "runtime_stack", "structink_1_1config_1_1statistics_1_1runner.html#a770e94f50ec0ae75b21b5e7678d6d7eb", null ]
+    [ "runtime_stack", "structink_1_1config_1_1statistics_1_1runner.html#a770e94f50ec0ae75b21b5e7678d6d7eb", null ],
+    [ "threads", "structink_1_1config_1_1statistics_1_1runner.html#a5d754549c6a0add70abe8f1db51c8595", null ]
 ];

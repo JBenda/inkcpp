@@ -5,5 +5,6 @@ var class_u_ink_list =
     [ "ContainsList", "class_u_ink_list.html#aef1b87d0d3b8c63e05557b39e6cd3713", null ],
     [ "Elements", "class_u_ink_list.html#ad570dd279c8e487c11e965a258e97dbe", null ],
     [ "ElementsOf", "class_u_ink_list.html#ad90cc3e753d376646f9fe3eb39581076", null ],
-    [ "ElementsOfAsString", "class_u_ink_list.html#af6fb0853f68d39169596ba8247883bff", null ]
+    [ "ElementsOfAsString", "class_u_ink_list.html#af6fb0853f68d39169596ba8247883bff", null ],
+    [ "IsValid", "class_u_ink_list.html#a46b38d55e53cfbb17afcbac7af27d0e0", null ]
 ];

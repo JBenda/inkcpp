@@ -65,9 +65,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_ink_asset_8h_source.html",
-"classink_1_1runtime_1_1runner__interface.html#ae86dc739d94d0969b8d4759ac3205272",
-"structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html#ae1362368dd28a7c74715e23c458ac1f2"
+"classink_1_1runtime_1_1runner__interface.html#ab491b834ff52317f4064b192f397c71f",
+"struct_ink_value.html#a412bb26a32f9eb10c0a7fdd8cde5ced5"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+const SYNCONMSG = 'click to disable panel synchronization';
+const SYNCOFFMSG = 'click to enable panel synchronization';
+const LISTOFALLMEMBERS = 'List of all members';

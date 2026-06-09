@@ -6,5 +6,6 @@ var classink_1_1runtime_1_1list__interface =
     [ "begin", "classink_1_1runtime_1_1list__interface.html#aa859743f6009c14b7dc044bc3a93687c", null ],
     [ "contains", "classink_1_1runtime_1_1list__interface.html#a1d4f533d150509c7bc51a8b45d874399", null ],
     [ "end", "classink_1_1runtime_1_1list__interface.html#aca807e9fac077e076e3ac241bb35732f", null ],
+    [ "operator=", "classink_1_1runtime_1_1list__interface.html#a60ba8a857acc28a09bb395ed35536638", null ],
     [ "remove", "classink_1_1runtime_1_1list__interface.html#a838b17e7e36be5e10a2fb6b6e5e7762b", null ]
 ];

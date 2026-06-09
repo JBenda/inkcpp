@@ -4,13 +4,13 @@ var annotated_dup =
       [ "compiler", "namespaceink_1_1compiler.html", [
         [ "compilation_results", "structink_1_1compiler_1_1compilation__results.html", "structink_1_1compiler_1_1compilation__results" ]
       ] ],
-      [ "config", null, [
-        [ "statistics", null, [
-          [ "container", "structink_1_1config_1_1statistics_1_1container.html", null ],
-          [ "global", "structink_1_1config_1_1statistics_1_1global.html", "structink_1_1config_1_1statistics_1_1global" ],
+      [ "config", "namespaceink_1_1config.html", [
+        [ "statistics", "namespaceink_1_1config_1_1statistics.html", [
+          [ "container", "structink_1_1config_1_1statistics_1_1container.html", "structink_1_1config_1_1statistics_1_1container" ],
           [ "list_table", "structink_1_1config_1_1statistics_1_1list__table.html", "structink_1_1config_1_1statistics_1_1list__table" ],
-          [ "runner", "structink_1_1config_1_1statistics_1_1runner.html", "structink_1_1config_1_1statistics_1_1runner" ],
-          [ "string_table", "structink_1_1config_1_1statistics_1_1string__table.html", null ]
+          [ "string_table", "structink_1_1config_1_1statistics_1_1string__table.html", "structink_1_1config_1_1statistics_1_1string__table" ],
+          [ "global", "structink_1_1config_1_1statistics_1_1global.html", "structink_1_1config_1_1statistics_1_1global" ],
+          [ "runner", "structink_1_1config_1_1statistics_1_1runner.html", "structink_1_1config_1_1statistics_1_1runner" ]
         ] ]
       ] ],
       [ "runtime", "namespaceink_1_1runtime.html", [
@@ -25,6 +25,7 @@ var annotated_dup =
       ] ]
     ] ],
     [ "AInkRuntime", "class_a_ink_runtime.html", "class_a_ink_runtime" ],
+    [ "FInkHandle", "struct_f_ink_handle.html", "struct_f_ink_handle" ],
     [ "FInkSnapshot", "struct_f_ink_snapshot.html", "struct_f_ink_snapshot" ],
     [ "FInkVar", "struct_f_ink_var.html", null ],
     [ "FListFlag", "struct_f_list_flag.html", "struct_f_list_flag" ],
@@ -39,6 +40,7 @@ var annotated_dup =
     [ "UInkAsset", "class_u_ink_asset.html", null ],
     [ "UInkChoice", "class_u_ink_choice.html", "class_u_ink_choice" ],
     [ "UInkList", "class_u_ink_list.html", "class_u_ink_list" ],
+    [ "UInkMigratableSnapshotAsync", "class_u_ink_migratable_snapshot_async.html", null ],
     [ "UInkThread", "class_u_ink_thread.html", "class_u_ink_thread" ],
     [ "UInkVarLibrary", "class_u_ink_var_library.html", null ],
     [ "UTagList", "class_u_tag_list.html", "class_u_tag_list" ]

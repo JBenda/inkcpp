@@ -7,5 +7,6 @@ var searchData=
   ['has_5ftags_4',['has_tags',['../classink_1_1runtime_1_1choice.html#a43ada6038d4f323e42dde255162f2fce',1,'ink::runtime::choice::has_tags()'],['../classink_1_1runtime_1_1runner__interface.html#a0374a4dd14a26929de47e5cf12868dde',1,'ink::runtime::runner_interface::has_tags()']]],
   ['hasenum_5',['HasEnum',['../class_u_tag_list.html#a7ee9b59f50482718fe1f8eed47f24a3e',1,'UTagList']]],
   ['hash_6',['hash',['../classink_1_1runtime_1_1story.html#aa294afadf928ee0a9df25c0d0735d72e',1,'ink::runtime::story']]],
-  ['hash_5fstring_7',['hash_string',['../namespaceink.html#add30d4ab28415ba7fdbbc67ed0de9630',1,'ink']]]
+  ['hash_5fdata_7',['hash_data',['../namespaceink.html#aa6cbe74bcafeed42e49544cb9e643126',1,'ink']]],
+  ['hash_5fstring_8',['hash_string',['../namespaceink.html#add30d4ab28415ba7fdbbc67ed0de9630',1,'ink']]]
 ];

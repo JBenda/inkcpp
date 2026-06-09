@@ -1,5 +1,6 @@
 var classink_1_1runtime_1_1runner__interface =
 [
+    [ "line_type", "classink_1_1runtime_1_1runner__interface.html#a2bfe0479270bfa9347fb61a703f6ae63", null ],
     [ "begin", "classink_1_1runtime_1_1runner__interface.html#a0372a6e0dc9f3c8c2d8a428efedc78da", null ],
     [ "bind", "classink_1_1runtime_1_1runner__interface.html#a4714f92451c75d3eb9def12ac1c9b6bb", null ],
     [ "bind", "classink_1_1runtime_1_1runner__interface.html#a104b364f7813bb85b2970a4f718d4e24", null ],
@@ -22,6 +23,7 @@ var classink_1_1runtime_1_1runner__interface =
     [ "has_global_tags", "classink_1_1runtime_1_1runner__interface.html#a2f549b9fc502fdb41445eac6bd5707e7", null ],
     [ "has_knot_tags", "classink_1_1runtime_1_1runner__interface.html#a40910043aaa0c6803a75716b8c3be2ff", null ],
     [ "has_tags", "classink_1_1runtime_1_1runner__interface.html#a0374a4dd14a26929de47e5cf12868dde", null ],
+    [ "move_to", "classink_1_1runtime_1_1runner__interface.html#aa6c487f17a35466a08430fb24d1d68b8", null ],
     [ "move_to", "classink_1_1runtime_1_1runner__interface.html#ab82d435af1828da231b1a60b6d06d492", null ],
     [ "num_choices", "classink_1_1runtime_1_1runner__interface.html#ae86dc739d94d0969b8d4759ac3205272", null ],
     [ "num_global_tags", "classink_1_1runtime_1_1runner__interface.html#a55258152885fecbc36eba94ec82ccb67", null ],

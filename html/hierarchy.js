@@ -6,6 +6,7 @@ var hierarchy =
     [ "ink::runtime::choice", "classink_1_1runtime_1_1choice.html", null ],
     [ "ink::compiler::compilation_results", "structink_1_1compiler_1_1compilation__results.html", null ],
     [ "ink::config::statistics::container", "structink_1_1config_1_1statistics_1_1container.html", null ],
+    [ "FInkHandle", "struct_f_ink_handle.html", null ],
     [ "FInkSnapshot", "struct_f_ink_snapshot.html", null ],
     [ "FInkVar", "struct_f_ink_var.html", null ],
     [ "ink::runtime::list_interface::iterator::Flag", "structink_1_1runtime_1_1list__interface_1_1iterator_1_1_flag.html", null ],
@@ -27,8 +28,13 @@ var hierarchy =
     [ "ink::runtime::runner_interface", "classink_1_1runtime_1_1runner__interface.html", null ],
     [ "ink::runtime::snapshot", "classink_1_1runtime_1_1snapshot.html", null ],
     [ "ink::runtime::story", "classink_1_1runtime_1_1story.html", null ],
-    [ "ink::runtime::story_ptr< T >", "classink_1_1runtime_1_1story__ptr.html", null ],
+    [ "ink::runtime::story_ptr&lt; T &gt;", "classink_1_1runtime_1_1story__ptr.html", null ],
+    [ "ink::runtime::story_ptr&lt; globals_interface &gt;", "classink_1_1runtime_1_1story__ptr.html", null ],
+    [ "ink::runtime::story_ptr&lt; runner_interface &gt;", "classink_1_1runtime_1_1story__ptr.html", null ],
     [ "ink::config::statistics::string_table", "structink_1_1config_1_1statistics_1_1string__table.html", null ],
+    [ "UBlueprintAsyncActionBase", null, [
+      [ "UInkMigratableSnapshotAsync", "class_u_ink_migratable_snapshot_async.html", null ]
+    ] ],
     [ "UBlueprintFunctionLibrary", null, [
       [ "UInkVarLibrary", "class_u_ink_var_library.html", null ]
     ] ],
