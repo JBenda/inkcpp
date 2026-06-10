@@ -30,13 +30,13 @@ struct INKCPP_API FInkSnapshot {
 	    , Migratable(migratable)
 	{
 	}
-	UPROPERTY(BlueprintReadWrite, SaveGame, Category = "ink|SaveGame")
+	UPROPERTY(BlueprintReadWrite, SaveGame, Category = "Ink|SaveGame")
 	/** Raw data used to restore runtime state.
 	 *  not needed if a USaveGame is used.
 	 */
 	TArray<uint8> data;
 
-	UPROPERTY(BlueprintReadOnly, SaveGame, Category = "ink|SaveGame")
+	UPROPERTY(BlueprintReadOnly, SaveGame, Category = "Ink|SaveGame")
 	/** Is true if the snapshot is migratable.
 	 */
 	bool Migratable;

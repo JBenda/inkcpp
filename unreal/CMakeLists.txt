@@ -16,13 +16,6 @@ if(INKCPP_UNREAL)
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/inkcpp/inkcpp.uplugin.in"
 								 "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/inkcpp.uplugin")
 
-	# Try to download inklecate for all platforms. The FetchContent_Declare calls (with URLs and
-	# hashes) live in the root CMakeLists.txt. For Fab store distributions the bundled binaries are
-	# stripped; users configure the path themselves via Project Settings > Plugins > InkCPP.
-	FetchContent_MakeAvailable(inklecate_mac inklecate_windows inklecate_linux)
-	set(FETCHCONTENT_QUIET OFF)
-	set(CMAKE_TLS_VERIFY true)
-
 	# Default all platform paths to empty (= "not bundled"). They are filled in only when the download
 	# succeeded.
 	set(INKLECATE_CMD_WIN "")
@@ -101,7 +94,7 @@ if(INKCPP_UNREAL)
 					to build target `unreal` set the filepath with the variable INKCPP_UNREAL_RunUAT_PATH")
 		endif()
 	else()
-		message(WARNING, "To directly build the plugin with `cmake --build . --target unreal` please \
+		message(WARNING "To directly build the plugin with `cmake --build . --target unreal` please \
 						set INKCPP_UNREAL_RunUAT_PATH to point to unreals RunUAT script.")
 	endif()
 

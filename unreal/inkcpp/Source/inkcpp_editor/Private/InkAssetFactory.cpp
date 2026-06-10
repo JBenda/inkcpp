@@ -106,11 +106,11 @@ void ShowInklecateSetupDialog()
 	    = (platform == TEXT("Windows")) ? TEXT("inklecate.exe") : TEXT("inklecate");
 	const FString contentSubFolder = TEXT("Content/inklecate/");
 
-	const FText titleText = NSLOCTEXT("InkCPP", "SetupTitle", "InkCPP: Inklecate Setup Required");
+	const FText titleText = NSLOCTEXT("InkCpp", "SetupTitle", "InkCPP: Inklecate Setup Required");
 
 	const FText bodyText = FText::Format(
 	    NSLOCTEXT(
-	        "InkCPP", "SetupBody",
+	        "InkCpp", "SetupBody",
 	        "To import .ink story files directly, InkCPP needs the inklecate compiler.\n\n"
 	        "Quick setup steps:\n"
 	        "  1. Download {0} for {1} using the link below.\n"
@@ -119,12 +119,9 @@ void ShowInklecateSetupDialog()
 	        "  3. Open Project Settings > Plugins > InkCPP and set\n"
 	        "     \"Inklecate Executable Path\" to:\n"
 	        "         {3}\n\n"
-	        "Tip: import a .ink.json file (exported from Inky) to skip inklecate entirely.\n\n"
-	        "This build of InkCPP expects ink format version {4}."
 	    ),
 	    FText::FromString(zipName), FText::FromString(platform),
-	    FText::FromString(contentSubFolder + binaryName), FText::FromString(recommendedPath),
-	    FText::AsNumber(( int64 ) ink::InkVersion)
+	    FText::FromString(contentSubFolder + binaryName), FText::FromString(recommendedPath)
 	);
 
 	TSharedPtr<SWindow> DialogPtr;
@@ -145,7 +142,7 @@ void ShowInklecateSetupDialog()
 	      0.f, 0.f, 0.f, 12.f
 	  )[SNew(SHyperlink)
 	        .Text(FText::Format(
-	            NSLOCTEXT("InkCPP", "DownloadLinkLabel", "Download: {0}"),
+	            NSLOCTEXT("InkCpp", "DownloadLinkLabel", "Download: {0}"),
 	            FText::FromString(downloadUrl)
 	        ))
 	        .OnNavigate_Lambda([downloadUrl]() {
@@ -156,11 +153,11 @@ void ShowInklecateSetupDialog()
 	    + SHorizontalBox::Slot().AutoWidth().Padding(
 	        0.f, 0.f, 8.f, 0.f
 	    )[SNew(SButton)
-	          .Text(NSLOCTEXT("InkCPP", "OpenSettingsBtn", "Open Project Settings"))
+	          .Text(NSLOCTEXT("InkCpp", "OpenSettingsBtn", "Open Project Settings"))
 	          .OnClicked_Lambda([DialogPtr]() {
 		          if (ISettingsModule* SettingsModule
 		              = FModuleManager::GetModulePtr<ISettingsModule>("Settings")) {
-			          SettingsModule->ShowViewer(TEXT("Project"), TEXT("Plugins"), TEXT("InkCPP"));
+			          SettingsModule->ShowViewer(TEXT("Project"), TEXT("Plugins"), TEXT("InkCpp"));
 		          }
 		          if (DialogPtr.IsValid()) {
 			          DialogPtr->RequestDestroyWindow();
@@ -168,7 +165,7 @@ void ShowInklecateSetupDialog()
 		          return FReply::Handled();
 	          })]
 	    + SHorizontalBox::Slot().AutoWidth()[SNew(SButton)
-	                                             .Text(NSLOCTEXT("InkCPP", "CloseBtn", "Close"))
+	                                             .Text(NSLOCTEXT("InkCpp", "CloseBtn", "Close"))
 	                                             .OnClicked_Lambda([DialogPtr]() {
 		                                             if (DialogPtr.IsValid()) {
 			                                             DialogPtr->RequestDestroyWindow();
@@ -180,76 +177,6 @@ void ShowInklecateSetupDialog()
 	FSlateApplication::Get().AddModalWindow(Dialog, nullptr, false);
 }
 
-// -------------------------------------------------------------------------
-// Inklecate version check
-// -------------------------------------------------------------------------
-
-/**
- * Runs "inklecate --version", parses the ink JSON version from its output, and
- * logs a warning if it does not match ink::InkVersion.
- * This check is non-fatal — a version mismatch may still compile correctly.
- */
-void CheckInklecateVersion(const std::string& inklecatePath)
-{
-	const std::string versionCmd = "\"" + inklecatePath + "\" --version 2>&1";
-
-	FILE* pipe =
-#if PLATFORM_WINDOWS
-	    _popen(versionCmd.c_str(), "r");
-#else
-	    popen(versionCmd.c_str(), "r");
-#endif
-	if (! pipe) {
-		UE_LOG(
-		    InkCpp, Warning, TEXT("InkCPP: Could not run inklecate --version (version check skipped).")
-		);
-		return;
-	}
-
-	std::string output;
-	char        buf[256];
-	while (fgets(buf, sizeof(buf), pipe)) {
-		output += buf;
-	}
-#if PLATFORM_WINDOWS
-	_pclose(pipe);
-#else
-	pclose(pipe);
-#endif
-
-	// inklecate prints something like "ink version: 21" or "inkVersion=21"
-	FString       outputFStr(output.c_str());
-	FRegexMatcher matcher(
-	    FRegexPattern(
-	        TEXT("(?:ink[Vv]ersion\\s*[=:]\\s*|ink\\s+version\\s*:?\\s*)(\\d+)"),
-	        ERegexPatternFlags{0}
-	    ),
-	    outputFStr
-	);
-
-	if (matcher.FindNext()) {
-		int32 reported = FCString::Atoi(*matcher.GetCaptureGroup(1));
-		if (static_cast<uint32_t>(reported) != ink::InkVersion) {
-			UE_LOG(
-			    InkCpp, Warning,
-			    TEXT("InkCPP: inklecate reports ink version %d, but this build of InkCPP expects "
-			         "version %u. Compilation may succeed but runtime behaviour could differ. "
-			         "Download a matching inklecate from https://github.com/inkle/ink/releases"),
-			    reported, ink::InkVersion
-			);
-		} else {
-			UE_LOG(
-			    InkCpp, Display, TEXT("InkCPP: inklecate version check passed (ink version %d)."),
-			    reported
-			);
-		}
-	} else {
-		UE_LOG(
-		    InkCpp, Warning, TEXT("InkCPP: Could not parse ink version from inklecate output: %s"),
-		    *outputFStr
-		);
-	}
-}
 
 } // anonymous namespace
 
@@ -369,9 +296,6 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 				bOutOperationCanceled = true;
 				return nullptr;
 			}
-
-			// Non-fatal version compatibility check
-			CheckInklecateVersion(inklecate_cmd);
 
 			// Build the inklecate invocation
 			use_temp_file = true;

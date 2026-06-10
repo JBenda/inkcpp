@@ -16,7 +16,7 @@
  *
  * @ingroup unreal
  */
-UCLASS(config = EditorPerProjectUserSettings, defaultconfig, meta = (DisplayName = "InkCPP"))
+UCLASS(config = Editor, DefaultConfig)
 
 class INKCPP_EDITOR_API UInkCppEditorSettings : public UDeveloperSettings
 {
@@ -26,7 +26,9 @@ public:
 	UInkCppEditorSettings();
 
 	// ~Begin UDeveloperSettings
+	virtual FName GetContainerName() const override;
 	virtual FName GetCategoryName() const override;
+	virtual FName GetSectionName() const override;
 	virtual FText GetSectionText() const override;
 	virtual FText GetSectionDescription() const override;
 	// ~End UDeveloperSettings
@@ -46,13 +48,12 @@ public:
 	 *   https://github.com/inkle/ink/releases
 	 */
 	UPROPERTY(
-	    config, EditAnywhere, Category = "Inklecate",
+	    config, EditAnywhere, Category = "Ink",
 	    meta
 	    = (DisplayName = "Inklecate Executable Path",
-	       ToolTip = "Absolute path to the inklecate executable (leave empty to use system PATH).",
-	       FilePathFilter = "exe,inklecate,", RelativeToGameDir = false)
+	       ToolTip = "Absolute path to the inklecate executable.", RelativeToGameDir = false)
 	)
-	FFilePath InklatePath;
+	FFilePath InklcatePath = TEXT("<NULL>");
 
 	/** Returns the configured path string, or an empty string if not set. */
 	FString GetInklecatePath() const;

@@ -34,7 +34,7 @@ inline std::string get_inklecate_cmd()
 	if (const UInkCppEditorSettings* Settings = GetDefault<UInkCppEditorSettings>())
 	{
 		FString ConfiguredPath = Settings->GetInklecatePath().TrimStartAndEnd();
-		if (!ConfiguredPath.IsEmpty())
+		if (!ConfiguredPath.IsEmpty() && ConfiguredPath != "<NULL>")
 		{
 			FPaths::NormalizeFilename(ConfiguredPath);
 			return std::string(TCHAR_TO_UTF8(*ConfiguredPath));
@@ -66,7 +66,7 @@ inline std::string get_inklecate_cmd()
 			if (UInkCppEditorSettings* MutableSettings =
 			        GetMutableDefault<UInkCppEditorSettings>())
 			{
-				MutableSettings->InklatePath.FilePath = FullPath;
+				MutableSettings->InklcatePath.FilePath = FullPath;
 				MutableSettings->SaveConfig();
 			}
 

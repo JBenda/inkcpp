@@ -16,7 +16,7 @@
  * Returns the path to the inklecate executable as a UTF-8 string.
  *
  * Resolution order:
- *  1. Value set in Project Settings > Plugins > InkCPP (InklatePath).
+ *  1. Value set in Project Settings > Plugins > InkCPP (InklcatePath).
  *  2. Empty string — caller interprets this as "inklecate not configured".
  *
  * A non-empty path does NOT guarantee the file exists; the caller is
@@ -27,7 +27,7 @@ inline std::string get_inklecate_cmd()
 	const UInkCppEditorSettings* Settings = GetDefault<UInkCppEditorSettings>();
 	if (Settings) {
 		FString ConfiguredPath = Settings->GetInklecatePath().TrimStartAndEnd();
-		if (! ConfiguredPath.IsEmpty()) {
+		if (! ConfiguredPath.IsEmpty() && ConfiguredPath != TEXT("<NULL>")) {
 			// Convert any forward/backward slashes to the OS-preferred separator
 			FPaths::NormalizeFilename(ConfiguredPath);
 			return std::string(TCHAR_TO_UTF8(*ConfiguredPath));
