@@ -29,6 +29,7 @@ if(INKCPP_UNREAL)
 				 DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/ThirdParty/inklecate/")
 		set(INKCPP_INKLECATE_BUNDLED TRUE)
 	else()
+		file(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/ThirdParty/inklecate/windows")
 		message(WARNING "InkCPP: failed to download inklecate for Windows. "
 										"A .ink file can still be imported if the user configures the inklecate path "
 										"in Project Settings > Plugins > InkCPP.")
@@ -39,6 +40,7 @@ if(INKCPP_UNREAL)
 				 DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/ThirdParty/inklecate/")
 		set(INKCPP_INKLECATE_BUNDLED TRUE)
 	else()
+		file(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/ThirdParty/inklecate/mac")
 		message(WARNING "InkCPP: failed to download inklecate for macOS. "
 										"A .ink file can still be imported if the user configures the inklecate path "
 										"in Project Settings > Plugins > InkCPP.")
@@ -49,6 +51,7 @@ if(INKCPP_UNREAL)
 				 DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/ThirdParty/inklecate/")
 		set(INKCPP_INKLECATE_BUNDLED TRUE)
 	else()
+		file(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/inkcpp/Source/ThirdParty/inklecate/linux")
 		message(WARNING "InkCPP: failed to download inklecate for Linux. "
 										"A .ink file can still be imported if the user configures the inklecate path "
 										"in Project Settings > Plugins > InkCPP.")
