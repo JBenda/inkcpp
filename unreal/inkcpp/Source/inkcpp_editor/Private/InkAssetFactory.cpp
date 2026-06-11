@@ -312,9 +312,8 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 			// Note: on Windows, if std::system()'s argument begins with '"', the outer
 			// pair of quotes is stripped, breaking paths with spaces. Emitting the first
 			// character outside the quoted section works around this.
-			cmd << inklecate_cmd[0] << "\"" << (inklecate_cmd.c_str() + 1) << "\""
-			    << " -o \"" << json_path.string() << "\""
-			    << " \"" << story_path.string() << "\" 2>&1";
+			cmd << inklecate_cmd[0] << "\"" << (inklecate_cmd.c_str() + 1) << "\"" << " -o \""
+			    << json_path.string() << "\"" << " \"" << story_path.string() << "\" 2>&1";
 			const std::string cmd_str = cmd.str();
 			int               result  = std::system(cmd_str.c_str());
 			if (result != 0) {
