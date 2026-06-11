@@ -63,7 +63,10 @@ mkdir build
 cd build
 mkdir plugin
 mkdir plugin-build
-cmake -DINKCPP_UNREAL_TARGET_VERSION="5.7" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=OS -INKCPP_UNREAL_TARGET_PLATFORM=Win64 ..
+cmake -DINKCPP_UNREAL_TARGET_VERSION="5.7" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=OS -DINKCPP_UNREAL_RunUAT_PATH=\Path\TO\UNREAL_ENGINE\Build\BatchFiles\RunUAT.bat -DINKCPP_UNREAL_TARGET_PLATFORM=Win64 ..
+# to set the variables with a GUI use
+# cmake ..
+# cmage-gui .
 cmake --build . --target unreal
 cmake --install . --componunt unreal_plugin --perifx ./your_project/Plugins # --prefix = path to global Plugins directory  of UE or to your GameProject
 ```
