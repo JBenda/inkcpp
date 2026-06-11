@@ -35,7 +35,7 @@ jobs:
       - name: List
         run: tree
       - name: Publish to PyPI
-        if: ${{! contains(github.ref_name, "+UEPatch")}}
+        if: ${{ !contains(github.ref_name, '+UEPatch')}}
         uses: pypa/gh-action-pypi-publish@release/v1.12
       - name: Create release
         env:
