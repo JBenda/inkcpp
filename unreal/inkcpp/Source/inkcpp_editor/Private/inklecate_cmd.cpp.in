@@ -31,11 +31,10 @@
 inline std::string get_inklecate_cmd()
 {
 	// --- 1. User-configured path takes priority ---
-	if (const UInkCppEditorSettings* Settings = GetDefault<UInkCppEditorSettings>())
-	{
+	if (const UInkCppEditorSettings* Settings = GetDefault<UInkCppEditorSettings>()) {
 		FString ConfiguredPath = Settings->GetInklecatePath().TrimStartAndEnd();
-		if (!ConfiguredPath.IsEmpty() && ConfiguredPath != "<NULL>")
-		{
+
+		if (! ConfiguredPath.IsEmpty()) {
 			FPaths::NormalizeFilename(ConfiguredPath);
 			return std::string(TCHAR_TO_UTF8(*ConfiguredPath));
 		}
@@ -53,19 +52,15 @@ inline std::string get_inklecate_cmd()
 	relPath = TEXT("@INKLECATE_CMD_LINUX@");
 #endif
 
-	if (!relPath.IsEmpty())
-	{
+	if (! relPath.IsEmpty()) {
 		// Resolve relative to the plugin's installation directory
 		TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("InkCPP"));
-		if (Plugin.IsValid())
-		{
+		if (Plugin.IsValid()) {
 			FString FullPath = Plugin->GetBaseDir() / relPath;
 			FPaths::NormalizeFilename(FullPath);
 
 			// Auto-fill Project Settings so the user can see and override the path
-			if (UInkCppEditorSettings* MutableSettings =
-			        GetMutableDefault<UInkCppEditorSettings>())
-			{
+			if (UInkCppEditorSettings* MutableSettings = GetMutableDefault<UInkCppEditorSettings>()) {
 				MutableSettings->InklcatePath.FilePath = FullPath;
 				MutableSettings->SaveConfig();
 			}

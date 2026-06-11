@@ -300,7 +300,7 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 			// Build the inklecate invocation
 			use_temp_file = true;
 			char tmp_filename[L_tmpnam];
-			if (tmpnam_s(tmp_filename, sizeof(tmp_filename)) != 0) {
+			if (tmpnam(tmp_filename) == 0) {
 				UE_LOG(InkCpp, Error, TEXT("InkCPP: Failed to create a temporary file name."));
 				return nullptr;
 			}

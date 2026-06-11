@@ -11,9 +11,6 @@ UInkCppEditorSettings::UInkCppEditorSettings()
 {
 	CategoryName = TEXT("Plugins");
 	SectionName  = TEXT("InkCPP");
-	if (InklcatePath.FilePath == TEXT("<NULL>")) {
-		InklcatePath.FilePath = *FString(get_inklecate_cmd().c_str());
-	}
 }
 
 FName UInkCppEditorSettings::GetContainerName() const { return TEXT("Project"); }

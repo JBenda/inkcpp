@@ -27,7 +27,7 @@ inline std::string get_inklecate_cmd()
 	const UInkCppEditorSettings* Settings = GetDefault<UInkCppEditorSettings>();
 	if (Settings) {
 		FString ConfiguredPath = Settings->GetInklecatePath().TrimStartAndEnd();
-		if (! ConfiguredPath.IsEmpty() && ConfiguredPath != TEXT("<NULL>")) {
+		if (! ConfiguredPath.IsEmpty()) {
 			// Convert any forward/backward slashes to the OS-preferred separator
 			FPaths::NormalizeFilename(ConfiguredPath);
 			return std::string(TCHAR_TO_UTF8(*ConfiguredPath));

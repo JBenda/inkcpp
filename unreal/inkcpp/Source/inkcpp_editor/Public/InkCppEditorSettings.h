@@ -53,7 +53,7 @@ public:
 	    = (DisplayName = "Inklecate Executable Path",
 	       ToolTip = "Absolute path to the inklecate executable.", RelativeToGameDir = false)
 	)
-	FFilePath InklcatePath = TEXT("<NULL>");
+	FFilePath InklcatePath;
 
 	/** Returns the configured path string, or an empty string if not set. */
 	FString GetInklecatePath() const;
