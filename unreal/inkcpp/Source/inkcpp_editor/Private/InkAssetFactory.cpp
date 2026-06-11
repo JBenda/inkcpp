@@ -269,7 +269,7 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 		if (cFilename.size() > ink_suffix.size()
 		    && std::equal(ink_suffix.rbegin(), ink_suffix.rend(), cFilename.rbegin())) {
 			// ---- .ink file: needs inklecate ----
-			const std::string inklecate_cmd = get_inklecate_cmd();
+			std::string inklecate_cmd = get_inklecate_cmd();
 
 			if (inklecate_cmd.empty()) {
 				// No path configured → show setup tutorial and abort
@@ -285,6 +285,15 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 			}
 
 			// Verify the binary actually exists on disk
+			// remove quotation marks
+			if ((inklecate_cmd.front() == '"' && inklecate_cmd.back() == '"')
+			    || (inklecate_cmd.front() == '\'' && inklecate_cmd.back() == '\'')) {
+				inklecate_cmd.erase(inklecate_cmd.begin());
+				inklecate_cmd.erase(inklecate_cmd.end() - 1);
+			}
+			if (! std::filesystem::path(inklecate_cmd).is_absolute()) {
+				inklecate_cmd = std::string(TCHAR_TO_UTF8(*FPaths::ProjectDir())) + inklecate_cmd;
+			}
 			if (! std::filesystem::exists(inklecate_cmd)) {
 				UE_LOG(
 				    InkCpp, Warning,
