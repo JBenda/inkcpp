@@ -11,14 +11,14 @@ public class inkcpp_editor : ModuleRules
         PCHUsage = ModuleRules.PCHUsageMode.NoSharedPCHs;
         PrivatePCHHeaderFile = "Public/inkcpp_editor.h";
         CppStandard = CppStandardVersion.Cpp20;
-		
+
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
 			}
 			);
-				
-		
+
+
 		PrivateIncludePaths.AddRange(
 			new string[] {
                 Path.Combine(ModuleDirectory, "../shared/Private"),
@@ -26,8 +26,8 @@ public class inkcpp_editor : ModuleRules
 				Path.Combine(ModuleDirectory, "../ThirdParty/Private"),
             }
 			);
-			
-		
+
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -36,8 +36,8 @@ public class inkcpp_editor : ModuleRules
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
-			
-		
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -45,12 +45,16 @@ public class inkcpp_editor : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-                "inkcpp",
-                "UnrealEd",
-            }
-            );
-		
-		
+				"inkcpp",
+				"UnrealEd",
+				// DeveloperSettings provides UDeveloperSettings (Project Settings integration)
+				"DeveloperSettings",
+				// Settings module used to open the Project Settings viewer programmatically
+				"Settings",
+			}
+			);
+
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{

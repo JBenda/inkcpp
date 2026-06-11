@@ -19,7 +19,7 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Download artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -35,6 +35,7 @@ jobs:
       - name: List
         run: tree
       - name: Publish to PyPI
+        if: ${{! contains(github.ref_name, "+UEPatch")}}
         uses: pypa/gh-action-pypi-publish@release/v1.12
       - name: Create release
         env:

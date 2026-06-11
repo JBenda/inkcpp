@@ -20,6 +20,7 @@ FetchContent_Declare(
 	URL_HASH SHA256=26f4e188e02536d6e99e73e71d9b13e2c2144187f1368a87e82fd5066176cff8
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/inklecate/linux")
 set(FETCHCONTENT_QUIET OFF)
+set(CMAKE_TLS_VERIFY ON)
 mark_as_advanced(FETCHCONTENT_QUIET)
 set(CMAKE_TLS_VERIFY true)
 mark_as_advanced(CMAKE_TLS_VERIFY)
@@ -58,8 +59,8 @@ option(INKCPP_PY "Build python bindings" OFF)
 cmake_dependent_option(WHEEL_BUILD "Set for build wheel python lib. (see setup.py for ussage)" OFF
 											 "INKCPP_PY" OFF)
 option(INKCPP_C "Build c library" OFF)
-option(INKCPP_TEST "Build inkcpp tests (requires: inklecate in path / env: INKLECATE set \
-	/ INKCPP_INKLECATE=OS or ALL)" OFF)
+option(INKCPP_TEST "Build inkcpp tests (requires: inklecate in path OR env: INKLECATE set \
+	OR INKCPP_INKLECATE=OS or ALL)" OFF)
 set(INKCPP_INKLECATE
 		"NONE"
 		CACHE STRING "If inklecate should be downloaded automatically from the official release page. \

@@ -44,9 +44,15 @@ KeyFeatures: snapshots, observers, binding ink functions, support ink [function 
 ## Unreal Plugin
 
 InkCPP is available via the [UE Marketplace](https://www.unrealengine.com/marketplace/product/inkcpp).
+Since the Unrea Marketplace does not allow for bundling executables, you must install inklecate by hand.
+If you add the first asset you will get prompted to download the correct version. Alternativly download [inklecate v1.1.1](https://github.com/inkle/ink/releases/tag/v1.1.1) unzip it and set `Project Settings > Plugins > InkCPP > Inklecate Executable Path` to the path.
+
 
 Alternativly is the latest version of the UE plugin can be downloaded from the [release page](https://github.com/JBenda/inkcpp/releases/latest) (`unreal.zip`).
-Place the content of this file at your plugin folder of your UE project and at the next start up it will be intigrated.
+Place the content of this file at a location of your choice and run the following command to build the Plugin.
+```sh
+\PATH\TO\UNREAL_ENGINE\Build\BatchFiles\RunUAT.bat BuildPlugin -plugin=<location_of_your_choice>\inkcpp\inkcpp.uplugin -package=GameProject\Plugins\inkcpp -TargetPlatforms=Win64 # compile plugin
+```
 
 
 A example project can be found [here](https://jbenda.github.io/inkcpp/unreal/InkCPP_DEMO.zip). And here the [Documentation](https://jbenda.github.io/inkcpp/html/group__unreal.html).
@@ -57,12 +63,14 @@ mkdir build
 cd build
 mkdir plugin
 mkdir plugin-build
-cmake -DINKCPP_UNREAL_TARGET_VERSION="5.5" ..
-cmake --install . --component unreal --prefix .\plugin  # create source files for plugin
-\PATH\TO\UNREAL_ENGINE\Build\BatchFiles\RunUAT.bat BuildPlugin -plugin=GIT_REPO\build\plugin\inkcpp\inkcpp.uplugin -package=GIT_REPO\build\plugin-build\inkcpp -TargetPlatforms=Win64 # compile plugin
-move plugin-build\inkcpp UE_ENGINE\Engine\Plugins\inkcpp
+cmake -DINKCPP_UNREAL_TARGET_VERSION="5.7" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=OS -DINKCPP_UNREAL_RunUAT_PATH=\Path\TO\UNREAL_ENGINE\Build\BatchFiles\RunUAT.bat -DINKCPP_UNREAL_TARGET_PLATFORM=Win64 ..
+# to set the variables with a GUI use
+# cmake ..
+# cmage-gui .
+cmake --build . --target unreal
+cmake --install . --componunt unreal_plugin --perifx ./your_project/Plugins # --prefix = path to global Plugins directory  of UE or to your GameProject
 ```
-Adapt `TargetPlatforms` as nessesarry. You might also want to install the Plugin directly into a project or the in UE5.5 introduced external plugin directory. Just adapt the pathets accordendly.
+Adapt `TargetPlatforms` as nessesarry. You might also want to install the Plugin directly into a project or the in UE5.5 introduced external plugin directory. Just adapt the pathes accordendly.
 
 ## Use standalone
 
