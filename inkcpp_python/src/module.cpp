@@ -122,18 +122,17 @@ Use iter(List) to iterate over all flags.)",
 	// py_value.def(py::init<>());
 	py_value.def(py::init<bool>(), py::arg("value").none(false));
 	py_value.def(
-	    "__init__",
-	    [](value& self, uint32_t v, value::Type type) {
+	    py::init([](uint32_t v, value::Type type) {
 		    if (type != value::Type::Uint32) {
 			    throw py::key_error("only use this signture if you want to explicit pass a uint");
 		    }
-		    self = value(v);
-	    },
+		    return value(v);
+	    }),
 	    "Used to explicit set a Uint32 value. Type must be inkcpp_py.Value.Type.Uint32!",
 	    py::arg("value").none(false), py::arg("type").none(false)
 	);
 	py_value.def(py::init<int32_t>(), py::arg("value").none(false));
-	py_value.def(py::init<float>(), py::arg("value").none(false));
+	py_value.def(py::init<float>(), py::arg("value").none(false).noconvert());
 	py_value.def(py::init<ilist*>(), py::arg("value").none(false));
 	py_value.def(
 	    py::init([](const std::string& str) { return new StringValueWrap(str); }),
@@ -288,7 +287,7 @@ Args:
 	        py::arg("name").none(false), py::arg("callback").none(false)
 	    )
 	    .def(
-	        "__getattr__",
+	        "__getitem__",
 	        [](const globals& self, const std::string& key) {
 		        auto res = self.get<value>(key.c_str());
 		        if (! res.has_value()) {
@@ -298,7 +297,7 @@ Args:
 	        },
 	        "Access global varible if exists, if not throws an KeyError"
 	    )
-	    .def("__setattr__", [](globals& self, const std::string& key, const value& val) {
+	    .def("__setitem__", [](globals& self, const std::string& key, const value& val) {
 		    if (! self.set<value>(key.c_str(), val)) {
 			    throw py::key_error(
 			        std::string("No global variable with name '") + key
@@ -320,12 +319,9 @@ To reload:
 	        )"
 	    )
 	    .def("can_continue", &runner::can_continue, "check if there is content left in story")
+	    .def("getline", py::overload_cast<>(&runner::getline), "Get content of the next output line")
 	    .def(
-	        "getline", static_cast<std::string (runner::*)()>(&runner::getline),
-	        "Get content of the next output line"
-	    )
-	    .def(
-	        "getall", static_cast<std::string (runner::*)()>(&runner::getall),
+	        "getall", py::overload_cast<>(&runner::getall),
 	        "execute getline and append until inkcp_py.Runner.can_continue is false"
 	    )
 	    .def("has_tags", &runner::has_tags, "Where there tags assoziated with the last line.")

@@ -238,8 +238,8 @@ if(NOT WHEEL_BUILD)
 			COMMAND
 				${CMAKE_COMMAND} -E cmake_echo_color --cyan
 				"Build Doxygen documentation in ${PROJECT_SOURCE_DIR}/Documentation."
-				"To view them you can for example use" "\"    python -m http.server -d \\\"\
-				${PROJECT_SOURCE_DIR}/Documentation\\\" 8080\"" "    explorer http://localhost:8080/html")
+				"To view them you can for example use" "\"    python -m http.server -d \
+\\\"${PROJECT_SOURCE_DIR}/Documentation/html\\\" 8080\"" "    explorer http://localhost:8080/html")
 
 		set(PY_HTML "${PROJECT_SOURCE_DIR}/Documentation/inkcpp_py.html")
 		if(INKCPP_PY)
@@ -247,7 +247,7 @@ if(NOT WHEEL_BUILD)
 			add_custom_target(
 				inkcpp_py_doc
 				python -m pybind11_stubgen -o . inkcpp_py
-				COMMAND python -m pdoc -d google -o . inkcpp_py.pyi
+				COMMAND python -m pdoc -d google -o . inkcpp_py
 				COMMAND ${CMAKE_COMMAND} -E copy "./inkcpp_py.html" ${PY_HTML}
 				DEPENDS inkcpp_py
 				WORKING_DIRECTORY $<TARGET_FILE_DIR:inkcpp_py>
