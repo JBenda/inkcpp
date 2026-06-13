@@ -300,6 +300,7 @@ function construct_ueasset(type, signature, doxy_blueprint_args) {
         		builder = build_call;
       		} break;
         case "BlueprintImplementableEvent": builder = build_event; break;
+        case "BlueprintNativeEvent": builder = build_event; break;
         case "BlueprintPure": builder = build_pure; break;
         default: throw new Exception(`unknown type: '${type}'`);
     }

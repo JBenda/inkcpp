@@ -86,7 +86,7 @@ public:
 	AInkRuntime* GetRuntime() const { return mpRuntime; }
 
 	// Called before the thread begins executing
-	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	UFUNCTION(BlueprintNativeEvent, Category = "Ink")
 	/** triggered after initializing the runner
 	 *
 	 * @blueprint
@@ -94,7 +94,7 @@ public:
 	void OnStartup();
 
 	// Called when the thread has printed a new line
-	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	UFUNCTION(BlueprintNativeEvent, Category = "Ink")
 	/** triggered if a new line of context is available
 	 * @param line text of new line
 	 * @param tags tags associated with this line
@@ -104,7 +104,7 @@ public:
 	void OnLineWritten(const FString& line, const UTagList* tags);
 
 	// Called when a new knot/stitch is entered (tunnels are ignored)
-	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	UFUNCTION(BlueprintNativeEvent, Category = "Ink")
 	/** triggered if a knew knot/stitch is entered (tunneling is ignored).
 	 * Triggers before the first line of a knot/stitch is written
 	 * @param global_tags tags assoziated with global file
@@ -114,7 +114,7 @@ public:
 	 */
 	void OnKnotEntered(const UTagList* global_tags, const UTagList* knot_tags);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	UFUNCTION(BlueprintNativeEvent, Category = "Ink")
 	/** triggered when a tag is encountered
 	 * @param tag_name the tag found
 	 *
@@ -122,7 +122,7 @@ public:
 	 */
 	void OnTag(const FString& tag_name);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	UFUNCTION(BlueprintNativeEvent, Category = "Ink")
 	/** triggered when reached a choice point.
 	 * @param choices possible branches to choose from, in order to continue
 	 * @see #PickChoice()
@@ -131,7 +131,7 @@ public:
 	 */
 	void OnChoice(const TArray<UInkChoice*>& choices);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Ink")
+	UFUNCTION(BlueprintNativeEvent, Category = "Ink")
 	/** triggered when the thread reached the end of context
 	 * @see AInkRuntime::StartExisting()
 	 *
@@ -235,7 +235,7 @@ protected:
 	}
 
 	/** @private */
-	virtual void OnTag_Implementation(const FString& line) {}
+	virtual void OnTag_Implementation(const FString& tag_name) {}
 
 	/** @private */
 	virtual void OnChoice_Implementation(const TArray<UInkChoice*>& choices) {}
