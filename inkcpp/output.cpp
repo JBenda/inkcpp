@@ -120,7 +120,7 @@ void basic_stream::append(const value* in, unsigned int length)
 }
 
 template<typename T>
-inline void write_char(T& output, char c)
+inline void write_char(T& /*output*/, char /*c*/)
 {
 	static_assert(always_false<T>::value, "Invalid output type");
 }

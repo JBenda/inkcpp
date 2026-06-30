@@ -129,15 +129,20 @@ public:
 
 	/// @}
 
+#ifdef __GNUCC__
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wtautological-compare"
+#endif
 	/** Get value to corresponding type
 	 * @tparam Ty #Type label of type to get
 	 * @attention behavior if undefined if Ty != value.type
 	 */
 	template<Type Ty>
 	const auto& get() const
-	{
-		static_assert(Ty != Ty, "No value getter for the selected type");
-	}
+	{ static_assert(Ty != Ty, "No value getter for the selected type"); }
+#ifdef __GNUCC__
+#	pragma GCC diagnostic pop
+#endif
 };
 
 /** access a @ref ink::runtime::value::Type::Bool value */

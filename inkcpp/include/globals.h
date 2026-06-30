@@ -28,7 +28,7 @@ public:
 	 * @return nullopt if variable won't exist or type won't match
 	 */
 	template<typename T>
-	optional<T> get(const char* name) const
+	optional<T> get(const char* /*name*/) const
 	{
 		static_assert(internal::always_false<T>::value, "Requested Type is not supported");
 	}
@@ -41,7 +41,7 @@ public:
 	 * @retval true on success
 	 */
 	template<typename T>
-	bool set(const char* name, const T& val)
+	bool set(const char* /*name*/, const T& /*val*/)
 	{
 		static_assert(internal::always_false<T>::value, "Requested Type is not supported");
 		return false;

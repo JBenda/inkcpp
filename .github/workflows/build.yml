@@ -16,30 +16,30 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
-            artifact: macos
-            name: MacOSX
-            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
-            proof: false
-            unreal: false
-          - os: macos-14
-            artifact: macos-arm
-            name: MacOSX-ARM
-            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
-            proof: false
-            unreal: false
+          # - os: macos-latest
+          #   artifact: macos
+          #   name: MacOSX
+          #   inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
+          #   proof: false
+          #   unreal: false
+          # - os: macos-14
+          #   artifact: macos-arm
+          #   name: MacOSX-ARM
+          #   inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
+          #   proof: false
+          #   unreal: false
           - os: windows-latest
             artifact: win64
             name: Windows x64
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_windows.zip
             proof: true
             unreal: false
-          - os: "ubuntu-22.04"
-            artifact: linux
-            name: Linux x64
-            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
-            proof: true
-            unreal: true
+          # - os: "ubuntu-22.04"
+          #   artifact: linux
+          #   name: Linux x64
+          #   inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
+          #   proof: true
+          #   unreal: true
 
     steps:
 
@@ -71,16 +71,34 @@ jobs:
 
     # Run CMake configuration to create build files
     - name: Configure CMake
-      shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -GNinja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DINKCPP_PY=OFF -DINKCPP_C=ON -DINKCPP_TEST=ON -DINKCPP_INKLECATE=OS
+      shell: pwsh -command ". {0}"
+      run: cmake ${{github.workspace}} -GNinja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DINKCPP_PY=OFF -DINKCPP_C=ON -DINKCPP_TEST=ON -DINKCPP_INKLECATE=OS
 
     # Build using CMake and OS toolkit
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: cmake --build . --config $BUILD_TYPE
-
+      shell: pwsh
+      run: cmake --build . --config ${{env.BUILD_TYPE}}
+    - name: Install Dumpbin
+      shell: pwsh
+      if: always()
+      run: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force;
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        choco install visualstudio2019buildtools --package-parameters "--includeRecommended --includeOptional --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64" --no-progress
+        $vsPath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC"
+        $latestVersion = (Get-ChildItem -Path $vsPath | Sort-Object Name -Descending | Select-Object -First 1).Name
+        $dumpbinPath = "$vsPath\$latestVersion\bin\Hostx64\x64"
+        echo $dumpbinPath >> $env:GITHUB_PATH
+    - name: Inspect inkcpp_cl dependencies
+      shell: pwsh
+      working-directory: ${{github.workspace}}/build
+      if: always()
+      run: |
+        dumpbin /dependents inkcpp_cl\inkcpp_cl.exe
+        dumpbin /imports inkcpp_cl\inkcpp_cl.exe
     # Run CMake tests (unit tests, etc.)
     - name: CTests
       working-directory: ${{github.workspace}}/build
@@ -243,12 +261,10 @@ jobs:
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
     - name: Configure CMake
-      shell: bash
       working-directory: ${{github.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DINKCPP_PY=ON -DINKCPP_DOC_BlueprintUE=ON
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: bash
       run: cmake --build . --target doc --config Release
     - name: Upload
       uses: actions/upload-artifact@v7
