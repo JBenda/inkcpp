@@ -31,15 +31,13 @@ namespace casting
 		const char* get() const { return _str; }
 
 	private:
-		const value& _val;
-		const char*  _str;
-		char         _data[512]; // TODO define central
+		const char* _str;
+		char        _data[512]; // TODO define central
 	};
 
 	// constructor for string_cast class
 	string_cast::string_cast(const value& val)
-	    : _val{val}
-	    , _str{nullptr}
+	    : _str{nullptr}
 	{
 		if (val.type() == value_type::string) {
 			// reference string if value is already a string

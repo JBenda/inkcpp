@@ -1,7 +1,5 @@
 #include <string.h>
 #include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #include <inkcpp.h>
 
@@ -21,7 +19,7 @@ void observer(InkValue new_value, InkValue old_value)
 	}
 }
 
-int main()
+int main(void)
 {
 	HInkStory*   story  = ink_story_from_file(INK_TEST_RESOURCE_DIR "ObserverStory.bin");
 	HInkGlobals* store  = ink_story_new_globals(story);

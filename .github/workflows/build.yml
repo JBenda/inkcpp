@@ -16,208 +16,181 @@ jobs:
     strategy:
       matrix:
         include:
-          # - os: macos-latest
-          #   artifact: macos
-          #   name: MacOSX
-          #   inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
-          #   proof: false
-          #   unreal: false
-          # - os: macos-14
-          #   artifact: macos-arm
-          #   name: MacOSX-ARM
-          #   inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
-          #   proof: false
-          #   unreal: false
+          - os: macos-latest
+            artifact: macos
+            name: MacOSX
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
+            proof: false
+            unreal: false
+          - os: macos-14
+            artifact: macos-arm
+            name: MacOSX-ARM
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
+            proof: false
+            unreal: false
           - os: windows-latest
             artifact: win64
             name: Windows x64
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_windows.zip
             proof: true
             unreal: false
-          # - os: "ubuntu-22.04"
-          #   artifact: linux
-          #   name: Linux x64
-          #   inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
-          #   proof: true
-          #   unreal: true
+          - os: "ubuntu-22.04"
+            artifact: linux
+            name: Linux x64
+            inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
+            proof: true
+            unreal: true
 
     steps:
+      # Checkout project
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
 
-    # Checkout project
-    - uses: actions/checkout@v6
-      with:
-        submodules: true
+      # Setup python
+      - uses: actions/setup-python@v5
+        if: ${{ matrix.proof }}
+        with:
+          python-version: "3.x"
 
-    # Setup python
-    - uses: actions/setup-python@v5
-      if: ${{ matrix.proof }}
-      with:
-        python-version: '3.x'
+      # Setup CMake
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "3.22.x"
 
-    # Setup CMake
-    - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v2
-      with:
-        cmake-version: '3.22.x'
+      # Setup Ninja
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@v1.1
+        with:
+          version: 1.13.0
+      # Create a build directory to store all the CMake generated files
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
 
-    # Setup Ninja
-    - name: Setup Ninja
-      uses: ashutoshvarma/setup-ninja@v1.1
-      with:
-        version: 1.13.0
-    # Create a build directory to store all the CMake generated files
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
+      # Run CMake configuration to create build files
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/build
+        # execute this in the native schell to get a native executable file
+        run: cmake ${{github.workspace}} -GNinja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DINKCPP_PY=OFF -DINKCPP_C=ON -DINKCPP_TEST=ON -DINKCPP_INKLECATE=OS
 
-    # Run CMake configuration to create build files
-    - name: Configure CMake
-      working-directory: ${{github.workspace}}/build
-      shell: pwsh -command ". {0}"
-      run: cmake ${{github.workspace}} -GNinja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DINKCPP_PY=OFF -DINKCPP_C=ON -DINKCPP_TEST=ON -DINKCPP_INKLECATE=OS
+      # Build using CMake and OS toolkit
+      - name: Build
+        working-directory: ${{github.workspace}}/build
+        # execute this in the native schell to get a native executable file
+        run: cmake --build . --config ${{env.BUILD_TYPE}}
+      # Run CMake tests (unit tests, etc.)
+      - name: CTests
+        working-directory: ${{github.workspace}}/build
+        run: ctest . -C ${{env.BUILD_TYPE}} -V
 
-    # Build using CMake and OS toolkit
-    - name: Build
-      working-directory: ${{github.workspace}}/build
-      shell: pwsh
-      run: cmake --build . --config ${{env.BUILD_TYPE}}
-    - name: Install Dumpbin
-      shell: pwsh
-      if: always()
-      run: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force;
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;
-        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-        choco install visualstudio2019buildtools --package-parameters "--includeRecommended --includeOptional --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64" --no-progress
-        $vsPath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC"
-        $latestVersion = (Get-ChildItem -Path $vsPath | Sort-Object Name -Descending | Select-Object -First 1).Name
-        $dumpbinPath = "$vsPath\$latestVersion\bin\Hostx64\x64"
-        echo $dumpbinPath >> $env:GITHUB_PATH
-    - name: Inspect inkcpp_cl dependencies
-      shell: pwsh
-      working-directory: ${{github.workspace}}/build
-      if: always()
-      run: |
-        dumpbin /dependents inkcpp_cl\inkcpp_cl.exe
-        dumpbin /imports inkcpp_cl\inkcpp_cl.exe
-    # Run CMake tests (unit tests, etc.)
-    - name: CTests
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: ctest . -C $BUILD_TYPE -V
+      # Copy all build artifacts to the bin directory
+      - name: Install Cl
+        working-directory: ${{github.workspace}}/build
+        run: cmake --install . --config ${{env.BUILD_TYPE}} --prefix comp_cl --component cl
+      - name: Upload Cl
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact }}-cl
+          path: build/comp_cl/
 
-    # Copy all build artifacts to the bin directory
-    - name: Install Cl
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: cmake --install . --config $BUILD_TYPE --prefix comp_cl --component cl
-    - name: Upload Cl
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ matrix.artifact }}-cl
-        path: build/comp_cl/
+      - name: Install Lib
+        working-directory: ${{github.workspace}}/build
+        run: cmake --install . --config ${{env.BUILD_TYPE}} --prefix comp_lib --component lib
+      - name: Upload Lib
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact }}-lib
+          path: build/comp_lib/
 
-    - name: Install Lib
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: cmake --install . --config $BUILD_TYPE --prefix comp_lib --component lib
-    - name: Upload Lib
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ matrix.artifact }}-lib
-        path: build/comp_lib/
+      - name: Install CLib
+        working-directory: ${{github.workspace}}/build
+        run: cmake --install . --config ${{env.BUILD_TYPE}} --prefix comp_clib --component clib
+      - name: Upload Clib
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{matrix.artifact}}-clib
+          path: build/comp_clib
 
-    - name: Install CLib
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: cmake --install . --config $BUILD_TYPE --prefix comp_clib --component clib
-    - name: Upload Clib
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{matrix.artifact}}-clib
-        path: build/comp_clib
+      - name: Install UE
+        if: ${{ matrix.unreal }}
+        working-directory: ${{github.workspace}}/build
+        run: |
+          cmake ${{github.workspace}} -DINKCPP_UNREAL_TARGET_VERSION="5.7" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=NONE
+          cmake --install . --config ${{env.BUILD_TYPE}} --prefix comp_unreal_5_7 --component unreal
+          cmake ${{github.workspace}} -DINKCPP_UNREAL_TARGET_VERSION="5.6" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=NONE
+          cmake --install . --config ${{env.BUILD_TYPE}} --prefix comp_unreal_5_6 --component unreal
+          cmake ${{github.workspace}} -DINKCPP_UNREAL_TARGET_VERSION="5.5" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=NONE
+          cmake --install . --config ${{env.BUILD_TYPE}} --prefix comp_unreal_5_5 --component unreal
+          cmake ${{github.workspace}} -DINKCPP_UNREAL_TARGET_VERSION="5.4" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=NONE
+          cmake --install . --config ${{env.BUILD_TYPE}} --prefix comp_unreal_5_4 --component unreal
+      - name: Upload UE 5.7
+        if: ${{ matrix.unreal }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: unreal_5_7
+          path: build/comp_unreal_5_7/
+      - name: Upload UE 5.6
+        if: ${{ matrix.unreal }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: unreal_5_6
+          path: build/comp_unreal_5_6/
+      - name: Upload UE 5.5
+        if: ${{ matrix.unreal }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: unreal_5_5
+          path: build/comp_unreal_5_5/
+      - name: Upload UE 5.4
+        if: ${{ matrix.unreal }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: unreal_5_4
+          path: build/comp_unreal_5_4/
 
-    - name: Install UE
-      if: ${{ matrix.unreal }}
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: |
-        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.7" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=NONE
-        cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_7 --component unreal
-        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.6" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=NONE
-        cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_6 --component unreal
-        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.5" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=NONE
-        cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_5 --component unreal
-        cmake $GITHUB_WORKSPACE -DINKCPP_UNREAL_TARGET_VERSION="5.4" -DINKCPP_UNREAL=ON -DINKCPP_INKLECATE=NONE
-        cmake --install . --config $BUILD_TYPE --prefix comp_unreal_5_4 --component unreal
-    - name: Upload UE 5.7
-      if: ${{ matrix.unreal }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: unreal_5_7
-        path: build/comp_unreal_5_7/
-    - name: Upload UE 5.6
-      if: ${{ matrix.unreal }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: unreal_5_6
-        path: build/comp_unreal_5_6/
-    - name: Upload UE 5.5
-      if: ${{ matrix.unreal }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: unreal_5_5
-        path: build/comp_unreal_5_5/
-    - name: Upload UE 5.4
-      if: ${{ matrix.unreal }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: unreal_5_4
-        path: build/comp_unreal_5_4/
+      # Make sure Inkproof has everything it needs to run our executable
+      - name: Setup Ink Proof
+        if: ${{ matrix.proof }}
+        working-directory: proofing/ink-proof
+        run: |
+          git apply ../diff_py-codecs.patch
+          python3 install_deps.py
+          cp ../inkcpp_runtime_driver drivers/
+          cmake -E make_directory deps/inkcpp
+          cp ../../build/comp_cl/* deps/inkcpp/
 
-    # Make sure Inkproof has everything it needs to run our executable
-    - name: Setup Ink Proof
-      if: ${{ matrix.proof }}
-      shell: bash
-      working-directory: proofing/ink-proof
-      run: |
-        python3 install_deps.py
-        cp ../inkcpp_runtime_driver drivers/
-        chmod +x drivers/inkcpp_runtime_driver
-        mkdir deps/inkcpp
-        cp ../../build/comp_cl/* deps/inkcpp/
-        chmod +x deps/inkcpp/inkcpp_cl
 
-    # Run it
-    - name: Run Ink Proof
-      if: ${{ matrix.proof }}
-      shell: bash
-      working-directory: proofing/ink-proof
-      run: |
-        python3 proof.py --examples 'I...' inklecate_v1.1.1 inkcpp_runtime > run.out
-        echo -e "| ${{ matrix.name }} | $(cat run.out) |" > ${{ matrix.artifact }}.txt
+      # Run it
+      - name: Run Ink Proof
+        if: ${{ matrix.proof }}
+        working-directory: proofing/ink-proof
+        run: |
+          python3 proof.py --examples 'I...' inklecate_v1.1.1 inkcpp_runtime > run.out
+          cmake -E echo "| ${{ matrix.name }} | $(cat run.out) |" > ${{ matrix.artifact }}.txt
 
-    # Creates a "disabled" artifact if ink proofing is disabled
-    - name: Create Disabled InkProof Results File
-      if: ${{ !matrix.proof }}
-      shell: bash
-      run: |
-        mkdir -p proofing/ink-proof
-        echo "| ${{ matrix.name }} | DISABLED |" > proofing/ink-proof/${{ matrix.artifact }}.txt
+      # Creates a "disabled" artifact if ink proofing is disabled
+      - name: Create Disabled InkProof Results File
+        if: ${{ !matrix.proof }}
+        shell: bash
+        run: |
+          mkdir -p proofing/ink-proof
+          echo "| ${{ matrix.name }} | DISABLED |" > proofing/ink-proof/${{ matrix.artifact }}.txt
 
-    # Upload results artifact
-    - name: Upload Results Artifact
-      uses: actions/upload-artifact@v7
-      with:
-        name: result-${{ matrix.artifact }}
-        path: proofing/ink-proof/${{ matrix.artifact }}.txt
+      # Upload results artifact
+      - name: Upload Results Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-${{ matrix.artifact }}
+          path: proofing/ink-proof/${{ matrix.artifact }}.txt
 
-    # Upload website artifact
-    - name: Upload Ink-Proof Website Artifact
-      if: ${{ matrix.proof }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ matrix.artifact }}-www
-        path: proofing/ink-proof/out
+      # Upload website artifact
+      - name: Upload Ink-Proof Website Artifact
+        if: ${{ matrix.proof }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact }}-www
+          path: proofing/ink-proof/out
 
   build-doc:
     name: Build Doxygen documentation
@@ -226,101 +199,101 @@ jobs:
     env:
       DOXYGEN_VERSION: "1.17.0"
     steps:
-    - uses: actions/checkout@v6
-      with:
-        submodules: true
-    - name: Set upt Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.x"
-    - name: install pyton libs
-      run: >-
-        python3 -m
-        pip install
-        pybind11-stubgen
-        pdoc
-        --user
-    - uses: actions/cache@v5
-      id: cache-doxygen
-      with:
-        path: doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
-        key: doxygen-${{ env.DOXYGEN_VERSION }}
-    - name: download Doxygen
-      if: steps.cache-doxygen.outputs.cache-hit != 'true'
-      run: wget https://www.doxygen.nl/files/doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz
-    - name: Install Doxygen
-      run: |
-        sudo apt-get install graphviz -y
-        tar xzf doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz
-        cd doxygen-$DOXYGEN_VERSION/
-        sudo make install
-    - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v2
-      with:
-        cmake-version: '3.22.x'
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
-    - name: Configure CMake
-      working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DINKCPP_PY=ON -DINKCPP_DOC_BlueprintUE=ON
-    - name: Build
-      working-directory: ${{github.workspace}}/build
-      run: cmake --build . --target doc --config Release
-    - name: Upload
-      uses: actions/upload-artifact@v7
-      with:
-        name: doxygen
-        path: Documentation/
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+      - name: Set upt Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: install pyton libs
+        run: >-
+          python3 -m
+          pip install
+          pybind11-stubgen
+          pdoc
+          --user
+      - uses: actions/cache@v5
+        id: cache-doxygen
+        with:
+          path: doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
+          key: doxygen-${{ env.DOXYGEN_VERSION }}
+      - name: download Doxygen
+        if: steps.cache-doxygen.outputs.cache-hit != 'true'
+        run: wget https://www.doxygen.nl/files/doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz
+      - name: Install Doxygen
+        run: |
+          sudo apt-get install graphviz -y
+          tar xzf doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz
+          cd doxygen-$DOXYGEN_VERSION/
+          sudo make install
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "3.22.x"
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/build
+        run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -DINKCPP_PY=ON -DINKCPP_DOC_BlueprintUE=ON
+      - name: Build
+        working-directory: ${{github.workspace}}/build
+        run: cmake --build . --target doc --config Release
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: doxygen
+          path: Documentation/
 
   build-python:
     name: Build Python package
     needs: compilation
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
-      with:
-        submodules: true
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.x"
-    - name: install build
-      run: >-
-        python3 -m
-        pip install
-        build
-        pybind11-stubgen
-        pdoc
-        pytest
-        --user
-    - name: Build python release
-      run: python3 -m build
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: install build
+        run: >-
+          python3 -m
+          pip install
+          build
+          pybind11-stubgen
+          pdoc
+          pytest
+          --user
+      - name: Build python release
+        run: python3 -m build
 
-    - uses: suisei-cn/actions-download-file@v1.6.0
-      name: Download Inklecate
-      id: download_inklecate
-      with:
-        url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
-        target: "inklecate/"
-    - name: Deploy Inkelcate
-      shell: bash
-      run: |
-        cd inklecate
-        unzip *.zip
-        echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
+      - uses: suisei-cn/actions-download-file@v1.6.0
+        name: Download Inklecate
+        id: download_inklecate
+        with:
+          url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_linux.zip
+          target: "inklecate/"
+      - name: Deploy Inkelcate
+        shell: bash
+        run: |
+          cd inklecate
+          unzip *.zip
+          echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
 
-    - name: Test python release
-      run: |
-        python3 -m pip install dist/*.whl --user
-        python3 -m pytest inkcpp_python/tests
-    - name: Remove wheel
-      run: |
-        rm dist/*.whl
-    - name: Upload Python files
-      uses: actions/upload-artifact@v7
-      with:
-        name: python-package-distribution
-        path: dist/
+      - name: Test python release
+        run: |
+          python3 -m pip install dist/*.whl --user
+          python3 -m pytest inkcpp_python/tests
+      - name: Remove wheel
+        run: |
+          rm dist/*.whl
+      - name: Upload Python files
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-package-distribution
+          path: dist/
 
   clang-format:
     name: "Check Formatting"
@@ -346,7 +319,7 @@ jobs:
     permissions:
       contents: write
     name: "Upload Ink-Proof to Github Pages"
-    needs: [ compilation, build-doc ]
+    needs: [compilation, build-doc]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:

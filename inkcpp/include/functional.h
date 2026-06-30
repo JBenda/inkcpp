@@ -72,9 +72,13 @@ public:
 			    static_cast<int>(type), static_cast<int>(new_val.type)
 			);
 			if constexpr (traits::arity == 2) {
-				// inkAssert(!old_val.has_value() || old_val.value().type == type,
-				// 	"Missmatch type for variable observers old value: expected optional<%i> got
-				// optional<%i>", static_cast<int>(type), static_cast<int>(old_val.value().type));
+				if (old_val.has_value() && old_val.value().type != type) {
+					inkFail(
+					    "Missmatch type for variable observers old value: expected optional<%i> got "
+					    "optional<%i>",
+					    static_cast<int>(type), static_cast<int>(old_val.value().type)
+					);
+				}
 			}
 		};
 		if constexpr (traits::arity > 0) {
@@ -132,12 +136,10 @@ public:
 	// TODO: remove ?
 #ifdef INK_ENABLE_UNREAL
 	virtual void
-	    call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists)
-	    = 0;
+	    call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) = 0;
 #else
 	virtual void
-	    call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists)
-	    = 0;
+	    call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists) = 0;
 #endif
 
 	bool lookaheadSafe() const { return _lookaheadSafe; }
@@ -176,9 +178,7 @@ public:
 	virtual void call(
 	    basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists
 	) override
-	{
-		call(stack, length, strings, lists, GenSeq<traits::arity>());
-	}
+	{ call(stack, length, strings, lists, GenSeq<traits::arity>()); }
 
 private:
 	// Callable functor object
@@ -210,8 +210,9 @@ private:
 	}
 
 	template<size_t... Is>
-	void
-	    call(basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists, seq<Is...>)
+	void call(
+	    basic_eval_stack* stack, size_t length, string_table& strings, list_table& lists, seq<Is...>
+	)
 	{
 		inkAssert(
 		    is_array_call() || sizeof...(Is) == length,

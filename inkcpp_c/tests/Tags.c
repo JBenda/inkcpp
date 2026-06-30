@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 #include <stdbool.h>
 
 #include <inkcpp.h>
@@ -7,7 +6,7 @@
 #undef NDEBUG
 #include <assert.h>
 
-int main()
+int main(void)
 {
 	HInkStory*   story  = ink_story_from_file(INK_TEST_RESOURCE_DIR "TagsStory.bin");
 	HInkGlobals* store  = ink_story_new_globals(story);

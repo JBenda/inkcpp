@@ -1,7 +1,5 @@
 #include <string.h>
 #include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #include <inkcpp.h>
 
@@ -22,7 +20,7 @@ void check_end(HInkRunner* runner)
 	assert(strcmp(ink_choice_text(ink_runner_get_choice(RUNNER, IDX)), STR) == 0)
 #define CHECK_NEXT_LINE(RUNNER, STR) assert(strcmp(ink_runner_get_line(RUNNER), STR) == 0)
 
-int main()
+int main(void)
 {
 	{
 		HInkStory*  story  = ink_story_from_file(INK_TEST_RESOURCE_DIR "SimpleStoryFlow.bin");
@@ -41,7 +39,7 @@ int main()
 			++cnt;
 		}
 
-		// snapshot befroe choose, context (last output lines) can not bet optained at loading
+		// snapshot before choose, context (last output lines) can not bet obtained at loading
 		HInkSnapshot* snap2 = ink_runner_create_snapshot(runner);
 
 		check_end(runner);

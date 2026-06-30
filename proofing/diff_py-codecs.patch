@@ -1,0 +1,23 @@
+diff --git a/diff.py b/diff.py
+index 115bf2c..320607d 100644
+--- a/diff.py
++++ b/diff.py
+@@ -1,7 +1,6 @@
+ #!/usr/bin/env python3
+ 
+ import sys
+-import codecs
+ from difflib import unified_diff
+ 
+ if len(sys.argv) != 3:
+@@ -9,8 +8,8 @@ if len(sys.argv) != 3:
+ 
+ _, a, b = sys.argv
+ 
+-a_lines = codecs.open(a, encoding='utf-8-sig').read().splitlines()
+-b_lines = codecs.open(b, encoding='utf-8-sig').read().splitlines()
++a_lines = open(a, encoding="utf-8-sig").read().splitlines()
++b_lines = open(b, encoding="utf-8-sig").read().splitlines()
+ 
+ 
+ out_lines = list(unified_diff(a_lines, b_lines, fromfile=a, tofile=b, lineterm=""))

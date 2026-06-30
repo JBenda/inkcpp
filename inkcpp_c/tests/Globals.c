@@ -1,7 +1,5 @@
 #include <string.h>
 #include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #include <inkcpp.h>
 
@@ -12,7 +10,7 @@ HInkStory*   story  = NULL;
 HInkGlobals* store  = NULL;
 HInkRunner*  thread = NULL;
 
-void setup()
+void setup(void)
 {
 	if (! story) {
 		story = ink_story_from_file(INK_TEST_RESOURCE_DIR "GlobalStory.bin");
@@ -27,7 +25,7 @@ void setup()
 	thread = ink_story_new_runner(story, store);
 }
 
-int main()
+int main(void)
 {
 	//====== Just reading Globals =====
 	setup();
@@ -57,7 +55,7 @@ int main()
 	val.int32_v = 30;
 	assert(ink_globals_set(store, "age", val));
 
-	// set value of 'friendl_name_of_player'
+	// set value of 'friendly_name_of_player'
 	val.type     = ValueTypeString;
 	val.string_v = "Freddy";
 	assert(ink_globals_set(store, "friendly_name_of_player", val));
