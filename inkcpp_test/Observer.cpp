@@ -154,9 +154,9 @@ SCENARIO("Observer", "[observer][globals][runtime]")
           CHECK_FALSE(o_i.has_value());
         } else {
           CHECK(i == 5);
-          REQUIRE(o_i.has_value());
-          CHECK(o_i.value() == 1);
-        }
+					REQUIRE(o_i.has_value());
+					CHECK(o_i.value() == 1);
+				}
 			};
 			int  var2_cnt = 0;
 			auto var2     = [&var2_cnt](value v, ink::optional<value> o_v) {
@@ -167,11 +167,11 @@ SCENARIO("Observer", "[observer][globals][runtime]")
           CHECK_FALSE(o_v.has_value());
         } else {
           CHECK(str == "test");
-          REQUIRE(o_v.has_value());
-          CHECK(o_v.value().type == value::Type::String);
-          std::string str2(o_v.value().get<value::Type::String>());
-          CHECK(str2 == "hello");
-        }
+					REQUIRE(o_v.has_value());
+					CHECK(o_v.value().type == value::Type::String);
+					std::string str2(o_v.value().get<value::Type::String>());
+					CHECK(str2 == "hello");
+				}
 			};
 
 			globals->observe("var1", var1);

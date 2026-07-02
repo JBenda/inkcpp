@@ -60,11 +60,15 @@ enum class value_type {
 
 // add operator for value_type (to simplify usage templates).
 constexpr value_type operator+(value_type t, int i)
-{ return static_cast<value_type>(static_cast<int>(t) + i); }
+{
+	return static_cast<value_type>(static_cast<int>(t) + i);
+}
 
 // add operator for Command (to simplify usage in templates).
 constexpr Command operator+(Command c, int i)
-{ return static_cast<Command>(static_cast<int>(c) + i); }
+{
+	return static_cast<Command>(static_cast<int>(c) + i);
+}
 
 struct string_type {
 	constexpr string_type(const char* string, bool allocated)
@@ -137,7 +141,9 @@ public:
 	/// get value of the type (if possible)
 	template<value_type ty>
 	typename ret<ty>::type get() const
-	{ static_assert(ty != ty, "No getter for this type defined!"); }
+	{
+		static_assert(ty != ty, "No getter for this type defined!");
+	}
 
 #ifdef __GNUCC__
 #	pragma GCC diagnostic pop
@@ -159,7 +165,9 @@ public:
 
 	/// returns if type is printable (see value_type)
 	constexpr bool printable() const
-	{ return _type >= value_type::PRINT_BEGIN && _type < value_type::PRINT_END; }
+	{
+		return _type >= value_type::PRINT_BEGIN && _type < value_type::PRINT_END;
+	}
 
 	friend basic_stream& operator<<(basic_stream& os, const value&);
 	// friend basic_stream& operator>>(basic_stream& is, value&); // TODO: implement
@@ -234,7 +242,9 @@ private:
 
 template<value_type ty, typename T, typename ENV>
 value redefine<ty, T, ENV>::operator()(const T&, const T& rh)
-{ return value{}.set<ty>(rh); }
+{
+	return value{}.set<ty>(rh);
+}
 
 // define get and set for int32
 template<>
@@ -244,7 +254,9 @@ struct value::ret<value_type::int32> {
 
 template<>
 inline int32_t value::get<value_type::int32>() const
-{ return int32_value; }
+{
+	return int32_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::int32, int32_t>(int32_t v)
@@ -262,7 +274,9 @@ struct value::ret<value_type::uint32> {
 
 template<>
 inline uint32_t value::get<value_type::uint32>() const
-{ return uint32_value; }
+{
+	return uint32_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::uint32, uint32_t>(uint32_t v)
@@ -280,7 +294,9 @@ struct value::ret<value_type::divert> {
 
 template<>
 inline uint32_t value::get<value_type::divert>() const
-{ return uint32_value; }
+{
+	return uint32_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::divert, uint32_t>(uint32_t v)
@@ -298,7 +314,9 @@ struct value::ret<value_type::float32> {
 
 template<>
 inline float value::get<value_type::float32>() const
-{ return float_value; }
+{
+	return float_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::float32, float>(float v)
@@ -316,7 +334,9 @@ struct value::ret<value_type::boolean> {
 
 template<>
 inline bool value::get<value_type::boolean>() const
-{ return bool_value; }
+{
+	return bool_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::boolean, bool>(bool v)
@@ -342,7 +362,9 @@ struct value::ret<value_type::list> {
 
 template<>
 inline list_table::list value::get<value_type::list>() const
-{ return list_value; }
+{
+	return list_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::list, list_table::list>(list_table::list list)
@@ -360,7 +382,9 @@ struct value::ret<value_type::list_flag> {
 
 template<>
 inline list_flag value::get<value_type::list_flag>() const
-{ return list_flag_value; }
+{
+	return list_flag_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::list_flag, list_flag>(list_flag flag)
@@ -378,7 +402,9 @@ struct value::ret<value_type::string> {
 
 template<>
 inline string_type value::get<value_type::string>() const
-{ return string_value; }
+{
+	return string_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::string, const char*>(const char* v)
@@ -429,7 +455,9 @@ struct value::ret<value_type::value_pointer> {
 
 template<>
 inline value::ret<value_type::value_pointer>::type value::get<value_type::value_pointer>() const
-{ return pointer; }
+{
+	return pointer;
+}
 
 template<>
 inline constexpr value& value::set<value_type::value_pointer, hash_t, int>(hash_t name, int ci)
@@ -448,7 +476,9 @@ struct value::ret<value_type::jump_marker> {
 
 template<>
 inline value::ret<value_type::jump_marker>::type value::get<value_type::jump_marker>() const
-{ return jump; }
+{
+	return jump;
+}
 
 template<>
 inline constexpr value&
@@ -477,7 +507,9 @@ struct value::ret<value_type::thread_start> {
 
 template<>
 inline value::ret<value_type::thread_start>::type value::get<value_type::thread_start>() const
-{ return jump; }
+{
+	return jump;
+}
 
 template<>
 inline constexpr value&
@@ -506,7 +538,9 @@ struct value::ret<value_type::thread_end> {
 
 template<>
 inline uint32_t value::get<value_type::thread_end>() const
-{ return uint32_value; }
+{
+	return uint32_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::thread_end, uint32_t>(uint32_t v)
@@ -595,7 +629,9 @@ struct value::ret<value_type::function_frame> {
 template<>
 inline typename value::ret<value_type::function_frame>::type
     value::get<value_type::function_frame>() const
-{ return frame_value; }
+{
+	return frame_value;
+}
 
 template<>
 inline constexpr value& value::set<value_type::function_frame, uint32_t>(uint32_t v, bool evalOn)

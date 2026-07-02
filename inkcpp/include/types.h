@@ -139,7 +139,9 @@ public:
 	 */
 	template<Type Ty>
 	const auto& get() const
-	{ static_assert(Ty != Ty, "No value getter for the selected type"); }
+	{
+		static_assert(Ty != Ty, "No value getter for the selected type");
+	}
 #ifdef __GNUCC__
 #	pragma GCC diagnostic pop
 #endif

@@ -69,7 +69,10 @@ public:
 	 * @param stack were the result(s) get pushed
 	 * @param vs array of values, first one = first argument etc
 	 */
-	void operator()(basic_eval_stack& /*stack*/, value* /*vs*/) { inkFail("operation not implemented!"); }
+	void operator()(basic_eval_stack& /*stack*/, value* /*vs*/)
+	{
+		inkFail("operation not implemented!");
+	}
 };
 } // namespace ink::runtime::internal
 
