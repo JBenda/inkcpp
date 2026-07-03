@@ -855,7 +855,8 @@ bool runner_impl::migrate_to(const loader& loader, hash_t path)
 		ip_t start_of_knot = _story->find_offset_for(_story->container_data(_current_knot_id)._hash);
 		fetch_tags(start_of_knot);
 		assign_tags({tags_level::KNOT});
-		if (start_of_knot != destination) {
+		// If the destination is in the recorded current knot
+		if (start_of_knot < destination) {
 			for (ip_t iter = start_of_knot; iter != destination; iter += 6) {
 				if (read<Command>(iter) == Command::DEFINE_TEMP) {
 					hash_t temp_name = read<hash_t>(iter + 2);
