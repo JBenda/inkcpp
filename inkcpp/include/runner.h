@@ -62,9 +62,13 @@ public:
 	 * to the content at the specified path.
 	 *
 	 * @param path path to search and move execution to
+	 * @param reset_callstack If true, discard the call stack when moving.
+	 * This is the default, safe, behaviour. Otherwise retain the current
+	 * stack as far as possible.
+	 * 
 	 * @return If the path was found
 	 */
-	virtual bool move_to(hash_t path) = 0;
+	virtual bool move_to(hash_t path, bool reset_callstack = true) = 0;
 
 	/**
 	 * Moves the runner to the specified path.
@@ -73,9 +77,12 @@ public:
 	 * to the content at the specified path.
 	 *
 	 * @param path path to search and move execution to
+	 * @param reset_callstack If true, discard the call stack when moving.
+	 * This is the default, safe, behaviour. Otherwise retain the current
+	 * stack as far as possible.
 	 * @return If the path was found
 	 */
-	bool move_to(const char* path) { return move_to(ink::hash_string(path)); }
+	bool move_to(const char* path, bool reset_callstack = true) { return move_to(ink::hash_string(path), reset_callstack); }
 
 	/**
 	 * Can the runner continue?

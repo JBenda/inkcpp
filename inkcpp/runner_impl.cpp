@@ -823,7 +823,7 @@ const char* runner_impl::getline_alloc()
 	return res;
 }
 
-bool runner_impl::move_to(hash_t path)
+bool runner_impl::move_to(hash_t path, bool reset_callstack)
 {
 	// find the path
 	ip_t destination = _story->find_offset_for(path);
@@ -832,9 +832,13 @@ bool runner_impl::move_to(hash_t path)
 		return false;
 	}
 
-	// Clear state and move to destination
-	reset();
-	_ptr = _story->instructions();
+	// Clear state if requested,
+	if (reset_callstack) {
+		reset();
+		_ptr = _story->instructions();
+	}
+
+	// Don't track visit (are we sure this is right?)
 	const bool record_visits    = false;
 	const bool track_knot_visit = false;
 	jump(destination, record_visits, track_knot_visit);
