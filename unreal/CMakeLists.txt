@@ -1,6 +1,6 @@
 set(INKCPP_UNREAL_TARGET_VERSION
-		"5.7"
-		CACHE STRING "Unreal engine version the plugin should target (e.g: 5.6)")
+		"5.8"
+		CACHE STRING "Unreal engine version the plugin should target (e.g: 5.8)")
 set(INKCPP_UNREAL_RunUAT_PATH
 		CACHE FILEPATH
 					"Path to Unreal engine installation RunUAT file. Used to automatcally build the plugin.")
