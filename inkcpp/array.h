@@ -35,7 +35,11 @@ public:
 		if constexpr (dynamic) {
 			if constexpr (simple) {
 				_dynamic_data = reinterpret_cast<T*>(new char[sizeof(T) * initialCapacity]);
-				inkAssert(( ::size_t ) _dynamic_data % alignof(T) == 0);
+				inkAssert(
+				    reinterpret_cast<std::uintptr_t>(_dynamic_data) % alignof(T) == 0,
+				    "The data array has a different alignment(%d) then the contained data(%d)",
+				    reinterpret_cast<std::uintptr_t>(_dynamic_data), alignof(T)
+				);
 			} else {
 				_dynamic_data = new T[initialCapacity];
 			}
@@ -110,11 +114,11 @@ public:
 			if (_size == _capacity) {
 				extend();
 			}
+			inkAssert(_size < _capacity, "Failed to extend full dynamic array!");
 		} else {
-			inkAssert(_size <= _capacity, "Try to append to a full array!");
+			inkAssert(_size < _capacity, "Try to append to a full array!");
 			// TODO(JBenda): Silent fail?
 		}
-		inkAssert(_size < _capacity);
 		return data()[_size++];
 	}
 
@@ -278,7 +282,11 @@ void managed_array<T, dynamic, initialCapacity, simple>::extend(size_t capacity)
 		// Warning: Allocating typed data in a char* container is potentially unsafe. We need to be sure
 		// the alignment is compatible with the destination type...
 		new_data = reinterpret_cast<T*>(new char[sizeof(T) * new_capacity]);
-		inkAssert(( ::size_t ) new_data % alignof(T) == 0);
+		inkAssert(
+		    reinterpret_cast<std::uintptr_t>(_dynamic_data) % alignof(T) == 0,
+		    "New allocated array for extansion is aligned(%d) but the data type has an alignment of %d",
+		    reinterpret_cast<std::uintptr_t>(_dynamic_data), alignof(T)
+		);
 
 		// ...and we have to copy the contents byte-by-byte, since client code (_list_handouts)
 		// type-puns between two classes with different vtbls here. Copying these elementwise would
