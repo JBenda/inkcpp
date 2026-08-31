@@ -42,7 +42,7 @@ mark_as_advanced(PYBIND11_USE_CROSSCOMPILING)
 enable_testing()
 
 # Project setup
-project(inkcpp VERSION 0.1.11)
+project(inkcpp VERSION 0.1.12)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INSTALL_LIBRARY_DIR lib)

@@ -41,7 +41,7 @@ def glob_src_files():
     for dir in dirs:
         files += src_files(dir)
     return files
-        
+
 
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "") -> None:
@@ -50,7 +50,7 @@ class CMakeExtension(Extension):
         src_files += ["CMakeLists.txt", "Config.cmake.in"]
         super().__init__(name, sources=src_files)
         self.sourcedir = os.fspath(Path(sourcedir).resolve())
-    
+
 class CMakeBuild(build_ext):
  def build_extension(self, ext: CMakeExtension) -> None:
         # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
@@ -149,11 +149,11 @@ class CMakeBuild(build_ext):
         )
         subprocess.run(
             ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
-        )            
+        )
 
 setup(
     name="inkcpp-py",
-    version="0.1.11",
+    version="0.1.12",
     author="Julian Benda",
     author_email="julian.benda@ovgu.de",
     description="Python bindings for InkCPP a Inkle runtime written in C++",
