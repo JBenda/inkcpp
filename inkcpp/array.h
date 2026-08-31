@@ -12,6 +12,7 @@
 #include "traits.h"
 
 #include <limits>
+#include <cstdint>
 
 namespace ink::runtime::internal
 {
