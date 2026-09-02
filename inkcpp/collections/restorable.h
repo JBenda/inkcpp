@@ -198,8 +198,10 @@ public:
 			_pos = _jump;
 
 		// Move over empty data
-		while (isNull(_buffer[_pos - 1]))
+		while (_pos > 0 && isNull(_buffer[_pos - 1]))
 			_pos--;
+
+		inkAssert(_pos > 0, "Can not pop. No non-null elements to pop!");
 
 		// Decrement and return
 		_pos--;
@@ -211,10 +213,11 @@ public:
 	{
 		inkAssert(_pos > 0, "Can not top. No elememnts to show!");
 		auto pos = _pos;
-		if (_pos == _save)
+		if (pos == _save)
 			pos = _jump;
-		while (isNull(_buffer[pos - 1]))
+		while (pos > 0 && isNull(_buffer[pos - 1]))
 			--pos;
+		inkAssert(pos > 0, "Can not top. No non-null elements to show!");
 		return _buffer[pos - 1];
 	}
 
@@ -228,7 +231,7 @@ public:
 
 	// Forward iterate
 	template<typename CallbackMethod, typename IsNullPredicate>
-	void for_each(CallbackMethod callback, IsNullPredicate isNull)
+	void for_each(CallbackMethod callback, IsNullPredicate isNull) const
 	{
 		if (_pos == 0) {
 			return;

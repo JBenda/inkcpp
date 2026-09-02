@@ -179,14 +179,9 @@ void basic_stack::push_frame<frame_type::tunnel>(offset_t return_to, bool eval)
 
 template<>
 void basic_stack::push_frame<frame_type::thread>(offset_t return_to, bool eval)
-{
-	add(InvalidHash, value{}.set<value_type::thread_frame>(return_to, eval));
-}
+{ add(InvalidHash, value{}.set<value_type::thread_frame>(return_to, eval)); }
 
-const entry* basic_stack::pop()
-{
-	return &base::pop([](const entry& elem) { return elem.name == ~0U; });
-}
+const entry* basic_stack::pop() { return &base::pop(is_entry_null); }
 
 entry* basic_stack::do_thread_jump_pop(const basic_stack::iterator& jumpStart)
 {
@@ -237,9 +232,9 @@ entry* basic_stack::do_thread_jump_pop(const basic_stack::iterator& jumpStart)
 		start.set<value_type::jump_marker>(jump);
 	} else if (vt == value_type::thread_start) {
 		start.set<value_type::thread_start>(jump);
-	} else {
-		inkFail("unknown jump type");
 	}
+
+	// Return pointer to frame marker
 	return threadIter.get();
 }
 
@@ -258,35 +253,29 @@ offset_t basic_stack::pop_frame(frame_type* type, bool& eval)
 	inkAssert(! base::is_empty(), "Can not pop frame from empty callstack.");
 
 	const entry* returnedFrame = nullptr;
-	auto         isNull        = [](const entry& e) {
-    return e.name == ~0U;
-	};
 
 	// Start iterating backwards
 	iterator iter = base::begin();
-	if (isNull(*iter.get())) {
-		iter.next(isNull);
+	if (is_entry_null(*iter.get())) {
+		iter.next(is_entry_null);
 	}
 	while (! iter.done()) {
 		// Keep popping if it's not a frame marker or thread marker of some kind
 		entry* frame = iter.get();
-		if (frame->name != InvalidHash) {
+		if (frame->name != InvalidHash || frame->data.type() == value_type::none) {
 			pop();
 			iter = base::begin();
-			if (isNull(*iter.get())) {
-				iter.next(isNull);
+			if (is_entry_null(*iter.get())) {
+				iter.next(is_entry_null);
 			}
 			continue;
 		}
 
 		// We now have a frame marker. Check if it's a thread
 		// Thread handling
-		if (
-		    // FIXME: is_tghead_marker, is_jump_marker
-		    frame->data.type() == value_type::thread_start
+		if (frame->data.type() == value_type::thread_start
 		    || frame->data.type() == value_type::thread_end
-		    || frame->data.type() == value_type::jump_marker
-		) {
+		    || frame->data.type() == value_type::jump_marker) {
 			// End of thread marker, we need to create a jump marker
 			if (frame->data.type() == value_type::thread_end) {
 				// Push a new jump marker after the thread end

@@ -31,6 +31,9 @@ namespace runtime
 			thread
 		};
 
+		inline bool is_entry_null(const entry& e)
+		{ return e.name == ~0U || (e.name == InvalidHash && e.data.type() == value_type::none); }
+
 		class basic_stack : protected restorable<entry>
 		{
 			friend list_table;
@@ -53,6 +56,20 @@ namespace runtime
 			const value* get(hash_t name) const;
 			value*       get(hash_t name);
 			value*       get_from_frame(int ci, hash_t name);
+
+			void print_dump()
+			{
+				printf("DUMPING STACK:\n");
+				int  idx = 0;
+				auto it  = this->begin();
+				while (! it.done()) {
+					printf(
+					    " [%d] hash %u type %u\n", idx++, it.get()->name,
+					    static_cast<unsigned int>(it.get()->data.type())
+					);
+					it.next();
+				}
+			}
 
 			// pushes a new frame onto the stack
 			// @param eval if evaluation mode was active

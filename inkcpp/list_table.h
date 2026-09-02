@@ -9,7 +9,7 @@
 #include "config.h"
 #include "system.h"
 #include "array.h"
-#include "list.h"
+#include "include/list.h"
 
 #ifdef INK_ENABLE_STL
 #	include <iosfwd>
@@ -78,7 +78,10 @@ public:
 			flag.flag    = -1;
 			return flag;
 		}
-		inkAssert(flag.list_id >= 0, "expected flag to have a base list.");
+		if (flag.list_id < 0 || static_cast<size_t>(flag.list_id) >= _list_end.size()) {
+			flag.flag = -1;
+			return flag;
+		}
 		for (size_t i = listBegin(static_cast<size_t>(flag.list_id));
 		     i < _list_end[static_cast<size_t>(flag.list_id)]; ++i) {
 			if (_flag_values[i] == flag.flag) {
@@ -92,12 +95,15 @@ public:
 
 	int get_flag_value(list_flag flag) const
 	{
-		inkAssert(
-		    flag.list_id >= 0 && flag.flag >= 0,
-		    "flag is not an valid flag (expeted list and flag in list)"
-		);
-		return _flag_values
-		    [listBegin(static_cast<size_t>(flag.list_id)) + static_cast<size_t>(flag.flag)];
+		if (flag.list_id < 0 || flag.flag < 0
+		    || static_cast<size_t>(flag.list_id) >= _list_end.size()) {
+			return 0;
+		}
+		size_t fid = listBegin(static_cast<size_t>(flag.list_id)) + static_cast<size_t>(flag.flag);
+		if (fid >= _flag_values.size()) {
+			return 0;
+		}
+		return _flag_values[fid];
 	}
 
 	/// zeros all usage values
@@ -136,8 +142,16 @@ public:
 	{
 	}
 
-	size_t      stringLen(const list_flag& e) const;
+	size_t stringLen(const list_flag& e) const
+	{
+		int fid = toFid(e);
+		if (fid < 0 || static_cast<size_t>(fid) >= _flag_names.size() || _flag_names[fid] == nullptr) {
+			return 0;
+		}
+		return c_str_len(_flag_names[fid]);
+	}
 	const char* toString(const list_flag& e) const;
+	char*       toString(char* out, const list_flag& e) const;
 
 	/** returns len of string representation of list */
 	size_t stringLen(const list& l) const;
@@ -225,13 +239,23 @@ public:
 	template<typename L, typename R>
 	bool less(L lh, R rh) const
 	{
-		return max(lh).flag < min(rh).flag;
+		list_flag mlh = max(lh);
+		list_flag mrh = min(rh);
+		if (mlh.list_id < 0 || mlh.flag < 0 || mrh.list_id < 0 || mrh.flag < 0) {
+			return false;
+		}
+		return get_flag_value(mlh) < get_flag_value(mrh);
 	}
 
 	template<typename L, typename R>
 	bool greater(L lh, R rh) const
 	{
-		return min(lh).flag > max(rh).flag;
+		list_flag mlh = min(lh);
+		list_flag mrh = max(rh);
+		if (mlh.list_id < 0 || mlh.flag < 0 || mrh.list_id < 0 || mrh.flag < 0) {
+			return false;
+		}
+		return get_flag_value(mlh) > get_flag_value(mrh);
 	}
 
 	bool equal(list lh, list rh) const;
@@ -243,20 +267,32 @@ public:
 
 	template<typename L, typename R>
 	bool not_equal(L lh, R rh) const
-	{
-		return equal(lh, rh);
-	}
+	{ return ! equal(lh, rh); }
 
 	template<typename L, typename R>
 	bool greater_equal(L lh, R rh) const
 	{
-		return max(lh).flag >= max(rh).flag && min(lh).flag >= min(rh).flag;
+		list_flag max_l = max(lh), max_r = max(rh);
+		list_flag min_l = min(lh), min_r = min(rh);
+		if (max_l.list_id < 0 || max_l.flag < 0 || max_r.list_id < 0 || max_r.flag < 0
+		    || min_l.list_id < 0 || min_l.flag < 0 || min_r.list_id < 0 || min_r.flag < 0) {
+			return false;
+		}
+		return get_flag_value(max_l) >= get_flag_value(max_r)
+		    && get_flag_value(min_l) >= get_flag_value(min_r);
 	}
 
 	template<typename L, typename R>
 	bool less_equal(L lh, R rh) const
 	{
-		return max(lh).flag <= max(rh).flag && min(lh).flag <= min(rh).flag;
+		list_flag max_l = max(lh), max_r = max(rh);
+		list_flag min_l = min(lh), min_r = min(rh);
+		if (max_l.list_id < 0 || max_l.flag < 0 || max_r.list_id < 0 || max_r.flag < 0
+		    || min_l.list_id < 0 || min_l.flag < 0 || min_r.list_id < 0 || min_r.flag < 0) {
+			return false;
+		}
+		return get_flag_value(max_l) <= get_flag_value(max_r)
+		    && get_flag_value(min_l) <= get_flag_value(min_r);
 	}
 
 	bool has(list lh, list rh) const;
@@ -297,7 +333,10 @@ private:
 
 	size_t listBegin(size_t lid) const
 	{
-		return lid == 0 ? 0 : _list_end[static_cast<size_t>(lid - 1)];
+		if (lid == 0 || lid > _list_end.size()) {
+			return 0;
+		}
+		return _list_end[static_cast<size_t>(lid - 1)];
 	}
 
 	const data_t* getPtr(int eid) const
@@ -335,7 +374,7 @@ private:
 
 	bool hasList(const data_t* data, int lid) const
 	{
-		if (lid < 0) {
+		if (lid < 0 || static_cast<size_t>(lid) >= numLists()) {
 			return false;
 		}
 		return getBit(data, static_cast<size_t>(lid));
@@ -343,14 +382,14 @@ private:
 
 	void setList(data_t* data, int lid, bool value = true)
 	{
-		if (lid >= 0) {
+		if (lid >= 0 && static_cast<size_t>(lid) < numLists()) {
 			setBit(data, static_cast<size_t>(lid), value);
 		}
 	}
 
 	bool hasFlag(const data_t* data, int fid) const
 	{
-		if (fid < 0) {
+		if (fid < 0 || static_cast<size_t>(fid) >= numFlags()) {
 			return false;
 		}
 		return getBit(data, static_cast<size_t>(fid) + numLists());
@@ -358,12 +397,12 @@ private:
 
 	void setFlag(data_t* data, int fid, bool value = true)
 	{
-		if (fid >= 0) {
+		if (fid >= 0 && static_cast<size_t>(fid) < numFlags()) {
 			setBit(data, static_cast<size_t>(fid) + numLists(), value);
 		}
 	}
 
-	size_t toFid(list_flag e) const;
+	int toFid(list_flag e) const;
 
 	auto flagStartMask() const
 	{
@@ -433,16 +472,21 @@ public:
 			if (_pos.flag.flag < 0 || _pos.flag.list_id < 0) {
 				return;
 			}
-			if (static_cast<size_t>(_pos.flag.flag)
-			    == _list._list_end[static_cast<size_t>(_pos.flag.list_id)]
-			           - _list.listBegin(static_cast<size_t>(_pos.flag.list_id))) {
+			while (static_cast<size_t>(_pos.flag.list_id) < _list.numLists()
+			       && static_cast<size_t>(_pos.flag.flag)
+			              >= _list._list_end[static_cast<size_t>(_pos.flag.list_id)]
+			                     - _list.listBegin(static_cast<size_t>(_pos.flag.list_id))) {
 				_pos.flag.flag = 0;
 				++_pos.flag.list_id;
 			}
-			if (static_cast<size_t>(_pos.flag.list_id) == _list.numLists()) {
+			if (static_cast<size_t>(_pos.flag.list_id) >= _list.numLists()) {
 				_pos.flag = null_flag;
+				_pos.name = nullptr;
 			} else {
-				_pos.name = _list._flag_names[_list.toFid(_pos.flag)];
+				int fid   = _list.toFid(_pos.flag);
+				_pos.name = (fid >= 0 && static_cast<size_t>(fid) < _list._flag_names.size())
+				              ? _list._flag_names[fid]
+				              : nullptr;
 			}
 		}
 
@@ -451,17 +495,21 @@ public:
 			bool valid;
 			do {
 				valid      = true;
-				size_t fid = _list.toFid(_pos.flag);
+				int fid    = _list.toFid(_pos.flag);
 				if (_data == nullptr) {
-					if (_list._flag_names[fid] == nullptr) {
+					if (fid < 0 || static_cast<size_t>(fid) >= _list._flag_names.size()
+					    || _list._flag_names[fid] == nullptr) {
 						valid = false;
 						++_pos.flag.flag;
 					}
 				} else if (! _list.hasList(_data, _pos.flag.list_id)) {
 					valid = false;
 					++_pos.flag.list_id;
-				} else if (! _list.hasFlag(_data, static_cast<int>(fid))
-				           || _list._flag_names[fid] == nullptr) {
+				} else if (
+				    fid < 0 || ! _list.hasFlag(_data, fid)
+				    || static_cast<size_t>(fid) >= _list._flag_names.size()
+				    || _list._flag_names[fid] == nullptr
+				) {
 					valid = false;
 					++_pos.flag.flag;
 				}

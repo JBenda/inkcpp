@@ -39,14 +39,14 @@ public:
 	bool empty() const { return _lists.empty(); }
 
 	struct named_list_flag {
-		named_list_flag(const std::string* name, list_flag flag)
-		    : name{name}
+		named_list_flag(std::string name, list_flag flag)
+		    : name{std::move(name)}
 		    , flag{flag}
 		{
 		}
 
-		const std::string* name;
-		list_flag          flag;
+		std::string name;
+		list_flag   flag;
 
 		bool operator<(const named_list_flag& oth) const
 		{
@@ -59,11 +59,11 @@ public:
 
 	const std::vector<named_list_flag>& get_flags() const { return _flags; }
 
-	const std::vector<std::string_view>& get_list_names() const { return _list_name; }
+	const std::vector<std::string>& get_list_names() const { return _list_name; }
 
 private:
 	std::map<std::string, int, std::less<>> _lists;
-	std::vector<std::string_view>           _list_name;
+	std::vector<std::string>                _list_name;
 	std::vector<int>                        _list_end;
 	std::vector<named_list_flag>            _flags;
 };
