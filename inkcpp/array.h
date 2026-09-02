@@ -284,15 +284,15 @@ void managed_array<T, dynamic, initialCapacity, simple>::extend(size_t capacity)
 		// the alignment is compatible with the destination type...
 		new_data = reinterpret_cast<T*>(new char[sizeof(T) * new_capacity]);
 		inkAssert(
-		    reinterpret_cast<std::uintptr_t>(_dynamic_data) % alignof(T) == 0,
+		    reinterpret_cast<std::uintptr_t>(new_data) % alignof(T) == 0,
 		    "New allocated array for extansion is aligned(%d) but the data type has an alignment of %d",
-		    reinterpret_cast<std::uintptr_t>(_dynamic_data), alignof(T)
+		    reinterpret_cast<std::uintptr_t>(new_data), alignof(T)
 		);
 
 		// ...and we have to copy the contents byte-by-byte, since client code (_list_handouts)
 		// type-puns between two classes with different vtbls here. Copying these elementwise would
 		// change the stored C++ type.
-		memcpy(new_data, _dynamic_data, sizeof(T) * _capacity);
+		memcpy(static_cast<void*>(new_data), static_cast<const void*>(_dynamic_data), sizeof(T) * _size);
 	} else {
 		// Allocate and copy typed data normally
 		new_data = new T[new_capacity];
