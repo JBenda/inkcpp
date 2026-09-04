@@ -133,7 +133,8 @@ void ShowInklecateSetupDialog()
 	                                 .SupportsMinimize(false);
 	DialogPtr = Dialog;
 
-	TSharedRef<SWidget> Content = SNew(SBorder).Padding(FMargin(16.f)
+	TSharedRef<SWidget> Content = SNew(SBorder).Padding(
+	    FMargin(16.f)
 	)[SNew(SVerticalBox)
 	  + SVerticalBox::Slot().AutoHeight().Padding(
 	      0.f, 0.f, 0.f, 12.f
@@ -141,14 +142,17 @@ void ShowInklecateSetupDialog()
 	  + SVerticalBox::Slot().AutoHeight().Padding(
 	      0.f, 0.f, 0.f, 12.f
 	  )[SNew(SHyperlink)
-	        .Text(FText::Format(
-	            NSLOCTEXT("InkCpp", "DownloadLinkLabel", "Download: {0}"),
-	            FText::FromString(downloadUrl)
-	        ))
+	        .Text(
+	            FText::Format(
+	                NSLOCTEXT("InkCpp", "DownloadLinkLabel", "Download: {0}"),
+	                FText::FromString(downloadUrl)
+	            )
+	        )
 	        .OnNavigate_Lambda([downloadUrl]() {
 		        FPlatformProcess::LaunchURL(*downloadUrl, nullptr, nullptr);
 	        })]
-	  + SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Left
+	  + SVerticalBox::Slot().AutoHeight().HAlign(
+	      HAlign_Left
 	  )[SNew(SHorizontalBox)
 	    + SHorizontalBox::Slot().AutoWidth().Padding(
 	        0.f, 0.f, 8.f, 0.f
@@ -243,8 +247,10 @@ UInkAssetFactory::UInkAssetFactory(const FObjectInitializer& ObjectInitializer)
 	SupportedClass     = UInkAsset::StaticClass();
 	bCreateNew         = false;
 	bAutomatedReimport = true;
-	bForceShowDialog   = true;
 	bEditorImport      = true;
+#if UE_VERSION_AT_LEAST(5, 5, 0)
+	bForceShowDialog = true;
+#endif
 
 	ImportPriority = 20;
 }
@@ -275,9 +281,11 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 				// No path configured → show setup tutorial and abort
 				UE_LOG(
 				    InkCpp, Warning,
-				    TEXT("InkCPP: No inklecate path configured. "
-				         "Set it in Project Settings > Plugins > InkCPP, "
-				         "or import a .ink.json file directly.")
+				    TEXT(
+				        "InkCPP: No inklecate path configured. "
+				        "Set it in Project Settings > Plugins > InkCPP, "
+				        "or import a .ink.json file directly."
+				    )
 				);
 				ShowInklecateSetupDialog();
 				bOutOperationCanceled = true;
@@ -297,8 +305,10 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 			if (! std::filesystem::exists(inklecate_cmd)) {
 				UE_LOG(
 				    InkCpp, Warning,
-				    TEXT("InkCPP: inklecate not found at '%s'. "
-				         "Update the path in Project Settings > Plugins > InkCPP."),
+				    TEXT(
+				        "InkCPP: inklecate not found at '%s'. "
+				        "Update the path in Project Settings > Plugins > InkCPP."
+				    ),
 				    *FString(inklecate_cmd.c_str())
 				);
 				ShowInklecateSetupDialog();
@@ -309,7 +319,12 @@ UObject* UInkAssetFactory::FactoryCreateFile(
 			// Build the inklecate invocation
 			use_temp_file = true;
 			char tmp_filename[L_tmpnam];
-			if (tmpnam(tmp_filename) == 0) {
+#ifdef _MSC_VER
+			if (! tmpnam_s(tmp_filename, L_tmpnam))
+#else
+			if (tmpnam(tmp_filename) == nullptr)
+#endif
+			{
 				UE_LOG(InkCpp, Error, TEXT("InkCPP: Failed to create a temporary file name."));
 				return nullptr;
 			}
@@ -394,9 +409,7 @@ void UInkAssetFactory::SetReimportPaths(UObject* Obj, const TArray<FString>& New
 int32 UInkAssetFactory::GetPriority() const { return ImportPriority; }
 
 TObjectPtr<UObject>* UInkAssetFactory::GetFactoryObject() const
-{
-	return const_cast<TObjectPtr<UObject>*>(&object_ptr);
-}
+{ return const_cast<TObjectPtr<UObject>*>(&object_ptr); }
 
 EReimportResult::Type UInkAssetFactory::Reimport(UObject* Obj)
 {
