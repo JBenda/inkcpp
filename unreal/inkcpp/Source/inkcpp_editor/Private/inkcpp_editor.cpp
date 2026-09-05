@@ -8,8 +8,10 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
-#include <AssetToolsModule.h>
+#include "AssetToolsModule.h"
+#include "Misc/EngineVersionComparison.h"
 #include "EditorFramework/AssetImportData.h"
+
 #include "InkAsset.h"
 
 #define LOCTEXT_NAMESPACE "AssetTypeActions"
@@ -40,7 +42,7 @@ public:
 		}
 	}
 
-#if UE_VERSION_AT_LEAST(5, 6, 0)
+#if ! UE_VERSION_OLDER_THAN(5, 6, 0)
 	bool ShouldFindEditorForAsset() const override { return false; }
 #endif
 
@@ -61,7 +63,9 @@ public:
 	bool AssetsActivatedOverride(
 	    const TArray<UObject*>& InObjects, EAssetTypeActivationMethod::Type ActivationType
 	) override
-	{ return false; }
+	{
+		return false;
+	}
 
 	bool CanRename(const FAssetData& InAsset, FText* OutErrorMsg) const override { return true; }
 
@@ -70,7 +74,9 @@ public:
 	TArray<FAssetData> GetValidAssetsForPreviewOrEdit(
 	    TArrayView<const FAssetData> InAssetDatas, bool bIsPreview
 	) override
-	{ return TArray<FAssetData>(); }
+	{
+		return TArray<FAssetData>();
+	}
 
 	bool CanFilter() override { return false; }
 
@@ -110,17 +116,22 @@ public:
 	UThumbnailInfo* GetThumbnailInfo(UObject* Asset) const override { return nullptr; }
 
 	EThumbnailPrimType GetDefaultThumbnailPrimitiveType(UObject* Asset) const override
-	{ return EThumbnailPrimType(); }
+	{
+		return EThumbnailPrimType();
+	}
 
 	TSharedPtr<class SWidget> GetThumbnailOverlay(const FAssetData& AssetData) const override
-	{ return TSharedPtr<class SWidget>(); }
+	{
+		return TSharedPtr<class SWidget>();
+	}
 
 	FText GetAssetDescription(const FAssetData& AssetData) const override
-	{ return LOCTEXT("InkAssetDescription", "In Inkle story compiled and ready to use with InkCPP"); }
+	{
+		return LOCTEXT("InkAssetDescription", "In Inkle story compiled and ready to use with InkCPP");
+	}
 
-	void GetSourceFileLabels(
-	    const TArray<UObject*>& TypeAssets, TArray<FString>& OutSourceFileLabels
-	) const override
+	void GetSourceFileLabels(const TArray<UObject*>& TypeAssets, TArray<FString>& OutSourceFileLabels)
+	    const override
 	{
 		for (const UObject* obj : TypeAssets) {
 			const UInkAsset* InkAsset = Cast<UInkAsset>(obj);
@@ -135,18 +146,26 @@ public:
 	FText GetDisplayNameFromAssetData(const FAssetData& AssetData) const override { return FText(); }
 
 	FTopLevelAssetPath GetClassPathName() const override
-	{ return GetSupportedClass()->GetClassPathName(); }
+	{
+		return GetSupportedClass()->GetClassPathName();
+	}
 
 	bool SupportsOpenedMethod(const EAssetTypeActivationOpenedMethod OpenedMethod) const override
-	{ return false; }
+	{
+		return false;
+	}
 
 	const FSlateBrush*
 	    GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const override
-	{ return nullptr; }
+	{
+		return nullptr;
+	}
 
 	const FSlateBrush*
 	    GetIconBrush(const FAssetData& InAssetData, const FName InClassName) const override
-	{ return nullptr; }
+	{
+		return nullptr;
+	}
 
 	// End of IAssetTypeActions interface
 };
