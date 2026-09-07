@@ -1001,7 +1001,9 @@ float d_contains(const size_t lh[2], const size_t rh[2], const int* matches)
  * @return 0 if identical
  */
 float d_label(const char* lh, const char* rh)
-{ return 1.f - algorithms::jaro_winkler_simularity(lh, rh); }
+{
+	return 1.f - algorithms::jaro_winkler_simularity(lh, rh);
+}
 
 /** Distance function for two values.
  * @param lh,rh numeric values to compare
@@ -1135,12 +1137,12 @@ bool list_table::create_match_lut(
 	constexpr float HIGH_CONFIDANCE_DROP_PANELTY = 0.3f;
 	constexpr float LOW_CONFIDANCE_DROP_PANELTY  = 0.6f;
 	float*          value_matrix                 = cost_matrix(
-	    MatchListValues{
-	        ref_table->_flag_names.data(), ref_table->_flag_values.data(), ref_table->numFlags()
-	    },
-	    MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
-	    LOW_CONFIDANCE_DROP_PANELTY
-	);
+      MatchListValues{
+          ref_table->_flag_names.data(), ref_table->_flag_values.data(), ref_table->numFlags()
+      },
+      MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
+      LOW_CONFIDANCE_DROP_PANELTY
+  );
 	const int n_flags = std::max(numFlags(), ref_table->numFlags());
 	list_value_matches.resize(n_flags);
 	algorithms::hungarian_solver(

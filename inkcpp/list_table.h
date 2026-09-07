@@ -282,7 +282,9 @@ public:
 
 	template<typename L, typename R>
 	bool not_equal(L lh, R rh) const
-	{ return ! equal(lh, rh); }
+	{
+		return ! equal(lh, rh);
+	}
 
 	template<typename L, typename R>
 	bool greater_equal(L lh, R rh) const
@@ -335,7 +337,9 @@ public:
 
 	template<typename L, typename R>
 	bool hasnt(L lh, R rh) const
-	{ return ! has(lh, rh); }
+	{
+		return ! has(lh, rh);
+	}
 
 	operator bool() const { return _valid; }
 
@@ -369,10 +373,14 @@ private:
 	}
 
 	const data_t* getPtr(int eid) const
-	{ return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid); }
+	{
+		return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid);
+	}
 
 	data_t* getPtr(int eid)
-	{ return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid); }
+	{
+		return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid);
+	}
 
 	size_t numFlags() const
 	{
@@ -383,7 +391,9 @@ private:
 	size_t numLists() const { return _list_end.size(); }
 
 	bool getBit(const data_t* data, size_t id) const
-	{ return data[id / bits_per_data] & (0x01 << (bits_per_data - 1 - (id % bits_per_data))); }
+	{
+		return data[id / bits_per_data] & (0x01 << (bits_per_data - 1 - (id % bits_per_data)));
+	}
 
 	void setBit(data_t* data, size_t id, bool value = true)
 	{
@@ -528,11 +538,9 @@ public:
 				} else if (! _list.hasList(_data, _pos.flag.list_id)) {
 					valid = false;
 					++_pos.flag.list_id;
-				} else if (
-				    fid < 0 || ! _list.hasFlag(_data, fid)
-				    || static_cast<size_t>(fid) >= _list._flag_names.size()
-				    || _list._flag_names[fid] == nullptr
-				) {
+				} else if (fid < 0 || ! _list.hasFlag(_data, fid)
+				           || static_cast<size_t>(fid) >= _list._flag_names.size()
+				           || _list._flag_names[fid] == nullptr) {
 					valid = false;
 					++_pos.flag.flag;
 				}
@@ -563,7 +571,9 @@ public:
     }
 		    , _data{filter}
 		    , _pos{{0, 0}, list._flag_names[0]}
-		{ goToValid(); }
+		{
+			goToValid();
+		}
 
 		const auto* operator->() const { return &_pos; }
 

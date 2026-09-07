@@ -179,7 +179,9 @@ void basic_stack::push_frame<frame_type::tunnel>(offset_t return_to, bool eval)
 
 template<>
 void basic_stack::push_frame<frame_type::thread>(offset_t return_to, bool eval)
-{ add(InvalidHash, value{}.set<value_type::thread_frame>(return_to, eval)); }
+{
+	add(InvalidHash, value{}.set<value_type::thread_frame>(return_to, eval));
+}
 
 const entry* basic_stack::pop() { return &base::pop(is_entry_null); }
 
