@@ -159,7 +159,7 @@ public:
 	// Iterator that begins at the end of the stack
 	iterator begin() { return iterator(&_buffer[_pos - 1], _buffer - 1); }
 
-	const_iterator begin() const { return iterator(&_buffer[_pos - 1], _buffer - 1); }
+	const_iterator begin() const { return const_iterator(&_buffer[_pos - 1], _buffer - 1); }
 
 	// Iterator that points to the element past the beginning of the stack
 	iterator end() { return iterator(_buffer - 1, _buffer - 1); }
