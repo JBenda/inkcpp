@@ -12,7 +12,7 @@
 #include "traits.h"
 
 #include <limits>
-#include <cstdint>
+#include <new>
 
 namespace ink::runtime::internal
 {
@@ -34,15 +34,16 @@ public:
 	    , _static_data{}
 	{
 		if constexpr (dynamic) {
-			if constexpr (simple) {
-				_dynamic_data = reinterpret_cast<T*>(new char[sizeof(T) * initialCapacity]);
-				inkAssert(
-				    reinterpret_cast<std::uintptr_t>(_dynamic_data) % alignof(T) == 0,
-				    "The data array has a different alignment(%d) then the contained data(%d)",
-				    reinterpret_cast<std::uintptr_t>(_dynamic_data), alignof(T)
-				);
-			} else {
-				_dynamic_data = new T[initialCapacity];
+			if constexpr (initialCapacity > 0) {
+				if constexpr (simple) {
+					_dynamic_data
+					    = reinterpret_cast<T*>(new (std::nothrow) char[sizeof(T) * initialCapacity]);
+					inkAssert(_dynamic_data != nullptr, "Out of memory in inkcpp: managed_array init failed");
+					inkAssert(( ::size_t ) _dynamic_data % alignof(T) == 0);
+				} else {
+					_dynamic_data = new (std::nothrow) T[initialCapacity];
+					inkAssert(_dynamic_data != nullptr, "Out of memory in inkcpp: managed_array init failed");
+				}
 			}
 		}
 	}
@@ -55,10 +56,12 @@ public:
 	virtual ~managed_array()
 	{
 		if constexpr (dynamic) {
-			if constexpr (simple) {
-				delete[] reinterpret_cast<char*>(_dynamic_data);
-			} else {
-				delete[] _dynamic_data;
+			if (_dynamic_data != nullptr) {
+				if constexpr (simple) {
+					delete[] reinterpret_cast<char*>(_dynamic_data);
+				} else {
+					delete[] _dynamic_data;
+				}
 			}
 		}
 	}
@@ -115,11 +118,11 @@ public:
 			if (_size == _capacity) {
 				extend();
 			}
-			inkAssert(_size < _capacity, "Failed to extend full dynamic array!");
 		} else {
-			inkAssert(_size < _capacity, "Try to append to a full array!");
+			inkAssert(_size <= _capacity, "Try to append to a full array!");
 			// TODO(JBenda): Silent fail?
 		}
+		inkAssert(_size < _capacity);
 		return data()[_size++];
 	}
 
@@ -282,31 +285,30 @@ void managed_array<T, dynamic, initialCapacity, simple>::extend(size_t capacity)
 	if constexpr (simple) {
 		// Warning: Allocating typed data in a char* container is potentially unsafe. We need to be sure
 		// the alignment is compatible with the destination type...
-		new_data = reinterpret_cast<T*>(new char[sizeof(T) * new_capacity]);
-		inkAssert(
-		    reinterpret_cast<std::uintptr_t>(new_data) % alignof(T) == 0,
-		    "New allocated array for extansion is aligned(%d) but the data type has an alignment of %d",
-		    reinterpret_cast<std::uintptr_t>(new_data), alignof(T)
-		);
+		new_data = reinterpret_cast<T*>(new (std::nothrow) char[sizeof(T) * new_capacity]);
+		inkAssert(new_data != nullptr, "Out of memory in inkcpp: managed_array extend failed (simple)");
+		inkAssert(( ::size_t ) new_data % alignof(T) == 0);
 
 		// ...and we have to copy the contents byte-by-byte, since client code (_list_handouts)
 		// type-puns between two classes with different vtbls here. Copying these elementwise would
 		// change the stored C++ type.
-		memcpy(static_cast<void*>(new_data), static_cast<const void*>(_dynamic_data), sizeof(T) * _size);
+		if (_dynamic_data) {
+			memcpy(new_data, _dynamic_data, sizeof(T) * _capacity);
+			delete[] reinterpret_cast<char*>(_dynamic_data);
+		}
 	} else {
 		// Allocate and copy typed data normally
-		new_data = new T[new_capacity];
+		new_data = new (std::nothrow) T[new_capacity];
+		inkAssert(new_data != nullptr, "Out of memory in inkcpp: managed_array extend failed (typed)");
 
-		for (size_t i = 0; i < _capacity; ++i) {
-			new_data[i] = _dynamic_data[i];
+		if (_dynamic_data) {
+			for (size_t i = 0; i < _capacity; ++i) {
+				new_data[i] = static_cast<T&&>(_dynamic_data[i]);
+			}
+			delete[] _dynamic_data;
 		}
 	}
 
-	if constexpr (simple) {
-		delete[] reinterpret_cast<char*>(_dynamic_data);
-	} else {
-		delete[] _dynamic_data;
-	}
 	_dynamic_data = new_data;
 	_capacity     = new_capacity;
 }

@@ -40,11 +40,13 @@ void list_impl::next(const char*& flag_name, const char*& list_name, int& i, boo
 		return;
 	}
 
-	list_flag flag{static_cast<int16_t>(i >> 16), static_cast<int16_t>(i & 0xFF)};
+	list_flag flag{static_cast<int16_t>(i >> 16), static_cast<int16_t>(i & 0x7FFF)};
 	if (flag_name != nullptr) {
 		++flag.flag;
 	}
-	if (static_cast<size_t>(flag.flag) >= _list_table->_list_end[flag.list_id]) {
+	if (flag.list_id < 0 || static_cast<size_t>(flag.list_id) >= _list_table->_list_end.size()
+	    || static_cast<size_t>(flag.flag)
+	           >= (_list_table->_list_end[flag.list_id] - _list_table->listBegin(flag.list_id))) {
 next_list:
 		if (one_list_only) {
 			i = -1;
@@ -53,7 +55,7 @@ next_list:
 		flag.flag = 0;
 		do {
 			++flag.list_id;
-			if (static_cast<size_t>(flag.list_id) >= _list_table->_list_end.size()) {
+			if (flag.list_id < 0 || static_cast<size_t>(flag.list_id) >= _list_table->_list_end.size()) {
 				i = -1;
 				return;
 			}
@@ -66,15 +68,24 @@ next_list:
 			goto next_list;
 		}
 	}
-	flag_name = _list_table->_flag_names[_list_table->toFid(flag)];
-	list_name = _list_table->_list_names[flag.list_id];
+	int fid   = _list_table->toFid(flag);
+	flag_name = (fid >= 0 && static_cast<size_t>(fid) < _list_table->_flag_names.size())
+	              ? _list_table->_flag_names[fid]
+	              : nullptr;
+	list_name
+	    = (flag.list_id >= 0 && static_cast<size_t>(flag.list_id) < _list_table->_list_names.size())
+	        ? _list_table->_list_names[flag.list_id]
+	        : nullptr;
 
-	i = (flag.list_id << 16) | flag.flag;
+	i = (flag.list_id << 16) | (flag.flag & 0x7FFF);
 }
 
 list_interface::iterator list_impl::begin(const char* list_name) const
 {
-	size_t list_id = _list_table->get_list_id(list_name).list_id;
-	return ++new_iterator(nullptr, list_id << 16, true);
+	list_flag lf = _list_table->get_list_id(list_name);
+	if (lf.list_id < 0) {
+		return end();
+	}
+	return ++new_iterator(nullptr, lf.list_id << 16, true);
 }
 } // namespace ink::runtime::internal

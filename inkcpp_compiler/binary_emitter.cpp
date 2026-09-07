@@ -523,8 +523,8 @@ void binary_emitter::set_list_meta(const list_data& list_defs)
 			_list_meta.write('\0');
 		}
 		_list_meta.write(
-		    reinterpret_cast<const byte_t*>(flag.name->c_str()),
-		    static_cast<size_t>(flag.name->size()) + 1
+		    reinterpret_cast<const byte_t*>(flag.name.c_str()),
+		    static_cast<size_t>(flag.name.size()) + 1
 		);
 	}
 	_list_meta.write(null_flag);

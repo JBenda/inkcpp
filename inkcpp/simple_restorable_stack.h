@@ -44,6 +44,7 @@ public:
 	bool iter(const T*& iterator) const;
 	bool rev_iter(const T*& iterator) const;
 
+
 	// == Save/Restore ==
 	bool is_saved() const { return _save != InvalidIndex; }
 
