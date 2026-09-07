@@ -9,7 +9,7 @@
 #include "config.h"
 #include "system.h"
 #include "array.h"
-#include "include/list.h"
+#include "list.h"
 
 #ifdef INK_ENABLE_STL
 #	include <iosfwd>
@@ -150,6 +150,7 @@ public:
 		}
 		return c_str_len(_flag_names[fid]);
 	}
+
 	const char* toString(const list_flag& e) const;
 	char*       toString(char* out, const list_flag& e) const;
 
@@ -239,10 +240,17 @@ public:
 	template<typename L, typename R>
 	bool less(L lh, R rh) const
 	{
-		list_flag mlh = max(lh);
-		list_flag mrh = min(rh);
-		if (mlh.list_id < 0 || mlh.flag < 0 || mrh.list_id < 0 || mrh.flag < 0) {
+		list_flag  mlh      = max(lh);
+		list_flag  mrh      = min(rh);
+		const bool lh_empty = mlh.list_id < 0 || mlh.flag < 0;
+		const bool rh_empty = mrh.list_id < 0 || mrh.flag < 0;
+		// nothing is smaller than an empty list
+		if (rh_empty) {
 			return false;
+		}
+		// an empty list is always smaller than a non-empty
+		if (lh_empty) {
+			return true;
 		}
 		return get_flag_value(mlh) < get_flag_value(mrh);
 	}
@@ -250,10 +258,17 @@ public:
 	template<typename L, typename R>
 	bool greater(L lh, R rh) const
 	{
-		list_flag mlh = min(lh);
-		list_flag mrh = max(rh);
-		if (mlh.list_id < 0 || mlh.flag < 0 || mrh.list_id < 0 || mrh.flag < 0) {
+		list_flag  mlh      = min(lh);
+		list_flag  mrh      = max(rh);
+		const bool lh_empty = mlh.list_id < 0 || mlh.flag < 0;
+		const bool rh_empty = mrh.list_id < 0 || mrh.flag < 0;
+		// an empty list is bigger then nothing
+		if (lh_empty) {
 			return false;
+		}
+		// a non-empty list is always greater than an empty one if (Rh_empty) {
+		if (rh_empty) {
+			return true;
 		}
 		return get_flag_value(mlh) > get_flag_value(mrh);
 	}
@@ -272,10 +287,18 @@ public:
 	template<typename L, typename R>
 	bool greater_equal(L lh, R rh) const
 	{
-		list_flag max_l = max(lh), max_r = max(rh);
-		list_flag min_l = min(lh), min_r = min(rh);
-		if (max_l.list_id < 0 || max_l.flag < 0 || max_r.list_id < 0 || max_r.flag < 0
-		    || min_l.list_id < 0 || min_l.flag < 0 || min_r.list_id < 0 || min_r.flag < 0) {
+		list_flag  max_l = max(lh), max_r = max(rh);
+		list_flag  min_l = min(lh), min_r = min(rh);
+		const bool lh_empty
+		    = max_l.list_id < 0 || max_l.flag < 0 || min_l.list_id < 0 || min_l.flag < 0;
+		const bool rh_empty
+		    = max_r.list_id < 0 || max_r.flag < 0 || min_r.list_id < 0 || min_r.flag < 0;
+		// everything is geared equal an empty list
+		if (rh_empty) {
+			return true;
+		}
+		// only an empty list is equal an empty list (already checked above)
+		if (lh_empty) {
 			return false;
 		}
 		return get_flag_value(max_l) >= get_flag_value(max_r)
@@ -285,10 +308,18 @@ public:
 	template<typename L, typename R>
 	bool less_equal(L lh, R rh) const
 	{
-		list_flag max_l = max(lh), max_r = max(rh);
-		list_flag min_l = min(lh), min_r = min(rh);
-		if (max_l.list_id < 0 || max_l.flag < 0 || max_r.list_id < 0 || max_r.flag < 0
-		    || min_l.list_id < 0 || min_l.flag < 0 || min_r.list_id < 0 || min_r.flag < 0) {
+		list_flag  max_l = max(lh), max_r = max(rh);
+		list_flag  min_l = min(lh), min_r = min(rh);
+		const bool lh_empty
+		    = max_l.list_id < 0 || max_l.flag < 0 || min_l.list_id < 0 || min_l.flag < 0;
+		const bool rh_empty
+		    = max_r.list_id < 0 || max_r.flag < 0 || min_r.list_id < 0 || min_r.flag < 0;
+		// an empty list is less or equal to every other list
+		if (lh_empty) {
+			return true;
+		}
+		// a non-empty list is always bigger then an empty one
+		if (rh_empty) {
 			return false;
 		}
 		return get_flag_value(max_l) <= get_flag_value(max_r)
@@ -304,9 +335,7 @@ public:
 
 	template<typename L, typename R>
 	bool hasnt(L lh, R rh) const
-	{
-		return ! has(lh, rh);
-	}
+	{ return ! has(lh, rh); }
 
 	operator bool() const { return _valid; }
 
@@ -340,14 +369,10 @@ private:
 	}
 
 	const data_t* getPtr(int eid) const
-	{
-		return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid);
-	}
+	{ return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid); }
 
 	data_t* getPtr(int eid)
-	{
-		return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid);
-	}
+	{ return _data.begin() + static_cast<ptrdiff_t>(_entrySize) * static_cast<ptrdiff_t>(eid); }
 
 	size_t numFlags() const
 	{
@@ -358,9 +383,7 @@ private:
 	size_t numLists() const { return _list_end.size(); }
 
 	bool getBit(const data_t* data, size_t id) const
-	{
-		return data[id / bits_per_data] & (0x01 << (bits_per_data - 1 - (id % bits_per_data)));
-	}
+	{ return data[id / bits_per_data] & (0x01 << (bits_per_data - 1 - (id % bits_per_data))); }
 
 	void setBit(data_t* data, size_t id, bool value = true)
 	{
@@ -494,8 +517,8 @@ public:
 		{
 			bool valid;
 			do {
-				valid      = true;
-				int fid    = _list.toFid(_pos.flag);
+				valid   = true;
+				int fid = _list.toFid(_pos.flag);
 				if (_data == nullptr) {
 					if (fid < 0 || static_cast<size_t>(fid) >= _list._flag_names.size()
 					    || _list._flag_names[fid] == nullptr) {
@@ -540,9 +563,7 @@ public:
     }
 		    , _data{filter}
 		    , _pos{{0, 0}, list._flag_names[0]}
-		{
-			goToValid();
-		}
+		{ goToValid(); }
 
 		const auto* operator->() const { return &_pos; }
 

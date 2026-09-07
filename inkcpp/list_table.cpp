@@ -576,14 +576,16 @@ int32_t list_table::count(list l) const
 list_flag list_table::min(list l) const
 {
 	list_flag     res{-1, -1};
-	int           min_val = -1;
-	const data_t* data = getPtr(l.lid);
+	int           min_val = 0;
+	bool          found   = false;
+	const data_t* data    = getPtr(l.lid);
 	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(data, i)) {
 			for (size_t j = listBegin(i); j < _list_end[i]; ++j) {
 				if (hasFlag(data, j)) {
 					int value = _flag_values[j];
-					if (min_val < 0 || value < min_val) {
+					if (! found || value < min_val) {
+						found       = true;
 						min_val     = value;
 						res.flag    = static_cast<int16_t>(j - listBegin(i));
 						res.list_id = static_cast<int16_t>(i);
@@ -599,14 +601,16 @@ list_flag list_table::min(list l) const
 list_flag list_table::max(list l) const
 {
 	list_flag     res{-1, -1};
-	int           max_val = -1;
-	const data_t* data = getPtr(l.lid);
+	int           max_val = 0;
+	bool          found   = false;
+	const data_t* data    = getPtr(l.lid);
 	for (size_t i = 0; i < numLists(); ++i) {
 		if (hasList(data, i)) {
 			for (size_t j = _list_end[i] - 1; j != ~0U && j >= listBegin(i); --j) {
 				if (hasFlag(data, j)) {
 					int value = _flag_values[j];
-					if (max_val < 0 || value > max_val) {
+					if (! found || value > max_val) {
+						found       = true;
 						max_val     = value;
 						res.flag    = static_cast<int16_t>(j - listBegin(i));
 						res.list_id = static_cast<int16_t>(i);
@@ -815,7 +819,7 @@ optional<list_flag> list_table::toFlag(const char* flag_name) const
 		if (list.list_id < 0 || static_cast<size_t>(list.list_id) >= _list_end.size()) {
 			return nullopt;
 		}
-		flag_name      = periode + 1;
+		flag_name         = periode + 1;
 		size_t list_begin = listBegin(static_cast<size_t>(list.list_id));
 		for (size_t i = list_begin; i != _list_end[list.list_id]; ++i) {
 			if (str_equal(flag_name, _flag_names[i])) {
@@ -997,9 +1001,7 @@ float d_contains(const size_t lh[2], const size_t rh[2], const int* matches)
  * @return 0 if identical
  */
 float d_label(const char* lh, const char* rh)
-{
-	return 1.f - algorithms::jaro_winkler_simularity(lh, rh);
-}
+{ return 1.f - algorithms::jaro_winkler_simularity(lh, rh); }
 
 /** Distance function for two values.
  * @param lh,rh numeric values to compare
@@ -1133,12 +1135,12 @@ bool list_table::create_match_lut(
 	constexpr float HIGH_CONFIDANCE_DROP_PANELTY = 0.3f;
 	constexpr float LOW_CONFIDANCE_DROP_PANELTY  = 0.6f;
 	float*          value_matrix                 = cost_matrix(
-      MatchListValues{
-          ref_table->_flag_names.data(), ref_table->_flag_values.data(), ref_table->numFlags()
-      },
-      MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
-      LOW_CONFIDANCE_DROP_PANELTY
-  );
+	    MatchListValues{
+	        ref_table->_flag_names.data(), ref_table->_flag_values.data(), ref_table->numFlags()
+	    },
+	    MatchListValues{_flag_names.data(), _flag_values.data(), numFlags()},
+	    LOW_CONFIDANCE_DROP_PANELTY
+	);
 	const int n_flags = std::max(numFlags(), ref_table->numFlags());
 	list_value_matches.resize(n_flags);
 	algorithms::hungarian_solver(
