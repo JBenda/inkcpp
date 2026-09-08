@@ -5,7 +5,7 @@
  * https://github.com/JBenda/inkcpp for full license details.
  */
 #include "list_impl.h"
-#include "list.h"
+#include "include/list.h"
 #include "list_table.h"
 
 namespace ink::runtime::internal
