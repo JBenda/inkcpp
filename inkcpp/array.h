@@ -293,8 +293,21 @@ void managed_array<T, dynamic, initialCapacity, simple>::extend(size_t capacity)
 		// type-puns between two classes with different vtbls here. Copying these elementwise would
 		// change the stored C++ type.
 		if (_dynamic_data) {
+
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable : 4201)
+#else
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
 			memcpy(new_data, _dynamic_data, sizeof(T) * _capacity);
 			delete[] reinterpret_cast<char*>(_dynamic_data);
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#else
+#	pragma GCC diagnostic pop
+#endif
 		}
 	} else {
 		// Allocate and copy typed data normally
