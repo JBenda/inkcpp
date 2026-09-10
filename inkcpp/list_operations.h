@@ -334,9 +334,9 @@ public:
 		inkAssert(vals[0].type() == value_type::list_flag, "LIST_VALUE only works on list_flag values");
 		list_flag flag = vals[0].get<value_type::list_flag>();
 		if (flag.list_id < 0 || flag.flag < 0) {
-			stack.push(value{}.set<value_type::int32>(0));
+			stack.push(value{}.set<value_type::int32>(int32_t{0}));
 		} else {
-			stack.push(value{}.set<value_type::int32>(_list_table.get_flag_value(flag)));
+			stack.push(value{}.set<value_type::int32>(static_cast<int32_t>(_list_table.get_flag_value(flag))));
 		}
 	}
 };
@@ -352,9 +352,9 @@ public:
 		list_table::list l        = vals[0].get<value_type::list>();
 		list_flag        max_flag = _list_table.max(l);
 		if (max_flag.list_id < 0 || max_flag.flag < 0) {
-			stack.push(value{}.set<value_type::int32>(0));
+			stack.push(value{}.set<value_type::int32>(int32_t{0}));
 		} else {
-			stack.push(value{}.set<value_type::int32>(_list_table.get_flag_value(max_flag)));
+			stack.push(value{}.set<value_type::int32>(static_cast<int32_t>(_list_table.get_flag_value(max_flag))));
 		}
 	}
 };
