@@ -48,7 +48,7 @@ jobs:
           submodules: true
 
       # Setup python
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         if: ${{ matrix.proof }}
         with:
           python-version: "3.x"
@@ -59,11 +59,6 @@ jobs:
         with:
           cmake-version: "3.22.x"
 
-      # Setup Ninja
-      - name: Setup Ninja
-        uses: ashutoshvarma/setup-ninja@v1.1
-        with:
-          version: 1.13.0
       # Create a build directory to store all the CMake generated files
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
@@ -168,7 +163,6 @@ jobs:
           cmake -E make_directory deps/inkcpp
           cp ../../build/comp_cl/* deps/inkcpp/
 
-
       # Run it
       - name: Run Ink Proof
         if: ${{ matrix.proof }}
@@ -211,7 +205,7 @@ jobs:
         with:
           submodules: true
       - name: Set upt Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.x"
       - name: install pyton libs
@@ -262,7 +256,7 @@ jobs:
         with:
           submodules: true
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.x"
       - name: install build
@@ -334,12 +328,12 @@ jobs:
       - uses: actions/checkout@v6
 
       # Download Ink Proof page for Linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: linux-www
           path: www/proof
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: doxygen
           path: www
