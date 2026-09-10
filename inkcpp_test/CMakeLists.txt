@@ -33,6 +33,7 @@ add_executable(
 	Fixes.cpp
 	Migration.cpp
 	MultiRunner.cpp
+	NotAnInkStory.cpp
 )
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
