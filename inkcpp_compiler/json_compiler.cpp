@@ -25,7 +25,7 @@ using std::vector;
  * outlives the entire compile (it is the caller's json, reached by reference
  * through compile() -> compile_container() -> handle_container_metadata()), so
  * borrowing is safe. */
-typedef std::tuple<const json*, std::string> defer_entry;
+typedef std::tuple<const json&, std::string> defer_entry;
 
 json_compiler::json_compiler()
     : _emitter(nullptr)
@@ -124,7 +124,7 @@ void json_compiler::handle_container_metadata(const json& meta, container_meta& 
 			// Child container
 			else {
 				// Add to deferred compilation list
-				data.deferred.push_back(std::make_tuple(&meta_iter.value(), meta_iter.key()));
+				data.deferred.emplace_back(meta_iter.value(), meta_iter.key());
 			}
 		}
 	} else if (is_knot) {
@@ -237,7 +237,7 @@ void json_compiler::compile_container(
 			using std::get;
 
 			// Add to named child list
-			compile_container(*get<0>(t), -1, depth + 1, get<1>(t));
+			compile_container(get<0>(t), -1, depth + 1, get<1>(t));
 
 			// Need a divert here
 			uint32_t pos = _emitter->fallthrough_divert();
