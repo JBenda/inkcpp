@@ -266,10 +266,7 @@ offset_t basic_stack::pop_frame(frame_type* type, bool& eval)
 		entry* frame = iter.get();
 		if (frame->name != InvalidHash || frame->data.type() == value_type::none) {
 			pop();
-			iter = base::begin();
-			if (is_entry_null(*iter.get())) {
-				iter.next(is_entry_null);
-			}
+			iter.next(is_entry_null);
 			continue;
 		}
 

@@ -25,9 +25,10 @@ class restorable_iter
 {
 public:
 	// Create an iterator moving from start (inclusive) to end (exclusive)
-	restorable_iter(ElementType* start, ElementType* end)
+	restorable_iter(int start, int end, ElementType* const& buffer)
 	    : _current(start)
 	    , _end(end)
+	    , _buffer(buffer)
 	{
 	}
 
@@ -43,7 +44,7 @@ public:
 			_current += dir;
 
 			// Make sure to skip over null items
-			while (isNull(*_current) && _current != _end) {
+			while (isNull(_buffer[_current]) && _current != _end) {
 				_current += dir;
 			}
 		}
@@ -57,20 +58,21 @@ public:
 	}
 
 	// Get current element
-	inline ElementType* get() { return _current; }
+	inline ElementType* get() { return &_buffer[_current]; }
 
 	// Get current element (const)
-	inline const ElementType* get() const { return _current; }
+	inline const ElementType* get() const { return &_buffer[_current]; }
 
 	// Is iteration complete (opposite of is valid)
 	inline bool done() const { return _current == _end; }
 
 private:
 	// Current point of iteration
-	ElementType* _current;
+	int _current;
 
 	// End point (non-valid)
-	ElementType* _end;
+	int                 _end;
+	ElementType* const& _buffer;
 };
 
 /**
@@ -157,14 +159,14 @@ public:
 	using const_iterator = restorable_iter<const ElementType>;
 
 	// Iterator that begins at the end of the stack
-	iterator begin() { return iterator(&_buffer[_pos - 1], _buffer - 1); }
+	iterator begin() { return iterator(_pos - 1, -1, _buffer); }
 
-	const_iterator begin() const { return const_iterator(&_buffer[_pos - 1], _buffer - 1); }
+	const_iterator begin() const { return const_iterator(_pos - 1, -1, _buffer); }
 
 	// Iterator that points to the element past the beginning of the stack
-	iterator end() { return iterator(_buffer - 1, _buffer - 1); }
+	iterator end() { return iterator(-1, -1, _buffer); }
 
-	iterator end() const { return const_iterator(_buffer - 1, _buffer - 1); }
+	iterator end() const { return const_iterator(-1, -1, _buffer); }
 
 	// Push element onto the top of collection
 	ElementType& push(const ElementType& elem)
