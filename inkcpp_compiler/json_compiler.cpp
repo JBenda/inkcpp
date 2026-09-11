@@ -18,7 +18,14 @@ namespace ink::compiler::internal
 using nlohmann::json;
 using std::vector;
 
-typedef std::tuple<json, std::string> defer_entry;
+/* Holds a pointer, not the container itself. Storing the json by value here
+ * deep-copied every named child's whole subtree, and because compile_container
+ * then recursed into that copy and deferred *its* children the same way, a
+ * container nested d levels deep was copied d times over. The source document
+ * outlives the entire compile (it is the caller's json, reached by reference
+ * through compile() -> compile_container() -> handle_container_metadata()), so
+ * borrowing is safe. */
+typedef std::tuple<const json&, std::string> defer_entry;
 
 json_compiler::json_compiler()
     : _emitter(nullptr)
@@ -117,7 +124,7 @@ void json_compiler::handle_container_metadata(const json& meta, container_meta& 
 			// Child container
 			else {
 				// Add to deferred compilation list
-				data.deferred.push_back(std::make_tuple(meta_iter.value(), meta_iter.key()));
+				data.deferred.emplace_back(meta_iter.value(), meta_iter.key());
 			}
 		}
 	} else if (is_knot) {
