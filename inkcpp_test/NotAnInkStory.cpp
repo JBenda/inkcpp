@@ -21,13 +21,13 @@ using namespace ink::compiler;
 
 namespace
 {
-	std::string compile_or_throw(const char* json)
-	{
-		std::istringstream in(json);
-		std::ostringstream out;
-		run(in, out);
-		return out.str();
-	}
+std::string compile_or_throw(const char* json)
+{
+	std::istringstream in(json);
+	std::ostringstream out;
+	run(in, out);
+	return out.str();
+}
 } // namespace
 
 SCENARIO("JSON that is not an Ink story is reported, not fatal", "[compiler]")
