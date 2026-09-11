@@ -71,7 +71,33 @@ struct container_hash_t {
 
 	uint32_t key() const { return _hash; }
 
-	bool operator<(const container_hash_t& other) const { return _hash < other._hash; }
+	/* Ordered by hash, then by offset.
+	 *
+	 * The offset is not decoration: without it this is a partial order, and
+	 * binary_emitter sorts the table with std::sort, which is not stable. Any two
+	 * entries sharing a hash could then come out in either order, and which one you
+	 * got depended on the standard library - the same story compiled to different
+	 * bytes under libstdc++ than under libc++, which makes byte comparison useless
+	 * as a check between builds.
+	 *
+	 * It is not only cosmetic. story_impl.cpp's upper_bound() returns the LAST entry
+	 * whose key is <= the target, so when entries share a hash the runtime resolves
+	 * the path to whichever one the sort happened to leave last. Ties are common:
+	 * paths are not unique here, because build_container_hash_map() recurses into
+	 * indexed children carrying the parent's name unchanged, so one path string is
+	 * emitted once per indexed child at a different offset. One test story has 164
+	 * entries under 128 distinct hashes, and every one of those 26 collisions is a
+	 * repeated path rather than two different paths colliding.
+	 *
+	 * Tie-breaking on the offset makes the order total, so every toolchain agrees
+	 * and the resolved container is a property of the story rather than of the
+	 * compiler that built it. key() deliberately still returns the hash alone - the
+	 * runtime's binary search looks up by hash and must keep matching every entry in
+	 * a run. */
+	bool operator<(const container_hash_t& other) const
+	{
+		return _hash != other._hash ? _hash < other._hash : _offset < other._offset;
+	}
 };
 
 // One entry in the container map. Used to work out which container a story location is in.
