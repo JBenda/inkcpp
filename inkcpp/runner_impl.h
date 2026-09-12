@@ -129,7 +129,7 @@ public:
 	virtual const char* getline_alloc() override;
 
 	// move to path
-	virtual bool move_to(hash_t path) override;
+	virtual bool move_to(hash_t path, bool reset_callstack = true) override;
 
 	// move to path but keep as much state as possible
 	bool migrate_to(const loader& loader, hash_t path);
