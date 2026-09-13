@@ -166,13 +166,29 @@ std::string basic_stream::get()
 	size_t start = find_start();
 
 	// Move up from marker
-	bool              hasGlue = false, lastNewline = false;
-	std::stringstream str;
+	bool        hasGlue = false, lastNewline = false;
+	std::string result;
 	for (size_t i = start; i < _size; i++) {
 		if (should_skip(i, hasGlue, lastNewline))
 			continue;
-		if (_data[i].printable()) {
-			_data[i].write(str, _lists_table);
+		if (! _data[i].printable()) {
+			continue;
+		}
+		if (_data[i].type() == value_type::string) {
+			// Spaces meeting at a SEAM collapse; spaces inside one value do
+			// not. See get_alloc(), which joins the same fragments the same
+			// way.
+			const char* value = _data[i].get<value_type::string>();
+			if (! result.empty() && isspace(static_cast<unsigned char>(result.back()))) {
+				while (*value == ' ') {
+					++value;
+				}
+			}
+			result += value;
+		} else {
+			std::stringstream piece;
+			_data[i].write(piece, _lists_table);
+			result += piece.str();
 		}
 	}
 
@@ -180,8 +196,6 @@ std::string basic_stream::get()
 	_size = start;
 
 	// Return processed string
-	// remove mulitple accourencies of ' '
-	std::string result = str.str();
 	if (! result.empty()) {
 		auto end = clean_string<true, false>(result.begin(), result.end());
 		if (result.begin() == end) {
@@ -368,6 +382,22 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			case value_type::string: {
 				// Copy string and advance
 				const char* value = _data[i].get<value_type::string>();
+				/* Spaces meeting at a SEAM collapse; spaces inside a value do
+				 * not. Two fragments joined by glue frequently bring a trailing
+				 * space and a leading space to the same join - `Knock ` and
+				 * ` again?` - and the reader should see one space, not two.
+				 *
+				 * That is the only case clean_string's old run-collapsing was
+				 * really for, and doing it here instead leaves the interior of
+				 * each value alone. Ink used to drive text into a terminal,
+				 * where nobody noticed; driving a fixed-width display it
+				 * matters, because laid-out text - tables, ASCII art, anything
+				 * aligned with gutters - loses its shape. */
+				if (ptr > buffer && isspace(static_cast<unsigned char>(ptr[-1]))) {
+					while (*value != 0 && *value == ' ') {
+						++value;
+					}
+				}
 				copy_string(value, i, ptr);
 			} break;
 			case value_type::newline:

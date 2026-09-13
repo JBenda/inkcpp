@@ -204,7 +204,26 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 					continue;
 				}
 			}
-			if (src + 1 != end && isspace(static_cast<unsigned char>(src[1]))) {
+			/* A run of spaces INSIDE a line is kept.
+			 *
+			 * Dropping a space whose neighbour is also a space turned `A    B`
+			 * into `A B`. Leading and trailing whitespace is still trimmed,
+			 * which is what the spec asks for; collapsing the middle is not,
+			 * and every layer below this one keeps those runs - inklecate
+			 * writes them into its JSON and the compiler carries them through.
+			 *
+			 * It matters wherever ink drives a fixed-width display. In the
+			 * project this was found in, a 32-column thermal printer, it
+			 * flattened every piece of ASCII art in the story archive: the
+			 * gutters that drew corridors and borders closed up, and 121 lines
+			 * across five stories printed as a row of characters where a
+			 * drawing should have been.
+			 *
+			 * Whitespace at the END of a line is still dropped: a space sitting
+			 * immediately before a newline is trailing whitespace wherever it
+			 * came from, and trimming it is what the spec asks for.
+			 */
+			if (src + 1 != end && src[1] == '\n') {
 				continue;
 			}
 		} else if (src[0] == '\n' && dst != begin && dst[-1] == '\n') {
