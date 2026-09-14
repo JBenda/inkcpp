@@ -65,9 +65,8 @@ endforeach()
 
 set(INKCPP_C_PC_EXTRA_CFLAGS "")
 if(MSVC)
-	# this archive is built with MSVC's default dynamic CRT (/MD in Release); clang defaults to a
-	# different CRT on Windows unless told otherwise, which leaves CRT symbols unresolved
-	set(INKCPP_C_PC_EXTRA_CFLAGS "-fms-runtime-lib=dll")
+	# this archive is built with MSVC's default dynamic CRT (/MD in Release).
+	set(INKCPP_C_PC_EXTRA_CFLAGS "-fms-runtime-lib=dll -lmsvcrt -lvcruntime -lucrt -loldnames")
 endif()
 
 set(PREFIX "/user/local")
