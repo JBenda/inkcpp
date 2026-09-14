@@ -308,6 +308,7 @@ jobs:
             skip_cpp=ON
           fi
           cmake -S Documentation/cmake_example -B build-lib -GNinja \
+            -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" \
             -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/lib" \
             -DINKCPP_EXAMPLE_SKIP_CPP="$skip_cpp"
           cmake --build build-lib
@@ -326,6 +327,7 @@ jobs:
             export CXX="${{ matrix.cxx }}"
           fi
           cmake -S Documentation/cmake_example -B build-clib -GNinja \
+            -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" \
             -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/clib"
           cmake --build build-clib
           cd Documentation/cmake_example
