@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <ink/c/inkcpp.h> // if <os>-lib.zip was used for the installation
-
-// #include <ink/inkcpp.h> // if <os>-clib.zip was used for the installation
+#if __has_include(<ink/c/inkcpp.h>)
+#	include <ink/c/inkcpp.h> // <os>-lib.zip layout
+#else
+#	include <ink/inkcpp.h> // <os>-clib.zip layout
+#endif
 
 InkValue ink_add(int argc, const InkValue argv[])
 {
@@ -15,7 +17,8 @@ InkValue ink_add(int argc, const InkValue argv[])
 
 int main()
 {
-	ink_compile_json("test.ink.json", "test.bin", NULL);
+	// test.bin is precompiled ahead of time (e.g. via inkcpp_cl) since the clib
+	// package does not include the compiler
 	HInkStory*  story  = ink_story_from_file("test.bin");
 	HInkRunner* runner = ink_story_new_runner(story, NULL);
 
