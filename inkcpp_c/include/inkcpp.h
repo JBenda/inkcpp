@@ -48,8 +48,11 @@ typedef struct HInkSTory    HInkStory;
 	 * <br/> To run the example do the following:
 	 *
 	 * + `export PKG_CONFIG_PATH=/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig`
-	 * + `gcc main.c -o main $(pkg-config --define-prefix --cflags --libs inkcpp)`
+	 * + `clang main.c -o main $(pkg-config --define-prefix --cflags --libs inkcpp)`
 	 * + `./main`
+	 *
+	 * @note `clang` is used here since, unlike `gcc`, it is readily available on Windows, macOS and
+	 * Linux alike.
 	 *
 	 * As a sideproduct a file named `test.bin` should be created coaining the binary format used by
 	 * inkCPP.

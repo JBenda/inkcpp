@@ -295,17 +295,26 @@ jobs:
 
       - name: CMake / lib
         shell: bash
+        # the "lib" package is built with AppleClang/libc++ on macOS; GCC cannot link a C++
+        # translation unit against that archive, so skip main_cpp for that combination
         run: |
           set -e
           if [ -n "${{ matrix.cc }}" ]; then
             export CC="${{ matrix.cc }}"
             export CXX="${{ matrix.cxx }}"
           fi
+          skip_cpp=OFF
+          if [[ "${{ matrix.os }}" == macos* && "${{ matrix.compiler }}" == "gcc" ]]; then
+            skip_cpp=ON
+          fi
           cmake -S Documentation/cmake_example -B build-lib -GNinja \
-            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/lib"
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/lib" \
+            -DINKCPP_EXAMPLE_SKIP_CPP="$skip_cpp"
           cmake --build build-lib
           cd Documentation/cmake_example
-          echo 0 | "${{ github.workspace }}/build-lib/main_cpp${{ matrix.exe_ext }}"
+          if [ "$skip_cpp" != "ON" ]; then
+            echo 0 | "${{ github.workspace }}/build-lib/main_cpp${{ matrix.exe_ext }}"
+          fi
           echo 0 | "${{ github.workspace }}/build-lib/main_c${{ matrix.exe_ext }}"
 
       - name: CMake / clib
