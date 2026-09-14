@@ -286,8 +286,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' && matrix.compiler == 'clang' }}
         run: |
           winget install pkgconf.pkgconf --source winget --accept-source-agreements --accept-package-agreements --disable-interactivity
-
-          $pkgconf = "C:\Program Files\pkgconf\bin\pkgconf.exe"
+          $pkgconf = (Get-ChildItem -Path "C:\Program Files", "C:\Program Files (x86)" -Filter pkgconf.exe -Recurse -ErrorAction SilentlyContinue Select-Object -First 1).FullName
           if (-not (Test-Path $pkgconf)) { throw "pkgconf.exe not found after winget install" }
 
           $bin = Split-Path $pkgconf -Parent
