@@ -1,0 +1,42 @@
+name: Setup MSVC dev environment
+description: >
+  Setups the MSVC toolchain. Based on https://github.com/ilammy/msvc-dev-cmd
+inputs:
+  arch:
+    description: Target architecture passed to vcvarsall.bat
+    required: false
+    default: x64
+runs:
+  using: composite
+  steps:
+    - name: Setup Environment
+      shell: pwsh
+      run: |
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+        $installPath = & $vswhere -latest -products * `
+          -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+          -property installationPath
+        if (-not $installPath) {
+          throw "vswhere could not find a Visual Studio install with the VC++ toolset"
+        }
+
+        $vcvarsall = Join-Path $installPath "VC\Auxiliary\Build\vcvarsall.bat"
+        if (-not (Test-Path $vcvarsall)) {
+          throw "vcvarsall.bat not found at $vcvarsall"
+        }
+
+        $before = @{}
+        Get-ChildItem Env: | ForEach-Object { $before[$_.Name] = $_.Value }
+
+        $output = & cmd.exe /c "`"$vcvarsall`" ${{ inputs.arch }} && set"
+        if ($LASTEXITCODE -ne 0) {
+          throw "vcvarsall.bat ${{ inputs.arch }} failed with exit code $LASTEXITCODE"
+        }
+
+        foreach ($line in $output) {
+          if ($line -notmatch '^([^=]+)=(.*)$') { continue }
+          $name = $Matches[1]
+          $value = $Matches[2]
+          if ($before[$name] -eq $value) { continue }
+          Add-Content -Path $env:GITHUB_ENV -Value "$name=$value"
+        }

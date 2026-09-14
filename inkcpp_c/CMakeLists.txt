@@ -54,13 +54,26 @@ install(
 	COMPONENT clib
 	EXCLUDE_FROM_ALL)
 
-# configure in two steps to get the current installation prefix
-set(PREFIX "@PREFIX@")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inkcpp_c.pc.in ${CMAKE_BINARY_DIR}/inkcpp_c.pc.in @ONLY)
+set(INKCPP_C_PC_EXTRA_LIBS "")
+foreach(lib IN LISTS CMAKE_CXX_IMPLICIT_LINK_LIBRARIES)
+	if(IS_ABSOLUTE "${lib}")
+		string(APPEND INKCPP_C_PC_EXTRA_LIBS " ${lib}")
+	else()
+		string(APPEND INKCPP_C_PC_EXTRA_LIBS " -l${lib}")
+	endif()
+endforeach()
+
+set(INKCPP_C_PC_EXTRA_CFLAGS "")
+if(MSVC)
+	# this archive is built with MSVC's default dynamic CRT (/MD in Release).
+	set(INKCPP_C_PC_EXTRA_CFLAGS "-fms-runtime-lib=dll -lmsvcrt -lvcruntime -lucrt -loldnames")
+endif()
+
+set(PREFIX "/user/local")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inkcpp_c.pc.in ${CMAKE_CURRENT_BINARY_DIR}/inkcpp.pc
+							 @ONLY)
 install(
-	CODE [[
-	get_filename_component(PREFIX ${CMAKE_INSTALL_PREFIX} ABSOLUTE)
-	configure_file(inkcpp_c.pc.in ${PREFIX}/lib/pkgconfig/inkcpp.pc @ONLY)
-	]]
+	FILES ${CMAKE_CURRENT_BINARY_DIR}/inkcpp.pc
+	DESTINATION lib/pkgconfig
 	COMPONENT clib
 	EXCLUDE_FROM_ALL)

@@ -47,12 +47,12 @@ typedef struct HInkSTory    HInkStory;
 	 * page](https://github.com/JBenda/inkcpp/releases/latest) to `/MY/INKCPP/EXAMPLE_INSTALL/PATH`.
 	 * <br/> To run the example do the following:
 	 *
-	 * + change the `prefix=...` in `/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig/inkcpp.pc`
-	 *   to `prefix=/MY/INKCPP_EXAMPLE_INSTALL_PATH/`
 	 * + `export PKG_CONFIG_PATH=/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig`
-	 * + `gcc -c main.c $(pkg-config --cflags inkcpp)`
-	 * + `g++ -o main main.o $(pkg-config --libs inkcpp)`
+	 * + `clang main.c -o main $(pkg-config --define-prefix --cflags --libs inkcpp)`
 	 * + `./main`
+	 *
+	 * @note `clang` is used here since, unlike `gcc`, it is readily available on Windows, macOS and
+	 * Linux alike.
 	 *
 	 * As a sideproduct a file named `test.bin` should be created coaining the binary format used by
 	 * inkCPP.
@@ -455,18 +455,6 @@ typedef struct HInkSTory    HInkStory;
 	HInkRunner*  ink_story_new_runner_from_snapshot(
 	     HInkStory* self, const HInkSnapshot* obj, HInkGlobals* store, int runner_id
 	 );
-
-	/**
-	 * @ingroup clib
-	 * Compiles a .ink.json file to an inkCPP .bin file.
-	 * @param input_filename path to file contaning input data (.ink.json)
-	 * @param output_filename path to file output data will be written (.bin)
-	 * @param error if not NULL will contain a error message if an error occures (else will be set to
-	 * NULL)
-	 */
-	void
-	    ink_compile_json(const char* input_filename, const char* output_filename, const char** error);
-
 
 #ifdef __cplusplus
 }

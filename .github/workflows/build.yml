@@ -59,6 +59,11 @@ jobs:
         with:
           cmake-version: "3.22.x"
 
+      # use MSVC instead of MinGW
+      - name: Setup MSVC dev environment
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: ./.github/actions/msvc-dev-cmd
+
       # Create a build directory to store all the CMake generated files
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
@@ -194,6 +199,161 @@ jobs:
           name: ${{ matrix.artifact }}-www
           path: proofing/ink-proof/out
 
+  verify-install:
+    name: Verify Install (${{ matrix.artifact }}, ${{ matrix.compiler }})
+    needs: compilation
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: "ubuntu-22.04"
+            artifact: linux
+            compiler: gcc
+            cc: gcc
+            cxx: g++
+            exe_ext: ""
+          - os: "ubuntu-22.04"
+            artifact: linux
+            compiler: clang
+            cc: clang
+            cxx: clang++
+            exe_ext: ""
+          - os: macos-latest
+            artifact: macos
+            compiler: clang
+            cc: clang
+            cxx: clang++
+            exe_ext: ""
+          - os: macos-latest
+            artifact: macos
+            compiler: gcc
+            cc: gcc-14
+            cxx: g++-14
+            exe_ext: ""
+          - os: macos-14
+            artifact: macos-arm
+            compiler: clang
+            cc: clang
+            cxx: clang++
+            exe_ext: ""
+          - os: macos-14
+            artifact: macos-arm
+            compiler: gcc
+            cc: gcc-14
+            cxx: g++-14
+            exe_ext: ""
+          - os: windows-latest
+            artifact: win64
+            compiler: msvc
+            cc: ""
+            cxx: ""
+            exe_ext: ".exe"
+          - os: windows-latest
+            artifact: win64
+            compiler: clang
+            cc: clang
+            cxx: clang++
+            exe_ext: ".exe"
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download Lib artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ matrix.artifact }}-lib
+          path: install/lib
+      - name: Download CLib artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ matrix.artifact }}-clib
+          path: install/clib
+      - name: Download Cl artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ matrix.artifact }}-cl
+          path: install/cl
+
+      - name: Make inkcpp_cl executable
+        shell: bash
+        run: chmod +x install/cl/inkcpp_cl${{ matrix.exe_ext }}
+
+      - name: Setup MSVC dev environment
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: ./.github/actions/msvc-dev-cmd
+
+      - name: Install pkg-config
+        if: ${{ matrix.os == 'windows-latest' && matrix.compiler == 'clang' }}
+        run: |
+          winget install pkgconf.pkgconf --source winget --accept-source-agreements --accept-package-agreements --disable-interactivity
+          $pkgconf = (Get-ChildItem -Path "C:\Program Files", "C:\Program Files (x86)" -Filter pkgconf.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+          if (-not (Test-Path $pkgconf)) { throw "pkgconf.exe not found after winget install" }
+
+          $bin = Split-Path $pkgconf -Parent
+          $alias = Join-Path $bin "pkg-config.exe"
+          if (-not (Test-Path $alias)) { Copy-Item $pkgconf $alias }
+          Add-Content -Path $env:GITHUB_PATH -Value $bin
+
+      - name: Precompile test story
+        shell: bash
+        run: >-
+          install/cl/inkcpp_cl${{ matrix.exe_ext }}
+          -o Documentation/cmake_example/test.bin
+          Documentation/cmake_example/test.ink.json
+
+      - name: CMake / lib
+        shell: bash
+        # the "lib" package is built with AppleClang/libc++ on macOS; GCC cannot link a C++
+        # translation unit against that archive, so skip main_cpp for that combination
+        run: |
+          set -e
+          if [ -n "${{ matrix.cc }}" ]; then
+            export CC="${{ matrix.cc }}"
+            export CXX="${{ matrix.cxx }}"
+          fi
+          skip_cpp=OFF
+          if [[ "${{ matrix.os }}" == macos* && "${{ matrix.compiler }}" == "gcc" ]]; then
+            skip_cpp=ON
+          fi
+          cmake -S Documentation/cmake_example -B build-lib -GNinja \
+            -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/lib" \
+            -DINKCPP_EXAMPLE_SKIP_CPP="$skip_cpp"
+          cmake --build build-lib
+          cd Documentation/cmake_example
+          if [ "$skip_cpp" != "ON" ]; then
+            echo 0 | "${{ github.workspace }}/build-lib/main_cpp${{ matrix.exe_ext }}"
+          fi
+          echo 0 | "${{ github.workspace }}/build-lib/main_c${{ matrix.exe_ext }}"
+
+      - name: CMake / clib
+        shell: bash
+        run: |
+          set -e
+          if [ -n "${{ matrix.cc }}" ]; then
+            export CC="${{ matrix.cc }}"
+            export CXX="${{ matrix.cxx }}"
+          fi
+          cmake -S Documentation/cmake_example -B build-clib -GNinja \
+            -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/clib"
+          cmake --build build-clib
+          cd Documentation/cmake_example
+          echo 0 | "${{ github.workspace }}/build-clib/main_c${{ matrix.exe_ext }}"
+
+      # cl.exe ignores pkg-configs linkage flags
+      - name: pkg-config / clib
+        if: ${{ matrix.compiler != 'msvc' }}
+        shell: bash
+        run: |
+          set -e
+          export CC="${{ matrix.cc }}"
+          export PKG_CONFIG_PATH="${{ github.workspace }}/install/clib/lib/pkgconfig"
+          pkg-config --define-prefix --cflags --libs inkcpp
+          cd Documentation/cmake_example
+          $CC main.c -o main_pkgconfig${{ matrix.exe_ext }} $(pkg-config --define-prefix --cflags --libs inkcpp)
+          echo 0 | ./main_pkgconfig${{ matrix.exe_ext }}
+
   build-doc:
     name: Build Doxygen documentation
     needs: [compilation, build-python]
@@ -271,7 +431,7 @@ jobs:
       - name: Build python release
         run: python3 -m build
 
-      - uses: suisei-cn/actions-download-file@v1.6.0
+      - uses: suisei-cn/actions-download-file@v1.6.1
         name: Download Inklecate
         id: download_inklecate
         with:
@@ -281,6 +441,7 @@ jobs:
         shell: bash
         run: |
           cd inklecate
+          echo "26f4e188e02536d6e99e73e71d9b13e2c2144187f1368a87e82fd5066176cff8 *$(ls *.zip)" | sha256sum -c -
           unzip *.zip
           echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
 
