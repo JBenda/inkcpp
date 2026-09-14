@@ -62,7 +62,7 @@ jobs:
       # use MSVC instead of MinGW
       - name: Setup MSVC dev environment
         if: ${{ matrix.os == 'windows-latest' }}
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ./.github/actions/msvc-dev-cmd
 
       # Create a build directory to store all the CMake generated files
       - name: Create Build Environment
@@ -280,7 +280,7 @@ jobs:
 
       - name: Setup MSVC dev environment
         if: ${{ matrix.os == 'windows-latest' }}
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ./.github/actions/msvc-dev-cmd
 
       - name: Install pkg-config
         if: ${{ matrix.os == 'windows-latest' && matrix.compiler == 'clang' }}
@@ -431,7 +431,7 @@ jobs:
       - name: Build python release
         run: python3 -m build
 
-      - uses: suisei-cn/actions-download-file@v1.6.0
+      - uses: suisei-cn/actions-download-file@v1.6.1
         name: Download Inklecate
         id: download_inklecate
         with:
@@ -441,6 +441,7 @@ jobs:
         shell: bash
         run: |
           cd inklecate
+          echo "26f4e188e02536d6e99e73e71d9b13e2c2144187f1368a87e82fd5066176cff8 *$(ls *.zip)" | sha256sum -c -
           unzip *.zip
           echo "INKLECATE=${{ matrix.inklecate_pre }}$GITHUB_WORKSPACE/inklecate/inklecate${{ matrix.inklecate_post }}" >> $GITHUB_ENV
 

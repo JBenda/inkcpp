@@ -35,7 +35,9 @@ int main()
 		}
 
 		int id;
-		scanf("%i", &id);
+		while (scanf("%i", &id) != 1) {
+			printf("Failed to parse input!, try again\n");
+		}
 		ink_runner_choose(runner, id);
 	}
 }
