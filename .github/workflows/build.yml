@@ -284,9 +284,25 @@ jobs:
 
       - name: Install pkg-config
         if: ${{ matrix.os == 'windows-latest' && matrix.compiler == 'clang' }}
-        run: >-
-          winget install pkgconf.pkgconf --source winget
-          --accept-source-agreements --accept-package-agreements --disable-interactivity
+        # Strawberry Perl's own broken "pkg-config" script is already on PATH ahead of
+        # anywhere winget installs pkgconf, so locate the real binary, give it a
+        # pkg-config.exe alias, and prepend its directory via GITHUB_PATH.
+        run: |
+          winget install pkgconf.pkgconf --source winget `
+            --accept-source-agreements --accept-package-agreements --disable-interactivity
+
+          $pkgconf = @("C:\Program Files\pkgconf\bin\pkgconf.exe", "C:\Program Files (x86)\pkgconf\bin\pkgconf.exe") |
+            Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $pkgconf) {
+            $pkgconf = (Get-ChildItem -Path "C:\Program Files", "C:\Program Files (x86)" -Filter pkgconf.exe -Recurse -ErrorAction SilentlyContinue |
+              Select-Object -First 1).FullName
+          }
+          if (-not $pkgconf) { throw "pkgconf.exe not found after winget install" }
+
+          $bin = Split-Path $pkgconf -Parent
+          $alias = Join-Path $bin "pkg-config.exe"
+          if (-not (Test-Path $alias)) { Copy-Item $pkgconf $alias }
+          Add-Content -Path $env:GITHUB_PATH -Value $bin
 
       - name: Precompile test story
         shell: bash
