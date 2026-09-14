@@ -1,5 +1,6 @@
 #include "catch.hpp"
 
+#include <choice.h>
 #include <compiler.h>
 #include <runner.h>
 #include <story.h>
@@ -32,38 +33,57 @@ std::string chomp(std::string line)
 	}
 	return line;
 }
+
+// clang-format off
+const char* const story_json =
+    R"({"inkVersion":21,"root":[[)"
+    R"("^A    B","\n",)"
+    R"("^tab\t\tsep","\n",)"
+    R"("^Knock ","<>","^ again?","\n",)"
+    R"("^Knock\t","<>","^ again?","\n",)"
+    R"("^before end   ","\n",)"
+    R"("ev","str","^Pick   me","/str","/ev",{"*":"0.c-0","flg":20},)"
+    R"({"c-0":["\n","end",{"->":"0.g-0"},{"#f":5}],"g-0":["done",null]}],"done",null],)"
+    R"("listDefs":{}})";
+// clang-format on
 } // namespace
 
-SCENARIO("a run of spaces inside a line survives to the output", "[regression][runtime]")
+SCENARIO("runs of whitespace inside a line", "[runtime][output]")
 {
-	GIVEN("a story whose text contains four consecutive spaces")
+	GIVEN("a story with runs of spaces and tabs")
 	{
-		std::unique_ptr<story> ink{
-		    compile_json(R"({"inkVersion":21,"root":[["^A    B","\n","done",null],"done",{"#f":1}],)"
-		                 R"("listDefs":{}})")
-		};
-		runner main = ink->new_runner();
-
-		WHEN("the line is read")
-		{
-			THEN("the spaces are still there") { REQUIRE(chomp(main->getline()) == "A    B"); }
-		}
-	}
-}
-
-SCENARIO("spaces that meet at a seam still collapse", "[regression][runtime]")
-{
-	GIVEN("two glued fragments, one ending and one beginning with a space")
-	{
-		std::unique_ptr<story> ink{compile_json(
-		    R"({"inkVersion":21,"root":[["^Knock ","<>","^ again?","\n","done",null],"done",)"
-		    R"({"#f":1}],"listDefs":{}})"
-		)};
+		std::unique_ptr<story> ink{compile_json(story_json)};
 		runner                 main = ink->new_runner();
 
-		WHEN("the line is read")
+		std::string spaces       = chomp(main->getline());
+		std::string tabs         = chomp(main->getline());
+		std::string space_seam   = chomp(main->getline());
+		std::string tab_seam     = chomp(main->getline());
+		std::string trailing_run = main->getline();
+		REQUIRE(main->num_choices() == 1);
+		std::string choice = main->get_choice(0)->text();
+
+		THEN("spaces meeting where two fragments are glued read as one")
 		{
-			THEN("the join reads as one space") { REQUIRE(chomp(main->getline()) == "Knock again?"); }
+			REQUIRE(space_seam == "Knock again?");
 		}
+		THEN("whitespace at the end of a line is dropped") { REQUIRE(trailing_run == "before end\n"); }
+#ifdef INKCPP_KEEP_SPACE_RUNS
+		THEN("with INKCPP_KEEP_SPACE_RUNS the runs are kept")
+		{
+			REQUIRE(spaces == "A    B");
+			REQUIRE(tabs == "tab\t\tsep");
+			REQUIRE(tab_seam == "Knock\tagain?");
+			REQUIRE(choice == "Pick   me");
+		}
+#else
+		THEN("by default each run collapses to one character, like the reference ink runtime")
+		{
+			REQUIRE(spaces == "A B");
+			REQUIRE(tabs == "tab\tsep");
+			REQUIRE(tab_seam == "Knock again?");
+			REQUIRE(choice == "Pick me");
+		}
+#endif
 	}
 }

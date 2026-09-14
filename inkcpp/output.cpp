@@ -166,7 +166,9 @@ std::string basic_stream::get()
 	size_t start = find_start();
 
 	// Move up from marker
-	bool        hasGlue = false, lastNewline = false;
+	bool              hasGlue = false, lastNewline = false;
+	std::stringstream str;
+#	ifdef INKCPP_KEEP_SPACE_RUNS
 	std::string result;
 	for (size_t i = start; i < _size; i++) {
 		if (should_skip(i, hasGlue, lastNewline))
@@ -175,34 +177,47 @@ std::string basic_stream::get()
 			continue;
 		}
 		if (_data[i].type() == value_type::string) {
-			// Spaces meeting at a SEAM collapse; spaces inside one value do
-			// not. See get_alloc(), which joins the same fragments the same
-			// way.
-			const char* value = _data[i].get<value_type::string>();
-			if (! result.empty() && isspace(static_cast<unsigned char>(result.back()))) {
-				while (*value == ' ') {
-					++value;
-				}
-			}
-			result += value;
+			result += skip_seam_spaces(
+			    _data[i].get<value_type::string>(), result.empty() ? '\0' : result.back()
+			);
 		} else {
-			std::stringstream piece;
-			_data[i].write(piece, _lists_table);
-			result += piece.str();
+			str.str("");
+			_data[i].write(str, _lists_table);
+			result += str.str();
 		}
 	}
+#	else
+	for (size_t i = start; i < _size; i++) {
+		if (should_skip(i, hasGlue, lastNewline))
+			continue;
+		if (_data[i].printable()) {
+			_data[i].write(str, _lists_table);
+		}
+	}
+#	endif
 
 	// Reset stream size to where we last held the marker
 	_size = start;
 
 	// Return processed string
+#	ifndef INKCPP_KEEP_SPACE_RUNS
+	// remove mulitple accourencies of ' '
+	std::string result = str.str();
+#	endif
 	if (! result.empty()) {
 		auto end = clean_string<true, false>(result.begin(), result.end());
 		if (result.begin() == end) {
 			result.resize(0);
 		} else {
 			_last_char = *(end - 1);
+#	ifdef INKCPP_KEEP_SPACE_RUNS
+			while (end[-1] == ' ') {
+				--end;
+			}
+			result.resize(end - result.begin());
+#	else
 			result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
+#	endif
 		}
 	}
 	return result;
@@ -382,22 +397,9 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			case value_type::string: {
 				// Copy string and advance
 				const char* value = _data[i].get<value_type::string>();
-				/* Spaces meeting at a SEAM collapse; spaces inside a value do
-				 * not. Two fragments joined by glue frequently bring a trailing
-				 * space and a leading space to the same join - `Knock ` and
-				 * ` again?` - and the reader should see one space, not two.
-				 *
-				 * That is the only case clean_string's old run-collapsing was
-				 * really for, and doing it here instead leaves the interior of
-				 * each value alone. Ink used to drive text into a terminal,
-				 * where nobody noticed; driving a fixed-width display it
-				 * matters, because laid-out text - tables, ASCII art, anything
-				 * aligned with gutters - loses its shape. */
-				if (ptr > buffer && isspace(static_cast<unsigned char>(ptr[-1]))) {
-					while (*value != 0 && *value == ' ') {
-						++value;
-					}
-				}
+#ifdef INKCPP_KEEP_SPACE_RUNS
+				value = skip_seam_spaces(value, ptr > buffer ? ptr[-1] : '\0');
+#endif
 				copy_string(value, i, ptr);
 			} break;
 			case value_type::newline:

@@ -180,6 +180,25 @@ inline constexpr bool isspace(int c)
 	return c == ' ' || c == '\t' || c == '\v' || c == '\n' || c == '\f' || c == '\r';
 }
 
+#ifdef INKCPP_KEEP_SPACE_RUNS
+/** skips the whitespace a string starts with if it would join a whitespace
+ * character already written, so that `Knock ` + ` again?` reads as one space.
+ * Newlines are never skipped.
+ * @param str string about to be appended
+ * @param previous last character written so far, or 0 if nothing was written
+ * @return str, advanced past the skipped whitespace
+ */
+inline constexpr const char* skip_seam_spaces(const char* str, char previous)
+{
+	if (isspace(static_cast<unsigned char>(previous))) {
+		while (*str != '\n' && isspace(static_cast<unsigned char>(*str))) {
+			++str;
+		}
+	}
+	return str;
+}
+#endif
+
 /** removes leading & tailing spaces as wide spaces
  * @param begin iterator of string
  * @param end iterator of string
@@ -198,34 +217,38 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 			}
 		} else if (src[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
 			continue;
+#ifdef INKCPP_KEEP_SPACE_RUNS
+		} else if (dst[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
+			// the rest of a run that starts a line
+			continue;
+#endif
 		} else if (isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n') {
 			if constexpr (TAILING_SPACES) {
 				if (src + 1 == end) {
 					continue;
 				}
 			}
-			/* A run of spaces INSIDE a line is kept.
-			 *
-			 * Dropping a space whose neighbour is also a space turned `A    B`
-			 * into `A B`. Leading and trailing whitespace is still trimmed,
-			 * which is what the spec asks for; collapsing the middle is not,
-			 * and every layer below this one keeps those runs - inklecate
-			 * writes them into its JSON and the compiler carries them through.
-			 *
-			 * It matters wherever ink drives a fixed-width display. In the
-			 * project this was found in, a 32-column thermal printer, it
-			 * flattened every piece of ASCII art in the story archive: the
-			 * gutters that drew corridors and borders closed up, and 121 lines
-			 * across five stories printed as a row of characters where a
-			 * drawing should have been.
-			 *
-			 * Whitespace at the END of a line is still dropped: a space sitting
-			 * immediately before a newline is trailing whitespace wherever it
-			 * came from, and trimming it is what the spec asks for.
-			 */
-			if (src + 1 != end && src[1] == '\n') {
+#ifdef INKCPP_KEEP_SPACE_RUNS
+			// Keep runs of whitespace inside a line, but still drop a run that
+			// ends the line.
+			auto next = src + 1;
+			while (next != end && isspace(static_cast<unsigned char>(next[0])) && next[0] != '\n') {
+				++next;
+			}
+			if (next != end && next[0] == '\n') {
 				continue;
 			}
+			if constexpr (TAILING_SPACES) {
+				if (next == end) {
+					continue;
+				}
+			}
+#else
+			// Collapse runs of whitespace, as the reference ink runtime does.
+			if (src + 1 != end && isspace(static_cast<unsigned char>(src[1]))) {
+				continue;
+			}
+#endif
 		} else if (src[0] == '\n' && dst != begin && dst[-1] == '\n') {
 			continue;
 		}
