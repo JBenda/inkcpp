@@ -6,5 +6,5 @@ includedir=${prefix}/include
 Name: inkcpp
 Description: C Bindnigs for inkpp. @CMAKE_PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
-CFlags: -I${includedir}
+CFlags: -I${includedir} @INKCPP_C_PC_EXTRA_CFLAGS@
 Libs: -L${libdir} -linkcpp_c @INKCPP_C_PC_EXTRA_LIBS@

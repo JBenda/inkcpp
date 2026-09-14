@@ -63,6 +63,13 @@ foreach(lib IN LISTS CMAKE_CXX_IMPLICIT_LINK_LIBRARIES)
 	endif()
 endforeach()
 
+set(INKCPP_C_PC_EXTRA_CFLAGS "")
+if(MSVC)
+	# this archive is built with MSVC's default dynamic CRT (/MD in Release); clang defaults to a
+	# different CRT on Windows unless told otherwise, which leaves CRT symbols unresolved
+	set(INKCPP_C_PC_EXTRA_CFLAGS "-fms-runtime-lib=dll")
+endif()
+
 set(PREFIX "/user/local")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inkcpp_c.pc.in ${CMAKE_CURRENT_BINARY_DIR}/inkcpp.pc
 							 @ONLY)
