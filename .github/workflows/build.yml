@@ -284,7 +284,9 @@ jobs:
 
       - name: Install pkg-config
         if: ${{ matrix.os == 'windows-latest' && matrix.compiler == 'clang' }}
-        run: winget install pkgconf.pkgconf
+        run: >-
+          winget install pkgconf.pkgconf --source winget
+          --accept-source-agreements --accept-package-agreements --disable-interactivity
 
       - name: Precompile test story
         shell: bash
