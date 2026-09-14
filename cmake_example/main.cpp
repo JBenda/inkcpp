@@ -4,7 +4,7 @@
 #include <ink/story.h>
 #include <ink/compiler.h>
 
-#include <memory.h>
+#include <memory>
 #include <iostream>
 
 using namespace ink::runtime;

@@ -146,8 +146,6 @@ Classes</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:gae63e421dcc4c2abfbec0e19a8f517e86" id="r_gae63e421dcc4c2abfbec0e19a8f517e86"><td class="memItemLeft">ink_hash_t&#160;</td><td class="memItemRight"><a class="el" href="#gae63e421dcc4c2abfbec0e19a8f517e86">ink_hash_string</a> (const char *str)</td></tr>
 <tr class="memdesc:gae63e421dcc4c2abfbec0e19a8f517e86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hash a string, this hash is used inside inkcpp instead of the string actual value.  <br /></td></tr>
-<tr class="memitem:ga807cb69b63b8d373b8900fc2136bc041" id="r_ga807cb69b63b8d373b8900fc2136bc041"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga807cb69b63b8d373b8900fc2136bc041">ink_compile_json</a> (const char *input_filename, const char *output_filename, const char **error)</td></tr>
-<tr class="memdesc:ga807cb69b63b8d373b8900fc2136bc041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compiles a .ink.json file to an inkCPP .bin file.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>C bindings for inkcpp. </p>
@@ -169,12 +167,11 @@ Example</h1>
 <p>And extract <span class="tt">&lt;os&gt;-clib.zip</span> from the <a href="https://github.com/JBenda/inkcpp/releases/latest">release page</a> to <span class="tt">/MY/INKCPP/EXAMPLE_INSTALL/PATH</span>. <br  />
  To run the example do the following:</p>
 <ul>
-<li>change the <span class="tt">prefix=...</span> in <span class="tt">/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig/inkcpp.pc</span> to <span class="tt">prefix=/MY/INKCPP_EXAMPLE_INSTALL_PATH/</span></li>
 <li><span class="tt">export PKG_CONFIG_PATH=/MY/INKCPP/EXAMPLE_INSTALL/PATH/lib/pkgconfig</span></li>
-<li><span class="tt">gcc -c main.c $(pkg-config --cflags inkcpp)</span></li>
-<li><span class="tt">g++ -o main main.o $(pkg-config --libs inkcpp)</span></li>
+<li><span class="tt">clang main.c -o main $(pkg-config --define-prefix --cflags --libs inkcpp)</span></li>
 <li><span class="tt">./main</span></li>
 </ul>
+<dl class="section note"><dt>Note</dt><dd><span class="tt">clang</span> is used here since, unlike <span class="tt">gcc</span>, it is readily available on Windows, macOS and Linux alike.</dd></dl>
 <p>As a sideproduct a file named <span class="tt">test.bin</span> should be created coaining the binary format used by inkCPP.</p>
 <h2 class="doxsection"><a class="anchor" id="src_main_c"></a>
 main.c</h2>
@@ -182,9 +179,11 @@ main.c</h2>
 <div class="line"><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;assert.h&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor">#include &lt;ink/c/inkcpp.h&gt;</span> <span class="comment">// if &lt;os&gt;-lib.zip was used for the installation</span></div>
-<div class="line"> </div>
-<div class="line"><span class="comment">// #include &lt;ink/inkcpp.h&gt; // if &lt;os&gt;-clib.zip was used for the installation</span></div>
+<div class="line"><span class="preprocessor">#if __has_include(&lt;ink/c/inkcpp.h&gt;)</span></div>
+<div class="line"><span class="preprocessor">#   include &lt;ink/c/inkcpp.h&gt;</span> <span class="comment">// &lt;os&gt;-lib.zip layout</span></div>
+<div class="line"><span class="preprocessor">#else</span></div>
+<div class="line"><span class="preprocessor">#   include &lt;ink/inkcpp.h&gt;</span> <span class="comment">// &lt;os&gt;-clib.zip layout</span></div>
+<div class="line"><span class="preprocessor">#endif</span></div>
 <div class="line"> </div>
 <div class="line"><a class="code hl_struct" href="struct_ink_value.html">InkValue</a> ink_add(<span class="keywordtype">int</span> argc, <span class="keyword">const</span> <a class="code hl_struct" href="struct_ink_value.html">InkValue</a> argv[])</div>
 <div class="line">{</div>
@@ -195,7 +194,8 @@ main.c</h2>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> main()</div>
 <div class="line">{</div>
-<div class="line">    <a class="code hl_function" href="#ga807cb69b63b8d373b8900fc2136bc041">ink_compile_json</a>(<span class="stringliteral">&quot;test.ink.json&quot;</span>, <span class="stringliteral">&quot;test.bin&quot;</span>, NULL);</div>
+<div class="line">    <span class="comment">// test.bin is precompiled ahead of time (e.g. via inkcpp_cl) since the clib</span></div>
+<div class="line">    <span class="comment">// package does not include the compiler</span></div>
 <div class="line">    <a class="code hl_class" href="class_h_ink_story.html">HInkStory</a>*  story  = ink_story_from_file(<span class="stringliteral">&quot;test.bin&quot;</span>);</div>
 <div class="line">    <a class="code hl_class" href="class_h_ink_runner.html">HInkRunner</a>* <a class="code hl_typedef" href="namespaceink_1_1runtime.html#ad63cbd82595f3f52ef21543b309ba8b6">runner</a> = ink_story_new_runner(story, NULL);</div>
 <div class="line"> </div>
@@ -212,53 +212,18 @@ main.c</h2>
 <div class="line">        }</div>
 <div class="line"> </div>
 <div class="line">        <span class="keywordtype">int</span> id;</div>
-<div class="line">        scanf(<span class="stringliteral">&quot;%i&quot;</span>, &amp;<span class="keywordtype">id</span>);</div>
+<div class="line">        <span class="keywordflow">while</span> (scanf(<span class="stringliteral">&quot;%i&quot;</span>, &amp;<span class="keywordtype">id</span>) != 1) {</div>
+<div class="line">            printf(<span class="stringliteral">&quot;Failed to parse input!, try again\n&quot;</span>);</div>
+<div class="line">        }</div>
 <div class="line">        ink_runner_choose(runner, <span class="keywordtype">id</span>);</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="ttc" id="aclass_h_ink_runner_html"><div class="ttname"><a href="class_h_ink_runner.html">HInkRunner</a></div><div class="ttdoc">A handle for an ink runner.</div></div>
 <div class="ttc" id="aclass_h_ink_story_html"><div class="ttname"><a href="class_h_ink_story.html">HInkStory</a></div><div class="ttdoc">Handle for a loaded ink story.</div></div>
-<div class="ttc" id="agroup__clib_html_ga807cb69b63b8d373b8900fc2136bc041"><div class="ttname"><a href="#ga807cb69b63b8d373b8900fc2136bc041">ink_compile_json</a></div><div class="ttdeci">void ink_compile_json(const char *input_filename, const char *output_filename, const char **error)</div><div class="ttdoc">Compiles a .ink.json file to an inkCPP .bin file.</div></div>
 <div class="ttc" id="anamespaceink_1_1runtime_html_ad63cbd82595f3f52ef21543b309ba8b6"><div class="ttname"><a href="namespaceink_1_1runtime.html#ad63cbd82595f3f52ef21543b309ba8b6">ink::runtime::runner</a></div><div class="ttdeci">story_ptr&lt; runner_interface &gt; runner</div><div class="ttdoc">alias for an managed ink::runtime::runner_interface pointer</div><div class="ttdef"><b>Definition</b> types.h:22</div></div>
 <div class="ttc" id="astruct_ink_value_html"><div class="ttname"><a href="struct_ink_value.html">InkValue</a></div><div class="ttdoc">Repserentation of a ink variable.</div><div class="ttdef"><b>Definition</b> inkcpp.h:201</div></div>
 <div class="ttc" id="astruct_ink_value_html_a412bb26a32f9eb10c0a7fdd8cde5ced5"><div class="ttname"><a href="struct_ink_value.html#a412bb26a32f9eb10c0a7fdd8cde5ced5">InkValue::int32_v</a></div><div class="ttdeci">int32_t int32_v</div><div class="ttdoc">contains value if type == ValueTypeInt32</div><div class="ttdef"><b>Definition</b> inkcpp.h:206</div></div>
 </div><!-- fragment --> </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="ga807cb69b63b8d373b8900fc2136bc041" name="ga807cb69b63b8d373b8900fc2136bc041"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga807cb69b63b8d373b8900fc2136bc041">&#9670;&#160;</a></span>ink_compile_json()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ink_compile_json </td>
-          <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>input_filename</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>output_filename</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char **</td>          <td class="paramname"><span class="paramname"><em>error</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Compiles a .ink.json file to an inkCPP .bin file. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">input_filename</td><td>path to file contaning input data (.ink.json) </td></tr>
-    <tr><td class="paramname">output_filename</td><td>path to file output data will be written (.bin) </td></tr>
-    <tr><td class="paramname">error</td><td>if not NULL will contain a error message if an error occures (else will be set to NULL) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="gae63e421dcc4c2abfbec0e19a8f517e86" name="gae63e421dcc4c2abfbec0e19a8f517e86"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gae63e421dcc4c2abfbec0e19a8f517e86">&#9670;&#160;</a></span>ink_hash_string()</h2>
 

@@ -172,7 +172,7 @@ main.cpp</h2>
 <div class="line"><span class="preprocessor">#include &lt;ink/story.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;ink/compiler.h&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor">#include &lt;memory.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;memory&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceink_1_1runtime.html">ink::runtime</a>;</div>
@@ -218,18 +218,30 @@ main.cpp</h2>
 </div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="src_cmake"></a>
 CMakeLists.txt</h2>
 <div class="fragment"><div class="line">cmake_minimum_required(VERSION 3.16)</div>
-<div class="line">project(main)</div>
+<div class="line">project(main C CXX)</div>
 <div class="line"> </div>
 <div class="line">find_package(inkcpp CONFIG REQUIRED)</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># for CXX builds</span></div>
-<div class="line">add_executable(main_cpp main.cpp)</div>
-<div class="line">set_property(TARGET main_cpp PROPERTY CXX_STANDARD 17)</div>
-<div class="line">target_link_libraries(main_cpp inkcpp inkcpp_compiler)</div>
+<div class="line"><span class="preprocessor"># Set when linking a libc++-built &quot;lib&quot; package against a compiler using a different C++ ABI (e.g.</span></div>
+<div class="line"><span class="preprocessor"># GCC on macOS), where the C++ example can never link.</span></div>
+<div class="line">option(INKCPP_EXAMPLE_SKIP_CPP <span class="stringliteral">&quot;Skip building the C++ example (main_cpp)&quot;</span> OFF)</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># for C builds</span></div>
-<div class="line"><span class="preprocessor"># add_executable(main_c main.c)</span></div>
-<div class="line"><span class="preprocessor"># target_link_libraries(main_c inkcpp_c)</span></div>
+<div class="line"><span class="preprocessor"># for CXX builds - only available when the &quot;lib&quot; package was installed</span></div>
+<div class="line"><span class="keywordflow">if</span>(NOT INKCPP_EXAMPLE_SKIP_CPP</div>
+<div class="line">     AND TARGET inkcpp</div>
+<div class="line">     AND TARGET inkcpp_compiler)</div>
+<div class="line">    add_executable(main_cpp main.cpp)</div>
+<div class="line">    set_property(TARGET main_cpp PROPERTY CXX_STANDARD 17)</div>
+<div class="line">    target_link_libraries(main_cpp PRIVATE inkcpp inkcpp_compiler)</div>
+<div class="line">endif()</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># for C builds - available from both the &quot;lib&quot; and &quot;clib&quot; packages</span></div>
+<div class="line"><span class="keywordflow">if</span>(TARGET inkcpp_c)</div>
+<div class="line">    add_executable(main_c main.c)</div>
+<div class="line">    set_property(TARGET main_c PROPERTY C_STANDARD 17)</div>
+<div class="line">    set_property(TARGET main_c PROPERTY C_STANDARD_REQUIRED ON)</div>
+<div class="line">    target_link_libraries(main_c PRIVATE inkcpp_c)</div>
+<div class="line">endif()</div>
 </div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="src_story_json"></a>
 test.ink</h2>
 <div class="fragment"><div class="line">EXTERNAL my_ink_function(a,b)</div>

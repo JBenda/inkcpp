@@ -142,8 +142,7 @@ var NAVTREEINDEX1 =
 "globals_8h_source.html":[6,0,0,0,2],
 "globals_func.html":[6,1,1],
 "group__clib.html":[3,3],
-"group__clib.html#ga807cb69b63b8d373b8900fc2136bc041":[3,3,8],
-"group__clib.html#gae63e421dcc4c2abfbec0e19a8f517e86":[3,3,9],
+"group__clib.html#gae63e421dcc4c2abfbec0e19a8f517e86":[3,3,8],
 "group__cpp.html":[3,0],
 "group__cpp.html#ga06363861b4e3c4da686c048c1473d356":[3,0,2],
 "group__cpp.html#ga3886a521b17d509c19f70c78cc1bf1b2":[3,0,1],
@@ -249,5 +248,6 @@ var NAVTREEINDEX1 =
 "struct_ink_list_iter.html#a26f2ce39cba3f8c69b1a2347fb8692db":[3,3,0,2],
 "struct_ink_list_iter.html#a4c8715fc22f42cc1fba8d2a8cd798db0":[3,3,0,0],
 "struct_ink_list_iter.html#a7b6be43246df4f0efbf71d45f658b2b8":[3,3,0,1],
-"struct_ink_value.html":[3,3,1]
+"struct_ink_value.html":[3,3,1],
+"struct_ink_value.html#a412bb26a32f9eb10c0a7fdd8cde5ced5":[3,3,1,3]
 };

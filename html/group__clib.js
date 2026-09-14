@@ -78,6 +78,5 @@ var group__clib =
       [ "ink_story_new_runner", "class_h_ink_story.html#a3ed3c0da0addadcfab93b9150744ce28", null ],
       [ "ink_story_new_runner_from_snapshot", "class_h_ink_story.html#ae73261d3ecfe6d6358255a2c96c2dc3f", null ]
     ] ],
-    [ "ink_compile_json", "group__clib.html#ga807cb69b63b8d373b8900fc2136bc041", null ],
     [ "ink_hash_string", "group__clib.html#gae63e421dcc4c2abfbec0e19a8f517e86", null ]
 ];

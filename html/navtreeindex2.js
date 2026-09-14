@@ -1,6 +1,5 @@
 var NAVTREEINDEX2 =
 {
-"struct_ink_value.html#a412bb26a32f9eb10c0a7fdd8cde5ced5":[3,3,1,3],
 "struct_ink_value.html#a52d185fc6b2df75ad8bd0f96913dca17":[3,3,1,5],
 "struct_ink_value.html#a56a96d76fc3e4a67d498879da0175ef5":[3,3,1,6],
 "struct_ink_value.html#a75e67f0c35d01980fa48b541b6b11206":[3,3,1,0],
