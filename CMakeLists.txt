@@ -69,9 +69,6 @@ set_property(CACHE INKCPP_INKLECATE PROPERTY STRINGS "NONE" "OS" "ALL")
 option(INKCPP_NO_RTTI
 			 "Disable real time type information depended code. Used to build without RTTI." OFF)
 option(INKCPP_NO_STD "Disables the use of C(++) std libs." OFF)
-option(INKCPP_KEEP_SPACE_RUNS
-			 "Keep runs of spaces and tabs inside a line instead of collapsing them to one, \
-			 e.g. for text laid out on a fixed-width display." OFF)
 
 if(INKCPP_NO_RTTI)
 	add_definitions(-DINKCPP_NO_RTTI)
@@ -81,9 +78,6 @@ if(INKCPP_NO_EXCEPTIONS)
 endif()
 if(INKCPP_NO_STD)
 	add_definitions(-DINKCPP_NO_STD)
-endif()
-if(INKCPP_KEEP_SPACE_RUNS)
-	add_definitions(-DINKCPP_KEEP_SPACE_RUNS)
 endif()
 string(TOUPPER "${INKCPP_INKLECATE}" inkcpp_inklecate_upper)
 if(inkcpp_inklecate_upper STREQUAL "ALL")

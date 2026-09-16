@@ -23,6 +23,26 @@ using runner  = story_ptr<runner_interface>;
 /** alias for @ref ink::runtime::list_interface pointer */
 using list    = list_interface*;
 
+/** How runs of whitespace inside a line are treated.
+ *
+ * Applies to all text a runner produces: lines, choice text and tags.
+ * @sa ink::runtime::runner_interface::set_whitespace_mode()
+ */
+enum class whitespace_mode {
+	/** Collapse a run of spaces and tabs inside a line to a single space.
+	 * The default, and what the reference ink runtime does for lines.
+	 * @note the reference runtime does not collapse runs in choice text,
+	 *       this mode does.
+	 */
+	collapse,
+	/** Keep runs of spaces and tabs inside a line, for text laid out for a
+	 * fixed width display. Whitespace where two glued fragments meet still
+	 * reads as a single character, and a run at the start or end of a line
+	 * is still dropped.
+	 */
+	keep_runs
+};
+
 /** A Ink variable
  *
  * Used for accessing, writing and observing global variables

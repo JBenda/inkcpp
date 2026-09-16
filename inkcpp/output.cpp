@@ -168,8 +168,8 @@ std::string basic_stream::get()
 	// Move up from marker
 	bool              hasGlue = false, lastNewline = false;
 	std::stringstream str;
-#	ifdef INKCPP_KEEP_SPACE_RUNS
-	std::string result;
+	std::string       result;
+	const bool        keep_runs = _whitespace_mode == whitespace_mode::keep_runs;
 	for (size_t i = start; i < _size; i++) {
 		if (should_skip(i, hasGlue, lastNewline))
 			continue;
@@ -177,47 +177,40 @@ std::string basic_stream::get()
 			continue;
 		}
 		if (_data[i].type() == value_type::string) {
-			result += skip_seam_spaces(
-			    _data[i].get<value_type::string>(), result.empty() ? '\0' : result.back()
-			);
+			const char* value = _data[i].get<value_type::string>();
+			if (keep_runs) {
+				// Spaces meeting at a SEAM collapse; spaces inside one value do
+				// not. See get_alloc(), which joins the same fragments the same
+				// way.
+				value = skip_seam_spaces(value, result.empty() ? '\0' : result.back());
+			}
+			result += value;
 		} else {
 			str.str("");
 			_data[i].write(str, _lists_table);
 			result += str.str();
 		}
 	}
-#	else
-	for (size_t i = start; i < _size; i++) {
-		if (should_skip(i, hasGlue, lastNewline))
-			continue;
-		if (_data[i].printable()) {
-			_data[i].write(str, _lists_table);
-		}
-	}
-#	endif
 
 	// Reset stream size to where we last held the marker
 	_size = start;
 
 	// Return processed string
-#	ifndef INKCPP_KEEP_SPACE_RUNS
-	// remove mulitple accourencies of ' '
-	std::string result = str.str();
-#	endif
 	if (! result.empty()) {
-		auto end = clean_string<true, false>(result.begin(), result.end());
+		auto end = clean_string<true, false>(result.begin(), result.end(), _whitespace_mode);
 		if (result.begin() == end) {
 			result.resize(0);
 		} else {
 			_last_char = *(end - 1);
-#	ifdef INKCPP_KEEP_SPACE_RUNS
-			while (end[-1] == ' ') {
-				--end;
+			if (keep_runs) {
+				// a run that ends the line goes whole, not all but one
+				while (end[-1] == ' ') {
+					--end;
+				}
+				result.resize(end - result.begin());
+			} else {
+				result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
 			}
-			result.resize(end - result.begin());
-#	else
-			result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
-#	endif
 		}
 	}
 	return result;
@@ -397,9 +390,14 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			case value_type::string: {
 				// Copy string and advance
 				const char* value = _data[i].get<value_type::string>();
-#ifdef INKCPP_KEEP_SPACE_RUNS
-				value = skip_seam_spaces(value, ptr > buffer ? ptr[-1] : '\0');
-#endif
+				if (_whitespace_mode == whitespace_mode::keep_runs) {
+					// Spaces meeting at a SEAM collapse; spaces inside a value
+					// do not. Two fragments joined by glue frequently bring a
+					// trailing space and a leading space to the same join -
+					// `Knock ` and ` again?` - and the reader should see one
+					// space, not two.
+					value = skip_seam_spaces(value, ptr > buffer ? ptr[-1] : '\0');
+				}
 				copy_string(value, i, ptr);
 			} break;
 			case value_type::newline:
@@ -421,7 +419,7 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 	_size = start;
 
 	// Return processed string
-	end  = clean_string<RemoveTail, RemoveTail>(buffer, buffer + c_str_len(buffer));
+	end  = clean_string<RemoveTail, RemoveTail>(buffer, buffer + c_str_len(buffer), _whitespace_mode);
 	*end = 0;
 	if (end != buffer) {
 		_last_char = end[-1];

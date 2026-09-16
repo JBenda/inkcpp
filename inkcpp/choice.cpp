@@ -60,7 +60,7 @@ namespace runtime
 		while (*end != '\0') {
 			++end;
 		}
-		end  = ink::runtime::internal::clean_string<true, true>(text, end);
+		end  = ink::runtime::internal::clean_string<true, true>(text, end, in.get_whitespace_mode());
 		*end = '\0';
 
 		_text = text;

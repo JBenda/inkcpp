@@ -21,6 +21,21 @@ typedef struct HInkSTory    HInkStory;
 #endif
 	typedef uint32_t ink_hash_t;
 
+	/** How runs of whitespace inside a line are treated.
+	 * @ingroup clib
+	 * @sa ink_runner_set_whitespace_mode()
+	 */
+	typedef enum {
+		/** Collapse a run of spaces and tabs inside a line to a single space.
+		 * The default, and what the reference ink runtime does for lines.
+		 */
+		INK_WHITESPACE_COLLAPSE  = 0,
+		/** Keep runs of spaces and tabs inside a line, for text laid out for a
+		 * fixed width display.
+		 */
+		INK_WHITESPACE_KEEP_RUNS = 1
+	} InkWhitespaceMode;
+
 	/** @defgroup clib Clib Interface
 	 * C bindings for inkcpp
 	 *
@@ -255,6 +270,16 @@ typedef struct HInkSTory    HInkStory;
 	 * Deconstructs the Runner and all frees assoziated resources
 	 */
 	void              ink_runner_delete(HInkRunner* self);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::set_rng_seed()
+	 */
+	void              ink_runner_set_rng_seed(HInkRunner* self, uint32_t seed);
+	/** @memberof HInkRunner
+	 * @copydoc ink::runtime::runner_interface::set_whitespace_mode()
+	 * @param self
+	 * @param mode @ref InkWhitespaceMode "whitespace mode" to use
+	 */
+	void              ink_runner_set_whitespace_mode(HInkRunner* self, InkWhitespaceMode mode);
 	/** @memberof HInkRunner
 	 * Creates a snapshot, for later reloading.
 	 * @attention All runners assoziated with the same globals will create the same snapshot

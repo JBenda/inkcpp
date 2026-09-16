@@ -226,6 +226,21 @@ extern "C" {
 
 	void ink_runner_delete(HInkRunner* self) { delete reinterpret_cast<const runner*>(self); }
 
+	void ink_runner_set_rng_seed(HInkRunner* self, uint32_t seed)
+	{
+		reinterpret_cast<runner*>(self)->get()->set_rng_seed(seed);
+	}
+
+	void ink_runner_set_whitespace_mode(HInkRunner* self, InkWhitespaceMode mode)
+	{
+		ink::runtime::whitespace_mode value = ink::runtime::whitespace_mode::collapse;
+		switch (mode) {
+			case INK_WHITESPACE_KEEP_RUNS: value = ink::runtime::whitespace_mode::keep_runs; break;
+			case INK_WHITESPACE_COLLAPSE: break;
+		}
+		reinterpret_cast<runner*>(self)->get()->set_whitespace_mode(value);
+	}
+
 	HInkSnapshot* ink_runner_create_snapshot(const HInkRunner* self)
 	{
 		return reinterpret_cast<HInkSnapshot*>(

@@ -54,6 +54,16 @@ public:
 	virtual void set_rng_seed(uint32_t seed) = 0;
 
 	/**
+	 * Sets how runs of whitespace inside a line are treated.
+	 *
+	 * Affects all text produced after this call: lines, choice text and tags,
+	 * so set it before reading the first line. Not part of a snapshot: a
+	 * runner restored from one starts at the default again.
+	 * @param mode @ref ink::runtime::whitespace_mode "whitespace mode" to use
+	 */
+	virtual void set_whitespace_mode(whitespace_mode mode) = 0;
+
+	/**
 	 * Moves the runner to the specified path.
 	 *
 	 * @sa move_to(const char*) for more conviance
