@@ -137,6 +137,12 @@ public:
 	{
 	}
 
+	constexpr explicit value(marker_kind kind)
+	    : int32_value{static_cast<int32_t>(kind)}
+	    , _type{value_type::marker}
+	{
+	}
+
 	explicit value(const ink::runtime::value& val);
 	bool                set(const ink::runtime::value& val);
 	ink::runtime::value to_interface_value(list_table&) const;
@@ -690,15 +696,13 @@ inline constexpr value& value::set<value_type::thread_frame, uint32_t>(uint32_t 
 // static constexpr instantiations of flag values
 namespace values
 {
-	static constexpr value marker
-	    = value{}.set<value_type::marker, marker_kind>(marker_kind::generic);
-	static constexpr value marker_start_tag
-	    = value{}.set<value_type::marker, marker_kind>(marker_kind::start_tag);
-	static constexpr value glue            = value(value_type::glue);
-	static constexpr value newline         = value(value_type::newline);
-	static constexpr value func_start      = value(value_type::func_start);
-	static constexpr value func_end        = value(value_type::func_end);
-	static constexpr value null            = value(value_type::null);
-	static constexpr value ex_fn_not_found = value(value_type::ex_fn_not_found);
+	static constexpr value marker           = value(marker_kind::generic);
+	static constexpr value marker_start_tag = value(marker_kind::start_tag);
+	static constexpr value glue             = value(value_type::glue);
+	static constexpr value newline          = value(value_type::newline);
+	static constexpr value func_start       = value(value_type::func_start);
+	static constexpr value func_end         = value(value_type::func_end);
+	static constexpr value null             = value(value_type::null);
+	static constexpr value ex_fn_not_found  = value(value_type::ex_fn_not_found);
 } // namespace values
 } // namespace ink::runtime::internal
