@@ -58,6 +58,13 @@ enum class value_type {
 	jump_marker            // callstack jump
 };
 
+
+/** Notes the intend of the current open output stream. */
+enum class marker_kind : int32_t {
+	generic = 0, ///< marker with no specific meaning tracked (string interpolation, choice text)
+	start_tag,   ///< marker opened by Command::START_TAG, to be closed by Command::END_TAG
+};
+
 // add operator for value_type (to simplify usage templates).
 constexpr value_type operator+(value_type t, int i)
 {
@@ -550,14 +557,26 @@ inline constexpr value& value::set<value_type::thread_end, uint32_t>(uint32_t v)
 	return *this;
 }
 
-// define setter for values without storage
 template<>
-inline constexpr value& value::set<value_type::marker>()
+struct value::ret<value_type::marker> {
+	using type = marker_kind;
+};
+
+template<>
+inline marker_kind value::get<value_type::marker>() const
 {
-	_type = value_type::marker;
+	return static_cast<marker_kind>(int32_value);
+}
+
+template<>
+inline constexpr value& value::set<value_type::marker, marker_kind>(marker_kind kind)
+{
+	int32_value = static_cast<int32_t>(kind);
+	_type       = value_type::marker;
 	return *this;
 }
 
+// define setter for values without storage
 template<>
 inline constexpr value& value::set<value_type::glue>()
 {
@@ -671,7 +690,10 @@ inline constexpr value& value::set<value_type::thread_frame, uint32_t>(uint32_t 
 // static constexpr instantiations of flag values
 namespace values
 {
-	static constexpr value marker          = value(value_type::marker);
+	static constexpr value marker
+	    = value{}.set<value_type::marker, marker_kind>(marker_kind::generic);
+	static constexpr value marker_start_tag
+	    = value{}.set<value_type::marker, marker_kind>(marker_kind::start_tag);
 	static constexpr value glue            = value(value_type::glue);
 	static constexpr value newline         = value(value_type::newline);
 	static constexpr value func_start      = value(value_type::func_start);

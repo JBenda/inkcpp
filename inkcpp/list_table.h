@@ -11,6 +11,8 @@
 #include "array.h"
 #include "./include/list.h"
 
+#include <new>
+
 #ifdef INK_ENABLE_STL
 #	include <iosfwd>
 #endif
@@ -469,12 +471,12 @@ private:
 	);
 
 	// defined list (meta data)
-	managed_array<size_t, config::maxListTypes>                     _list_end;
-	managed_array<const char*, config::maxFlags>                    _flag_names;
-	managed_array<int, config::maxFlags>                            _flag_values;
-	managed_array<const char*, config::maxListTypes>                _list_names;
+	managed_array<size_t, config::maxListTypes>                   _list_end;
+	managed_array<const char*, config::maxFlags>                  _flag_names;
+	managed_array<int, config::maxFlags>                          _flag_values;
+	managed_array<const char*, config::maxListTypes>              _list_names;
 	/// keep track over lists accessed with get_var, and clear then at gc time
-	managed_array<list_interface, config::limitEditableLists, true> _list_handouts;
+	managed_instances<list_interface, config::limitEditableLists> _list_handouts;
 
 	bool _valid;
 

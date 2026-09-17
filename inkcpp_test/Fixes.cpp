@@ -376,3 +376,166 @@ SCENARIO("Node text lookup error after loading story", "[regression][runtime][mi
 		}
 	}
 }
+
+SCENARIO("Dangling tag does not leak past a divert #170", "[regression][tags][runtime]")
+{
+	GIVEN("a shuffled block whose tag is never closed on the taken branch")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "case1_repro.bin")};
+		runner                 thread = ink->new_runner();
+
+		THEN("the line reads correctly and getline does not throw")
+		{
+			REQUIRE(thread->getline() == "Le soleil brille sur la place.\n");
+		}
+	}
+}
+
+SCENARIO(
+    "Choice created by a recursively-threaded knot can be resumed #170",
+    "[regression][runtime][threads]"
+)
+{
+	GIVEN("a knot that recurses via '<-' and offers a choice from a nested thread")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "case2_repro.bin")};
+		runner                 thread = ink->new_runner();
+
+		WHEN("the story runs to the choice presented by the nested thread")
+		{
+			thread->getall();
+			REQUIRE(thread->num_choices() == 1);
+			CHECK(std::string(thread->get_choice(0)->text()) == "Vers B...");
+
+			AND_WHEN("the choice is selected")
+			{
+				thread->choose(0);
+
+				THEN("execution resumes at the divert target instead of throwing")
+				{
+					REQUIRE(thread->getall() == "Arrived.\n");
+				}
+			}
+		}
+	}
+}
+
+SCENARIO(
+    "Newline inside an interpolated string is not mistaken for a dangling tag",
+    "[regression][tags][runtime]"
+)
+{
+	GIVEN("a string literal built from a conditional with its own line breaks")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "case3_repro.bin")};
+		runner                 thread = ink->new_runner();
+
+		THEN("the composed string is printed intact, with no spurious tag")
+		{
+			REQUIRE(thread->getall() == "prefix\nline one\nsuffix\n");
+			REQUIRE(thread->has_tags() == false);
+		}
+	}
+}
+
+SCENARIO(
+    "Choice tags remain valid after later choices force the tag array to grow #170",
+    "[regression][tags][runtime]"
+)
+{
+	GIVEN("a knot offering six choices, each carrying four of its own tags")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "case4_repro.bin")};
+		runner                 thread = ink->new_runner();
+
+		WHEN("all six choices are discovered in a single pass")
+		{
+			thread->getall();
+
+			THEN("every choice still reports its own tags, not another choice's or garbage")
+			{
+				REQUIRE(thread->num_choices() == 6);
+				const char* expected[6][4] = {
+				    {"a1", "a2", "a3", "a4"},
+            {"b1", "b2", "b3", "b4"},
+            {"c1", "c2", "c3", "c4"},
+				    {"d1", "d2", "d3", "d4"},
+            {"e1", "e2", "e3", "e4"},
+            {"f1", "f2", "f3", "f4"},
+				};
+				for (int i = 0; i < 6; ++i) {
+					REQUIRE(thread->get_choice(static_cast<ink::size_t>(i))->num_tags() == 4);
+					for (int j = 0; j < 4; ++j) {
+						CHECK(
+						    std::string(thread->get_choice(static_cast<ink::size_t>(i))
+						                    ->get_tag(static_cast<ink::size_t>(j)))
+						    == expected[i][j]
+						);
+					}
+				}
+			}
+		}
+	}
+}
+
+SCENARIO("Storylets weave threads share temporaries across gathers #170", "[regression][runtime]")
+{
+	GIVEN("the Storylets story, which re-enters a recursive weave via '<-' each turn")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "Storylets.bin")};
+		runner                 thread = ink->new_runner();
+
+		WHEN("all three storylets are visited one at a time")
+		{
+			std::string content = thread->getall();
+			REQUIRE(content == "The beginning!\n");
+			REQUIRE(thread->num_choices() == 2);
+			CHECK(thread->get_choice(0)->text() == std::string("Visit the Avocado Witch"));
+			CHECK(thread->get_choice(1)->text() == std::string("Visit the Crumpet King"));
+
+			thread->choose(0);
+			content = thread->getall();
+			REQUIRE(content == "You visit the witch.\n");
+			REQUIRE(thread->num_choices() == 1);
+			CHECK(thread->get_choice(0)->text() == std::string("Visit the Crumpet King"));
+
+			thread->choose(0);
+			content = thread->getall();
+			REQUIRE(content == "You visit the king.\n");
+			REQUIRE(thread->num_choices() == 1);
+			CHECK(
+			    thread->get_choice(0)->text()
+			    == std::string("Now you have met the King, visit the Banana Boy!")
+			);
+
+			thread->choose(0);
+			content = thread->getall();
+			THEN("no 'done' point is missing and the story falls back once storylets run out")
+			{
+				REQUIRE(content == "You visit the boy.\nThere was nothing else to do.\n");
+				REQUIRE_FALSE(thread->has_choices());
+			}
+		}
+	}
+}
+
+SCENARIO(
+    "Sequence inside an interpolated string does not drop content across a divert #170",
+    "[regression][runtime]"
+)
+{
+	GIVEN("a string literal built from a cycle whose branches converge via a divert")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "case5_repro.bin")};
+		runner                 thread = ink->new_runner();
+
+		THEN("every cycle step is composed into the string intact, in order")
+		{
+			REQUIRE(thread->getline() == "prefix AAAA suffix\n");
+			REQUIRE(thread->getline() == "prefix BBBB suffix\n");
+			REQUIRE(thread->getline() == "prefix CCCC suffix\n");
+			REQUIRE(thread->getline() == "prefix AAAA suffix\n");
+			REQUIRE(thread->getline() == "After line.\n");
+		}
+	}
+}

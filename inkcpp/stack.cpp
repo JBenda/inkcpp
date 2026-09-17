@@ -30,6 +30,8 @@ void basic_stack::set(hash_t name, const value& val)
 		*existing = val;
 }
 
+void basic_stack::define(hash_t name, const value& val) { add(name, val); }
+
 bool reverse_find_predicat(hash_t name, thread_t& skip, uint32_t& jumping, entry& e)
 {
 	// Jumping
@@ -405,6 +407,13 @@ thread_t basic_stack::fork_thread()
 	//  back
 
 	return new_thread;
+}
+
+thread_t basic_stack::fork_scope()
+{
+	thread_t new_scope = ScopeIdTag | (_next_scope++);
+	add(InvalidHash, value{}.set<value_type::thread_start>(new_scope, 0u));
+	return new_scope;
 }
 
 void basic_stack::complete_thread(thread_t thread)

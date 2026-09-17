@@ -23,7 +23,7 @@ class list_table;
 class snapshot_interface
 {
 public:
-	constexpr snapshot_interface(){};
+	constexpr snapshot_interface() {};
 
 	static unsigned char* snap_write(unsigned char* ptr, const void* data, size_t length, bool write)
 	{
@@ -54,7 +54,6 @@ public:
 	struct snapper {
 		const string_table& strings;
 		const char*         story_string_table;
-		const snap_tag*     runner_tags = nullptr;
 
 		snapper(const string_table& strings, const char* story_string_table)
 		    : strings{strings}
@@ -69,8 +68,7 @@ public:
 	struct loader {
 		managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 		const char*                          story_string_table;
-		const bool                           migratable  = false;
-		const snap_tag*                      runner_tags = nullptr;
+		const bool                           migratable = false;
 		managed_array<int, true, 5, true>&   list_old_new_map;
 		managed_array<int, true, 5, true>&   list_list_matches;
 		managed_array<int, true, 5, true>&   list_value_matches;

@@ -36,7 +36,7 @@ class choice;
 class runner_interface
 {
 public:
-	virtual ~runner_interface(){};
+	virtual ~runner_interface() {};
 
 /** String type to simplify interfaces working with strings */
 #ifdef INK_ENABLE_STL
@@ -365,6 +365,8 @@ public:
 	 *
 	 * Returns the choice object at a given index
 	 *
+	 * @attention the returned pointer is only valid until @ref choose is called next; do not
+	 * retain it across a choice being made.
 	 * @see num_choices
 	 * @param index index of the choice to access
 	 * @return choice object with info on the choice
@@ -374,6 +376,8 @@ public:
 	/**
 	 * Shorcut for accessing a choice
 	 *
+	 * @attention the returned pointer is only valid until @ref choose is called next; do not
+	 * retain it across a choice being made.
 	 * @see get_choice
 	 * @param index index of the choice to access
 	 * @return choice object with info on the choice

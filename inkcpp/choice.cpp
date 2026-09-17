@@ -7,6 +7,7 @@
 #include "choice.h"
 
 #include "output.h"
+#include "runner_impl.h"
 #include "snapshot_impl.h"
 #include "string_table.h"
 #include "string_utils.h"
@@ -16,28 +17,27 @@ namespace ink
 namespace runtime
 {
 
-	size_t choice::num_tags() const
-	{
-		return static_cast<size_t>(std::distance(_tags_start, _tags_end));
-	}
+	size_t choice::num_tags() const { return _tags_end - _tags_start; }
 
 	const char* choice::get_tag(size_t index) const
 	{
-		return (index < num_tags()) ? _tags_start[index].text() : nullptr;
+		return (index < num_tags()) ? _runner->tag_text(_tags_start + index) : nullptr;
 	}
 
 	choice& choice::setup(
 	    internal::basic_stream& in, internal::string_table& strings, internal::list_table& lists,
-	    int index, uint32_t path, thread_t thread, const internal::snap_tag* tags_start,
-	    const internal::snap_tag* tags_end
+	    int index, uint32_t path, thread_t thread, thread_t scope_thread,
+	    const internal::runner_impl& runner, size_t tags_start, size_t tags_end
 	)
 	{
 		// Index/path
-		_index      = index;
-		_path       = path;
-		_thread     = thread;
-		_tags_start = tags_start;
-		_tags_end   = tags_end;
+		_index        = index;
+		_path         = path;
+		_thread       = thread;
+		_scope_thread = scope_thread;
+		_runner       = &runner;
+		_tags_start   = tags_start;
+		_tags_end     = tags_end;
 
 		char* text = nullptr;
 		// if we only have one item in our output stream

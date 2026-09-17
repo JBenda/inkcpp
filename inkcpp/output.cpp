@@ -255,16 +255,7 @@ void basic_stream::get(value* ptr, size_t length)
 
 size_t basic_stream::find_first_of(value_type type, size_t offset /*= 0*/) const
 {
-	if (_size == 0)
-		return npos;
-
-	// TODO: Cache?
-	for (size_t i = offset; i < _size; ++i) {
-		if (_data[i].type() == type)
-			return i;
-	}
-
-	return npos;
+	return find_first_of([type](const value& v) { return v.type() == type; }, offset);
 }
 
 size_t basic_stream::find_last_of(value_type type, size_t offset /*= 0*/) const
@@ -376,7 +367,7 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 				break;
 			case value_type::list: ptr = lists.toString(ptr, _data[i].get<value_type::list>()); break;
 			case value_type::list_flag:
-				ptr = lists.toString(ptr, _data[i].get<value_type::list>());
+				ptr = lists.toString(ptr, _data[i].get<value_type::list_flag>());
 				break;
 			default: inkFail("cant convert expression to string!");
 		}

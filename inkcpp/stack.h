@@ -51,8 +51,16 @@ namespace runtime
 
 			virtual ~basic_stack() = default;
 
-			// Sets existing value, or creates a new one at this callstack entry
+			/** Sets existing value, or creates a new one at this callstack entry
+			 * @sa define()
+			 */
 			void set(hash_t name, const value& val);
+
+			/** Always creates a new entry, shadowing existing.
+			 * Needed for e.g. recursion
+			 * @sa set()
+			 */
+			void define(hash_t name, const value& val);
 
 			// Gets an existing value, or nullptr
 			const value* get(hash_t name) const;
@@ -95,6 +103,11 @@ namespace runtime
 			// Forks a new thread from the current callstack and returns that thread's unique id
 			thread_t fork_thread();
 
+			/** Forks a lightweight mark id, without consuming ids from fork_thread()'s id space.
+			 * used e.g. to give choices a fresh scope to not bleed there variables
+			 */
+			thread_t fork_scope();
+
 			// Mark a thread as "done". It's callstack is still preserved until collapse_to_thread is
 			// called.
 			void complete_thread(thread_t thread);
@@ -129,6 +142,10 @@ namespace runtime
 			// thread ids
 			thread_t _next_thread        = 0;
 			thread_t _backup_next_thread = 0;
+
+			// scope IDs @ref fork_scope()
+			thread_t              _next_scope = 0;
+			static const thread_t ScopeIdTag  = 0x8000'0000U;
 
 			static const hash_t NulledHashId = ~0U;
 		};

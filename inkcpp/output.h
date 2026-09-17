@@ -92,6 +92,25 @@ namespace runtime
 			 */
 			size_t find_first_of(value_type type, size_t offset = 0) const;
 
+			/** Find the first entry in the output for which pred returns true
+			 * @param predicate when evaluate to true will count as match
+			 * @param offset into buffer
+			 * @return index or @ref npos if no entry matches
+			 */
+			template<typename Pred>
+			size_t find_first_of(Pred predicate, size_t offset = 0) const
+			{
+				if (_size == 0) {
+					return npos;
+				}
+				for (size_t i = offset; i < _size; ++i) {
+					if (predicate(_data[i])) {
+						return i;
+					}
+				}
+				return npos;
+			}
+
 			/** Find the last occurrence of the type in the output
 			 * @param type type to look for in the output
 			 * @param offset offset into buffer
