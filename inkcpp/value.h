@@ -147,7 +147,7 @@ public:
 	bool                set(const ink::runtime::value& val);
 	ink::runtime::value to_interface_value(list_table&) const;
 
-#ifdef __GNUCC__
+#ifdef __GNUC__
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wtautological-compare"
 #endif
@@ -158,7 +158,7 @@ public:
 		static_assert(ty != ty, "No getter for this type defined!");
 	}
 
-#ifdef __GNUCC__
+#ifdef __GNUC__
 #	pragma GCC diagnostic pop
 #endif
 

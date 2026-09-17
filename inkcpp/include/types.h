@@ -129,7 +129,7 @@ public:
 
 	/// @}
 
-#ifdef __GNUCC__
+#ifdef __GNUC__
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wtautological-compare"
 #endif
@@ -142,7 +142,7 @@ public:
 	{
 		static_assert(Ty != Ty, "No value getter for the selected type");
 	}
-#ifdef __GNUCC__
+#ifdef __GNUC__
 #	pragma GCC diagnostic pop
 #endif
 };
