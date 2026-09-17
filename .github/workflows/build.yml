@@ -47,6 +47,13 @@ jobs:
         with:
           submodules: true
 
+      # Windows Defender`s real-time scanning can lock/delay the visibility of freshly written files.
+      # This can lead to faling tests (since proofing creates many files and read them imediat)
+      - name: Exclude workspace from Windows Defender scanning
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: Add-MpPreference -ExclusionPath "${{ github.workspace }}"
+
       # Setup python
       - uses: actions/setup-python@v7
         if: ${{ matrix.proof }}
