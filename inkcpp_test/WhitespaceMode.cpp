@@ -36,18 +36,33 @@ std::string chomp(std::string line)
 	return line;
 }
 
-// clang-format off
-const char* const story_json =
-    R"({"inkVersion":21,"root":[[)"
-    R"("^A    B","\n",)"
-    R"("^tab\t\tsep","\n",)"
-    R"("^Knock ","<>","^ again?","\n",)"
-    R"("^Knock\t","<>","^ again?","\n",)"
-    R"("^before end \t\t","\n",)"
-    R"("ev","str","^Pick   me","/str","/ev",{"*":"0.c-0","flg":20},)"
-    R"({"c-0":["\n","end",{"->":"0.g-0"},{"#f":5}],"g-0":["done",null]}],"done",null],)"
-    R"("listDefs":{}})";
-// clang-format on
+const char* const story_json = R"==({
+  "inkVersion": 21,
+  "root": [
+    [
+      "^A    B", "\n", "^tab\t\tsep", "\n", "^Knock ",
+      "<>",
+      "^ again?", "\n", "^Knock\t",
+      "<>",
+      "^ again?", "\n", "^before end \t\t", "\n",
+      "ev", "str",
+	      "^Pick   me",
+      "/str", "/ev",
+      { "*": "0.c-0", "flg": 20 },
+      {
+        "c-0": [
+          "\n",
+          "end",
+          { "->": "0.g-0" },
+          { "#f": 5 }
+        ],
+        "g-0": [ "done", null ]
+      }
+    ],
+    "done", null
+  ],
+  "listDefs": {}
+})==";
 
 /** everything the runner emits for the story above */
 struct transcript {

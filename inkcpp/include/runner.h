@@ -56,9 +56,13 @@ public:
 	/**
 	 * Sets how runs of whitespace inside a line are treated.
 	 *
-	 * Affects all text produced after this call: lines, choice text and tags,
-	 * so set it before reading the first line. Not part of a snapshot: a
-	 * runner restored from one starts at the default again.
+	 * @attention Affects all text produced after this call:
+	 * lines, variables, choice text and tags.
+	 * ! set it before reading the first line.
+	 *
+	 * @attention Not part of a snapshot: runner restored from one starts at the default again.
+	 * but tags an variables already evaluated are uneffected.
+	 *
 	 * @param mode @ref ink::runtime::whitespace_mode "whitespace mode" to use
 	 */
 	virtual void set_whitespace_mode(whitespace_mode mode) = 0;

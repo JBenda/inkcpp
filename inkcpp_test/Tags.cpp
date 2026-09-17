@@ -34,9 +34,7 @@ const char* const tag_whitespace_json_v1 = R"==({
   "inkVersion": 21,
   "root": [
     [
-      "#",
-      "^global   tag",
-      "/#",
+      "#", "^global   tag", "/#",
       [ "done", { "#n": "g-0" } ],
       null
     ],
@@ -50,11 +48,10 @@ const char* const tag_whitespace_json_v1 = R"==({
       ],
       "global decl": [
         "ev",
-        false,
-        { "VAR=": "seen" },
+	        false,
+	        { "VAR=": "seen" },
         "/ev",
-        "end",
-        null
+        "end", null
       ]
     }
   ],
@@ -65,9 +62,7 @@ const char* const tag_whitespace_json_v2 = R"==({
   "inkVersion": 21,
   "root": [
     [
-      "#",
-      "^global   tag",
-      "/#",
+      "#", "^global   tag", "/#",
       [ "done", { "#n": "g-0" } ],
       null
     ],
@@ -82,12 +77,11 @@ const char* const tag_whitespace_json_v2 = R"==({
       "global decl": [
         "ev",
         false,
-        { "VAR=": "seen" },
-        1,
-        { "VAR=": "extra" },
+	        { "VAR=": "seen" },
+	        1,
+	        { "VAR=": "extra" },
         "/ev",
-        "end",
-        null
+        "end", null
       ]
     }
   ],
@@ -424,7 +418,7 @@ SCENARIO("tags respect whitespace mode", "[tags][runtime][output]")
 		{
 			runner main = ink->new_runner();
 			main->move_to(ink::hash_string("knot"));
-			main->getline(); // "First." - enters the sub-stitch, picking up the knot tag
+			REQUIRE(main->getline() == "First.\n"); // enters the sub-stitch, picking up the knot tag
 			std::string line = main->getline();
 
 			THEN("the knot tag and inline tag both have their interior run collapsed")

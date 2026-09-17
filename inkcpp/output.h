@@ -126,8 +126,7 @@ namespace runtime
 
 			char last_char() const { return _last_char; }
 
-			// how runs of whitespace inside a line are treated, see
-			// ink::runtime::runner_interface::set_whitespace_mode()
+			/** @sa ink::runtime::runner_interface::set_whitespace_mode() */
 			void set_whitespace_mode(whitespace_mode mode) { _whitespace_mode = mode; }
 
 			whitespace_mode get_whitespace_mode() const { return _whitespace_mode; }

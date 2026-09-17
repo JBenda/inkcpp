@@ -438,14 +438,15 @@ iter(inkcpp_py.Runner) returns a iterator over all current choices.)",
 	    .def("num_choices", &runner::num_choices, "Number of current open choices")
 	    .def(
 	        "set_rng_seed", &runner::set_rng_seed,
-	        "Set the seed for the PRNG used by this runner. Else the current time is used.",
+	        "Set the seed for the PRNG used by this runner. At creation the runner is seeded with "
+	        "the current time.",
 	        py::arg("seed").none(false)
 	    )
 	    .def(
 	        "set_whitespace_mode", &runner::set_whitespace_mode,
 	        R"(Set how runs of whitespace inside a line are treated.
 
-Affects all text produced after this call: lines, choice text and tags,
+Affects all text produced after this call: lines, variables, choice text and tags,
 so set it before reading the first line.
 
 >>> runner.set_whitespace_mode(inkcpp_py.WhitespaceMode.KeepRuns)

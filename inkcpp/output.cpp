@@ -179,9 +179,7 @@ std::string basic_stream::get()
 		if (_data[i].type() == value_type::string) {
 			const char* value = _data[i].get<value_type::string>();
 			if (keep_runs) {
-				// Spaces meeting at a SEAM collapse; spaces inside one value do
-				// not. See get_alloc(), which joins the same fragments the same
-				// way.
+				// Spaces meeting at a SEAM collapse; spaces inside one value do not.
 				value = skip_seam_spaces(value, result.empty() ? '\0' : result.back());
 			}
 			result += value;
@@ -203,7 +201,6 @@ std::string basic_stream::get()
 		} else {
 			_last_char = *(end - 1);
 			if (keep_runs) {
-				// a run that ends the line goes whole, not all but one
 				while (end[-1] != '\n' && isspace(static_cast<unsigned char>(end[-1]))) {
 					--end;
 				}
@@ -394,11 +391,7 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 				// Copy string and advance
 				const char* value = _data[i].get<value_type::string>();
 				if (_whitespace_mode == whitespace_mode::keep_runs) {
-					// Spaces meeting at a SEAM collapse; spaces inside a value
-					// do not. Two fragments joined by glue frequently bring a
-					// trailing space and a leading space to the same join -
-					// `Knock ` and ` again?` - and the reader should see one
-					// space, not two.
+					// Spaces meeting at a SEAM collapse; spaces inside a value do not.
 					value = skip_seam_spaces(value, ptr > buffer ? ptr[-1] : '\0');
 				}
 				copy_string(value, i, ptr);
