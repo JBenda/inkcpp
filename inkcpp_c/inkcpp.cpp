@@ -237,6 +237,7 @@ extern "C" {
 		switch (mode) {
 			case INK_WHITESPACE_KEEP_RUNS: value = ink::runtime::whitespace_mode::keep_runs; break;
 			case INK_WHITESPACE_COLLAPSE: break;
+			default: break;
 		}
 		reinterpret_cast<runner*>(self)->get()->set_whitespace_mode(value);
 	}

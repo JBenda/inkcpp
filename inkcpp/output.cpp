@@ -204,12 +204,15 @@ std::string basic_stream::get()
 			_last_char = *(end - 1);
 			if (keep_runs) {
 				// a run that ends the line goes whole, not all but one
-				while (end[-1] == ' ') {
+				while (end[-1] != '\n' && isspace(static_cast<unsigned char>(end[-1]))) {
 					--end;
 				}
 				result.resize(end - result.begin());
 			} else {
-				result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
+				result.resize(
+				    end - result.begin()
+				    - (_last_char != '\n' && isspace(static_cast<unsigned char>(_last_char)) ? 1 : 0)
+				);
 			}
 		}
 	}

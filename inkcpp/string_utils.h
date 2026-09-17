@@ -215,10 +215,8 @@ inline constexpr ITR clean_string(ITR begin, ITR end, whitespace_mode mode)
 					continue;
 				}
 			}
-		} else if (src[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
-			continue;
-		} else if (keep_runs && dst[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
-			// the rest of a run that starts a line
+		} else if (dst[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
+			// leading whitespace of a line, including the rest of a run that starts one
 			continue;
 		} else if (isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n') {
 			if constexpr (TAILING_SPACES) {

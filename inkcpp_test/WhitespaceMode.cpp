@@ -1,9 +1,11 @@
 #include "catch.hpp"
+#include "system.h"
 
 #include <choice.h>
 #include <compiler.h>
 #include <runner.h>
 #include <story.h>
+#include <globals.h>
 
 #include <cstring>
 #include <memory>
@@ -23,7 +25,7 @@ story* compile_json(const char* json)
 
 	auto* copy = new unsigned char[bytes.size()];
 	std::memcpy(copy, bytes.data(), bytes.size());
-	return story::from_binary(copy, bytes.size(), true);
+	return story::from_binary(copy, static_cast<ink::size_t>(bytes.size()), true);
 }
 
 std::string chomp(std::string line)
@@ -41,7 +43,7 @@ const char* const story_json =
     R"("^tab\t\tsep","\n",)"
     R"("^Knock ","<>","^ again?","\n",)"
     R"("^Knock\t","<>","^ again?","\n",)"
-    R"("^before end   ","\n",)"
+    R"("^before end \t\t","\n",)"
     R"("ev","str","^Pick   me","/str","/ev",{"*":"0.c-0","flg":20},)"
     R"({"c-0":["\n","end",{"->":"0.g-0"},{"#f":5}],"g-0":["done",null]}],"done",null],)"
     R"("listDefs":{}})";

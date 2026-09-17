@@ -12,6 +12,7 @@
 #include "header.h"
 #include "snapshot_impl.h"
 #include "story_impl.h"
+#include "string_utils.h"
 #include "system.h"
 #include "types.h"
 #include "value.h"
@@ -314,7 +315,12 @@ void runner_impl::fetch_tags(ip_t begin)
 		}
 		// store tags in dynamic data, too keep migratable stories on the table
 		// TODO: maybe let tags live on the static data again.
-		add_tag(_globals->strings().duplicate(read<const char*>(iter + 6 + 2)), tags_level::UNKNOWN);
+		char* tag_value = _globals->strings().duplicate(read<const char*>(iter + 6 + 2));
+		char* end       = clean_string<true, true>(
+        tag_value, tag_value + c_str_len(tag_value), _output.get_whitespace_mode()
+    );
+		*end = 0;
+		add_tag(tag_value, tags_level::UNKNOWN);
 		iter += 18;
 	}
 }
@@ -834,7 +840,7 @@ bool runner_impl::move_to(hash_t path)
 
 	// Clear state and move to destination
 	reset();
-	_ptr = _story->instructions();
+	_ptr                        = _story->instructions();
 	const bool record_visits    = false;
 	const bool track_knot_visit = false;
 	jump(destination, record_visits, track_knot_visit);
@@ -884,7 +890,7 @@ bool runner_impl::migrate_to(const loader& loader, hash_t path)
 	// preserve_turns=true keeps the turns-since counters restored from the snapshot intact;
 	// without this the visit() call inside jump() would reset them to 0.
 	_container.clear();
-	_ptr = nullptr;
+	_ptr                        = nullptr;
 	const bool record_visits    = false;
 	const bool track_knot_visit = false;
 	const bool preserve_turns   = true;
