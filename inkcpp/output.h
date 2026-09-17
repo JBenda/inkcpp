@@ -46,7 +46,10 @@ namespace runtime
 			}
 
 			// Returns the number of data items that will be extracted by the next get
-			size_t queued() const;
+			size_t queued();
+
+			// Commit output before extracting a marker-delimited value.
+			void commit_marker_extraction();
 
 			// Peeks the top entry
 			const value& peek() const;
@@ -151,6 +154,7 @@ namespace runtime
 			const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 		private:
+			void   rebase_save(size_t position);
 			size_t find_start() const;
 			bool   should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
 

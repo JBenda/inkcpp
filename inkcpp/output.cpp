@@ -207,7 +207,7 @@ FString basic_stream::get()
 }
 #endif
 
-size_t basic_stream::queued() const
+size_t basic_stream::queued()
 {
 	size_t start = find_start();
 	return _size - start;
@@ -307,6 +307,13 @@ void basic_stream::forget()
 	_save = npos;
 }
 
+void basic_stream::rebase_save(size_t position)
+{
+	inkAssert(saved(), "No save point to rebase!");
+	inkAssert(position <= _save, "Can not move save point forward!");
+	_save = position;
+}
+
 template char* basic_stream::get_alloc<true>(string_table& strings, list_table& lists);
 template char* basic_stream::get_alloc<false>(string_table& strings, list_table& lists);
 
@@ -395,13 +402,20 @@ size_t basic_stream::find_start() const
 {
 	// Find marker (or start)
 	size_t start = _size;
+	bool   found = false;
 	while (start > 0) {
 		start--;
-		if (_data[start].type() == value_type::marker)
+		if (_data[start].type() == value_type::marker) {
+			found = true;
 			break;
+		}
 	}
 
-	// Make sure we're not violating a save point
+	// If the marker was already consumed, the save point is the start of the
+	// remaining output and data before it must not be extracted.
+	if (saved() && ! found) {
+		start = _save;
+	}
 	if (saved() && start < _save) {
 		// TODO: check if we don't reset save correct
 		// at some point we can modifiy the output even behind save (probally discard?) and push a new
@@ -410,6 +424,14 @@ size_t basic_stream::find_start() const
 	}
 
 	return start;
+}
+
+void basic_stream::commit_marker_extraction()
+{
+	const size_t marker = find_first_of(value_type::marker);
+	if (marker != npos && saved() && marker < _save) {
+		rebase_save(marker);
+	}
 }
 
 bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const

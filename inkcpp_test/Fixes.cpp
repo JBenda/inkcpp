@@ -520,6 +520,76 @@ SCENARIO("Storylets weave threads share temporaries across gathers #170", "[regr
 }
 
 SCENARIO(
+    "A story from the original issue reproduces without missing done pointers #170",
+    "[regression][runtime]"
+)
+{
+	GIVEN("the PaniqueAMandonez story from the issue report")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "PaniqueAMandonez.bin")};
+		runner                 thread = ink->new_runner();
+
+		WHEN("the story starts and the first choice is taken")
+		{
+			thread->getall();
+			REQUIRE(thread->num_choices() == 2);
+			CHECK(std::string(thread->get_choice(0)->text()) == std::string("Commencer"));
+			CHECK(std::string(thread->get_choice(1)->text()) == std::string("Informations sur le jeu"));
+			thread->choose(0);
+			thread->getall();
+			REQUIRE(thread->num_choices() == 2);
+			CHECK(std::string(thread->get_choice(0)->text()) == std::string("Observer le village"));
+			CHECK(std::string(thread->get_choice(1)->text()) == std::string("Descendre"));
+			thread->choose(0);
+
+			THEN("resuming from the branch does not trip the done-pointer assertion")
+			{
+				REQUIRE_NOTHROW(thread->getall());
+			}
+		}
+	}
+}
+
+SCENARIO(
+    "CLI choice streams from the original issue do not corrupt save points #170",
+    "[regression][runtime]"
+)
+{
+	GIVEN("the PaniqueAMandonez story and the raw choice sequences reported in the issue")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "PaniqueAMandonez.bin")};
+
+		for (const std::string& sequence : {std::string("11111433232214"), std::string("1232322142")}) {
+			runner      thread    = ink->new_runner();
+			std::string remaining = sequence;
+
+			WHEN("the story is driven through the same choice stream the CLI saw")
+			{
+				THEN("no save-point or output-stream assertion is raised")
+				{
+					while (true) {
+						while (thread->can_continue()) {
+							REQUIRE_NOTHROW(thread->getline());
+						}
+						if (! thread->has_choices()) {
+							break;
+						}
+						if (remaining.empty()) {
+							break;
+						}
+						const int choice = remaining.front() - '0';
+						REQUIRE(choice >= 1);
+						REQUIRE(choice <= static_cast<int>(thread->num_choices()));
+						REQUIRE_NOTHROW(thread->choose(static_cast<size_t>(choice - 1)));
+						remaining.erase(remaining.begin());
+					}
+				}
+			}
+		}
+	}
+}
+
+SCENARIO(
     "Sequence inside an interpolated string does not drop content across a divert #170",
     "[regression][runtime]"
 )

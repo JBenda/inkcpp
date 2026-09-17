@@ -299,11 +299,11 @@ void runner_impl::clear_tags(tags_clear_level which)
 
 void runner_impl::close_dangling_tag()
 {
-	if (_output.find_first_of([](const value& v) {
-		    return v.type() == value_type::marker
-		        && v.get<value_type::marker>() == marker_kind::start_tag;
-	    })
-	    != _output.npos) {
+	const size_t marker = _output.find_first_of([](const value& v) {
+		return v.type() == value_type::marker && v.get<value_type::marker>() == marker_kind::start_tag;
+	});
+	if (marker != _output.npos) {
+		_output.commit_marker_extraction();
 		add_tag(_output.get_alloc<true>(_globals->strings(), _globals->lists()), tags_level::UNKNOWN);
 	}
 }
@@ -1507,6 +1507,7 @@ void runner_impl::step()
 
 					// Load value from output stream
 					// Push onto stack
+					_output.commit_marker_extraction();
 					_eval.push(value{}.set<value_type::string>(
 					    _output.get_alloc<false>(_globals->strings(), _globals->lists())
 					));
@@ -1521,6 +1522,7 @@ void runner_impl::step()
 
 				case Command::END_TAG: {
 					read<uint32_t>();
+					_output.commit_marker_extraction();
 					auto tag = _output.get_alloc<true>(_globals->strings(), _globals->lists());
 					add_tag(tag, tags_level::UNKNOWN);
 				} break;

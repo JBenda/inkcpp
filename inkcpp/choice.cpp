@@ -40,6 +40,7 @@ namespace runtime
 		_tags_end     = tags_end;
 
 		char* text = nullptr;
+		in.commit_marker_extraction();
 		// if we only have one item in our output stream
 		if (in.queued() == 2) {
 			// If it's a string, just grab it. Otherwise, use allocation
