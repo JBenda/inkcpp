@@ -1528,9 +1528,8 @@ void runner_impl::step()
 
 				case Command::END_TAG: {
 					read<uint32_t>();
-					_output.commit_marker_extraction();
-					auto tag = _output.get_alloc<true>(_globals->strings(), _globals->lists());
-					add_tag(tag, tags_level::UNKNOWN);
+					// we can reach a END_TAG without an START_TAG
+					close_dangling_tag();
 				} break;
 
 				// == Choice commands

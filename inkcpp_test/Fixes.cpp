@@ -647,8 +647,7 @@ SCENARIO(
 }
 
 SCENARIO(
-    "A dangling empty tag is not left in front of a real tag #170",
-    "[regression][tags][runtime][!shouldfail]"
+    "A dangling empty tag is not left in front of a real tag #170", "[regression][tags][runtime]"
 )
 {
 	GIVEN(
@@ -660,18 +659,22 @@ SCENARIO(
 		runner                 thread    = ink->new_runner();
 		std::string            remaining = "11111433232214";
 
-		bool        found     = false;
-		ink::size_t foundTags = 0;
+		int         entrouverteSeen = 0;
+		bool        found           = false;
+		ink::size_t foundTags       = 0;
 		std::string foundTag0;
 
 		while (true) {
 			while (thread->can_continue()) {
 				std::string line = thread->getline();
 				if (! found && line.find("entrouverte") != std::string::npos) {
-					found     = true;
-					foundTags = thread->num_tags();
-					if (foundTags > 0) {
-						foundTag0 = thread->get_tag(0);
+					++entrouverteSeen;
+					if (entrouverteSeen == 2) {
+						found     = true;
+						foundTags = thread->num_tags();
+						if (foundTags > 0) {
+							foundTag0 = thread->get_tag(0);
+						}
 					}
 				}
 			}
