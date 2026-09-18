@@ -624,9 +624,14 @@ void basic_stack::fetch_values(basic_stack& stack)
 
 void basic_stack::push_values(basic_stack& stack)
 {
-	for (auto itr = base::begin();
-	     itr.get()->name != InvalidHash && itr.get()->data.type() != value_type::value_pointer;
-	     itr.next()) {
+	// Skip over entries nulled by a collapse_to_thread()
+	auto itr = base::begin();
+	if (! itr.done() && is_entry_null(*itr.get())) {
+		itr.next(is_entry_null);
+	}
+	for (; ! itr.done() && itr.get()->name != InvalidHash
+	       && itr.get()->data.type() != value_type::value_pointer;
+	     itr.next(is_entry_null)) {
 		stack.set(itr.get()->name, itr.get()->data);
 	}
 }

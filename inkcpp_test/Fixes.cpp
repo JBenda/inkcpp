@@ -697,7 +697,7 @@ SCENARIO(
 
 SCENARIO(
     "Returning from a nested tunnel back into a threaded weave does not desync the ref stack #170",
-    "[regression][runtime][threads][!shouldfail]"
+    "[regression][runtime][threads]"
 )
 {
 	GIVEN("a title knot that tunnels through act1/act_1_sc_1 and back out to playloop")
@@ -722,7 +722,7 @@ SCENARIO(
 				REQUIRE_NOTHROW(thread->choose(0));
 				std::string content;
 				REQUIRE_NOTHROW(content = thread->getall());
-				REQUIRE(content == "The PLAYLOOP\n");
+				REQUIRE(content == "Express Joy\nThe PLAYLOOP\n");
 			}
 		}
 	}
