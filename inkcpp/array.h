@@ -247,6 +247,23 @@ public:
 
 	void forgett() { _last_size = 0; }
 
+	/** Moves the save pointer backwards, to allow reclasificaion.
+	 * Only should move past uncommited elements.
+	 * @param position to rebase on
+	 * @param is_pending predicate to validate that elements are non commited
+	 */
+	template<typename Pred>
+	void rebase_save(size_t position, Pred is_pending)
+	{
+		if (! is_saved() || position >= _last_size) {
+			return;
+		}
+		for (size_t i = position; i < _last_size; ++i) {
+			inkAssert(is_pending(i), "Cannot rebase save point over already committed data.");
+		}
+		_last_size = position;
+	}
+
 	bool has_changed() const { return base::size() != _last_size; }
 
 	size_t last_size() const { return _last_size; }
@@ -669,5 +686,95 @@ inline const unsigned char* allocated_restorable_array<
 	ptr = base::impl_snap_load_payload(ptr);
 	return ptr;
 }
+
+/** A managed @ref managed_array sibling class if pointers to element should be handed.
+ * If in dynamic mode, does allocate a new chunk of data each time the limit is reached, but keep
+ * the old one for the old data.
+ * If in static mode behaves like a static managed_array
+ * @attention cannot be snapshoted!
+ */
+template<typename T, int config>
+class managed_instances
+{
+	static constexpr bool   dynamic = config < 0;
+	static constexpr size_t fixed_n = dynamic ? 0 : static_cast<size_t>(config);
+
+public:
+	managed_instances()
+	{
+		if constexpr (dynamic) {
+			T* block = reinterpret_cast<T*>(new (std::nothrow) unsigned char[sizeof(T) * abs(config)]);
+			inkAssert(block != nullptr, "Out of memory in inkcpp: managed_instances grow failed");
+			inkAssert(( ::size_t ) block % alignof(T) == 0, "Miss aligend data in managed_instances");
+			for (size_t i = 0; i < abs(config); ++i) {
+				_blocks.push() = block + i;
+			}
+		}
+	}
+
+	managed_instances(const managed_instances&)            = delete;
+	managed_instances& operator=(const managed_instances&) = delete;
+
+	~managed_instances()
+	{
+		if constexpr (dynamic) {
+			for (size_t i = 0; i < _blocks.size(); i = i == 0 ? abs(config) : i + next_chunk_size(i)) {
+				delete[] reinterpret_cast<unsigned char*>(_blocks[i]);
+			}
+		}
+	}
+
+	T& push()
+	{
+		if constexpr (dynamic) {
+			if (_active == _blocks.size()) {
+				const size_t n_new_elements = next_chunk_size(_blocks.size());
+				T*           block
+				    = reinterpret_cast<T*>(new (std::nothrow) unsigned char[sizeof(T) * n_new_elements]);
+				inkAssert(block != nullptr, "Out of memory in inkcpp: managed_instances grow failed");
+				inkAssert(( ::size_t ) block % alignof(T) == 0, "Miss aligend data in managed_instances");
+				for (size_t i = 0; i < n_new_elements; ++i) {
+					_blocks.push() = block + i;
+				}
+			}
+			return *_blocks[_active++];
+		} else {
+			inkAssert(_active < fixed_n, "managed_instaces is full, and is static");
+			T* slot = reinterpret_cast<T*>(_storage + _active * sizeof(T));
+			++_active;
+			return *slot;
+		}
+	}
+
+	/** Marks every handou-out slot as free again.
+	 * @attention The memory is retained
+	 */
+	void clear() { _active = 0; }
+
+	config::statistics::container statistics() const
+	{
+		if constexpr (dynamic) {
+			return {static_cast<int>(_blocks.size()), static_cast<int>(_active)};
+		} else {
+			return {static_cast<int>(fixed_n), static_cast<int>(_active)};
+		}
+	}
+
+private:
+	/** Number of elements allocate for the next chunk.
+	 * @param total_allocated total number of currently allocated slots
+	 */
+	static constexpr size_t next_chunk_size(size_t total_allocated)
+	{
+		size_t n = total_allocated / 2;
+		return n == 0 ? 1 : n;
+	}
+
+	size_t _active = 0;
+	alignas(
+	    dynamic ? alignof(unsigned char) : alignof(T)
+	) unsigned char _storage[dynamic ? 1 : fixed_n * sizeof(T)];
+	managed_array<T*, dynamic, dynamic ? abs(config) : 1, true> _blocks;
+};
 
 } // namespace ink::runtime::internal

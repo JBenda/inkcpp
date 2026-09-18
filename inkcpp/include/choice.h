@@ -17,7 +17,6 @@ namespace runtime
 		class runner_impl;
 		class string_table;
 		class list_table;
-		class snap_tag;
 	} // namespace internal
 
 	/**
@@ -69,17 +68,19 @@ namespace runtime
 
 		choice& setup(
 		    internal::basic_stream&, internal::string_table& strings, internal::list_table& lists,
-		    int index, uint32_t path, thread_t thread, const internal::snap_tag* tags_start,
-		    const internal::snap_tag* tags_end
+		    int index, uint32_t path, thread_t thread, thread_t scope_thread,
+		    const internal::runner_impl& runner, size_t tags_start, size_t tags_end
 		);
 
 	protected:
-		const char*               _text       = nullptr; ///< @private
-		const internal::snap_tag* _tags_start = nullptr; ///< @private
-		const internal::snap_tag* _tags_end   = nullptr; ///< @private
-		uint32_t                  _path       = ~0U;     ///< @private
-		thread_t                  _thread     = ~0U;     ///< @private
-		int                       _index      = -1;      ///< @private
+		const char*                  _text       = nullptr; ///< @private
+		const internal::runner_impl* _runner     = nullptr; ///< @private
+		size_t                       _tags_start = 0;       ///< @private
+		size_t                       _tags_end   = 0;       ///< @private
+		uint32_t                     _path       = ~0U;     ///< @private
+		thread_t                     _thread     = ~0U;     ///< @private
+		thread_t _scope_thread = ~0U; ///< Used to avoid variable pollution from choices. @private
+		int      _index        = -1;  ///< @private
 	};
 
 } // namespace runtime

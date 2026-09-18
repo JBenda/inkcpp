@@ -123,6 +123,8 @@ public:
 		return get_tag<tags_level::KNOT>(index);
 	};
 
+	const char* tag_text(size_t idx) const { return _tags[idx].text(); }
+
 	virtual hash_t get_current_knot() const override;
 
 	snapshot* create_snapshot() const override;
@@ -220,6 +222,12 @@ private:
 	void clear_tags(tags_clear_level which);
 	// Fetch string only tags at Tag/Global level
 	void fetch_tags(ip_t begin);
+
+	/** Simulate a END_TAG, to close a still open START_TAG marker.
+	 * This might happen if a tag is closed in a not taken branch
+	 * @todo evaluate if the tag should be dropped instead.
+	 */
+	void close_dangling_tag();
 
 	// Special code for jumping from the current IP to another.
 	// preserve_turns: if true, existing turns-since counters on visited knots are not reset
