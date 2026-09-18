@@ -6,9 +6,88 @@
 #include <compiler.h>
 #include <globals.h>
 #include <runner.h>
+#include <snapshot.h>
 #include <story.h>
 
+#include <cstring>
+#include <memory>
+#include <sstream>
+
 using namespace ink::runtime;
+
+namespace
+{
+story* compile_json(const char* json)
+{
+	std::istringstream in{json};
+	std::stringstream  out;
+	ink::compiler::run(in, out);
+	const std::string bytes = out.str();
+
+	auto* copy = new unsigned char[bytes.size()];
+	std::memcpy(copy, bytes.data(), bytes.size());
+	return story::from_binary(copy, static_cast<ink::size_t>(bytes.size()), true);
+}
+
+// Literal global, knot and inline tag, wrapped in two stories to test migration
+const char* const tag_whitespace_json_v1 = R"==({
+  "inkVersion": 21,
+  "root": [
+    [
+      "#", "^global   tag", "/#",
+      [ "done", { "#n": "g-0" } ],
+      null
+    ],
+    "done",
+    {
+      "knot": [
+        { "->": ".^.sub" },
+        {
+          "sub": [ "#", "^knot   tag", "/#", "^First.", "\n", "^Some text.  ", "#", "^inline   tag", "/#", "\n", "end", null ]
+        }
+      ],
+      "global decl": [
+        "ev",
+	        false,
+	        { "VAR=": "seen" },
+        "/ev",
+        "end", null
+      ]
+    }
+  ],
+  "listDefs": {}
+})==";
+
+const char* const tag_whitespace_json_v2 = R"==({
+  "inkVersion": 21,
+  "root": [
+    [
+      "#", "^global   tag", "/#",
+      [ "done", { "#n": "g-0" } ],
+      null
+    ],
+    "done",
+    {
+      "knot": [
+        { "->": ".^.sub" },
+        {
+          "sub": [ "#", "^knot   tag", "/#", "^First.", "\n", "^Some other text.  ", "#", "^inline   tag", "/#", "\n", "end", null ]
+        }
+      ],
+      "global decl": [
+        "ev",
+        false,
+	        { "VAR=": "seen" },
+	        1,
+	        { "VAR=": "extra" },
+        "/ev",
+        "end", null
+      ]
+    }
+  ],
+  "listDefs": {}
+	})==";
+} // namespace
 
 SCENARIO("tags", "[tags][runtime]")
 {
@@ -321,6 +400,100 @@ SCENARIO("run story with tags", "[tags][runtime]")
 				CHECK(thread->has_tags());
 				REQUIRE(thread->num_tags() == 1);
 				CHECK(std::string(thread->get_tag(0)) == "close_tag");
+			}
+		}
+	}
+}
+
+SCENARIO("tags respect whitespace mode", "[tags][runtime][output]")
+{
+	GIVEN(
+	    "a story with a literal global tag, knot tag and inline tag, each with an interior "
+	    "run of spaces"
+	)
+	{
+		std::unique_ptr<story> ink{compile_json(tag_whitespace_json_v1)};
+
+		WHEN("the knot is reached through normal execution, in the default (collapse) mode")
+		{
+			runner main = ink->new_runner();
+			main->move_to(ink::hash_string("knot"));
+			REQUIRE(main->getline() == "First.\n"); // enters the sub-stitch, picking up the knot tag
+			std::string line = main->getline();
+
+			THEN("the knot tag and inline tag both have their interior run collapsed")
+			{
+				REQUIRE(line == "Some text.\n");
+				REQUIRE(main->has_knot_tags());
+				REQUIRE(main->num_knot_tags() == 1);
+				CHECK(std::string(main->get_knot_tag(0)) == "knot tag");
+				REQUIRE(main->num_tags() == 1);
+				CHECK(std::string(main->get_tag(0)) == "inline tag");
+			}
+		}
+
+		WHEN("the knot is reached through normal execution, in keep_runs mode")
+		{
+			runner main = ink->new_runner();
+			main->move_to(ink::hash_string("knot"));
+			main->set_whitespace_mode(whitespace_mode::keep_runs);
+			REQUIRE(main->getline() == "First.\n"); // enters the sub-stitch, picking up the knot tag
+			std::string line = main->getline();
+
+			THEN("the knot tag and inline tag both keep their interior run of spaces")
+			{
+				REQUIRE(main->has_knot_tags());
+				REQUIRE(main->num_knot_tags() == 1);
+				CHECK(std::string(main->get_knot_tag(0)) == "knot   tag");
+				REQUIRE(main->num_tags() == 1);
+				CHECK(std::string(main->get_tag(0)) == "inline   tag");
+			}
+		}
+
+		WHEN(
+		    "a snapshot taken inside the knot is restored into a differently-compiled version of "
+		    "the story, forcing migration"
+		)
+		{
+			runner main = ink->new_runner();
+			main->move_to(ink::hash_string("knot"));
+			REQUIRE(main->getline() == "First.\n"); // enters the sub-stitch, picking up the knot tag
+			std::unique_ptr<snapshot> snap{main->create_snapshot()};
+
+			std::unique_ptr<story> ink_v2{compile_json(tag_whitespace_json_v2)};
+			REQUIRE(ink_v2->hash() != ink->hash());
+			runner migrated = ink_v2->new_runner_from_snapshot(*snap);
+
+			THEN(
+			    "runner_impl::fetch_tags() re-derives the global and knot tag through its "
+			    "constant-string fast path, still collapsed and without leftover bytes from the "
+			    "un-truncated source string"
+			)
+			{
+				REQUIRE(migrated->has_global_tags());
+				REQUIRE(migrated->num_global_tags() == 1);
+				CHECK(std::string(migrated->get_global_tag(0)) == "global tag");
+				REQUIRE(migrated->has_knot_tags());
+				REQUIRE(migrated->num_knot_tags() == 1);
+				CHECK(std::string(migrated->get_knot_tag(0)) == "knot tag");
+			}
+
+			AND_WHEN("whitespace mode is set on the migrated runner before reading on")
+			{
+				migrated->set_whitespace_mode(whitespace_mode::keep_runs);
+				// migration jumps back to start of knot
+				migrated->getline(); // "First." - enters the sub-stitch, so _current_knot_id is set
+				std::string line = migrated->getline();
+
+				THEN(
+				    "the setting still applies normally to the inline tag reached by execution "
+				    "after migration, even though the tags fetched during migration stay collapsed"
+				)
+				{
+					REQUIRE(line == "Some other text.\n");
+					REQUIRE(migrated->num_tags() == 1);
+					CHECK(std::string(migrated->get_tag(0)) == "inline   tag");
+				}
 			}
 		}
 	}

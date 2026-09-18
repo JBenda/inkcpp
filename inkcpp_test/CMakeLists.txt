@@ -31,6 +31,7 @@ add_executable(
 	MoveTo.cpp
 	ListMatching.cpp
 	Fixes.cpp
+	WhitespaceMode.cpp
 	Migration.cpp
 	MultiRunner.cpp
 	NotAnInkStory.cpp

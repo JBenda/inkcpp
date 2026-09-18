@@ -126,6 +126,11 @@ namespace runtime
 
 			char last_char() const { return _last_char; }
 
+			/** @sa ink::runtime::runner_interface::set_whitespace_mode() */
+			void set_whitespace_mode(whitespace_mode mode) { _whitespace_mode = mode; }
+
+			whitespace_mode get_whitespace_mode() const { return _whitespace_mode; }
+
 			// snapshot interface
 			bool                 can_be_migrated() const;
 			size_t               snap(unsigned char* data, const snapper&) const;
@@ -139,7 +144,8 @@ namespace runtime
 			void copy_string(const char* str, size_t& dataIter, T& output);
 
 		private:
-			char _last_char = '\0';
+			char            _last_char       = '\0';
+			whitespace_mode _whitespace_mode = whitespace_mode::collapse;
 
 			// data stream
 			value* _data = nullptr;
