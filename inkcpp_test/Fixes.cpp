@@ -612,7 +612,7 @@ SCENARIO(
 
 SCENARIO(
     "One more choice on top of the fixed CLI stream still corrupts the save point #170",
-    "[regression][runtime][!shouldfail]"
+    "[regression][runtime]"
 )
 {
 	GIVEN(

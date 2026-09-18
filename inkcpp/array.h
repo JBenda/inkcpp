@@ -247,6 +247,23 @@ public:
 
 	void forgett() { _last_size = 0; }
 
+	/** Moves the save pointer backwards, to allow reclasificaion.
+	 * Only should move past uncommited elements.
+	 * @param position to rebase on
+	 * @param is_pending predicate to validate that elements are non commited
+	 */
+	template<typename Pred>
+	void rebase_save(size_t position, Pred is_pending)
+	{
+		if (! is_saved() || position >= _last_size) {
+			return;
+		}
+		for (size_t i = position; i < _last_size; ++i) {
+			inkAssert(is_pending(i), "Cannot rebase save point over already committed data.");
+		}
+		_last_size = position;
+	}
+
 	bool has_changed() const { return base::size() != _last_size; }
 
 	size_t last_size() const { return _last_size; }

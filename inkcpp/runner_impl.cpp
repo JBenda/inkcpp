@@ -249,6 +249,12 @@ void runner_impl::assign_tags(std::initializer_list<tags_level> wheres)
 		idy        = _tags_begin[static_cast<int>(tags_level::UNKNOWN)];
 		end        = _tags_begin[static_cast<int>(tags_level::UNKNOWN) + 1];
 		inkAssert(n == end - idy, "Same size in each iteration");
+		// Reclassifying pending tags may reach into the region a later, still
+		// active save point already considers committed (e.g. a save() taken
+		// while these tags were still unresolved). Rebase the save point so it
+		// keeps enclosing this data instead of tripping the insert guard, but
+		// only if that data is still the pending UNKNOWN tags being moved here.
+		_tags.rebase_save(idx, [idy](size_t i) { return i >= idy; });
 		for (size_t i = 0; i < n; ++i) {
 			const char* tag       = _tags[idy + i * 2];
 			_tags.insert(idx + i) = tag;
