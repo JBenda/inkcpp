@@ -609,3 +609,121 @@ SCENARIO(
 		}
 	}
 }
+
+SCENARIO(
+    "One more choice on top of the fixed CLI stream still corrupts the save point #170",
+    "[regression][runtime][!shouldfail]"
+)
+{
+	GIVEN(
+	    "the PaniqueAMandonez story and the previously-fixed choice stream with one extra choice "
+	    "appended, as reported by smwhr after PR #173"
+	)
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "PaniqueAMandonez.bin")};
+		runner                 thread    = ink->new_runner();
+		std::string            remaining = "111114332322142";
+
+		THEN("no save-point or output-stream assertion is raised")
+		{
+			while (true) {
+				while (thread->can_continue()) {
+					REQUIRE_NOTHROW(thread->getline());
+				}
+				if (! thread->has_choices()) {
+					break;
+				}
+				if (remaining.empty()) {
+					break;
+				}
+				const int choice = remaining.front() - '0';
+				REQUIRE(choice >= 1);
+				REQUIRE(choice <= static_cast<int>(thread->num_choices()));
+				REQUIRE_NOTHROW(thread->choose(static_cast<size_t>(choice - 1)));
+				remaining.erase(remaining.begin());
+			}
+		}
+	}
+}
+
+SCENARIO(
+    "A dangling empty tag is not left in front of a real tag #170",
+    "[regression][tags][runtime][!shouldfail]"
+)
+{
+	GIVEN(
+	    "the PaniqueAMandonez story driven through the same choice stream that exposes the "
+	    "leading-comma tag glitch smwhr reported after PR #173"
+	)
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "PaniqueAMandonez.bin")};
+		runner                 thread    = ink->new_runner();
+		std::string            remaining = "11111433232214";
+
+		bool        found     = false;
+		ink::size_t foundTags = 0;
+		std::string foundTag0;
+
+		while (true) {
+			while (thread->can_continue()) {
+				std::string line = thread->getline();
+				if (! found && line.find("entrouverte") != std::string::npos) {
+					found     = true;
+					foundTags = thread->num_tags();
+					if (foundTags > 0) {
+						foundTag0 = thread->get_tag(0);
+					}
+				}
+			}
+			if (! thread->has_choices() || remaining.empty()) {
+				break;
+			}
+			const int choice = remaining.front() - '0';
+			thread->choose(static_cast<size_t>(choice - 1));
+			remaining.erase(remaining.begin());
+		}
+
+		THEN(
+		    "the line describing the Maire's office carries only its own tag, with none left over "
+		    "from an earlier line"
+		)
+		{
+			REQUIRE(found);
+			REQUIRE(foundTags == 1);
+			REQUIRE(foundTag0 == "didascalie");
+		}
+	}
+}
+
+SCENARIO(
+    "Returning from a nested tunnel back into a threaded weave does not desync the ref stack #170",
+    "[regression][runtime][threads][!shouldfail]"
+)
+{
+	GIVEN("a title knot that tunnels through act1/act_1_sc_1 and back out to playloop")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "case6_repro.bin")};
+		runner                 thread = ink->new_runner();
+
+		WHEN("Play is chosen, reaching the choice offered inside the nested weave")
+		{
+			thread->getall();
+			REQUIRE(thread->num_choices() == 1);
+			CHECK(std::string(thread->get_choice(0)->text()) == "Play");
+			thread->choose(0);
+			thread->getall();
+			REQUIRE(thread->num_choices() == 2);
+
+			THEN(
+			    "selecting a choice and returning through the tunnel reaches playloop without "
+			    "throwing"
+			)
+			{
+				REQUIRE_NOTHROW(thread->choose(0));
+				std::string content;
+				REQUIRE_NOTHROW(content = thread->getall());
+				REQUIRE(content == "The PLAYLOOP\n");
+			}
+		}
+	}
+}
