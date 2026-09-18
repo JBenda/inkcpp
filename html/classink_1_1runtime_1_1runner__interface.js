@@ -32,5 +32,6 @@ var classink_1_1runtime_1_1runner__interface =
     [ "operator bool", "classink_1_1runtime_1_1runner__interface.html#ae9d0aaad2022e67f6bf0aacbd0a829a7", null ],
     [ "operator[]", "classink_1_1runtime_1_1runner__interface.html#ae616e2f291c7cd279b3b67ea5d1a974d", null ],
     [ "set_rng_seed", "classink_1_1runtime_1_1runner__interface.html#a03a5787865d7708227ebff27a2518f1c", null ],
+    [ "set_whitespace_mode", "classink_1_1runtime_1_1runner__interface.html#adad0b881ee7c218829feb680a02e7320", null ],
     [ "statistics", "classink_1_1runtime_1_1runner__interface.html#a47ed0eb990c0cafe27c63b73782bf94b", null ]
 ];

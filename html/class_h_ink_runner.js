@@ -2,6 +2,7 @@ var class_h_ink_runner =
 [
     [ "InkExternalFunction", "class_h_ink_runner.html#a4e79305d26dead4e612fd3c2edd6cd4d", null ],
     [ "InkExternalFunctionVoid", "class_h_ink_runner.html#ab9e2f0105357eac273213aaa255888fe", null ],
+    [ "InkWhitespaceMode", "class_h_ink_runner.html#ab12f709586c85c2116abaea203d02d39", null ],
     [ "ink_runner_bind", "class_h_ink_runner.html#a244bd1db4c6e819bab0c277803526187", null ],
     [ "ink_runner_bind_void", "class_h_ink_runner.html#a70126dc2ca3850b71631e22fe91d2ac3", null ],
     [ "ink_runner_can_continue", "class_h_ink_runner.html#acfa96a79ca2d4c2cf2e0d9e9287cf9dd", null ],
@@ -18,5 +19,7 @@ var class_h_ink_runner =
     [ "ink_runner_num_global_tags", "class_h_ink_runner.html#abec19117a876d1f89622145c4698c6ee", null ],
     [ "ink_runner_num_knot_tags", "class_h_ink_runner.html#a894681b0e452d9954671d373cbd75c00", null ],
     [ "ink_runner_num_tags", "class_h_ink_runner.html#a5aba5cc9fd0d63b04d2491ad4ca0ca96", null ],
+    [ "ink_runner_set_rng_seed", "class_h_ink_runner.html#ad18f761fe94c350ae69221876c82d893", null ],
+    [ "ink_runner_set_whitespace_mode", "class_h_ink_runner.html#a06d5fedc799a5917808ff7b070ad2c1c", null ],
     [ "ink_runner_tag", "class_h_ink_runner.html#a665a93019c70b2143dba60cdb4f5acb1", null ]
 ];

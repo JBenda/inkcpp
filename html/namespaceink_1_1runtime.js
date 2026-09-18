@@ -11,6 +11,10 @@ var namespaceink_1_1runtime =
     [ "globals", "namespaceink_1_1runtime.html#a224e2e5f47e5ce0a2f88a91d16054e93", null ],
     [ "list", "namespaceink_1_1runtime.html#a54df30a046c9e4988a686ca00ea35107", null ],
     [ "runner", "namespaceink_1_1runtime.html#ad63cbd82595f3f52ef21543b309ba8b6", null ],
+    [ "whitespace_mode", "namespaceink_1_1runtime.html#ae024bea5db27de16dc79876279201d2d", [
+      [ "collapse", "namespaceink_1_1runtime.html#ae024bea5db27de16dc79876279201d2da1a721faf2df53972bfd0831c64b6146d", null ],
+      [ "keep_runs", "namespaceink_1_1runtime.html#ae024bea5db27de16dc79876279201d2da54a00d96c865d7a108fea84209971df0", null ]
+    ] ],
     [ "value::get< value::Type::Bool >", "namespaceink_1_1runtime.html#acc21647cb714862434fc51a3b0894f5f", null ],
     [ "value::get< value::Type::Float >", "namespaceink_1_1runtime.html#aadb39541614546023d73580d745dcf65", null ],
     [ "value::get< value::Type::Int32 >", "namespaceink_1_1runtime.html#aeacdda632b11cb20347911ee9dd604ee", null ],

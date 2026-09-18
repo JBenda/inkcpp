@@ -1,15 +1,15 @@
 var searchData=
 [
-  ['new_5fglobals_0',['new_globals',['../classink_1_1runtime_1_1story.html#ac9a48e930c85ed58c0d2f6bbe89c9b62',1,'ink::runtime::story']]],
-  ['new_5fglobals_5ffrom_5fsnapshot_1',['new_globals_from_snapshot',['../classink_1_1runtime_1_1story.html#a1aee464428448e8ef0a047f37e4e7ea2',1,'ink::runtime::story']]],
-  ['new_5frunner_2',['new_runner',['../classink_1_1runtime_1_1story.html#ab0bcc61fba0c879979d334cca8e21f16',1,'ink::runtime::story']]],
-  ['new_5frunner_5ffrom_5fsnapshot_3',['new_runner_from_snapshot',['../classink_1_1runtime_1_1story.html#a3f95b261be2b654817affb1742d230d3',1,'ink::runtime::story']]],
-  ['none_4',['None',['../group__unreal.html#gga4dce7f8c806a47a9718b817d09998e2fa6adf97f83acf6453d4a6a4b1070f3754',1,'InkVar.h']]],
-  ['null_5fflag_5',['null_flag',['../namespaceink.html#a022c51ad81e3aac458f31f32cec844b7',1,'ink']]],
-  ['nullopt_6',['nullopt',['../namespaceink.html#aba6ffa4b92f9738a07e5af66330e8076',1,'ink']]],
-  ['num_5fchoices_7',['num_choices',['../classink_1_1runtime_1_1runner__interface.html#ae86dc739d94d0969b8d4759ac3205272',1,'ink::runtime::runner_interface']]],
-  ['num_5fglobal_5ftags_8',['num_global_tags',['../classink_1_1runtime_1_1runner__interface.html#a55258152885fecbc36eba94ec82ccb67',1,'ink::runtime::runner_interface']]],
-  ['num_5fknot_5ftags_9',['num_knot_tags',['../classink_1_1runtime_1_1runner__interface.html#a0c5a5ed61326bf14bd1fe04c70f0e398',1,'ink::runtime::runner_interface']]],
-  ['num_5frunners_10',['num_runners',['../classink_1_1runtime_1_1snapshot.html#a9d580a0a4ca50685b595bf368032d8db',1,'ink::runtime::snapshot']]],
-  ['num_5ftags_11',['num_tags',['../classink_1_1runtime_1_1choice.html#a4caaba1a0177ad914a0f9bda0cb1c74a',1,'ink::runtime::choice::num_tags()'],['../classink_1_1runtime_1_1runner__interface.html#a55e73bec8b70c4004136bab9c6c963c2',1,'ink::runtime::runner_interface::num_tags()']]]
+  ['main_20c_0',['main.c',['../group__clib.html#src_main_c',1,'']]],
+  ['main_20cpp_1',['main.cpp',['../index.html#src_main',1,'']]],
+  ['maxarraycallarity_2',['maxArrayCallArity',['../namespaceink_1_1config.html#a54f47bafeba3728b12cd1f4476940ef7',1,'ink::config']]],
+  ['maxchoices_3',['maxChoices',['../namespaceink_1_1config.html#acfcc1e8ccc8daa053c59305e1a72cfd1',1,'ink::config']]],
+  ['maxflags_4',['maxFlags',['../namespaceink_1_1config.html#a04aa3aced8863deff64ecaec1c6e54c9',1,'ink::config']]],
+  ['maxlists_5',['maxLists',['../namespaceink_1_1config.html#a03ce9455149c09105dd86358fd1912e2',1,'ink::config']]],
+  ['maxlisttypes_6',['maxListTypes',['../namespaceink_1_1config.html#a985b57f1d2b917402e24164404ab6c7d',1,'ink::config']]],
+  ['migratable_7',['Migratable',['../struct_f_ink_snapshot.html#a854061537cf0178d179b9d1a4b36a07b',1,'FInkSnapshot']]],
+  ['migratablesnapshot_8',['MigratableSnapshot',['../class_a_ink_runtime.html#a8a13fff6ff9ca7526384dd49a29568fc',1,'AInkRuntime']]],
+  ['migration_9',['Migration',['../classink_1_1runtime_1_1snapshot.html#snapshot_migration',1,'Migration'],['../todo.html#_todo000002',1,'Migration']]],
+  ['minimal_10',['Minimal',['../group__unreal.html#ue_example_minimal',1,'']]],
+  ['move_5fto_11',['move_to',['../classink_1_1runtime_1_1runner__interface.html#ab82d435af1828da231b1a60b6d06d492',1,'ink::runtime::runner_interface::move_to(hash_t path)=0'],['../classink_1_1runtime_1_1runner__interface.html#aa6c487f17a35466a08430fb24d1d68b8',1,'ink::runtime::runner_interface::move_to(const char *path)']]]
 ];

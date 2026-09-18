@@ -154,6 +154,13 @@ using&#160;</td><td class="memItemRight"><b>runner</b> = <a class="el" href="cla
 using&#160;</td><td class="memItemRight"><b>list</b> = <a class="el" href="classink_1_1runtime_1_1list__interface.html">list_interface</a>*</td></tr>
 <tr class="memdesc:a54df30a046c9e4988a686ca00ea35107"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias for <a class="el" href="classink_1_1runtime_1_1list__interface.html" title="ink::runtime::list_interface">ink::runtime::list_interface</a> pointer <br /></td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ae024bea5db27de16dc79876279201d2d" id="r_ae024bea5db27de16dc79876279201d2d"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ae024bea5db27de16dc79876279201d2d">whitespace_mode</a> { <a class="el" href="#ae024bea5db27de16dc79876279201d2da1a721faf2df53972bfd0831c64b6146d">collapse</a>
+, <a class="el" href="#ae024bea5db27de16dc79876279201d2da54a00d96c865d7a108fea84209971df0">keep_runs</a>
+ }</td></tr>
+<tr class="memdesc:ae024bea5db27de16dc79876279201d2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">How runs of whitespace inside a line are treated.  <a href="#ae024bea5db27de16dc79876279201d2d">More...</a><br /></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:acc21647cb714862434fc51a3b0894f5f" id="r_acc21647cb714862434fc51a3b0894f5f"><td class="memItemLeft"><a id="acc21647cb714862434fc51a3b0894f5f" name="acc21647cb714862434fc51a3b0894f5f"></a>
@@ -184,7 +191,41 @@ template&lt;&gt; </td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Contaning all modules and classes used for the inkles ink runtime. </p>
 <p>A minimal example can be found at <a class="el" href="index.html#src_main" title="main.cpp">main.cpp</a> </p>
-</div></div><!-- contents -->
+</div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="ae024bea5db27de16dc79876279201d2d" name="ae024bea5db27de16dc79876279201d2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae024bea5db27de16dc79876279201d2d">&#9670;&#160;</a></span>whitespace_mode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#ae024bea5db27de16dc79876279201d2d">ink::runtime::whitespace_mode</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How runs of whitespace inside a line are treated. </p>
+<p>Applies to all text a runner produces: lines, variables, choice text and tags. </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classink_1_1runtime_1_1runner__interface.html#adad0b881ee7c218829feb680a02e7320" title="Sets how runs of whitespace inside a line are treated.">ink::runtime::runner_interface::set_whitespace_mode()</a> </dd></dl>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae024bea5db27de16dc79876279201d2da1a721faf2df53972bfd0831c64b6146d" name="ae024bea5db27de16dc79876279201d2da1a721faf2df53972bfd0831c64b6146d"></a>collapse&#160;</td><td class="fielddoc"><p>Collapse a run of spaces and tabs inside a line to a single space. </p>
+<p>The default, and what the reference ink runtime does for lines. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae024bea5db27de16dc79876279201d2da54a00d96c865d7a108fea84209971df0" name="ae024bea5db27de16dc79876279201d2da54a00d96c865d7a108fea84209971df0"></a>keep_runs&#160;</td><td class="fielddoc"><p>Keep runs of spaces and tabs inside a line, for text laid out for a fixed width display. </p>
+<p>Whitespace where two glued fragments meet still reads as a single character, and a run at the start or end of a line is still dropped. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>

@@ -57,6 +57,33 @@
 
             </li>
             <li>
+                    <a class="class" href="#WhitespaceMode">WhitespaceMode</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#WhitespaceMode.__init__">WhitespaceMode</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#WhitespaceMode.name">name</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#WhitespaceMode.value">value</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#WhitespaceMode.Collapse">Collapse</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#WhitespaceMode.KeepRuns">KeepRuns</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="variable" href="#Collapse">Collapse</a>
+            </li>
+            <li>
+                    <a class="variable" href="#KeepRuns">KeepRuns</a>
+            </li>
+            <li>
                     <a class="class" href="#Value">Value</a>
                             <ul class="memberlist">
                         <li>
@@ -255,6 +282,12 @@
                                 <a class="function" href="#Runner.num_choices">num_choices</a>
                         </li>
                         <li>
+                                <a class="function" href="#Runner.set_rng_seed">set_rng_seed</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Runner.set_whitespace_mode">set_whitespace_mode</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Runner.choose">choose</a>
                         </li>
                         <li>
@@ -445,6 +478,109 @@ inkcpp_py    </h1>
 
 
                             </div>
+                </section>
+                <section id="WhitespaceMode">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">WhitespaceMode</span><wbr>(<span class="base">pybind11_builtins.pybind11_object</span>):
+
+        
+    </div>
+    <a class="headerlink" href="#WhitespaceMode"></a>
+    
+            <div class="docstring"><p>How runs of whitespace inside a line are treated</p>
+</div>
+
+
+                            <div id="WhitespaceMode.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">WhitespaceMode</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">value</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#WhitespaceMode.__init__"></a>
+    
+            <div class="docstring"><p>__init__(self: <a href="#WhitespaceMode">inkcpp_py.WhitespaceMode</a>, value: typing.SupportsInt | typing.SupportsIndex) -> None</p>
+</div>
+
+
+                            </div>
+                            <div id="WhitespaceMode.name" class="classattr">
+                                <div class="attr variable">
+            <span class="name">name</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#WhitespaceMode.name"></a>
+    
+            <div class="docstring"><p>name(self: object, /) -> str</p>
+</div>
+
+
+                            </div>
+                            <div id="WhitespaceMode.value" class="classattr">
+                                <div class="attr variable">
+            <span class="name">value</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#WhitespaceMode.value"></a>
+    
+            <div class="docstring"><p>(arg0: <a href="#WhitespaceMode">inkcpp_py.WhitespaceMode</a>) -> int</p>
+</div>
+
+
+                            </div>
+                            <div id="WhitespaceMode.Collapse" class="classattr">
+                                <div class="attr variable">
+            <span class="name">Collapse</span><span class="annotation">: ClassVar[<a href="#WhitespaceMode">WhitespaceMode</a>]</span>        =
+<span class="default_value">&lt;<a href="#WhitespaceMode.Collapse">WhitespaceMode.Collapse</a>: 0&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#WhitespaceMode.Collapse"></a>
+    
+    
+
+                            </div>
+                            <div id="WhitespaceMode.KeepRuns" class="classattr">
+                                <div class="attr variable">
+            <span class="name">KeepRuns</span><span class="annotation">: ClassVar[<a href="#WhitespaceMode">WhitespaceMode</a>]</span>        =
+<span class="default_value">&lt;<a href="#WhitespaceMode.KeepRuns">WhitespaceMode.KeepRuns</a>: 1&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#WhitespaceMode.KeepRuns"></a>
+    
+    
+
+                            </div>
+                </section>
+                <section id="Collapse">
+                    <div class="attr variable">
+            <span class="name">Collapse</span><span class="annotation">: <a href="#WhitespaceMode">WhitespaceMode</a></span>        =
+<span class="default_value">&lt;<a href="#WhitespaceMode.Collapse">WhitespaceMode.Collapse</a>: 0&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Collapse"></a>
+    
+    
+
+                </section>
+                <section id="KeepRuns">
+                    <div class="attr variable">
+            <span class="name">KeepRuns</span><span class="annotation">: <a href="#WhitespaceMode">WhitespaceMode</a></span>        =
+<span class="default_value">&lt;<a href="#WhitespaceMode.KeepRuns">WhitespaceMode.KeepRuns</a>: 1&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#KeepRuns"></a>
+    
+    
+
                 </section>
                 <section id="Value">
                     <div class="attr class">
@@ -1345,6 +1481,44 @@ To reload:</p>
     <a class="headerlink" href="#Runner.num_choices"></a>
     
             <div class="docstring"><p>Number of current open choices</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.set_rng_seed" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">set_rng_seed</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">seed</span><span class="p">:</span> <span class="n">SupportsInt</span> <span class="o">|</span> <span class="n">SupportsIndex</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.set_rng_seed"></a>
+    
+            <div class="docstring"><p>Set the seed for the PRNG used by this runner. At creation the runner is seeded with the current time.</p>
+</div>
+
+
+                            </div>
+                            <div id="Runner.set_whitespace_mode" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">set_whitespace_mode</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">mode</span><span class="p">:</span> <span class="n"><a href="#WhitespaceMode">WhitespaceMode</a></span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Runner.set_whitespace_mode"></a>
+    
+            <div class="docstring"><p>Set how runs of whitespace inside a line are treated.</p>
+
+<p>Affects all text produced after this call: lines, variables, choice text and tags,
+so set it before reading the first line.</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">runner</span><span class="o">.</span><span class="n">set_whitespace_mode</span><span class="p">(</span><span class="n"><a href="#KeepRuns">inkcpp_py.WhitespaceMode.KeepRuns</a></span><span class="p">)</span>
+</code></pre>
+</div>
 </div>
 
 
