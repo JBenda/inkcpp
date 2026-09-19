@@ -12,6 +12,7 @@
 #include "header.h"
 #include "snapshot_impl.h"
 #include "story_impl.h"
+#include "string_utils.h"
 #include "system.h"
 #include "types.h"
 #include "value.h"
@@ -331,7 +332,12 @@ void runner_impl::fetch_tags(ip_t begin)
 		}
 		// store tags in dynamic data, too keep migratable stories on the table
 		// TODO: maybe let tags live on the static data again.
-		add_tag(_globals->strings().duplicate(read<const char*>(iter + 6 + 2)), tags_level::UNKNOWN);
+		char* tag_value = _globals->strings().duplicate(read<const char*>(iter + 6 + 2));
+		char* end       = clean_string<true, true>(
+        tag_value, tag_value + c_str_len(tag_value), _output.get_whitespace_mode()
+    );
+		*end = 0;
+		add_tag(tag_value, tags_level::UNKNOWN);
 		iter += 18;
 	}
 }

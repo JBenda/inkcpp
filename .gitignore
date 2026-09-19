@@ -28,3 +28,5 @@ inkcpp_py.egg-info/
 # Visual Studio
 /out/build/
 .vs
+
+.cache/

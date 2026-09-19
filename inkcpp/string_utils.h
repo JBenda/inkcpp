@@ -180,15 +180,35 @@ inline constexpr bool isspace(int c)
 	return c == ' ' || c == '\t' || c == '\v' || c == '\n' || c == '\f' || c == '\r';
 }
 
+/** Glues two strings together.
+ * Skip the leading whitespaces, if previouse string ended with one
+ * Newlines are never skipped.
+ * > `Knock ` + ` again?` => `Knock again?`
+ * @param str string about to be appended
+ * @param previous last character written so far, or 0 if nothing was written
+ * @return str, advanced past the skipped whitespace
+ */
+inline constexpr const char* skip_seam_spaces(const char* str, char previous)
+{
+	if (isspace(static_cast<unsigned char>(previous))) {
+		while (*str != '\n' && isspace(static_cast<unsigned char>(*str))) {
+			++str;
+		}
+	}
+	return str;
+}
+
 /** removes leading & tailing spaces as wide spaces
  * @param begin iterator of string
  * @param end iterator of string
+ * @param mode whether runs of whitespace inside a line are kept or collapsed
  * @return new end iterator
  */
 template<bool LEADING_SPACES, bool TAILING_SPACES, typename ITR>
-inline constexpr ITR clean_string(ITR begin, ITR end)
+inline constexpr ITR clean_string(ITR begin, ITR end, whitespace_mode mode)
 {
-	auto dst = begin;
+	const bool keep_runs = mode == whitespace_mode::keep_runs;
+	auto       dst       = begin;
 	for (auto src = begin; src != end; ++src) {
 		if (dst == begin) {
 			if constexpr (LEADING_SPACES) {
@@ -196,7 +216,7 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 					continue;
 				}
 			}
-		} else if (src[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
+		} else if (dst[-1] == '\n' && isspace(static_cast<unsigned char>(src[0]))) {
 			continue;
 		} else if (isspace(static_cast<unsigned char>(src[0])) && src[0] != '\n') {
 			if constexpr (TAILING_SPACES) {
@@ -204,7 +224,21 @@ inline constexpr ITR clean_string(ITR begin, ITR end)
 					continue;
 				}
 			}
-			if (src + 1 != end && isspace(static_cast<unsigned char>(src[1]))) {
+			if (keep_runs) {
+				// TODO: check complexity O(k*n): where n is the string length, and k the length of the run
+				auto next = src + 1;
+				while (next != end && isspace(static_cast<unsigned char>(next[0])) && next[0] != '\n') {
+					++next;
+				}
+				if (next != end && next[0] == '\n') {
+					continue;
+				}
+				if constexpr (TAILING_SPACES) {
+					if (next == end) {
+						continue;
+					}
+				}
+			} else if (src + 1 != end && isspace(static_cast<unsigned char>(src[1]))) {
 				continue;
 			}
 		} else if (src[0] == '\n' && dst != begin && dst[-1] == '\n') {

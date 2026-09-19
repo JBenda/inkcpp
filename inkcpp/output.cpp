@@ -168,11 +168,25 @@ std::string basic_stream::get()
 	// Move up from marker
 	bool              hasGlue = false, lastNewline = false;
 	std::stringstream str;
+	std::string       result;
+	const bool        keep_runs = _whitespace_mode == whitespace_mode::keep_runs;
 	for (size_t i = start; i < _size; i++) {
 		if (should_skip(i, hasGlue, lastNewline))
 			continue;
-		if (_data[i].printable()) {
+		if (! _data[i].printable()) {
+			continue;
+		}
+		if (_data[i].type() == value_type::string) {
+			const char* value = _data[i].get<value_type::string>();
+			if (keep_runs) {
+				// Spaces meeting at a SEAM collapse; spaces inside one value do not.
+				value = skip_seam_spaces(value, result.empty() ? '\0' : result.back());
+			}
+			result += value;
+		} else {
+			str.str("");
 			_data[i].write(str, _lists_table);
+			result += str.str();
 		}
 	}
 
@@ -180,15 +194,23 @@ std::string basic_stream::get()
 	_size = start;
 
 	// Return processed string
-	// remove mulitple accourencies of ' '
-	std::string result = str.str();
 	if (! result.empty()) {
-		auto end = clean_string<true, false>(result.begin(), result.end());
+		auto end = clean_string<true, false>(result.begin(), result.end(), _whitespace_mode);
 		if (result.begin() == end) {
 			result.resize(0);
 		} else {
 			_last_char = *(end - 1);
-			result.resize(end - result.begin() - (_last_char == ' ' ? 1 : 0));
+			if (keep_runs) {
+				while (end[-1] != '\n' && isspace(static_cast<unsigned char>(end[-1]))) {
+					--end;
+				}
+				result.resize(end - result.begin());
+			} else {
+				result.resize(
+				    end - result.begin()
+				    - (_last_char != '\n' && isspace(static_cast<unsigned char>(_last_char)) ? 1 : 0)
+				);
+			}
 		}
 	}
 	return result;
@@ -366,6 +388,10 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 			case value_type::string: {
 				// Copy string and advance
 				const char* value = _data[i].get<value_type::string>();
+				if (_whitespace_mode == whitespace_mode::keep_runs) {
+					// Spaces meeting at a SEAM collapse; spaces inside a value do not.
+					value = skip_seam_spaces(value, ptr > buffer ? ptr[-1] : '\0');
+				}
 				copy_string(value, i, ptr);
 			} break;
 			case value_type::newline:
@@ -387,7 +413,7 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 	_size = start;
 
 	// Return processed string
-	end  = clean_string<RemoveTail, RemoveTail>(buffer, buffer + c_str_len(buffer));
+	end  = clean_string<RemoveTail, RemoveTail>(buffer, buffer + c_str_len(buffer), _whitespace_mode);
 	*end = 0;
 	if (end != buffer) {
 		_last_char = end[-1];

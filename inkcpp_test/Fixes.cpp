@@ -1,6 +1,7 @@
 #include "catch.hpp"
 #include "snapshot.h"
 #include "../snapshot_impl.h"
+#include "../string_utils.h"
 
 #include <memory>
 #include <story.h>
@@ -351,6 +352,42 @@ SCENARIO("Provoke thread array expension _ #142", "[regression][runtime]")
 				for (const char* c = options; *c; ++c) {
 					CHECK(thread->get_choice(static_cast<ink::size_t>(c - options))->text()[0] == *c);
 				}
+			}
+		}
+	}
+}
+
+SCENARIO(
+    "clean_string only stripped the first space of a leading run after a newline",
+    "[regression][runtime][output]"
+)
+{
+	GIVEN("a buffer with a run of interior spaces starting a line after a newline")
+	{
+		using ink::runtime::internal::clean_string;
+
+		WHEN("cleaned in collapse mode, as story lines are")
+		{
+			std::string buffer = "First line.\n  Second line.";
+			auto end = clean_string<true, false>(buffer.begin(), buffer.end(), whitespace_mode::collapse);
+			buffer.resize(static_cast<size_t>(end - buffer.begin()));
+
+			THEN("the whole leading run is stripped, not just its first character")
+			{
+				REQUIRE(buffer == "First line.\nSecond line.");
+			}
+		}
+
+		WHEN("cleaned in keep_runs mode")
+		{
+			std::string buffer = "First line.\n  Second line.";
+			auto        end
+			    = clean_string<true, false>(buffer.begin(), buffer.end(), whitespace_mode::keep_runs);
+			buffer.resize(static_cast<size_t>(end - buffer.begin()));
+
+			THEN("the leading run is still fully stripped, only interior runs are kept")
+			{
+				REQUIRE(buffer == "First line.\nSecond line.");
 			}
 		}
 	}

@@ -65,6 +65,12 @@ public:
 	// sets seed for prng in runner
 	virtual void set_rng_seed(uint32_t seed) override { _rng.srand(seed); }
 
+	// sets how runs of whitespace inside a line are treated
+	virtual void set_whitespace_mode(whitespace_mode mode) override
+	{
+		_output.set_whitespace_mode(mode);
+	}
+
 	// Checks that the runner can continue
 	virtual bool can_continue() const override;
 

@@ -109,6 +109,18 @@ Use iter(List) to iterate over all flags.)",
 	        py::keep_alive<0, 1>()
 	    )
 	    .def("__str__", &list_to_str);
+	py::enum_<ink::runtime::whitespace_mode>(
+	    m, "WhitespaceMode", "How runs of whitespace inside a line are treated"
+	)
+	    .value(
+	        "Collapse", ink::runtime::whitespace_mode::collapse,
+	        "Collapse a run of spaces and tabs to a single space, the default"
+	    )
+	    .value(
+	        "KeepRuns", ink::runtime::whitespace_mode::keep_runs,
+	        "Keep runs of spaces and tabs inside a line"
+	    )
+	    .export_values();
 	py::class_<value> py_value(m, "Value", "A Value of a Ink Variable");
 	py::enum_<value::Type>(py_value, "Type")
 	    .value("Bool", value::Type::Bool)
@@ -424,6 +436,23 @@ iter(inkcpp_py.Runner) returns a iterator over all current choices.)",
 	        py::arg("index").none(false), py::return_value_policy::reference_internal
 	    )
 	    .def("num_choices", &runner::num_choices, "Number of current open choices")
+	    .def(
+	        "set_rng_seed", &runner::set_rng_seed,
+	        "Set the seed for the PRNG used by this runner. At creation the runner is seeded with "
+	        "the current time.",
+	        py::arg("seed").none(false)
+	    )
+	    .def(
+	        "set_whitespace_mode", &runner::set_whitespace_mode,
+	        R"(Set how runs of whitespace inside a line are treated.
+
+Affects all text produced after this call: lines, variables, choice text and tags,
+so set it before reading the first line.
+
+>>> runner.set_whitespace_mode(inkcpp_py.WhitespaceMode.KeepRuns)
+	        )",
+	        py::arg("mode").none(false)
+	    )
 	    .def(
 	        "__iter__",
 	        [](const runner& self) { return py::make_iterator(self.begin(), self.end()); },
