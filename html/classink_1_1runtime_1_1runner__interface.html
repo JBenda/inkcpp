@@ -524,6 +524,7 @@ template&lt;typename D&gt; </div>
 
 <p>Gets a choice. </p>
 <p>Returns the choice object at a given index</p>
+<dl class="section attention"><dt>Attention</dt><dd>the returned pointer is only valid until <a class="el" href="#a28aee9166888663eaa334d555e2932a4" title="choose">choose</a> is called next; do not retain it across a choice being made. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#ae86dc739d94d0969b8d4759ac3205272" title="Returns the number of choices currently available.">num_choices</a> </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1164,6 +1165,7 @@ template&lt;typename D&gt; </div>
 </div><div class="memdoc">
 
 <p>Shorcut for accessing a choice. </p>
+<dl class="section attention"><dt>Attention</dt><dd>the returned pointer is only valid until <a class="el" href="#a28aee9166888663eaa334d555e2932a4" title="choose">choose</a> is called next; do not retain it across a choice being made. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#ab491b834ff52317f4064b192f397c71f" title="Gets a choice.">get_choice</a> </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
