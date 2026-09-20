@@ -123,17 +123,17 @@ void runner_impl::set_var<runner_impl::Scope::LOCAL>(
 		inkAssert(is_redef == false, "value pointer can only use to initelize variable!");
 		auto [name, ci] = val.get<value_type::value_pointer>();
 		if (ci == 0) {
-			_stack.set(variableName, val);
+			_stack.define(variableName, val);
 		} else {
 			const value* dref = dereference(val);
 			if (dref == nullptr) {
 				value v   = val;
 				auto  ref = v.get<value_type::value_pointer>();
 				v.set<value_type::value_pointer>(ref.name, 0);
-				_stack.set(variableName, v);
+				_stack.define(variableName, v);
 			} else {
-				_ref_stack.set(variableName, val);
-				_stack.set(variableName, *dref);
+				_ref_stack.define(variableName, val);
+				_stack.define(variableName, *dref);
 			}
 		}
 	} else {
@@ -150,7 +150,7 @@ void runner_impl::set_var<runner_impl::Scope::LOCAL>(
 				_stack.set(variableName, src->redefine(val, _globals->lists()));
 			}
 		} else {
-			_stack.set(variableName, val);
+			_stack.define(variableName, val);
 		}
 	}
 }
@@ -250,6 +250,12 @@ void runner_impl::assign_tags(std::initializer_list<tags_level> wheres)
 		idy        = _tags_begin[static_cast<int>(tags_level::UNKNOWN)];
 		end        = _tags_begin[static_cast<int>(tags_level::UNKNOWN) + 1];
 		inkAssert(n == end - idy, "Same size in each iteration");
+		// Reclassifying pending tags may reach into the region a later, still
+		// active save point already considers committed (e.g. a save() taken
+		// while these tags were still unresolved). Rebase the save point so it
+		// keeps enclosing this data instead of tripping the insert guard, but
+		// only if that data is still the pending UNKNOWN tags being moved here.
+		_tags.rebase_save(idx, [idy](size_t i) { return i >= idy; });
 		for (size_t i = 0; i < n; ++i) {
 			const char* tag       = _tags[idy + i * 2];
 			_tags.insert(idx + i) = tag;
@@ -295,6 +301,17 @@ void runner_impl::clear_tags(tags_clear_level which)
 			}
 			break;
 		default: inkAssert(false, "Unhandeld clear type %d for tags.", static_cast<int>(which));
+	}
+}
+
+void runner_impl::close_dangling_tag()
+{
+	const size_t marker = _output.find_first_of([](const value& v) {
+		return v.type() == value_type::marker && v.get<value_type::marker>() == marker_kind::start_tag;
+	});
+	if (marker != _output.npos) {
+		_output.commit_marker_extraction();
+		add_tag(_output.get_alloc<true>(_globals->strings(), _globals->lists()), tags_level::UNKNOWN);
 	}
 }
 
@@ -653,8 +670,8 @@ void runner_impl::choose(size_t index)
 	_done = nullptr;
 
 	// Collapse callstacks to the correct thread
-	_stack.collapse_to_thread(choiceThread);
-	_ref_stack.collapse_to_thread(choiceThread);
+	_stack.collapse_to_thread(c._scope_thread);
+	_ref_stack.collapse_to_thread(c._scope_thread);
 	_threads.clear();
 	_eval.clear();
 
@@ -734,10 +751,9 @@ size_t runner_impl::snap(unsigned char* data, snapper& snapper) const
 	ptr += _eval.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags_begin.snap(data ? ptr : nullptr, snapper);
 	ptr += _tags.snap(data ? ptr : nullptr, snapper);
-	snapper.runner_tags = _tags.data();
-	ptr                 = snap_write(ptr, _entered_global, should_write);
-	ptr                 = snap_write(ptr, _entered_knot, should_write);
-	ptr                 = snap_write(ptr, get_current_knot(), should_write);
+	ptr = snap_write(ptr, _entered_global, should_write);
+	ptr = snap_write(ptr, _entered_knot, should_write);
+	ptr = snap_write(ptr, get_current_knot(), should_write);
 	if (_current_knot_id_backup != ~0U) {
 		ptr = snap_write(ptr, _story->container_data(_current_knot_id_backup)._hash, should_write);
 	} else {
@@ -770,22 +786,21 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	int32_t seed;
 	ptr = snap_read(ptr, seed);
 	_rng.srand(seed);
-	ptr                = snap_read(ptr, _evaluation_mode);
-	ptr                = snap_read(ptr, _string_mode);
-	ptr                = snap_read(ptr, _saved_evaluation_mode);
-	ptr                = snap_read(ptr, _saved);
-	ptr                = snap_read(ptr, _is_falling);
-	ptr                = _output.snap_load(ptr, loader);
-	ptr                = _stack.snap_load(ptr, loader);
-	ptr                = _ref_stack.snap_load(ptr, loader);
-	ptr                = _eval.snap_load(ptr, loader);
-	ptr                = _tags_begin.snap_load(ptr, loader);
-	ptr                = _tags.snap_load(ptr, loader);
-	loader.runner_tags = _tags.data();
-	ptr                = snap_read(ptr, _entered_global);
-	ptr                = snap_read(ptr, _entered_knot);
-	_current_knot_id   = ~0U;
-	ptr                = snap_read(ptr, current_knot_name);
+	ptr              = snap_read(ptr, _evaluation_mode);
+	ptr              = snap_read(ptr, _string_mode);
+	ptr              = snap_read(ptr, _saved_evaluation_mode);
+	ptr              = snap_read(ptr, _saved);
+	ptr              = snap_read(ptr, _is_falling);
+	ptr              = _output.snap_load(ptr, loader);
+	ptr              = _stack.snap_load(ptr, loader);
+	ptr              = _ref_stack.snap_load(ptr, loader);
+	ptr              = _eval.snap_load(ptr, loader);
+	ptr              = _tags_begin.snap_load(ptr, loader);
+	ptr              = _tags.snap_load(ptr, loader);
+	ptr              = snap_read(ptr, _entered_global);
+	ptr              = snap_read(ptr, _entered_knot);
+	_current_knot_id = ~0U;
+	ptr              = snap_read(ptr, current_knot_name);
 	if (current_knot_name) {
 		ip_t knot_ip = _story->find_offset_for(current_knot_name);
 		bool found   = knot_ip != nullptr
@@ -812,9 +827,13 @@ const unsigned char* runner_impl::snap_load(const unsigned char* data, loader& l
 	_fallback_choice = nullopt;
 	if (has_fallback_choice) {
 		_fallback_choice.emplace();
-		ptr = _fallback_choice.value().snap_load(ptr, loader);
+		ptr                              = _fallback_choice.value().snap_load(ptr, loader);
+		_fallback_choice.value()._runner = this;
 	}
 	ptr = _choices.snap_load(ptr, loader);
+	for (size_t i = 0; i < _choices.size(); ++i) {
+		_choices[i]._runner = this;
+	}
 	return ptr;
 }
 
@@ -1163,6 +1182,7 @@ void runner_impl::step()
 					if (_evaluation_mode) {
 						_eval.push(values::newline);
 					} else {
+						close_dangling_tag();
 						if (! _output.ends_with(value_type::newline)) {
 							_output << values::newline;
 						}
@@ -1277,6 +1297,7 @@ void runner_impl::step()
 
 				case Command::END:
 					read<uint32_t>();
+					close_dangling_tag();
 					_ptr = nullptr;
 					break;
 
@@ -1498,6 +1519,7 @@ void runner_impl::step()
 
 					// Load value from output stream
 					// Push onto stack
+					_output.commit_marker_extraction();
 					_eval.push(value{}.set<value_type::string>(
 					    _output.get_alloc<false>(_globals->strings(), _globals->lists())
 					));
@@ -1506,14 +1528,14 @@ void runner_impl::step()
 				// == Tag commands
 				case Command::START_TAG: {
 					read<uint32_t>();
-					_output << values::marker;
+					_output << values::marker_start_tag;
 				} break;
 
 
 				case Command::END_TAG: {
 					read<uint32_t>();
-					auto tag = _output.get_alloc<true>(_globals->strings(), _globals->lists());
-					add_tag(tag, tags_level::UNKNOWN);
+					// we can reach a END_TAG without an START_TAG
+					close_dangling_tag();
 				} break;
 
 				// == Choice commands
@@ -1567,11 +1589,9 @@ void runner_impl::step()
 
 					// Fetch tags related to the current choice
 
-					size_t start = _tags_begin[static_cast<int>(tags_level::CHOICE) + 1];
+					size_t tags_start = _tags_begin[static_cast<int>(tags_level::CHOICE) + 1];
 					assign_tags({tags_level::CHOICE});
-					const snap_tag* tags_start = _tags.data() + start;
-					const snap_tag* tags_end
-					    = _tags.data() + _tags_begin[static_cast<int>(tags_level::CHOICE) + 1];
+					size_t tags_end = _tags_begin[static_cast<int>(tags_level::CHOICE) + 1];
 
 					// Create choice and record it
 					choice* current_choice = nullptr;
@@ -1581,9 +1601,19 @@ void runner_impl::step()
 					} else {
 						current_choice = &add_choice();
 					}
+
+					// Capture local variables in a new scope. To avoid side effects from other choices.
+					thread_t scope_thread = _stack.fork_scope();
+					{
+						thread_t t = _ref_stack.fork_scope();
+						inkAssert(t == scope_thread, "ref_stack and stack should be in sync!");
+					}
+					_stack.complete_thread(scope_thread);
+					_ref_stack.complete_thread(scope_thread);
+
 					current_choice->setup(
 					    _output, _globals->strings(), _globals->lists(), _choices.size() - 1, path,
-					    current_thread(), tags_start, tags_end
+					    current_thread(), scope_thread, *this, tags_start, tags_end
 					);
 					// save stack at last choice
 					if (_saved) {
@@ -1622,12 +1652,8 @@ void runner_impl::step()
 						_is_falling = false;
 
 						frame_type type;
-						if (! _threads.empty()) {
-							on_done(false);
-							break;
-						} else if (_stack.has_frame(&type) && type == frame_type::function) // implicit return
-						                                                                    // is only for
-						                                                                    // functions
+						if (_stack.has_frame(&type)
+						    && type == frame_type::function) // implicit return is only for functions
 						{
 							// push null and return
 							_eval.push(values::null);
@@ -1635,6 +1661,9 @@ void runner_impl::step()
 							// HACK
 							_ptr += sizeof(Command) + sizeof(CommandFlag);
 							execute_return();
+						} else if (! _threads.empty()) {
+							// a choice was found in a thread, note done position for to continue later
+							on_done(true);
 						} else if (_ptr == _story->end()) { // check needed, because it colud exist an unnamed
 							                                  // toplevel container (empty named container stack
 							                                  // != empty container stack)
@@ -1715,10 +1744,17 @@ void runner_impl::step()
 
 void runner_impl::on_done(bool setDone)
 {
+	close_dangling_tag();
+
 	// If we're in a thread
 	if (! _threads.empty()) {
 		// Get the thread ID of the current thread
 		thread_t completedThreadId = _threads.pop();
+
+		// Record where this thread ends. This allowes to continue from any choice.
+		if (setDone) {
+			_threads.set(completedThreadId, _ptr);
+		}
 
 		// Push in a complete marker
 		_stack.complete_thread(completedThreadId);

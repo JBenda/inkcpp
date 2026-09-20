@@ -229,7 +229,7 @@ FString basic_stream::get()
 }
 #endif
 
-size_t basic_stream::queued() const
+size_t basic_stream::queued()
 {
 	size_t start = find_start();
 	return _size - start;
@@ -277,16 +277,7 @@ void basic_stream::get(value* ptr, size_t length)
 
 size_t basic_stream::find_first_of(value_type type, size_t offset /*= 0*/) const
 {
-	if (_size == 0)
-		return npos;
-
-	// TODO: Cache?
-	for (size_t i = offset; i < _size; ++i) {
-		if (_data[i].type() == type)
-			return i;
-	}
-
-	return npos;
+	return find_first_of([type](const value& v) { return v.type() == type; }, offset);
 }
 
 size_t basic_stream::find_last_of(value_type type, size_t offset /*= 0*/) const
@@ -336,6 +327,13 @@ void basic_stream::forget()
 {
 	// Just null the save point and continue as normal
 	_save = npos;
+}
+
+void basic_stream::rebase_save(size_t position)
+{
+	inkAssert(saved(), "No save point to rebase!");
+	inkAssert(position <= _save, "Can not move save point forward!");
+	_save = position;
 }
 
 template char* basic_stream::get_alloc<true>(string_table& strings, list_table& lists);
@@ -402,7 +400,7 @@ char* basic_stream::get_alloc(string_table& strings, list_table& lists)
 				break;
 			case value_type::list: ptr = lists.toString(ptr, _data[i].get<value_type::list>()); break;
 			case value_type::list_flag:
-				ptr = lists.toString(ptr, _data[i].get<value_type::list>());
+				ptr = lists.toString(ptr, _data[i].get<value_type::list_flag>());
 				break;
 			default: inkFail("cant convert expression to string!");
 		}
@@ -430,13 +428,20 @@ size_t basic_stream::find_start() const
 {
 	// Find marker (or start)
 	size_t start = _size;
+	bool   found = false;
 	while (start > 0) {
 		start--;
-		if (_data[start].type() == value_type::marker)
+		if (_data[start].type() == value_type::marker) {
+			found = true;
 			break;
+		}
 	}
 
-	// Make sure we're not violating a save point
+	// If the marker was already consumed, the save point is the start of the
+	// remaining output and data before it must not be extracted.
+	if (saved() && ! found) {
+		start = _save;
+	}
 	if (saved() && start < _save) {
 		// TODO: check if we don't reset save correct
 		// at some point we can modifiy the output even behind save (probally discard?) and push a new
@@ -445,6 +450,14 @@ size_t basic_stream::find_start() const
 	}
 
 	return start;
+}
+
+void basic_stream::commit_marker_extraction()
+{
+	const size_t marker = find_first_of(value_type::marker);
+	if (marker != npos && saved() && marker < _save) {
+		rebase_save(marker);
+	}
 }
 
 bool basic_stream::should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const

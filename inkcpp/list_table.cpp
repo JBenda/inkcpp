@@ -865,9 +865,9 @@ list_flag list_table::get_list_id(const char* list_name) const
 
 list_table::list list_table::redefine(list lh, list rh)
 {
+	list    res = create();
 	data_t* l   = getPtr(lh.lid);
 	data_t* r   = getPtr(rh.lid);
-	list    res = create();
 	data_t* o   = getPtr(res.lid);
 
 	// if the new list has no origin: give it the origin of the old value

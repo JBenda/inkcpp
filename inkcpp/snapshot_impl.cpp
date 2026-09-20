@@ -154,15 +154,14 @@ size_t snap_choice::snap(unsigned char* data, const snapper& snapper) const
 	ptr                         = snap_write(ptr, _index, should_write);
 	ptr                         = snap_write(ptr, _path, should_write);
 	ptr                         = snap_write(ptr, _thread, should_write);
+	ptr                         = snap_write(ptr, _scope_thread, should_write);
 	// handle difference between no tag and first tag
 	if (num_tags() == 0) {
 		ptr = snap_write(ptr, false, should_write);
 	} else {
-		ptr                         = snap_write(ptr, true, should_write);
-		std::uintptr_t offset_start = _tags_start - snapper.runner_tags;
-		ptr                         = snap_write(ptr, offset_start, should_write);
-		std::uintptr_t offset_end   = _tags_end - snapper.runner_tags;
-		ptr                         = snap_write(ptr, offset_end, should_write);
+		ptr = snap_write(ptr, true, should_write);
+		ptr = snap_write(ptr, _tags_start, should_write);
+		ptr = snap_write(ptr, _tags_end, should_write);
 	}
 	ptr = snap_write(ptr, snapper.strings.get_id(_text), should_write);
 	return static_cast<size_t>(ptr - data);
@@ -174,18 +173,15 @@ const unsigned char* snap_choice::snap_load(const unsigned char* data, const loa
 	ptr                      = snap_read(ptr, _index);
 	ptr                      = snap_read(ptr, _path);
 	ptr                      = snap_read(ptr, _thread);
+	ptr                      = snap_read(ptr, _scope_thread);
 	bool has_tags;
 	ptr = snap_read(ptr, has_tags);
 	if (has_tags) {
-		std::uintptr_t offset_start = 0;
-		ptr                         = snap_read(ptr, offset_start);
-		_tags_start                 = loader.runner_tags + offset_start;
-		std::uintptr_t offset_end   = 0;
-		ptr                         = snap_read(ptr, offset_end);
-		_tags_end                   = loader.runner_tags + offset_end;
+		ptr = snap_read(ptr, _tags_start);
+		ptr = snap_read(ptr, _tags_end);
 	} else {
-		_tags_start = nullptr;
-		_tags_end   = nullptr;
+		_tags_start = 0;
+		_tags_end   = 0;
 	}
 	size_t string_id;
 	ptr   = snap_read(ptr, string_id);

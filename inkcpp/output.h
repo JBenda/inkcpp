@@ -46,7 +46,10 @@ namespace runtime
 			}
 
 			// Returns the number of data items that will be extracted by the next get
-			size_t queued() const;
+			size_t queued();
+
+			// Commit output before extracting a marker-delimited value.
+			void commit_marker_extraction();
 
 			// Peeks the top entry
 			const value& peek() const;
@@ -91,6 +94,25 @@ namespace runtime
 			 * @return index or @ref npos if the type could not be found
 			 */
 			size_t find_first_of(value_type type, size_t offset = 0) const;
+
+			/** Find the first entry in the output for which pred returns true
+			 * @param predicate when evaluate to true will count as match
+			 * @param offset into buffer
+			 * @return index or @ref npos if no entry matches
+			 */
+			template<typename Pred>
+			size_t find_first_of(Pred predicate, size_t offset = 0) const
+			{
+				if (_size == 0) {
+					return npos;
+				}
+				for (size_t i = offset; i < _size; ++i) {
+					if (predicate(_data[i])) {
+						return i;
+					}
+				}
+				return npos;
+			}
 
 			/** Find the last occurrence of the type in the output
 			 * @param type type to look for in the output
@@ -137,6 +159,7 @@ namespace runtime
 			const unsigned char* snap_load(const unsigned char* data, const loader&);
 
 		private:
+			void   rebase_save(size_t position);
 			size_t find_start() const;
 			bool   should_skip(size_t iter, bool& hasGlue, bool& lastNewline) const;
 
