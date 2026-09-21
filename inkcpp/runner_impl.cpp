@@ -16,6 +16,8 @@
 #include "types.h"
 #include "value.h"
 
+#include <ctime>
+
 #ifdef INK_ENABLE_STL
 #	include <iomanip>
 #endif
