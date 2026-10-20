@@ -361,6 +361,37 @@ jobs:
           $CC main.c -o main_pkgconfig${{ matrix.exe_ext }} $(pkg-config --define-prefix --cflags --libs inkcpp)
           echo 0 | ./main_pkgconfig${{ matrix.exe_ext }}
 
+  verify-nix-pkg-config:
+    name: Verify pkg-config (Nix toolchain)
+    needs: compilation
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: cachix/install-nix-action@v31
+
+      - name: Build and link C example with Nix toolchain
+        shell: bash
+        run: |
+          nix --extra-experimental-features "nix-command flakes" shell --quiet \
+            nixpkgs#clang nixpkgs#cmake nixpkgs#ninja nixpkgs#gcc nixpkgs#pkg-config \
+            --command bash -euo pipefail -c '
+            src="$GITHUB_WORKSPACE"
+            work=$(mktemp -d)
+            cmake -S "$src" -B "$work/build" -GNinja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DINKCPP_C=ON \
+              -DINKCPP_TEST=OFF \
+              -DINKCPP_PY=OFF \
+              -DINKCPP_INKLECATE=NONE
+            cmake --build "$work/build" --target inkcpp_c
+            cmake --install "$work/build" --component clib --prefix "$work/install"
+            export PKG_CONFIG_PATH="$work/install/lib/pkgconfig"
+            pkg-config --define-prefix --cflags --libs inkcpp
+            clang "$src/Documentation/cmake_example/main.c" -o "$work/main" \
+              $(pkg-config --define-prefix --cflags --libs inkcpp)
+          '
+
   build-doc:
     name: Build Doxygen documentation
     needs: [compilation, build-python]
