@@ -767,3 +767,38 @@ SCENARIO(
 		}
 	}
 }
+
+SCENARIO(
+    "snapshot restores visit counts of unnamed and same-named containers",
+    "[regression][snapshot][runtime]"
+)
+{
+	// The sequence's container is tracked but has no name of its own, and the labelled gather sits
+	// below a choice's indexed container. Restoring a snapshot used to look each tracked container up
+	// again by name, which found nothing for the first and could find another container for the
+	// second, and threw.
+	GIVEN("a story with a sequence and a labelled gather inside a choice")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "SnapshotVisitCounts.bin")};
+		runner                 thread = ink->new_runner();
+
+		WHEN("it is played to the first choice and a snapshot is taken")
+		{
+			std::string text = thread->getall();
+			REQUIRE(text == "First visit.\n");
+			REQUIRE(thread->num_choices() == 2);
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+
+			THEN("the snapshot loads into a new runner, which continues the sequence")
+			{
+				runner loaded;
+				REQUIRE_NOTHROW(loaded = ink->new_runner_from_snapshot(*snap));
+				REQUIRE(loaded->num_choices() == 2);
+				loaded->choose(0);
+				REQUIRE(loaded->getall() == "Inside.\n");
+				loaded->choose(0);
+				REQUIRE(loaded->getall() == "Later visit.\n");
+			}
+		}
+	}
+}
