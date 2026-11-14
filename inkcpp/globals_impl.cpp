@@ -285,20 +285,27 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	);
 	for (size_t i = 0; i < old_capacity; ++i) {
 		hash_t path;
-		ptr                      = snap_read(ptr, path);
+		ptr = snap_read(ptr, path);
+		if (! loader.migratable) {
+			// Not migrating, so this is the story the snapshot was taken from and the counts were loaded
+			// in container order. The stored hash only confirms that; it cannot be used to look the
+			// container up again. A tracked container without a name of its own (a sequence) stores
+			// hash 0, and named containers below an indexed one can share a name, so the lookup finds
+			// nothing or a different container.
+			inkAssert(
+			    _owner->container_data(i)._hash == path,
+			    "Snapshot does not match this story: tracked container %u differs.", ( unsigned ) i
+			);
+			continue;
+		}
 		container_t c_id         = ~0U;
 		ip_t        container_ip = _owner->find_offset_for(path);
 		bool        found        = container_ip != nullptr
 		          && _owner->find_container_id(
 		              static_cast<uint32_t>(container_ip - _owner->instructions()), c_id
 		          );
-		if (! loader.migratable) {
-			inkAssert(found, "Invalid container id reference.");
-			inkAssert(c_id == i, "tracked containere are not allowed to move, expect we migrate");
-		} else {
-			if (found) {
-				_visit_counts.set(c_id, _visit_counts.get_old(i));
-			}
+		if (found) {
+			_visit_counts.set(c_id, _visit_counts.get_old(i));
 		}
 	}
 	if (loader.migratable) {
