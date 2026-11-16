@@ -498,7 +498,20 @@ void binary_emitter::build_container_hash_map(
 	// Search indexed children (which duplicates named childen...)
 	// TODO: Merge duplicate child arrays, very error-prone.
 	for (auto child : context->indexed_children) {
-		build_container_hash_map(hash_map, data, name, child.second);
+		// A named child was hashed above, under its own name. Walking it again here would hash its
+		// children under this container's name instead, one level short, and overwrite the right
+		// _hash with that: "body.dead" became "dead". Every named child is filed under index -1, and
+		// the map keeps only the first, so it hit the first-compiled knot of every story.
+		bool named = false;
+		for (const auto& named_child : context->named_children) {
+			if (named_child.second == child.second) {
+				named = true;
+				break;
+			}
+		}
+		if (! named) {
+			build_container_hash_map(hash_map, data, name, child.second);
+		}
 	}
 }
 
