@@ -209,7 +209,7 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 	globals globs = new_globals();
 	snapshot.strings().clear();
 	snapshot_interface::loader loader(
-	    snapshot.strings(), _string_table, snapshot.list_list_matches(), snapshot.list_old_new_map(),
+	    snapshot.strings(), _string_table, snapshot.list_old_new_map(), snapshot.list_list_matches(),
 	    snapshot.list_value_matches(), snapshot.can_be_migrated(), hash() != snapshot.hash(),
 	    snapshot.old_ref_table
 	);

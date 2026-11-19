@@ -463,3 +463,38 @@ SCENARIO("Migratibility of the UE_example story", "[migration][intigration]")
 		}
 	}
 }
+
+SCENARIO("Migration of a temporary list variable", "[migration][integration][lists]")
+{
+	// The temporary holds the list literal (green, blue), a permanent list with id 0 in the old
+	// story. The new story has an extra literal (red, blue) which is emitted first and so takes id 0.
+	// Migrating the runner must re-create the temporary's list, not reuse new list id 0. This failed
+	// when new_globals_from_snapshot passed list_old_new_map and list_list_matches swapped, which
+	// left the list-definition matches where the runner expects the old-to-new list id map.
+	GIVEN("a story with a temporary list variable and a changed version of it")
+	{
+		std::unique_ptr<story> before{story::from_file(INK_TEST_RESOURCE_DIR
+		                                               "MigrationListTempBefore.bin")};
+		std::unique_ptr<story> after{story::from_file(INK_TEST_RESOURCE_DIR "MigrationListTempAfter.bin"
+		)};
+		runner                 thread = before->new_runner();
+		REQUIRE(thread->getall() == "Start.\n");
+		thread->choose(0);
+		std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+		REQUIRE(snap->can_be_migrated());
+
+		WHEN("the snapshot taken after a choice is migrated to the new story")
+		{
+			globals new_globals = after->new_globals_from_snapshot(*snap);
+			REQUIRE(new_globals);
+			runner new_thread = after->new_runner_from_snapshot(*snap, new_globals);
+			REQUIRE(new_thread);
+
+			THEN("the temporary list keeps its value")
+			{
+				REQUIRE(thread->getall() == "green, blue\n");
+				REQUIRE(new_thread->getall() == "green, blue\n");
+			}
+		}
+	}
+}
