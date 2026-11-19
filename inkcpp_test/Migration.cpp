@@ -473,11 +473,13 @@ SCENARIO("Migration of a temporary list variable", "[migration][integration][lis
 	// left the list-definition matches where the runner expects the old-to-new list id map.
 	GIVEN("a story with a temporary list variable and a changed version of it")
 	{
-		std::unique_ptr<story> before{story::from_file(INK_TEST_RESOURCE_DIR
-		                                               "MigrationListTempBefore.bin")};
-		std::unique_ptr<story> after{story::from_file(INK_TEST_RESOURCE_DIR "MigrationListTempAfter.bin"
-		)};
-		runner                 thread = before->new_runner();
+		std::unique_ptr<story> before{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationListTempBefore.bin")
+		};
+		std::unique_ptr<story> after{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationListTempAfter.bin")
+		};
+		runner thread = before->new_runner();
 		REQUIRE(thread->getall() == "Start.\n");
 		thread->choose(0);
 		std::unique_ptr<snapshot> snap{thread->create_snapshot()};
@@ -547,9 +549,11 @@ SCENARIO(
 	// same choice in the new version.
 	GIVEN("a story with choices in knots, stitches, nested weaves and conditionals")
 	{
-		std::unique_ptr<story> v1{story::from_file(INK_TEST_RESOURCE_DIR "MigrationPositionsBefore.bin")
+		std::unique_ptr<story> v1{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationPositionsBefore.bin")
 		};
-		std::unique_ptr<story> v2{story::from_file(INK_TEST_RESOURCE_DIR "MigrationPositionsAfter.bin")
+		std::unique_ptr<story> v2{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationPositionsAfter.bin")
 		};
 
 		THEN("a choice in a knot's weave resumes in its body")
@@ -615,11 +619,13 @@ SCENARIO(
 	// The new version only adds a choice at the bottom of the knot.
 	GIVEN("a story with a sequence and once-only choices in two conditionals")
 	{
-		std::unique_ptr<story> v1{story::from_file(INK_TEST_RESOURCE_DIR
-		                                           "MigrationVisitCountsBefore.bin")};
-		std::unique_ptr<story> v2{story::from_file(INK_TEST_RESOURCE_DIR "MigrationVisitCountsAfter.bin"
-		)};
-		runner                 thread = v1->new_runner();
+		std::unique_ptr<story> v1{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationVisitCountsBefore.bin")
+		};
+		std::unique_ptr<story> v2{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationVisitCountsAfter.bin")
+		};
+		runner thread = v1->new_runner();
 		REQUIRE(thread->getall() == "First visit.\n");
 		REQUIRE(thread->num_choices() == 3);
 		thread->choose(0);

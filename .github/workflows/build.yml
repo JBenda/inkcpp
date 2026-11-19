@@ -16,13 +16,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-26-intel
             artifact: macos
             name: MacOSX
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
             proof: false
             unreal: false
-          - os: macos-14
+          - os: macos-latest
             artifact: macos-arm
             name: MacOSX-ARM
             inklecate_url: https://github.com/inkle/ink/releases/download/v1.1.1/inklecate_mac.zip
@@ -226,25 +226,25 @@ jobs:
             cc: clang
             cxx: clang++
             exe_ext: ""
-          - os: macos-latest
+          - os: macos-26-intel
             artifact: macos
             compiler: clang
             cc: clang
             cxx: clang++
             exe_ext: ""
-          - os: macos-latest
+          - os: macos-26-intel
             artifact: macos
             compiler: gcc
             cc: gcc-14
             cxx: g++-14
             exe_ext: ""
-          - os: macos-14
+          - os: macos-latest
             artifact: macos-arm
             compiler: clang
             cc: clang
             cxx: clang++
             exe_ext: ""
-          - os: macos-14
+          - os: macos-latest
             artifact: macos-arm
             compiler: gcc
             cc: gcc-14
@@ -476,13 +476,13 @@ jobs:
           git fetch origin master
       - name: Check clang-format
         run: |
-          clang-format-18 --version
-          git clang-format-18 --extensions c,cpp,h,hpp --style file -q --diff origin/master
-          diff=$(git clang-format-18 --extensions c,cpp,h,hpp --style file -q --diff origin/master)
-          echo "::error Format diff >$diff<"
-          if [ "$diff" != "" ]; then
-            echo run git clang-format-18 --extensions c,cpp,h,hpp --style file master
-            echo or upstream/master depending on your setup
+          clang-format-22 --version
+          diff=$(git clang-format-22 --extensions c,cpp,h,hpp --style file -q --diff origin/master)
+          if [ -n "$diff" ]; then
+            echo "$diff"
+            echo "::error::Formatting differs from clang-format-22. Run: git clang-format-22 --extensions c,cpp,h,hpp --style file master (or upstream/master, depending on your setup)"
+            echo "::error::or use  uvx --from "clang-format==22.*" git-clang-format --extensions c,cpp,h,hpp --style file origin/master"
+            exit 1
           fi
 
   pages:

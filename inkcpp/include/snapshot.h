@@ -41,6 +41,9 @@ namespace ink::runtime
  * whatever is now at that position, or dropped. Knots, stitches and labelled gathers are identified
  * by their name.
  *
+ * @note Labelled choices (<tt>* (label) [Text]</tt>) can not be migrated by their label:
+ * inklecate's <tt>.ink.json</tt> format does not contain choice labels
+ *
  * + Global variables which (name) still exist will be transfared.
  *   + New ones will be initelized with its default value
  *   + Old ones will be droped
