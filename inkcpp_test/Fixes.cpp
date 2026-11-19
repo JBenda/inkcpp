@@ -800,5 +800,24 @@ SCENARIO(
 				REQUIRE(loaded->getall() == "Later visit.\n");
 			}
 		}
+
+		// A snapshot without open choices is migratable, but loading it back into the same story is
+		// not a migration: the visit counts must be restored in place, not looked up by name.
+		WHEN("a choice is chosen and a migratable snapshot is taken")
+		{
+			REQUIRE(thread->getall() == "First visit.\n");
+			thread->choose(0);
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			REQUIRE(snap->can_be_migrated());
+
+			THEN("the snapshot loads into the same story and continues the sequence")
+			{
+				runner loaded;
+				REQUIRE_NOTHROW(loaded = ink->new_runner_from_snapshot(*snap));
+				REQUIRE(loaded->getall() == "Inside.\n");
+				loaded->choose(0);
+				REQUIRE(loaded->getall() == "Later visit.\n");
+			}
+		}
 	}
 }

@@ -210,7 +210,8 @@ globals story_impl::new_globals_from_snapshot(const snapshot& data)
 	snapshot.strings().clear();
 	snapshot_interface::loader loader(
 	    snapshot.strings(), _string_table, snapshot.list_list_matches(), snapshot.list_old_new_map(),
-	    snapshot.list_value_matches(), snapshot.can_be_migrated(), snapshot.old_ref_table
+	    snapshot.list_value_matches(), snapshot.can_be_migrated(), hash() != snapshot.hash(),
+	    snapshot.old_ref_table
 	);
 	auto end = globs.cast<globals_impl>()->snap_load(snapshot.get_globals_snap(), loader);
 	inkAssert(end == snapshot.get_runner_snap(0), "not all data were used for global reconstruction");
@@ -250,6 +251,7 @@ runner story_impl::new_runner_from_snapshot(const snapshot& data, globals store,
 	    snapshot.list_list_matches(),
 	    snapshot.list_value_matches(),
 	    snapshot.can_be_migrated(),
+	    hash() != snapshot.hash(),
 	    snapshot.old_ref_table
 	};
 	auto end = run.cast<runner_impl>()->snap_load(snapshot.get_runner_snap(idx), loader);

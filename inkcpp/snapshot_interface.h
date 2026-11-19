@@ -23,7 +23,7 @@ class list_table;
 class snapshot_interface
 {
 public:
-	constexpr snapshot_interface(){};
+	constexpr snapshot_interface() {};
 
 	static unsigned char* snap_write(unsigned char* ptr, const void* data, size_t length, bool write)
 	{
@@ -68,7 +68,16 @@ public:
 	struct loader {
 		managed_array<const char*, true, 5>& string_table; /// FIXME: make configurable
 		const char*                          story_string_table;
+		/** If the snapshot was taken in a migratable state.
+		 * @attention This does @b not say anything about if this story is migrated right now.
+		 * if you want to check if we need to migrate this snapshot since it was loaded into a different
+		 * story please refer to @ref migrate
+		 */
 		const bool                           migratable = false;
+		/** If the snapshot is loaded into a different story (hash missmatch).
+		 * implies @ref migratable == true
+		 */
+		const bool                           migrate    = false;
 		managed_array<int, true, 5, true>&   list_old_new_map;
 		managed_array<int, true, 5, true>&   list_list_matches;
 		managed_array<int, true, 5, true>&   list_value_matches;
@@ -78,12 +87,13 @@ public:
 		    managed_array<const char*, true, 5>& string_table, const char* story_string_table,
 		    managed_array<int, true, 5, true>& list_old_new_map,
 		    managed_array<int, true, 5, true>& list_list_matches,
-		    managed_array<int, true, 5, true>& list_value_matches, bool migratable,
+		    managed_array<int, true, 5, true>& list_value_matches, bool migratable, bool migrate,
 		    const list_table*& old_ref_table
 		)
 		    : string_table{string_table}
 		    , story_string_table{story_string_table}
 		    , migratable(migratable)
+		    , migrate(migrate)
 		    , list_old_new_map(list_old_new_map)
 		    , list_list_matches(list_list_matches)
 		    , list_value_matches(list_value_matches)
