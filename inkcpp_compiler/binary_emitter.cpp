@@ -107,7 +107,10 @@ uint32_t binary_emitter::start_container(int index_in_parent, const std::string&
 	// Add to parents lists
 	if (_current != nullptr) {
 		_current->children.push_back(container);
-		_current->indexed_children.insert({index_in_parent, container});
+		// named children have the index -1, and are not referable by index.
+		if (index_in_parent >= 0) {
+			_current->indexed_children.insert({index_in_parent, container});
+		}
 
 		if (! name.empty()) {
 			_current->named_children.insert({name, container});
@@ -495,10 +498,20 @@ void binary_emitter::build_container_hash_map(
 		build_container_hash_map(hash_map, data, child_name, child.second);
 	}
 
-	// Search indexed children (which duplicates named childen...)
-	// TODO: Merge duplicate child arrays, very error-prone.
+	// A child at an array position can also carry a name (#n), so it is in both maps.
 	for (auto child : context->indexed_children) {
-		build_container_hash_map(hash_map, data, name, child.second);
+		// this would lead to overwriting the full name of "body.dead" with the short name "dead"
+		// see #177
+		bool named = false;
+		for (const auto& named_child : context->named_children) {
+			if (named_child.second == child.second) {
+				named = true;
+				break;
+			}
+		}
+		if (! named) {
+			build_container_hash_map(hash_map, data, name, child.second);
+		}
 	}
 }
 

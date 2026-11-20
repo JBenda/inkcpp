@@ -93,3 +93,31 @@ SCENARIO("run a story, but jump around manually", "[move-to][runtime]")
 		}
 	}
 }
+
+SCENARIO("the current knot is named by its full path", "[move-to][runtime]")
+{
+	// Object keys come out of the compiler's JSON sorted, so "Dialog" is the first knot compiled
+	// and "Transformations" a later one. The first one's stitches were hashed by their bare names
+	// ("core"), every later one's by the full path, so which form get_current_knot() returned
+	// depended on where the knot fell in the alphabet. (A later knot's stitch: Tags.cpp,
+	// "knot2.sub".)
+	GIVEN("a story whose first knot has stitches")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "MoveTo.bin")};
+		globals                globStore = ink->new_globals();
+		runner                 thread    = ink->new_runner(globStore);
+
+		WHEN("the story runs into a stitch of the first knot")
+		{
+			thread->getall();
+			THEN("the knot is its full path")
+			{
+				REQUIRE(thread->get_current_knot() == ink::hash_string("Dialog.core"));
+			}
+		}
+		WHEN("a stitch is looked up by its bare name")
+		{
+			THEN("it is not found") { REQUIRE_FALSE(thread->move_to(ink::hash_string("core"))); }
+		}
+	}
+}
