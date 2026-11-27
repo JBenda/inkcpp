@@ -25,8 +25,24 @@ namespace ink::runtime
  *
  * @section snapshot_migration Migration
  *
- * Migrating a snapshot will "snap bag" to the last Knot, there for it is best practive to do this
- * only directly after choosing a choice.
+ * Migrating a snapshot will "snap back" to the start of the innermost container it can name (e.g.
+ * the body of the last chosen choice), so output since then is repeated. Therefore it is best
+ * practice to do this only directly after choosing a choice.
+ *
+ * @attention Migration assumes that the story only @b grows @b at @b the @b bottom: new choices are
+ * added after the existing choices of a choice list (and new gathers, conditionals, sequences and
+ * other content after the existing ones of their section). Changing the text of existing content
+ * and adding new knots and stitches is fine.
+ * Choices (also labelled ones, they are numbered @c c-0, @c c-1, ...) and containers without a
+ * name (sequences, conditionals, ...) are identified by their position, like in ink paths (e.g.
+ * @c knot.0.c-1 for the second choice in a knot). If content is inserted before or between
+ * existing ones, or existing ones are removed or reordered, their positions shift: visit counts
+ * (e.g. of once-only choices or sequences) and the position of the runner are then restored to
+ * whatever is now at that position, or dropped. Knots, stitches and labelled gathers are identified
+ * by their name.
+ *
+ * @note Labelled choices (<tt>* (label) [Text]</tt>) can not be migrated by their label:
+ * inklecate's <tt>.ink.json</tt> format does not contain choice labels
  *
  * + Global variables which (name) still exist will be transfared.
  *   + New ones will be initelized with its default value
@@ -45,10 +61,10 @@ namespace ink::runtime
  *   +  for each pair of old and new list (definition) the best good match is taken
  *     + the similiraty is calculated based on the jaccard similiraty of the contained flags, and
  *       the jaro-winkler similarty of the lists names
- * + visit counts (e.g. used for once only choices)
- *   + existing ones (exact name match) are kept
- *     + !! a choice with no explicit label is tracked via its position in the list, reordering
- *       choices can therfore break your visit counts
+ * + visit counts (e.g. used for once only choices and sequences)
+ *   + existing ones (exact path match) are kept
+ *     + !! choices and containers without a name are tracked via their position (see above),
+ *       inserting before, removing or reordering them can therfore break your visit counts
  *   + new ones are zero
  *   + old ones are discarded
  *
@@ -58,7 +74,7 @@ namespace ink::runtime
 class snapshot
 {
 public:
-	virtual ~snapshot(){};
+	virtual ~snapshot() {};
 
 	/** Construct snapshot from blob.
 	 * Memory must be kept valid until the snapshot is deconstructed.
