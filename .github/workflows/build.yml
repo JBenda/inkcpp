@@ -289,6 +289,15 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         uses: ./.github/actions/msvc-dev-cmd
 
+      # Use the LLVM shipped with Visual Studio to avoid version incompabilities
+      - name: Prefer Visual Studio bundled clang
+        if: ${{ matrix.os == 'windows-latest' && matrix.compiler == 'clang' }}
+        run: |
+          $llvm = Join-Path $env:VCINSTALLDIR "Tools\Llvm\x64\bin"
+          if (-not (Test-Path (Join-Path $llvm "clang++.exe"))) { throw "Visual Studio bundled clang not found at $llvm" }
+          Add-Content -Path $env:GITHUB_PATH -Value $llvm
+          & (Join-Path $llvm "clang++.exe") --version
+
       - name: Install pkg-config
         if: ${{ matrix.os == 'windows-latest' && matrix.compiler == 'clang' }}
         run: |
