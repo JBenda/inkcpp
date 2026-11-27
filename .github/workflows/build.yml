@@ -477,10 +477,9 @@ jobs:
       - name: Check clang-format
         run: |
           clang-format-22 --version
-          diff=$(git clang-format-22 --extensions c,cpp,h,hpp --style file -q --diff origin/master)
-          if [ -n "$diff" ]; then
+          if ! diff=$(git clang-format-22 --binary clang-format-22 --extensions c,cpp,h,hpp --style file -q --diff origin/master); then
             echo "$diff"
-            echo "::error::Formatting differs from clang-format-22. Run: git clang-format-22 --extensions c,cpp,h,hpp --style file master (or upstream/master, depending on your setup)"
+            echo "::error::Formatting differs from clang-format-22. Run: git clang-format-22 --binary clang-format-22 --extensions c,cpp,h,hpp --style file master (or upstream/master, depending on your setup)"
             echo "::error::or use  uvx --from "clang-format==22.*" git-clang-format --extensions c,cpp,h,hpp --style file origin/master"
             exit 1
           fi
