@@ -107,7 +107,10 @@ uint32_t binary_emitter::start_container(int index_in_parent, const std::string&
 	// Add to parents lists
 	if (_current != nullptr) {
 		_current->children.push_back(container);
-		_current->indexed_children.insert({index_in_parent, container});
+		// named children have the index -1, and are not referable by index.
+		if (index_in_parent >= 0) {
+			_current->indexed_children.insert({index_in_parent, container});
+		}
 
 		if (! name.empty()) {
 			_current->named_children.insert({name, container});
@@ -479,8 +482,7 @@ void binary_emitter::build_container_hash_map(
 		// Get the child's name in the hierarchy
 		std::string child_name = name.empty() ? child.first : (name + "." + child.first);
 
-		// Hash name. We only do this at the named child level. In theory we could support indexed
-		// children as well. The root is anonymous so the fact that it's skipped is not an issue.
+		// Hash name. The root is anonymous so the fact that it's skipped is not an issue.
 		const hash_t child_name_hash = hash_string(child_name.c_str());
 
 		// Store hash in the data.
@@ -495,10 +497,30 @@ void binary_emitter::build_container_hash_map(
 		build_container_hash_map(hash_map, data, child_name, child.second);
 	}
 
-	// Search indexed children (which duplicates named childen...)
-	// TODO: Merge duplicate child arrays, very error-prone.
+	// Children without a name are addressed by their index, like in ink paths ("knot.0.c-1").
 	for (auto child : context->indexed_children) {
-		build_container_hash_map(hash_map, data, name, child.second);
+		// A child at an array position can also carry a name (#n), so it is in both maps.
+		// see #177
+		bool named = false;
+		for (const auto& named_child : context->named_children) {
+			if (named_child.second == child.second) {
+				named = true;
+				break;
+			}
+		}
+		if (named) {
+			continue;
+		}
+		const std::string child_name
+		    = name.empty() ? std::to_string(child.first) : (name + "." + std::to_string(child.first));
+		// Only tracked containers need to be found by path.
+		if (child.second->counter_index != ~0U) {
+			const hash_t child_name_hash            = hash_string(child_name.c_str());
+			data[child.second->counter_index]._hash = child_name_hash;
+			hash_map.push_back({child_name_hash, child.second->offset});
+		}
+
+		build_container_hash_map(hash_map, data, child_name, child.second);
 	}
 }
 

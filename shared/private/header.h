@@ -82,12 +82,9 @@ struct container_hash_t {
 	 *
 	 * It is not only cosmetic. story_impl.cpp's upper_bound() returns the LAST entry
 	 * whose key is <= the target, so when entries share a hash the runtime resolves
-	 * the path to whichever one the sort happened to leave last. Ties are common:
-	 * paths are not unique here, because build_container_hash_map() recurses into
-	 * indexed children carrying the parent's name unchanged, so one path string is
-	 * emitted once per indexed child at a different offset. One test story has 164
-	 * entries under 128 distinct hashes, and every one of those 26 collisions is a
-	 * repeated path rather than two different paths colliding.
+	 * the path to whichever one the sort happened to leave last. build_container_hash_map()
+	 * names containers without a name by their index ("knot.0.c-1"), soties only come from
+	 * colliding 32-bit hashs.
 	 *
 	 * Tie-breaking on the offset makes the order total, so every toolchain agrees
 	 * and the resolved container is a property of the story rather than of the

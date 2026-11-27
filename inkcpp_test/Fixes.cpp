@@ -800,5 +800,87 @@ SCENARIO(
 				REQUIRE(loaded->getall() == "Later visit.\n");
 			}
 		}
+
+		// A snapshot without open choices is migratable, but loading it back into the same story is
+		// not a migration: the visit counts must be restored in place, not looked up by name.
+		WHEN("a choice is chosen and a migratable snapshot is taken")
+		{
+			REQUIRE(thread->getall() == "First visit.\n");
+			thread->choose(0);
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			REQUIRE(snap->can_be_migrated());
+
+			THEN("the snapshot loads into the same story and continues the sequence")
+			{
+				runner loaded;
+				REQUIRE_NOTHROW(loaded = ink->new_runner_from_snapshot(*snap));
+				REQUIRE(loaded->getall() == "Inside.\n");
+				loaded->choose(0);
+				REQUIRE(loaded->getall() == "Later visit.\n");
+			}
+		}
+	}
+}
+
+SCENARIO(
+    "snapshot taken right after a choice keeps the sequence state #178",
+    "[regression][snapshot][runtime]"
+)
+{
+	// A snapshot without open choices is migratable, so loading it back into the same story used to
+	// go through the migration path, which dropped the visit counts of the unnamed sequence
+	// container.
+	GIVEN("a story with a sequence, right after a choice")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "SnapshotSequence.bin")};
+		runner                 thread = ink->new_runner();
+		REQUIRE(thread->getall() == "first\n");
+		thread->choose(0);
+
+		WHEN("a snapshot is taken and loaded into the same story")
+		{
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			REQUIRE(snap->can_be_migrated());
+			runner loaded;
+			REQUIRE_NOTHROW(loaded = ink->new_runner_from_snapshot(*snap));
+
+			THEN("it continues like the original")
+			{
+				CHECK(thread->getall() == "second\n");
+				CHECK(loaded->getall() == "second\n");
+			}
+		}
+	}
+}
+
+SCENARIO(
+    "snapshot taken right after a choice keeps cycle and shuffle state #178",
+    "[regression][snapshot][runtime]"
+)
+{
+	GIVEN("a story with three kinds of sequence, visited twice")
+	{
+		std::unique_ptr<story> ink{story::from_file(INK_TEST_RESOURCE_DIR "SnapshotSequenceKinds.bin")};
+		runner                 thread = ink->new_runner();
+		for (int i = 0; i < 2; ++i) {
+			thread->getall();
+			REQUIRE(thread->num_choices() == 1);
+			thread->choose(0);
+		}
+
+		WHEN("a snapshot is taken and loaded into the same story")
+		{
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			REQUIRE(snap->can_be_migrated());
+			runner loaded;
+			REQUIRE_NOTHROW(loaded = ink->new_runner_from_snapshot(*snap));
+
+			THEN("it continues like the original")
+			{
+				const std::string original = thread->getall();
+				CHECK(original == "stopping: third\ncycle: three\n");
+				CHECK(loaded->getall() == original);
+			}
+		}
 	}
 }

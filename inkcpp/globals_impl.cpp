@@ -268,7 +268,7 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	ptr                  = _visit_counts.snap_load(ptr, loader);
 	size_t old_capacity  = _visit_counts.loaded_capacity();
 	// shuffle values if needed
-	if (loader.migratable) {
+	if (loader.migrate) {
 		// extend array if needed
 		if (_visit_counts.capacity() < _owner->num_containers()) {
 			_visit_counts.resize(_owner->num_containers());
@@ -286,7 +286,7 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 	for (size_t i = 0; i < old_capacity; ++i) {
 		hash_t path;
 		ptr = snap_read(ptr, path);
-		if (! loader.migratable) {
+		if (! loader.migrate) {
 			// Not migrating, so this is the story the snapshot was taken from and the counts were loaded
 			// in container order. The stored hash only confirms that; it cannot be used to look the
 			// container up again. A tracked container without a name of its own (a sequence) stores
@@ -308,7 +308,7 @@ const unsigned char* globals_impl::snap_load(const unsigned char* ptr, const loa
 			_visit_counts.set(c_id, _visit_counts.get_old(i));
 		}
 	}
-	if (loader.migratable) {
+	if (loader.migrate) {
 		_visit_counts.forget();
 		_visit_counts.resize(_num_containers);
 	}
