@@ -34,8 +34,7 @@ add_executable(
 	WhitespaceMode.cpp
 	Migration.cpp
 	MultiRunner.cpp
-	NotAnInkStory.cpp
-)
+	NotAnInkStory.cpp)
 
 target_link_libraries(inkcpp_test PUBLIC inkcpp inkcpp_compiler inkcpp_shared)
 target_include_directories(inkcpp_test PRIVATE ../shared/private/)
@@ -130,6 +129,15 @@ foreach(ink_file IN LISTS INK_FILES)
 	list(APPEND INK_OUT_FILES ${OUTPUT})
 endforeach()
 target_sources(inkcpp_test PRIVATE ${INK_OUT_FILES})
+
+# Links only the runtime library, to catch runtime dependencies on compiler symbols (#175)
+add_executable(inkcpp_runtime_only_test RuntimeOnly.cpp)
+target_link_libraries(inkcpp_runtime_only_test PRIVATE inkcpp)
+target_compile_definitions(inkcpp_runtime_only_test
+													 PRIVATE INK_TEST_RESOURCE_DIR="${INK_TEST_RESOURCE_DIR}/")
+# The story binaries are generated as part of inkcpp_test
+add_dependencies(inkcpp_runtime_only_test inkcpp_test)
+add_test(NAME RuntimeOnly COMMAND $<TARGET_FILE:inkcpp_runtime_only_test>)
 
 if(TARGET inkcpp_c)
 	file(GLOB TEST_FILES "${PROJECT_SOURCE_DIR}/inkcpp_c/tests/*.c")

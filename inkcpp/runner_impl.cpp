@@ -1060,7 +1060,7 @@ void runner_impl::step()
 
 #ifdef INK_ENABLE_STL
 		if (_debug_stream != nullptr) {
-			*_debug_stream << "cmd " << cmd << " flags " << flag << " ";
+			*_debug_stream << "cmd " << static_cast<int>(cmd) << " flags " << flag << " ";
 		}
 #endif
 

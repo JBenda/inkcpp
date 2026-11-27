@@ -4,7 +4,7 @@
  * See file LICENSE.txt or go to
  * https://github.com/JBenda/inkcpp for full license details.
  */
-#include "command.h"
+#include "command_strings.h"
 
 namespace ink
 {

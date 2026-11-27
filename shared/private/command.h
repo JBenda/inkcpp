@@ -126,16 +126,6 @@ enum class Command : uint8_t {
 	NUM_COMMANDS,
 };
 
-extern const char* CommandStrings[];
-
-inline std::ostream& operator<<(std::ostream& out, Command cmd)
-{
-	using number = std::underlying_type_t<Command>;
-	out << CommandStrings[static_cast<number>(cmd)];
-
-	return out;
-}
-
 // Flags for commands
 enum class CommandFlag : uint8_t {
 	NO_FLAGS = 0,

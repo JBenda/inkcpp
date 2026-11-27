@@ -7,6 +7,7 @@
 #include "json_compiler.h"
 
 #include "command.h"
+#include "command_strings.h"
 #include "list_data.h"
 #include "system.h"
 #include "version.h"
