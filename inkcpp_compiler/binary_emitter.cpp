@@ -482,8 +482,7 @@ void binary_emitter::build_container_hash_map(
 		// Get the child's name in the hierarchy
 		std::string child_name = name.empty() ? child.first : (name + "." + child.first);
 
-		// Hash name. We only do this at the named child level. In theory we could support indexed
-		// children as well. The root is anonymous so the fact that it's skipped is not an issue.
+		// Hash name. The root is anonymous so the fact that it's skipped is not an issue.
 		const hash_t child_name_hash = hash_string(child_name.c_str());
 
 		// Store hash in the data.
@@ -498,9 +497,9 @@ void binary_emitter::build_container_hash_map(
 		build_container_hash_map(hash_map, data, child_name, child.second);
 	}
 
-	// A child at an array position can also carry a name (#n), so it is in both maps.
+	// Children without a name are addressed by their index, like in ink paths ("knot.0.c-1").
 	for (auto child : context->indexed_children) {
-		// this would lead to overwriting the full name of "body.dead" with the short name "dead"
+		// A child at an array position can also carry a name (#n), so it is in both maps.
 		// see #177
 		bool named = false;
 		for (const auto& named_child : context->named_children) {
@@ -509,9 +508,19 @@ void binary_emitter::build_container_hash_map(
 				break;
 			}
 		}
-		if (! named) {
-			build_container_hash_map(hash_map, data, name, child.second);
+		if (named) {
+			continue;
 		}
+		const std::string child_name
+		    = name.empty() ? std::to_string(child.first) : (name + "." + std::to_string(child.first));
+		// Only tracked containers need to be found by path.
+		if (child.second->counter_index != ~0U) {
+			const hash_t child_name_hash            = hash_string(child_name.c_str());
+			data[child.second->counter_index]._hash = child_name_hash;
+			hash_map.push_back({child_name_hash, child.second->offset});
+		}
+
+		build_container_hash_map(hash_map, data, child_name, child.second);
 	}
 }
 

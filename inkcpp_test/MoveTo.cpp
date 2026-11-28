@@ -111,9 +111,7 @@ SCENARIO("the current knot is named by its full path", "[move-to][runtime]")
 		{
 			thread->getall();
 			THEN("the knot is its full path")
-			{
-				REQUIRE(thread->get_current_knot() == ink::hash_string("Dialog.core"));
-			}
+			{ REQUIRE(thread->get_current_knot() == ink::hash_string("Dialog.core")); }
 		}
 		WHEN("a stitch is looked up by its bare name")
 		{

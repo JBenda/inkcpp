@@ -463,3 +463,190 @@ SCENARIO("Migratibility of the UE_example story", "[migration][intigration]")
 		}
 	}
 }
+
+SCENARIO("Migration of a temporary list variable", "[migration][integration][lists]")
+{
+	// The temporary holds the list literal (green, blue), a permanent list with id 0 in the old
+	// story. The new story has an extra literal (red, blue) which is emitted first and so takes id 0.
+	// Migrating the runner must re-create the temporary's list, not reuse new list id 0. This failed
+	// when new_globals_from_snapshot passed list_old_new_map and list_list_matches swapped, which
+	// left the list-definition matches where the runner expects the old-to-new list id map.
+	GIVEN("a story with a temporary list variable and a changed version of it")
+	{
+		std::unique_ptr<story> before{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationListTempBefore.bin")
+		};
+		std::unique_ptr<story> after{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationListTempAfter.bin")
+		};
+		runner thread = before->new_runner();
+		REQUIRE(thread->getall() == "Start.\n");
+		thread->choose(0);
+		std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+		REQUIRE(snap->can_be_migrated());
+
+		WHEN("the snapshot taken after a choice is migrated to the new story")
+		{
+			globals new_globals = after->new_globals_from_snapshot(*snap);
+			REQUIRE(new_globals);
+			runner new_thread = after->new_runner_from_snapshot(*snap, new_globals);
+			REQUIRE(new_thread);
+
+			THEN("the temporary list keeps its value")
+			{
+				REQUIRE(thread->getall() == "green, blue\n");
+				REQUIRE(new_thread->getall() == "green, blue\n");
+			}
+		}
+	}
+}
+
+namespace
+{
+// Plays `picks` from the start of `from` (reading all output after each choice but the last),
+// takes a snapshot directly after the last choice (and after `lines` more getline() calls), and
+// migrates it to `to`. Returns the output of the migrated runner up to the next choice, or
+// "<not migratable>" / "<failed>".
+std::string migrate_after(
+    story& from, story& to, std::initializer_list<int> picks, int lines = 0,
+    int* migrated_choices = nullptr
+)
+{
+	runner thread = from.new_runner();
+	thread->getall();
+	int left = static_cast<int>(picks.size());
+	for (int pick : picks) {
+		thread->choose(pick);
+		if (--left > 0) {
+			thread->getall();
+		}
+	}
+	for (int i = 0; i < lines; ++i) {
+		thread->getline();
+	}
+	std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+	if (! snap->can_be_migrated()) {
+		return "<not migratable>";
+	}
+	runner migrated = to.new_runner_from_snapshot(*snap);
+	if (! migrated) {
+		return "<failed>";
+	}
+	std::string out = migrated->getall();
+	if (migrated_choices) {
+		*migrated_choices = static_cast<int>(migrated->num_choices());
+	}
+	return out;
+}
+} // namespace
+
+SCENARIO(
+    "Migration resumes the runner at the position it was snapshotted", "[migration][integration]"
+)
+{
+	// The new version changes every text from v1 to v2 and adds one choice at the bottom of every
+	// choice list. A runner snapshotted directly after a choice must continue in the body of the
+	// same choice in the new version.
+	GIVEN("a story with choices in knots, stitches, nested weaves and conditionals")
+	{
+		std::unique_ptr<story> v1{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationPositionsBefore.bin")
+		};
+		std::unique_ptr<story> v2{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationPositionsAfter.bin")
+		};
+
+		THEN("a choice in a knot's weave resumes in its body")
+		{
+			CHECK(migrate_after(*v1, *v2, {0, 0}) == "Plain one v2.\nPlain one second v2.\n");
+			CHECK(migrate_after(*v1, *v2, {0, 1}) == "Plain two v2.\n");
+		}
+		THEN("a choice in a stitch resumes in its body")
+		{
+			CHECK(migrate_after(*v1, *v2, {2, 0}) == "Stitch one v2.\n");
+			CHECK(migrate_after(*v1, *v2, {2, 1}) == "Stitch two v2.\n");
+		}
+		THEN("a choice with a nested weave resumes and offers the new nested choice")
+		{
+			int choices = 0;
+			CHECK(migrate_after(*v1, *v2, {1, 0}, 0, &choices) == "Nested gather v2.\n");
+			CHECK(choices == 3);
+			CHECK(migrate_after(*v1, *v2, {1, 1}) == "Nested two v2.\n");
+		}
+		THEN("a nested choice below a labelled gather resumes in its body")
+		{
+			CHECK(migrate_after(*v1, *v2, {1, 0, 0}) == "Nested A v2.\n");
+			CHECK(migrate_after(*v1, *v2, {1, 0, 1}) == "Nested B v2.\n");
+		}
+		THEN("a choice inside one of two conditionals resumes in its own body")
+		{
+			// Both conditionals hold a choice c-0, so without indices in the path both are named
+			// cond.b.c-0.
+			CHECK(migrate_after(*v1, *v2, {3, 0}) == "Cond A v2.\n");
+			CHECK(migrate_after(*v1, *v2, {3, 1}) == "Cond B v2.\n");
+			CHECK(migrate_after(*v1, *v2, {3, 2}) == "Cond plain v2.\n");
+		}
+		THEN("the new choice at the bottom of the knot is offered after migration")
+		{
+			int choices = 0;
+			CHECK(migrate_after(*v1, *v2, {0}, 0, &choices) == "");
+			CHECK(choices == 3);
+		}
+		THEN("a snapshot inside a sequence branch resumes in the same branch")
+		{
+			// The sequence is tracked but has no name. Before containers got their index as name it had
+			// no hash, so a snapshot inside it was not migratable. Resuming must not count the
+			// sequence again, which would select the next branch.
+			CHECK(migrate_after(*v1, *v2, {4, 0}) == "Seq one v2.\nSeq one second v2.\n");
+			CHECK(migrate_after(*v1, *v2, {4, 0}, 1) == "Seq one v2.\nSeq one second v2.\n");
+		}
+		THEN("a snapshot in the middle of a choice body resumes at the start of the body")
+		{
+			// Migration snaps back to the start of the innermost container that can be named, so the
+			// line already read is output again (in its new version).
+			CHECK(migrate_after(*v1, *v2, {0, 0}, 1) == "Plain one v2.\nPlain one second v2.\n");
+		}
+	}
+}
+
+SCENARIO(
+    "Migration keeps visit counts of sequences and choices in conditionals",
+    "[migration][integration]"
+)
+{
+	// The knot starts with a sequence (a tracked container without a name) and has two
+	// conditionals each holding a once-only choice c-0 (same name without indices in the path).
+	// The new version only adds a choice at the bottom of the knot.
+	GIVEN("a story with a sequence and once-only choices in two conditionals")
+	{
+		std::unique_ptr<story> v1{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationVisitCountsBefore.bin")
+		};
+		std::unique_ptr<story> v2{
+		    story::from_file(INK_TEST_RESOURCE_DIR "MigrationVisitCountsAfter.bin")
+		};
+		runner thread = v1->new_runner();
+		REQUIRE(thread->getall() == "First visit.\n");
+		REQUIRE(thread->num_choices() == 3);
+		thread->choose(0);
+		REQUIRE(thread->getall() == "A chosen.\nSecond visit.\n");
+		REQUIRE(thread->num_choices() == 2);
+
+		WHEN("the snapshot taken after choosing B is migrated")
+		{
+			thread->choose(0);
+			std::unique_ptr<snapshot> snap{thread->create_snapshot()};
+			REQUIRE(snap->can_be_migrated());
+			runner migrated = v2->new_runner_from_snapshot(*snap);
+			REQUIRE(migrated);
+
+			THEN("the sequence continues and neither once-only choice comes back")
+			{
+				CHECK(migrated->getall() == "B chosen.\nLater visit.\n");
+				REQUIRE(migrated->num_choices() == 2);
+				CHECK(std::string(migrated->get_choice(0)->text()) == "Leave");
+				CHECK(std::string(migrated->get_choice(1)->text()) == "Stay");
+			}
+		}
+	}
+}
